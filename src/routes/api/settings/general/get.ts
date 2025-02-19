@@ -2,8 +2,8 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { checkAdminRole } from "~/server/session/checkAdminRole";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);

@@ -14,10 +14,10 @@ import {
   replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function ProfileSettings() {
   const [graph, setGraph] = useGraph();

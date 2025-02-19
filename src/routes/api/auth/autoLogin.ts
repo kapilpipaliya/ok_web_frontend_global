@@ -20,7 +20,7 @@ export async function GET({ request }: APIEvent) {
     // Get all query parameters except token and redirect
     const queryParams = new URLSearchParams();
     for (const [key, value] of url.searchParams.entries()) {
-      if (key !== 'token' && key !== 'redirect') {
+      if (key !== "token" && key !== "redirect") {
         queryParams.append(key, value);
       }
     }

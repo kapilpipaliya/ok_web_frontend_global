@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";
-import { encodeUserData, UserData } from "~/lib/auth/userDataEncoder";
+import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
 import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
 import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
@@ -15,7 +15,9 @@ export async function GET({ request }: APIEvent) {
   const user = await getUserFromSession(request);
 
   // Generate a secure token instead of passing user data directly
-  const secureToken = user ? await generateSecureToken(encodeUserData(user.P as UserData), dbSession) : undefined;
+  const secureToken = user
+    ? await generateSecureToken(encodeUserData(user.P as UserData), dbSession)
+    : undefined;
 
   try {
     const result = await renderPageAsMHtml({
@@ -23,14 +25,14 @@ export async function GET({ request }: APIEvent) {
       pageName: "test",
       queryParams: {
         param1: "value1",
-        param2: "value2"
+        param2: "value2",
       },
       secureToken,
       subDomain,
     });
-    
+
     if (!result.success) {
-      throw new APIError(result.error || 'Failed to render page', 500);
+      throw new APIError(result.error || "Failed to render page", 500);
     }
 
     const fileVertex = result.result![0];
@@ -38,15 +40,18 @@ export async function GET({ request }: APIEvent) {
       emailSubject: "Test Email With Attachment",
       emailTo: "kapil.pipaliya@gmail.com",
       fileVertex,
-      subDomain
+      subDomain,
     });
-    return new Response(JSON.stringify({ 
-      message: "Test email sent successfully",
-      result: result.result 
-    }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({
+        message: "Test email sent successfully",
+        result: result.result,
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      },
+    );
   } catch (error: unknown) {
     return handleAPIError(error);
   }

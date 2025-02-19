@@ -14,10 +14,10 @@ import {
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
+import { STYLES } from "~/components/styled/constants/styles";
 import { AddNewButton } from "~/features/grid/AddNewButton";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/features/page_attr_render/utils/getDataVertex";
-import { STYLES } from "~/components/styled/constants/styles";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";

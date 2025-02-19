@@ -1,4 +1,5 @@
-import { Session } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
+
 import { createHash, randomBytes } from "node:crypto";
 
 import {

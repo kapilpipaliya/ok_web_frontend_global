@@ -1,6 +1,6 @@
-import { expect } from 'playwright/test';
+import { expect } from "playwright/test";
 
-import { getDriver } from '~/cypher/driver';
+import { getDriver } from "~/cypher/driver";
 
 // Not used in the project yet.
 export async function removeAdmin(subDomain: string) {
@@ -8,10 +8,9 @@ export async function removeAdmin(subDomain: string) {
   const getSubDomainQuery = `MATCH (s:SubDomain { key: $subDomain })-[:UserSubDomain]-(u:User)
         RETURN u`;
   try {
-    const getUser = await dbSession.run(
-      getSubDomainQuery,
-      { subDomain: subDomain }
-    );
+    const getUser = await dbSession.run(getSubDomainQuery, {
+      subDomain: subDomain,
+    });
     expect(getUser.records.length).toBe(1);
 
     const user = getUser.records[0].get("u");
@@ -24,11 +23,14 @@ export async function removeAdmin(subDomain: string) {
     `;
     const subDomainCountResult = await dbSession.run(
       checkMultipleSubDomainsQuery,
-      { id: user.identity }
+      { id: user.identity },
     );
 
-    const subDomainCount = subDomainCountResult.records[0].get("subDomainCount");
-    expect(subDomainCount, "User has multiple subDomains. Cannot delete.").toBe(1);
+    const subDomainCount =
+      subDomainCountResult.records[0].get("subDomainCount");
+    expect(subDomainCount, "User has multiple subDomains. Cannot delete.").toBe(
+      1,
+    );
 
     // Delete the edge between User and SubDomain
     const deleteEdgeQuery = `
@@ -36,10 +38,10 @@ export async function removeAdmin(subDomain: string) {
     WHERE elementId(u) = $id
     DELETE r
     `;
-    await dbSession.run(
-      deleteEdgeQuery,
-      { id: user.identity, subDomain: subDomain }
-    );
+    await dbSession.run(deleteEdgeQuery, {
+      id: user.identity,
+      subDomain: subDomain,
+    });
 
     // Delete the User
     const deleteUserQuery = `
@@ -47,10 +49,9 @@ export async function removeAdmin(subDomain: string) {
     WHERE elementId(u) = $id
     DETACH DELETE u
     `;
-    const deleteResult = await dbSession.run(
-      deleteUserQuery,
-      { id: user.identity }
-    );
+    const deleteResult = await dbSession.run(deleteUserQuery, {
+      id: user.identity,
+    });
 
     expect(deleteResult.summary.counters.updates().nodesDeleted).toBe(1);
 
@@ -59,16 +60,12 @@ export async function removeAdmin(subDomain: string) {
     MATCH (s:SubDomain { key: $subDomain })
     DELETE s
     `;
-    await dbSession.run(
-      deleteSubDomainQuery,
-      { subDomain: subDomain }
-    );
+    await dbSession.run(deleteSubDomainQuery, { subDomain: subDomain });
 
     // Verify the subDomain was removed
-    const verifyResult = await dbSession.run(
-      getSubDomainQuery,
-      { subDomain: subDomain }
-    );
+    const verifyResult = await dbSession.run(getSubDomainQuery, {
+      subDomain: subDomain,
+    });
 
     expect(verifyResult.records.length).toBe(0); // Expect no results, indicating subDomain was removed
   } finally {

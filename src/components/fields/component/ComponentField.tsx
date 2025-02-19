@@ -2,6 +2,12 @@ import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
 
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
 import {
+  RepeaterVertexContext,
+  useRepeaterVertexContext,
+} from "~/features/page_attr_render/context/PageAttrContext";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
+import {
   PreviewContext,
   usePreviewContext,
 } from "~/features/page_designer/context/PreviewContext";
@@ -13,12 +19,6 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import type { GenericComponentProps } from "../FieldType";
 
-import {
-  RepeaterVertexContext,
-  useRepeaterVertexContext,
-} from "~/features/page_attr_render/context/PageAttrContext";
-import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
-import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { ComponentChildrenContext } from "../contexts/ComponentChildrenContext";
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
 

@@ -2,11 +2,11 @@ import { createMemo, Match, Show, Switch } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { FilePickerButton } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { IconButton } from "~/components/styled/IconButton";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
+import { FilePickerButton } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
+import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";

@@ -4,13 +4,13 @@ import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { type GlobalProperties, useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import { URLS } from "../constants/URLS";
-import {postAPI} from "~/lib/api/postApi";
-import {API} from "~/lib/api/endpoints";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;

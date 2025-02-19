@@ -1,4 +1,5 @@
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+
 import { logout } from "../../../server/session/logout";
 
 export async function POST() {
@@ -7,7 +8,7 @@ export async function POST() {
     return {
       message: "Logout successful",
     };
-  } catch (error) {
+  } catch (_error) {
     return handleAPIError(new APIError("Failed to logout", 500));
   }
 }

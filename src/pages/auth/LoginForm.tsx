@@ -4,9 +4,9 @@ import { v7 as uuidv7 } from "uuid";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
-import {API} from "~/lib/api/endpoints";
-import {postAPI} from "~/lib/api/postApi";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validateEmail } from "~/lib/validation/validateEmail";
@@ -134,9 +134,7 @@ export function LoginForm() {
                   {
                     componentName: "Icon",
                     props: () => ({
-                      icon: showPassword.password
-                        ? "ph:eye"
-                        : "ph:eye-slash",
+                      icon: showPassword.password ? "ph:eye" : "ph:eye-slash",
                       onClick: () =>
                         setShowPassword("password", !showPassword.password),
                     }),

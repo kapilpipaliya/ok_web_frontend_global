@@ -3,11 +3,11 @@ import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
-import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { STYLES } from "~/components/styled/constants/styles";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { createAppState } from "~/createAppState";
+import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";

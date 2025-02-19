@@ -49,6 +49,7 @@ export async function createRootFolder(
   }
 }
 
+// TODO: this is access levels, not permissions
 async function createDefaultPermissions(tx: Session | Transaction) {
   const query = `
     MERGE (insert:Perm {key: 'insert'})

@@ -1,10 +1,12 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+
+import { v7 as uuidv7 } from "uuid";
+
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { handleAPIError, APIError } from "~/lib/api/apiErrorHandler";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
-import { v7 as uuidv7 } from "uuid";
+import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -12,8 +14,8 @@ export async function POST({ request }: APIEvent) {
   try {
     const user = await getUserFromSession(request);
     const [graph] = useGraph();
-    
-    if (!user?.P?.email || !isAdminRole(graph)) {
+
+    if (!(user?.P?.email && isAdminRole(graph))) {
       throw new APIError("Unauthorized", 401);
     }
 
@@ -22,7 +24,7 @@ export async function POST({ request }: APIEvent) {
     // Check if user already exists
     const existingUser = await dbSession.run(
       "MATCH (u:User {email: $email}) RETURN u",
-      { email }
+      { email },
     );
 
     if (existingUser.records.length > 0) {
@@ -30,7 +32,8 @@ export async function POST({ request }: APIEvent) {
     }
 
     // Create new user
-    const result = await dbSession.run(`
+    const _result = await dbSession.run(
+      `
       CREATE (u:User {
         uuid: $uuid,
         email: $email,
@@ -39,16 +42,18 @@ export async function POST({ request }: APIEvent) {
       })
       WITH u
       MATCH (r:Role {name: $roleName})
-      CREATE (u)-[:HAS_ROLE]->(r)
+      CREATE (u)-[:UserRole]->(r)
       RETURN u
-    `, { 
-      uuid: uuidv7(),
-      email,
-      roleName 
-    });
+    `,
+      {
+        email,
+        roleName,
+        uuid: uuidv7(),
+      },
+    );
 
     // TODO: Send invitation email
-    
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
       status: 200,
@@ -58,4 +63,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { APIError } from "~/lib/api/apiErrorHandler";
+
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { APIError } from "~/lib/api/apiErrorHandler";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
@@ -12,8 +13,8 @@ export async function POST({ request }: APIEvent) {
   try {
     const currentUser = await getUserFromSession(request);
     const [graph] = useGraph();
-    
-    if (!currentUser?.P?.email || !isAdminRole(graph)) {
+
+    if (!(currentUser?.P?.email && isAdminRole(graph))) {
       throw new APIError("Unauthorized", 401);
     }
 
@@ -25,21 +26,27 @@ export async function POST({ request }: APIEvent) {
     }
 
     // Check if user exists
-    const userCheck = await dbSession.run(`
+    const userCheck = await dbSession.run(
+      `
       MATCH (u:User {uuid: $uuid})
       RETURN u
-    `, { uuid });
+    `,
+      { uuid },
+    );
 
     if (userCheck.records.length === 0) {
       throw new APIError("User not found", 404);
     }
 
     // Delete user and all relationships
-    await dbSession.run(`
+    await dbSession.run(
+      `
       MATCH (u:User {uuid: $uuid})
       OPTIONAL MATCH (u)-[r]-()
       DELETE u, r
-    `, { uuid });
+    `,
+      { uuid },
+    );
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
@@ -50,4 +57,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

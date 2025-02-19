@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
@@ -15,7 +16,7 @@ export async function GET({ request }: APIEvent) {
 
     const result = await dbSession.run(`
       MATCH (u:User)
-      OPTIONAL MATCH (u)-[:HAS_ROLE]->(r:Role)
+      OPTIONAL MATCH (u)-[:UserRole]->(r:Role)
       RETURN u, r.name as role
       ORDER BY u.email ASC
     `);
@@ -40,4 +41,4 @@ export async function GET({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

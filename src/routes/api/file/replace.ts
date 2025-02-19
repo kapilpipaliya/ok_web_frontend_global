@@ -4,8 +4,8 @@ import type { HTTPEvent } from "vinxi/runtime/http-types";
 import { readMultipartFormData } from "vinxi/http";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { replaceFiles } from "~/server/upload/replaceFiles";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { replaceFiles } from "~/server/upload/replaceFiles";
 
 export async function PUT({ request }: APIEvent, event: HTTPEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

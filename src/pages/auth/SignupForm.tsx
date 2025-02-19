@@ -4,7 +4,9 @@ import { v7 as uuidv7 } from "uuid";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validateEmail } from "~/lib/validation/validateEmail";
@@ -14,8 +16,6 @@ import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect"
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../settings/constants";
-import {postAPI} from "~/lib/api/postApi";
-import {API} from "~/lib/api/endpoints";
 
 export function SignupForm() {
   const [graph, setGraph] = useGraph();
@@ -83,12 +83,12 @@ export function SignupForm() {
           });
           handleLoginRedirect(value, graph, navigate);
         },
-        promise: (postAPI(API.signUpUrl, {
+        promise: postAPI(API.signUpUrl, {
           email: formData.P.email.toLowerCase(),
           password: formData.P.password,
           subDomain: formData.P.subDomain,
           username: formData.P.username.toLowerCase(),
-        })),
+        }),
         successMessage: "Registered Successfully",
       });
     }
@@ -145,9 +145,7 @@ export function SignupForm() {
                   {
                     componentName: "Icon",
                     props: () => ({
-                      icon: showPassword.password
-                        ? "ph:eye"
-                        : "ph:eye-slash",
+                      icon: showPassword.password ? "ph:eye" : "ph:eye-slash",
                       onClick: () =>
                         setShowPassword("password", !showPassword.password),
                     }),

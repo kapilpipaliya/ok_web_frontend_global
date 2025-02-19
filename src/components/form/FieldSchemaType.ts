@@ -1,12 +1,12 @@
 import type { Accessor, Owner } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-
 import type {
   PageRenderObject,
   PageRenderStore,
 } from "~/features/page_attr_render/context/PageRenderContext";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
 import type { FormStoreObject } from "./context/FormContext";
 
 export type ComponentNameType = (options: FunctionArgumentType) => string;

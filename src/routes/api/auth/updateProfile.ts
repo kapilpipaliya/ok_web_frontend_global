@@ -16,9 +16,9 @@ export async function POST({ request }: APIEvent) {
     if (!payload.uuid) {
       throw new APIError("UUID is required", 400);
     }
-    
+
     const result = await updateProfile(payload, dbSession, subDomain);
-    
+
     if ("error" in result) {
       throw new APIError(result.error, result.status || 500);
     }
@@ -28,7 +28,7 @@ export async function POST({ request }: APIEvent) {
       pageName: EMAIL_TEMPLATES.PROFILE_UPDATED,
       queryParams: {
         updateTime: new Date().toISOString(),
-        username: result.user.P.username
+        username: result.user.P.username,
       },
       subDomain,
     });
@@ -39,10 +39,10 @@ export async function POST({ request }: APIEvent) {
         emailSubject: "Your Profile Has Been Updated",
         emailTo: result.user.P.email,
         fileVertex,
-        subDomain
+        subDomain,
       });
     }
-    
+
     return result;
   } catch (error) {
     return handleAPIError(error);

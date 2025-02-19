@@ -3,10 +3,10 @@ import { createStore } from "solid-js/store";
 
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
-import { QuickEditModal } from "~/features/grid/QuickEditModal";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
+import { QuickEditModal } from "~/features/grid/QuickEditModal";
 import { CommonAddComponent } from "~/features/page_designer/settings/rules/CommonAddComponent";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

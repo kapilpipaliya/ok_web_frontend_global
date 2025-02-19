@@ -266,9 +266,7 @@ export function MultiSelectField(
             >
               <Icon
                 icon={
-                  isExpanded()
-                    ? "ph:caret-down-bold"
-                    : "ph:caret-right-bold"
+                  isExpanded() ? "ph:caret-down-bold" : "ph:caret-right-bold"
                 }
                 noobserver
               />

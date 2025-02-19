@@ -21,16 +21,16 @@ interface SMTPConfig {
   user: string;
 }
 
-export async function sendEmail({ 
-  attachmentName, 
-  attachmentPath, 
-  content, 
-  subDomain, 
-  subject, 
-  to
+export async function sendEmail({
+  attachmentName,
+  attachmentPath,
+  content,
+  subDomain,
+  subject,
+  to,
 }: EmailOptions) {
   const dbSettings = await getEmailSettings(subDomain);
-  
+
   const transportConfig = {
     auth: {
       pass: dbSettings?.pass || process.env.SMTP_PASS,
@@ -38,7 +38,7 @@ export async function sendEmail({
     },
     host: dbSettings?.host || process.env.SMTP_HOST,
     port: dbSettings?.port || Number(process.env.SMTP_PORT),
-    secure: dbSettings?.secure ?? (process.env.SMTP_SECURE === "true"),
+    secure: dbSettings?.secure ?? process.env.SMTP_SECURE === "true",
     tls: {
       rejectUnauthorized: false,
     },
@@ -54,10 +54,12 @@ export async function sendEmail({
   };
 
   if (attachmentPath && attachmentName) {
-    emailOptions.attachments = [{
-      filename: attachmentName,
-      path: attachmentPath,
-    }];
+    emailOptions.attachments = [
+      {
+        filename: attachmentName,
+        path: attachmentPath,
+      },
+    ];
   }
 
   await transporter.sendMail(emailOptions);
@@ -78,7 +80,7 @@ async function getEmailSettings(subDomain: string): Promise<null | SMTPConfig> {
               s.smtpPassword as pass,
               s.fromEmail as from,
               s.secure as secure
-       LIMIT 1`
+       LIMIT 1`,
     );
 
     if (result.records.length === 0) {
@@ -87,17 +89,24 @@ async function getEmailSettings(subDomain: string): Promise<null | SMTPConfig> {
 
     const record = result.records[0];
     const settings = {
-      from: record.get('from'),
-      host: record.get('host'),
-      pass: record.get('pass'),
-      port: parseInt(record.get('port')),
-      secure: record.get('secure') === true,
-      user: record.get('user')
+      from: record.get("from"),
+      host: record.get("host"),
+      pass: record.get("pass"),
+      port: Number.parseInt(record.get("port")),
+      secure: record.get("secure") === true,
+      user: record.get("user"),
     };
 
     // Validate that all required fields are present
-    if (!settings.host || !settings.port || !settings.user || 
-        !settings.pass || !settings.from) {
+    if (
+      !(
+        settings.host &&
+        settings.port &&
+        settings.user &&
+        settings.pass &&
+        settings.from
+      )
+    ) {
       return null;
     }
 
@@ -105,4 +114,4 @@ async function getEmailSettings(subDomain: string): Promise<null | SMTPConfig> {
   } finally {
     await dbSession.close();
   }
-} 
+}

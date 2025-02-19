@@ -6,9 +6,8 @@ import type { IDToRuleMap } from "~/features/page_designer/functions/generateFor
 import type { GraphInterface, Id } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-
 import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
+import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
 

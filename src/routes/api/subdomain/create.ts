@@ -44,28 +44,6 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
-async function validateKeyAndDomain(
-  dbSession: Session,
-  key: string,
-  domain: string,
-) {
-  const existingKey = await dbSession.run(
-    "MATCH (s:SubDomain {key: $key}) RETURN s",
-    { key },
-  );
-  if (existingKey.records.length > 0) {
-    throw new APIError("Subdomain with this key already exists", 400);
-  }
-
-  const existingDomain = await dbSession.run(
-    "MATCH (s:SubDomain {domain: $domain}) RETURN s",
-    { domain },
-  );
-  if (existingDomain.records.length > 0) {
-    throw new APIError("Domain name is already taken", 400);
-  }
-}
-
 async function createSubdomain(
   dbSession: Session,
   key: string,
@@ -94,6 +72,28 @@ async function createUserSubdomainRelation(
      CREATE (u)-[:UserSubDomain]->(s)`,
     { key, uuid: userUuid },
   );
+}
+
+async function validateKeyAndDomain(
+  dbSession: Session,
+  key: string,
+  domain: string,
+) {
+  const existingKey = await dbSession.run(
+    "MATCH (s:SubDomain {key: $key}) RETURN s",
+    { key },
+  );
+  if (existingKey.records.length > 0) {
+    throw new APIError("Subdomain with this key already exists", 400);
+  }
+
+  const existingDomain = await dbSession.run(
+    "MATCH (s:SubDomain {domain: $domain}) RETURN s",
+    { domain },
+  );
+  if (existingDomain.records.length > 0) {
+    throw new APIError("Domain name is already taken", 400);
+  }
 }
 
 async function validateUser(email: null | string, dbSession: Session) {

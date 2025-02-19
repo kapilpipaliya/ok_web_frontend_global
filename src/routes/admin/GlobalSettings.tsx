@@ -3,13 +3,13 @@ import { createSignal, For, Show } from "solid-js";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
-
-import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
 import { CompanySettings } from "~/pages/global/CompanySettings";
 import { EmailSettings } from "~/pages/global/EmailSettings";
 import { GeneralSettings } from "~/pages/global/GeneralSettings";
 import { RoleSettings } from "~/pages/global/RoleSettings";
 import { UserManagement } from "~/pages/global/UserManagement";
+
+import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
 
 export default function GlobalSettings() {
   const [graph] = useGraph();

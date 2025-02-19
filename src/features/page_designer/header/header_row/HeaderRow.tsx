@@ -3,8 +3,8 @@ import type { JSX } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
+import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 
 import {
   type PageLayoutObject,

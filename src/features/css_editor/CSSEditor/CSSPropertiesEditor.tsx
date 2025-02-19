@@ -2,9 +2,9 @@ import { Icon } from "@iconify-icon/solid";
 import { batch, createSignal, Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
+import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { TextEditor } from "~/features/css_editor/CSSEditor/TextEditor";
 import { StyleEditor } from "~/features/css_editor/StyleEditor/StyleEditor";
-import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteEdge } from "~/lib/graph/mutate/edge";

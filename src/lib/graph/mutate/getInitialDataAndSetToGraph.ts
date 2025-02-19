@@ -1,11 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type {
-  GlobalProperties,
-  GraphInterface,
-  Id,
-  Vertex,
-} from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/graph";
 
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";

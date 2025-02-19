@@ -24,11 +24,7 @@ export const MiddleSectionButtons = () => {
               section !== "Build",
             "color:grey r:5|0|0|5": section === "Build",
           }}
-          icon={
-            section === "Build"
-              ? "ph:hammer"
-              : "ph:gear"
-          }
+          icon={section === "Build" ? "ph:hammer" : "ph:gear"}
           onclick={() =>
             mergeVertexProperties<PageLayoutObject>(
               0,

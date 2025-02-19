@@ -35,11 +35,11 @@ export async function POST({ request }: APIEvent) {
 
     await createActivityLog(
       dbSession,
-      'login',
-      'User',
+      "login",
+      "User",
       user.P.uuid,
       user.P.email,
-      'User logged in successfully'
+      "User logged in successfully",
     );
     await updateSession(user);
     delete user.P.password;
@@ -50,7 +50,7 @@ export async function POST({ request }: APIEvent) {
       pageName: EMAIL_TEMPLATES.LOGIN_NOTIFICATION,
       queryParams: {
         loginTime: new Date().toISOString(),
-        username: user.P.username
+        username: user.P.username,
       },
       subDomain: subDomain!,
     });
@@ -61,7 +61,7 @@ export async function POST({ request }: APIEvent) {
         emailSubject: "New Login to Your Account",
         emailTo: user.P.email,
         fileVertex,
-        subDomain: subDomain!
+        subDomain: subDomain!,
       });
     }
 
@@ -87,7 +87,7 @@ async function authenticateSuperUser(superUser: Vertex, password: string) {
     if (superDbResult.records.length === 0) {
       throw new APIError(
         `Not Authorized Email or Username for UUID: ${superUser.P.uuid}. Please contact customer support.`,
-        401
+        401,
       );
     }
     const user = convertNodeToJson(superDbResult.records[0].get("u"));
@@ -103,31 +103,37 @@ async function authenticateUser(
   _subDomain: string,
   dbSession: Session,
 ) {
-    const query =
-      "MATCH (u:User) WHERE u.email = $emailOrUsername OR u.username = $emailOrUsername RETURN u";
-    const result = await dbSession.run(query, { emailOrUsername });
+  const query =
+    "MATCH (u:User) WHERE u.email = $emailOrUsername OR u.username = $emailOrUsername RETURN u";
+  const result = await dbSession.run(query, { emailOrUsername });
 
-    if (result.records.length === 0) {
-      throw new APIError("Not Authorized Email or Username.", 401);
-    }
+  if (result.records.length === 0) {
+    throw new APIError("Not Authorized Email or Username.", 401);
+  }
 
-    const user = convertNodeToJson(result.records[0].get("u"));
+  const user = convertNodeToJson(result.records[0].get("u"));
 
-    if (!user.P.emailConfirmed) {
-      throw new APIError("Please confirm your email address before logging in.", 403);
-    }
+  if (!user.P.emailConfirmed) {
+    throw new APIError(
+      "Please confirm your email address before logging in.",
+      403,
+    );
+  }
 
-    // when system user, check password from system db
-    if (user.P.isSuper) {
-      return await authenticateSuperUser(user, password);
-    }
-    return comparePassword(user, password);
+  // when system user, check password from system db
+  if (user.P.isSuper) {
+    return await authenticateSuperUser(user, password);
+  }
+  return comparePassword(user, password);
 }
 
 async function comparePassword(user: Vertex, password: string) {
   const isValid = await verifyPassword(password, user.P.password, user.P.salt);
   if (!isValid) {
-    throw new APIError("Unauthorized: Incorrect email, username, or password.", 401);
+    throw new APIError(
+      "Unauthorized: Incorrect email, username, or password.",
+      401,
+    );
   }
 
   return user;

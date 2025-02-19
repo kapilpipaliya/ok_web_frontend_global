@@ -1,13 +1,12 @@
 import { type JSX, Match, Show, splitProps, Switch } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
+import { replacePlaceholderWithUrl } from "~/features/css_editor/utils/cssStateToString";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/graph";
 
 import type { GenericComponentProps } from "./FieldType";
-
-import { replacePlaceholderWithUrl } from "~/features/css_editor/utils/cssStateToString";
-import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 
 // HtmlField
 export function HtmlField(

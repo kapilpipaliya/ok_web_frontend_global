@@ -1,8 +1,8 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendTestEmail } from "~/lib/email/sendTestEmail";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { getUserFromSession } from "~/server/session/getUserFromSession";

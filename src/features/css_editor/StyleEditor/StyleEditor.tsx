@@ -1,8 +1,8 @@
 import { createSignal } from "solid-js";
 
+import { filterSections } from "../utils/filterSections";
 import { SearchBar } from "./SearchBar";
 import { SectionList } from "./SectionList";
-import { filterSections } from "../utils/filterSections";
 
 export function StyleEditor() {
   const [searchQuery, setSearchQuery] = createSignal("");

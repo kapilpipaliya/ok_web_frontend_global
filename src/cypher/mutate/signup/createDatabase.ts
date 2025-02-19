@@ -10,7 +10,6 @@ export async function createDatabase(subdomain: string) {
     neo4JDriver = await getDriver();
     const session = neo4JDriver.session();
     await session.run(`CREATE DATABASE ${subdomain}`);
-    console.log(`Database ${subdomain} created successfully.`);
   } catch (error) {
     console.error(`Failed to create database ${subdomain}:`, error);
     throw error;

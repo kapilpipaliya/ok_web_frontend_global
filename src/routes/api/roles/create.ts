@@ -13,8 +13,8 @@ export async function POST({ request }: APIEvent) {
   try {
     const user = await getUserFromSession(request);
     const [graph] = useGraph();
-    
-    if (!user?.P?.email || !isAdminRole(graph)) {
+
+    if (!(user?.P?.email && isAdminRole(graph))) {
       throw new APIError("Unauthorized", 401);
     }
 
@@ -23,14 +23,15 @@ export async function POST({ request }: APIEvent) {
     // Check if role already exists
     const existingRole = await dbSession.run(
       "MATCH (r:Role {key: $key}) RETURN r",
-      { key }
+      { key },
     );
 
     if (existingRole.records.length > 0) {
       throw new APIError("Role with this name already exists", 400);
     }
 
-    const result = await dbSession.run(`
+    const result = await dbSession.run(
+      `
       CREATE (r:Role {
         key: $key,
         description: $description,
@@ -39,7 +40,9 @@ export async function POST({ request }: APIEvent) {
         updatedAt: datetime()
       })
       RETURN r
-    `, { description, key, name, permissions });
+    `,
+      { description, key, name, permissions },
+    );
 
     const role = convertNodeToJson(result.records[0].get("r"));
 
@@ -52,4 +55,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

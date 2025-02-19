@@ -21,6 +21,10 @@ import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { CommonTable } from "~/components/styled/Table";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import {
+  getConfiguredPermissions,
+  hasPermissions,
+} from "~/features/page_attr_render/permissions";
 import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
@@ -33,10 +37,6 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { createInputFilteredFormMetaData } from "~/lib/meta/functions/createInputFilteredFormMetaData";
 
-import {
-  getConfiguredPermissions,
-  hasPermissions,
-} from "~/features/page_attr_render/permissions";
 import { CreateGridHeaders } from "./CreateGridHeaders";
 import {
   DataGridProvider,

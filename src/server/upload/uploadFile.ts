@@ -53,7 +53,12 @@ export async function uploadFiles(
         // username,
       };
 
-      return await saveFileMetadataToNeo4j(neo4jSession, metadata, undefined, others.label);
+      return await saveFileMetadataToNeo4j(
+        neo4jSession,
+        metadata,
+        undefined,
+        others.label,
+      );
     }),
   );
 

@@ -1,9 +1,10 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
+
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { handleAPIError, APIError } from "~/lib/api/apiErrorHandler";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
+import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -11,24 +12,30 @@ export async function POST({ request }: APIEvent) {
   try {
     const user = await getUserFromSession(request);
     const [graph] = useGraph();
-    
-    if (!user?.P?.email || !isAdminRole(graph)) {
+
+    if (!(user?.P?.email && isAdminRole(graph))) {
       throw new APIError("Unauthorized", 401);
     }
 
-    const { userId, roleName } = await request.json();
+    const { roleName, userId } = await request.json();
 
     // Remove existing role relationship
-    await dbSession.run(`
-      MATCH (u:User {uuid: $userId})-[r:HAS_ROLE]->(:Role)
+    await dbSession.run(
+      `
+      MATCH (u:User {uuid: $userId})-[r:UserRole]->(:Role)
       DELETE r
-    `, { userId });
+    `,
+      { userId },
+    );
 
     // Create new role relationship
-    await dbSession.run(`
+    await dbSession.run(
+      `
       MATCH (u:User {uuid: $userId}), (r:Role {name: $roleName})
-      CREATE (u)-[:HAS_ROLE]->(r)
-    `, { userId, roleName });
+      CREATE (u)-[:UserRole]->(r)
+    `,
+      { roleName, userId },
+    );
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
@@ -39,4 +46,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

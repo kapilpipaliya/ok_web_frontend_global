@@ -1,6 +1,9 @@
 import { splitProps } from "solid-js";
 
-import { IconButton, type IconButtonProps } from "../../components/styled/IconButton";
+import {
+  IconButton,
+  type IconButtonProps,
+} from "../../components/styled/IconButton";
 
 export function AddNewButton(props: IconButtonProps) {
   const [_local, rest] = splitProps(props, ["children"]);

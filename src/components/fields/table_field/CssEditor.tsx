@@ -1,9 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, type Setter, Show } from "solid-js";
 
-import { CSSPropertiesEditorWrapper } from "~/features/css_editor/CSSEditor/CSSPropertiesEditorWrapper";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { Drawer } from "~/components/styled/Drawer";
+import { CSSPropertiesEditorWrapper } from "~/features/css_editor/CSSEditor/CSSPropertiesEditorWrapper";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 

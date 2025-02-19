@@ -3,9 +3,9 @@ import { createSignal, type JSX } from "solid-js";
 
 import logo from "~/assets/graphics/logo.png";
 import { useToast } from "~/components/styled/Toast";
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
 import { validateEmail } from "~/lib/validation/validateEmail";
-import {postAPI} from "~/lib/api/postApi";
-import {API} from "~/lib/api/endpoints";
 
 interface FormHeaderProps {
   subtitle: string;

@@ -27,7 +27,7 @@ export async function POST({ request }: APIEvent) {
     if (user.isSuper) {
       throw new APIError(
         "Super user password changes not allowed through this interface",
-        403
+        403,
       );
     }
 
@@ -57,7 +57,7 @@ export async function POST({ request }: APIEvent) {
       pageName: EMAIL_TEMPLATES.PASSWORD_CHANGED,
       queryParams: {
         changeTime: new Date().toISOString(),
-        username: user.username
+        username: user.username,
       },
       subDomain,
     });
@@ -68,7 +68,7 @@ export async function POST({ request }: APIEvent) {
         emailSubject: "Your Password Has Been Changed",
         emailTo: user.email,
         fileVertex,
-        subDomain
+        subDomain,
       });
     }
 

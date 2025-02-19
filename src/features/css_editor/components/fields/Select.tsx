@@ -96,7 +96,10 @@ const DropdownButton = (props: DropdownButtonProps) => (
       height={16}
       icon={"ph:caret-down"}
       noobserver
-      style={{ transform: props.isActive ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}
+      style={{
+        transform: props.isActive ? "rotate(180deg)" : "rotate(0deg)",
+        transition: "transform 0.2s ease",
+      }}
       width={16}
     />
   </div>

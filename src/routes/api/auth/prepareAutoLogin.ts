@@ -2,13 +2,14 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { parse } from "tldts";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
-import { Vertex } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function GET({ request }: APIEvent) {
   try {
@@ -37,7 +38,7 @@ export async function GET({ request }: APIEvent) {
       host,
       targetDomain,
       targetSubdomain,
-      secureToken
+      secureToken,
     );
 
     return new Response(null, {
@@ -54,7 +55,7 @@ function buildAutoLoginUrl(
   host: string,
   targetDomain: null | string,
   targetSubdomain: null | string,
-  secureToken: string
+  secureToken: string,
 ) {
   if (host.includes("localhost")) {
     // For localhost, use port if present
@@ -83,7 +84,7 @@ function validateRequest(url: URL) {
 }
 
 function validateUser(user?: null | Vertex) {
-  if (!user || !(user.P.email && user.P.username && user.P.uuid)) {
+  if (!(user && user.P.email && user.P.username && user.P.uuid)) {
     throw new APIError("Missing user data", 401);
   }
   return user;

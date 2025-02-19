@@ -25,17 +25,17 @@ import {
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
 import { getFormData } from "~/components/form/functions/getFormData";
 import { SaveCancelButton } from "~/components/form/SaveCancelButton";
-import { PageView } from "~/features/page_attr_render/PageView";
-import {
-  getConfiguredPermissions,
-  hasPermissions,
-} from "~/features/page_attr_render/permissions";
 import { SiteTitle } from "~/components/SiteTitle";
 import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { PreviewPage } from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { PageView } from "~/features/page_attr_render/PageView";
+import {
+  getConfiguredPermissions,
+  hasPermissions,
+} from "~/features/page_attr_render/permissions";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";

@@ -1,7 +1,7 @@
 import type { Transaction } from "neo4j-driver";
 import type { Session } from "neo4j-driver";
 
-import { BrowserContext, chromium, Page } from "playwright";
+import { type BrowserContext, chromium, type Page } from "playwright";
 
 import { isDev } from "~/routes/constants/constants";
 import { uploadFiles } from "~/server/upload/uploadFile";
@@ -36,19 +36,31 @@ export async function renderPageAsMHtml({
   let browser;
 
   try {
-    const browserSetup = await setupBrowserAndPage(pageName, queryParams, subDomain, secureToken);
+    const browserSetup = await setupBrowserAndPage(
+      pageName,
+      queryParams,
+      subDomain,
+      secureToken,
+    );
     browser = browserSetup.browser;
 
-    const snapshotData = await capturePageSnapshot(browserSetup.page, browserSetup.context);
+    const snapshotData = await capturePageSnapshot(
+      browserSetup.page,
+      browserSetup.context,
+    );
     const fileName = `${pageName}.mhtml`;
 
-    const { result } = await uploadFiles([
-      { 
-        data: snapshotData as unknown as Buffer, 
-        filename: fileName, 
-        label: "Email" 
-      }
-    ], subDomain, neo4jSession);
+    const { result } = await uploadFiles(
+      [
+        {
+          data: snapshotData as unknown as Buffer,
+          filename: fileName,
+          label: "Email",
+        },
+      ],
+      subDomain,
+      neo4jSession,
+    );
 
     if (!result?.length) {
       throw new Error("Failed to upload file");
@@ -66,7 +78,10 @@ export async function renderPageAsMHtml({
   }
 }
 
-async function capturePageSnapshot(page: Page, context: BrowserContext): Promise<string> {
+async function capturePageSnapshot(
+  page: Page,
+  context: BrowserContext,
+): Promise<string> {
   const cdpSession = await context.newCDPSession(page);
   const { data } = await cdpSession.send("Page.captureSnapshot", {
     format: "mhtml",
@@ -75,36 +90,39 @@ async function capturePageSnapshot(page: Page, context: BrowserContext): Promise
 }
 
 async function setupBrowserAndPage(
-  pageName: string, 
-  queryParams: Record<string, string>, 
-  subDomain: string, 
-  token?: string
+  pageName: string,
+  queryParams: Record<string, string>,
+  subDomain: string,
+  token?: string,
 ): Promise<BrowserSetup> {
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
-  
+
   const searchParams = new URLSearchParams(queryParams);
   const redirectUrl = `/email-templates/${pageName}`;
-  
+
   if (token) {
     searchParams.set("token", token);
     searchParams.set("redirect", redirectUrl);
   }
 
-  const protocol = isDev ? 'http' : 'https';
-  const domainPort = process.env.DOMAIN_PORT ? `:${process.env.DOMAIN_PORT}` : '';
-  const subDomainPart = subDomain && subDomain !== 'super' ? `${subDomain}.` : '';
-  
+  const protocol = isDev ? "http" : "https";
+  const domainPort = process.env.DOMAIN_PORT
+    ? `:${process.env.DOMAIN_PORT}`
+    : "";
+  const subDomainPart =
+    subDomain && subDomain !== "super" ? `${subDomain}.` : "";
+
   const baseUrl = `${protocol}://${subDomainPart}${process.env.DOMAIN}${domainPort}`;
   const queryString = searchParams.toString();
-  
+
   const url = token
     ? `${baseUrl}/api/auth/autoLogin?${queryString}`
     : `${baseUrl}${redirectUrl}${queryString ? `?${queryString}` : ""}`;
 
   await page.goto(url);
   await page.waitForLoadState("networkidle");
-  
+
   return { browser, context, page };
 }

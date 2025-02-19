@@ -1,9 +1,10 @@
+import type { Vertex } from "~/lib/graph/graph";
+
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
 import { hashPassword } from "~/lib/auth/password";
-import { Vertex } from "~/lib/graph/graph";
 
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";
@@ -12,7 +13,7 @@ export const superUserData = {
   email: "superuser@easyformforge.com",
   password: "kK11235813@",
   subDomain: SYSTEM_DB_NAME,
-  username: "superuser"
+  username: "superuser",
 };
 
 export async function setupSuperUser(): Promise<{
@@ -45,11 +46,17 @@ export async function setupSuperUser(): Promise<{
       });
 
       if (checkUserResult.records.length > 0) {
-        return { error: "User with the same username already exists.", status: 400, user: null };
+        return {
+          error: "User with the same username already exists.",
+          status: 400,
+          user: null,
+        };
       }
 
       // Hash password before saving
-      const { hashedPassword, salt } = await hashPassword(superUserData.password);
+      const { hashedPassword, salt } = await hashPassword(
+        superUserData.password,
+      );
 
       const createUserQuery = `
         CREATE (u:User {
@@ -65,7 +72,7 @@ export async function setupSuperUser(): Promise<{
         CREATE (u)-[:UserSubDomain]->(s)
         RETURN u, s
       `;
-      
+
       const createUserResult = await dbSession.run(createUserQuery, {
         email: superUserData.email,
         hashedPassword,
@@ -75,7 +82,11 @@ export async function setupSuperUser(): Promise<{
       });
 
       if (createUserResult.records.length === 0) {
-        return { error: `Failed to create ${SYSTEM_DB_NAME} user.`, status: 500, user: null };
+        return {
+          error: `Failed to create ${SYSTEM_DB_NAME} user.`,
+          status: 500,
+          user: null,
+        };
       }
 
       const user = convertNodeToJson(createUserResult.records[0].get("u"));
@@ -95,7 +106,11 @@ export async function setupSuperUser(): Promise<{
 
       const response = await insertComponents(dbSession);
       if (!response.success) {
-        return { error: "Failed to insert component tree", status: 500, user: null };
+        return {
+          error: "Failed to insert component tree",
+          status: 500,
+          user: null,
+        };
       }
 
       return { status: 200, user };
@@ -104,7 +119,7 @@ export async function setupSuperUser(): Promise<{
       return {
         error: `Failed to create ${SYSTEM_DB_NAME} user`,
         status: 500,
-        user: null
+        user: null,
       };
     } finally {
       await dbSession.close();
@@ -114,7 +129,7 @@ export async function setupSuperUser(): Promise<{
     return {
       error: `Failed to setup ${SYSTEM_DB_NAME} user: ${(error as Error).message}`,
       status: 500,
-      user: null
+      user: null,
     };
   } finally {
     await systemDbSession.close();

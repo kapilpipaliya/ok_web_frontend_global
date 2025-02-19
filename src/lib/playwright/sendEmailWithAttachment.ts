@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 
-import { Vertex } from "../graph/graph";
+import type { Vertex } from "../graph/graph";
+
 import { sendEmail } from "./sendEmail";
 
 // example
@@ -12,7 +13,10 @@ import { sendEmail } from "./sendEmail";
 //   subDomain
 // });
 export async function sendEmailWithAttachment({
-  emailSubject, emailTo, fileVertex, subDomain
+  emailSubject,
+  emailTo,
+  fileVertex,
+  subDomain,
 }: {
   emailSubject: string;
   emailTo: string;
@@ -26,6 +30,6 @@ export async function sendEmailWithAttachment({
     content: fileData.toString(),
     subDomain,
     subject: emailSubject,
-    to: emailTo
+    to: emailTo,
   });
 }

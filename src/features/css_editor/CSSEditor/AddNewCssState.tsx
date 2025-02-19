@@ -1,9 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 
-import { cssSelectorTree } from "~/features/css_editor/constants/StateSelector";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
+import { cssSelectorTree } from "~/features/css_editor/constants/StateSelector";
 
 import { PROPERTIES } from "../../../components/styled/constants/constant";
 import { useCssEditor } from "../context/CssEditorContext";

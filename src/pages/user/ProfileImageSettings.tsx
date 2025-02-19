@@ -4,8 +4,8 @@ import { v7 as uuidv7 } from "uuid";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { useToast } from "~/components/styled/Toast";
+import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
@@ -18,9 +18,9 @@ import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { profileImage } from "~/pages/constants/constant";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function ProfileImageSettings() {
   const [openDialog, setOpenDialog] = createSignal(false);

@@ -16,6 +16,18 @@ import {
 import { createStore, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
+import { Label } from "~/features/css_editor/components/fields/Label";
+import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
+import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
+import {
+  PageRenderContextProvider,
+  usePageRenderContext,
+} from "~/features/page_attr_render/context/PageRenderContext";
+import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
+import {
+  getConfiguredPermissions,
+  hasPermissions,
+} from "~/features/page_attr_render/permissions";
 import {
   PreviewContext,
   usePreviewContext,
@@ -39,20 +51,8 @@ import type {
   FunctionArgumentType,
 } from "./FieldSchemaType";
 
-import { Label } from "~/features/css_editor/components/fields/Label";
-import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
-import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
-import {
-  PageRenderContextProvider,
-  usePageRenderContext,
-} from "~/features/page_attr_render/context/PageRenderContext";
-import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
-import {
-  getConfiguredPermissions,
-  hasPermissions,
-} from "~/features/page_attr_render/permissions";
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";

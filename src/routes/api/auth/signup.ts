@@ -57,8 +57,8 @@ async function handleSignup(
       user = await signupUser(tx, data);
     }
 
-    if (!('id' in user)) {
-      throw new Error('User creation failed');
+    if (!("id" in user)) {
+      throw new Error("User creation failed");
     }
 
     await tx.commit();
@@ -71,13 +71,16 @@ async function handleSignup(
       pageName: EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,
       queryParams: {
         email: data.email,
-        username: data.username
+        username: data.username,
       },
       subDomain,
     });
 
-    if (!result.success || !result.result) {
-      throw new APIError(result.error || 'Failed to render confirmation email', 500);
+    if (!(result.success && result.result)) {
+      throw new APIError(
+        result.error || "Failed to render confirmation email",
+        500,
+      );
     }
 
     const fileVertex = result.result[0];
@@ -85,13 +88,14 @@ async function handleSignup(
       emailSubject: "Welcome to Our Platform - Please Confirm Your Email",
       emailTo: data.email,
       fileVertex,
-      subDomain
+      subDomain,
     });
 
     return user;
   } catch (error) {
     await tx.rollback();
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
     return new Response(errorMessage, { status: 500 });
   }
 }

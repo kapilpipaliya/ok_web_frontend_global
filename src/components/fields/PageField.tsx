@@ -1,11 +1,10 @@
 import { splitProps } from "solid-js";
 
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import type { GenericComponentProps } from "./FieldType";
-
-import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 
 export function PageField(props: Readonly<GenericComponentProps>) {
   const [local, _others] = splitProps(props, [

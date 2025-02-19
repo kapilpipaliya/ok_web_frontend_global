@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
@@ -19,8 +20,8 @@ export async function GET({ request }: APIEvent) {
       ORDER BY r.name ASC
     `);
 
-    const roles = result.records.map((record) => 
-      convertNodeToJson(record.get("r"))
+    const roles = result.records.map((record) =>
+      convertNodeToJson(record.get("r")),
     );
 
     return new Response(JSON.stringify({ roles }), {
@@ -32,4 +33,4 @@ export async function GET({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

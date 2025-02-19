@@ -19,9 +19,7 @@ export function MenuItems(props: Readonly<MenuItemsProps>): JSX.Element {
       fallback={<UnauthenticatedMenu onClose={props.onClose} />}
       when={!!getMemberVertex(graph)?.P?.email}
     >
-      <AuthenticatedMenu
-        onClose={props.onClose}
-      />
+      <AuthenticatedMenu onClose={props.onClose} />
     </Show>
   );
 }

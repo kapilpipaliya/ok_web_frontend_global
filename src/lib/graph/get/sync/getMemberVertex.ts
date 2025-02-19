@@ -1,9 +1,6 @@
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { evalExpression } from "~/lib/expression_eval";
-import {
-  defaultLogo,
-  profileImage,
-} from "~/pages/constants/constant";
+import { defaultLogo, profileImage } from "~/pages/constants/constant";
 
 import type { GraphInterface, Vertex } from "../../graph";
 

@@ -1,12 +1,11 @@
 import type { Vertex } from "~/lib/graph/graph";
 
-import { isVertex } from "~/lib/graph/mutate/vertex";
-
 import {
   RepeaterVertexContext,
   useRepeaterVertexContext,
 } from "~/features/page_attr_render/context/PageAttrContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
+import { isVertex } from "~/lib/graph/mutate/vertex";
 
 export function RepeaterInternal(props: {
   data: any;

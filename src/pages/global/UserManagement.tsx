@@ -17,24 +17,33 @@ export function UserManagement() {
   const UserSchema = {
     attributes: [
       {
-        componentName: "Text",
+        componentName: "TextInput",
+        displayName: "Username",
+        key: "username",
+      },
+      {
+        componentName: "TextInput",
         displayName: "Email",
         key: "email",
       },
       {
-        componentName: "Text",
+        componentName: "TextInput",
         displayName: "Name",
         key: "name",
       },
       {
-        componentName: "Text",
-        displayName: "Role",
+        collection: "g:'Role'",
+        componentName: "MultiSelect",
         key: "role",
       },
       {
-        componentName: "Text",
+        componentName: "Select",
         displayName: "Status",
         key: "status",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Inactive", value: "inactive" },
+        ],
       },
     ],
     key: "users",
@@ -49,4 +58,4 @@ export function UserManagement() {
       tableId="users"
     />
   );
-} 
+}

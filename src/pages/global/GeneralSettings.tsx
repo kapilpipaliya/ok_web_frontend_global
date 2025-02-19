@@ -11,10 +11,10 @@ import {
   addNewVertex,
   replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function GeneralSettings() {
   const [graph, setGraph] = useGraph();

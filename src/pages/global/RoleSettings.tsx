@@ -44,4 +44,4 @@ export function RoleSettings() {
       tableId="roles"
     />
   );
-} 
+}

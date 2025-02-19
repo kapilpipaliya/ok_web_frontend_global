@@ -12,9 +12,9 @@ import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { validatePassword } from "~/lib/validation/validatePassword";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function PasswordChangeForm() {
   const [graph, setGraph] = useGraph();
@@ -134,9 +134,7 @@ function createPasswordField(
               {
                 componentName: "Icon",
                 props: () => ({
-                  icon: showPassword[key]
-                    ? "ph:eye"
-                    : "ph:eye-slash",
+                  icon: showPassword[key] ? "ph:eye" : "ph:eye-slash",
                   onClick: () => setShowPassword(key, !showPassword[key]),
                 }),
               },

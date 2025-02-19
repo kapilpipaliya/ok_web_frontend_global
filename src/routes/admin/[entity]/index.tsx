@@ -1,8 +1,8 @@
 import { useParams } from "@solidjs/router";
 import { Match, Switch } from "solid-js";
 
-import { DataGrid } from "~/features/grid/DataGrid";
 import FileManager from "~/features/file_manager/FileManager";
+import { DataGrid } from "~/features/grid/DataGrid";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 
 export default function TablePage() {
