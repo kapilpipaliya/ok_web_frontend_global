@@ -8,7 +8,7 @@ import { EmailSettings } from "~/pages/global/EmailSettings";
 import { GeneralSettings } from "~/pages/global/GeneralSettings";
 import { RoleSettings } from "~/pages/global/RoleSettings";
 import { UserManagement } from "~/pages/global/UserManagement";
-import { FileManager } from "~/routes/admin/FileManager";
+import FileManager from "~/routes/admin/FileManager";
 
 import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
 
