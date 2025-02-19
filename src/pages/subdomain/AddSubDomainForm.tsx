@@ -13,10 +13,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-
-const GRID_ITEM_CLASS =
-  "grid grid-template-columns:150px|400px ai:center gap:8";
-const LABEL_CLASS = "fg:base-50 font-weight:500 font:15";
+import { SETTINGS_CONSTANTS } from "../settings/constants";
 
 interface Props {
   onSuccess: () => void;
@@ -82,7 +79,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
             as: "div",
             attributes: [
               {
-                class: LABEL_CLASS,
+                class: SETTINGS_CONSTANTS.LABEL_CLASS,
                 componentName: "Text",
                 text: "Name",
                 validation: { required: true },
@@ -95,14 +92,14 @@ export const AddSubDomainForm: Component<Props> = (props) => {
                 validation: { required: true },
               },
             ],
-            class: GRID_ITEM_CLASS,
+            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
           },
           {
             as: "div",
             attributes: [
               {
-                class: LABEL_CLASS,
+                class: SETTINGS_CONSTANTS.LABEL_CLASS,
                 componentName: "Text",
                 text: "Domain",
                 validation: { required: true },
@@ -114,11 +111,11 @@ export const AddSubDomainForm: Component<Props> = (props) => {
                 placeholder: "Enter domain (Optional) eg: example.com",
               },
             ],
-            class: GRID_ITEM_CLASS,
+            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
           },
         ],
-        class: "p:16 grid gap:10",
+        class: SETTINGS_CONSTANTS.FORM_CLASS,
         componentName: "Box",
       },
     ],
@@ -129,12 +126,12 @@ export const AddSubDomainForm: Component<Props> = (props) => {
     as: "div",
     attributes: [
       {
-        class: "font-size:18 font-weight:500",
+        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
         componentName: "Text",
         text: "Add New SubDomain",
       }
     ],
-    class: "p:16 border-bottom:1px|solid|base-20",
+    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
     componentName: "Box"
   };
 
@@ -142,7 +139,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
     as: "div",
     attributes: [
       {
-        class: "bg:base-10 fg:base-80 p:8|16 r:4 cursor:pointer border:1px|solid|base-20",
+        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
         componentName: "Button",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
@@ -152,7 +149,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
         }),
       },
       {
-        class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
+        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
         componentName: "Button",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.["isLoading"],
@@ -161,7 +158,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
         }),
       },
     ],
-    class: "display:flex jc:flex-end p:16 gap:6 border-top:1px|solid|base-20 bg:base-5",
+    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
     componentName: "Box",
   };
   const schema: FieldAttribute = {
@@ -170,7 +167,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
         as: "div",
         attributes: [
           {
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
+            class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
             componentName: "Button",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {
@@ -180,13 +177,22 @@ export const AddSubDomainForm: Component<Props> = (props) => {
             }),
           },
           {
+            as: "div",
+            attributes: [],
+            class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+            componentName: "Box",
+            props: (options: FunctionArgumentType) => ({
+              hidden: !options.dataContext.modalState[0]?.["showModal"],
+            }),
+          },
+          {
             as: "dialog",
             attributes: [
               modalHeaderSchema,
               formSchema,
               modalFooterSchema,
             ],
-            class: "border:1px|solid|base-20 r:4 p:0 w:600px position:fixed top:50% left:50% transform:translate(-50%,-50%) bg:base-5 z:1",
+            class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
             componentName: "Html",
             open: true,
             props: (options: FunctionArgumentType) => ({
