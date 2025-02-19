@@ -12,7 +12,7 @@ export async function checkAdminRole(request: Request): Promise<boolean> {
     }
 
     const result = await dbSession.run(
-      `MATCH (u:User)-[:UserHasRole]->(r:Role)
+      `MATCH (u:User)-[:UserRole]->(r:Role)
        WHERE elementId(u) = $userId AND r.key = 'Admin'
        RETURN count(r) > 0 as isAdmin`,
       { userId: user.id },

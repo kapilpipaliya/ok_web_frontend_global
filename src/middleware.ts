@@ -10,9 +10,12 @@ export default createMiddleware({
   onRequest: [
     async (event) => {
       const url = new URL(event.request.url);
-      const sessionUser = await getUserFromSession(event.request);
+      if (url.pathname === "/api/mutate/superUserSetup") {
+        return;
+      }
       const subdomain = await getSubDomain(event.request.headers.get("host")!);
       const isSuperSubDomain = subdomain === SYSTEM_DB_NAME;
+      const sessionUser = await getUserFromSession(event.request);
 
       // Check if the request URL path is in the list of public paths
       if (url.pathname.includes("/system")) {

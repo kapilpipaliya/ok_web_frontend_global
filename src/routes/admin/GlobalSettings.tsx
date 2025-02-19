@@ -8,6 +8,7 @@ import { EmailSettings } from "~/pages/global/EmailSettings";
 import { GeneralSettings } from "~/pages/global/GeneralSettings";
 import { RoleSettings } from "~/pages/global/RoleSettings";
 import { UserManagement } from "~/pages/global/UserManagement";
+import { FileManager } from "~/routes/admin/FileManager";
 
 import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
 
@@ -35,6 +36,11 @@ export default function GlobalSettings() {
       component: "ThemeSettings",
       id: "theme",
       label: "Theme Settings",
+    },
+    {
+      component: "Permissions",
+      id: "permissions",
+      label: "Permissions",
     },
     {
       component: "RoleSettings",
@@ -92,6 +98,13 @@ export default function GlobalSettings() {
           </Show>
           <Show when={selectedMenu() === "theme"}>
             <ThemeSettings />
+          </Show>
+          <Show when={selectedMenu() === "permissions"}>
+            <FileManager
+              parentVertexLabel="Perm"
+              rootKeys={{ $or: [{ key: "Root" }] }}
+              toParentEdgeType="ParentPerm"
+            />
           </Show>
           <Show when={selectedMenu() === "roles"}>
             <RoleSettings />

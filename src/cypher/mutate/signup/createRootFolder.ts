@@ -28,6 +28,7 @@ export async function createRootFolder(
   const query = `
     MERGE (:Folder {key: 'Root'})
     MERGE (:Comp {key: 'Root'})
+    MERGE (:Perm {key: 'Root'})
     MERGE (globalSetting:GlobalSetting {key: 'Default'})
     MERGE (theme:Theme {key: 'Default'})
     SET theme.data = $theme
@@ -51,6 +52,7 @@ export async function createRootFolder(
 
 // TODO: this is access levels, not permissions
 async function createDefaultPermissions(tx: Session | Transaction) {
+  return;
   const query = `
     MERGE (insert:Perm {key: 'insert'})
     MERGE (edit:Perm {key: 'edit'}) 
