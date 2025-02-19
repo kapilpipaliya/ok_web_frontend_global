@@ -25,6 +25,15 @@ export const parentTemplateAttribute = {
   type: "ParentTemplate",
   // validation: { required: true },
 };
+export const parentPermAttribute = {
+  collection: "g:'Perm'",
+  componentName: "MultiSelect",
+  displayName: "Parent Permission",
+  key: "ParentPerm",
+  type: "ParentPerm",
+  // validation: { required: true },
+};
+
 export const Comp: IFormMetaData = {
   attributes: [
     {

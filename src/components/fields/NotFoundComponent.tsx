@@ -1,7 +1,7 @@
 export function NotFoundComponent(props: { componentName: string }) {
   return (
     <div
-      class={"c:error"}
+      class={"fg:error"}
     >{`${props.componentName ?? "Component"} Not implemented`}</div>
   );
 }

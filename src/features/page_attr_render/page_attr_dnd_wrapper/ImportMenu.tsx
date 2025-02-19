@@ -108,7 +108,7 @@ export function ImportMenu(
         </div>
       </div>
       <Show when={error()}>
-        <div style={{ color: "red" }}>{error()}</div>
+        <div class="fg:error">{error()}</div>
       </Show>
 
       <DialogFooter>

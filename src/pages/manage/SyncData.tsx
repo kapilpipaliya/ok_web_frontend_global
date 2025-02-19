@@ -2,7 +2,6 @@ import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { Breadcrumb } from "~/components/styled/Breadcrumb";
 import { useToast } from "~/components/styled/Toast";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { syncNodesAPICall } from "~/cypher/mutate/sync";
@@ -48,14 +47,6 @@ export function SyncData() {
 
   return (
     <>
-      <Breadcrumb
-        breadcrumb={[
-          { href: "/admin", icon: "clarity:administrator-line", key: "Admin" },
-          { key: "Sync" },
-        ]}
-        title="Sync"
-      />
-
       <div class="box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-1px|rgba(0,0,0,0.06)  overflow-x:auto  position:relative  r:0.5rem@sm">
         {TableActions()}
         {Table()}

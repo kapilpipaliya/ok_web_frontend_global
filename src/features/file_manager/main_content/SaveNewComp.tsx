@@ -16,7 +16,7 @@ import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { parentCompAttribute } from "~/lib/meta/base/Comp";
+import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
 
 import { useFileManagerStore } from "../FileManagerContext";
 
@@ -25,6 +25,7 @@ export function SaveNewComp(
     onClose: () => void;
     onMouseLeave: () => void;
     parentRef: HTMLElement;
+    saveAsLabel?: "Comp" | "Perm";
   }>,
 ) {
   let nameInputRef: HTMLInputElement;
@@ -35,6 +36,8 @@ export function SaveNewComp(
   const [error, setError] = createSignal("");
   const { showErrorToast, showSuccessToast } = useToast();
 
+  const label = () => props.saveAsLabel === "Perm" ? "Permission" : "Component";
+
   const saveComponent = async () => {
     const currentItem = fileManagerStore.selectedItem;
 
@@ -44,7 +47,7 @@ export function SaveNewComp(
       graph,
       setGraph,
       newFormTxnId,
-      "Comp",
+      props.saveAsLabel || "Comp",
       {
         key: componentName(),
       },
@@ -56,7 +59,7 @@ export function SaveNewComp(
       IN: {},
       L: [],
       OUT: {},
-      P: parentCompAttribute,
+      P: props.saveAsLabel === "Perm" ? parentPermAttribute : parentCompAttribute,
     } as Vertex;
 
     setSelectionValue(
@@ -71,26 +74,33 @@ export function SaveNewComp(
     const commitData = commitTxn(newFormTxnId, graph);
 
     if (!commitData) {
-      showErrorToast("Failed to upload file");
+      showErrorToast(`Failed to upload ${label()}`);
       return;
     }
 
     try {
-      await submitDataCall({ ...commitData }, graph, setGraph, newFormTxnId);
+      const result = await submitDataCall({ ...commitData }, graph, setGraph, newFormTxnId);
+      if (!result.error) {
+        fileManagerStore.gridStore?.[0].fetchTableData();
+      }
     } catch (_error: any) {
-      showErrorToast("An error occurred while uploading the file");
+      showErrorToast(`An error occurred while uploading the ${label()}`);
       return;
     }
-    showSuccessToast("File uploaded successfully");
+    showSuccessToast(`${label()} uploaded successfully`);
   };
 
   const saveAsTemplate = async (key: string) => {
+    if (!componentName()) {
+      setError("Please enter a name");
+      return;
+    }
     const res = await checkUniqueConstrains({
-      L: ["TemplatePage"],
+      L: [props.saveAsLabel || "Comp"],
       P: { key },
     } as unknown as Vertex);
     if (res.error) {
-      setError(res.message);
+      setError(res.error);
       return;
     }
     saveComponent();
@@ -106,9 +116,9 @@ export function SaveNewComp(
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >
-      <DialogHeader title="New Component" />
+      <DialogHeader title={`New ${label()}`} />
       <DialogSubTitle>
-        Component key must be unique. If the key already exists, you will be
+        {label()} key must be unique. If the key already exists, you will be
         prompted to change it.
       </DialogSubTitle>
 
@@ -117,14 +127,14 @@ export function SaveNewComp(
           class="lh:1.25rem  color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
           for="templateName"
         >
-          Component Name
+          {label()} Name
         </label>
         <div class="mt:2">
           <input
             class="lh:1.25rem@sm border-radius:0.375rem  border-width:0  box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus  color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
             id="templateName"
             onChange={(e) => setComponentName(e.target.value)}
-            placeholder="New Component Name"
+            placeholder={`New ${label()} Name`}
             ref={nameInputRef!}
             type="text"
             value={componentName()}
@@ -132,13 +142,13 @@ export function SaveNewComp(
         </div>
       </div>
       <Show when={error()}>
-        <div style={{ color: "red" }}>{error()}</div>
+        <div class="fg:error">{error()}</div>
       </Show>
 
       <DialogFooter>
         <button
           class={dialogOkButtonClass}
-          disabled={!componentName()}
+          // disabled={!componentName()}
           onClick={() => saveAsTemplate(componentName())}
           type="button"
         >

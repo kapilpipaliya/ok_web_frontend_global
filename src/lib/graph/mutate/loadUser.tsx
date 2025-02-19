@@ -72,7 +72,7 @@ export async function loadUser(
   });
 
   try {
-    const data = await getAPI(API.getUserUrl);
+    const data = await getAPI(API.auth.getUserUrl);
     if (data) {
       handleUserData(data, graph, setGraph);
       if (data.user) {

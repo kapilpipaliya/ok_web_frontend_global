@@ -71,7 +71,7 @@ export function AuthenticatedMenu(
                   navigate(URLS.ADMIN.LOGIN);
                 }
               },
-              promise: postAPI(API.logOutUrl, {}),
+              promise: postAPI(API.auth.logOutUrl, {}),
               successMessage: "Log Out Successfully",
             });
             mergeVertexProperties<GlobalProperties>(

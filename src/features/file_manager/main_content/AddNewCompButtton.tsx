@@ -4,7 +4,7 @@ import { AddNewButton } from "~/features/grid/AddNewButton";
 
 import { SaveNewComp } from "./SaveNewComp";
 
-export function AddNewCompButton() {
+export function AddNewCompButton(props: Readonly<{ saveAsLabel?: "Comp" | "Perm" }>) {
   const [showModal, setShowModal] = createSignal(false);
   let addNewButtonRef: HTMLElement;
 
@@ -19,6 +19,7 @@ export function AddNewCompButton() {
           onClose={() => setShowModal(false)}
           onMouseLeave={() => setShowModal(false)}
           parentRef={addNewButtonRef!}
+          saveAsLabel={props.saveAsLabel}
         />
       </Show>
     </div>

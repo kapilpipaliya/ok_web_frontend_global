@@ -160,7 +160,7 @@ async function handlePasswordChange(
   showSuccessToast: (msg: string) => void,
 ) {
   try {
-    const response = await postAPI(API.changePasswordUrl, {
+    const response = await postAPI(API.auth.changePasswordUrl, {
       currentPassword: formData.P.currentPassword,
       newPassword: formData.P.newPassword,
       uuid: getMemberVertex(graph)?.P.uuid,
