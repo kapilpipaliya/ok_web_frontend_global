@@ -5,9 +5,9 @@ export const Perm = {
       key: "key",
     },
     {
-      componentName: "TextInput",
+      componentName: "TextArea",
       key: "description",
-    }
+    },
   ],
   isInlineEditable: true,
   key: "Perm",

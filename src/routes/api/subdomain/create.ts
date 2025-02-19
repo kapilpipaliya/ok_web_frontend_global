@@ -10,9 +10,9 @@ import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
+  const { dbSession } = await getDBSessionForSubdomain(request);
   try {
     const { domain, key } = await request.json();
-    const { dbSession } = await getDBSessionForSubdomain(request);
 
     const user = await validateUser(
       (await getUserFromSession(request))?.P.email,

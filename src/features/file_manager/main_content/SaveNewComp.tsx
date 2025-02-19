@@ -160,7 +160,7 @@ export function SaveNewComp(
           },
           {
             class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
+            componentName: "TextArea",
             key: "description",
             placeholder: "description",
           },

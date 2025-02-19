@@ -10,9 +10,9 @@
     "start": "vinxi start --port 3000"
   },
   "dependencies": {
-    "@ai-sdk/openai": "1.1.11",
-    "@ai-sdk/solid": "1.1.18",
-    "@ai-sdk/ui-utils": "1.1.14",
+    "@ai-sdk/openai": "1.1.13",
+    "@ai-sdk/solid": "1.1.19",
+    "@ai-sdk/ui-utils": "1.1.15",
     "@floating-ui/dom": "^1.6.13",
     "@iconify-icon/solid": "^2.3.0",
     "@master/css": "2.0.0-rc.47",
@@ -37,7 +37,7 @@
     "@tanstack/solid-table": "^9.0.0-alpha.10",
     "acorn": "^8.14.0",
     "acorn-jsx": "^5.3.2",
-    "ai": "4.1.41",
+    "ai": "4.1.43",
     "broadcast-channel": "^7.0.0",
     "case-switcher-js": "^1.1.10",
     "corvu": "^0.7.2",
@@ -105,7 +105,7 @@
     "eslint-plugin-perfectionist": "^4.9.0",
     "globals": "^15.15.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.0"
+    "typescript-eslint": "^8.24.1"
   },
   "overrides": {
     "vite": "^6.0.11"

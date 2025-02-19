@@ -52,8 +52,8 @@ export async function createUserInUserDB(
   isSuper?: boolean,
 ) {
   // If password is provided, hash it
-  let hashedPassword;
-  let salt;
+  let hashedPassword = null;
+  let salt = null;
   if (typeof params.password === "string" && !isSuper) {
     const hashResult = await hashPassword(params.password);
     hashedPassword = hashResult.hashedPassword;
