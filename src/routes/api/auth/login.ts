@@ -10,7 +10,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { verifyPassword } from "~/lib/auth/password";
-import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
+import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
 import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 import { updateSession } from "~/server/session/updateSession";
 
@@ -45,7 +45,7 @@ export async function POST({ request }: APIEvent) {
     delete user.P.password;
     updateRedirectUrl(user, subDomain!);
 
-    const result = await renderPageAsMHtml({
+    const result = await renderPageAsHtml({
       neo4jSession: dbSession,
       pageName: EMAIL_TEMPLATES.LOGIN_NOTIFICATION,
       queryParams: {

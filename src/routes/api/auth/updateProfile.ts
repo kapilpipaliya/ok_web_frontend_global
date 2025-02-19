@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
+import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
 import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
@@ -23,7 +23,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError(result.error, result.status || 500);
     }
 
-    const emailResult = await renderPageAsMHtml({
+    const emailResult = await renderPageAsHtml({
       neo4jSession: dbSession,
       pageName: EMAIL_TEMPLATES.PROFILE_UPDATED,
       queryParams: {

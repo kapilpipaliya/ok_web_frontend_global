@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
-import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
+import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
 import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
@@ -52,7 +52,7 @@ export async function POST({ request }: APIEvent) {
       { hashedPassword, salt, uuid: user.uuid },
     );
 
-    const result = await renderPageAsMHtml({
+    const result = await renderPageAsHtml({
       neo4jSession: dbSession,
       pageName: EMAIL_TEMPLATES.PASSWORD_CHANGED,
       queryParams: {

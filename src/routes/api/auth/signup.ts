@@ -9,7 +9,7 @@ import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { signupUser } from "~/cypher/mutate/signup/signupUser";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
-import { renderPageAsMHtml } from "~/lib/playwright/renderPageAsMHtml";
+import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
 import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 import { updateSession } from "~/server/session/updateSession";
 
@@ -66,7 +66,7 @@ async function handleSignup(
     delete user.P.password;
     updateRedirectUrl(user, subDomain);
 
-    const result = await renderPageAsMHtml({
+    const result = await renderPageAsHtml({
       neo4jSession: tx,
       pageName: EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,
       queryParams: {

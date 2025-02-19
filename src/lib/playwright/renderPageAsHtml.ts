@@ -5,6 +5,7 @@ import { type BrowserContext, chromium, type Page } from "playwright";
 
 import { isDev } from "~/routes/constants/constants";
 import { uploadFiles } from "~/server/upload/uploadFile";
+
 import { API } from "../api/endpoints";
 
 interface BrowserSetup {
@@ -27,7 +28,7 @@ interface SendPageOptions {
   subDomain: string;
 }
 
-export async function renderPageAsMHtml({
+export async function renderPageAsHtml({
   neo4jSession,
   pageName,
   queryParams = {},
@@ -45,16 +46,33 @@ export async function renderPageAsMHtml({
     );
     browser = browserSetup.browser;
 
-    const snapshotData = await capturePageSnapshot(
-      browserSetup.page,
-      browserSetup.context,
+    // Wait for master CSS to be applied
+    await browserSetup.page.waitForSelector('style#master', {state: 'attached'});
+    
+    // Get the computed styles
+    const masterStyles = await browserSetup.page.evaluate(() => {
+      const masterStyleEl = document.querySelector('style#master');
+      if (!masterStyleEl?.sheet) return '';
+      
+      const cssRules = Array.from(masterStyleEl.sheet.cssRules);
+      return cssRules.map(rule => rule.cssText).join('\n');
+    });
+
+    // Get page content
+    let html = await browserSetup.page.content();
+
+    // Replace empty master style tag with computed styles
+    html = html.replace(
+      /<style id="master"><\/style>/,
+      `<style id="master">${masterStyles}</style>`
     );
-    const fileName = `${pageName}.mhtml`;
+
+    const fileName = `${pageName}.html`;
 
     const { result } = await uploadFiles(
       [
         {
-          data: snapshotData as unknown as Buffer,
+          data: Buffer.from(html),
           filename: fileName,
           label: "Email",
         },
@@ -77,17 +95,6 @@ export async function renderPageAsMHtml({
   } finally {
     await browser?.close();
   }
-}
-
-async function capturePageSnapshot(
-  page: Page,
-  context: BrowserContext,
-): Promise<string> {
-  const cdpSession = await context.newCDPSession(page);
-  const { data } = await cdpSession.send("Page.captureSnapshot", {
-    format: "mhtml",
-  });
-  return data;
 }
 
 async function setupBrowserAndPage(
