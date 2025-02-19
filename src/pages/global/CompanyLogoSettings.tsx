@@ -85,7 +85,7 @@ export function CompanyLogoSettings() {
       return;
     }
 
-    const response = await postAPI(API.updateCompanyLogoUrl, {
+    const response = await postAPI(API.settings.company.updateLogoUrl, {
       logoImage: selectedFile.id,
     });
 

@@ -34,7 +34,7 @@ export function CompanySettings() {
 
   const loadSettingsData = async () => {
     try {
-      const data = await getAPI(API.getCompanySettingsUrl);
+      const data = await getAPI(API.settings.company.getUrl);
       if (data.settings?.P) {
         replaceVertexProperties(
           0,
@@ -139,7 +139,7 @@ export function CompanySettings() {
                 try {
                   const settings = graph.vertexes[formDataId];
                   const response = await postAPI(
-                    API.updateCompanySettingsUrl,
+                    API.settings.company.updateUrl,
                     settings.P,
                   );
                   if (response.error) {

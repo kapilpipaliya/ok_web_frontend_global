@@ -94,7 +94,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
     if (existingPreview.length > 0) {
       const preview = existingPreview[existingPreview.length - 1];
       const previewData = await capturePreview(
-        `${API.replaceFileUrl}?fileId=${preview.id}`,
+        `${API.file.replaceFileUrl}?fileId=${preview.id}`,
         "PUT",
       );
       if (!previewData?.result) {
@@ -104,7 +104,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
       // const data = commitTxn(imgSaveTxnId, graph);
       // submitDataCall(data, graph, setGraph, imgSaveTxnId);
     } else {
-      const previewData = await capturePreview(API.uploadFileUrl);
+      const previewData = await capturePreview(API.file.uploadFileUrl);
       if (!previewData?.result) {
         showErrorToast("Failed to capture preview");
         return;

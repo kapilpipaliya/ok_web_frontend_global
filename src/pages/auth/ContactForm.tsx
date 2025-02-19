@@ -59,7 +59,7 @@ export function ContactForm(): JSX.Element {
         onSuccess: () => {
           navigate("/");
         },
-        promise: postAPI(API.profileUrl, {
+        promise: postAPI(API.auth.profileUrl, {
           action: "create",
           email: formData().email.toLowerCase(),
           message: formData().message,

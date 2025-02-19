@@ -136,7 +136,7 @@ export function ProfileSettings() {
                   username: user.P.username,
                   uuid: user.P.uuid,
                 };
-                const response = await postAPI(API.profileUrl, payload);
+                const response = await postAPI(API.auth.profileUrl, payload);
                 if (response.error) {
                   showErrorToast(response.error);
                 } else {
@@ -167,7 +167,7 @@ export function ProfileSettings() {
   // Get user data and update vertex properties
   const loadUserData = async () => {
     try {
-      const data = await getAPI(API.getUserUrl);
+      const data = await getAPI(API.auth.getUserUrl);
       const user = data.user;
 
       replaceVertexProperties(0, formDataId, graph, setGraph, user.P);

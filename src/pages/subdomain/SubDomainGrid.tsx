@@ -23,7 +23,7 @@ interface SubDomain {
 
 export const SubDomainGrid = () => {
   const getTableData = async () => {
-    const data = await getAPI(API.getSubDomainsUrl);
+    const data = await getAPI(API.subdomain.listUrl);
     return {
       graph: {
         edges: {},
@@ -44,11 +44,11 @@ export const SubDomainGrid = () => {
   };
 
   const getSubdomainUrl = (key: string) => {
-    return `/api/auth/prepare-auto-login?subdomain=${key}`;
+    return `${API.auth.prepareAutoLoginUrl}?subdomain=${key}`;
   };
 
   const getDomainUrl = (domain: string) => {
-    return `/api/auth/prepare-auto-login?domain=${domain}`;
+    return `${API.auth.prepareAutoLoginUrl}?domain=${domain}`;
   };
 
   const SubDomain: IFormMetaData = {

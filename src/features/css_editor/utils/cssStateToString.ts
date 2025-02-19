@@ -7,6 +7,7 @@ import type { CSSStore } from "../context/CssEditorContext";
 
 import { arrayToString } from "./arrayToString";
 import { getCssSelectedFileEdgeName } from "./getCssSelectedFileEdgeName";
+import { API } from "~/lib/api/endpoints";
 
 export function cssStateToString(
   cssStore: CSSStore | string,
@@ -68,7 +69,7 @@ export function cssStateToString(
 }
 
 export function getUrl(data: Vertex) {
-  return `/api/file/download?fileId=${data.id}`;
+  return `${API.file.downloadFileUrl}?fileId=${data.id}`;
 }
 
 export function replacePlaceholderWithUrl(

@@ -1,10 +1,12 @@
 import type { Vertex } from "~/lib/graph/graph";
 
+import { API } from "~/lib/api/endpoints";
+
 export const getDownloadLink = (metaVertex?: Vertex) => {
   if (!metaVertex) {
     return "";
   }
-  return `/api/file/download?fileId=${metaVertex.id}`;
+  return `${API.file.downloadFileUrl}?fileId=${metaVertex.id}`;
 };
 
 export const openInNewTab = (url: string) => {

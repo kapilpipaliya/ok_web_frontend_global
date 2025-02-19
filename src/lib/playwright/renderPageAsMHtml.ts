@@ -5,6 +5,7 @@ import { type BrowserContext, chromium, type Page } from "playwright";
 
 import { isDev } from "~/routes/constants/constants";
 import { uploadFiles } from "~/server/upload/uploadFile";
+import { API } from "../api/endpoints";
 
 interface BrowserSetup {
   browser: Awaited<ReturnType<typeof chromium.launch>>;
@@ -118,7 +119,7 @@ async function setupBrowserAndPage(
   const queryString = searchParams.toString();
 
   const url = token
-    ? `${baseUrl}/api/auth/autoLogin?${queryString}`
+    ? `${baseUrl}${API.auth.autoLoginUrl}?${queryString}`
     : `${baseUrl}${redirectUrl}${queryString ? `?${queryString}` : ""}`;
 
   await page.goto(url);

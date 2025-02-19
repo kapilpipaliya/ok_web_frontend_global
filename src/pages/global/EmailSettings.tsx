@@ -34,7 +34,7 @@ export function EmailSettings() {
 
   const loadSettingsData = async () => {
     try {
-      const data = await getAPI(API.getEmailSettingsUrl);
+      const data = await getAPI(API.settings.email.getUrl);
       if (data.settings?.P) {
         replaceVertexProperties(
           0,
@@ -174,7 +174,7 @@ export function EmailSettings() {
               onClick: async () => {
                 const settings = graph.vertexes[formDataId];
                 const response = await postAPI(
-                  API.updateEmailSettingsUrl,
+                  API.settings.email.updateUrl,
                   settings.P,
                 );
                 if (response.error) {
@@ -194,7 +194,7 @@ export function EmailSettings() {
               onClick: async () => {
                 const settings = graph.vertexes[formDataId];
                 const response = await postAPI(
-                  API.testEmailSettingsUrl,
+                  API.settings.email.testUrl,
                   settings.P,
                 );
                 if (response.error) {

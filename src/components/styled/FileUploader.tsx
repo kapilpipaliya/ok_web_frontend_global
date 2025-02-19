@@ -14,6 +14,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { setSelectValueHelper } from "../fields/utils/setSelectValueHelper";
 import { runEvent } from "../solid_blocks/tools";
+import { API } from "~/lib/api/endpoints";
 
 export type FileUploaderProps = JSX.HTMLAttributes<HTMLLabelElement> & {
   data?: Vertex;
@@ -46,7 +47,7 @@ export function FileUploader(props: FileUploaderProps) {
   const handleFileUpload = async (file: File) => {
     if (file) {
       try {
-        return await uploadFile(file, "/api/file/upload");
+        return await uploadFile(file, API.file.uploadFileUrl);
       } catch (error) {
         // Handle the error case
         console.error("Upload error:", error);

@@ -88,7 +88,7 @@ export function GeneralSettings() {
               onClick: async () => {
                 const settings = graph.vertexes[formDataId];
                 const response = await postAPI(
-                  API.updateGeneralSettingsUrl,
+                  API.settings.general.updateUrl,
                   settings.P,
                 );
                 if (response.error) {
@@ -112,7 +112,7 @@ export function GeneralSettings() {
   // Add loadSettingsData function
   const loadSettingsData = async () => {
     try {
-      const data = await getAPI(API.getGeneralSettingsUrl);
+      const data = await getAPI(API.settings.general.getUrl);
       if (data.settings?.P) {
         replaceVertexProperties(
           0,

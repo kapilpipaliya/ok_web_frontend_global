@@ -83,7 +83,7 @@ export function SignupForm() {
           });
           handleLoginRedirect(value, graph, navigate);
         },
-        promise: postAPI(API.signUpUrl, {
+        promise: postAPI(API.auth.signUpUrl, {
           email: formData.P.email.toLowerCase(),
           password: formData.P.password,
           subDomain: formData.P.subDomain,

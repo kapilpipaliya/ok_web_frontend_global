@@ -55,7 +55,7 @@ export const AddSubDomainForm: Component<Props> = (props) => {
 
     try {
       setIsLoading(true);
-      const response = await postAPI(API.createSubDomainUrl, {
+      const response = await postAPI(API.subdomain.createUrl, {
         domain: formData.P.domain,
         key: formData.P.key,
       });

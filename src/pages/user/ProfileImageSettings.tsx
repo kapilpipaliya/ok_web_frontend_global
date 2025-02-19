@@ -90,7 +90,7 @@ export function ProfileImageSettings() {
     }
 
     const memberVertex = getMemberVertex(graph);
-    const response = await postAPI(API.updateProfileImageUrl, {
+    const response = await postAPI(API.auth.updateProfileImageUrl, {
       profileImage: selectedFile.id,
       uuid: memberVertex.P.uuid,
     });

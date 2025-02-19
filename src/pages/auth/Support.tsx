@@ -28,7 +28,7 @@ interface SupportTicketSectionProps {
 //   parentVertexId: any,
 //   newMessage: any,
 // ) {
-//   return await postAPI(API.profileUrl, {
+//   return await postAPI(API.auth.profileUrl, {
 //     action: "chat",
 //     newMessage,
 //     panel: "supportTicket",
@@ -55,7 +55,7 @@ export const SupportTicketSection = (
       };
 
       try {
-        await postAPI(API.profileUrl, {
+        await postAPI(API.auth.profileUrl, {
           action: "chat",
           newMessage,
           panel: "supportTicket",
@@ -92,7 +92,7 @@ export const SupportTicketSection = (
     let messageContainer: HTMLDivElement;
 
     const getMessages = async () => {
-      const message = await postAPI(API.profileUrl, {
+      const message = await postAPI(API.auth.profileUrl, {
         action: "chat",
         panel: "supportTicket",
         parentVertexId: props.id,
@@ -238,7 +238,7 @@ export const SupportTicketSection = (
         const data = props.contactList().filter((c: any) => c.id !== id);
         props.setContactList(data);
       },
-      promise: postAPI(API.profileUrl, {
+      promise: postAPI(API.auth.profileUrl, {
         action: "delete",
         id,
         panel: "supportTicket",
@@ -250,7 +250,7 @@ export const SupportTicketSection = (
 
   const changeStatus = async (id: string, status: string) => {
     props.setIsMainScreenLoad(true);
-    const res: any = await postAPI(API.profileUrl, {
+    const res: any = await postAPI(API.auth.profileUrl, {
       action: "updateStatus",
       id,
       panel: "supportTicket",
