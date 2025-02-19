@@ -24,3 +24,36 @@ CREATE INDEX token_hashed_token FOR (t:Token) ON (t.hashedToken);
 Optional tasks:
 - Contact us form convert to FormSchema.
 - display loader on signup and login.
+
+
+
+sendEmail to: “kapil….” Remove, keep to only
+
+Role Setting => name => key, Permissions => Table
+Role => create API permissions save
+When signup root fix created permissions, its access level only
+createRootFolder => createDefaultPermissions
+
+
+
+Delete database and create one
+In the permissions page, make a separate component to add edit new form.
+
+Get List of DEFAULT access levels and set on form schema.
+It will be saved on vertex itself as string.
+
+Find relation between page schema and global schema, see NetSuite help for custom feature permissions.
+
+We need a global system for all the url user can access or not, if not then display proper error message.
+
+Fix In Permissions, File Manager Columns are displayed.
+
+
+GetInitial Data support an argument to get user too.
+Make a separate function to load data and return initial data and then set it.
+Use CreateResource to fetch initial data.
+
+Fix MHTML is not readable at all in email
+
+Use IMAP server instead of smtp
+
