@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import { createSignal, Match, Show, Switch } from "solid-js";
+import { Match, Show, Switch } from "solid-js";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import type {
@@ -12,10 +12,10 @@ import type {
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { getSelectNameValue } from "~/features/grid/functions/getSelectNameValue";
 import { getTagValue } from "~/features/grid/functions/getTagValue";
-import { QuickEditModal } from "~/features/grid/QuickEditModal";
 import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import type { DataGridState } from "./DataGridContext";
 
@@ -199,7 +199,6 @@ export function CreateGridHeaders(
   tableColumns.push({
     accessorKey: "Actions",
     cell: (info) => {
-      const [isEditModalOpen, setIsEditModelOpen] = createSignal(false);
       return (
         <div
           class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}
@@ -212,37 +211,31 @@ export function CreateGridHeaders(
                   gridState.hasViewPermission()))
             }
           >
-            <IconButton
-              disabled={
-                !gridState.isNoPermissionCheck &&
-                !!gridState.formMetaData() &&
-                !(
-                  gridState.hasEditPermission() || gridState.hasViewPermission()
-                )
-              }
-              icon="fluent:edit-12-regular"
-              iconClass="color:#3477CC"
-              onClick={() => {
-                if (formNew.isInlineEditable) {
-                  setIsEditModelOpen(true);
-                } else {
-                  return navigate(`/admin/${tableId}/${info.row.original.id}`);
-                }
-              }}
-              size={21}
-            />
-            <Show when={isEditModalOpen()}>
-              <QuickEditModal
-                disabled={
-                  !gridState.isNoPermissionCheck &&
-                  !!gridState.formMetaData() &&
-                  !gridState.hasEditPermission()
-                }
-                info={info}
-                onClose={setIsEditModelOpen}
-                tableId={tableId}
-              />
-            </Show>
+            <Switch>
+              <Match when={formNew.isInlineEditable}>
+                <SchemaRenderer
+                  form={gridState.editSchema!}
+                  formDataId={info.row.original.id}
+                />
+              </Match>
+              <Match when={true}>
+                <IconButton
+                  disabled={
+                    !gridState.isNoPermissionCheck &&
+                    !!gridState.formMetaData() &&
+                    !(
+                      gridState.hasEditPermission() || gridState.hasViewPermission()
+                    )
+                  }
+                  icon="fluent:edit-12-regular"
+                  iconClass="color:#3477CC"
+                  onClick={() => {
+                    return navigate(`/admin/${tableId}/${info.row.original.id}`);
+                  }}
+                  size={21}
+                />
+              </Match>
+            </Switch>
           </Show>
 
           <Show

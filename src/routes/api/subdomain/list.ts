@@ -2,8 +2,11 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import type { Node } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { Vertex } from "~/lib/graph/graph";
+import { Edge } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
@@ -14,6 +17,9 @@ export async function GET({ request }: APIEvent) {
     if (!user?.P?.email) {
       throw new APIError("Unauthorized", 401);
     }
+
+    const nodes: { [key: string]: Vertex } = {};
+    const relationships: { [key: string]: Edge } = {};
 
     // Get subdomains for current user with their latest activity
     const result = await dbSession.run(
@@ -29,6 +35,8 @@ export async function GET({ request }: APIEvent) {
     `,
       { email: user?.P?.email },
     );
+
+    processResult(result.records, { nodes, relationships }, "subdomain", "");
 
     const subdomains = result.records.map((record) => {
       const subdomainNode = convertNodeToJson(record.get("subdomain"));
@@ -46,16 +54,15 @@ export async function GET({ request }: APIEvent) {
         },
       };
     });
-
-    return new Response(
-      JSON.stringify({
-        subdomains,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
+    
+    return {
+      graph: {
+        edges: relationships,
+        vertexes: nodes,
       },
-    );
+      result: subdomains,
+      timestamp: new Date().getTime(),
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

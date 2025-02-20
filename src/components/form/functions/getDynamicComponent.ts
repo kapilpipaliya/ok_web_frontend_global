@@ -119,13 +119,11 @@ export const componentsMap: Record<string, any> = {
   Fragment: FragmentField,
   Html: HtmlField,
   Icon: IconField,
-  Match,
   MultiSelect: SelectField,
   Page: PageField,
   Portal,
   Select: SelectField,
   Show,
-  Switch,
   Table: TableInputField,
   // keep as its used in metadata
   Text: TextField,

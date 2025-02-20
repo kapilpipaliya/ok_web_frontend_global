@@ -27,8 +27,8 @@ export function TableBodyCell(
     <div
       class={`${props.class ?? ""} @fade|.4s align-content:center p:2 text:center`}
       classList={{
-        "bg:#3478cc0d": props.index ? props.index % 2 !== 0 : false,
-        "bg:base-5": props.index ? props.index % 2 === 0 : false,
+        "bg:primary-5": props.index ? props.index % 2 !== 0 : false,
+        // "": props.index ? props.index % 2 === 0 : false,
       }}
     >
       {props.children}

@@ -4,6 +4,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import { CustomModal } from "../../components/styled/CustomModal";
 
+// Deprecated
 export const QuickEditModal = (p: {
   disabled?: boolean;
   info: any;

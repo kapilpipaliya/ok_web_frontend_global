@@ -17,6 +17,7 @@ export function getInitialGridState(graph: GraphInterface) {
     cardSize:
       graph.vertexes[getGlobalStore(graph).P.userSettingId]?.P.cardSize || 3,
     deleteRowId: null as Id | null,
+    editSchema: undefined as IFormMetaData | undefined,
     error: null as null | string,
     fetchTableData: (() => {}) as (
       skip?: number,

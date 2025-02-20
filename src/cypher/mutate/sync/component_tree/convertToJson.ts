@@ -13,8 +13,7 @@ export function getComponentTree(): ComponentNode[] {
   - Portal
   - Data
   - Form
-  - Switch
-  - Match
+  - Show
   - ComponentChildren
   - Transition
   - TransitionGroup

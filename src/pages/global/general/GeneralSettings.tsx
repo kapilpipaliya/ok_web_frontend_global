@@ -68,9 +68,9 @@ export function GeneralSettings() {
             componentName: "Select",
             key: "defaultLanguage",
             options: [
-              { text: "English", value: "en" },
-              { text: "Spanish", value: "es" },
-              { text: "French", value: "fr" },
+              { id: "en", label: "English" },
+              { id: "es", label: "Spanish" },
+              { id: "fr", label: "French" },
             ],
           },
         ],

@@ -224,19 +224,25 @@ export const AddUserForm: Component<Props> = (props) => {
             }),
           },
           {
-            as: "dialog",
-            attributes: [
-              modalHeaderSchema,
-              formSchema,
-              modalFooterSchema,
-            ],
-            class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
-            componentName: "Html",
-            open: true,
-            props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.["showModal"],
-            }),
-          },
+            attributes: [{
+              as: "dialog",
+              attributes: [
+                modalHeaderSchema,
+                formSchema,
+                modalFooterSchema,
+              ],
+              class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+              componentName: "Html",
+              open: true,
+              props: (options: FunctionArgumentType) => ({
+                hidden: !options.dataContext.modalState[0]?.["showModal"],
+                style: {
+                  'z-index': options.zIndex + 1,
+                },
+              }),
+            }],
+            componentName: "ZIndex",
+          }
         ],
         componentName: "Box",
       }

@@ -7,8 +7,11 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
+import { useGraph } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { AddSubDomainForm } from "./AddSubDomainForm";
+import { getSubDomainFormSchema } from "./getSubDomainFormSchema";
 
 interface SubDomain {
   domain: string;
@@ -22,25 +25,15 @@ interface SubDomain {
 }
 
 export const SubDomainGrid = () => {
+  // const [graph, setGraph] = useGraph();
   const getTableData = async () => {
     const data = await getAPI(API.subdomain.listUrl);
-    return {
-      graph: {
-        edges: {},
-        vertexes: {},
-      },
-      result: data.subdomains.map((subdomain: Vertex<SubDomain>) => ({
-        ...subdomain,
-        P: {
-          ...subdomain.P,
-          activity:
-            subdomain.P.recentActivities?.length > 0
-              ? `${subdomain.P.recentActivities[0].P.action}`
-              : "No activity",
-          recentActivities: subdomain.P.recentActivities,
-        },
-      })),
-    };
+    // data.result.map((subdomain: Vertex<SubDomain>) => {
+    //   subdomain.P.activity = subdomain.P.recentActivities?.length > 0
+    //     ? `${subdomain.P.recentActivities[0].P.action}`
+    //     : "No activity";
+    // });
+    return data;
   };
 
   const getSubdomainUrl = (key: string) => {
@@ -93,21 +86,24 @@ export const SubDomainGrid = () => {
         key: "activity",
       },
     ],
+    isInlineEditable: true,
     key: "subdomains",
     title: "Subdomains",
   };
 
   let gridStore: DataGridStore;
-
+  const onSuccess = () => {
+    gridStore?.[0].fetchTableData();
+  }
+  const editSchema = getSubDomainFormSchema(onSuccess);
   return (
     <DataGrid
       CustomAddNewButton={() => (
         <AddSubDomainForm
-          onSuccess={() => {
-            gridStore?.[0].fetchTableData();
-          }}
+          onSuccess={onSuccess}
         />
       )}
+      editSchema={editSchema}
       formSchema={SubDomain}
       getTableData={getTableData}
       hideDeleteAction={true}

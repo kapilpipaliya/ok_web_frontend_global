@@ -53,6 +53,7 @@ interface DataGridProps {
     disabled: boolean;
     onClick: () => void;
   }) => JSX.Element;
+  editSchema?: IFormMetaData;
   enableMultiRowSelection?: RowSelectionOptions<Vertex>["enableMultiRowSelection"];
   enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
   formSchema?: IFormMetaData;
@@ -70,6 +71,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
   const gridStore = createStore<DataGridState>({
     ...getInitialGridState(graph),
+    editSchema: props.editSchema,
     fetchTableData,
     get tableId() {
       return props.tableId;
