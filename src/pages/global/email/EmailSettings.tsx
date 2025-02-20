@@ -60,13 +60,16 @@ export function EmailSettings() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "SMTP Host",
+            text: "Protocol",
           },
           {
             class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
-            key: "smtpHost",
-            placeholder: "Enter SMTP host",
+            componentName: "Select",
+            key: "protocol",
+            options: [
+              { id: "smtp", label: "SMTP" },
+              { id: "imap", label: "IMAP" },
+            ],
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -78,13 +81,31 @@ export function EmailSettings() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "SMTP Port",
+            text: "Host",
+          },
+          {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            key: "smtpHost",
+            placeholder: "Enter host",
+          },
+        ],
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+        componentName: "Box",
+      },
+      {
+        as: "div",
+        attributes: [
+          {
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Text",
+            text: "Port",
           },
           {
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "smtpPort",
-            placeholder: "Enter SMTP port",
+            placeholder: "Enter port",
             type: "number",
           },
         ],
@@ -97,13 +118,13 @@ export function EmailSettings() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "SMTP Username",
+            text: "Username",
           },
           {
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "smtpUsername",
-            placeholder: "Enter SMTP username",
+            placeholder: "Enter username",
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -115,13 +136,13 @@ export function EmailSettings() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "SMTP Password",
+            text: "Password",
           },
           {
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "smtpPassword",
-            placeholder: "Enter SMTP password",
+            placeholder: "Enter password",
             type: "password",
           },
         ],
@@ -156,7 +177,7 @@ export function EmailSettings() {
             text: "Use Secure Connection",
           },
           {
-            componentName: "Checkbox",
+            componentName: "CheckBox",
             key: "secure",
           },
         ],
