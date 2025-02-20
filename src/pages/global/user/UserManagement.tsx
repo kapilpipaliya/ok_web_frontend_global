@@ -5,18 +5,15 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
 import { AddUserForm } from "./AddUserForm";
+import { getUserFormSchema } from "./userFormSchema";
 
 export function UserManagement() {
   let gridStore: DataGridStore;
   const getTableData = async () => {
-    const data = await getAPI(API.user.getUsersListUrl);
-    return {
-      graph: {
-        edges: {},
-        vertexes: {},
-      },
-      result: data.users,
-    };
+    return await getAPI(API.user.getUsersListUrl);
+  };
+  const onSuccess = () => {
+    gridStore?.[0].fetchTableData();
   };
 
   const UserSchema = {
@@ -51,19 +48,21 @@ export function UserManagement() {
         ],
       },
     ],
+    isInlineEditable: true,
     key: "users",
     title: "Users",
   };
+
+  const editSchema = getUserFormSchema(onSuccess);
 
   return (
     <DataGrid
       CustomAddNewButton={() => (
         <AddUserForm
-          onSuccess={() => {
-            gridStore?.[0].fetchTableData();
-          }}
+          onSuccess={onSuccess}
         />
       )}
+      editSchema={editSchema}
       formSchema={UserSchema}
       getTableData={getTableData}
       initializeGridStoreParent={(gridStore_) => {

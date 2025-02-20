@@ -1,5 +1,7 @@
 import type { Record } from "neo4j-driver";
 
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
 import {
   convertNodeToJson,
   convertRelationshipToJson,
@@ -10,59 +12,61 @@ import type { ContextType } from "../../types/ContextType";
 export function processResult(
   records: Record[],
   context: ContextType,
-  nodeLabel: string,
+  nodeLabel: string | string[],
   typeLabel?: string,
-  _inward?: boolean,
 ) {
-  const vertices = records.map((record) =>
-    convertNodeToJson(record.get(nodeLabel)),
-  );
-  const relationships = [];
-  if (typeLabel) {
-    for (const record of records) {
-      const relationshipData = record.get(typeLabel);
-      if (Array.isArray(relationshipData)) {
-        for (const relationship of relationshipData) {
-          relationships.push(convertRelationshipToJson(relationship));
-        }
-      } else {
-        relationships.push(convertRelationshipToJson(relationshipData));
+  const vertices: Vertex[] = [];
+  const labels = Array.isArray(nodeLabel) ? nodeLabel : [nodeLabel];
+  const { nodes, relationships: relationshipMap } = context;
+
+  for (const record of records) {
+    // Process nodes
+    for (const label of labels) {
+      const vertex = convertNodeToJson(record.get(label));
+      vertices.push(vertex);
+      if (nodes) {
+        nodes[vertex.id] = vertex;
       }
     }
-  }
 
-  if (context.nodes) {
-    for (const vertex of vertices) {
-      context.nodes[vertex.id] = vertex;
-    }
-  }
+    // Process relationships
+    if (!typeLabel) continue;
 
-  if (context.relationships) {
+    const relationshipData = record.get(typeLabel);
+    const relationships = Array.isArray(relationshipData) 
+      ? relationshipData 
+      : relationshipData ? [relationshipData] : [];
+
     for (const relationship of relationships) {
-      updateNodeRelations(context, relationship);
-      context.relationships[relationship.id] = relationship;
+      const convertedRel = convertRelationshipToJson(relationship);
+      if (relationshipMap) {
+        updateNodeRelations(context, convertedRel);
+        relationshipMap[convertedRel.id] = convertedRel;
+      }
     }
   }
 
   return vertices;
 }
 
-function updateNodeRelations(context: ContextType, relationship: any) {
+function updateNodeRelations(context: ContextType, relationship: Edge) {
   if (!context.nodes) {
     return;
   }
 
-  if (context.nodes[relationship.S]) {
-    if (!context.nodes[relationship.S].OUT[relationship.T]) {
-      context.nodes[relationship.S].OUT[relationship.T] = [];
+  const sourceNode = context.nodes[relationship.S];
+  if (sourceNode) {
+    if (!sourceNode.OUT[relationship.T]) {
+      sourceNode.OUT[relationship.T] = [];
     }
-    context.nodes[relationship.S].OUT[relationship.T].push(relationship.id);
+    sourceNode.OUT[relationship.T].push(relationship.id);
   }
 
-  if (context.nodes[relationship.E]) {
-    if (!context.nodes[relationship.E].IN[relationship.T]) {
-      context.nodes[relationship.E].IN[relationship.T] = [];
+  const targetNode = context.nodes[relationship.E];
+  if (targetNode) {
+    if (!targetNode.IN[relationship.T]) {
+      targetNode.IN[relationship.T] = [];
     }
-    context.nodes[relationship.E].IN[relationship.T].push(relationship.id);
+    targetNode.IN[relationship.T].push(relationship.id);
   }
 }

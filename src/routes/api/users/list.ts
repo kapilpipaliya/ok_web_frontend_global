@@ -1,8 +1,10 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
+import { userFormSchema } from "~/pages/global/user/userFormSchema";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
@@ -14,28 +16,17 @@ export async function GET({ request }: APIEvent) {
       throw new Error("Unauthorized");
     }
 
-    const result = await dbSession.run(`
-      MATCH (u:User)
-      OPTIONAL MATCH (u)-[:UserRole]->(r:Role)
-      RETURN u, r.name as role
-      ORDER BY u.email ASC
-    `);
+    const { incoming, outgoing } = getEdgesFromRowsAttr(
+      userFormSchema.attributes!,
+    );
 
-    const users = result.records.map((record) => {
-      const userNode = convertNodeToJson(record.get("u"));
-      return {
-        ...userNode,
-        P: {
-          ...userNode.P,
-          role: record.get("role") || "User",
-        },
-      };
+    const data = await fetchDataFromMG({
+      expression: `g:'User'`,
+      incoming,
+      outgoing,
     });
 
-    return new Response(JSON.stringify({ users }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    return data;
   } catch (error) {
     return handleAPIError(error);
   } finally {

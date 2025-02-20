@@ -34,7 +34,9 @@ export function RoleSettings() {
     key: "roles",
     title: "Roles",
   } as IFormMetaData;
+
   const editSchema = getRoleFormSchema(onSuccess);
+  
   return (
     <DataGrid
       CustomAddNewButton={() => <AddRoleForm onSuccess={onSuccess} />}
