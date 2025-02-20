@@ -36,7 +36,7 @@ export async function saveGraphToCypherQL() {
 
     const nodes = new Set<Node>();
     const relationships = new Set<Relationship>();
-    result.records.forEach((record) => {
+    for (const record of result.records) {
       const node = record.get("n");
       const relationship = record.get("r");
       const relatedNode = record.get("m");
@@ -50,19 +50,19 @@ export async function saveGraphToCypherQL() {
       if (relatedNode) {
         nodes.add(relatedNode);
       }
-    });
+    }
 
     const timestamp = format(new Date(), "yyyyMMddHHmmss");
     const folderPath = `./cypherql_backups/${timestamp}`;
     mkdirSync(folderPath, { recursive: true });
 
-    nodes.forEach((node) => {
+    for (const node of nodes) {
       const nodeId = node.elementId;
       const nodeCypherQL = `CREATE (n${node.labels.length ? `:${node.labels.join(":")}` : ""} ${JSON.stringify(node.properties)})`;
       writeFileSync(`${folderPath}/node_${nodeId}.cypherql`, nodeCypherQL);
-    });
+    }
 
-    relationships.forEach((relationship) => {
+    for (const relationship of relationships) {
       const relationshipId = relationship.elementId;
       const startNodeId = relationship.startNodeElementId;
       const endNodeId = relationship.endNodeElementId;
@@ -71,7 +71,7 @@ export async function saveGraphToCypherQL() {
         `${folderPath}/relationship_${relationshipId}.cypherql`,
         relationshipCypherQL,
       );
-    });
+    }
   } catch (error) {
     return handleAPIError(error);
   } finally {

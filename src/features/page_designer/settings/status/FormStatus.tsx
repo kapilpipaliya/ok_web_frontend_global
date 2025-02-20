@@ -273,8 +273,7 @@ function createVertices(
       },
     },
   ];
-
-  vertices.forEach((vertex) => {
+  for (const vertex of vertices) {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
     addNewVertex(txnId, newVertexInstance, graph, setGraph);
     if (vertex.attributes) {
@@ -286,5 +285,5 @@ function createVertices(
         vertex.attributes,
       );
     }
-  });
+  }
 }

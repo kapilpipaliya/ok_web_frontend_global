@@ -20,13 +20,13 @@ export async function handleInsert(
         : [insert.P],
     });
     if (result.records.length > 0) {
-      result.records.forEach((record, index) => {
+      for (const [index, record] of result.records.entries()) {
         const id = record.get("n").elementId;
         const oldId = Array.isArray(insert) ? insert[index].id : insert.id;
         clientToServerVertexIdMap.set(oldId, id);
         // can also send new vertex array to clients
         txnResult.push({ insert: [oldId, id] });
-      });
+      }
     }
   } catch (error) {
     throw new Error(

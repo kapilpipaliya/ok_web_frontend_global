@@ -31,8 +31,8 @@ export function SyncData() {
     return result; // Ensure result has the expected structure
   }
 
-  const onClickTransfer = (node: any) => {
-    selectedUsers().forEach(async (element) => {
+  const onClickTransfer = async (node: any) => {
+    for (const element of selectedUsers()) {
       await showLoadingToast({
         errorMessage: `Error Transfering nodes for ${element.P.username}`,
         loadMessage: "Transfering nodes...",
@@ -42,7 +42,7 @@ export function SyncData() {
         promise: migrateNodes(element, node),
         successMessage: `Transfer completed successfully for ${element.P.username}`,
       });
-    });
+    }
   };
 
   return (

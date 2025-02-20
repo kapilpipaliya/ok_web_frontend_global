@@ -105,7 +105,9 @@ export function getElements(
     return;
   }
   if (Array.isArray(children)) {
-    children.forEach((child) => getElements(child, filter, props, result));
+    for (const child of children) {
+      getElements(child, filter, props, result);
+    }
   } else if (typeof children === "function") {
     getElements(children.apply(null, props), filter, props, result);
   } else {

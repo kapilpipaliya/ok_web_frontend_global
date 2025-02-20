@@ -55,12 +55,12 @@ export function convertToIdToRuleMap(ruleToIDMap: RuleToIDMap): IDToRuleMap {
   for (const ruleId in ruleToIDMap) {
     const idArrays = ruleToIDMap[ruleId];
 
-    idArrays.forEach((id) => {
+    for (const id of idArrays) {
       if (!idToRuleMap[id]) {
         idToRuleMap[id] = [];
       }
       idToRuleMap[id].push(ruleId);
-    });
+    }
   }
 
   return idToRuleMap;
@@ -142,7 +142,7 @@ export function getAllFieldsUsedInAllRules(
   const rules =
     evalExpression("->Rule", { graph, setGraph, vertexes: [formVertex] }) || [];
   const ruleToIDMap: RuleToIDMap = {};
-  rules.forEach((rule: Vertex) => {
+  for (const rule of rules) {
     ruleToIDMap[rule.id] = (
       evalExpression("(->$0Cond->$0LeftField)++(->$0Cond->$0RightField)", {
         graph,
@@ -150,7 +150,7 @@ export function getAllFieldsUsedInAllRules(
         vertexes: [rule],
       }) || []
     ).map((vertex: Vertex) => vertex.id);
-  });
+  }
   return convertToIdToRuleMap(ruleToIDMap);
 }
 
@@ -172,7 +172,9 @@ export function getAllFieldsUsedInRootLevelSetting(
     if (allUniqueKeyIds.includes(vertex.id)) {
       fieldsUsedInUniqueConstraints.push(vertex.id);
     }
-    getChildrenAttrs(graph, setGraph, vertex).forEach(collectUniqueConstraints);
+    for (const child of getChildrenAttrs(graph, setGraph, vertex)) {
+        collectUniqueConstraints(child);
+    }
   }
   collectUniqueConstraints(layoutVertex);
 
@@ -249,9 +251,9 @@ export function isAttrUsedInRules(
     }
 
     const children = getChildrenAttrs(graph, {}, vertex);
-    children.forEach((child) => {
+    for (const child of children) {
       collectUsedAttrs(child, usedAttrsInRules, graph, result);
-    });
+    }
   }
 
   collectUsedAttrs(attrVertex, usedAttrsInRules, graph, result);

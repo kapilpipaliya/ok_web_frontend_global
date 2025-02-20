@@ -27,11 +27,11 @@ export const FieldWithCustomBox = (
   createEffect(() => {
     if (props.customProperty && props.customProperty.length > 0) {
       let isValueSet = false;
-      props.customProperty.forEach((property) => {
+      for (const property of props.customProperty) {
         if (cssState[state()]?.[property.key] !== undefined) {
           isValueSet = true;
         }
-      });
+      }
       if (isValueSet) {
         setOptionType("custom");
       }

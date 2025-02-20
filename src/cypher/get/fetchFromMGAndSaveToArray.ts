@@ -19,7 +19,7 @@ export async function fetchFromMGAndSaveToArray(
   try {
     const result = await dbSession.run(query, params);
     for (const record of result.records) {
-      record.forEach((value) => {
+      for (const value of record) {
         if (value instanceof types.Node) {
           const id = value.elementId;
           nodeObj[id] = convertNodeToJson(value);
@@ -36,7 +36,7 @@ export async function fetchFromMGAndSaveToArray(
             }
           }
         }
-      });
+      }
     }
   } catch (error) {
     console.error("Failed to execute query:", query, "Error:", error);

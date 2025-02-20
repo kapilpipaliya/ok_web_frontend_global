@@ -5,7 +5,7 @@ export function removeUndefinedProperties(
   recursive = 0,
 ) {
   const returnObj = {};
-  Object.entries(obj).forEach(([key, val]) => {
+  for (const [key, val] of Object.entries(obj)) {
     if (val === undefined) {
       if (mutate) {
         delete obj[key];
@@ -16,15 +16,15 @@ export function removeUndefinedProperties(
         recursiveVal = removeUndefinedProperties(
           val,
           mutate,
-          // @ts-ignore
+          // @ts-expect-error
           typeof recursive === "number" ? recursive - 1 : true,
         );
       }
       if (!mutate) {
-        // @ts-ignore
+        // @ts-expect-error
         returnObj[key] = recursiveVal || val;
       }
     }
-  });
+  }
   return mutate ? obj : returnObj;
 }

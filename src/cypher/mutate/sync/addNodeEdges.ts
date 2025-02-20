@@ -44,9 +44,9 @@ export async function addNodeEdges(
         childId: existingChild.id,
         props: superVertex.P,
       });
-      result.records.forEach((v) =>
-        results.push(convertNodeToJson(v.get("a"))),
-      );
+      for (const v of result.records) {
+        results.push(convertNodeToJson(v.get("a")));
+      }
     } else {
       const isGlobalCollection = globalCollections.includes(superVertex.L[0]);
       const targetNode = isGlobalCollection
@@ -83,9 +83,9 @@ export async function addNodeEdges(
           };
 
       const result = await sessionTarget.run(query, params);
-      result.records.forEach((v) =>
-        results.push(convertNodeToJson(v.get("b"))),
-      );
+      for (const v of result.records) {
+        results.push(convertNodeToJson(v.get("b")));
+      }
     }
   }
 

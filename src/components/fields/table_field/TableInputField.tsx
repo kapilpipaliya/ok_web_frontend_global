@@ -104,11 +104,11 @@ export function TableInputField(
       const [draggedRow] = updatedRows.splice(dragFromIndex()!, 1);
       updatedRows.splice(dragToIndex()!, 0, draggedRow);
       setSortedVertexes(updatedRows);
-      updatedRows.forEach((vertex, index) => {
+      for (const [index, vertex] of updatedRows.entries()) {
         mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, {
           pos: index + 1,
         });
-      });
+      }
     }
     setDragFromIndex(null);
     setDragToIndex(null);
