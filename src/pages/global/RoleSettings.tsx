@@ -30,11 +30,7 @@ export function RoleSettings() {
         displayName: "Description",
         key: "description",
       },
-      {
-        componentName: "Text",
-        displayName: "Permissions",
-        key: "permissions",
-      },
+
     ],
     key: "roles",
     title: "Roles",

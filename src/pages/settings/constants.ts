@@ -11,7 +11,7 @@ export const SETTINGS_CONSTANTS = {
       CANCEL_CLASS: "bg:base-10 fg:base-80 p:8|16 r:4 cursor:pointer border:1px|solid|base-20",
       SAVE_CLASS: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
     },
-    CONTAINER_CLASS: "border:1px|solid|base-20 r:4 p:0 position:fixed top:50% left:50% transform:translate(-50%,-50%) bg:base-5 z:2",
+    CONTAINER_CLASS: "border:1px|solid|base-20 r:4 p:0 position:fixed top:50% left:50% transform:translate(-50%,-50%) bg:base-5",
     FOOTER: {
       CLASS: "display:flex jc:flex-end p:16 gap:6 border-top:1px|solid|base-20 bg:base-5",
     },

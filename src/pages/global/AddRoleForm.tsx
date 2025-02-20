@@ -9,6 +9,7 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../settings/constants";
@@ -67,6 +68,32 @@ export const AddRoleForm: Component<Props> = (props) => {
       options.dataContext.modalState[1]("isLoading", false);
     }
   };
+
+  const permissionsTableSchema = (label: string) => ({
+    attributes: [
+      {
+        collection: `g:'${label}'`,
+        componentName: "Select",
+        key: label,
+      },
+      {
+        componentName: "Select", 
+        displayName: "Access Level",
+        key: "access",
+        options: `NONE
+VIEW
+CREATE
+EDIT
+FULL`,
+      },
+      // {
+      //   componentName: "TextInput",
+      //   key: "scope",
+      // },
+    ],
+    componentName: "DynamicTable",
+    key: label,
+  } as FieldAttribute);
 
   const formSchema = {
     as: "div",
@@ -133,6 +160,83 @@ export const AddRoleForm: Component<Props> = (props) => {
         ],
         class: SETTINGS_CONSTANTS.FORM_CLASS,
         componentName: "Box",
+      },
+      {
+        attributes: [
+          {
+            as: "div",
+            attributes: [
+              {
+                class: "cursor:pointer p:8|16 ",
+                componentName: "Button",
+                props: (options: FunctionArgumentType) => ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Perm" ? "bb:2px|solid|primary" : "bb:2px|solid|transparent",
+                  onClick: () => options.dataContext.tabState[1]("activeTab", "Perm"),
+                  text: "Permissions"
+                })
+              },
+              {
+                class: "cursor:pointer p:8|16 ",
+                componentName: "Button", 
+                props: (options: FunctionArgumentType) => ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Page" ? "bb:2px|solid|primary" : "bb:2px|solid|transparent",
+                  onClick: () => options.dataContext.tabState[1]("activeTab", "Page"),
+                  text: "Pages"
+                })
+              },
+              {
+                class: "cursor:pointer p:8|16 ",
+                componentName: "Button",
+                props: (options: FunctionArgumentType) => ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Form" ? "bb:2px|solid|primary" : "bb:2px|solid|transparent",
+                  onClick: () => options.dataContext.tabState[1]("activeTab", "Form"),
+                  text: "Forms"
+                })
+              }
+            ],
+            class: "display:flex bb:1px|solid|base-20",
+            componentName: "Box"
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "div",
+                attributes: [permissionsTableSchema("Perm")],
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Perm" ? "" : "d:none"
+                }),
+              },
+              {
+                as: "div",
+                attributes: [permissionsTableSchema("Page")],
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Page" ? "" : "d:none"
+                })
+              },
+              {
+                as: "div",
+                attributes: [permissionsTableSchema("Form")],
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Form" ? "" : "d:none"
+                })
+              }
+            ],
+            class: "mt:16",
+            componentName: "Box"
+          }
+        ],
+        componentName: "Data",
+        name: "tabState",
+        noRepeat: true,
+        props: () => ({
+          data: createStore({
+            activeTab: "Perm"
+          })
+        })
       },
     ],
     componentName: "Box",
@@ -204,18 +308,26 @@ export const AddRoleForm: Component<Props> = (props) => {
             }),
           },
           {
-            as: "dialog",
             attributes: [
-              modalHeaderSchema,
-              formSchema,
-              modalFooterSchema,
+              {
+                as: "dialog",
+                attributes: [
+                  modalHeaderSchema,
+                  formSchema,
+                  modalFooterSchema,
+                ],
+                class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                componentName: "Html",
+                open: true,
+                props: (options: FunctionArgumentType) => ({
+                  hidden: !options.dataContext.modalState[0]?.["showModal"],
+                  style: {
+                    'z-index': options.zIndex + 1,
+                  },
+                }),
+              },
             ],
-            class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
-            componentName: "Html",
-            open: true,
-            props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.["showModal"],
-            }),
+            componentName: "ZIndex",
           },
         ],
         componentName: "Box",
