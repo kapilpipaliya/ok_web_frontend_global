@@ -22,7 +22,7 @@ interface Props {
 export const AddUserForm: Component<Props> = (props) => {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
-  const formDataId = uuidv7();
+  const formDataId = `-${uuidv7()}`;
 
   addNewVertex(
     0,

@@ -8,6 +8,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 export function SchemaRenderer(props: {
   form: IFormMetaData;
   formDataId: string;
+  txnId?: string;
 }) {
   const [graph, setGraph] = useGraph();
   const metaTxnId = generateNewTxnId(graph, setGraph);
@@ -23,6 +24,7 @@ export function SchemaRenderer(props: {
       isNoPermissionCheck={true}
       metaTxnId={metaTxnId}
       pageVertexName="SchemaRenderer"
+      txnId={props.txnId}
     />
   );
 }

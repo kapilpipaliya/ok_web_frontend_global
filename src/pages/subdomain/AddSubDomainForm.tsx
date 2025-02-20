@@ -6,7 +6,7 @@ import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { getSubDomainFormSchema } from "./getSubDomainFormSchema";
+import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
 
 interface Props {
   onSuccess: () => void;

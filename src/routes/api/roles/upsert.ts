@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
@@ -16,38 +16,28 @@ export async function POST({ request }: APIEvent) {
     //   throw new APIError("Unauthorized", 401);
     // }
 
-    const { description, key, name, permissions } = await request.json();
+    const { data, role } = await request.json();
 
-    // Check if role already exists
     const existingRole = await dbSession.run(
-      "MATCH (r:Role {key: $key}) RETURN r",
-      { key },
+      "MATCH (r:Role {key: $key}) where elementId(r) <> $elementId RETURN r",
+      { elementId: role.id, key: role.P.key },
     );
 
     if (existingRole.records.length > 0) {
       throw new APIError("Role with this name already exists", 400);
     }
 
-    const result = await dbSession.run(
-      `
-      CREATE (r:Role {
-        key: $key,
-        description: $description,
-        permissions: $permissions,
-        createdAt: datetime(),
-        updatedAt: datetime()
-      })
-      RETURN r
-    `,
-      { description, key, name, permissions },
-    );
-
-    const role = convertNodeToJson(result.records[0].get("r"));
-
-    return new Response(JSON.stringify({ role }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    const tx = dbSession.beginTransaction();
+    try {
+      const res = await mutateData(data, tx);
+      await tx.commit();
+      return res;
+    } catch (error: unknown) {
+      await tx.rollback();
+      throw error;
+    } finally {
+      await tx.close();
+    }
   } catch (error) {
     return handleAPIError(error);
   } finally {

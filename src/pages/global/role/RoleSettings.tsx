@@ -3,20 +3,18 @@ import type { DataGridStore } from "~/features/grid/DataGridContext";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
+import { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { AddRoleForm } from "./AddRoleForm";
+import { getRoleFormSchema } from "./functions/formSchema";
 
 export function RoleSettings() {
   let gridStore: DataGridStore;
+  const onSuccess = () => {
+    gridStore?.[0].fetchTableData();
+  };
   const getTableData = async () => {
-    const data = await getAPI(API.role.getRolesUrl);
-    return {
-      graph: {
-        edges: {},
-        vertexes: {},
-      },
-      result: data.roles,
-    };
+    return await getAPI(API.role.getRolesUrl);
   };
 
   const RoleSchema = {
@@ -32,19 +30,15 @@ export function RoleSettings() {
         key: "description",
       },
     ],
+    isInlineEditable: true,
     key: "roles",
     title: "Roles",
-  };
-
+  } as IFormMetaData;
+  const editSchema = getRoleFormSchema(onSuccess);
   return (
     <DataGrid
-      CustomAddNewButton={() => (
-        <AddRoleForm
-          onSuccess={() => {
-            gridStore?.[0].fetchTableData();
-          }}
-        />
-      )}
+      CustomAddNewButton={() => <AddRoleForm onSuccess={onSuccess} />}
+      editSchema={editSchema}
       formSchema={RoleSchema}
       getTableData={getTableData}
       initializeGridStoreParent={(gridStore_) => {

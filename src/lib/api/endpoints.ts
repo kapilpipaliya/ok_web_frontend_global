@@ -18,10 +18,11 @@ export const API = {
   // Other endpoints
   getInitialDataUrl: "/api/get/getInitialData",
   role: {
-    createRoleUrl: "/api/roles/create",
     deleteRoleUrl: "/api/roles/delete",
     getRolesUrl: "/api/roles/list",
+    getRoleUrl: "/api/roles/get",
     updateRoleUrl: "/api/roles/update",
+    upsertRoleUrl: "/api/roles/upsert",
   },
   settings: {
     company: {

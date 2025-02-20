@@ -45,6 +45,7 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import type {
   ComponentNameType,
@@ -77,7 +78,7 @@ export function DynamicComponent(
   const formId = useFormContext();
   const formVertex = () =>
     formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
-  const { showErrorToast } = useToast();
+  const { showErrorToast, showSuccessToast } = useToast();
   const [ref, setRef] = createSignal(null);
   const [mounted, setMounted] = createSignal(false);
   const zIndex = useZIndex();
@@ -261,6 +262,14 @@ export function DynamicComponent(
       get setGraph() {
         return setGraph;
       },
+      setGraphData: (
+        args: Parameters<typeof setGraphData>[2],
+        options: Parameters<typeof setGraphData>[3],
+      ) => {
+        setGraphData(graph, setGraph, args, options);
+      },
+      showErrorToast,
+      showSuccessToast,
       get txnId() {
         return props.txnId!;
       },

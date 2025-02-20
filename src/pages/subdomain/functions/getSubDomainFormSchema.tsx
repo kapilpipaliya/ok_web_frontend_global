@@ -12,7 +12,8 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 
-import { SETTINGS_CONSTANTS } from "../settings/constants";
+import { SETTINGS_CONSTANTS } from "../../settings/constants";
+import { addEditButtonSchema } from "./addEditButtonSchema";
 
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -154,54 +155,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
       {
         as: "div",
         attributes: [
-          {
-            attributes: [
-              {
-                attributes: [
-                  {
-                    class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-                    componentName: "Button",
-                    props: (options: FunctionArgumentType) => ({
-                      onClick: () => {
-                        options.dataContext.modalState[1]("showModal", true);
-                      },
-                      text: "Add New SubDomain",
-                    }),
-                  },
-                ],
-                componentName: "Show",
-                props: (options: FunctionArgumentType) => ({
-                  when: options.data?.id?.startsWith("-"),
-                }),
-              },
-              {
-                attributes: [
-                  {
-                    attributes: [
-                      {
-                        componentName: "Icon",
-                        height: 20,
-                        icon: "ph:pencil",
-                        width: 20,
-                      },
-                    ],
-                    class: "flex ai:center",
-                    componentName: "Button",
-                    props: (options: FunctionArgumentType) => ({
-                      onClick: () => {
-                        options.dataContext.modalState[1]("showModal", true);
-                      },
-                    }),
-                  },
-                ],
-                componentName: "Show",
-                props: (options: FunctionArgumentType) => ({
-                  when: !options.data?.id?.startsWith("-"),
-                }),
-              },
-            ],
-            componentName: "Fragment",
-          },
+          addEditButtonSchema("SubDomain"),
           {
             as: "div",
             attributes: [],

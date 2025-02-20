@@ -9,7 +9,7 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
 import { AddSubDomainForm } from "./AddSubDomainForm";
-import { getSubDomainFormSchema } from "./getSubDomainFormSchema";
+import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
 
 interface SubDomain {
   domain: string;

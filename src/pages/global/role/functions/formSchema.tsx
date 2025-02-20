@@ -1,10 +1,22 @@
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
-import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+import type { Vertex } from "~/lib/graph/graph";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
+import { useToast } from "~/components/styled/Toast";
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
+import { onMutatDataGet } from "~/lib/graph/mutate/onMutatDataGet";
+import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
+
+import { loadingIconSchema } from "./loadingIconSchema";
 
 export const permissionsTableSchema = (label: string) =>
   ({
@@ -33,9 +45,10 @@ FULL`,
     key: label,
   }) as FieldAttribute;
 
-export const formSchema = {
+export const roleFormSchema = {
   as: "div",
   attributes: [
+    loadingIconSchema(),
     {
       as: "div",
       attributes: [
@@ -199,4 +212,166 @@ export const formSchema = {
     },
   ],
   componentName: "Box",
+  props: () => {
+    return {
+      onMount: async (options: FunctionArgumentType) => {
+        if (!options.data.id.startsWith("-")) {
+          try {
+            options.dataContext.modalState[1]("isLoading", true);
+            const response = await postAPI(API.role.getRoleUrl, {
+              id: options.data.id,
+            });
+            if (response.error) {
+              throw new Error(response.error);
+            }
+            options.setGraphData(response.graph, {});
+          } catch (error) {
+            options.showErrorToast((error as Error).message);
+          } finally {
+            options.dataContext.modalState[1]("isLoading", false);
+          }
+        }
+      },
+    };
+  },
+};
+
+export const getRoleFormSchema = (onSuccess: () => void) => {
+  const { showErrorToast, showSuccessToast } = useToast();
+
+  const validateForm = (formData: Vertex) => {
+    if (!formData.P.key?.trim()) {
+      showErrorToast("Please enter role name");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSave = async (options: FunctionArgumentType) => {
+    const formData = options.data;
+    if (!validateForm(formData)) {
+      return;
+    }
+
+    try {
+      options.dataContext.modalState[1]("isLoading", true);
+      const data = commitTxn(options.txnId, options.graph);
+      if (!data) {
+        return;
+      }
+      const response = await postAPI(API.role.upsertRoleUrl, {
+        data,
+        role: formData,
+      });
+
+      if (response.error) {
+        showErrorToast(response.error);
+      } else {
+        onMutatDataGet(options.graph, options.setGraph, response);
+        showSuccessToast("Role created successfully");
+        onSuccess();
+      }
+    } catch (error) {
+      showErrorToast((error as Error).message);
+    } finally {
+      options.dataContext.modalState[1]("isLoading", false);
+    }
+  };
+
+  // Modal schemas similar to SubDomainForm
+  const modalHeaderSchema = {
+    as: "div",
+    attributes: [
+      {
+        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
+        componentName: "Text",
+        text: "Add New Role",
+      },
+    ],
+    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
+    componentName: "Box",
+  };
+
+  const modalFooterSchema = {
+    as: "div",
+    attributes: [
+      {
+        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
+        componentName: "Button",
+        props: (options: FunctionArgumentType) => ({
+          onClick: () => {
+            options.dataContext.modalState[1]("showModal", false);
+          },
+          text: "Cancel",
+        }),
+      },
+      {
+        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+        componentName: "Button",
+        props: (options: FunctionArgumentType) => ({
+          disabled: options.dataContext.modalState[0]?.isLoading,
+          onClick: handleSave,
+          text: options.dataContext.modalState[0]?.isLoading
+            ? "Saving..."
+            : "Save",
+        }),
+      },
+    ],
+    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
+    componentName: "Box",
+  };
+
+  const schema = {
+    attributes: [
+      {
+        as: "div",
+        attributes: [
+          addEditButtonSchema("Role"),
+          {
+            as: "div",
+            attributes: [],
+            class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+            componentName: "Box",
+            props: (options: FunctionArgumentType) => ({
+              hidden: !options.dataContext.modalState[0]?.showModal,
+            }),
+          },
+          {
+            attributes: [
+              {
+                as: "dialog",
+                attributes: [
+                  modalHeaderSchema,
+                  roleFormSchema,
+                  modalFooterSchema,
+                ],
+                class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                componentName: "Html",
+                open: true,
+                props: (options: FunctionArgumentType) => ({
+                  hidden: !options.dataContext.modalState[0]?.showModal,
+                  style: {
+                    "z-index": options.zIndex + 1,
+                  },
+                }),
+              },
+            ],
+            componentName: "ZIndex",
+          },
+        ],
+        componentName: "Box",
+      },
+    ],
+    componentName: "Data",
+    name: "modalState",
+    noRepeat: true,
+    props: () => ({
+      data: createStore({
+        isLoading: false,
+        showModal: false,
+      }),
+    }),
+  };
+
+  return { attributes: [schema], key: "Role" } as IFormMetaData;
 };

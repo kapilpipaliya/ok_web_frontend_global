@@ -302,61 +302,6 @@ export function PageViewWrapper(
       setFormStore("formDataId", props.formDataId);
       return;
     }
-    if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) {
-      return;
-    }
-    try {
-      const { data, error } = await getFormData(
-        graph,
-        formStore().P.formMetaData!.attributes,
-        id()!,
-      );
-
-      if (error || !Array.isArray(data?.result) || data.result.length === 0) {
-        setFormStore("error", `No ${props.pageVertexName} found`);
-        return;
-      }
-
-      // Find all Component vertices from the loaded data
-      const componentVertices = Object.values(data!.graph!.vertexes).filter(
-        (v) => v.L.includes("Component"),
-      );
-
-      // Fetch data for all components
-      if (componentVertices.length > 0) {
-        await fetchComponentData(componentVertices, graph, setGraph);
-      }
-
-      setGraphData(graph, setGraph, data!.graph!);
-      setFormStore("formDataId", data!.result[0].id);
-    } catch (e: any) {
-      setFormStore("error", `Error When Loading Form: ${e.message}`);
-    }
-  }
-  onMount(async () => {
-    setFormStore("mounted", true);
-    if (!(await loadFormDesignerMetaData())) {
-      return;
-    }
-    if (
-      formStore().P.formMetaId &&
-      !isNoPermissionCheck() &&
-      !graph.vertexes[formStore().P.formMetaId!]!.P.public
-    ) {
-      setFormStore(
-        "error",
-        `${props.pageVertexName} ${props.pageVertexLabel} is not authorized`,
-      );
-      return;
-    }
-    if (!graph.vertexes[formStore().P.formMetaId!]) {
-      setFormStore("error", "No form meta data found");
-      return;
-    }
-    if (!graph.vertexes[formStore().P.formMetaId!]?.P.key) {
-      setFormStore("error", `No key for the ${props.pageVertexName}`);
-      return;
-    }
     if (!id()) {
       const createResult = createFormVertex(
         graph,
@@ -417,11 +362,69 @@ export function PageViewWrapper(
         return;
       }
     }
+
     saveUndoPoint(formStore().P.txnId, graph, setGraph);
     if (!(props.parentId || props.txnId)) {
       setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
     }
     saveStepIndex(formStore().P.txnId, "initial", graph, setGraph);
+
+    if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) {
+      return;
+    }
+    try {
+      const { data, error } = await getFormData(
+        graph,
+        formStore().P.formMetaData!.attributes,
+        id()!,
+      );
+
+      if (error || !Array.isArray(data?.result) || data.result.length === 0) {
+        setFormStore("error", `No ${props.pageVertexName} found`);
+        return;
+      }
+
+      // Find all Component vertices from the loaded data
+      const componentVertices = Object.values(data!.graph!.vertexes).filter(
+        (v) => v.L.includes("Component"),
+      );
+
+      // Fetch data for all components
+      if (componentVertices.length > 0) {
+        await fetchComponentData(componentVertices, graph, setGraph);
+      }
+
+      setGraphData(graph, setGraph, data!.graph!);
+      setFormStore("formDataId", data!.result[0].id);
+    } catch (e: any) {
+      setFormStore("error", `Error When Loading Form: ${e.message}`);
+    }
+  }
+  onMount(async () => {
+    setFormStore("mounted", true);
+    if (!(await loadFormDesignerMetaData())) {
+      return;
+    }
+    if (
+      formStore().P.formMetaId &&
+      !isNoPermissionCheck() &&
+      !graph.vertexes[formStore().P.formMetaId!]!.P.public
+    ) {
+      setFormStore(
+        "error",
+        `${props.pageVertexName} ${props.pageVertexLabel} is not authorized`,
+      );
+      return;
+    }
+    if (!graph.vertexes[formStore().P.formMetaId!]) {
+      setFormStore("error", "No form meta data found");
+      return;
+    }
+    if (!graph.vertexes[formStore().P.formMetaId!]?.P.key) {
+      setFormStore("error", `No key for the ${props.pageVertexName}`);
+      return;
+    }
+
     props.initializeFormStoreParent?.(pageFormVertexObject.id);
     await loadData();
   });
