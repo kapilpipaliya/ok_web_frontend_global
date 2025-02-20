@@ -11,8 +11,8 @@ import {
   replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
 
-import { SchemaRenderer } from "../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "../settings/constants";
+import { SchemaRenderer } from "../../SchemaRenderer";
+import { SETTINGS_CONSTANTS } from "../../settings/constants";
 
 export function EmailSettings() {
   const [graph, setGraph] = useGraph();

@@ -13,7 +13,7 @@ import {
 } from "~/lib/graph/mutate/vertex";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-import { SchemaRenderer } from "../SchemaRenderer";
+import { SchemaRenderer } from "../../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";
 
 export function GeneralSettings() {

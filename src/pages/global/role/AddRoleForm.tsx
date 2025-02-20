@@ -11,8 +11,8 @@ import { useGraph, Vertex } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { SchemaRenderer } from "../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "../settings/constants";
+import { SchemaRenderer } from "../../SchemaRenderer";
+import { SETTINGS_CONSTANTS } from "../../settings/constants";
 
 interface Props {
   onSuccess: () => void;

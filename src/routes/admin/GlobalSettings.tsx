@@ -4,12 +4,12 @@ import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription
 import FileManager from "~/features/file_manager/FileManager";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
-import { CompanySettings } from "~/pages/global/CompanySettings";
-import { EmailSettings } from "~/pages/global/EmailSettings";
-import { GeneralSettings } from "~/pages/global/GeneralSettings";
-import { RoleSettings } from "~/pages/global/RoleSettings";
-import { UserManagement } from "~/pages/global/UserManagement";
-import { PermissionsSettings } from "~/pages/global/PermissionsSettings";
+import { CompanySettings } from "~/pages/global/company/CompanySettings";
+import { EmailSettings } from "~/pages/global/email/EmailSettings";
+import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
+import { RoleSettings } from "~/pages/global/role/RoleSettings";
+import { UserManagement } from "~/pages/global/user/UserManagement";
+import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 
 import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
 

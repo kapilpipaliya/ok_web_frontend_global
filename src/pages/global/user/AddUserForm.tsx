@@ -10,8 +10,8 @@ import { postAPI } from "~/lib/api/postApi";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 
-import { SchemaRenderer } from "../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "../settings/constants";
+import { SchemaRenderer } from "../../SchemaRenderer";
+import { SETTINGS_CONSTANTS } from "../../settings/constants";
 
 interface Props {
   onSuccess: () => void;

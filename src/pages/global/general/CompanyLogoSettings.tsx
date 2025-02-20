@@ -16,7 +16,7 @@ import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { defaultLogo } from "~/pages/constants/constant";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-import { SchemaRenderer } from "../SchemaRenderer";
+import { SchemaRenderer } from "../../SchemaRenderer";
 
 export function CompanyLogoSettings() {
   const [openDialog, setOpenDialog] = createSignal(false);
