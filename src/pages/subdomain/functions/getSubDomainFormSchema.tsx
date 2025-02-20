@@ -37,15 +37,22 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
 
     try {
       options.dataContext.modalState[1]("isLoading", true);
-      const response = await postAPI(API.subdomain.createUrl, {
+      const url = !formData.id.startsWith("-") ? API.subdomain.updateUrl : API.subdomain.createUrl;
+      const payload = {
         domain: formData.P.domain,
         key: formData.P.key,
-      });
+      };
+      
+      if (!formData.id.startsWith("-")) {
+        payload.id = formData.id;
+      }
+
+      const response = await postAPI(url, payload);
 
       if (response.error) {
         showErrorToast(response.error);
       } else {
-        showSuccessToast("Subdomain created successfully");
+        showSuccessToast(!formData.id.startsWith("-") ? "Subdomain updated successfully" : "Subdomain created successfully");
         onSuccess();
       }
     } catch (error) {
