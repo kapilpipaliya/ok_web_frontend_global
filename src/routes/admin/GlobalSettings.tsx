@@ -2,6 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
+import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { CompanySettings } from "~/pages/global/company/CompanySettings";
@@ -11,12 +12,12 @@ import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettin
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
 
-import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
-
 export default function GlobalSettings() {
   const [graph] = useGraph();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedMenu, setSelectedMenu] = createSignal(searchParams.tab || "general");
+  const [selectedMenu, setSelectedMenu] = createSignal(
+    searchParams.tab || "general",
+  );
 
   createEffect(() => {
     const tab = searchParams.tab;
@@ -28,39 +29,39 @@ export default function GlobalSettings() {
   const menuItems = [
     {
       component: "GeneralSettings",
-      id: "general", 
-      label: "General"
+      id: "general",
+      label: "General",
     },
     {
       component: "CompanySettings",
       id: "company",
-      label: "Company Details"
+      label: "Company Details",
     },
     {
-      component: "EmailSettings", 
+      component: "EmailSettings",
       id: "email",
-      label: "Email Settings"
+      label: "Email Settings",
     },
     {
       component: "ThemeSettings",
       id: "theme",
-      label: "Theme Settings"
+      label: "Theme Settings",
     },
     {
       component: "Permissions",
       id: "permissions",
-      label: "Permissions"
+      label: "Permissions",
     },
     {
       component: "RoleSettings",
       id: "roles",
-      label: "Roles"
+      label: "Roles",
     },
     {
       component: "UserManagement",
       id: "users",
-      label: "Users"
-    }
+      label: "Users",
+    },
   ];
 
   const handleMenuSelect = (id: string) => {
@@ -87,7 +88,7 @@ export default function GlobalSettings() {
             {(item) => (
               <Show when={isAdminRole(graph)}>
                 <div
-                  class={`p:12px cursor:pointer r:4px mb:8px`}
+                  class={"p:12px cursor:pointer r:4px mb:8px"}
                   classList={{
                     "bg:#f3f4f6:hover fg:#374151": selectedMenu() !== item.id,
                     "bg:secondary fg:base-5": selectedMenu() === item.id,

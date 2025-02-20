@@ -1,12 +1,14 @@
-import { type Component } from "solid-js";
+import type { Component } from "solid-js";
+
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
@@ -45,7 +47,9 @@ export const AddRoleForm: Component<Props> = (props) => {
 
   const handleSave = async (options: FunctionArgumentType) => {
     const formData = graph.vertexes[formDataId];
-    if (!validateForm(formData)) return;
+    if (!validateForm(formData)) {
+      return;
+    }
 
     try {
       options.dataContext.modalState[1]("isLoading", true);
@@ -68,8 +72,6 @@ export const AddRoleForm: Component<Props> = (props) => {
     }
   };
 
-
-
   // Modal schemas similar to SubDomainForm
   const modalHeaderSchema = {
     as: "div",
@@ -78,10 +80,10 @@ export const AddRoleForm: Component<Props> = (props) => {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
         componentName: "Text",
         text: "Add New Role",
-      }
+      },
     ],
     class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box"
+    componentName: "Box",
   };
 
   const modalFooterSchema = {
@@ -101,9 +103,11 @@ export const AddRoleForm: Component<Props> = (props) => {
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
         componentName: "Button",
         props: (options: FunctionArgumentType) => ({
-          disabled: options.dataContext.modalState[0]?.["isLoading"],
+          disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: handleSave,
-          text: options.dataContext.modalState[0]?.["isLoading"] ? "Saving..." : "Save",
+          text: options.dataContext.modalState[0]?.isLoading
+            ? "Saving..."
+            : "Save",
         }),
       },
     ],
@@ -132,25 +136,21 @@ export const AddRoleForm: Component<Props> = (props) => {
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.["showModal"],
+              hidden: !options.dataContext.modalState[0]?.showModal,
             }),
           },
           {
             attributes: [
               {
                 as: "dialog",
-                attributes: [
-                  modalHeaderSchema,
-                  formSchema,
-                  modalFooterSchema,
-                ],
+                attributes: [modalHeaderSchema, formSchema, modalFooterSchema],
                 class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                 componentName: "Html",
                 open: true,
                 props: (options: FunctionArgumentType) => ({
-                  hidden: !options.dataContext.modalState[0]?.["showModal"],
+                  hidden: !options.dataContext.modalState[0]?.showModal,
                   style: {
-                    'z-index': options.zIndex + 1,
+                    "z-index": options.zIndex + 1,
                   },
                 }),
               },
@@ -159,7 +159,7 @@ export const AddRoleForm: Component<Props> = (props) => {
           },
         ],
         componentName: "Box",
-      }
+      },
     ],
     componentName: "Data",
     name: "modalState",
@@ -178,4 +178,4 @@ export const AddRoleForm: Component<Props> = (props) => {
       formDataId={formDataId}
     />
   );
-}; 
+};

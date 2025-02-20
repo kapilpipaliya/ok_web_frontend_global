@@ -4,7 +4,9 @@ import { AddNewButton } from "~/features/grid/AddNewButton";
 
 import { SaveNewComp } from "./SaveNewComp";
 
-export function AddNewCompButton(props: Readonly<{ saveAsLabel?: "Comp" | "Perm" }>) {
+export function AddNewCompButton(
+  props: Readonly<{ saveAsLabel?: "Comp" | "Perm" }>,
+) {
   const [showModal, setShowModal] = createSignal(false);
   let addNewButtonRef: HTMLElement;
 

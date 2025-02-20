@@ -1,5 +1,6 @@
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
+import { API } from "~/lib/api/endpoints";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
 
@@ -7,7 +8,6 @@ import type { CSSStore } from "../context/CssEditorContext";
 
 import { arrayToString } from "./arrayToString";
 import { getCssSelectedFileEdgeName } from "./getCssSelectedFileEdgeName";
-import { API } from "~/lib/api/endpoints";
 
 export function cssStateToString(
   cssStore: CSSStore | string,

@@ -7,8 +7,6 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
-import { useGraph } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { AddSubDomainForm } from "./AddSubDomainForm";
 import { getSubDomainFormSchema } from "./getSubDomainFormSchema";
@@ -94,15 +92,11 @@ export const SubDomainGrid = () => {
   let gridStore: DataGridStore;
   const onSuccess = () => {
     gridStore?.[0].fetchTableData();
-  }
+  };
   const editSchema = getSubDomainFormSchema(onSuccess);
   return (
     <DataGrid
-      CustomAddNewButton={() => (
-        <AddSubDomainForm
-          onSuccess={onSuccess}
-        />
-      )}
+      CustomAddNewButton={() => <AddSubDomainForm onSuccess={onSuccess} />}
       editSchema={editSchema}
       formSchema={SubDomain}
       getTableData={getTableData}

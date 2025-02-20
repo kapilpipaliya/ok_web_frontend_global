@@ -1,6 +1,8 @@
 import { createSignal, Show } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import {
   dialogCancelButtonClass,
@@ -20,7 +22,6 @@ import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
-import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
@@ -39,7 +40,8 @@ export function SaveNewComp(
   const [error, setError] = createSignal("");
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const label = () => props.saveAsLabel === "Perm" ? "Permission" : "Component";
+  const label = () =>
+    props.saveAsLabel === "Perm" ? "Permission" : "Component";
 
   const formDataId = uuidv7();
   addNewVertex(
@@ -79,7 +81,10 @@ export function SaveNewComp(
       IN: {},
       L: [],
       OUT: {},
-      P: props.saveAsLabel === "Perm" ? parentPermAttribute : parentCompAttribute,
+      P:
+        props.saveAsLabel === "Perm"
+          ? parentPermAttribute
+          : parentCompAttribute,
     } as Vertex;
 
     setSelectionValue(
@@ -99,11 +104,16 @@ export function SaveNewComp(
     }
 
     try {
-      const result = await submitDataCall({ ...commitData }, graph, setGraph, newFormTxnId);
+      const result = await submitDataCall(
+        { ...commitData },
+        graph,
+        setGraph,
+        newFormTxnId,
+      );
       if (!result.error) {
         fileManagerStore.gridStore?.[0].fetchTableData();
       }
-    } catch (err) {
+    } catch (_err) {
       showErrorToast(`An error occurred while uploading the ${label()}`);
       return;
     }

@@ -47,15 +47,19 @@ export async function renderPageAsHtml({
     browser = browserSetup.browser;
 
     // Wait for master CSS to be applied
-    await browserSetup.page.waitForSelector('style#master', {state: 'attached'});
-    
+    await browserSetup.page.waitForSelector("style#master", {
+      state: "attached",
+    });
+
     // Get the computed styles
     const masterStyles = await browserSetup.page.evaluate(() => {
-      const masterStyleEl = document.querySelector('style#master');
-      if (!masterStyleEl?.sheet) return '';
-      
+      const masterStyleEl = document.querySelector("style#master");
+      if (!masterStyleEl?.sheet) {
+        return "";
+      }
+
       const cssRules = Array.from(masterStyleEl.sheet.cssRules);
-      return cssRules.map(rule => rule.cssText).join('\n');
+      return cssRules.map((rule) => rule.cssText).join("\n");
     });
 
     // Get page content
@@ -64,7 +68,7 @@ export async function renderPageAsHtml({
     // Replace empty master style tag with computed styles
     html = html.replace(
       /<style id="master"><\/style>/,
-      `<style id="master">${masterStyles}</style>`
+      `<style id="master">${masterStyles}</style>`,
     );
 
     const fileName = `${pageName}.html`;

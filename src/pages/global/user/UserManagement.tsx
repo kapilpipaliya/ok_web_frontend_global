@@ -1,5 +1,6 @@
+import type { DataGridStore } from "~/features/grid/DataGridContext";
+
 import { DataGrid } from "~/features/grid/DataGrid";
-import { DataGridStore } from "~/features/grid/DataGridContext";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 

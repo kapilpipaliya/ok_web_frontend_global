@@ -1,12 +1,13 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { Node } from "neo4j-driver";
 
+import type { Vertex } from "~/lib/graph/graph";
+import type { Edge } from "~/lib/graph/graph";
+
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { Vertex } from "~/lib/graph/graph";
-import { Edge } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
@@ -54,7 +55,7 @@ export async function GET({ request }: APIEvent) {
         },
       };
     });
-    
+
     return {
       graph: {
         edges: relationships,

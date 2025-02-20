@@ -3,8 +3,6 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError } from "~/lib/api/apiErrorHandler";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
-import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
-import { useGraph } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {

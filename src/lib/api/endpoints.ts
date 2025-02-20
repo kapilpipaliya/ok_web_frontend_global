@@ -12,7 +12,7 @@ export const API = {
   },
   file: {
     downloadFileUrl: "/api/file/download",
-    replaceFileUrl: "/api/file/replace", 
+    replaceFileUrl: "/api/file/replace",
     uploadFileUrl: "/api/file/upload",
   },
   // Other endpoints

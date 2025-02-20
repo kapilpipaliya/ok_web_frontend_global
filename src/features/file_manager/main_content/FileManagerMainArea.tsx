@@ -71,8 +71,15 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
       <div>
         <DataGrid
           CustomAddNewButton={
-            fileManagerStore.parentVertexLabel === "Comp" || fileManagerStore.parentVertexLabel === "Perm"
-              ? () => <AddNewCompButton saveAsLabel={fileManagerStore.parentVertexLabel as "Comp" | "Perm"} />
+            fileManagerStore.parentVertexLabel === "Comp" ||
+            fileManagerStore.parentVertexLabel === "Perm"
+              ? () => (
+                  <AddNewCompButton
+                    saveAsLabel={
+                      fileManagerStore.parentVertexLabel as "Comp" | "Perm"
+                    }
+                  />
+                )
               : AddNewFileButton
           }
           enableRowSelection={fileManagerStore.enableRowSelection}

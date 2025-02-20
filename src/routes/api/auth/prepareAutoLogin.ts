@@ -84,7 +84,7 @@ function validateRequest(url: URL) {
 }
 
 function validateUser(user?: null | Vertex) {
-  if (!(user && user.P.email && user.P.username && user.P.uuid)) {
+  if (!(user?.P.email && user.P.username && user.P.uuid)) {
     throw new APIError("Missing user data", 401);
   }
   return user;

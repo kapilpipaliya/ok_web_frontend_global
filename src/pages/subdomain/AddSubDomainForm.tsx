@@ -1,4 +1,5 @@
-import { type Component } from "solid-js";
+import type { Component } from "solid-js";
+
 import { v7 as uuidv7 } from "uuid";
 
 import { useGraph } from "~/lib/graph/graph";
@@ -30,10 +31,5 @@ export const AddSubDomainForm: Component<Props> = (props) => {
   );
 
   const schema = getSubDomainFormSchema(props.onSuccess);
-  return (
-    <SchemaRenderer
-      form={schema}
-      formDataId={formDataId}
-    />
-  );
+  return <SchemaRenderer form={schema} formDataId={formDataId} />;
 };

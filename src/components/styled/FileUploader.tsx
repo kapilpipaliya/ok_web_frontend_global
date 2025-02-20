@@ -8,13 +8,13 @@ import {
   Switch,
 } from "solid-js";
 
+import { API } from "~/lib/api/endpoints";
 import { getSelectedVertexValue } from "~/lib/graph/get/sync/getSelectedVertexValue";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { setSelectValueHelper } from "../fields/utils/setSelectValueHelper";
 import { runEvent } from "../solid_blocks/tools";
-import { API } from "~/lib/api/endpoints";
 
 export type FileUploaderProps = JSX.HTMLAttributes<HTMLLabelElement> & {
   data?: Vertex;

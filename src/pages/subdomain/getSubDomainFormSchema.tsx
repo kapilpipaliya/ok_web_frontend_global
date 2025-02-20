@@ -1,16 +1,18 @@
 import { createStore } from "solid-js/store";
 
-import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { Vertex } from "~/lib/graph/graph";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "~/lib/meta/FormMetadataType";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { Vertex } from "~/lib/graph/graph";
 
 import { SETTINGS_CONSTANTS } from "../settings/constants";
-
 
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -28,7 +30,9 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
 
   const handleSave = async (options: FunctionArgumentType) => {
     const formData = options.data;
-    if (!validateForm(formData)) return;
+    if (!validateForm(formData)) {
+      return;
+    }
 
     try {
       options.dataContext.modalState[1]("isLoading", true);
@@ -110,10 +114,10 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
         componentName: "Text",
         text: "Add New SubDomain",
-      }
+      },
     ],
     class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box"
+    componentName: "Box",
   };
 
   const modalFooterSchema = {
@@ -133,9 +137,11 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
         componentName: "Button",
         props: (options: FunctionArgumentType) => ({
-          disabled: options.dataContext.modalState[0]?.["isLoading"],
+          disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: handleSave,
-          text: options.dataContext.modalState[0]?.["isLoading"] ? "Saving..." : "Save",
+          text: options.dataContext.modalState[0]?.isLoading
+            ? "Saving..."
+            : "Save",
         }),
       },
     ],
@@ -148,7 +154,6 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
       {
         as: "div",
         attributes: [
-
           {
             attributes: [
               {
@@ -162,38 +167,40 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                       },
                       text: "Add New SubDomain",
                     }),
-                  }
+                  },
                 ],
                 componentName: "Show",
                 props: (options: FunctionArgumentType) => ({
-                  when: options.data?.id?.startsWith('-')
-                })
+                  when: options.data?.id?.startsWith("-"),
+                }),
               },
               {
-                attributes: [{
-                  attributes: [
-                    {
-                      componentName: "Icon",
-                      height: 20,
-                      icon: "ph:pencil",
-                      width: 20,
-                    }
-                  ],
-                  class: "flex ai:center",
-                  componentName: "Button",
-                  props: (options: FunctionArgumentType) => ({
-                    onClick: () => {
-                      options.dataContext.modalState[1]("showModal", true);
-                    }
-                  }),
-                }],
+                attributes: [
+                  {
+                    attributes: [
+                      {
+                        componentName: "Icon",
+                        height: 20,
+                        icon: "ph:pencil",
+                        width: 20,
+                      },
+                    ],
+                    class: "flex ai:center",
+                    componentName: "Button",
+                    props: (options: FunctionArgumentType) => ({
+                      onClick: () => {
+                        options.dataContext.modalState[1]("showModal", true);
+                      },
+                    }),
+                  },
+                ],
                 componentName: "Show",
                 props: (options: FunctionArgumentType) => ({
-                  when: !options.data?.id?.startsWith('-')
-                })
-              }
+                  when: !options.data?.id?.startsWith("-"),
+                }),
+              },
             ],
-            componentName: "Fragment"
+            componentName: "Fragment",
           },
           {
             as: "div",
@@ -201,32 +208,30 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.["showModal"],
+              hidden: !options.dataContext.modalState[0]?.showModal,
             }),
           },
           {
-            attributes: [{
-              as: "dialog",
-              attributes: [
-                modalHeaderSchema,
-                formSchema,
-                modalFooterSchema,
-              ],
-              class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
-              componentName: "Html",
-              open: true,
-              props: (options: FunctionArgumentType) => ({
-                hidden: !options.dataContext.modalState[0]?.["showModal"],
-                style: {
-                  'z-index': options.zIndex + 1,
-                },
-              }),
-            }],
+            attributes: [
+              {
+                as: "dialog",
+                attributes: [modalHeaderSchema, formSchema, modalFooterSchema],
+                class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                componentName: "Html",
+                open: true,
+                props: (options: FunctionArgumentType) => ({
+                  hidden: !options.dataContext.modalState[0]?.showModal,
+                  style: {
+                    "z-index": options.zIndex + 1,
+                  },
+                }),
+              },
+            ],
             componentName: "ZIndex",
           },
         ],
         componentName: "Box",
-      }
+      },
     ],
     componentName: "Data",
     name: "modalState",

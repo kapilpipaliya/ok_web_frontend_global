@@ -539,7 +539,10 @@ export function PageViewWrapper(
           userRoles={getGlobalStore(graph).P.userRoles}
         />
       </Show> */}
-      <Show fallback={<div>Data not found!</div>} when={graph.vertexes[formStore().P.formDataId!]}>
+      <Show
+        fallback={<div>Data not found!</div>}
+        when={graph.vertexes[formStore().P.formDataId!]}
+      >
         <FormContext.Provider value={formStore().id}>
           <Switch>
             <Match

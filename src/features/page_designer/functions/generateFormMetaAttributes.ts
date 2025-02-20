@@ -173,7 +173,7 @@ export function getAllFieldsUsedInRootLevelSetting(
       fieldsUsedInUniqueConstraints.push(vertex.id);
     }
     for (const child of getChildrenAttrs(graph, setGraph, vertex)) {
-        collectUniqueConstraints(child);
+      collectUniqueConstraints(child);
     }
   }
   collectUniqueConstraints(layoutVertex);

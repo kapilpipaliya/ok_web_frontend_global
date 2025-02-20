@@ -69,7 +69,7 @@ Tooltip.Trigger = clientOnly(
   () => import("~/components/ssr/tooltip/TooltipTrigger"),
 );
 
-import { Match, Portal, Show, Switch } from "solid-js/web";
+import { Portal, Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
 import { ComponentChildrenField } from "~/components/fields/component/ComponentChildrenField";

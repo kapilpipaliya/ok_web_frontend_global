@@ -4,15 +4,13 @@ import { v7 as uuidv7 } from "uuid";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
-import { useGraph } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    const user = await getUserFromSession(request);
+    const _user = await getUserFromSession(request);
     // const [graph] = useGraph();
 
     // if (!(user?.P?.email && isAdminRole(graph))) {

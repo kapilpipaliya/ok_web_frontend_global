@@ -8,22 +8,26 @@ export const SETTINGS_CONSTANTS = {
   LABEL_CLASS: "color:base-50 font-weight:500 font:15",
   MODAL: {
     BUTTONS: {
-      CANCEL_CLASS: "bg:base-10 fg:base-80 p:8|16 r:4 cursor:pointer border:1px|solid|base-20",
+      CANCEL_CLASS:
+        "bg:base-10 fg:base-80 p:8|16 r:4 cursor:pointer border:1px|solid|base-20",
       SAVE_CLASS: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
     },
-    CONTAINER_CLASS: "border:1px|solid|base-20 r:4 p:0 position:fixed top:50% left:50% transform:translate(-50%,-50%) bg:base-5",
+    CONTAINER_CLASS:
+      "border:1px|solid|base-20 r:4 p:0 position:fixed top:50% left:50% transform:translate(-50%,-50%) bg:base-5",
     FOOTER: {
-      CLASS: "display:flex jc:flex-end p:16 gap:6 border-top:1px|solid|base-20 bg:base-5",
+      CLASS:
+        "display:flex jc:flex-end p:16 gap:6 border-top:1px|solid|base-20 bg:base-5",
     },
     HEADER: {
       CLASS: "p:16 border-bottom:1px|solid|base-20",
       TEXT_CLASS: "font-size:18 font-weight:500",
     },
-    OVERLAY_CLASS: "position:fixed top:0 left:0 w:100% h:100% bg:base-10 opacity:50 z:1"
+    OVERLAY_CLASS:
+      "position:fixed top:0 left:0 w:100% h:100% bg:base-10 opacity:50 z:1",
   },
   SAVE_BUTTON_CLASS:
     "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
   SECONDARY_BUTTON_CLASS:
     "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
-  SECTION_DIVIDER_CLASS: "my-8 border-t border-gray-200"
+  SECTION_DIVIDER_CLASS: "my-8 border-t border-gray-200",
 } as const;

@@ -224,13 +224,16 @@ export function CreateGridHeaders(
                     !gridState.isNoPermissionCheck &&
                     !!gridState.formMetaData() &&
                     !(
-                      gridState.hasEditPermission() || gridState.hasViewPermission()
+                      gridState.hasEditPermission() ||
+                      gridState.hasViewPermission()
                     )
                   }
                   icon="fluent:edit-12-regular"
                   iconClass="color:#3477CC"
                   onClick={() => {
-                    return navigate(`/admin/${tableId}/${info.row.original.id}`);
+                    return navigate(
+                      `/admin/${tableId}/${info.row.original.id}`,
+                    );
                   }}
                   size={21}
                 />
