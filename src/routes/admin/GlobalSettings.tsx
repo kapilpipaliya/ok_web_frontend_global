@@ -1,59 +1,72 @@
-import { createSignal, For, Show } from "solid-js";
+import { useSearchParams } from "@solidjs/router";
+import { createEffect, createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import FileManager from "~/features/file_manager/FileManager";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { CompanySettings } from "~/pages/global/company/CompanySettings";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
+import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
-import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 
-import { isAdminRole } from "../../lib/graph/get/sync/isAdminRole";
+import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 
 export default function GlobalSettings() {
   const [graph] = useGraph();
-  const [selectedMenu, setSelectedMenu] = createSignal("general");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedMenu, setSelectedMenu] = createSignal(searchParams.tab || "general");
+
+  createEffect(() => {
+    const tab = searchParams.tab;
+    if (tab && tab !== selectedMenu()) {
+      setSelectedMenu(tab);
+    }
+  });
 
   const menuItems = [
     {
       component: "GeneralSettings",
-      id: "general",
-      label: "General",
+      id: "general", 
+      label: "General"
     },
     {
       component: "CompanySettings",
       id: "company",
-      label: "Company Details",
+      label: "Company Details"
     },
     {
-      component: "EmailSettings",
+      component: "EmailSettings", 
       id: "email",
-      label: "Email Settings",
+      label: "Email Settings"
     },
     {
       component: "ThemeSettings",
       id: "theme",
-      label: "Theme Settings",
+      label: "Theme Settings"
     },
     {
       component: "Permissions",
       id: "permissions",
-      label: "Permissions",
+      label: "Permissions"
     },
     {
       component: "RoleSettings",
       id: "roles",
-      label: "Roles",
+      label: "Roles"
     },
     {
       component: "UserManagement",
       id: "users",
-      label: "Users",
-    },
+      label: "Users"
+    }
   ];
+
+  const handleMenuSelect = (id: string) => {
+    setSelectedMenu(id);
+    setSearchParams({ tab: id });
+  };
 
   return (
     <div class="display:grid grid-template-rows:auto|1fr h:100vh">
@@ -79,7 +92,7 @@ export default function GlobalSettings() {
                       ? "bg:secondary fg:base-5"
                       : "bg:#f3f4f6:hover fg:#374151"
                   }`}
-                  onClick={() => setSelectedMenu(item.id)}
+                  onClick={() => handleMenuSelect(item.id)}
                 >
                   {item.label}
                 </div>
