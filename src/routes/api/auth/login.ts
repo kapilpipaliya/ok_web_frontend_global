@@ -11,7 +11,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { verifyPassword } from "~/lib/auth/password";
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
+import {sendEmail} from "~/lib/playwright/sendEmail";
 import { updateSession } from "~/server/session/updateSession";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
@@ -46,7 +46,6 @@ export async function POST({ request }: APIEvent) {
     updateRedirectUrl(user, subDomain!);
 
     const result = await renderPageAsHtml({
-      neo4jSession: dbSession,
       pageName: EMAIL_TEMPLATES.LOGIN_NOTIFICATION,
       queryParams: {
         loginTime: new Date().toISOString(),
@@ -55,13 +54,12 @@ export async function POST({ request }: APIEvent) {
       subDomain: subDomain!,
     });
 
-    if (result.success && result.result) {
-      const fileVertex = result.result[0];
-      await sendEmailWithAttachment({
-        emailSubject: "New Login to Your Account",
-        emailTo: user.P.email,
-        fileVertex,
+    if (result.success && result.html) {
+      await sendEmail({
+        content: result.html!,
         subDomain: subDomain!,
+        subject: "New Login to Your Account",
+        to: user.P.email,
       });
     }
 

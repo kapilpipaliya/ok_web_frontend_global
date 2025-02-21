@@ -1,10 +1,6 @@
-import type { Transaction } from "neo4j-driver";
-import type { Session } from "neo4j-driver";
-
 import { type BrowserContext, chromium, type Page } from "playwright";
 
 import { isDev } from "~/routes/constants/constants";
-import { uploadFiles } from "~/server/upload/uploadFile";
 
 import { API } from "../api/endpoints";
 
@@ -16,12 +12,11 @@ interface BrowserSetup {
 
 interface RenderResult {
   error?: string;
-  result?: any[];
+  html?: string;
   success: boolean;
 }
 
 interface SendPageOptions {
-  neo4jSession: Session | Transaction;
   pageName: string;
   queryParams?: Record<string, string>;
   secureToken?: string;
@@ -29,7 +24,6 @@ interface SendPageOptions {
 }
 
 export async function renderPageAsHtml({
-  neo4jSession,
   pageName,
   queryParams = {},
   secureToken,
@@ -71,25 +65,11 @@ export async function renderPageAsHtml({
       `<style id="master">${masterStyles}</style>`,
     );
 
-    const fileName = `${pageName}.html`;
-
-    const { result } = await uploadFiles(
-      [
-        {
-          data: Buffer.from(html),
-          filename: fileName,
-          label: "Email",
-        },
-      ],
-      subDomain,
-      neo4jSession,
-    );
-
-    if (!result?.length) {
-      throw new Error("Failed to upload file");
+    if (!html) {
+      throw new Error("Failed to render page");
     }
 
-    return { result, success: true };
+    return { html, success: true };
   } catch (error) {
     console.error("Error rendering page:", error);
     return {

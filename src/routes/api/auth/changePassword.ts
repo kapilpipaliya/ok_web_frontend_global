@@ -4,7 +4,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
+import {sendEmail} from "~/lib/playwright/sendEmail";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
 
@@ -53,7 +53,6 @@ export async function POST({ request }: APIEvent) {
     );
 
     const result = await renderPageAsHtml({
-      neo4jSession: dbSession,
       pageName: EMAIL_TEMPLATES.PASSWORD_CHANGED,
       queryParams: {
         changeTime: new Date().toISOString(),
@@ -62,13 +61,12 @@ export async function POST({ request }: APIEvent) {
       subDomain,
     });
 
-    if (result.success && result.result) {
-      const fileVertex = result.result[0];
-      await sendEmailWithAttachment({
-        emailSubject: "Your Password Has Been Changed",
-        emailTo: user.email,
-        fileVertex,
+    if (result.success && result.html) {
+      await sendEmail({
+        content: result.html!,
         subDomain,
+        subject: "Your Password Has Been Changed",
+        to: user.email,
       });
     }
 

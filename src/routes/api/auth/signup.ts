@@ -10,7 +10,7 @@ import { signupUser } from "~/cypher/mutate/signup/signupUser";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
+import { sendEmail } from "~/lib/playwright/sendEmail";
 import { updateSession } from "~/server/session/updateSession";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
@@ -67,7 +67,6 @@ async function handleSignup(
     updateRedirectUrl(user, subDomain);
 
     const result = await renderPageAsHtml({
-      neo4jSession: tx,
       pageName: EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,
       queryParams: {
         email: data.email,
@@ -76,19 +75,18 @@ async function handleSignup(
       subDomain,
     });
 
-    if (!(result.success && result.result)) {
+    if (!result.success || !result.html) {
       throw new APIError(
         result.error || "Failed to render confirmation email",
         500,
       );
     }
 
-    const fileVertex = result.result[0];
-    await sendEmailWithAttachment({
-      emailSubject: "Welcome to Our Platform - Please Confirm Your Email",
-      emailTo: data.email,
-      fileVertex,
+    await sendEmail({
+      content: result.html!,
       subDomain,
+      subject: "Welcome to Our Platform - Please Confirm Your Email",
+      to: data.email,
     });
 
     return user;

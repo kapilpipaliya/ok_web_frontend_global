@@ -5,7 +5,7 @@ import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
+import { sendEmail } from "~/lib/playwright/sendEmail";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
@@ -21,7 +21,6 @@ export async function GET({ request }: APIEvent) {
 
   try {
     const result = await renderPageAsHtml({
-      neo4jSession: dbSession,
       pageName: "test",
       queryParams: {
         param1: "value1",
@@ -35,17 +34,16 @@ export async function GET({ request }: APIEvent) {
       throw new APIError(result.error || "Failed to render page", 500);
     }
 
-    const fileVertex = result.result![0];
-    await sendEmailWithAttachment({
-      emailSubject: "Test Email With Attachment",
-      emailTo: "kapil.pipaliya@gmail.com",
-      fileVertex,
+    await sendEmail({
+      content: result.html!,
       subDomain,
+      subject: "Test Email With Attachment",
+      to: "kapil.pipaliya@gmail.com",
     });
     return new Response(
       JSON.stringify({
         message: "Test email sent successfully",
-        result: result.result,
+        result: result.html,
       }),
       {
         headers: { "Content-Type": "application/json" },

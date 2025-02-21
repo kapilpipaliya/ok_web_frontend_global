@@ -3,10 +3,10 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import { sendEmailWithAttachment } from "~/lib/playwright/sendEmailWithAttachment";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
 import { updateProfile } from "./functions/updateProfile";
+import { sendEmail } from "~/lib/playwright/sendEmail";
 
 export async function POST({ request }: APIEvent) {
   const payload = await request.json();
@@ -24,7 +24,6 @@ export async function POST({ request }: APIEvent) {
     }
 
     const emailResult = await renderPageAsHtml({
-      neo4jSession: dbSession,
       pageName: EMAIL_TEMPLATES.PROFILE_UPDATED,
       queryParams: {
         updateTime: new Date().toISOString(),
@@ -33,13 +32,12 @@ export async function POST({ request }: APIEvent) {
       subDomain,
     });
 
-    if (emailResult.success && emailResult.result) {
-      const fileVertex = emailResult.result[0];
-      await sendEmailWithAttachment({
-        emailSubject: "Your Profile Has Been Updated",
-        emailTo: result.user.P.email,
-        fileVertex,
+    if (emailResult.success && emailResult.html) {
+      await sendEmail({
+        content: emailResult.html!,
         subDomain,
+        subject: "Your Profile Has Been Updated",
+        to: result.user.P.email,
       });
     }
 
