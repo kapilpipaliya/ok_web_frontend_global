@@ -81,13 +81,13 @@ export function EmailSettings() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "Host",
+            text: "SMTP Host",
           },
           {
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "smtpHost",
-            placeholder: "Enter host",
+            placeholder: "Enter SMTP host",
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -99,13 +99,13 @@ export function EmailSettings() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "Port",
+            text: "SMTP Port",
           },
           {
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "smtpPort",
-            placeholder: "Enter port",
+            placeholder: "Enter SMTP port",
             type: "number",
           },
         ],
@@ -118,13 +118,13 @@ export function EmailSettings() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "Username",
+            text: "SMTP Username",
           },
           {
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "smtpUsername",
-            placeholder: "Enter username",
+            placeholder: "Enter SMTP username",
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -136,13 +136,13 @@ export function EmailSettings() {
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Text",
-            text: "Password",
+            text: "SMTP Password",
           },
           {
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key: "smtpPassword",
-            placeholder: "Enter password",
+            placeholder: "Enter SMTP password",
             type: "password",
           },
         ],

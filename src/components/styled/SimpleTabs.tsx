@@ -29,7 +29,7 @@ export function TabsWithUnderline(
           Select a tab
         </label>
         <select
-          class="lh:1.5rem lh:1.25rem@sm border-color:rgb(209,213,219) border-color:rgb(99,102,241):focus border-radius:0.375rem display:block outline-offset:2px:focus outline:2px|solid|transparent pl:0.75rem pr:2.5rem py:0.5rem width:100%"
+          class="lh:1.5rem lh:1.25rem@sm border-color:base-5 border-color:primary:focus border-radius:0.375rem display:block outline-offset:2px:focus outline:2px|solid|transparent pl:0.75rem pr:2.5rem py:0.5rem width:100%"
           id="tabs"
           onChange={(e) => props.onTabClick(e.currentTarget.selectedIndex)}
           value={props.selectedIndex}
@@ -48,7 +48,7 @@ export function TabsWithUnderline(
       </div>
 
       <div class="display:none display:block@sm">
-        <div class="border-bottom-width:1px border-color:rgb(229,231,235)">
+        <div class="border-bottom-width:1px border-color:base-5">
           <nav aria-label="Tabs" class="flex gap:0.5rem margin-bottom:-1px">
             <For each={props.tabs}>
               {(tab, index) => (
@@ -56,7 +56,7 @@ export function TabsWithUnderline(
                   aria-current={
                     index() === props.selectedIndex ? "page" : undefined
                   }
-                  class={`lh:1.25rem ${index() === props.selectedIndex ? "border:indigo-50 text:indigo-60" : "border-color:transparent border:gray-30:hover color:gray-50 color:gray-70:hover"} border-bottom-width:2px  font-weight:500 px:0.25rem py:0.5rem white-space:nowrap`}
+                  class={`lh:1.25rem ${index() === props.selectedIndex ? "border:primary-50 text:primary-60" : "border-color:transparent border:base-30:hover color:secondary-50 color:secondary-70:hover"} border-bottom-width:2px font-weight:500 px:0.25rem py:0.5rem white-space:nowrap`}
                   onClick={() => props.onTabClick(index())}
                   type="button"
                 >

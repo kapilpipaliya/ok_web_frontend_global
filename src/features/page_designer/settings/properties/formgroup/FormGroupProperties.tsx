@@ -7,6 +7,7 @@ import {
   For,
   Match,
   onCleanup,
+  Show,
   Switch,
 } from "solid-js";
 
@@ -126,13 +127,15 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           />
         )}
       </For>
-      <ClassesComponent
-        metaAttributes={props.metaAttributes}
-        onChange={props.onChange}
-        selectedLayout={props.selectedLayout}
-        txnId={props.txnId}
-        vertexIds={vertexIds}
-      />
+      <Show when={selectedAttr()?.P.componentName === "Html" || selectedAttr()?.P.componentName === "Icon"}>
+        <ClassesComponent
+          metaAttributes={props.metaAttributes}
+          onChange={props.onChange}
+          selectedLayout={props.selectedLayout}
+          txnId={props.txnId}
+          vertexIds={vertexIds}
+        />
+      </Show>
     </>
   );
 }

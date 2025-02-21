@@ -2,7 +2,6 @@ import { createSignal, type JSX, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { useToast } from "~/components/styled/Toast";
 import { getProfileImageUrl } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 
@@ -11,7 +10,6 @@ import { ProfileHeader } from "./ProfileHeader";
 
 export function UserDropdownMenuDisplay(): JSX.Element {
   const [graph] = useGraph();
-  const { showErrorToast, showLoadingToast } = useToast();
   const [isOpen, setIsOpen] = createSignal(false);
   let btnEl: HTMLButtonElement;
 
@@ -21,11 +19,10 @@ export function UserDropdownMenuDisplay(): JSX.Element {
   return (
     <>
       <button
-        class="flex ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover height:36px p:6 r:7 width:36px mr:3"
+        class={`flex ai:center bg:primary-5 bg:primary-10:hover height:36px p:6 r:7 width:36px mr:3 background-size:cover border:none cursor:pointer bg:primary-5 background-image:url(${getProfileImageUrl(graph)})`}
         id="user-dropdown-toggle"
         onClick={handleOpen}
         ref={btnEl!}
-        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${getProfileImageUrl(graph)})`}
       />
       <Show when={isOpen()}>
         <ZIndex>
@@ -37,7 +34,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
           >
             <ul class="list-style-type:none m:0 p:0 position:relative">
               <ProfileHeader profileImage={getProfileImageUrl(graph)} />
-              <hr class="color:rgb(223,223,223)" />
+              <hr class="color:base-5" />
               <MenuItems onClose={handleClose} />
             </ul>
           </DropdownMenu>

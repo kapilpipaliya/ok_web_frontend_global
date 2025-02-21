@@ -22,10 +22,6 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
       showErrorToast("Please enter subdomain name");
       return false;
     }
-    if (!formData.P.domain?.trim()) {
-      showErrorToast("Please enter domain");
-      return false;
-    }
     return true;
   };
 

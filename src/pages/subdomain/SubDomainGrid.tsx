@@ -8,7 +8,7 @@ import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
-import { AddSubDomainForm } from "./AddSubDomainForm";
+import { SchemaRenderer } from "../SchemaRenderer";
 import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
 
 interface SubDomain {
@@ -93,10 +93,12 @@ export const SubDomainGrid = () => {
   const onSuccess = () => {
     gridStore?.[0].fetchTableData();
   };
+
+  const addSchema = getSubDomainFormSchema(onSuccess);
   const editSchema = getSubDomainFormSchema(onSuccess);
   return (
     <DataGrid
-      CustomAddNewButton={() => <AddSubDomainForm onSuccess={onSuccess} />}
+      CustomAddNewButton={() => <SchemaRenderer form={addSchema} />}
       editSchema={editSchema}
       formSchema={SubDomain}
       getTableData={getTableData}

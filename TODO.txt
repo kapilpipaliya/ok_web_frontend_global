@@ -27,9 +27,7 @@ Optional tasks:
 
 
 
-sendEmail to: “kapil….” Remove, keep to only
 
-Role Setting => name => key, Permissions => Table
 Role => create API permissions save
 When signup root fix created permissions, its access level only
 createRootFolder => createDefaultPermissions
@@ -52,8 +50,4 @@ Fix In Permissions, File Manager Columns are displayed.
 GetInitial Data support an argument to get user too.
 Make a separate function to load data and return initial data and then set it.
 Use CreateResource to fetch initial data.
-
-Fix MHTML is not readable at all in email
-
-Use IMAP server instead of smtp
 
