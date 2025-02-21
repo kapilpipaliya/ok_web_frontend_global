@@ -1,10 +1,14 @@
+import { Title } from "@solidjs/meta";
+
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
 
+
 export default function Projects() {
   return (
     <div class="display:grid grid-template-rows:auto|1fr h:100vh">
+      <Title>Projects</Title>
       <div class="display:flex">
         <HeaderWithDescription
           class="flex:1"

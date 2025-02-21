@@ -1,3 +1,4 @@
+import { Title } from "@solidjs/meta";
 import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
 
@@ -42,6 +43,7 @@ export default function UserSettings() {
 
   return (
     <div class="display:grid grid-template-rows:auto|1fr h:100vh">
+      <Title>Account Settings - {menuItems.find(item => item.id === selectedMenu())?.label}</Title>
       <div class="display:flex">
         <HeaderWithDescription
           class="flex:1"
