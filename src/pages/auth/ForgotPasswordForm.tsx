@@ -8,7 +8,6 @@ import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validatePassword } from "~/lib/validation/validatePassword";
-import { sendEmail } from "~/server/email/sendEmail";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../settings/constants";
@@ -42,9 +41,15 @@ export function ForgotPasswordForm() {
       showErrorToast("Enter email");
       return;
     }
-    await sendEmail(email, "Reset Password");
-    setStage(1);
-  };
+    // Todo: This function should not be called from frontend side.
+  //   await sendEmail({
+  //     content: "Reset Password",
+  //     subDomain: subDomain,
+  //     subject: "Reset Password",
+  //     to: email,
+  //   });
+  //   setStage(1);
+  // };
 
   const handleOtpSubmit = (formData: any) => {
     const { otp } = formData.P;

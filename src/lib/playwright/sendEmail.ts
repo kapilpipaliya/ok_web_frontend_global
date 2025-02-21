@@ -20,7 +20,6 @@ interface SMTPConfig {
   secure: boolean;
   user: string;
 }
-
 export async function sendEmail({
   attachmentName,
   attachmentPath,
@@ -29,41 +28,78 @@ export async function sendEmail({
   subject,
   to,
 }: EmailOptions) {
-  return;
   const dbSettings = await getEmailSettings(subDomain);
+  let emailInfo;
 
-  const transportConfig = {
-    auth: {
-      pass: dbSettings?.pass || process.env.SMTP_PASS,
-      user: dbSettings?.user || process.env.SMTP_USER,
-    },
-    host: dbSettings?.host || process.env.SMTP_HOST,
-    port: dbSettings?.port || Number(process.env.SMTP_PORT),
-    secure: dbSettings?.secure ?? process.env.SMTP_SECURE === "true",
-    tls: {
-      rejectUnauthorized: false,
-    },
-  };
-
-  const transporter = nodemailer.createTransport(transportConfig);
-
-  const emailOptions: nodemailer.SendMailOptions = {
-    from: dbSettings?.from || process.env.SMTP_FROM,
-    html: content, // Using html instead of text to preserve formatting
-    subject,
-    to: "kapilpipaliya@gmail.com",
-  };
-
-  if (attachmentPath && attachmentName) {
-    emailOptions.attachments = [
-      {
-        filename: attachmentName,
-        path: attachmentPath,
+  try {
+    const transportConfig = {
+      auth: {
+        pass: dbSettings?.pass || process.env.SMTP_PASS,
+        user: dbSettings?.user || process.env.SMTP_USER,
       },
-    ];
+      host: dbSettings?.host || process.env.SMTP_HOST,
+      port: dbSettings?.port || Number(process.env.SMTP_PORT),
+      secure: dbSettings?.secure ?? process.env.SMTP_SECURE === "true",
+      tls: {
+        rejectUnauthorized: false,
+      },
+    };
+
+    const transporter = nodemailer.createTransport(transportConfig);
+
+    const emailOptions: nodemailer.SendMailOptions = {
+      from: dbSettings?.from || process.env.SMTP_FROM,
+      html: content, // Using html instead of text to preserve formatting
+      subject,
+      to,
+    };
+
+    if (attachmentPath && attachmentName) {
+      emailOptions.attachments = [
+        {
+          filename: attachmentName,
+          path: attachmentPath,
+        },
+      ];
+    }
+
+    emailInfo = await transporter.sendMail(emailOptions);
+  } catch (error) {
+    console.error("Failed to send email:", error);
+    // Continue execution to save to database even if email fails
   }
 
-  await transporter.sendMail(emailOptions);
+  // Save sent/failed email to database
+  const dbSession = (await getDriver()).session({ database: subDomain });
+  try {
+    await dbSession.run(
+      `CREATE (e:Email {
+        from: $from,
+        to: $to,
+        subject: $subject,
+        content: $content,
+        attachmentName: $attachmentName,
+        attachmentPath: $attachmentPath,
+        messageId: $messageId,
+        sentAt: datetime(),
+        status: $status
+      })`,
+      {
+        attachmentName: attachmentName || null,
+        attachmentPath: attachmentPath || null, 
+        content,
+        from: dbSettings?.from || process.env.SMTP_FROM,
+        messageId: emailInfo?.messageId || null,
+        status: emailInfo ? 'sent' : 'failed',
+        subject,
+        to,
+      }
+    );
+  } finally {
+    await dbSession.close();
+  }
+
+  return emailInfo;
 }
 
 async function getEmailSettings(subDomain: string): Promise<null | SMTPConfig> {

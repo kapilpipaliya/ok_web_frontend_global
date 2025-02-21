@@ -54,6 +54,9 @@ export const API = {
     inviteUserUrl: "/api/users/invite",
     updateUserUrl: "/api/users/update",
   },
+  email: {
+    auditUrl: "/api/email/audit",
+  },
 } as const;
 
 export function generate401RedirectUrl(pathname: string): string {

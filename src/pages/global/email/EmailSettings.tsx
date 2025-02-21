@@ -54,27 +54,27 @@ export function EmailSettings() {
   const form = {
     as: "div",
     attributes: [
-      {
-        as: "div",
-        attributes: [
-          {
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
-            text: "Protocol",
-          },
-          {
-            class: PROPERTIES.Css.TextField,
-            componentName: "Select",
-            key: "protocol",
-            options: [
-              { id: "smtp", label: "SMTP" },
-              { id: "imap", label: "IMAP" },
-            ],
-          },
-        ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-        componentName: "Box",
-      },
+      // {
+      //   as: "div",
+      //   attributes: [
+      //     {
+      //       class: SETTINGS_CONSTANTS.LABEL_CLASS,
+      //       componentName: "Text",
+      //       text: "Protocol",
+      //     },
+      //     {
+      //       class: PROPERTIES.Css.TextField,
+      //       componentName: "Select",
+      //       key: "protocol",
+      //       options: [
+      //         { id: "smtp", label: "SMTP" },
+      //         { id: "imap", label: "IMAP" },
+      //       ],
+      //     },
+      //   ],
+      //   class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+      //   componentName: "Box",
+      // },
       {
         as: "div",
         attributes: [

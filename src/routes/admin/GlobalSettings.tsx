@@ -6,6 +6,7 @@ import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { CompanySettings } from "~/pages/global/company/CompanySettings";
+import { EmailAudit } from "~/pages/global/email/EmailAudit";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
 import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
@@ -61,6 +62,11 @@ export default function GlobalSettings() {
       component: "UserManagement",
       id: "users",
       label: "Users",
+    },
+    {
+      component: "EmailAudit",
+      id: "email-audit",
+      label: "Email Audit",
     },
   ];
 
@@ -122,6 +128,9 @@ export default function GlobalSettings() {
           </Show>
           <Show when={selectedMenu() === "users"}>
             <UserManagement />
+          </Show>
+          <Show when={selectedMenu() === "email-audit"}>
+            <EmailAudit />
           </Show>
         </div>
       </div>
