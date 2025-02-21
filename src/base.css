@@ -1,5 +1,6 @@
 /*@import '@master/normal.css';*/
 
+@layer base {
 /*https://github.com/tailwindlabs/tailwindcss/blob/master/src/css/preflight.css*/
 /* Remove all theme() function usage*/
 
@@ -427,4 +428,6 @@ Make elements with the HTML hidden attribute stay hidden by default.
   background-color: transparent;
   padding: 0;
   border: none;
+}
+
 }

@@ -3,10 +3,10 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
+import { sendEmail } from "~/lib/playwright/sendEmail";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
 import { updateProfile } from "./functions/updateProfile";
-import { sendEmail } from "~/lib/playwright/sendEmail";
 
 export async function POST({ request }: APIEvent) {
   const payload = await request.json();

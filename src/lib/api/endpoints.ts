@@ -10,6 +10,9 @@ export const API = {
     signUpUrl: "/api/auth/signup",
     updateProfileImageUrl: "/api/auth/updateProfileImage",
   },
+  email: {
+    auditUrl: "/api/email/audit",
+  },
   file: {
     downloadFileUrl: "/api/file/download",
     replaceFileUrl: "/api/file/replace",
@@ -53,9 +56,6 @@ export const API = {
     getUsersListUrl: "/api/users/list",
     inviteUserUrl: "/api/users/invite",
     updateUserUrl: "/api/users/update",
-  },
-  email: {
-    auditUrl: "/api/email/audit",
   },
 } as const;
 

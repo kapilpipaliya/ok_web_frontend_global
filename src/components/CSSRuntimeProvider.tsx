@@ -1,123 +1,79 @@
-import type { Config } from "@master/css";
+import type { Config } from '@master/css';
 
-import { RuntimeCSS } from "@master/css-runtime";
-import {
-  createContext,
-  createEffect,
-  createSignal,
-  type JSX,
-  on,
-  onCleanup,
-  useContext,
-} from "solid-js";
+import { RuntimeCSS } from '@master/css-runtime';
+import { createContext, createEffect, createSignal, JSX, onCleanup, onMount, useContext } from 'solid-js';
 
-export const RuntimeCSSContext = createContext<RuntimeCSS | undefined>();
+const RuntimeCSSContext = createContext<RuntimeCSS | undefined>(undefined);
+export const useRuntimeCSS = () => useContext(RuntimeCSSContext);
 
-// https://github.com/master-co/css/blob/beta/packages/react/src/CSSProvider.tsx
-export function CSSRuntimeProvider(
-  props: Readonly<{
-    children: JSX.Element;
-    config?: Config | Promise<any>;
-    root?: Document | ShadowRoot;
-  }>,
-) {
-  const [runtimeCSS, setCSSRuntime] = createSignal<RuntimeCSS | undefined>(
-    undefined,
-  );
-  let identifier = 0;
-  let initializing = false;
-  let newRuntimeCSS: RuntimeCSS | undefined = undefined;
-  let isExternalRuntimeCSS = false;
+export function CSSRuntimeProvider(props: {
+  children: JSX.Element,
+  config?: Config | Promise<any>,
+  root?: Document | ShadowRoot
+}) {
+  const [runtimeCSS, setRuntimeCSS] = createSignal<RuntimeCSS>();
 
-  const waitInitialized = async () => {
-    const currentIdentifier = ++identifier;
-    if (initializing) {
-      await new Promise<void>((resolve) => {
-        const interval = setInterval(() => {
-          if (!initializing) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 10);
-      });
-    }
-    return currentIdentifier === identifier;
-  };
+  const resolveConfig = async () => {
+    const configModule = await props.config;
+    return configModule?.config || configModule?.default || configModule;
+  }
 
-  createEffect(
-    on([() => JSON.stringify(props.config), () => props.root], async () => {
-      (async () => {
-        if (!(typeof window !== "undefined")) {
-          return;
-        }
-        if (!(await waitInitialized())) {
-          return;
-        }
+  const initialize = async (signal: AbortSignal) => {
+    const resolvedConfig = await resolveConfig();
+    if (signal.aborted) return;
+    setRuntimeCSS(new RuntimeCSS(props.root ?? document, resolvedConfig).observe());
+  }
 
-        const configModule = await props.config;
-        const resolvedConfig =
-          configModule?.config || configModule?.default || configModule;
+  onMount(() => {
+    const controller = new AbortController();
+    initialize(controller.signal);
 
-        const init = async () => {
-          initializing = true;
-
-          const currentRoot = props.root ?? document;
-          const existingCSSRuntime = (globalThis as any).runtimeCSSs.find(
-            (eachCSS: RuntimeCSS) => eachCSS.root === currentRoot,
-          );
-          if (existingCSSRuntime) {
-            setCSSRuntime((newRuntimeCSS = existingCSSRuntime));
-            isExternalRuntimeCSS = true;
-          } else {
-            setCSSRuntime(
-              (newRuntimeCSS = new RuntimeCSS(
-                props.root,
-                resolvedConfig,
-              ).observe()),
-            );
-            isExternalRuntimeCSS = false;
-          }
-
-          initializing = false;
-        };
-
-        if (!newRuntimeCSS) {
-          await init();
-        } else if (
-          newRuntimeCSS.root !== props.root &&
-          (props.root || newRuntimeCSS.root !== document)
-        ) {
-          newRuntimeCSS.destroy();
-          await init();
-        } else {
-          newRuntimeCSS.refresh(resolvedConfig);
-        }
-      })();
-    }),
-  );
-
-  createEffect(() => {
     onCleanup(() => {
-      if (!isExternalRuntimeCSS) {
-        (async () => {
-          if (!(await waitInitialized())) {
-            return;
-          }
-
-          newRuntimeCSS?.destroy();
-          newRuntimeCSS = undefined;
-        })();
-      }
+      controller.abort();
+      runtimeCSS()?.destroy();
+      setRuntimeCSS(undefined);
     });
   });
 
-  return (
-    <RuntimeCSSContext.Provider value={runtimeCSS()}>
-      {props.children}
-    </RuntimeCSSContext.Provider>
-  );
-}
+  // Watch config changes
+  let prevConfig = props.config;
+  createEffect(() => {
+    if (props.config === prevConfig) return;
+    prevConfig = props.config;
 
-export function useRuntimeCSS() {
-  return useContext(RuntimeCSSContext);
+    const controller = new AbortController();
+    (async () => {
+      const resolvedConfig = await resolveConfig();
+      if (controller.signal.aborted) return;
+      runtimeCSS()?.refresh(resolvedConfig); // NOTE: dont know why setTimeout is needed to make this working.
+      // setTimeout(() => runtimeCSS()?.refresh(resolvedConfig), 500);
+    })();
+
+    onCleanup(() => {
+      controller.abort();
+    });
+  });
+
+  // Watch root changes  
+  let prevRoot = props.root;
+  createEffect(() => {
+    if (props.root === prevRoot) return;
+    prevRoot = props.root;
+
+    const controller = new AbortController();
+    (async () => {
+      if (controller.signal.aborted) return;
+      if (runtimeCSS()) {
+        runtimeCSS()?.destroy();
+        setRuntimeCSS(undefined);
+        initialize(controller.signal);
+      }
+    })();
+
+    onCleanup(() => {
+      controller.abort();
+    });
+  });
+
+  return <RuntimeCSSContext.Provider value={runtimeCSS()}>{props.children}</RuntimeCSSContext.Provider>;
 }

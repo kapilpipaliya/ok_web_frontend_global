@@ -49,7 +49,7 @@ export function ForgotPasswordForm() {
   //     to: email,
   //   });
   //   setStage(1);
-  // };
+  };
 
   const handleOtpSubmit = (formData: any) => {
     const { otp } = formData.P;

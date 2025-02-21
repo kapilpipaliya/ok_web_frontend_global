@@ -9,7 +9,7 @@ import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { getCompanyLogoVertex } from "~/lib/graph/get/sync/getMemberVertex";
+import { getCompanyLogoVertex } from "~/lib/graph/get/sync/getCompanyLogoVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";

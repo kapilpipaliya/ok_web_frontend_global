@@ -2,7 +2,7 @@ import { createSignal, type JSX, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { getProfileImageUrl } from "~/lib/graph/get/sync/getMemberVertex";
+import { getProfileImageUrl } from "~/lib/graph/get/sync/getProfileImageUrl";
 import { useGraph } from "~/lib/graph/graph";
 
 import { MenuItems } from "./MenuItems";
