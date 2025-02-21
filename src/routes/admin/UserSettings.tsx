@@ -4,7 +4,6 @@ import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
-import { SubDomainSettings } from "~/pages/subdomain/SubDomainSettings";
 import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
 import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
@@ -22,12 +21,6 @@ export default function UserSettings() {
       component: "PasswordSettings",
       id: "password",
       label: "Change Password",
-    },
-    {
-      adminOnly: true,
-      component: "SubDomainSettings",
-      id: "subdomain",
-      label: "Projects",
     },
   ];
 
@@ -69,9 +62,6 @@ export default function UserSettings() {
           </Show>
           <Show when={selectedMenu() === "password"}>
             <PasswordSettings />
-          </Show>
-          <Show when={selectedMenu() === "subdomain"}>
-            <SubDomainSettings />
           </Show>
         </div>
       </div>

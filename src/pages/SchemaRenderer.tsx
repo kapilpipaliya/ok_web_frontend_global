@@ -7,7 +7,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 export function SchemaRenderer(props: {
   form: IFormMetaData;
-  formDataId: string;
+  formDataId?: string;
   txnId?: string;
 }) {
   const [graph, setGraph] = useGraph();

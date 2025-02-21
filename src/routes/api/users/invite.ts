@@ -17,16 +17,26 @@ export async function POST({ request }: APIEvent) {
     //   throw new APIError("Unauthorized", 401);
     // }
 
-    const { email, roleName } = await request.json();
+    const { email, name, roles, username } = await request.json();
 
-    // Check if user already exists
-    const existingUser = await dbSession.run(
+    // Check if user already exists with email
+    const existingUserEmail = await dbSession.run(
       "MATCH (u:User {email: $email}) RETURN u",
       { email },
     );
 
-    if (existingUser.records.length > 0) {
+    if (existingUserEmail.records.length > 0) {
       throw new APIError("User with this email already exists", 400);
+    }
+
+    // Check if username already exists
+    const existingUsername = await dbSession.run(
+      "MATCH (u:User {username: $username}) RETURN u",
+      { username },
+    );
+
+    if (existingUsername.records.length > 0) {
+      throw new APIError("Username already taken", 400);
     }
 
     // Create new user
@@ -35,27 +45,30 @@ export async function POST({ request }: APIEvent) {
       CREATE (u:User {
         uuid: $uuid,
         email: $email,
+        username: $username,
+        name: $name,
         status: "invited",
         createdAt: datetime()
       })
       WITH u
-      MATCH (r:Role {name: $roleName})
+      UNWIND $roles as roleId
+      MATCH (r:Role)
+      WHERE elementId(r) = roleId
       CREATE (u)-[:UserRole]->(r)
       RETURN u
     `,
       {
         email,
-        roleName,
+        name,
+        roles,
+        username,
         uuid: uuidv7(),
       },
     );
 
     // TODO: Send invitation email
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    return { success: true };
   } catch (error) {
     return handleAPIError(error);
   } finally {

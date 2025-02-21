@@ -52,9 +52,9 @@ export const API = {
     deleteUserUrl: "/api/users/delete",
     getUsersListUrl: "/api/users/list",
     inviteUserUrl: "/api/users/invite",
-    updateUserRoleUrl: "/api/users/updateRole",
+    updateUserUrl: "/api/users/update",
   },
-};
+} as const;
 
 export function generate401RedirectUrl(pathname: string): string {
   return `/auth/login?redirectUrl=${encodeURIComponent(pathname)}`;

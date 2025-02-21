@@ -90,24 +90,6 @@ export const roleFormSchema = {
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
           componentName: "Box",
         },
-        {
-          as: "div",
-          attributes: [
-            {
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
-              text: "Permissions",
-            },
-            {
-              class: PROPERTIES.Css.TextField,
-              componentName: "TextInput",
-              key: "permissions",
-              placeholder: "Enter permissions",
-            },
-          ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
-        },
       ],
       class: SETTINGS_CONSTANTS.FORM_CLASS,
       componentName: "Box",

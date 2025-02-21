@@ -4,7 +4,7 @@ import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
-import { AddUserForm } from "./AddUserForm";
+import { SchemaRenderer } from "../../SchemaRenderer";
 import { getUserFormSchema } from "./userFormSchema";
 
 export function UserManagement() {
@@ -53,13 +53,14 @@ export function UserManagement() {
     title: "Users",
   };
 
+  const addSchema = getUserFormSchema(onSuccess);
   const editSchema = getUserFormSchema(onSuccess);
 
   return (
     <DataGrid
       CustomAddNewButton={() => (
-        <AddUserForm
-          onSuccess={onSuccess}
+        <SchemaRenderer
+          form={addSchema}
         />
       )}
       editSchema={editSchema}

@@ -82,6 +82,9 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 componentName: "TextInput",
                 key: "key",
                 placeholder: "Enter subdomain name",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: !options.data.id.startsWith("-"),
+                }),
                 validation: { required: true },
               },
             ],

@@ -5,6 +5,7 @@ import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
+import { evalExpression } from "~/lib/expression_eval";
 import { Vertex } from "~/lib/graph/graph";
 import { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
@@ -118,17 +119,26 @@ export const getUserFormSchema = (onSuccess: () => void) => {
 
     try {
       options.dataContext.modalState[1]("isLoading", true);
-      const response = await postAPI(API.user.inviteUserUrl, {
+
+      const roles = (evalExpression("->$0Role", {
+        graph: options.graph,
+        setGraph: options.setGraph,
+        vertexes: [formData],
+      }) as Vertex[]) || [];
+
+      const url = formData.id.startsWith("-") ? API.user.inviteUserUrl : API.user.updateUserUrl;
+      const response = await postAPI(url, {
         email: formData.P.email,
         name: formData.P.name,
-        role: formData.P.role,
+        roles: roles.map((role) => role.id),
         username: formData.P.username,
+        uuid: formData.P.uuid,
       });
 
       if (response.error) {
         showErrorToast(response.error);
       } else {
-        showSuccessToast("User invited successfully");
+        showSuccessToast(formData.id.startsWith("-") ? "User invited successfully" : "User updated successfully");
         onSuccess();
       }
     } catch (error) {

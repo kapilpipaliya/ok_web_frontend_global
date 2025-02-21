@@ -5,7 +5,7 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { AddRoleForm } from "./AddRoleForm";
+import { SchemaRenderer } from "../../SchemaRenderer";
 import { getRoleFormSchema } from "./functions/formSchema";
 
 export function RoleSettings() {
@@ -35,11 +35,16 @@ export function RoleSettings() {
     title: "Roles",
   } as IFormMetaData;
 
+  const addSchema = getRoleFormSchema(onSuccess);
   const editSchema = getRoleFormSchema(onSuccess);
   
   return (
     <DataGrid
-      CustomAddNewButton={() => <AddRoleForm onSuccess={onSuccess} />}
+      CustomAddNewButton={() => (
+        <SchemaRenderer
+          form={addSchema}
+        />
+      )}
       editSchema={editSchema}
       formSchema={RoleSchema}
       getTableData={getTableData}
