@@ -1,4 +1,5 @@
-import { createSignal, For, Show } from "solid-js";
+import { useSearchParams } from "@solidjs/router";
+import { createEffect, createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
@@ -9,7 +10,17 @@ import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
 export default function UserSettings() {
   const [graph] = useGraph();
-  const [selectedMenu, setSelectedMenu] = createSignal("profile");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedMenu, setSelectedMenu] = createSignal(
+    searchParams.tab || "profile"
+  );
+
+  createEffect(() => {
+    const tab = searchParams.tab;
+    if (tab && tab !== selectedMenu()) {
+      setSelectedMenu(tab);
+    }
+  });
 
   const menuItems = [
     {
@@ -23,6 +34,11 @@ export default function UserSettings() {
       label: "Change Password",
     },
   ];
+
+  const handleMenuSelect = (id: string) => {
+    setSelectedMenu(id);
+    setSearchParams({ tab: id });
+  };
 
   return (
     <div class="display:grid grid-template-rows:auto|1fr h:100vh">
@@ -48,7 +64,7 @@ export default function UserSettings() {
                       ? "bg:secondary fg:base-5"
                       : "bg:#f3f4f6:hover fg:#374151"
                   }`}
-                  onClick={() => setSelectedMenu(item.id)}
+                  onClick={() => handleMenuSelect(item.id)}
                 >
                   {item.label}
                 </div>
