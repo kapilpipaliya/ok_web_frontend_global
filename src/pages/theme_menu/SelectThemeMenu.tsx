@@ -17,7 +17,7 @@ import { AddNewThemeDialog } from "./AddNewThemeDialog";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
 
-export function SelectThemeMenu() {
+export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   const [graph, setGraph] = useGraph();
   const [_selectedTheme, setSelectedTheme] = createSignal<Id>();
   const [loading, setLoading] = createSignal(true);
@@ -87,15 +87,17 @@ export function SelectThemeMenu() {
 
   return (
     <>
-      <DialogHeader title="Themes" />
+      <Show when={!props.isStandalone}>
+        <DialogHeader title="Themes" />
+      </Show>
       <Show when={error()}>
-        <div>{error()}</div>
+        <div class="p:0.5rem fg:error">{error()}</div>
       </Show>
       <Show when={loading()}>
-        <div>Loading...</div>
+        <div class="p:0.5rem">Loading...</div>
       </Show>
       <Show when={!(loading() || error())}>
-        <ul class="width:100%">
+        <ul class={`width:100% ${props.isStandalone ? 'max-height:none' : 'max-height:300px'} overflow-y:auto`}>
           <For each={graph.vertexLabelIdMap.Theme}>
             {(theme) => {
               const isSelected = () =>
@@ -104,18 +106,20 @@ export function SelectThemeMenu() {
                 <li
                   class={`${
                     isSelected() ? "bg:primary-30" : ""
-                  } flex ai:center bg:primary-20:hover jc:space-between p:0.25rem cursor:pointer`}
+                  } flex ai:center bg:primary-20:hover jc:space-between p:0.5rem cursor:pointer border-bottom:1px|solid|#eee`}
                   onClick={() => handleThemeSelect(theme)}
                 >
-                  <span>
+                  <div class="flex ai:center gap:0.5rem">
                     <Show when={isSelected()}>
-                      <span>✔️</span>
+                      <span class="fg:primary">✓</span>
                     </Show>
-                    {graph.vertexes[theme].P.key}
-                  </span>
-                  <ThemePreview item={graph.vertexes[theme]} />
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <ThemeConfigButton item={graph.vertexes[theme]} size={16} />
+                    <span>{graph.vertexes[theme].P.key}</span>
+                  </div>
+                  <div class="flex ai:center gap:0.5rem">
+                    <ThemePreview item={graph.vertexes[theme]} />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <ThemeConfigButton item={graph.vertexes[theme]} size={16} />
+                    </div>
                   </div>
                 </li>
               );

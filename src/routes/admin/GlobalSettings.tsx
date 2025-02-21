@@ -11,6 +11,7 @@ import { EmailSettings } from "~/pages/global/email/EmailSettings";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
 import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
+import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
 
 export default function GlobalSettings() {
@@ -136,8 +137,4 @@ export default function GlobalSettings() {
       </div>
     </div>
   );
-}
-
-function ThemeSettings() {
-  return <div>Theme Settings</div>;
 }

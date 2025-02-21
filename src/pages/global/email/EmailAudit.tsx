@@ -50,6 +50,7 @@ export function EmailAudit() {
 
   return (
     <DataGrid
+      CustomAddNewButton={() => <div></div>}
       formSchema={EmailAuditSchema}
       getTableData={getTableData}
       initializeGridStoreParent={(gridStore_) => {
