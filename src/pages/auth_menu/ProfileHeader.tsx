@@ -1,18 +1,21 @@
-import { type JSX, Show } from "solid-js";
+import { type JSX } from "solid-js";
 
 import {
   getMemberVertex,
 } from "~/lib/graph/get/sync/getMemberVertex";
 import { getProfileImageUrl } from "~/lib/graph/get/sync/getProfileImageUrl";
 import { useGraph } from "~/lib/graph/graph";
+
 export interface ProfileHeaderProps {
   profileImage: string;
 }
 
-export function ProfileHeader(
-  _props: Readonly<ProfileHeaderProps>,
-): JSX.Element {
+export function ProfileHeader(): JSX.Element {
   const [graph] = useGraph();
+  const member = () => getMemberVertex(graph);
+  
+  const displayName = () => member()?.P?.username ?? "Guest User";
+  const displayEmail = () => member()?.P?.email ?? "guest@gmail.com";
 
   return (
     <li class="flex mb:5px p:10px">
@@ -22,20 +25,10 @@ export function ProfileHeader(
       />
       <div class="ml:10 mr:1rem">
         <div class="f:15 font-weight:bold text-align:start">
-          <Show
-            fallback={getMemberVertex(graph)?.P?.username ?? "anonymous"}
-            when={!getMemberVertex(graph)?.P?.username}
-          >
-            Guest User
-          </Show>
+          {displayName()}
         </div>
         <div class="f:13 text-align:start">
-          <Show
-            fallback={getMemberVertex(graph)?.P?.email ?? "anonymous@gmail.com"}
-            when={!getMemberVertex(graph)?.P?.email}
-          >
-            guest@gmail.com
-          </Show>
+          {displayEmail()}
         </div>
       </div>
     </li>

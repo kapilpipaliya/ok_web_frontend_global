@@ -1,14 +1,17 @@
+import { Show } from "solid-js";
+import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
+import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import {
   addNewVertex,
   replaceVertexProperties,
@@ -22,6 +25,8 @@ import { ProfileImageSettings } from "./ProfileImageSettings";
 export function ProfileSettings() {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
+
+  const isSystemSubDomain = () => getMemberVertex(graph).P.subDomain === "super";
 
   const formDataId = uuidv7();
   addNewVertex(
@@ -40,6 +45,17 @@ export function ProfileSettings() {
   const form = {
     as: "div",
     attributes: [
+      {
+        as: "div",
+        attributes: [
+          {
+            class: "mb:16px fg:base-60 text-align:left",
+            componentName: "Text",
+            text: "Note: Changing your username or email will update them across all your projects.",
+          }
+        ],
+        componentName: "Box"
+      },
       {
         as: "div",
         attributes: [
@@ -108,56 +124,73 @@ export function ProfileSettings() {
         as: "div",
         attributes: [
           {
-            as: "button",
-            class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-            componentName: "Box",
-            props: () => ({
-              onClick: async () => {
-                // TODO: Run Form Validation
-                const user = graph.vertexes[formDataId];
+            as: "div",
+            attributes: [
+              {
+                as: "button",
+                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  onClick: async () => {
+                    options.dataContext.saveState[1]("isLoading", true);
 
-                if (!user.P.username.trim()) {
-                  showErrorToast("Please enter username");
-                  return;
-                }
+                    // TODO: Run Form Validation
+                    const user = graph.vertexes[formDataId];
 
-                if (!user.P.email.trim()) {
-                  showErrorToast("Please enter email");
-                  return;
-                }
+                    if (!user.P.username.trim()) {
+                      showErrorToast("Please enter username");
+                      return;
+                    }
 
-                if (validateEmail(user.P.email)) {
-                  showErrorToast("Please enter a valid email");
-                  return;
-                }
+                    if (!user.P.email.trim()) {
+                      showErrorToast("Please enter email");
+                      return;
+                    }
 
-                const payload = {
-                  email: user.P.email,
-                  username: user.P.username,
-                  uuid: user.P.uuid,
-                };
-                const response = await postAPI(API.auth.profileUrl, payload);
-                if (response.error) {
-                  showErrorToast(response.error);
-                } else {
-                  showSuccessToast("Profile updated successfully");
-                  setTimeout(() => {
-                    window.location.reload();
-                  }, 1500);
-                }
+                    if (validateEmail(user.P.email)) {
+                      showErrorToast("Please enter a valid email");
+                      return;
+                    }
+
+                    try {
+                      const payload = {
+                        email: user.P.email,
+                        username: user.P.username,
+                        uuid: user.P.uuid,
+                      };
+                      const response = await postAPI(API.auth.profileUrl, payload);
+                      if (response.error) {
+                        showErrorToast(response.error);
+                      } else {
+                        showSuccessToast("Profile updated successfully");
+                      }
+                    } finally {
+                      options.dataContext.saveState[1]("isLoading", false);
+                    }
+                  },
+                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                }),
               },
-            }),
-            text: "Save Changes",
+              // {
+              //   as: "button",
+              //   class: "bg:#f3f4f6 fg:#374151 p:8|16 r:4 cursor:pointer border:1px|solid|#e5e7eb",
+              //   componentName: "Box",
+              //   text: "Cancel",
+              // },
+            ],
+            class: "flex",
+            componentName: "Box",
           },
-          // {
-          //   as: "button",
-          //   class: "bg:#f3f4f6 fg:#374151 p:8|16 r:4 cursor:pointer border:1px|solid|#e5e7eb",
-          //   componentName: "Box",
-          //   text: "Cancel",
-          // },
         ],
-        class: "mt:24 flex",
-        componentName: "Box",
+        componentName: "Data",
+        name: "saveState",
+        noRepeat: true,
+        props: () => ({
+          data: createStore({
+            isLoading: false,
+          }),
+        }),
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
@@ -172,35 +205,22 @@ export function ProfileSettings() {
 
       replaceVertexProperties(0, formDataId, graph, setGraph, user.P);
 
-      // Create profile image vertex and edge if exists
-      if (data.profileImage) {
-        if (!graph.vertexes[data.profileImage.id]) {
-          addNewVertex(0, data.profileImage, graph, setGraph);
-        }
-        setSelectionValue(
-          0,
-          graph.vertexes[formDataId],
-          graph,
-          setGraph,
-          { id: "", IN: {}, L: [], OUT: {}, P: { type: "UserProfileImage" } },
-          data.profileImage.id,
-        );
-      }
     } catch (err) {
       showErrorToast((err as Error).message);
     }
   };
 
   loadUserData();
-
   return (
     <div>
       <SchemaRenderer
         form={{ attributes: [form], key: "Profile" }}
         formDataId={formDataId}
       />
+      <Show when={!isSystemSubDomain()}>
       <hr class={SETTINGS_CONSTANTS.SECTION_DIVIDER_CLASS} />
-      <ProfileImageSettings />
+        <ProfileImageSettings />
+      </Show>
     </div>
   );
 }

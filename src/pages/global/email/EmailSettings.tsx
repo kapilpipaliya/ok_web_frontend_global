@@ -1,3 +1,4 @@
+import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
@@ -160,44 +161,84 @@ export function EmailSettings() {
         as: "div",
         attributes: [
           {
-            as: "button",
-            class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-            componentName: "Box",
-            props: () => ({
-              onClick: async (options: FunctionArgumentType) => {
-                const settings = options.data;
-                const response = await postAPI(
-                  API.settings.email.updateUrl,
-                  settings.P,
-                );
-                if (response.error) {
-                  showErrorToast(response.error);
-                } else {
-                  showSuccessToast("Email settings updated successfully");
-                }
+            attributes: [
+              {
+                as: "button",
+                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  onClick: async () => {
+                    try {
+                      options.dataContext.saveState[1]("isLoading", true);
+                      const settings = options.data;
+                      const response = await postAPI(
+                        API.settings.email.updateUrl,
+                        settings.P,
+                      );
+                      if (response.error) {
+                        showErrorToast(response.error);
+                      } else {
+                        showSuccessToast("Email settings updated successfully");
+                      }
+                    } catch (error) {
+                      showErrorToast((error as Error).message);
+                    } finally {
+                      options.dataContext.saveState[1]("isLoading", false);
+                    }
+                  },
+                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                }),
               },
+            ],
+            componentName: "Data",
+            name: "saveState",
+            noRepeat: true,
+            props: () => ({
+              data: createStore({
+                isLoading: false,
+              }),
             }),
-            text: "Save Changes",
           },
           {
-            as: "button",
-            class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS,
-            componentName: "Box",
-            props: () => ({
-              onClick: async (options: FunctionArgumentType) => {
-                const settings = options.data;
-                const response = await postAPI(
-                  API.settings.email.testUrl,
-                  settings.P,
-                );
-                if (response.error) {
-                  showErrorToast(response.error);
-                } else {
-                  showSuccessToast("Test email sent successfully");
-                }
+            attributes: [
+              {
+                as: "button",
+                class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS,
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: options.dataContext.testState[0]?.isLoading,
+                  onClick: async () => {
+                    try {
+                      options.dataContext.testState[1]("isLoading", true);
+                      const settings = options.data;
+                      const response = await postAPI(
+                        API.settings.email.testUrl,
+                        settings.P,
+                      );
+                      if (response.error) {
+                        showErrorToast(response.error);
+                      } else {
+                        showSuccessToast("Test email sent successfully");
+                      }
+                    } catch (error) {
+                      showErrorToast((error as Error).message);
+                    } finally {
+                      options.dataContext.testState[1]("isLoading", false);
+                    }
+                  },
+                  text: options.dataContext.testState[0]?.isLoading ? "Testing..." : "Test Connection",
+                }),
               },
+            ],
+            componentName: "Data", 
+            name: "testState",
+            noRepeat: true,
+            props: () => ({
+              data: createStore({
+                isLoading: false,
+              }),
             }),
-            text: "Test Connection",
           },
         ],
         class: "mt:24",

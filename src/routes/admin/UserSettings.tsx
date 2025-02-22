@@ -42,7 +42,7 @@ export default function UserSettings() {
   };
 
   return (
-    <div class="display:grid grid-template-rows:auto|1fr h:100vh">
+    <div class="">
       <Title>Account Settings - {menuItems.find(item => item.id === selectedMenu())?.label}</Title>
       <div class="display:flex">
         <HeaderWithDescription
@@ -63,8 +63,8 @@ export default function UserSettings() {
                 <div
                   class={`p:12px cursor:pointer r:4px mb:8px ${
                     selectedMenu() === item.id
-                      ? "bg:secondary fg:base-5"
-                      : "bg:#f3f4f6:hover fg:#374151"
+                      ? "bg:primary fg:base-5"
+                      : "bg:primary-10:hover fg:#374151"
                   }`}
                   onClick={() => handleMenuSelect(item.id)}
                 >
@@ -79,7 +79,7 @@ export default function UserSettings() {
             <ProfileSettings />
           </Show>
           <Show when={selectedMenu() === "password"}>
-            <PasswordSettings />
+            <PasswordChangeForm />
           </Show>
         </div>
       </div>
@@ -87,10 +87,3 @@ export default function UserSettings() {
   );
 }
 
-function PasswordSettings() {
-  return (
-    <div>
-      <PasswordChangeForm />
-    </div>
-  );
-}

@@ -16,7 +16,7 @@ export async function GET({ request }: APIEvent) {
     const data = await findUserByEmail(dbSession, user?.P?.email, subDomain);
 
     if (!data.user) {
-      throw new APIError("User not found", 404);
+      throw new APIError("User not authorized", 401);
     }
 
     delete data.user.P.password;

@@ -23,7 +23,7 @@ import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 export function ThemeConfigDialog(
   props: Readonly<{
-    item?: Vertex; // Make item optional
+    item?: Vertex;
     onClose: () => void;
     onMouseLeave: () => void;
     parentRef: HTMLElement;
@@ -41,6 +41,7 @@ export function ThemeConfigDialog(
   const [themeName, setThemeName] = createSignal(
     props.item ? props.item.P.key : "New",
   );
+  const [isSaving, setIsSaving] = createSignal(false);
   let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
 
   const handleChange = (value: string) => {
@@ -58,6 +59,7 @@ export function ThemeConfigDialog(
         editorRef.setValue(formatted);
       } catch (err) {
         console.error("Formatting failed:", err);
+        showWarningToast("Failed to format code");
       }
     }
   };
@@ -77,13 +79,15 @@ export function ThemeConfigDialog(
 
     if (createResult.error) {
       setError(createResult.error as string);
-      return;
+      return false;
     }
 
     const data = await handleCommitTxn(newFormTxnId);
     if (data) {
       props.onClose();
+      return true;
     }
+    return false;
   };
 
   const handleCommitTxn = async (newFormTxnId: number) => {
@@ -115,20 +119,27 @@ export function ThemeConfigDialog(
     );
     if (mergeResult.error) {
       setError(mergeResult.error as string);
-      return;
+      return false;
     }
 
     const data = await handleCommitTxn(newFormTxnId);
     if (data) {
       props.onClose();
+      return true;
     }
+    return false;
   };
 
   const handleSave = async () => {
-    if (props.item) {
-      await saveExistingTheme();
-    } else {
-      await saveNewTheme();
+    setIsSaving(true);
+    try {
+      if (props.item) {
+        await saveExistingTheme();
+      } else {
+        await saveNewTheme();
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -154,24 +165,32 @@ export function ThemeConfigDialog(
             onMount={(editor) => (editorRef = editor)}
             value={themeData()}
           />
-          <button
-            class="px:3 py:1 bg:gray-60 fg:base-5 r:1 self:end"
-            onClick={formatCode}
-            title="Format Code"
-          >
-            Format
-          </button>
+          <div class="flex ai:center gap:0.50rem">
+            <button
+              class="px:5 py:5 bg:gray-60 fg:base-5 r:5"
+              onClick={formatCode}
+              title="Format Code"
+            >
+              Format
+            </button>
+          </div>
         </div>
       </div>
       <Show when={error()}>
-        <div class="bg:error">{error()}</div>
+        <div class="bg:error p:0.5rem r:sm">{error()}</div>
       </Show>
       <DialogFooter>
-        <button class={dialogOkButtonClass} onClick={handleSave} type="button">
-          Save
+        <button
+          class={dialogOkButtonClass}
+          disabled={isSaving()}
+          onClick={handleSave}
+          type="button"
+        >
+          {isSaving() ? "Saving..." : "Save"}
         </button>
         <button
           class={dialogCancelButtonClass}
+          disabled={isSaving()}
           onClick={props.onClose}
           type="button"
         >

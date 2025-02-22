@@ -1,12 +1,12 @@
-import { createSignal, Show } from "solid-js";
-import { v7 as uuidv7 } from "uuid";
+import { createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import {
   dialogCancelButtonClass,
-  DialogFooter,
   dialogOkButtonClass,
 } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
@@ -18,7 +18,6 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
@@ -43,26 +42,12 @@ export function SaveNewComp(
   const label = () =>
     props.saveAsLabel === "Perm" ? "Permission" : "Component";
 
-  const formDataId = uuidv7();
-  addNewVertex(
-    0,
-    {
-      id: formDataId,
-      IN: {},
-      L: [props.saveAsLabel || "Comp"],
-      OUT: {},
-      P: {},
-    },
-    graph,
-    setGraph,
-  );
-
-  const saveComponent = async () => {
+  const saveComponent = async (options: FunctionArgumentType) => {
     const currentItem = fileManagerStore.selectedItem;
 
     const newFormTxnId = generateNewTxnId(graph, setGraph);
 
-    const formVertex = graph.vertexes[formDataId];
+    const formVertex = options.data;
 
     const createResult = createFormVertex(
       graph,
@@ -120,8 +105,8 @@ export function SaveNewComp(
     showSuccessToast(`${label()} uploaded successfully`);
   };
 
-  const saveAsTemplate = async () => {
-    const formVertex = graph.vertexes[formDataId];
+  const saveAsTemplate = async (options: FunctionArgumentType) => {
+    const formVertex = options.data;
     if (!formVertex.P.key) {
       setError("Please enter a name");
       return;
@@ -134,7 +119,7 @@ export function SaveNewComp(
       setError(res.error);
       return;
     }
-    saveComponent();
+    saveComponent(options);
   };
 
   const form = {
@@ -178,6 +163,57 @@ export function SaveNewComp(
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
         componentName: "Box",
       },
+      {
+        as: "div",
+        attributes: [
+          {
+            class: "fg:error",
+            componentName: "Text",
+            props: () => ({
+              text: error(),
+            }),
+          },
+        ],
+        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
+        componentName: "Box",
+        props: () => ({
+          hidden: !error(),
+        }),
+      },
+      {
+        as: "div",
+        attributes: [
+          {
+            attributes: [
+              {
+                class: dialogOkButtonClass,
+                componentName: "Button",
+                onClick: saveAsTemplate,
+                props: (options: FunctionArgumentType) => ({
+                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save",
+                }),
+              },
+            ],
+            componentName: "Data",
+            name: "saveState",
+            noRepeat: true,
+            props: () => ({
+              data: createStore({
+                isLoading: false,
+              }),
+            }),
+          },
+          {
+            class: dialogCancelButtonClass,
+            componentName: "Button",
+            onClick: props.onClose,
+            text: "Cancel",
+          }
+        ],
+        class: "d:flex gap:8",
+        componentName: "Box",
+      },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
@@ -196,30 +232,8 @@ export function SaveNewComp(
       </DialogSubTitle>
 
       <SchemaRenderer
-        form={{ attributes: [form], key: "Profile" }}
-        formDataId={formDataId}
+        form={{ attributes: [form], key: props.saveAsLabel || "Comp" }}
       />
-
-      <Show when={error()}>
-        <div class="fg:error">{error()}</div>
-      </Show>
-
-      <DialogFooter>
-        <button
-          class={dialogOkButtonClass}
-          onClick={saveAsTemplate}
-          type="button"
-        >
-          Save
-        </button>
-        <button
-          class={dialogCancelButtonClass}
-          onClick={props.onClose}
-          type="button"
-        >
-          Cancel
-        </button>
-      </DialogFooter>
     </DropdownMenu>
   );
 }

@@ -8,5 +8,6 @@ export const URLS = {
   },
   SYSTEM: {
     PROJECTS: "/system/projects",
+    USER_SETTINGS: "/system/UserSettings",
   },
 } as const;

@@ -7,14 +7,23 @@ import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
 
 export default function Projects() {
   return (
-    <div class="display:grid grid-template-rows:auto|1fr h:100vh">
+    <div class="">
       <Title>Projects</Title>
       <div class="display:flex">
         <HeaderWithDescription
           class="flex:1"
-          description="Manage your projects"
+          description={
+            <>
+              Manage your projects.
+              <br />
+              Each project has a separate subdomain and database. Only administrator can create and manage projects.
+              <br />
+              Click on Subdomain Name or Custom Domain Name to login to that project.
+            </>
+          }
           title="Projects"
         />
+
         <div class="ml:auto flex gap:4">
           <UserDropdownMenuDisplay />
         </div>

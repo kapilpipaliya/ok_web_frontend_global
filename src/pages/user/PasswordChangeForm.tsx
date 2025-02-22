@@ -1,8 +1,9 @@
+import { useNavigate } from "@solidjs/router";
 import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
-import { v7 as uuidv7 } from "uuid";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -10,14 +11,14 @@ import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 
 export function PasswordChangeForm() {
-  const [graph, setGraph] = useGraph();
+  const [graph] = useGraph();
+  const navigate = useNavigate();
   const { showErrorToast, showSuccessToast } = useToast();
 
   const [showPassword, setShowPassword] = createStore({
@@ -25,20 +26,6 @@ export function PasswordChangeForm() {
     currentPassword: false,
     newPassword: false,
   });
-
-  const formDataId = uuidv7();
-  addNewVertex(
-    0,
-    {
-      id: formDataId,
-      IN: {},
-      L: ["PasswordChange"],
-      OUT: {},
-      P: {},
-    },
-    graph,
-    setGraph,
-  );
 
   const form = {
     as: "div",
@@ -65,24 +52,43 @@ export function PasswordChangeForm() {
         as: "div",
         attributes: [
           {
-            as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
-            componentName: "Box",
-            props: () => ({
-              onClick: async () => {
-                const formData = graph.vertexes[formDataId];
-                if (validateFormData(formData, showErrorToast)) {
-                  await handlePasswordChange(
-                    formData,
-                    graph,
-                    showErrorToast,
-                    showSuccessToast,
-                  );
-                }
+            attributes: [
+              {
+                as: "button",
+                class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  onClick: async () => {
+                    const formData = options.data;
+                    if (validateFormData(formData, showErrorToast)) {
+                      try {
+                        options.dataContext.saveState[1]("isLoading", true);
+                        await handlePasswordChange(
+                          formData,
+                          graph,
+                          showErrorToast,
+                          showSuccessToast,
+                        );
+                        // Redirect to login page as session is expired
+                        navigate?.("/auth/login");
+                      } finally {
+                        options.dataContext.saveState[1]("isLoading", false);
+                      }
+                    }
+                  },
+                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Change Password",
+                }),
               },
+            ],
+            componentName: "Data",
+            name: "saveState",
+            noRepeat: true,
+            props: () => ({
+              data: createStore({
+                isLoading: false,
+              }),
             }),
-            text: "Change Password",
           },
         ],
         class: "mt:24",
@@ -96,7 +102,6 @@ export function PasswordChangeForm() {
   return (
     <SchemaRenderer
       form={{ attributes: [form], key: "PasswordChange" }}
-      formDataId={formDataId}
     />
   );
 }

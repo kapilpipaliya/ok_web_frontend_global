@@ -11,7 +11,7 @@ import { getAPI } from "~/lib/api/getApi";
 import { SchemaRenderer } from "../SchemaRenderer";
 import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
 
-interface SubDomain {
+export interface SubDomain {
   domain: string;
   key: string;
   name: string;
@@ -45,7 +45,7 @@ export const SubDomainGrid = () => {
   const SubDomain: IFormMetaData = {
     attributes: [
       {
-        cell: (info: CellContext<any, unknown>) => {
+        cell: (info: CellContext<Vertex<SubDomain>, unknown>) => {
           return (
             <a
               class="color:primary text-decoration:none hover:text-decoration:underline"
@@ -58,11 +58,11 @@ export const SubDomainGrid = () => {
           );
         },
         componentName: "Text",
-        displayName: "Name",
+        displayName: "Subdomain",
         key: "key",
       },
       {
-        cell: (info: CellContext<any, unknown>) => {
+        cell: (info: CellContext<Vertex<SubDomain>, unknown>) => {
           return (
             <a
               class="color:primary text-decoration:none hover:text-decoration:underline"

@@ -2,6 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -98,79 +99,100 @@ export function LoginForm() {
     as: "div",
     attributes: [
       {
-        as: "div",
         attributes: [
-          {
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
-            text: "Username/Email",
-          },
-          {
-            class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
-            key: "email",
-            validation: { required: true },
-          },
-          {
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
-            text: "Password",
-          },
           {
             as: "div",
             attributes: [
               {
+                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                componentName: "Text",
+                text: "Username/Email",
+              },
+              {
                 class: PROPERTIES.Css.TextField,
                 componentName: "TextInput",
-                key: "password",
-                props: () => ({
-                  type: showPassword.password ? "text" : "password",
-                }),
+                key: "email",
                 validation: { required: true },
+              },
+              {
+                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                componentName: "Text",
+                text: "Password",
               },
               {
                 as: "div",
                 attributes: [
                   {
-                    componentName: "Icon",
-                    props: () => ({
-                      icon: showPassword.password ? "ph:eye" : "ph:eye-slash",
-                      onClick: () =>
-                        setShowPassword("password", !showPassword.password),
+                    class: PROPERTIES.Css.TextField,
+                    componentName: "TextInput",
+                    key: "password",
+                    props: (options: FunctionArgumentType) => ({
+                      onKeyPress: async (e: KeyboardEvent) => {
+                        if (e.key === "Enter") {
+                          try {
+                            options.dataContext.submitState[1]("isLoading", true);
+                            const formData = graph.vertexes[formDataId];
+                            await handleSubmit(formData);
+                          } finally {
+                            options.dataContext.submitState[1]("isLoading", false);
+                          }
+                        }
+                      },
+                      type: showPassword.password ? "text" : "password"
                     }),
+                    validation: { required: true },
+                  },
+                  {
+                    as: "div",
+                    attributes: [
+                      {
+                        componentName: "Icon",
+                        props: () => ({
+                          icon: showPassword.password ? "ph:eye" : "ph:eye-slash",
+                          onClick: () =>
+                            setShowPassword("password", !showPassword.password),
+                        }),
+                      },
+                    ],
+                    class:
+                      "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                    componentName: "Box",
                   },
                 ],
-                class:
-                  "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                class: "position:rel",
                 componentName: "Box",
               },
             ],
-            class: "position:rel",
+            class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
             componentName: "Box",
           },
-        ],
-        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-        componentName: "Box",
-      },
-      {
-        as: "div",
-        attributes: [
           {
             as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
             componentName: "Box",
-            props: () => ({
+            props: (options: FunctionArgumentType) => ({
+              disabled: options.dataContext.submitState[0]?.isLoading,
               onClick: async () => {
-                const formData = graph.vertexes[formDataId];
-                await handleSubmit(formData);
+                try {
+                  options.dataContext.submitState[1]("isLoading", true);
+                  const formData = graph.vertexes[formDataId];
+                  await handleSubmit(formData);
+                } finally {
+                  options.dataContext.submitState[1]("isLoading", false);
+                }
               },
+              text: options.dataContext.submitState[0]?.isLoading ? "Logging in..." : "Log In",
             }),
-            text: "Log In",
           },
         ],
-        class: "",
-        componentName: "Box",
+        componentName: "Data",
+        name: "submitState",
+        noRepeat: true,
+        props: () => ({
+          data: createStore({
+            isLoading: false,
+          }),
+        }),
       },
       {
         as: "div",

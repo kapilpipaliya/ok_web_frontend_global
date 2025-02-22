@@ -1,8 +1,11 @@
 import { createMemo, createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { useToast } from "~/components/styled/Toast";
 import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
@@ -78,24 +81,6 @@ export function CompanyLogoSettings() {
     setOpenDialog(false);
   };
 
-  const onSave = async () => {
-    const selectedFile = companyLogoVertex()[0];
-    if (!selectedFile) {
-      showErrorToast("Please select a company logo first");
-      return;
-    }
-
-    const response = await postAPI(API.settings.company.updateLogoUrl, {
-      logoImage: selectedFile.id,
-    });
-
-    if (response.error) {
-      showErrorToast(response.error);
-    } else {
-      showSuccessToast("Company logo updated successfully");
-    }
-  };
-
   const setFileManagerStore = (fileManagerStore_: FileManagerObject) => {
     fileManagerStore = fileManagerStore_;
   };
@@ -138,13 +123,49 @@ export function CompanyLogoSettings() {
             text: "Change Company Logo",
           },
           {
-            as: "button",
-            class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-            componentName: "Box",
+            attributes: [
+              {
+                as: "button",
+                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  onClick: async () => {
+                    const selectedFile = companyLogoVertex()[0];
+                    if (!selectedFile) {
+                      showErrorToast("Please select a company logo first");
+                      return;
+                    }
+
+                    try {
+                      options.dataContext.saveState[1]("isLoading", true);
+                      const response = await postAPI(API.settings.company.updateLogoUrl, {
+                        logoImage: selectedFile.id,
+                      });
+
+                      if (response.error) {
+                        showErrorToast(response.error);
+                      } else {
+                        showSuccessToast("Company logo updated successfully");
+                      }
+                    } catch (error) {
+                      showErrorToast((error as Error).message);
+                    } finally {
+                      options.dataContext.saveState[1]("isLoading", false);
+                    }
+                  },
+                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                }),
+              },
+            ],
+            componentName: "Data",
+            name: "saveState",
+            noRepeat: true,
             props: () => ({
-              onClick: onSave,
+              data: createStore({
+                isLoading: false,
+              }),
             }),
-            text: "Save Changes",
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
@@ -153,7 +174,7 @@ export function CompanyLogoSettings() {
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
-  };
+  } as FieldAttribute;
 
   const companyLogoVertex = createMemo(() => {
     return (

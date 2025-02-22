@@ -481,6 +481,8 @@ export function DynamicComponent(
 
         const value = meta[key];
         if (typeof value === "function") {
+          result[key] = value;
+          /* we will not modify function signature, as we already have options in props context.
           result[key] = (...args: unknown[]) => {
             // Note: runWithOwner is breaking the reactivity of the function
             // return runWithOwner(owner, () => {
@@ -494,7 +496,7 @@ export function DynamicComponent(
               return undefined;
             }
             // });
-          };
+          };*/
         } else if (key.toLowerCase().endsWith("class")) {
           result[key] = cssStateToString(
             value,

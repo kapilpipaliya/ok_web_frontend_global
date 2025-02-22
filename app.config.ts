@@ -1,4 +1,6 @@
 import { defineConfig } from "@solidjs/start/config";
+import devtools from 'solid-devtools/vite';
+
 
 export default defineConfig({
   middleware: "./src/middleware.ts",
@@ -27,6 +29,11 @@ export default defineConfig({
       //   port: 2900, // Change this to the desired port number for HMR
       // },
     // },
-    plugins: [],
+    plugins: [
+      devtools({
+        /* features options - all disabled by default */
+        autoname: true,
+      }),
+    ],
   },
 });

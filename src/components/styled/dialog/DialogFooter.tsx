@@ -5,6 +5,7 @@ export const dialogOkButtonClass =
 export const dialogCancelButtonClass =
   "lh:1.25rem  align-items:center  bg:base-5  border-radius:0.375rem  border-width:1px  border-color:gray-30  color:gray-90  display:inline-flex  f:0.875rem  font:semibold  outline-color:gray-30:focus-visible  outline-offset:2px:focus-visible outline-style:solid:focus-visible outline-width:2px:focus-visible px:0.75rem py:0.5rem";
 
+// TODO: Depricate this component
 export function DialogFooter(
   props: JSX.IntrinsicElements["button"] & {
     buttonText?: string;

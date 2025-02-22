@@ -4,7 +4,7 @@ interface WithDescriptionProps {
   backgroundColor?: string;
   borderColor?: string;
   class?: string;
-  description?: string;
+  description?: JSX.Element | string;
   descriptionColor?: string;
   paddingX?: string;
   paddingXSm?: string;

@@ -97,11 +97,11 @@ export default function GlobalSettings() {
             {(item) => (
               <Show when={isAdminRole(graph)}>
                 <div
-                  class={"p:12px cursor:pointer r:4px mb:8px"}
-                  classList={{
-                    "bg:#f3f4f6:hover fg:#374151": selectedMenu() !== item.id,
-                    "bg:secondary fg:base-5": selectedMenu() === item.id,
-                  }}
+                  class={`p:12px cursor:pointer r:4px mb:8px ${
+                    selectedMenu() === item.id
+                      ? "bg:primary fg:base-5"
+                      : "bg:primary-10:hover fg:#374151"
+                  }`}
                   onClick={() => handleMenuSelect(item.id)}
                 >
                   {item.label}

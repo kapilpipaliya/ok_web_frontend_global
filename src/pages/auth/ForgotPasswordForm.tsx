@@ -2,6 +2,7 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { useGraph } from "~/lib/graph/graph";
@@ -42,13 +43,13 @@ export function ForgotPasswordForm() {
       return;
     }
     // Todo: This function should not be called from frontend side.
-  //   await sendEmail({
-  //     content: "Reset Password",
-  //     subDomain: subDomain,
-  //     subject: "Reset Password",
-  //     to: email,
-  //   });
-  //   setStage(1);
+    //   await sendEmail({
+    //     content: "Reset Password",
+    //     subDomain: subDomain,
+    //     subject: "Reset Password",
+    //     to: email,
+    //   });
+    //   setStage(1);
   };
 
   const handleOtpSubmit = (formData: any) => {
@@ -102,24 +103,34 @@ export function ForgotPasswordForm() {
               componentName: "Box",
             },
             {
-              as: "div",
               attributes: [
                 {
                   as: "button",
-                  class:
-                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
-                  props: () => ({
+                  props: (options: FunctionArgumentType) => ({
+                    disabled: options.dataContext.submitState[0]?.isLoading,
                     onClick: async () => {
-                      const formData = graph.vertexes[formDataId];
-                      await handleEmailSubmit(formData);
+                      try {
+                        options.dataContext.submitState[1]("isLoading", true);
+                        const formData = graph.vertexes[formDataId];
+                        await handleEmailSubmit(formData);
+                      } finally {
+                        options.dataContext.submitState[1]("isLoading", false);
+                      }
                     },
+                    text: options.dataContext.submitState[0]?.isLoading ? "Sending..." : "Confirm",
                   }),
-                  text: "Confirm",
                 },
               ],
-              class: "",
-              componentName: "Box",
+              componentName: "Data",
+              name: "submitState",
+              noRepeat: true,
+              props: () => ({
+                data: createStore({
+                  isLoading: false,
+                }),
+              }),
             },
           ],
           class: SETTINGS_CONSTANTS.FORM_CLASS,
@@ -152,24 +163,34 @@ export function ForgotPasswordForm() {
               componentName: "Box",
             },
             {
-              as: "div",
               attributes: [
                 {
                   as: "button",
-                  class:
-                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
-                  props: () => ({
-                    onClick: () => {
-                      const formData = graph.vertexes[formDataId];
-                      handleOtpSubmit(formData);
+                  props: (options: FunctionArgumentType) => ({
+                    disabled: options.dataContext.submitState[0]?.isLoading,
+                    onClick: async () => {
+                      try {
+                        options.dataContext.submitState[1]("isLoading", true);
+                        const formData = graph.vertexes[formDataId];
+                        handleOtpSubmit(formData);
+                      } finally {
+                        options.dataContext.submitState[1]("isLoading", false);
+                      }
                     },
+                    text: options.dataContext.submitState[0]?.isLoading ? "Verifying..." : "Submit",
                   }),
-                  text: "Submit",
                 },
               ],
-              class: "",
-              componentName: "Box",
+              componentName: "Data",
+              name: "submitState",
+              noRepeat: true,
+              props: () => ({
+                data: createStore({
+                  isLoading: false,
+                }),
+              }),
             },
           ],
           class: SETTINGS_CONSTANTS.FORM_CLASS,
@@ -281,24 +302,34 @@ export function ForgotPasswordForm() {
               componentName: "Box",
             },
             {
-              as: "div",
               attributes: [
                 {
                   as: "button",
-                  class:
-                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
-                  props: () => ({
-                    onClick: () => {
-                      const formData = graph.vertexes[formDataId];
-                      handlePasswordResetSubmit(formData);
+                  props: (options: FunctionArgumentType) => ({
+                    disabled: options.dataContext.submitState[0]?.isLoading,
+                    onClick: async () => {
+                      try {
+                        options.dataContext.submitState[1]("isLoading", true);
+                        const formData = graph.vertexes[formDataId];
+                        handlePasswordResetSubmit(formData);
+                      } finally {
+                        options.dataContext.submitState[1]("isLoading", false);
+                      }
                     },
+                    text: options.dataContext.submitState[0]?.isLoading ? "Resetting..." : "Confirm",
                   }),
-                  text: "Confirm",
                 },
               ],
-              class: "",
-              componentName: "Box",
+              componentName: "Data",
+              name: "submitState",
+              noRepeat: true,
+              props: () => ({
+                data: createStore({
+                  isLoading: false,
+                }),
+              }),
             },
           ],
           class: SETTINGS_CONSTANTS.FORM_CLASS,
@@ -308,7 +339,48 @@ export function ForgotPasswordForm() {
   };
 
   const form = {
-    attributes: [getFormByStage()],
+    attributes: [getFormByStage(), {
+      as: "div",
+      attributes: [
+        {
+          class: "color:grey",
+          componentName: "Text",
+          text: "Already have an account? ",
+        },
+        {
+          as: "a",
+          class: "color:primary text-decoration:none font-weight:bold",
+          componentName: "Box",
+          props: () => ({
+            href: "/auth/login",
+          }),
+          text: "Sign In",
+        },
+      ],
+      class: "text-align:center mt:16",
+      componentName: "Box",
+    },
+    {
+      as: "div",
+      attributes: [
+        {
+          class: "color:grey",
+          componentName: "Text",
+          text: "Don't have an account? ",
+        },
+        {
+          as: "a",
+          class: "color:primary text-decoration:none font-weight:bold",
+          componentName: "Box",
+          props: () => ({
+            href: "/auth/signup",
+          }),
+          text: "Sign Up",
+        },
+      ],
+      class: "text-align:center mt:8",
+      componentName: "Box",
+    },],
     componentName: "Box",
   };
 

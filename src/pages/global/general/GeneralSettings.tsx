@@ -1,5 +1,7 @@
+import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -81,24 +83,44 @@ export function GeneralSettings() {
         as: "div",
         attributes: [
           {
-            as: "button",
-            class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-            componentName: "Box",
-            props: () => ({
-              onClick: async () => {
-                const settings = graph.vertexes[formDataId];
-                const response = await postAPI(
-                  API.settings.general.updateUrl,
-                  settings.P,
-                );
-                if (response.error) {
-                  showErrorToast(response.error);
-                } else {
-                  showSuccessToast("Settings updated successfully");
-                }
+            attributes: [
+              {
+                as: "button",
+                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                componentName: "Box",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  onClick: async () => {
+                    try {
+                      options.dataContext.saveState[1]("isLoading", true);
+                      const settings = graph.vertexes[formDataId];
+                      const response = await postAPI(
+                        API.settings.general.updateUrl,
+                        settings.P,
+                      );
+                      if (response.error) {
+                        showErrorToast(response.error);
+                      } else {
+                        showSuccessToast("Settings updated successfully");
+                      }
+                    } catch (error) {
+                      showErrorToast((error as Error).message);
+                    } finally {
+                      options.dataContext.saveState[1]("isLoading", false);
+                    }
+                  },
+                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                }),
               },
+            ],
+            componentName: "Data",
+            name: "saveState",
+            noRepeat: true,
+            props: () => ({
+              data: createStore({
+                isLoading: false,
+              }),
             }),
-            text: "Save Changes",
           },
         ],
         class: "mt:24",

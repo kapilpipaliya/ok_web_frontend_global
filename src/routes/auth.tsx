@@ -11,7 +11,7 @@ export default function AuthLayout(props: Readonly<RouteSectionProps>) {
   return (
     <>
       <Link href={getCompanyLogoUrl(graph) || ""} rel="icon" />
-      <GetInitialData authenticate={true} dontRedirectToLogin={true}>
+      <GetInitialData authenticate={false} dontRedirectToLogin={true}>
         {props.children}
       </GetInitialData>
     </>
