@@ -37,7 +37,7 @@ export function UploadVideo() {
   };
 
   return (
-    <div class="align-items:center border-radius:8px border:1px|solid|#ccc display:flex flex-direction:column padding:16px width:300px">
+    <div class="align-items:center border-radius:8px border:1px|solid|base display:flex flex-direction:column padding:16px width:300px">
       <input
         accept="video/*"
         class="margin-bottom:16px"

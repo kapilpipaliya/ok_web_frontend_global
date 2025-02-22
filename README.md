@@ -1,3 +1,9 @@
+Section Links:
+http://localhost:3000/admin/UserSettings
+http://localhost:3000/admin/GlobalSettings
+http://localhost:3000/admin/
+http://localhost:3000/admin/Page
+
 ##Development
 # Getting Started Neo4j
 https://neo4j.com/docs/getting-started/whats-neo4j/

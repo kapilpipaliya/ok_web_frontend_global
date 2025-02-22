@@ -64,7 +64,7 @@ export function GeneralSettings() {
             text: "Default Language",
           },
           {
-            class: "border:1px|solid|#ccc p:5|10 r:4",
+            class: "",
             componentName: "Select",
             key: "defaultLanguage",
             options: [

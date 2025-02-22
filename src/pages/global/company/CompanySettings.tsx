@@ -1,55 +1,20 @@
-import { v7 as uuidv7 } from "uuid";
-
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
-import { useGraph } from "~/lib/graph/graph";
-import {
-  addNewVertex,
-  replaceVertexProperties,
-} from "~/lib/graph/mutate/vertex";
+import { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
 
 export function CompanySettings() {
-  const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const formDataId = uuidv7();
-  addNewVertex(
-    0,
-    {
-      id: formDataId,
-      IN: {},
-      L: ["CompanySettings"],
-      OUT: {},
-      P: {},
-    },
-    graph,
-    setGraph,
-  );
-
   const loadSettingsData = async () => {
-    try {
-      const data = await getAPI(API.settings.company.getUrl);
-      if (data.settings?.P) {
-        replaceVertexProperties(
-          0,
-          formDataId,
-          graph,
-          setGraph,
-          data.settings.P,
-        );
-      }
-    } catch (err) {
-      showErrorToast((err as Error).message);
-    }
+    return await getAPI(API.settings.company.getUrl);
   };
-
-  loadSettingsData();
 
   const form = {
     as: "div",
@@ -135,9 +100,9 @@ export function CompanySettings() {
             class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
             componentName: "Box",
             props: () => ({
-              onClick: async () => {
+              onClick: async (options: FunctionArgumentType) => {
                 try {
-                  const settings = graph.vertexes[formDataId];
+                  const settings = options.data;
                   const response = await postAPI(
                     API.settings.company.updateUrl,
                     settings.P,
@@ -161,12 +126,13 @@ export function CompanySettings() {
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
-  };
+    key: "CompanySettings"
+  } as IFormMetaData;
 
   return (
     <SchemaRenderer
-      form={{ attributes: [form], key: "CompanySettings" }}
-      formDataId={formDataId}
+      form={form}
+      getFormData={loadSettingsData}
     />
   );
 }

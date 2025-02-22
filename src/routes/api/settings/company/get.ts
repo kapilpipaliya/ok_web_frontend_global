@@ -1,8 +1,10 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { Edge, Vertex } from "~/lib/graph/graph";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 
 export async function GET({ request }: APIEvent) {
@@ -14,15 +16,25 @@ export async function GET({ request }: APIEvent) {
     if (!isAdmin) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
+
+    const nodes: { [key: string]: Vertex } = {};
+    const relationships: { [key: string]: Edge } = {};
+
     const result = await dbSession.run(
       `MATCH (s:CompanySetting)
        RETURN s as settings`,
     );
 
-    const node = result.records[0]?.get("settings");
-    const settings = node ? convertNodeToJson(node) : null;
+    const settings = processResult(result.records, { nodes, relationships }, "settings", "");
 
-    return { settings };
+    return {
+      graph: {
+        edges: relationships,
+        vertexes: nodes,
+      },
+      result: settings,
+      timestamp: new Date().getTime(),
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

@@ -2,7 +2,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
 
-import { sendEmail } from "./sendEmail"; // You'll need to implement this
+// import { sendEmail } from "./sendEmail"; // You'll need to implement this
 
 export async function sendConfirmationEmail(
   email: string,

@@ -4,6 +4,7 @@ import {
   createSignal,
   For,
   getOwner,
+  onMount,
   runWithOwner,
   Show,
 } from "solid-js";
@@ -175,6 +176,12 @@ export function SelectField(
     }
     return props.componentName;
   }
+
+  onMount(() => {
+    if (isStaticOptions(meta())) {
+      loadOptions();
+    }
+  })
 
   const onChangeSelect = (value: Option[], isRemove: boolean) => {
     runWithOwner(outerOwner, () => {

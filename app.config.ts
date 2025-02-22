@@ -2,9 +2,9 @@ import { defineConfig } from "@solidjs/start/config";
 
 export default defineConfig({
   middleware: "./src/middleware.ts",
-  server: {
-    preset: "deno",
-  },
+  // server: {
+  //   preset: "deno",
+  // },
   vite: {
     // dev: {
     //   force: false,

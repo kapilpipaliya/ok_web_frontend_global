@@ -72,7 +72,7 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 export function PageViewWrapper(
   props: Readonly<{
     closePopUp?: () => void;
-    context?: any;
+    context?: Record<string, unknown>;
     dataId?: Id;
     dontConfirmExit?: boolean;
     enableSEO?: boolean;
@@ -80,6 +80,7 @@ export function PageViewWrapper(
     formDataId?: Id;
     formId?: string;
     formMetaId?: Id;
+    getFormData?: () => Promise<ServerResult>
     hideSaveCancelButton?: boolean;
     initializeFormStoreParent?: (formStoreId: Id) => void;
     isNoPermissionCheck?: boolean;
@@ -298,6 +299,22 @@ export function PageViewWrapper(
   }
 
   async function loadData() {
+    if (props.getFormData) {
+      try {
+        const data = await props.getFormData();
+        if (data?.graph) {
+          setGraphData(graph, setGraph, data.graph);
+        }
+        const formDataId = data.result[0]?.id;
+        if (formDataId) {
+          setFormStore("formDataId", formDataId);
+          return;
+        }
+      } catch (error) {
+        setFormStore("error", (error as Error).message);
+        return;
+      }
+    }
     if (props.formDataId) {
       setFormStore("formDataId", props.formDataId);
       return;

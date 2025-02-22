@@ -65,7 +65,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       <label class="f:15 flex:.5">{inputProps.label}</label>
       <input
         checked={inputProps.type === "checkbox" ? inputProps.value : undefined}
-        class="border:1px|solid|#ccc f:15 flex:1 p:2"
+        class="border:1px|solid|base f:15 flex:1 p:2"
         onChange={(e) => {
           inputProps.onChange(e);
           props.onChange(props.meta, values);
@@ -81,7 +81,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
         <label class="f:15 flex:.5">Regex</label>
         <input
-          class="border:1px|solid|#ccc f:15 flex:1 p:2"
+          class="border:1px|solid|base f:15 flex:1 p:2"
           onChange={(e) =>
             setValues("regex", regexprops.index, "value", e.target.value)
           }
@@ -93,7 +93,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
         <label class="f:15 flex:.5">Enabled</label>
         <input
           checked={values.regex[regexprops.index].enabled}
-          class="border:1px|solid|#ccc f:15 flex:1 p:2"
+          class="border:1px|solid|base f:15 flex:1 p:2"
           onChange={(e) =>
             setValues("regex", regexprops.index, "enabled", e.target.checked)
           }
@@ -103,7 +103,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
         <label class="f:15 flex:.5">Message</label>
         <input
-          class="border:1px|solid|#ccc f:15 flex:1 p:2"
+          class="border:1px|solid|base f:15 flex:1 p:2"
           onChange={(e) =>
             setValues("regex", regexprops.index, "message", e.target.value)
           }
@@ -113,7 +113,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       </div>
       <div>
         <button
-          class="border:1px|solid|#ccc p:2"
+          class="border:1px|solid|base p:2"
           onClick={() => deleteRegex(regexprops.index)}
           type="button"
         >

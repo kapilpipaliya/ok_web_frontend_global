@@ -91,7 +91,7 @@ export function ProfileSettings() {
       //       text: "Country"
       //     },
       //     {
-      //       class: "border:1px|solid|#ccc p:5|10 r:4",
+      //       class: "",
       //       componentName: "Select",
       //       key: "country",
       //       options: [

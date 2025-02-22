@@ -52,7 +52,7 @@ export function MultiSelectField(
 ) {
   const { showErrorToast } = useToast();
   let inputRef: HTMLInputElement | undefined;
-  let optionTimeout: NodeJS.Timeout;
+  let optionTimeout: NodeJS.Timeout | undefined;
   const owner = getOwner();
 
   const [isReFetchSelectedValues, setIsReFetchSelectedValues] = createSignal(1);
@@ -73,8 +73,7 @@ export function MultiSelectField(
     if (props.optionValueKey) {
       return option[props.optionValueKey as keyof Option];
     }
-    // @ts-expect-error ignore
-    return option.id;
+    return (option as { id: string }).id;
   };
 
   const getOptionLabel = (option: Option) => {
@@ -226,22 +225,27 @@ export function MultiSelectField(
     const Option = (p: { option: Option }) => {
       const isExpanded = () => !hiddenOptions().has(p.option);
       const childrenKey = () => props.childrenKey || "children";
+      const hasChildren = () => {
+        const option = p.option as { [key: string]: unknown };
+        const children = option[childrenKey()];
+        return Array.isArray(children) && children.length > 0;
+      };
+
       return (
         <Show
           fallback={
-            <div // NOSONAR
-              class="bg:#e0e0e0:hover cursor:pointer f:14 m:3 p:8px r:5 t:left"
+            <div
+              class="bg:primary-10:hover cursor:pointer f:14 m:3 p:8px r:5 t:left"
               classList={{
-                "bg:#ddd opacity:0.5": selectedValue().some(
+                "bg:primary-20": selectedValue().some(
                   (item) => getOptionValue(item) === getOptionValue(p.option),
                 ),
               }}
-              // @ts-expect-error ignore
               onClick={() =>
                 runWithOwner(owner, () => {
-                  (!p.option[childrenKey()] ||
-                    p.option[childrenKey()].length === 0) &&
+                  if (!hasChildren()) {
                     handleSelectChange(p.option);
+                  }
                 })
               }
             >
@@ -251,14 +255,13 @@ export function MultiSelectField(
                 : getOptionLabel(p.option)}
             </div>
           }
-          // @ts-expect-error ignore
-          when={p.option[childrenKey()] && p.option[childrenKey()].length > 0}
+          when={hasChildren()}
         >
           <div>
             <div // NOSONAR
-              class="flex ai:center bg:#e0e0e0:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left"
+              class="flex ai:center bg:primary-10:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left"
               classList={{
-                "bg:#ddd opacity:0.5": selectedValue().some(
+                "bg:primary-20": selectedValue().some(
                   (item) => getOptionValue(item) === getOptionValue(p.option),
                 ),
               }}
@@ -291,7 +294,7 @@ export function MultiSelectField(
 
     return (
       <div
-        class={`radius:5 flex bg:#f4f4f4 flex:column max-h:200px ${STYLES.overflow} w:100% z-index:${zIndex}`}
+        class={`radius:5 flex bg:base-5 flex:column max-h:200px ${STYLES.overflow} w:100% z-index:${zIndex}`}
       >
         <Show
           fallback={<div class="cursor:pointer p:8px w:100%">Loading...</div>}
@@ -312,9 +315,9 @@ export function MultiSelectField(
 
   return (
     <div
-      class={`pos:relative b:1px|solid|#ccc bg:base-5 p:0px|3px r:4px text-align:left w:100% ${props.class}`}
+      class={`pos:relative b:1px|solid|base  p:0px|3px r:4px text-align:left w:100% ${props.class}`}
       classList={{
-        "b:1px|solid|#ff0000": !!props.error,
+        "b:1px|solid|error": !!props.error,
       }}
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
     >
@@ -323,7 +326,7 @@ export function MultiSelectField(
       >
         <For each={selectedValue()}>
           {(tag) => (
-            <div class="c:#000 ai:center bg:#e0e0e0 cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
+            <div class="ai:center bg:primary-20 cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
               <span class="white-space:nowrap">
                 {props.renderLabel
                   ? props.renderLabel(tag, true)
@@ -341,33 +344,28 @@ export function MultiSelectField(
             </div>
           )}
         </For>
-        {/* ${props.selectedValues().length === 1 && props.selectionLimit === 1 ? "display:none" : ""} */}
-        <input
-          auto-complete="off"
-          // @ts-expect-error disable lastpass
-          AutoComplete="off"
-          class={`${props.selectionLimit === 1 && selectedValue().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
-          data-lpignore="true"
-          disabled={props.disable}
-          // onBlur={() => {
-          //   if (dropdownVisible()) {
-          //     // This is working fine, but its giving some bad user experience.
-          //     optionTimeout = setTimeout(() => setDropdownVisible(false), 100);
-          //     if (props.selectionLimit === 1) {
-          //       setInputValue('');
-          //     }
-          //   }
-          // }}
-          onFocus={handleInputFocus}
-          onInput={(e) => setInputValue(e.target.value)}
-          placeholder={props.placeholder ?? "Select options"}
-          ref={inputRef}
-          type="text"
-          value={inputValue()}
-        />
+        <div class="flex ai:center flex:1">
+          <input
+            auto-complete="off"
+            class={`${props.selectionLimit === 1 && selectedValue().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
+            data-lpignore="true"
+            disabled={props.disable}
+            onFocus={handleInputFocus}
+            onInput={(e) => setInputValue(e.target.value)}
+            placeholder={props.placeholder ?? "Select options"}
+            ref={inputRef}
+            type="text"
+            value={inputValue()}
+          />
+          <Icon
+            class="mr:5 c:base-50"
+            icon={dropdownVisible() ? "ph:caret-up-bold" : "ph:caret-down-bold"}
+            width={20}
+          />
+        </div>
       </div>
       <Show when={props.error}>
-        <div class="c:#ff0000 f:12 p:2px">{props.error}</div>
+        <div class="fg:error f:12 p:2px">{props.error}</div>
       </Show>
       <Show when={dropdownVisible()}>
         <ZIndex>

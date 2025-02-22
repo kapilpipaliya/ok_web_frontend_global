@@ -164,7 +164,7 @@ function InputField(props: Readonly<InputFieldProps>): JSX.Element {
         {props.label}
       </label>
       <input
-        class="border:1px|solid|#ccc p:8px r:4px w:100%"
+        class="border:1px|solid|base p:8px r:4px w:100%"
         id={props.id}
         name={props.name}
         onInput={props.onInput}
@@ -185,7 +185,7 @@ function TextAreaField(props: Readonly<TextAreaFieldProps>): JSX.Element {
       </label>
       <textarea
         aria-multiline="true"
-        class="border:1px|solid|#ccc max-h:10rem p:8px r:4px w:100%"
+        class="border:1px|solid|base max-h:10rem p:8px r:4px w:100%"
         id={props.id}
         name={props.name}
         onInput={props.onInput}

@@ -47,7 +47,7 @@ export async function POST({ request }: APIEvent) {
           updatedAt: datetime()
         })
         SET s += $settings
-        RETURN id(s) as id`,
+        RETURN s.key as key`,
         { key: newKey, settings },
       );
       settingsKey = createResult.records[0].get("key");

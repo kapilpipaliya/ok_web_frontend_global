@@ -7,7 +7,7 @@ export function getDefaultTheme() {
     "secondary": variables.gray,
     "accent": variables.amber,
     "neutral": variables.beryl,
-    "base": variables.slate, // use base-5, base-5, base-5
+    "base": variables.slate, // use base-5, base-10, base-20
     "info": variables.blue,
     "success": variables.green,
     "warning": variables.yellow,

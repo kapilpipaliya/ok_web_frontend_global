@@ -325,10 +325,21 @@ ${Object.keys(binopsInitial).join("\n")}`,
           componentName: "MultiSelect",
           key: "role",
         },
+        // This will be hidden in the UI
+        // {
+        //   collection: "g:'Perm'",
+        //   componentName: "MultiSelect",
+        //   key: "perm",
+        // },
         {
-          collection: "g:'Perm'",
-          componentName: "MultiSelect",
-          key: "perm",
+          componentName: "Select",
+          displayName: "Access Level",
+          key: "access",
+          options: `NONE
+  VIEW
+  CREATE
+  EDIT
+  FULL`,
         },
         {
           componentName: "TextInput",

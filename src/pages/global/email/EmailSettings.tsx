@@ -1,5 +1,6 @@
 import { v7 as uuidv7 } from "uuid";
 
+import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -15,38 +16,9 @@ import { SchemaRenderer } from "../../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
 
 export function EmailSettings() {
-  const [graph, setGraph] = useGraph();
-  const { showErrorToast, showSuccessToast } = useToast();
-
-  const formDataId = uuidv7();
-  addNewVertex(
-    0,
-    {
-      id: formDataId,
-      IN: {},
-      L: ["EmailSettings"],
-      OUT: {},
-      P: {},
-    },
-    graph,
-    setGraph,
-  );
-
+  const {showErrorToast, showSuccessToast} = useToast();
   const loadSettingsData = async () => {
-    try {
-      const data = await getAPI(API.settings.email.getUrl);
-      if (data.settings?.P) {
-        replaceVertexProperties(
-          0,
-          formDataId,
-          graph,
-          setGraph,
-          data.settings.P,
-        );
-      }
-    } catch (err) {
-      showErrorToast((err as Error).message);
-    }
+    return await getAPI(API.settings.email.getUrl);
   };
 
   loadSettingsData();
@@ -192,8 +164,8 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
             componentName: "Box",
             props: () => ({
-              onClick: async () => {
-                const settings = graph.vertexes[formDataId];
+              onClick: async (options: FunctionArgumentType) => {
+                const settings = options.data;
                 const response = await postAPI(
                   API.settings.email.updateUrl,
                   settings.P,
@@ -212,8 +184,8 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS,
             componentName: "Box",
             props: () => ({
-              onClick: async () => {
-                const settings = graph.vertexes[formDataId];
+              onClick: async (options: FunctionArgumentType) => {
+                const settings = options.data;
                 const response = await postAPI(
                   API.settings.email.testUrl,
                   settings.P,
@@ -239,7 +211,7 @@ export function EmailSettings() {
   return (
     <SchemaRenderer
       form={{ attributes: [form], key: "EmailSettings" }}
-      formDataId={formDataId}
+      getFormData={loadSettingsData}
     />
   );
 }
