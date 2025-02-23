@@ -11,7 +11,6 @@ export async function createUserInSuperDB(
   userData: {
     email: string;
     password: string;
-    subDomain: string[];
     username: string;
   },
 ) {
@@ -38,10 +37,6 @@ export async function createUserInSuperDB(
 
   const createUserResult = await superTx.run(createUserQuery, createUserParams);
   const userNode = createUserResult.records[0].get("u");
-
-  for (const subDomain of userData.subDomain) {
-    await createAndLinkSubDomain(superTx, uuid, subDomain);
-  }
 
   return convertNodeToJson(userNode);
 }
@@ -78,25 +73,4 @@ export async function createUserInUserDB(
     salt,
   });
   return convertNodeToJson(createUserResult.records[0].get("u"));
-}
-
-async function createAndLinkSubDomain(
-  tx: Session | Transaction,
-  uuid: string,
-  subDomain: string,
-) {
-  const createSubDomainQuery = `CREATE (s:SubDomain {
-    key: $subDomain
-  }) RETURN s;`;
-
-  const createSubDomainResult = await tx.run(createSubDomainQuery, {
-    subDomain,
-  });
-
-  const createEdgeQuery = `MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $subDomain })
-                          CREATE (u)-[:UserSubDomain]->(s);`;
-
-  await tx.run(createEdgeQuery, { subDomain, uuid });
-
-  return createSubDomainResult.records[0].get("s");
 }

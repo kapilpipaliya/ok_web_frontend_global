@@ -18,8 +18,25 @@ export async function POST({ request }: APIEvent) {
       (await getUserFromSession(request))?.P.email,
       dbSession,
     );
+
+    // Get the user's account
+    const accountResult = await dbSession.run(`
+      MATCH (a:Account)-[:AccountUser]->(u:User {uuid: $uuid})
+      RETURN a
+    `, { uuid: user.P.uuid });
+
+    if (accountResult.records.length === 0) {
+      throw new APIError("Account not found", 404);
+    }
+
+    const account = convertNodeToJson(accountResult.records[0].get("a"));
+
     await validateKeyAndDomain(dbSession, key, domain);
     const newSubdomain = await createSubdomain(dbSession, key, domain);
+
+    // Create AccountSubdomain relationship
+    await createAccountSubdomainRelation(dbSession, account.id, newSubdomain.id);
+
     await createActivityLog(
       dbSession,
       "SESSION_CREATE",
@@ -28,7 +45,7 @@ export async function POST({ request }: APIEvent) {
       user.P.email,
       `Created subdomain ${key} with domain ${domain}`,
     );
-    await createUserSubdomainRelation(dbSession, key, user.P.uuid);
+
     // @ts-expect-error ignore
     await subdomainRegister(dbSession, {
       ...user.P,
@@ -42,6 +59,21 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
+}
+
+async function createAccountSubdomainRelation(
+  dbSession: Session,
+  accountId: string,
+  subdomainId: string,
+) {
+  await dbSession.run(`
+    MATCH (a:Account), (s:SubDomain)
+    WHERE elementId(a) = $accountId AND elementId(s) = $subdomainId
+    CREATE (a)-[:AccountSubdomain]->(s)
+  `, {
+    accountId,
+    subdomainId,
+  });
 }
 
 async function createSubdomain(
@@ -60,18 +92,6 @@ async function createSubdomain(
     { domain, key },
   );
   return convertNodeToJson(result.records[0]?.get("s"));
-}
-
-async function createUserSubdomainRelation(
-  dbSession: Session,
-  key: string,
-  userUuid: string,
-) {
-  await dbSession.run(
-    `MATCH (u:User { uuid: $uuid }), (s:SubDomain { key: $key })
-     CREATE (u)-[:UserSubDomain]->(s)`,
-    { key, uuid: userUuid },
-  );
 }
 
 async function validateKeyAndDomain(

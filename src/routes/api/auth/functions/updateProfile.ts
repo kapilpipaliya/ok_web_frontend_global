@@ -27,15 +27,12 @@ export async function updateProfile(
   const basicQuery = await buildUpdateQuery(email, username);
 
   if (subDomain === SYSTEM_DB_NAME) {
-    const subDomainsResult = await dbSession.run(
-      `MATCH (u:User {uuid: $uuid})-[:UserSubDomain]->(s:SubDomain)
-       RETURN s.key as subdomain`,
-      { uuid },
-    );
-
+    // Get subdomains through Account relationship
+    const subdomains = await getSubdomainsForAccount(dbSession, uuid);
+    
     const driver = await getDriver();
-    const validationSessions = subDomainsResult.records.map((record) =>
-      driver.session({ database: record.get("subdomain") }),
+    const validationSessions = subdomains.map((subdomain) =>
+      driver.session({ database: subdomain }),
     );
 
     try {
@@ -178,6 +175,16 @@ async function buildUpdateQuery(email?: string, username?: string) {
     basicQuery += "RETURN u";
   }
   return basicQuery;
+}
+
+async function getSubdomainsForAccount(dbSession: Session, uuid: string) {
+  const subDomainsResult = await dbSession.run(
+    `MATCH (u:User {uuid: $uuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
+     RETURN s.key as subdomain`,
+    { uuid }
+  );
+  
+  return subDomainsResult.records.map(record => record.get("subdomain"));
 }
 
 async function validateField(

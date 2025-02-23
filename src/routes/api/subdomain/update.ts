@@ -13,12 +13,27 @@ export async function POST({ request }: APIEvent) {
   try {
     const { domain, id, key, status } = await request.json();
 
+    if (!id) {
+      throw new APIError("Subdomain key required", 400);
+    }
+    
     const user = await validateUser(
       (await getUserFromSession(request))?.P.email,
       dbSession
     );
-    if (!id) {
-      throw new APIError("Subdomain not found", 404);
+
+    // Get the user's account and verify subdomain access
+    const accessResult = await dbSession.run(`
+      MATCH (u:User {uuid: $uuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
+      WHERE elementId(s) = $subdomainId
+      RETURN a, s
+    `, { 
+      subdomainId: id,
+      uuid: user.P.uuid 
+    });
+
+    if (accessResult.records.length === 0) {
+      throw new APIError("Unauthorized access to subdomain", 403);
     }
 
     await validateDomain(dbSession, id, domain);

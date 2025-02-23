@@ -296,3 +296,9 @@ An Introduction to the Deno Crypto Module
 https://friendlyuser.github.io/posts/tech/2023/An_Introduction_to_the_Deno_Crypto_Module/
 which hashing algorithm is right for you?
 https://stytch.com/blog/argon2-vs-bcrypt-vs-scrypt/
+
+
+
+Email service:
+Privacy-focused encrypted email for everyone. All-in-one alternative to Gmail + Mailchimp + Sendgrid.
+https://github.com/forwardemail/forwardemail.net

@@ -33,6 +33,7 @@ export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.
     return isSystemSubDomain()
       ? [
           { href: URLS.SYSTEM.PROJECTS, icon: "ph:umbrella", label: "Projects" },
+          { href: URLS.SYSTEM.GLOBAL_SETTINGS, icon: "ph:gear", label: "Global Settings" },
           { href: URLS.SYSTEM.USER_SETTINGS, icon: "ph:user-gear", label: "User Settings" },
           ...commonItems,
         ]

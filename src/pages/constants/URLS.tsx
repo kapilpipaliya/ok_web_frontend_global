@@ -7,6 +7,7 @@ export const URLS = {
     USER_SETTINGS: "/admin/UserSettings",
   },
   SYSTEM: {
+    GLOBAL_SETTINGS: "/system/GlobalSettings",
     PROJECTS: "/system/projects",
     USER_SETTINGS: "/system/UserSettings",
   },

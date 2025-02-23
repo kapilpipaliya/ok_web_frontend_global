@@ -22,10 +22,10 @@ export async function GET({ request }: APIEvent) {
     const nodes: { [key: string]: Vertex } = {};
     const relationships: { [key: string]: Edge } = {};
 
-    // Get subdomains for current user with their latest activity
+    // Get subdomains through Account relationship
     const result = await dbSession.run(
       `
-      MATCH (u:User {email: $email})-[:UserSubDomain]->(s:SubDomain)
+      MATCH (u:User {email: $email})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
       OPTIONAL MATCH (a:Activity)
       WHERE a.entityType = 'SubDomain' AND a.entityId = s.key
       WITH s, a

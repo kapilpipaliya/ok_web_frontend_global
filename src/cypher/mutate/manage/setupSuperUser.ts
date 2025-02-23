@@ -1,3 +1,6 @@
+import { Session } from "neo4j-driver";
+import { v7 as uuidv7 } from "uuid";
+
 import type { Vertex } from "~/lib/graph/graph";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
@@ -64,20 +67,16 @@ export async function setupSuperUser(): Promise<{
           password: $hashedPassword,
           salt: $salt,
           username: $username,
-          uuid: randomUUID()
+          uuid: randomUUID(),
+          emailConfirmed: true
         })
-        CREATE (s:SubDomain {
-          key: $systemDbName
-        })
-        CREATE (u)-[:UserSubDomain]->(s)
-        RETURN u, s
+        RETURN u
       `;
 
       const createUserResult = await dbSession.run(createUserQuery, {
         email: superUserData.email,
         hashedPassword,
         salt,
-        systemDbName: SYSTEM_DB_NAME,
         username: superUserData.username,
       });
 
@@ -91,11 +90,11 @@ export async function setupSuperUser(): Promise<{
 
       const user = convertNodeToJson(createUserResult.records[0].get("u"));
 
-      const setEmailConfirmedQuery = `
-        MATCH (u:User {uuid: $uuid})
-        SET u.emailConfirmed = true
-      `;
-      await dbSession.run(setEmailConfirmedQuery, { uuid: user.P.uuid });
+      // Create Account and link with User
+      const accountId = await createSuperAccount(dbSession, user.P.uuid);
+      
+      // Create SubDomain and link with Account
+      await createSystemSubdomain(dbSession, accountId);
 
       await createRootFolder(dbSession, user.P.uuid);
 
@@ -129,4 +128,46 @@ export async function setupSuperUser(): Promise<{
   } finally {
     await systemDbSession.close();
   }
+}
+
+async function createSuperAccount(dbSession: Session, userUuid: string) {
+  const accountId = uuidv7();
+  const query = `
+    CREATE (a:Account {
+      id: $accountId,
+      name: $username,
+      createdAt: datetime(),
+      lastModified: datetime()
+    })
+    WITH a
+    MATCH (u:User {uuid: $userUuid})
+    CREATE (a)-[:AccountUser]->(u)
+    RETURN a
+  `;
+
+  await dbSession.run(query, {
+    accountId,
+    username: superUserData.username,
+    userUuid,
+  });
+  return accountId;
+}
+
+async function createSystemSubdomain(dbSession: Session, accountId: string) {
+  const query = `
+    CREATE (s:SubDomain {
+      key: $systemDbName,
+      createdAt: datetime(),
+      lastModified: datetime()
+    })
+    WITH s
+    MATCH (a:Account {id: $accountId})
+    CREATE (a)-[:AccountSubdomain]->(s)
+    RETURN s
+  `;
+
+  return await dbSession.run(query, {
+    accountId,
+    systemDbName: SYSTEM_DB_NAME,
+  });
 }
