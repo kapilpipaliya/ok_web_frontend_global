@@ -240,13 +240,13 @@ export function RenderMainContent() {
         )}${layoutStore().mainPanel?.findIndex((panel) => layoutStore()[`mainPanel${panel}Width`] === "1fr") !== -1 ? "|0px" : "|1fr"}${layoutStore().isRight0Open ? `|${layoutStore().rightWidth0}px` : ""}${layoutStore().isRight1Open ? `|${layoutStore().rightWidth1}px` : ""}${layoutStore().isRight2Open ? `|${layoutStore().rightWidth2}px` : ""}
       width:100vw
       height:100vh
-      grid-template-rows:36px|1fr
+      grid-template-rows:38px|1fr
     `}
       // overflow:hidden
       //  grid-template-rows:1fr|${sizes.bottomHeight}px
     >
       <HeaderRow
-        class="height:36px"
+        class="ai:center"
         style={{
           "grid-column": `1 / span ${layoutStore().mainPanel?.length + 1 + 4}`,
         }}

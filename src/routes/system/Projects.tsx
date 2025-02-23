@@ -14,8 +14,6 @@ export default function Projects() {
           class="flex:1"
           description={
             <>
-              Manage your projects.
-              <br />
               Each project has a separate subdomain and database. Only administrator can create and manage projects.
               <br />
               Click on Subdomain Name or Custom Domain Name to login to that project.

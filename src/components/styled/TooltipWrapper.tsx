@@ -8,17 +8,21 @@ export function TooltipWrapper(props: {
   arrowClass?: string;
   children: JSX.Element;
   content: JSX.Element;
+  group?: string;
+  openDelay?: number;
   triggerAs?: string;
   triggerClass?: string;
 }) {
   return (
     <Tooltip
+      closeDelay={0}
       floatingOptions={{
         flip: true,
         offset: 13,
         shift: true,
       }}
-      openDelay={200}
+      group={props.group}
+      openDelay={props.openDelay ?? 200}
       placement="top"
     >
       <Tooltip.Trigger as={props.triggerAs} class={props.triggerClass}>
@@ -26,11 +30,11 @@ export function TooltipWrapper(props: {
       </Tooltip.Trigger>
       <Tooltip.Portal>
         <Tooltip.Content
-          class={`rounded-lg bg:rgb(243,244,246) px-3 py-2 font-medium ${STYLES.tooltip.animation}`}
+          class={`r:8 bg:base-20 text:base-90 p:8 font-medium ${STYLES.tooltip.animation}`}
         >
           {props.content}
 
-          <Tooltip.Arrow class={props.arrowClass} />
+          <Tooltip.Arrow class={`color:base-20 ${props.arrowClass ?? ''}`} />
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip>

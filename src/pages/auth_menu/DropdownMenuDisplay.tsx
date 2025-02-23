@@ -19,7 +19,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
   return (
     <>
       <button
-        class={`flex ai:center bg:primary-5 bg:primary-10:hover height:36px p:6 r:7 width:36px mr:3 background-size:cover border:none cursor:pointer bg:primary-5 background-image:url(${getProfileImageUrl(graph)})`}
+        class={`flex ai:center bg:primary-5 bg:primary-10:hover h:36px p:6 r:7 width:36px mr:3 background-size:cover border:none cursor:pointer bg:primary-5 background-image:url(${getProfileImageUrl(graph)})`}
         id="user-dropdown-toggle"
         onClick={handleOpen}
         ref={btnEl!}

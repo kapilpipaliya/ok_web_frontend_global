@@ -64,6 +64,7 @@ export function SaveAllButton() {
       }
       size={22}
       title="Save All"
+      tooltipGroup="right-buttons"
     />
   );
 }

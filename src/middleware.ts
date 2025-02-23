@@ -13,7 +13,16 @@ import { getUserFromSession } from "./server/session/getUserFromSession";
 export default createMiddleware({
   onRequest: [
     csrfProtection,
-    secureRequest(),
+    // temporary disable secureRequest
+    // secureRequest({
+    //   csp: {
+    //     dev: {
+    //       value: {
+    //         "connect-src": ["'self'", "ws://localhost:*", "https://api.iconify.design", "https://api.unisvg.com", "https://api.simplesvg.com"],
+    //       }
+    //     }
+    //   }
+    // }),
     async (event) => {
       const url = new URL(event.request.url);
       if (url.pathname === "/api/mutate/superUserSetup") {

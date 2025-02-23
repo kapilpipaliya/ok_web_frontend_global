@@ -10,6 +10,7 @@ import {
   useDesignerFormIdContext,
 } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { headerIconButtonClass } from "~/pages/constants/constant";
 
 export const LeftIcons = () => {
   const navigate = useNavigate();
@@ -25,12 +26,12 @@ export const LeftIcons = () => {
   return (
     <div class="flex ai:center">
       <IconButton
-        class="flex ai:center bg:rgb(255,253,253,.5) bg:rgb(232,229,229):hover cursor:pointer jc:center r:5|5|5|5"
+        class={`${headerIconButtonClass} ml:2`}
         icon="ph:house"
-        iconClass={"color:secondary color:black:hover"}
         onClick={() => navigate("/admin")}
-        size={30}
+        size={22}
         title="Home"
+        tooltipGroup="left-buttons"
       />
     </div>
   );

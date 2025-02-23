@@ -29,12 +29,12 @@ export function HeaderRow(props: {
 
   return (
     <header
-      class={`flex bg:#f3f3f4 jc:space-between r:7 ${props.class}`}
+      class={`flex bg:base-5 jc:space-between r:7 ${props.class}`}
       style={props.style}
     >
       <LeftIcons />
 
-      <div class="flex ai:center gap:5">
+      <div class="flex ai:center gap:2">
         <ToggleButtons />
         <SaveAllButton />
         <SelectThemeButton />

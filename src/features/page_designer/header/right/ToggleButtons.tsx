@@ -1,6 +1,7 @@
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { headerIconButtonClass } from "~/pages/constants/constant";
 
 import {
   INITIAL_WIDTHS,
@@ -35,45 +36,51 @@ export function ToggleButtons() {
   };
 
   return (
-    <div class="flex ai:center gap:2 mr:3">
+    <>
       <IconButton
-        class="border-radius:5px cursor:pointer"
+        class={`${headerIconButtonClass}`}
         icon="ph:squares-four"
         iconClass={`${layoutStore().isLeftOpen ? "color:#37c" : "color:gray-60"}`}
         onClick={() => togglePanel("isLeftOpen")}
         size={22}
         title="Toggle Elements Panel"
+        tooltipGroup="right-buttons"
       />
       <IconButton
-        class="border-radius:5px cursor:pointer"
+        class={`${headerIconButtonClass}`}
         icon="ph:robot"
         iconClass={`${layoutStore().isRight0Open ? "color:#37c" : "color:gray-60"}`}
         onClick={() => togglePanel("isRight0Open")}
         size={22}
         title="Toggle AI Panel"
+        tooltipGroup="right-buttons"
       />
       <IconButton
-        class="border-radius:5px cursor:pointer"
+        class={`${headerIconButtonClass}`}
         icon="ph:sliders"
         iconClass={`${layoutStore().isRight1Open ? "color:#37c" : "color:gray-60"}`}
         onClick={() => togglePanel("isRight1Open")}
         size={22}
         title="Toggle Properties Panel"
+        tooltipGroup="right-buttons"
       />
       <IconButton
-        class="border-radius:5px cursor:pointer"
+        class={`${headerIconButtonClass}`}
         icon="ph:gear"
         iconClass={`${layoutStore().isRight2Open ? "color:#37c" : "color:gray-60"}`}
         onClick={() => togglePanel("isRight2Open")}
         size={22}
         title="Toggle Settings Panel"
+        tooltipGroup="right-buttons"
       />
       <IconButton
+        class={headerIconButtonClass}
         icon="ph:arrows-counter-clockwise"
         onClick={resetLayout}
         size={22}
         title="Reset Layout"
+        tooltipGroup="right-buttons"
       />
-    </div>
+    </>
   );
 }

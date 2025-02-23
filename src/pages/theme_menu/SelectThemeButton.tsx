@@ -18,7 +18,8 @@ export function SelectThemeButton() {
         onClick={() => setIsThemeOptionsOpen(true)}
         ref={setButtonRef}
         size={22}
-        title="Close"
+        title="Select Theme"
+        tooltipGroup="right-buttons"
         type="button"
       />
       <Show when={isThemeOptionsOpen()}>

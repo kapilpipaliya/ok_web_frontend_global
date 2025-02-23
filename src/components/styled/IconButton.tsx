@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show, splitProps } from "solid-js";
 
 import { STYLES } from "./constants/styles";
+import { TooltipWrapper } from "./TooltipWrapper";
 
 export interface IconButtonProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -10,6 +11,7 @@ export interface IconButtonProps
   iconClassList?: { [k: string]: boolean | undefined };
   noCenter?: boolean;
   size?: number | string;
+  tooltipGroup?: string;
 }
 
 export function IconButton(props: Readonly<IconButtonProps>) {
@@ -21,9 +23,11 @@ export function IconButton(props: Readonly<IconButtonProps>) {
     "size",
     "children",
     "noCenter",
+    "title",
+    "tooltipGroup",
   ]);
 
-  return (
+  const ButtonContent = () => (
     <button
       class={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
       type="button"
@@ -41,5 +45,13 @@ export function IconButton(props: Readonly<IconButtonProps>) {
       </Show>
       {local.children}
     </button>
+  );
+
+  return (
+    <Show fallback={<ButtonContent />} when={local.title}>
+      <TooltipWrapper content={local.title!} group={local.tooltipGroup} openDelay={300}>
+        <ButtonContent />
+      </TooltipWrapper>
+    </Show>
   );
 }
