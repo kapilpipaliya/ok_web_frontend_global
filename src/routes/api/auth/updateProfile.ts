@@ -2,8 +2,7 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import { sendEmail } from "~/lib/playwright/sendEmail";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
 import { updateProfile } from "./functions/updateProfile";
@@ -23,23 +22,10 @@ export async function POST({ request }: APIEvent) {
       throw new APIError(result.error, result.status || 500);
     }
 
-    const emailResult = await renderPageAsHtml({
-      pageName: EMAIL_TEMPLATES.PROFILE_UPDATED,
-      queryParams: {
-        updateTime: new Date().toISOString(),
-        username: result.user.P.username,
-      },
-      subDomain,
+    // Fire and forget the email sending process
+    sendNotificationEmail(EMAIL_TEMPLATES.PROFILE_UPDATED, {}, "Your Profile Has Been Updated", result.user, subDomain).catch(error => {
+      console.error('Failed to send profile updated email:', error);
     });
-
-    if (emailResult.success && emailResult.html) {
-      await sendEmail({
-        content: emailResult.html!,
-        subDomain,
-        subject: "Your Profile Has Been Updated",
-        to: result.user.P.email,
-      });
-    }
 
     return result;
   } catch (error) {

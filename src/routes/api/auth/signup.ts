@@ -9,12 +9,12 @@ import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { signupUser } from "~/cypher/mutate/signup/signupUser";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
-import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import { sendEmail } from "~/lib/playwright/sendEmail";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { updateSession } from "~/server/session/updateSession";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
 import { updateRedirectUrl } from "./functions/updateRedirectUrl";
+
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
     throw new APIError("Invalid content type. Expected application/json", 415);
@@ -66,28 +66,11 @@ async function handleSignup(
     delete user.P.password;
     updateRedirectUrl(user, subDomain);
 
-    const result = await renderPageAsHtml({
-      pageName: EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,
-      queryParams: {
-        email: data.email,
-        username: data.username,
-      },
-      subDomain,
+    // Fire and forget the email sending process
+    sendNotificationEmail(EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,{}, "Welcome to Our Platform - Please Confirm Your Email", user, subDomain).catch(error => {
+      console.error('Failed to send signup confirmation email:', error);
     });
 
-    if (!result.success || !result.html) {
-      throw new APIError(
-        result.error || "Failed to render confirmation email",
-        500,
-      );
-    }
-
-    await sendEmail({
-      content: result.html!,
-      subDomain,
-      subject: "Welcome to Our Platform - Please Confirm Your Email",
-      to: data.email,
-    });
 
     return user;
   } catch (error) {

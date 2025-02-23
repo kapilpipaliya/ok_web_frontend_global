@@ -1,4 +1,5 @@
 import { ofetch as $fetch } from "ofetch";
+
 import type { EmailOptions } from "../types/email-options";
 import type { EmailService } from "../types/email-service";
 
@@ -19,26 +20,26 @@ export class PlunkService implements EmailService {
       throw new Error("Plunk token is missing");
     }
 
-    const { to, from, subject, text, html } = emailOptions;
+    const { from, html, subject, text, to } = emailOptions;
     if (!to || !from || (!text && !html)) {
       throw new Error("Required email fields are missing");
     }
 
     const payload = {
-      from,
-      to,
-      subject,
       body: html || text,
+      from,
+      subject,
+      to,
     };
 
     try {
       const response = await $fetch(this.apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiToken}`,
-        },
         body: JSON.stringify(payload),
+        headers: {
+          Authorization: `Bearer ${this.apiToken}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
       });
       return response;
     } catch (error) {

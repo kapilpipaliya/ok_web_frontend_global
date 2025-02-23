@@ -1,4 +1,5 @@
 import { ofetch as $fetch } from "ofetch";
+
 import type { EmailOptions } from "../types/email-options";
 import type { EmailService } from "../types/email-service";
 
@@ -15,7 +16,7 @@ export const MailgunService = (apiKey?: string): EmailService => {
       throw new Error("Mailgun API key or domain is missing");
     }
 
-    const { to, from, subject, text, html } = emailOptions;
+    const { from, html, subject, text, to } = emailOptions;
     if (!to || !from || (!text && !html)) {
       throw new Error("Required email fields are missing");
     }
@@ -29,11 +30,11 @@ export const MailgunService = (apiKey?: string): EmailService => {
 
     try {
       await $fetch(MAILGUN_API_URL, {
-        method: "POST",
+        body: formData,
         headers: {
           Authorization: `api:${MAILGUN_API_KEY}`,
         },
-        body: formData,
+        method: "POST",
       });
       console.log("Email sent via Mailgun");
     } catch (error) {

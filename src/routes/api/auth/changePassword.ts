@@ -3,8 +3,7 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
-import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import {sendEmail} from "~/lib/playwright/sendEmail";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
 
@@ -52,23 +51,10 @@ export async function POST({ request }: APIEvent) {
       { hashedPassword, salt, uuid: user.uuid },
     );
 
-    const result = await renderPageAsHtml({
-      pageName: EMAIL_TEMPLATES.PASSWORD_CHANGED,
-      queryParams: {
-        changeTime: new Date().toISOString(),
-        username: user.username,
-      },
-      subDomain,
+    // Send email notification
+    sendNotificationEmail(EMAIL_TEMPLATES.PASSWORD_CHANGED,{}, "Your Password Has Been Changed", user, subDomain).catch(error => {
+      console.error('Failed to send password changed email:', error);
     });
-
-    if (result.success && result.html) {
-      await sendEmail({
-        content: result.html!,
-        subDomain,
-        subject: "Your Password Has Been Changed",
-        to: user.email,
-      });
-    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },

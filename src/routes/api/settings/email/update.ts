@@ -1,11 +1,12 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
-import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+
 import { createOrUpdateAccountEmailSettings } from "./functions";
 
 export async function POST({ request }: APIEvent) {

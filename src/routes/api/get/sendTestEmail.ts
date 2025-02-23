@@ -4,9 +4,10 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
-import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import { sendEmail } from "~/lib/playwright/sendEmail";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
+
+import { EMAIL_TEMPLATES } from "../auth/constants/constants";
 
 export async function GET({ request }: APIEvent) {
   // const { email } = await request.json(); // Extract email from request body
@@ -14,42 +15,31 @@ export async function GET({ request }: APIEvent) {
 
   const user = await getUserFromSession(request);
 
+  if (!user) {
+    throw new APIError("User not found", 404);
+  }
+
   // Generate a secure token instead of passing user data directly
   const secureToken = user
     ? await generateSecureToken(encodeUserData(user.P as UserData), dbSession)
     : undefined;
 
   try {
-    const result = await renderPageAsHtml({
-      pageName: "test",
-      queryParams: {
+    await sendNotificationEmail(
+      EMAIL_TEMPLATES.TEST_EMAIL,
+      {
         param1: "value1",
         param2: "value2",
       },
-      secureToken,
+      "Test Email",
+      user,
       subDomain,
-    });
-
-    if (!result.success) {
-      throw new APIError(result.error || "Failed to render page", 500);
-    }
-
-    await sendEmail({
-      content: result.html!,
-      subDomain,
-      subject: "Test Email With Attachment",
-      to: "kapil.pipaliya@gmail.com",
-    });
-    return new Response(
-      JSON.stringify({
-        message: "Test email sent successfully",
-        result: result.html,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
-      },
+      secureToken
     );
+
+    return {
+      message: "Test email sent successfully",
+    };
   } catch (error: unknown) {
     return handleAPIError(error);
   }

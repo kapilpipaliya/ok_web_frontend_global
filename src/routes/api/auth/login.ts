@@ -10,8 +10,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { verifyPassword } from "~/lib/auth/password";
-import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
-import {sendEmail} from "~/lib/playwright/sendEmail";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { updateSession } from "~/server/session/updateSession";
 
 import { EMAIL_TEMPLATES } from "./constants/constants";
@@ -45,23 +44,10 @@ export async function POST({ request }: APIEvent) {
     delete user.P.password;
     updateRedirectUrl(user, subDomain!);
 
-    const result = await renderPageAsHtml({
-      pageName: EMAIL_TEMPLATES.LOGIN_NOTIFICATION,
-      queryParams: {
-        loginTime: new Date().toISOString(),
-        username: user.P.username,
-      },
-      subDomain: subDomain!,
+    // Fire and forget the email sending process
+    sendNotificationEmail(EMAIL_TEMPLATES.LOGIN_NOTIFICATION,{}, "New Login to Your Account", user, subDomain!).catch(error => {
+      console.error('Failed to send login notification email:', error);
     });
-
-    if (result.success && result.html) {
-      await sendEmail({
-        content: result.html!,
-        subDomain: subDomain!,
-        subject: "New Login to Your Account",
-        to: user.P.email,
-      });
-    }
 
     return user;
   } catch (error) {

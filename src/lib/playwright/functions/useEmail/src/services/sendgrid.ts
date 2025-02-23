@@ -1,4 +1,5 @@
 import { ofetch as $fetch } from "ofetch";
+
 import type { EmailOptions } from "../types/email-options";
 import type { EmailService } from "../types/email-service";
 
@@ -22,39 +23,39 @@ export class SendGridService implements EmailService {
       throw new Error("SendGrid API key is missing");
     }
 
-    const { to, from, subject, text, html } = emailOptions;
+    const { from, html, subject, text, to } = emailOptions;
     if (!to || !from || (!text && !html)) {
       throw new Error("Required email fields are missing");
     }
 
     const payload = {
-      personalizations: [
-        {
-          to: Array.isArray(to)
-            ? to.map((email) => ({ email }))
-            : [{ email: to }],
-          subject,
-        },
-      ],
-      from: {
-        email: from,
-      },
       content: [
         {
           type: text ? "text/plain" : "text/html",
           value: text || html,
         },
       ],
+      from: {
+        email: from,
+      },
+      personalizations: [
+        {
+          subject,
+          to: Array.isArray(to)
+            ? to.map((email) => ({ email }))
+            : [{ email: to }],
+        },
+      ],
     };
 
     try {
       const response = await $fetch(this.apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
-        },
         body: JSON.stringify(payload),
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
       });
       return response;
     } catch (error) {

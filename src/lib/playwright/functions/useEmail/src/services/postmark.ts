@@ -1,4 +1,5 @@
 import { ofetch as $fetch } from "ofetch";
+
 import type { EmailOptions } from "../types/email-options";
 import type { EmailService } from "../types/email-service";
 
@@ -19,29 +20,29 @@ export class PostmarkService implements EmailService {
       throw new Error("Postmark server token is missing");
     }
 
-    const { to, from, subject, text, html } = emailOptions;
+    const { from, html, subject, text, to } = emailOptions;
     if (!to || !from || (!text && !html)) {
       throw new Error("Required email fields are missing");
     }
 
     const payload = {
       From: from,
-      To: Array.isArray(to) ? to.join(",") : to,
-      Subject: subject,
-      TextBody: text,
       HtmlBody: html,
       MessageStream: "outbound",
+      Subject: subject,
+      TextBody: text,
+      To: Array.isArray(to) ? to.join(",") : to,
     };
 
     try {
       const response = await $fetch(this.apiUrl, {
-        method: "POST",
+        body: JSON.stringify(payload),
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
           "X-Postmark-Server-Token": this.apiToken,
         },
-        body: JSON.stringify(payload),
+        method: "POST",
       });
       return response;
     } catch (error) {

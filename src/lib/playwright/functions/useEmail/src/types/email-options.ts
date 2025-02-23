@@ -3,18 +3,18 @@
  */
 export type EmailOptions = {
   from: string;
-  to: string | string[];
-  subject: string;
   html?: string;
+  subject: string;
   text?: string;
+  to: string | string[];
 };
 
 /**
  * Supported email providers
  */
 export type EmailProvider =
-  | "resend"
+  | "mailgun"
   | "plunk"
-  | "sendgrid"
   | "postmark"
-  | "mailgun";
+  | "resend"
+  | "sendgrid";
