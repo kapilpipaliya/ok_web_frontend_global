@@ -22,4 +22,8 @@ export default createHandler(() => (
       );
     }}
   />
-));
+),
+  (event) => ({
+    nonce: `nonce-${event.locals.nonce}`,
+  })
+);

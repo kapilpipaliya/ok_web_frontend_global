@@ -58,6 +58,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-player": "^2.16.0",
+    "shieldwall": "^0.3.0",
     "solid-boundaries": "^2.1.0",
     "solid-collapse": "^1.1.0",
     "solid-colorful": "^0.0.2",

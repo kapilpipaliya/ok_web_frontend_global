@@ -32,6 +32,7 @@ export async function POST({ request }: APIEvent) {
 
     const user = await authenticateUser(email, password, subDomain, dbSession);
 
+    // TODO: need login autdit log form in UI too.
     await createActivityLog(
       dbSession,
       "login",
@@ -45,9 +46,9 @@ export async function POST({ request }: APIEvent) {
     updateRedirectUrl(user, subDomain!);
 
     // Fire and forget the email sending process
-    sendNotificationEmail(EMAIL_TEMPLATES.LOGIN_NOTIFICATION,{}, "New Login to Your Account", user, subDomain!).catch(error => {
-      console.error('Failed to send login notification email:', error);
-    });
+    // sendNotificationEmail(EMAIL_TEMPLATES.LOGIN_NOTIFICATION,{}, "New Login to Your Account", user, subDomain!).catch(error => {
+    //   console.error('Failed to send login notification email:', error);
+    // });
 
     return user;
   } catch (error) {
