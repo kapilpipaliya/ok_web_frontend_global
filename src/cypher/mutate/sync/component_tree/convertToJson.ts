@@ -14,6 +14,8 @@ export function getComponentTree(): ComponentNode[] {
   - Data
   - Form
   - Show
+  - Link
+  - Meta
   - ComponentChildren
   - Transition
   - TransitionGroup

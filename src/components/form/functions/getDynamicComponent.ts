@@ -68,7 +68,8 @@ Tooltip.Portal = clientOnly(
 Tooltip.Trigger = clientOnly(
   () => import("~/components/ssr/tooltip/TooltipTrigger"),
 );
-
+import { Link } from "@solidjs/meta";
+import { Meta } from "@solidjs/meta";
 import { Portal, Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
@@ -119,6 +120,8 @@ export const componentsMap: Record<string, any> = {
   Fragment: FragmentField,
   Html: HtmlField,
   Icon: IconField,
+  Link,
+  Meta,
   MultiSelect: SelectField,
   Page: PageField,
   Portal,
