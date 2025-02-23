@@ -30,10 +30,11 @@ export default defineConfig({
       // },
     // },
     plugins: [
-      devtools({
-        /* features options - all disabled by default */
-        autoname: true,
-      }),
+      // monaco-editor gives error in devtools
+      // devtools({
+      //   /* features options - all disabled by default */
+      //   autoname: true,
+      // }),
     ],
   },
 });

@@ -5,9 +5,11 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { createOrUpdateAccountEmailSettings } from "./functions";
 
 export async function POST({ request }: APIEvent) {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     const isAdmin = await checkAdminRole(request);
@@ -28,31 +30,48 @@ export async function POST({ request }: APIEvent) {
     //   `,
     //   subject: "Test Email Settings"
     // });
-
-    const result = await dbSession.run(
-      `MATCH (s:EmailSetting) 
-       SET s += $settings,
-           s.updatedAt = datetime() 
-       RETURN s.key as key`,
-      { settings },
-    );
-
-    let settingsKey: string;
-    if (result.records.length === 0) {
-      const newKey = `email_settings_${Date.now()}`;
-      const createResult = await dbSession.run(
-        `CREATE (s:EmailSetting {
-          key: $key,
-          createdAt: datetime(),
-          updatedAt: datetime()
-        })
-        SET s += $settings
-        RETURN s.key as key`,
-        { key: newKey, settings },
+    let settingsKey;
+    if (subDomain === SYSTEM_DB_NAME) {
+      // Get account ID for the current user
+      const accountResult = await dbSession.run(
+        `MATCH (a:Account)-[:AccountUser]->(u:User {uuid: $uuid})
+         RETURN a.id as accountId`,
+        { uuid: user?.P.uuid }
       );
-      settingsKey = createResult.records[0].get("key");
+      const accountId = accountResult.records[0]?.get("accountId");
+      
+      if (!accountId) {
+        throw new APIError("Account not found", 404);
+      }
+
+      // Create or update account-specific email settings
+      settingsKey = await createOrUpdateAccountEmailSettings(dbSession, accountId, settings);
     } else {
-      settingsKey = result.records[0].get("key");
+
+      const result = await dbSession.run(
+        `MATCH (s:EmailSetting) 
+         SET s += $settings,
+             s.updatedAt = datetime() 
+         RETURN s.key as key`,
+        { settings },
+      );
+  
+      if (result.records.length === 0) {
+        const newKey = `email_settings_${Date.now()}`;
+        const createResult = await dbSession.run(
+          `CREATE (s:EmailSetting {
+            key: $key,
+            createdAt: datetime(),
+            updatedAt: datetime()
+          })
+          SET s += $settings
+          RETURN s.key as key`,
+          { key: newKey, settings },
+        );
+        settingsKey = createResult.records[0].get("key");
+      } else {
+        settingsKey = result.records[0].get("key");
+      }
     }
 
     await createActivityLog(

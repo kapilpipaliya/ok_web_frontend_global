@@ -1,5 +1,5 @@
 export const SETTINGS_CONSTANTS = {
-  FORM_CLASS: "p:10 grid gap:24",
+  FORM_CLASS: "p:10 grid gap:20",
   FORM_GRID_CLASS:
     "grid grid-cols:1 grid-cols:2@xs grid-template-cols:auto|1fr@xs gap-y:8 gap-y:24@xs gap-x:32@xs ai:center",
   GRID_ITEM_CLASS: "grid grid-template-columns:200px|400px ai:center gap:8",

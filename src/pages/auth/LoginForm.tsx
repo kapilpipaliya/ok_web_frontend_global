@@ -112,6 +112,19 @@ export function LoginForm() {
                 class: PROPERTIES.Css.TextField,
                 componentName: "TextInput",
                 key: "email",
+                props: (options: FunctionArgumentType) => ({
+                  onKeyPress: async (e: KeyboardEvent) => {
+                    if (e.key === "Enter") {
+                      try {
+                        options.dataContext.submitState[1]("isLoading", true);
+                        const formData = graph.vertexes[formDataId];
+                        await handleSubmit(formData);
+                      } finally {
+                        options.dataContext.submitState[1]("isLoading", false);
+                      }
+                    }
+                  },
+                }),
                 validation: { required: true },
               },
               {

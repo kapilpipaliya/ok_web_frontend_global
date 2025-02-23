@@ -1,7 +1,13 @@
+import { Session } from "neo4j-driver";
 import nodemailer from "nodemailer";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
+
+import { useEmail } from "./functions/getEmailService";
 
 interface EmailOptions {
   attachmentName?: string;
@@ -12,64 +18,178 @@ interface EmailOptions {
   to: string;
 }
 
-interface SMTPConfig {
-  from: string;
-  host: string;
-  pass: string;
-  port: number;
-  secure: boolean;
-  user: string;
-}
-export async function sendEmail({
-  attachmentName,
-  attachmentPath,
-  content,
-  subDomain,
-  subject,
-  to,
-}: EmailOptions) {
+export async function sendEmail(options: EmailOptions) {
+  const { attachmentName, attachmentPath, content, subDomain, subject, to } = options;
   const dbSettings = await getEmailSettings(subDomain);
   let emailInfo;
 
   try {
-    const transportConfig = {
-      auth: {
-        pass: dbSettings?.pass || process.env.SMTP_PASS,
-        user: dbSettings?.user || process.env.SMTP_USER,
-      },
-      host: dbSettings?.host || process.env.SMTP_HOST,
-      port: dbSettings?.port || Number(process.env.SMTP_PORT),
-      secure: dbSettings?.secure ?? process.env.SMTP_SECURE === "true",
-      tls: {
-        rejectUnauthorized: false,
-      },
-    };
+    if (dbSettings?.P.active && dbSettings.P.active !== "smtp") {
+      // Use email service provider if active
+      const emailService = useEmail(dbSettings);
+      emailInfo = await emailService.send({
+        // Not supported yet
+        // attachments: attachmentPath && attachmentName ? [{
+        //   filename: attachmentName,
+        //   path: attachmentPath,
+        // }] : undefined,
+        from: dbSettings.P.from,
+        html: content,
+        subject,
+        to,
+      });
+    } else {
+      // Fall back to SMTP if no active provider
+      const transportConfig = {
+        auth: {
+          pass: dbSettings?.P.smtpPassword || process.env.SMTP_PASS,
+          user: dbSettings?.P.smtpUsername || process.env.SMTP_USER,
+        },
+        host: dbSettings?.P.smtpHost || process.env.SMTP_HOST,
+        port: dbSettings?.P.smtpPort || Number(process.env.SMTP_PORT),
+        secure: dbSettings?.P.secure ?? process.env.SMTP_SECURE === "true",
+        tls: {
+          rejectUnauthorized: false,
+        },
+      };
 
-    const transporter = nodemailer.createTransport(transportConfig);
+      const transporter = nodemailer.createTransport(transportConfig);
 
-    const emailOptions: nodemailer.SendMailOptions = {
-      from: dbSettings?.from || process.env.SMTP_FROM,
-      html: content, // Using html instead of text to preserve formatting
-      subject,
-      to,
-    };
-
-    if (attachmentPath && attachmentName) {
-      emailOptions.attachments = [
-        {
+      const emailOptions: nodemailer.SendMailOptions = {
+        attachments: attachmentPath && attachmentName ? [{
           filename: attachmentName,
           path: attachmentPath,
-        },
-      ];
-    }
+        }] : undefined,
+        from: dbSettings?.P.from || process.env.SMTP_FROM,
+        html: content,
+        subject,
+        to,
+      };
 
-    emailInfo = await transporter.sendMail(emailOptions);
+      emailInfo = await transporter.sendMail(emailOptions);
+    }
   } catch (error) {
     console.error("Failed to send email:", error);
     // Continue execution to save to database even if email fails
   }
 
-  // Save sent/failed email to database
+  await saveEmailToDatabase(subDomain, {
+    attachmentName,
+    attachmentPath,
+    content,
+    dbSettings,
+    emailInfo,
+    subject,
+    to,
+  });
+
+  return emailInfo;
+}
+
+
+async function getEmailSettings(subDomain: string): Promise<null | Vertex> {
+  const driver = await getDriver();
+  const dbSession = driver.session({ database: subDomain });
+
+  try {
+    const emailSettingVertex = await getEmailSettingVertex(subDomain, dbSession);
+    return emailSettingVertex || getEnvEmailSettings();
+  } finally {
+    await dbSession.close();
+  }
+}
+
+async function getEmailSettingVertex(subDomain: string, dbSession: Session): Promise<null | Vertex> {
+  if (subDomain === SYSTEM_DB_NAME) {
+    return await getSystemEmailSettings(subDomain, dbSession);
+  }
+
+  return await getSubdomainEmailSettings(dbSession) || await getParentAccountEmailSettings(subDomain);
+}
+function getEnvEmailSettings(): null | Vertex {
+  if (
+    !process.env.SMTP_HOST ||
+    !process.env.SMTP_PORT ||
+    !process.env.SMTP_USER ||
+    !process.env.SMTP_PASS ||
+    !process.env.SMTP_FROM
+  ) {
+    return null;
+  }
+
+  return {
+    id: "EmailSetting",
+    IN: {},
+    L: [],
+    OUT: {},
+    P: {
+      active: "smtp",
+      from: process.env.SMTP_FROM,
+      secure: process.env.SMTP_SECURE === "true",
+      smtpHost: process.env.SMTP_HOST,
+      smtpPassword: process.env.SMTP_PASS,
+      smtpPort: Number(process.env.SMTP_PORT),
+      smtpUsername: process.env.SMTP_USER,
+    }
+  };
+}
+
+async function getParentAccountEmailSettings(subDomain: string): Promise<null | Vertex> {
+  const driver = await getDriver();
+  const systemSession = driver.session({ database: SYSTEM_DB_NAME });
+
+  try {
+    return await getSystemEmailSettings(subDomain, systemSession);
+  } finally {
+    await systemSession.close();
+  }
+}
+
+async function getSubdomainEmailSettings(dbSession: Session): Promise<null | Vertex> {
+  const result = await dbSession.run(
+    `MATCH (e:EmailSetting)
+     WHERE e.active IS NOT NULL AND e.active <> ''
+     RETURN e as settings
+     LIMIT 1`
+  );
+
+  return result.records.length > 0
+    ? convertNodeToJson(result.records[0].get("settings"))
+    : null;
+}
+
+async function getSystemEmailSettings(subDomain: string, dbSession: Session): Promise<null | Vertex> {
+  const result = await dbSession.run(
+    `MATCH (s:SubDomain {key: $subDomain})<-[:AccountSubdomain]-(a:Account)
+     MATCH (a)-[:AccountEmailSetting]->(e:EmailSetting)
+     WHERE e.active IS NOT NULL AND e.active <> ''
+     RETURN e as settings
+     LIMIT 1`,
+    { subDomain }
+  );
+
+  return result.records.length > 0 
+    ? convertNodeToJson(result.records[0].get("settings"))
+    : null;
+}
+
+async function saveEmailToDatabase(subDomain: string, {
+  attachmentName,
+  attachmentPath,
+  content,
+  dbSettings,
+  emailInfo,
+  subject,
+  to,
+}: {
+  attachmentName?: string;
+  attachmentPath?: string;
+  content: string;
+  dbSettings: null | Vertex;
+  emailInfo: Record<string, unknown>;
+  subject: string;
+  to: string;
+}) {
   const dbSession = (await getDriver()).session({ database: subDomain });
   try {
     await dbSession.run(
@@ -86,68 +206,15 @@ export async function sendEmail({
       })`,
       {
         attachmentName: attachmentName || null,
-        attachmentPath: attachmentPath || null, 
+        attachmentPath: attachmentPath || null,
         content,
-        from: dbSettings?.from || process.env.SMTP_FROM,
+        from: dbSettings?.P.from || process.env.SMTP_FROM || null,
         messageId: emailInfo?.messageId || null,
         status: emailInfo ? 'sent' : 'failed',
         subject,
         to,
       }
     );
-  } finally {
-    await dbSession.close();
-  }
-
-  return emailInfo;
-}
-
-async function getEmailSettings(subDomain: string): Promise<null | SMTPConfig> {
-  if (subDomain === SYSTEM_DB_NAME) {
-    return null; // Will use env settings
-  }
-
-  const dbSession = (await getDriver()).session({ database: subDomain });
-  try {
-    const result = await dbSession.run(
-      `MATCH (s:EmailSetting) 
-       RETURN s.smtpHost as host, 
-              s.smtpPort as port,
-              s.smtpUsername as user,
-              s.smtpPassword as pass,
-              s.fromEmail as from,
-              s.secure as secure
-       LIMIT 1`,
-    );
-
-    if (result.records.length === 0) {
-      return null;
-    }
-
-    const record = result.records[0];
-    const settings = {
-      from: record.get("from"),
-      host: record.get("host"),
-      pass: record.get("pass"),
-      port: Number.parseInt(record.get("port")),
-      secure: record.get("secure") === true,
-      user: record.get("user"),
-    };
-
-    // Validate that all required fields are present
-    if (
-      !(
-        settings.host &&
-        settings.port &&
-        settings.user &&
-        settings.pass &&
-        settings.from
-      )
-    ) {
-      return null;
-    }
-
-    return settings;
   } finally {
     await dbSession.close();
   }

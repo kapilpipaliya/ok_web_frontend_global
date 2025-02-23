@@ -1,14 +1,16 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { Edge, Vertex } from "~/lib/graph/graph";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
+import { getUserFromSession } from "~/server/session/getUserFromSession";
+
 
 export async function GET({ request }: APIEvent) {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     const isAdmin = await checkAdminRole(request);
@@ -19,10 +21,23 @@ export async function GET({ request }: APIEvent) {
     const nodes: { [key: string]: Vertex } = {};
     const relationships: { [key: string]: Edge } = {};
 
-    const result = await dbSession.run(
-      `MATCH (s:EmailSetting)
-       RETURN s as settings`,
-    );
+    let result;
+    if (subDomain === SYSTEM_DB_NAME) {
+      // Get account-specific email settings
+      const user = await getUserFromSession(request);
+      result = await dbSession.run(
+        `MATCH (a:Account)-[:AccountUser]->(u:User {uuid: $uuid})
+         MATCH (a)-[:AccountEmailSetting]->(s:EmailSetting)
+         RETURN s as settings`,
+        { uuid: user?.P.uuid }
+      );
+    } else {
+      // Get subdomain email settings
+      result = await dbSession.run(
+        `MATCH (s:EmailSetting)
+         RETURN s as settings`
+      );
+    }
 
     const settings = processResult(result.records, { nodes, relationships }, "settings", "");
 

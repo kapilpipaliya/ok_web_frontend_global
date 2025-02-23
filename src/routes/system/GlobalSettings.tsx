@@ -12,7 +12,7 @@ export default function GlobalSettings() {
   const [graph] = useGraph();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMenu, setSelectedMenu] = createSignal(
-    searchParams.tab || "general",
+    searchParams.tab || "email",
   );
 
   createEffect(() => {
