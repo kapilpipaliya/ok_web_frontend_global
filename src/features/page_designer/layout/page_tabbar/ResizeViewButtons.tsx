@@ -1,3 +1,4 @@
+import { toTitle } from "case-switcher-js";
 import { For } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -38,7 +39,8 @@ export const ResizeViewButtons = (props: {
               });
             }}
             size={22}
-            title={view.id}
+            title={toTitle(view.id)}
+            tooltipGroup="page-buttons"
           />
         )}
       </For>

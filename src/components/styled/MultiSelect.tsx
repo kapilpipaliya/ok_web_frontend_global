@@ -358,8 +358,10 @@ export function MultiSelectField(
             value={inputValue()}
           />
           <Icon
-            class="mr:5 c:base-50"
+            class="mr:5 fg:base-50 cursor:pointer"
             icon={dropdownVisible() ? "ph:caret-up-bold" : "ph:caret-down-bold"}
+            noobserver
+            onClick={() => setDropdownVisible(!dropdownVisible())}
             width={20}
           />
         </div>

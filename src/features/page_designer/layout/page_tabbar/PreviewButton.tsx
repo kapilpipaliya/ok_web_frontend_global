@@ -63,6 +63,7 @@ export function PreviewButton(props: { formStoreId: string }) {
         onClick={handleButtonClick}
         size={22}
         title="Preview"
+        tooltipGroup="page-buttons"
         type="button"
       />
 

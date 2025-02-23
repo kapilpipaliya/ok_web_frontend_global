@@ -24,10 +24,10 @@ export function ProfileHeader(): JSX.Element {
         style={`background-size:cover;background-image: url(${getProfileImageUrl(graph)})`}
       />
       <div class="ml:10 mr:1rem">
-        <div class="f:15 font-weight:bold text-align:start">
+        <div class="font-weight:bold text-align:start">
           {displayName()}
         </div>
-        <div class="f:13 text-align:start">
+        <div class="f:14 text-align:start">
           {displayEmail()}
         </div>
       </div>

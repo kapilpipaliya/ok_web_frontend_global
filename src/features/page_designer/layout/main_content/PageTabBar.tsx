@@ -51,6 +51,7 @@ export function PageTabBar(props: {
             icon="ph:x-circle"
             onClick={props.onClose}
             title="Close Tab"
+            tooltipGroup="page-buttons"
           />
         </Show>
       </div>

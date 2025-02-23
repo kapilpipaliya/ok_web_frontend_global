@@ -167,16 +167,6 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
-        props: (options: FunctionArgumentType) => ({
-          onClick: () => {
-            options.dataContext.modalState[1]("showModal", false);
-          },
-          text: "Cancel",
-        }),
-      },
-      {
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
         componentName: "Button",
         props: (options: FunctionArgumentType) => ({
@@ -185,6 +175,16 @@ export const getUserFormSchema = (onSuccess: () => void) => {
           text: options.dataContext.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
+        }),
+      },
+      {
+        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
+        componentName: "Button",
+        props: (options: FunctionArgumentType) => ({
+          onClick: () => {
+            options.dataContext.modalState[1]("showModal", false);
+          },
+          text: "Cancel",
         }),
       },
     ],
@@ -210,18 +210,25 @@ export const getUserFormSchema = (onSuccess: () => void) => {
           {
             attributes: [
               {
-                as: "dialog",
-                attributes: [modalHeaderSchema, userFormSchema, modalFooterSchema],
-                class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
-                componentName: "Html",
-                open: true,
+                attributes: [
+                  {
+                    as: "dialog",
+                    attributes: [modalHeaderSchema, userFormSchema, modalFooterSchema],
+                    class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                    componentName: "Html",
+                    open: true,
+                    props: (options: FunctionArgumentType) => ({
+                      style: {
+                        "z-index": options.zIndex + 1,
+                      },
+                    }),
+                  },
+                ],
+                componentName: "Portal",
                 props: (options: FunctionArgumentType) => ({
                   hidden: !options.dataContext.modalState[0]?.showModal,
-                  style: {
-                    "z-index": options.zIndex + 1,
-                  },
                 }),
-              },
+              }
             ],
             componentName: "ZIndex",
           },

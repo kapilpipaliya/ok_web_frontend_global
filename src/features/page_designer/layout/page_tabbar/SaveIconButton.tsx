@@ -145,6 +145,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
       onClick={handleSave}
       size={22}
       title="Save"
+      tooltipGroup="page-buttons"
     />
   );
 }

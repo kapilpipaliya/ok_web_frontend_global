@@ -47,6 +47,7 @@ export function PasswordChangeForm() {
         "confirmPassword",
         showPassword,
         setShowPassword,
+        "Confirm New Password",
       ),
       {
         as: "div",
@@ -111,6 +112,7 @@ function createPasswordField(
   key: string,
   showPassword: Store<{ [key: string]: boolean }>,
   setShowPassword: SetStoreFunction<{ [key: string]: boolean }>,
+  placeholder?: string,
 ) {
   return {
     as: "div",
@@ -127,7 +129,7 @@ function createPasswordField(
             class: PROPERTIES.Css.TextField,
             componentName: "TextInput",
             key,
-            placeholder: `Enter ${label.toLowerCase()}`,
+            placeholder: placeholder || `Enter ${label.toLowerCase()}`,
             props: () => ({
               type: showPassword[key] ? "text" : "password",
             }),

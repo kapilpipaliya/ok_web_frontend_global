@@ -8,6 +8,7 @@ export function RefreshButton(props: { handleRefresh: () => void }) {
       icon="ph:arrows-counter-clockwise"
       onClick={props.handleRefresh}
       title="Refresh Preview"
+      tooltipGroup="page-buttons"
     />
   );
 }

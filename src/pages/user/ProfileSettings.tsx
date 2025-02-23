@@ -49,9 +49,31 @@ export function ProfileSettings() {
         as: "div",
         attributes: [
           {
-            class: "mb:16px fg:base-60 text-align:left",
-            componentName: "Text",
-            text: "Note: Changing your username or email will update them across all your projects.",
+            as: "div",
+            attributes: [
+              {
+                as: "div",
+                attributes: [
+                  {
+                    class: "fg:base-80",
+                    componentName: "Text",
+                    text: "Important!",
+                  },
+                  {
+                    class: "ml:4 mt:4px fg:base-60",
+                    componentName: "Text", 
+                    text: "Changing your username or email will update them across all your projects.",
+                  }
+                ],
+                class: "p:16px bg:primary-5 r:8px border:1px|solid|primary-10",
+                componentName: "Box"
+              }
+            ],
+            class: "mb:24px",
+            componentName: "Box",
+            props: () => ({
+              hidden: !isSystemSubDomain(),
+            }),
           }
         ],
         componentName: "Box"

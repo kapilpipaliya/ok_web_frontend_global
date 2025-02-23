@@ -5,6 +5,7 @@ import { Dynamic } from "solid-js/web";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/components/styled/constants/constant";
+import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { headerIconButtonClass } from "~/pages/constants/constant";
 
@@ -54,16 +55,18 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           title={`Switch to ${isTableLayout() ? "Card" : "Table"} Layout`}
         />
         <Show when={!isTableLayout()}>
-          <input
-            class={`${PROPERTIES.Css.TextField.replace("w:100%", "")}`}
-            max="10"
-            min="1"
-            onInput={(e) =>
-              setGridState("cardSize", Number(e.currentTarget.value))
-            }
-            type="number"
-            value={gridState.cardSize}
-          />
+          <TooltipWrapper content="Column Size">
+            <input
+              class={`${PROPERTIES.Css.TextField.replace("w:100%", "")}`}
+              max="10"
+              min="1"
+              onInput={(e) =>
+                setGridState("cardSize", Number(e.currentTarget.value))
+              }
+              type="number"
+              value={gridState.cardSize}
+            />
+          </TooltipWrapper>
         </Show>
       </div>
     </div>

@@ -41,6 +41,7 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
             onClick={item.onClick}
             size={22}
             title={item.tooltip}
+            tooltipGroup="page-buttons"
           />
         )}
       </For>

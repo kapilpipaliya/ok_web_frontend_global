@@ -34,7 +34,7 @@ export function UserDropdownMenuDisplay(): JSX.Element {
           >
             <ul class="list-style-type:none m:0 p:0 position:relative">
               <ProfileHeader />
-              <hr class="color:base-5" />
+              <hr class="color:base-20" />
               <MenuItems onClose={handleClose} />
             </ul>
           </DropdownMenu>
