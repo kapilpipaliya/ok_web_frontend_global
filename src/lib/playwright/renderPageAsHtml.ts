@@ -69,6 +69,9 @@ export async function renderPageAsHtml({
       throw new Error("Failed to render page");
     }
 
+    // Remove all script tags
+    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
     return { html, success: true };
   } catch (error) {
     console.error("Error rendering page:", error);

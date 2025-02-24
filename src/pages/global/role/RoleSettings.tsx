@@ -31,7 +31,7 @@ export function RoleSettings() {
       },
     ],
     isInlineEditable: true,
-    key: "roles",
+    key: "Role",
     title: "Roles",
   } as IFormMetaData;
 
@@ -53,7 +53,7 @@ export function RoleSettings() {
         gridStore = gridStore_;
       }}
       isShowPagination={true}
-      tableId="roles"
+      tableId="Role"
     />
   );
 }

@@ -5,7 +5,7 @@ import { APIError } from "~/lib/api/apiErrorHandler";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
-export async function POST({ request }: APIEvent) {
+export async function DELETE({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
@@ -16,20 +16,21 @@ export async function POST({ request }: APIEvent) {
     //   throw new APIError("Unauthorized", 401);
     // }
 
-    const { uuid } = await request.json();
+    const { id } = await request.json();
 
     // Prevent self-deletion
-    if (uuid === currentUser.P.uuid) {
+    if (id === currentUser?.id) {
       throw new APIError("Cannot delete your own account", 400);
     }
 
     // Check if user exists
     const userCheck = await dbSession.run(
       `
-      MATCH (u:User {uuid: $uuid})
+      MATCH (u:User)
+      WHERE elementId(u) = $id
       RETURN u
     `,
-      { uuid },
+      { id },
     );
 
     if (userCheck.records.length === 0) {
@@ -39,17 +40,20 @@ export async function POST({ request }: APIEvent) {
     // Delete user and all relationships
     await dbSession.run(
       `
-      MATCH (u:User {uuid: $uuid})
+      MATCH (u:User)
+      WHERE elementId(u) = $id
       OPTIONAL MATCH (u)-[r]-()
       DELETE u, r
     `,
-      { uuid },
+      { id },
     );
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    return {
+      graph: {
+        deleted_vertexes: [id]
+      },
+      success: true
+    }
   } catch (error) {
     return handleAPIError(error);
   } finally {

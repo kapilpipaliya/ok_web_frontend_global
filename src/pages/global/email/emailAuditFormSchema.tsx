@@ -1,4 +1,5 @@
 import { createStore } from "solid-js/store";
+import xss, { IFilterXSSOptions } from "xss";
 
 import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
@@ -9,6 +10,23 @@ import { Vertex } from "~/lib/graph/graph";
 import { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
+
+const whiteList = xss.whiteList;
+whiteList['html'] = [];
+whiteList['head'] = [];
+whiteList['body'] = [];
+whiteList['style'] = [];
+const xssOptions: IFilterXSSOptions = {
+  onTagAttr: (tag, name, value, isWhiteAttr) => {
+    if (name === 'style') {
+      // Allow the style attribute
+      return `${name}="${xss.escapeAttrValue(value)}"`;
+    }
+  },
+  stripIgnoreTag: true, // Filter out tags not in the whitelist. Ignore tags like "BASE", "meta" etc. stripIgnoreTagBody: ["script"],
+  stripIgnoreTagBody: ["script"],
+  whiteList
+}
 
 export const emailAuditFormSchema = {
   as: "div",
@@ -78,7 +96,7 @@ export const emailAuditFormSchema = {
               componentName: "Html",
               key: "content",
               props: (options: FunctionArgumentType) => ({
-                srcdoc: options.data.P.content,
+                srcdoc: xss(options.data.P.content, xssOptions),
               }),
               validation: { required: true },
             },

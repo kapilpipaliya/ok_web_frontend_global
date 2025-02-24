@@ -14,12 +14,16 @@ export const API = {
     auditUrl: "/api/email/audit",
   },
   file: {
+    deleteFileUrl: "/api/file/delete",
     downloadFileUrl: "/api/file/download",
     replaceFileUrl: "/api/file/replace",
     uploadFileUrl: "/api/file/upload",
   },
   // Other endpoints
   getInitialDataUrl: "/api/get/getInitialData",
+  permission: {
+    deletePermissionUrl: "/api/permissions/delete",
+  },
   role: {
     deleteRoleUrl: "/api/roles/delete",
     getRolesUrl: "/api/roles/list",

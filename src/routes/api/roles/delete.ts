@@ -5,7 +5,7 @@ import { APIError } from "~/lib/api/apiErrorHandler";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
-export async function POST({ request }: APIEvent) {
+export async function DELETE({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
@@ -16,23 +16,24 @@ export async function POST({ request }: APIEvent) {
     //   throw new APIError("Unauthorized", 401);
     // }
 
-    const { key } = await request.json();
+    const { id } = await request.json();
 
     // Check if role exists and is not in use
     const roleCheck = await dbSession.run(
       `
-      MATCH (r:Role {key: $key})
+      MATCH (r:Role)
+      WHERE elementId(r) = $id
       OPTIONAL MATCH (u:User)-[:UserRole]->(r)
       RETURN r, count(u) as userCount
     `,
-      { key },
+      { id },
     );
 
     if (roleCheck.records.length === 0) {
       throw new APIError("Role not found", 404);
     }
 
-    const userCount = roleCheck.records[0].get("userCount").toNumber();
+    const userCount = roleCheck.records[0].get("userCount");
     if (userCount > 0) {
       throw new APIError("Cannot delete role that is assigned to users", 400);
     }
@@ -40,16 +41,18 @@ export async function POST({ request }: APIEvent) {
     // Delete the role
     await dbSession.run(
       `
-      MATCH (r:Role {key: $key})
+      MATCH (r:Role)
+      WHERE elementId(r) = $id
       DELETE r
     `,
-      { key },
+      { id },
     );
-
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    return {
+      graph: {
+        deleted_vertexes: [roleCheck.records[0].get("r").identity]
+      },
+      success: true
+    }
   } catch (error) {
     return handleAPIError(error);
   } finally {

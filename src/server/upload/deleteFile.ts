@@ -21,20 +21,16 @@ export async function deleteFile(fileId: string, neo4jSession: Session) {
 
     await deleteFileMetadataFromNeo4j(neo4jSession, fileId);
 
-    return new Response(
-      JSON.stringify({ message: "File deleted successfully" }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
+    return {
+      graph: {
+        deleted_vertexes: [fileId]
       },
-    );
+      success: true
+    }
   } catch (error: any) {
-    return new Response(
-      JSON.stringify({ error: `Error deleting file ${error.message}` }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      },
-    );
+    return {
+      error: `Error deleting file ${error.message}`,
+      success: false
+    }
   }
 }

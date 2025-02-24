@@ -49,7 +49,7 @@ export function UserManagement() {
       },
     ],
     isInlineEditable: true,
-    key: "users",
+    key: "User",
     title: "Users",
   };
 
@@ -71,7 +71,7 @@ export function UserManagement() {
         gridStore = gridStore_;
       }}
       isShowPagination={true}
-      tableId="users"
+      tableId="User"
     />
   );
 }

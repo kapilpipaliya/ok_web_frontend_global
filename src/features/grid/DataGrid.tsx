@@ -275,7 +275,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     setGridState("filteredData", nodes);
   }
 
-  const onDelete = useDeleteRowConfirm(gridState);
+  const onDelete = useDeleteRowConfirm(gridState, setGridState);
 
   return (
     <DataGridProvider value={gridStore}>
