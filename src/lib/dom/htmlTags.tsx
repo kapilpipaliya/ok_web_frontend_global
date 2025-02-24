@@ -1,4 +1,5 @@
 // https://github.com/sindresorhus/html-tags/blob/main/html-tags.json
+// https://html.spec.whatwg.org/multipage/indices.html#elements-3
 
 export const htmlTags = [
   "a",

@@ -35,15 +35,13 @@ export const DIMENSIONS = {
     id: "tablet",
     width: "768px",
   },
-};
+} as const;
 
 export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
     class?: string;
-    height?: string;
     view: Id;
-    width?: string;
   }>,
 ) {
   const [width, setWidth] = createSignal(props.width || "");
@@ -61,14 +59,15 @@ export function ResizableContainer(
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const viewVertex = () =>
-    graph.vertexes[props.view] as Vertex<{ view: string }>;
+    graph.vertexes[props.view] as Vertex<{ view: string; width: string; height: string }>;
 
   createEffect(() => {
-    if (!(props.width || props.height)) {
-      const dimension =
-        DIMENSIONS[
-          viewVertex()?.P.view?.toLowerCase() as keyof typeof DIMENSIONS
-        ] || DIMENSIONS.desktop;
+    const view = viewVertex();
+    if (view?.P.width && view?.P.height) {
+      setWidth(view.P.width);
+      setHeight(view.P.height);
+    } else {
+      const dimension = DIMENSIONS[view?.P.view?.toLowerCase() as keyof typeof DIMENSIONS] || DIMENSIONS.desktop;
       setWidth(dimension.width);
       setHeight(dimension.height);
     }
@@ -96,11 +95,13 @@ export function ResizableContainer(
       }
 
       if (direction === "horizontal") {
-        const newWidth = initialWidth + e.clientX - startX;
-        setWidth(`${Math.max(50, newWidth)}px`);
+        const newWidth = `${Math.max(50, initialWidth + e.clientX - startX)}px`;
+        setWidth(newWidth);
+        mergeVertexProperties(0, props.view, graph, setGraph, { width: newWidth });
       } else if (direction === "vertical") {
-        const newHeight = initialHeight + e.clientY - startY;
-        setHeight(`${Math.max(50, newHeight)}px`);
+        const newHeight = `${Math.max(50, initialHeight + e.clientY - startY)}px`;
+        setHeight(newHeight);
+        mergeVertexProperties(0, props.view, graph, setGraph, { height: newHeight });
       }
     };
 
@@ -150,11 +151,11 @@ export function ResizableContainer(
   };
 
   return (
-    <div class={`grid ${props.class} ${STYLES.overflow}  flex-shrink:0`}>
+    <div class={`grid ${props.class} ${STYLES.overflow} flex-shrink:0`}>
       <div
-        class={`${STYLES.overflow} justify-self:center position:relative r:10|10|10|10 flex flex:col`}
+        class={`${STYLES.overflow} justify-self:center position:relative r:10 flex flex:col`}
         classList={{
-          "bg:#f3f3f4": isDraggingOver(),
+          "bg:primary-5": isDraggingOver(),
           "user-select:none": resizing(),
         }}
         onDragLeave={handleDragLeave}

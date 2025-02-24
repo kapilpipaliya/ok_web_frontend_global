@@ -51,3 +51,5 @@ GetInitial Data support an argument to get user too.
 Make a separate function to load data and return initial data and then set it.
 Use CreateResource to fetch initial data.
 
+Group <a> tag with proper categories
+make save all button save preview too.

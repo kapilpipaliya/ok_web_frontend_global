@@ -46,7 +46,7 @@ export function JsonEditorFieldComponent() {
 
   return (
     <label class="mt:5">
-      Properties JSON
+      JSON
       {/* <textarea
           placeholder="Enter value here"
           value={JSON.stringify(graph.vertexes[formStoreVertex()?.P.selectedId].P, null, 2)}

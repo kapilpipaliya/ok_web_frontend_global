@@ -1,9 +1,7 @@
 import { toTitle } from "case-switcher-js";
-import { For } from "solid-js";
+import { createEffect } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-
-import { IconButton } from "~/components/styled/IconButton";
 import { DIMENSIONS } from "~/components/styled/ResizableDivView";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
@@ -13,37 +11,81 @@ export const ResizeViewButtons = (props: {
   openIndex: number;
 }) => {
   const [graph, setGraph] = useGraph();
+  
   const formStoreVertex = () =>
     graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
   const openedView = () => formStoreVertex()?.P.openedViews[props.openIndex];
   const viewVertex = () =>
-    graph.vertexes[openedView()] as Vertex<{ view: string }>;
+    graph.vertexes[openedView()] as Vertex<{ height: string; view: string; width: string; }>;
+
+  // Initialize dimensions if not set
+  createEffect(() => {
+    const view = viewVertex();
+    if (!view?.P.width || !view?.P.height) {
+      const defaultDimension = DIMENSIONS.desktop;
+      mergeVertexProperties(0, openedView(), graph, setGraph, {
+        height: defaultDimension.height,
+        view: defaultDimension.id,
+        width: defaultDimension.width,
+      });
+    }
+  });
+
+  const handleDimensionSelect = (selected: string) => {
+    if (selected === 'custom') {
+      return;
+    }
+    const dimension = DIMENSIONS[selected as keyof typeof DIMENSIONS];
+    mergeVertexProperties(0, openedView(), graph, setGraph, {
+      height: dimension.height,
+      view: dimension.id,
+      width: dimension.width,
+    });
+  };
+
+  const handleWidthChange = (width: string) => {
+    mergeVertexProperties(0, openedView(), graph, setGraph, {
+      view: 'custom',
+      width,
+    });
+  };
+
+  const handleHeightChange = (height: string) => {
+    mergeVertexProperties(0, openedView(), graph, setGraph, {
+      height,
+      view: 'custom',
+    });
+  };
+
   return (
-    <div class="flex">
-      <For each={Object.values(DIMENSIONS)}>
-        {(view, index) => (
-          <IconButton
-            class="b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default f:0.875rem font-weight:600 px:0.75rem py:0.5rem"
-            classList={{
-              "bg:#E0E7F3": view.id === viewVertex()?.P.view?.toLowerCase(),
-              "bl:none": index() !== 0,
-              "color:#5252F1": view.id === viewVertex()?.P.view?.toLowerCase(),
-              "color:grey": view.id !== viewVertex()?.P.view?.toLowerCase(),
-              "r:0|5|5|0": index() === 2,
-              "r:5|0|0|5": index() === 0,
-            }}
-            icon={view.icon}
-            onclick={() => {
-              mergeVertexProperties(0, openedView(), graph, setGraph, {
-                view: view.id,
-              });
-            }}
-            size={22}
-            title={toTitle(view.id)}
-            tooltipGroup="page-buttons"
-          />
-        )}
-      </For>
+    <div class="flex gap:1rem ai:center">
+      <select
+        class="b:1px|solid|primary-10 r:5 p:0.5rem bg:base-0 color:base-100"
+        onChange={(e) => handleDimensionSelect(e.target.value)}
+        value={viewVertex()?.P.view?.toLowerCase()}
+      >
+        {Object.entries(DIMENSIONS).map(([key, value]) => (
+          <option value={key}>{toTitle(value.id)}</option>
+        ))}
+        <option value="custom">Custom</option>
+      </select>
+
+      <div class="flex gap:0.5rem ai:center">
+        <span class="flex ai:center">w:</span>
+        <input
+          class="b:1px|solid|primary-10 r:5 p:0.25rem w:5rem bg:base-0"
+          onInput={(e) => handleWidthChange(e.target.value)}
+          type="text"
+          value={viewVertex()?.P.width || ""}
+        />
+        <span class="flex ai:center">h:</span>
+        <input
+          class="b:1px|solid|primary-10 r:5 p:0.25rem w:5rem bg:base-0"
+          onInput={(e) => handleHeightChange(e.target.value)}
+          type="text"
+          value={viewVertex()?.P.height || ""}
+        />
+      </div>
     </div>
   );
 };

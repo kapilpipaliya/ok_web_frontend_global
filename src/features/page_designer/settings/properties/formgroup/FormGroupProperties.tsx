@@ -180,7 +180,7 @@ function createVertices(
       P: {
         class: PROPERTIES.Css.TextField,
         componentName: "TextInput",
-        displayName: "Unique Name",
+        displayName: "Unique ID",
         key: uniqueNameKey,
       },
     },
@@ -329,8 +329,8 @@ function moveClassToLast(
   );
 
   return [
-    graph.vertexes[vertexIds.attrLabel],
     graph.vertexes[vertexIds.key],
+    graph.vertexes[vertexIds.attrLabel],
     ...(isForm && componentName === "Form"
       ? [graph.vertexes[vertexIds.thankYouPage]]
       : []),
