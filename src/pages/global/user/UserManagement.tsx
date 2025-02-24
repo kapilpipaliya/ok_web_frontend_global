@@ -66,6 +66,7 @@ export function UserManagement() {
       editSchema={editSchema}
       formSchema={UserSchema}
       getTableData={getTableData}
+      hideEditJsonAction={true}
       initializeGridStoreParent={(gridStore_) => {
         gridStore = gridStore_;
       }}

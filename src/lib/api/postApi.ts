@@ -9,13 +9,14 @@ import { isValidResponse } from "./isValidResponse";
 export async function postAPI(
   url: string,
   data: object,
+  action: "DELETE" | "POST" = "POST",
 ): Promise<{ [key: string]: any }> {
   const response = await fetch(url, {
     body: JSON.stringify(data),
     headers: {
       "Content-Type": "application/json",
     },
-    method: "POST",
+    method: action,
   });
 
   const contentType = response.headers.get("content-type");

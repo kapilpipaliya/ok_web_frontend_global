@@ -43,6 +43,7 @@ export function EmailSettings() {
                   { id: "sendgrid", label: "SendGrid" },
                   // Add other providers as needed
                 ],
+                placeholder: "Select Email Provider",
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -268,6 +269,7 @@ export function EmailSettings() {
                         }
                       },
                       text: options.dataContext.testState[0]?.isLoading ? "Testing..." : "Test Connection",
+                      title: "Please save changes and click Test Connection to send test email to current logged in user",
                     }),
                   },
                 ],

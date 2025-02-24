@@ -74,6 +74,7 @@ export function GeneralSettings() {
               { id: "es", label: "Spanish" },
               { id: "fr", label: "French" },
             ],
+            placeholder: "Select Default Language",
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,

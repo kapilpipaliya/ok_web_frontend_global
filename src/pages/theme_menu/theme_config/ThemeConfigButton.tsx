@@ -25,6 +25,7 @@ export function ThemeConfigButton(props: {
         ref={(el) => (saveAsTemplateRef = el)}
         size={props.size}
         title="Edit Theme"
+        tooltipGroup="theme-actions"
       />
       <Show when={showModal()}>
         <ThemeConfigDialog

@@ -2,14 +2,12 @@ import { createSignal, type Setter } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import {
-  DialogFooter,
-  dialogOkButtonClass,
-} from "~/components/styled/dialog/DialogFooter";
+import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function PreviewCSSMenu(
   props: Readonly<{
@@ -41,7 +39,7 @@ export function PreviewCSSMenu(
 
       <DialogFooter>
         <button
-          class={dialogOkButtonClass}
+          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS}
           onClick={props.onClose}
           type="button"
         >

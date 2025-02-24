@@ -1,7 +1,11 @@
 import { createSignal, For, onMount, Show } from "solid-js";
+import { Portal } from "solid-js/web";
 
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
+import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
 import {
   getGlobalSettingVertex,
   getGlobalThemeVertex,
@@ -9,10 +13,12 @@ import {
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 import { handleDataSubmission } from "~/lib/graph/mutate/handleDataSubmission";
+import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { GlobalSetting } from "~/lib/meta/base/GlobalSetting";
 
+import { SETTINGS_CONSTANTS } from "../settings/constants";
 import { AddNewThemeDialog } from "./AddNewThemeDialog";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
@@ -23,6 +29,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   const [loading, setLoading] = createSignal(true);
   const { showErrorToast, showSuccessToast } = useToast();
   const [error, setError] = createSignal<null | string>(null);
+  const [confirmDelete, setConfirmDelete] = createSignal<Id | null>(null);
 
   const loadThemes = async () => {
     const result = await fetchAndSetGraphData(graph, setGraph, "g:'Theme'");
@@ -72,7 +79,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
       themeId,
     );
 
-    const _isSuccess = await handleDataSubmission(
+    await handleDataSubmission(
       newFormTxnId,
       graph,
       setGraph,
@@ -83,6 +90,28 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
         successMessage: null,
       },
     );
+  };
+
+  const confirmDeleteTheme = (themeId: Id) => {
+    setConfirmDelete(themeId);
+  };
+
+  const handleDeleteConfirmation = async () => {
+    if (confirmDelete() === null) return;
+
+    const themeId = confirmDelete();
+    setConfirmDelete(null);
+
+    try {
+      const result = await postAPI(API.settings.theme.deleteUrl, { themeId }, "DELETE");
+      if (result.success) {
+        setGraphData(graph, setGraph, result.graph);
+      }
+      showSuccessToast("Theme deleted successfully");
+      loadThemes(); // Reload themes after deletion
+    } catch (error) {
+      showErrorToast("Failed to delete theme");
+    }
   };
 
   return (
@@ -96,6 +125,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
       <Show when={loading()}>
         <div class="p:0.5rem">Loading...</div>
       </Show>
+      <AddNewThemeDialog />
       <Show when={!(loading() || error())}>
         <ul class={`width:100% ${props.isStandalone ? 'max-height:none' : 'max-height:300px'} overflow-y:auto`}>
           <For each={graph.vertexLabelIdMap.Theme}>
@@ -104,9 +134,8 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                 getGlobalThemeVertex(graph)?.id === theme;
               return (
                 <li
-                  class={`${
-                    isSelected() ? "bg:primary-30" : ""
-                  } flex ai:center bg:primary-20:hover jc:space-between p:0.5rem cursor:pointer border-bottom:1px|solid|#eee`}
+                  class={`${isSelected() ? "bg:primary-30" : ""
+                    } flex ai:center bg:primary-20:hover jc:space-between p:0.5rem cursor:pointer border-bottom:1px|solid|#eee`}
                   onClick={() => handleThemeSelect(theme)}
                 >
                   <div class="flex ai:center gap:0.5rem">
@@ -117,9 +146,22 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                   </div>
                   <div class="flex ai:center gap:0.5rem">
                     <ThemePreview item={graph.vertexes[theme]} />
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <ThemeConfigButton item={graph.vertexes[theme]} size={16} />
-                    </div>
+
+                    <ThemeConfigButton item={graph.vertexes[theme]} size={18} />
+
+                    <Show when={!isSelected()}>
+                      <IconButton
+                        class="color:error"
+                        icon="ph:trash"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmDeleteTheme(theme);
+                        }}
+                        size={18}
+                        title="Delete Theme"
+                        tooltipGroup="theme-actions"
+                      />
+                    </Show>
                   </div>
                 </li>
               );
@@ -127,7 +169,20 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
           </For>
         </ul>
       </Show>
-      <AddNewThemeDialog />
+      <Show when={confirmDelete()}>
+        <Portal>
+          <div class={`${SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS}`}>
+            <div class={SETTINGS_CONSTANTS.MODAL.HEADER.CLASS}>
+              <h3 class={SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS}>Delete Theme</h3>
+            </div>
+            <p class={SETTINGS_CONSTANTS.MODAL.BODY.CLASS}>Are you sure you want to delete this theme?</p>
+            <div class={SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS}>
+              <button class={SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CLASS} onClick={handleDeleteConfirmation}>Yes</button>
+              <button class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS} onClick={() => setConfirmDelete(null)}>No</button>
+            </div>
+          </div>
+        </Portal>
+      </Show>
     </>
   );
 }

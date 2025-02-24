@@ -16,7 +16,7 @@ import { getCompanyLogoVertex } from "~/lib/graph/get/sync/getCompanyLogoVertex"
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
-import { defaultLogo } from "~/pages/constants/constant";
+import { profileImage } from "~/pages/constants/constant";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
@@ -105,7 +105,7 @@ export function CompanyLogoSettings() {
               const selectedFile = companyLogoVertex()[0];
               return {
                 onClick: () => setOpenDialog(true),
-                src: getDownloadLink(selectedFile) || defaultLogo,
+                src: getDownloadLink(selectedFile) || profileImage,
               };
             },
           },

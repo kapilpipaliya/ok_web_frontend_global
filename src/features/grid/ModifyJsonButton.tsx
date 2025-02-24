@@ -18,7 +18,7 @@ export function ModifyJsonButton(props: {
     <>
       <IconButton
         class={`${props.class} cursor:pointer`}
-        icon="bxs:edit"
+        icon="ph:note-pencil"
         onClick={() => setShowModal(true)}
         ref={(el) => (saveAsTemplateRef = el)}
         size={props.size}

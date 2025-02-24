@@ -4,6 +4,8 @@ import { type Accessor, Show } from "solid-js";
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 autofocus;
 
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+
 import { CustomModal } from "./CustomModal";
 
 export function DialogWithButtons(
@@ -28,21 +30,21 @@ export function DialogWithButtons(
       customTitle={<span>{props.title}</span>}
       dialogClass="min-w:20% r:10px p:0"
       footer={() => (
-        <div class="flex ai:center jc:end">
+        <div class={SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS}>
+          <Show when={props.hasPermission ?? true}>
+            <button class={SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CLASS} onClick={handleConfirm} type="button">
+              Confirm
+            </button>
+          </Show>
           <button
             autofocus
-            class="danger mr:7px"
+            class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS}
             onClick={props.onCancel}
             type="button"
             use:autofocus
           >
             Cancel
           </button>
-          <Show when={props.hasPermission ?? true}>
-            <button class="mr:10px" onClick={handleConfirm} type="button">
-              Confirm
-            </button>
-          </Show>
         </div>
       )}
       open={props.open}
@@ -50,13 +52,13 @@ export function DialogWithButtons(
     >
       <Show
         fallback={
-          <p class="color:gray-50 p:10px|0px">
+          <p class={SETTINGS_CONSTANTS.MODAL.BODY.CLASS}>
             You do not have permission to perform the action.
           </p>
         }
         when={props.hasPermission ?? true}
       >
-        <p class="p:10px|0px">{props.message}</p>
+        <p class={SETTINGS_CONSTANTS.MODAL.BODY.CLASS}>{props.message}</p>
       </Show>
     </CustomModal>
   );

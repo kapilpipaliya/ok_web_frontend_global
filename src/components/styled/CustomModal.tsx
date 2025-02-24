@@ -9,6 +9,7 @@ import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { useZIndex } from "../fields/ZIndex";
 import { STYLES } from "./constants/styles";
@@ -33,9 +34,6 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
       ? ([props.open, props.setOpen] as [Accessor<boolean>, Setter<boolean>])
       : createSignal(false);
 
-  const modalContainerClass = `position:fixed top:0 left:0 width:100% height:100% display:flex jc:center ai:center z-index:${zIndex} background-color:rgba(0,0,0,0.5)`;
-  const modalClass = "position:relative background-color:base-5";
-
   const Content = () => {
     const [floating, setFloating] = createSignal<HTMLElement | undefined>();
 
@@ -51,7 +49,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
 
     const Header = () => {
       return (
-        <div class="font-weight:bold mb:4">
+        <div class={SETTINGS_CONSTANTS.MODAL.HEADER.CLASS}>
           <Show fallback={props.customTitle} when={!props.customTitle}>
             {props.title}
           </Show>
@@ -71,7 +69,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
     return (
       <div
         aria-modal="true"
-        class={`${modalClass} ${props.dialogClass ?? ""} r:10`}
+        class={`${SETTINGS_CONSTANTS.MODAL.BODY.CLASS} ${props.dialogClass ?? ""} r:10`}
         ref={setFloating}
         role="dialog"
       >
@@ -88,7 +86,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
   return (
     <Show when={open()}>
       <Portal>
-        <div class={modalContainerClass} role="presentation">
+        <div class={`${SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS}`}>
           <Content />
         </div>
       </Portal>

@@ -1,5 +1,5 @@
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
-import { defaultLogo } from "~/pages/constants/constant";
+import { profileImage } from "~/pages/constants/constant";
 
 import type { GraphInterface } from "../../graph";
 
@@ -7,5 +7,5 @@ import { getCompanyLogoVertex } from "./getCompanyLogoVertex";
 
 export function getCompanyLogoUrl(graph: GraphInterface): string {
   const companyLogoVertex = getCompanyLogoVertex(graph);
-  return getDownloadLink(companyLogoVertex) || defaultLogo;
+  return getDownloadLink(companyLogoVertex) || profileImage;
 }

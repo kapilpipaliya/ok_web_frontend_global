@@ -1,6 +1,5 @@
-import type { JSX } from "solid-js";
-
 import Tooltip from "@corvu/tooltip";
+import { type JSX, splitProps } from "solid-js";
 
 import { STYLES } from "./constants/styles";
 
@@ -13,6 +12,7 @@ export function TooltipWrapper(props: {
   triggerAs?: string;
   triggerClass?: string;
 }) {
+  const [local, others] = splitProps(props, ["children", "content", "group", "openDelay", "triggerAs", "triggerClass", "arrowClass"]);
   return (
     <Tooltip
       closeDelay={0}
@@ -25,7 +25,7 @@ export function TooltipWrapper(props: {
       openDelay={props.openDelay ?? 200}
       placement="top"
     >
-      <Tooltip.Trigger as={props.triggerAs} class={props.triggerClass}>
+      <Tooltip.Trigger as={props.triggerAs} class={props.triggerClass} {...others}>
         {props.children}
       </Tooltip.Trigger>
       <Tooltip.Portal>

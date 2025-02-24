@@ -5,10 +5,6 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
-import {
-  dialogCancelButtonClass,
-  dialogOkButtonClass,
-} from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
@@ -186,7 +182,7 @@ export function SaveNewComp(
           {
             attributes: [
               {
-                class: dialogOkButtonClass,
+                class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
                 componentName: "Button",
                 onClick: saveAsTemplate,
                 props: (options: FunctionArgumentType) => ({
@@ -205,7 +201,7 @@ export function SaveNewComp(
             }),
           },
           {
-            class: dialogCancelButtonClass,
+            class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
             componentName: "Button",
             onClick: props.onClose,
             text: "Cancel",

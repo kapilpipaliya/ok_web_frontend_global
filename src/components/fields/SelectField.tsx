@@ -41,6 +41,7 @@ export function SelectField(
       data?: Vertex;
       isRealTime?: boolean;
       meta?: Vertex;
+      placeholder?: string;
       title: string;
       txnId?: number;
     }
@@ -275,7 +276,7 @@ export function SelectField(
         onSelect={(e) => onChangeSelect(e, false)}
         options={options()}
         optionValueKey={meta().P.valueKey ? meta().P.valueKey : "id"}
-        placeholder={`${props.title || ""}`}
+        placeholder={`${props.placeholder || ""}`}
         renderLabel={meta().P.renderLabel}
         selectedValues={() => {
           if (isStaticOptions(meta())) {

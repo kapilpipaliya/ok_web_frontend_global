@@ -6,7 +6,7 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
-import { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
@@ -139,17 +139,16 @@ export function CompanySettings() {
           },
         ],
         class: "mt:24",
-        componentName: "Box",
+        componentName: "Box"
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
-    key: "CompanySettings"
-  } as IFormMetaData;
+  } as FieldAttribute;
 
   return (
     <SchemaRenderer
-      form={form}
+      form={{ attributes: [form], key: "CompanySettings" }}
       getFormData={loadSettingsData}
     />
   );

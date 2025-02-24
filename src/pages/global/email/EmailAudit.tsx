@@ -4,6 +4,8 @@ import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
+import { getEmailAuditFormSchema } from "./emailAuditFormSchema";
+
 export function EmailAudit() {
   let gridStore: DataGridStore;
   const getTableData = async () => {
@@ -43,16 +45,25 @@ export function EmailAudit() {
         key: "messageId",
       }
     ],
-    isInlineEditable: false,
-    key: "emails",
+    isInlineEditable: true,
+    key: "Email",
     title: "Email Audit Log"
   };
+
+  const onSuccess = () => {
+    gridStore?.[0].fetchTableData();
+  };
+
+  const editSchema = getEmailAuditFormSchema(onSuccess);
 
   return (
     <DataGrid
       CustomAddNewButton={() => <div></div>}
+      editSchema={editSchema}
       formSchema={EmailAuditSchema}
       getTableData={getTableData}
+      hideDeleteAction={true}
+      hideEditJsonAction={true}
       initializeGridStoreParent={(gridStore_) => {
         gridStore = gridStore_;
       }}

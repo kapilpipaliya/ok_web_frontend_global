@@ -48,6 +48,7 @@ export function RoleSettings() {
       editSchema={editSchema}
       formSchema={RoleSchema}
       getTableData={getTableData}
+      hideEditJsonAction={true}
       initializeGridStoreParent={(gridStore_) => {
         gridStore = gridStore_;
       }}

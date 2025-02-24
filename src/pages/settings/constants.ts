@@ -8,9 +8,14 @@ export const SETTINGS_CONSTANTS = {
   HEADER_MENU_CLASS: "flex bg:base-5 jc:space-between r:7",
   LABEL_CLASS: "color:base-50 font-weight:500 font:15",
   MODAL: {
+    BODY: {
+      CLASS: "p:16",
+      TEXT_CLASS: "font-size:18 font-weight:500",
+    },
     BUTTONS: {
       CANCEL_CLASS:
         "bg:base-10 fg:base-80 p:8|16 r:4 cursor:pointer border:1px|solid|base-20",
+      DELETE_CLASS: "bg:error fg:base-5 p:8|16 r:4 cursor:pointer border:none",
       SAVE_CLASS: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
     },
     CONTAINER_CLASS:

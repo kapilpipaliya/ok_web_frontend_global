@@ -179,7 +179,7 @@ export const roleFormSchema = {
               }),
             },
           ],
-          class: "mt:16",
+          class: "mt:16 p:8",
           componentName: "Box",
         },
       ],

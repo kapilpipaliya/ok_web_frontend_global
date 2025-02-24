@@ -3,9 +3,7 @@ import { createSignal, onCleanup, onMount, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import {
-  dialogCancelButtonClass,
   DialogFooter,
-  dialogOkButtonClass,
 } from "~/components/styled/dialog/DialogFooter";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
@@ -15,6 +13,7 @@ import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId
 import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { DialogHeader } from "../../../components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "../../../components/styled/dialog/DialogSubTitle";
@@ -113,7 +112,7 @@ export function ImportMenu(
 
       <DialogFooter>
         <button
-          class={dialogOkButtonClass}
+          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
           disabled={!htmlContent()}
           onClick={onImport}
           type="button"
@@ -121,7 +120,7 @@ export function ImportMenu(
           Import
         </button>
         <button
-          class={dialogCancelButtonClass}
+          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS}
           onClick={onCancel}
           type="button"
         >

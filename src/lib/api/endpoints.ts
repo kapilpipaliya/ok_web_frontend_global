@@ -42,6 +42,9 @@ export const API = {
       getUrl: "/api/settings/general/get",
       updateUrl: "/api/settings/general/update",
     },
+    theme: {
+      deleteUrl: "/api/settings/theme/delete",
+    },
   },
   subdomain: {
     activityUrl: "/api/subdomain/activity",

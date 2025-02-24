@@ -228,7 +228,7 @@ export function CreateGridHeaders(
                       gridState.hasViewPermission()
                     )
                   }
-                  icon="fluent:edit-12-regular"
+                  icon="ph:pen"
                   iconClass="color:#3477CC"
                   onClick={() => {
                     return navigate(
@@ -254,7 +254,7 @@ export function CreateGridHeaders(
                 !!gridState.formMetaData() &&
                 !gridState.hasDeletePermission()
               }
-              icon="fluent:delete-12-regular"
+              icon="ph:trash"
               iconClass="color:rgb(255,0,0)"
               onClick={() => setDeleteRowId(info.row.original.id)}
               size={22}
@@ -263,7 +263,7 @@ export function CreateGridHeaders(
 
           <Show when={tableId === "Form"}>
             <IconButton
-              icon="bxs:data"
+              icon="ph:database"
               iconClass="color:#3477CC"
               onClick={() => {
                 const newUrl = `/admin/${info.row.original.P.key}`;
