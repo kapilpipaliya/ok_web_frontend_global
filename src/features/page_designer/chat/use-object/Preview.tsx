@@ -202,7 +202,7 @@ export function Preview(props: {
           <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
             <div class="display:flex gap:8px">
               <select
-                class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px"
+                class="padding:8px border:1px|solid|base border-radius:6px"
                 onChange={(e) => setInsertMode(e.currentTarget.value as any)}
                 value={insertMode()}
               >

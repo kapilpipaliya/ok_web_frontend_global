@@ -64,7 +64,7 @@ export function FormStatus() {
                           Form Status
                         </label>
                         <select
-                          class="ring-inset --ring-color:rgb(209,213,219) ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
+                          class="ring-inset --ring-color:base ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
                           id="form-status"
                           onInput={(e) => setFormStatus(e.currentTarget.value)}
                           value={formStatus()}
@@ -100,7 +100,7 @@ export function FormStatus() {
                           Expiration Date
                         </label>
                         <input
-                          class="ring-inset --ring-color:rgb(209,213,219) ::color:rgb(156,163,175)placeholder ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
+                          class="ring-inset --ring-color:base ::color:rgb(156,163,175)placeholder ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
                           id="expiration-date"
                           onInput={(e) =>
                             setExpirationDate(e.currentTarget.value)
@@ -115,7 +115,7 @@ export function FormStatus() {
                           Expiration Time
                         </label>
                         <input
-                          class="ring-inset --ring-color:rgb(209,213,219) ::color:rgb(156,163,175)placeholder ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
+                          class="ring-inset --ring-color:base ::color:rgb(156,163,175)placeholder ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
                           id="expiration-time"
                           onInput={(e) =>
                             setExpirationTime(e.currentTarget.value)
@@ -143,7 +143,7 @@ export function FormStatus() {
                           Submission Limit
                         </label>
                         <input
-                          class="ring-inset --ring-color:rgb(209,213,219) ::color:rgb(156,163,175)placeholder ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
+                          class="ring-inset --ring-color:base ::color:rgb(156,163,175)placeholder ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
                           id="submission-limit"
                           onInput={(e) =>
                             setSubmissionLimit(e.currentTarget.value)
@@ -172,7 +172,7 @@ export function FormStatus() {
                           Warning Message
                         </label>
                         <input
-                          class="ring-inset --ring-color:rgb(209,213,219) ::color:rgb(156,163,175)placeholder ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
+                          class="ring-inset --ring-color:base ::color:rgb(156,163,175)placeholder ring-inset:focus --ring-color:rgb(79,70,229):focus lh:1.25rem@sm border-radius:0.375rem border-width:0 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem@sm py:0.375rem width:100%"
                           id="warning-message"
                           onInput={(e) =>
                             setWarningMessage(e.currentTarget.value)

@@ -38,7 +38,7 @@ export function Divider(props: Readonly<DividerProps>): JSX.Element {
     <div
       class={props.class || ""}
       classList={{
-        [`border-color:${props.borderColor || "rgb(209,213,219)"}`]: true,
+        [`border-color:${props.borderColor || "base"}`]: true,
         [`border-top-width:${props.borderTopWidth || "1px"}`]: true,
         [`width:${props.width || "100%"}`]: true,
       }}

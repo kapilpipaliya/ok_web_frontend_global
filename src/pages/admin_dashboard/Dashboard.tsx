@@ -14,23 +14,15 @@ export default function AdminDashboard() {
     setSelectedIndex(index);
   };
   const tabs = [
-    ...PageDesignerLabels.filter((label) => label !== "CompExample").map(
-      (label) => ({
-        key: label,
-        label: toTitle(label.replace(/(\w+)(Page)$/, "$1")) + "s",
-      }),
-    ),
-    {
-      key: "Component",
-      label: "Components",
-    },
+    { key: "Page", label: "Pages" },
+    { key: "Form", label: "Forms" },
+    { key: "Component", label: "Components" },
+    { key: "TemplatePage", label: "Templates" },
+    { key: "EmailTemplate", label: "Email Templates" },
   ];
 
   return (
     <div>
-      <div class="flex gap:4 position:fixed right:1rem">
-        <UserDropdownMenuDisplay />
-      </div>
       <TabsWithUnderline
         displayValueKey="label"
         onTabClick={handleTabClick}

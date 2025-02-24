@@ -125,7 +125,7 @@ export function SyncData() {
                     checked={displayedUsers().every((user) =>
                       selectedUsers().includes(user),
                     )}
-                    class="bg:rgb(243,244,246) border-color:rgb(209,213,219) color:rgb(37,99,235) h:1rem r:0.25rem w:1rem"
+                    class="bg:rgb(243,244,246) border-color:base color:rgb(37,99,235) h:1rem r:0.25rem w:1rem"
                     id="checkbox-all-search"
                     onChange={handleSelectAll}
                     type="checkbox"
@@ -155,7 +155,7 @@ export function SyncData() {
                     <div class="flex ai:center">
                       <input
                         checked={selectedUsers().includes(user)}
-                        class="bg:rgb(243,244,246) border-color:rgb(209,213,219) color:rgb(37,99,235) h:1rem r:0.25rem w:1rem"
+                        class="bg:rgb(243,244,246) border-color:base color:rgb(37,99,235) h:1rem r:0.25rem w:1rem"
                         id={`checkbox-table-search-${user.id}`}
                         onChange={() => handleCheckboxChange(user)}
                         type="checkbox"
@@ -230,7 +230,7 @@ export function SyncData() {
           <ul class="--space-x-reverse:1:rtl lh:1.25rem display:inline-flex f:0.875rem h:2rem ml:-1px">
             <li>
               <button
-                class="ms-0 lh:1.25 rounded-s-lg flex ai:center bg:rgb(255,255,255) bg:rgb(243,244,246):hover border-color:rgb(209,213,219) border-width:1px color:rgb(107,114,128) color:rgb(55,65,81):hover h:2rem justify-content:center px:0.75rem r:5|0|0|5"
+                class="ms-0 lh:1.25 rounded-s-lg flex ai:center bg:rgb(255,255,255) bg:rgb(243,244,246):hover border-color:base border-width:1px color:rgb(107,114,128) color:rgb(55,65,81):hover h:2rem justify-content:center px:0.75rem r:5|0|0|5"
                 onClick={() => setCurrentPage(Math.max(currentPage() - 1, 1))}
               >
                 Previous
@@ -240,11 +240,11 @@ export function SyncData() {
               {(page) => (
                 <li>
                   <button
-                    class="lh:1.25 flex ai:center bg:rgb(255,255,255) border-color:rgb(209,213,219) border-width:1px color:rgb(107,114,128) h:2rem justify-content:center px:0.75rem"
+                    class="lh:1.25 flex ai:center bg:rgb(255,255,255) border-color:base border-width:1px color:rgb(107,114,128) h:2rem justify-content:center px:0.75rem"
                     classList={{
                       "bg:rgb(243,244,246):hover color:rgb(55,65,81):hover bg:rgb(31,41,55)@dark border-color:rgb(55,65,81)@dark color:rgb(156,163,175)@dark bg:rgb(55,65,81):hover@dark color:rgb(255,255,255):hover@dark":
                         page !== currentPage(),
-                      "color:rgb(37,99,235) border-color:rgb(209,213,219) bg:rgb(239,246,255) bg:rgb(219,234,254):hover color:rgb(29,78,216):hover border-color:rgb(55,65,81)@dark bg:rgb(55,65,81)@dark":
+                      "color:rgb(37,99,235) border-color:base bg:rgb(239,246,255) bg:rgb(219,234,254):hover color:rgb(29,78,216):hover border-color:rgb(55,65,81)@dark bg:rgb(55,65,81)@dark":
                         page === currentPage(),
                     }}
                     onClick={() => setCurrentPage(page)}
@@ -256,7 +256,7 @@ export function SyncData() {
             </For>
             <li>
               <button
-                class="lh:1.25 rounded-e-lg flex ai:center bg:rgb(255,255,255) bg:rgb(243,244,246):hover border-color:rgb(209,213,219) border-width:1px color:rgb(107,114,128) color:rgb(55,65,81):hover h:2rem justify-content:center px:0.75rem r:0|5|5|0"
+                class="lh:1.25 rounded-e-lg flex ai:center bg:rgb(255,255,255) bg:rgb(243,244,246):hover border-color:base border-width:1px color:rgb(107,114,128) color:rgb(55,65,81):hover h:2rem justify-content:center px:0.75rem r:0|5|5|0"
                 onClick={() =>
                   setCurrentPage(Math.min(currentPage() + 1, totalPages))
                 }
@@ -337,7 +337,7 @@ export function SyncData() {
       <div class="flex-column space-y:1rem flex  ai:center  bg:rgb(255,255,255) bg:rgb(17,24,39)@dark flex-direction:row@md  flex-wrap:wrap jc:space-between margin-top:0@md p:10  py:1rem">
         <div>
           <button
-            class="lh:1.25rem  ai:center  bg:rgb(255,255,255)  bg:rgb(243,244,246):hover  border-color:rgb(209,213,219)  border-width:1px  color:rgb(107,114,128) display:inline-flex f:0.875rem  font-weight:500  outline:none px:0.75rem py:0.375rem r:0.5rem"
+            class="lh:1.25rem  ai:center  bg:rgb(255,255,255)  bg:rgb(243,244,246):hover  border-color:base  border-width:1px  color:rgb(107,114,128) display:inline-flex f:0.875rem  font-weight:500  outline:none px:0.75rem py:0.375rem r:0.5rem"
             id="dropdownActionButton"
             onClick={() => setShowModal(!showModal())}
             type="button"
@@ -409,7 +409,7 @@ export function SyncData() {
         </label>
         <div class="">
           <input
-            class="lh:1.25rem bg:rgb(249,250,251) border-color:rgb(209,213,219) border-color:rgb(59,130,246):focus border-width:1px  color:rgb(17,24,39)  display:block  f:0.875rem  outline:none p:5 r:0.5rem w:20rem"
+            class="lh:1.25rem bg:rgb(249,250,251) border-color:base border-color:rgb(59,130,246):focus border-width:1px  color:rgb(17,24,39)  display:block  f:0.875rem  outline:none p:5 r:0.5rem w:20rem"
             id="table-search-users"
             onInput={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by username or email"

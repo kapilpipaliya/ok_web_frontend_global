@@ -1,5 +1,10 @@
 import type { JSX } from "solid-js";
 
+import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
+
+import { UserDropdownMenuDisplay } from "./auth_menu/DropdownMenuDisplay";
+import { SETTINGS_CONSTANTS } from "./settings/constants";
+
 interface AdminLayoutProps {
   children?: JSX.Element;
 }
@@ -37,7 +42,15 @@ export function AdminLayout(props: Readonly<AdminLayoutProps>): JSX.Element {
     //     "flex-grow:1": (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSideBarOpen || (graph.vertexes[globalStoreId] as Vertex<GlobalProperties>).P.isSubSideBarOpen,
     //   }}
     // >
-    <>{props.children}</>
+    <>
+      <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
+        <HomeIcon url="/admin" />
+        <div class="ml:auto flex gap:4">
+          <UserDropdownMenuDisplay />
+        </div>
+      </header>
+      {props.children}
+    </>
     // </div>
   );
 }

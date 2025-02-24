@@ -5,6 +5,7 @@ export const SETTINGS_CONSTANTS = {
   GRID_ITEM_CLASS: "grid grid-template-columns:200px|400px ai:center gap:8",
   GRID_ITEM_CLASS_NARROW:
     "grid grid-template-columns:150px|500px ai:center gap:8",
+  HEADER_MENU_CLASS: "flex bg:base-5 jc:space-between r:7",
   LABEL_CLASS: "color:base-50 font-weight:500 font:15",
   MODAL: {
     BUTTONS: {

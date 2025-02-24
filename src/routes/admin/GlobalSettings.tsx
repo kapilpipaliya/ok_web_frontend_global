@@ -3,6 +3,7 @@ import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
+import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
@@ -14,6 +15,7 @@ import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettin
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
 import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export default function GlobalSettings() {
   const [graph] = useGraph();
@@ -78,18 +80,13 @@ export default function GlobalSettings() {
   };
 
   return (
-    <div class="display:grid grid-template-rows:auto|1fr h:100vh">
+    <div class="">
       <Title>Global Settings - {menuItems.find(item => item.id === selectedMenu())?.label}</Title>
-      <div class="display:flex">
-        <HeaderWithDescription
-          class="flex:1"
+      <HeaderWithDescription
+        class="flex:1"
           description="Manage global application settings"
           title="Global Settings"
         />
-        <div class="ml:auto flex gap:4">
-          <UserDropdownMenuDisplay />
-        </div>
-      </div>
 
       <div class="display:grid grid-template-columns:250px|1fr border-right:1px|solid|#eee p:6">
         <div>

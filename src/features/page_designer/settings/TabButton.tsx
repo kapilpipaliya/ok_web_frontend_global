@@ -12,7 +12,7 @@ export function TabButton(props: TabButtonProps) {
       <button
         class="rounded-t-lg border-bottom-width:2.5px border-color:transparent display:inline-block p:10px white-space:nowrap"
         classList={{
-          "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover":
+          "border-color:base:hover color:rgb(75,85,99):hover":
             !props.isSelected,
           "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)":
             props.isSelected,

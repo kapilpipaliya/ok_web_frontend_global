@@ -61,7 +61,7 @@ export function ChatInput(props: ChatInputProps) {
         />
         <div class="display:flex gap:8px">
           <textarea
-            class="flex:1 padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed min-height:40px resize:vertical"
+            class="flex:1 padding:8px border:1px|solid|base border-radius:6px disabled:opacity:50 disabled:cursor:not-allowed min-height:40px resize:vertical"
             disabled={props.isLoading()}
             onChange={props.onInputChange}
             onKeyDown={(e) => {
@@ -287,7 +287,7 @@ function ModelSelector(props: {
 }) {
   return (
     <select
-      class="padding:8px border:1px|solid|rgb(209,213,219) border-radius:6px width:fit-content"
+      class="padding:8px border:1px|solid|base border-radius:6px width:fit-content"
       disabled={props.isLoading()}
       onChange={(e) => props.setSelectedModel(e.currentTarget.value)}
       value={props.selectedModel()}

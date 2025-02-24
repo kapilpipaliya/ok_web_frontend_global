@@ -34,7 +34,7 @@ function ResponsePreview(props: { message: Vertex<DBMessage> }) {
   return (
     <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
       <div class="font-weight:500 margin-bottom:8px">Preview:</div>
-      <div class="border:1px|dashed|rgb(209,213,219) padding:16px border-radius:6px min-height:100px">
+      <div class="border:1px|dashed|base padding:16px border-radius:6px min-height:100px">
         <For
           each={(() => {
             const parsed = JSON.parse(props.message.P.data || "[]");

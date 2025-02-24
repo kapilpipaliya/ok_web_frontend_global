@@ -100,7 +100,7 @@ function ModalFooter() {
       </Show>
       <Show when={props.closeButtonText}>
         <button
-          class="lh:1.25rem ring-inset --ring-color:rgb(209,213,219) bg:rgb(255,255,255) bg:rgb(249,250,251):hover border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) color:rgb(17,24,39) display:inline-flex f:0.875rem font-weight:600 justify-content:center mt:0.75rem margin-top:0@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
+          class="lh:1.25rem ring-inset --ring-color:base bg:rgb(255,255,255) bg:rgb(249,250,251):hover border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) color:rgb(17,24,39) display:inline-flex f:0.875rem font-weight:600 justify-content:center mt:0.75rem margin-top:0@sm px:0.75rem py:0.5rem width:100% width:auto@sm"
           onClick={props.onClose}
           type="button"
         >

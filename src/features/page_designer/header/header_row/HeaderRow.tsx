@@ -4,6 +4,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 
 import {
@@ -11,14 +12,39 @@ import {
   useDesignerFormIdContext,
 } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
-import { LeftIcons } from "../left/LeftIcons";
+import { HomeIcon } from "../left/HomeIcon";
 import { SaveAllButton } from "../right/SaveAllButton";
 import { ToggleButtons } from "../right/ToggleButtons";
 
-export function HeaderRow(props: {
+interface HeaderProps {
+  children?: JSX.Element;
   class?: string;
   style?: JSX.CSSProperties;
-}) {
+}
+
+const RightSection = () => {
+  return (
+    <div class="flex ai:center gap:2">
+      <ToggleButtons />
+      <SaveAllButton />
+      <SelectThemeButton />
+      <UserDropdownMenuDisplay />
+    </div>
+  );
+};
+
+export function Header(props: HeaderProps) {
+  return (
+    <header
+      class={`${SETTINGS_CONSTANTS.HEADER_MENU_CLASS} ${props.class}`}
+      style={props.style}
+    >
+      {props.children}
+    </header>
+  );
+}
+
+export function HeaderRow(props: HeaderProps) {
   const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const _layoutStore = () =>
@@ -28,18 +54,9 @@ export function HeaderRow(props: {
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
-    <header
-      class={`flex bg:base-5 jc:space-between r:7 ${props.class}`}
-      style={props.style}
-    >
-      <LeftIcons />
-
-      <div class="flex ai:center gap:2">
-        <ToggleButtons />
-        <SaveAllButton />
-        <SelectThemeButton />
-        <UserDropdownMenuDisplay />
-      </div>
-    </header>
+    <Header class={props.class} style={props.style}>
+      <HomeIcon url="/admin" />
+      <RightSection />
+    </Header>
   );
 }

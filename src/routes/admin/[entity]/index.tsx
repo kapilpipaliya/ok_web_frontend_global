@@ -3,15 +3,11 @@ import { Match, Switch } from "solid-js";
 
 import FileManager from "~/features/file_manager/FileManager";
 import { DataGrid } from "~/features/grid/DataGrid";
-import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 
 export default function TablePage() {
   const params = useParams();
   return (
     <>
-      <div class="flex gap:4 ml:auto">
-        <UserDropdownMenuDisplay />
-      </div>
       <Switch>
         <Match when={params.entity === "Comp"}>
           <FileManager
