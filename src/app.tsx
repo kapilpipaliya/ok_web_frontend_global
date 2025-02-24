@@ -23,10 +23,10 @@ export default function App() {
       root={(props) => {
         const location = useLocation();
         return (
+          <GraphContext.Provider value={graph}>
           <CSSRuntimeProvider
             config={themeConfig(getGlobalThemeVertex(graph[0]))}
           >
-            <GraphContext.Provider value={graph}>
               <MetaProvider>
                 <Suspense fallback={<LoaderNew />}>
                   {/* <ErrorBoundary fallback={(error) => {
@@ -39,8 +39,8 @@ export default function App() {
                   <Toaster />
                 </Show>
               </MetaProvider>
-            </GraphContext.Provider>
-          </CSSRuntimeProvider>
+            </CSSRuntimeProvider>
+          </GraphContext.Provider>
         );
       }}
     >

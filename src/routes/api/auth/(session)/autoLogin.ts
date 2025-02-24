@@ -7,7 +7,7 @@ import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 import { updateSession } from "~/server/session/updateSession";
 
-import { updateRedirectUrl } from "./functions/updateRedirectUrl";
+import { updateRedirectUrl } from "../functions/updateRedirectUrl";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

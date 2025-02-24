@@ -5,7 +5,7 @@ import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 
-import { EMAIL_TEMPLATES } from "./constants/constants";
+import { EMAIL_TEMPLATES } from "../constants/constants";
 
 export async function POST({ request }: APIEvent) {
   const { currentPassword, newPassword, uuid } = await request.json();

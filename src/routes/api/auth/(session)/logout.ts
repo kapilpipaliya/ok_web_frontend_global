@@ -1,6 +1,6 @@
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
-import { logout } from "../../../server/session/logout";
+import { logout } from "../../../../server/session/logout";
 
 export async function POST() {
   try {
