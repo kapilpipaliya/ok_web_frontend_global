@@ -23,7 +23,6 @@ export async function sendEmail(options: EmailOptions) {
     options;
   const dbSettings = await getEmailSettings(subDomain);
   let emailInfo;
-  return;
   try {
     if (dbSettings?.P.active && dbSettings.P.active !== "smtp") {
       // Use email service provider if active
@@ -41,20 +40,18 @@ export async function sendEmail(options: EmailOptions) {
       });
     } else {
       // Fall back to SMTP if no active provider
-      const transportConfig = {
+      const transporter = nodemailer.createTransport({
         auth: {
           pass: dbSettings?.P.smtpPassword || process.env.SMTP_PASS,
           user: dbSettings?.P.smtpUsername || process.env.SMTP_USER,
         },
         host: dbSettings?.P.smtpHost || process.env.SMTP_HOST,
         port: dbSettings?.P.smtpPort || Number(process.env.SMTP_PORT),
-        secure: dbSettings?.P.secure ?? process.env.SMTP_SECURE === "true",
+        secure: dbSettings?.P.secure ?? process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true,
         tls: {
           rejectUnauthorized: false,
         },
-      };
-
-      const transporter = nodemailer.createTransport(transportConfig);
+      });
 
       const emailOptions: nodemailer.SendMailOptions = {
         attachments:

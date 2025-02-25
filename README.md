@@ -302,3 +302,19 @@ https://stytch.com/blog/argon2-vs-bcrypt-vs-scrypt/
 Email service:
 Privacy-focused encrypted email for everyone. All-in-one alternative to Gmail + Mailchimp + Sendgrid.
 https://github.com/forwardemail/forwardemail.net
+
+
+
+// Check for specific permissions
+const canCreateUser = await checkPermission(request, PERMISSIONS.CREATE_USER, dbSession);
+
+// Check for multiple permissions (any of them)
+const canManageUsers = await checkPermission(
+  request, 
+  [PERMISSIONS.CREATE_USER, PERMISSIONS.DELETE_USER], 
+  dbSession
+);
+
+// Check for roles
+const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession);
+
