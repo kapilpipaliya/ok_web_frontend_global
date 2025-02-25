@@ -1,7 +1,8 @@
 import type { Vertex } from "~/lib/graph/graph";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
-import { URLS } from "~/pages/constants/URLS";
+
+import {AUTH_MENU_URLS} from "~/lib/api/endpoints";
 
 export function updateRedirectUrl(
   user: Vertex,
@@ -29,6 +30,6 @@ export function updateRedirectUrl(
   // Fall back to default redirect logic if no valid redirect URL provided
   user.P.redirectUrl =
     subDomain === SYSTEM_DB_NAME
-      ? URLS.SYSTEM.PROJECTS
-      : URLS.ADMIN.USER_SETTINGS;
+      ? AUTH_MENU_URLS.SYSTEM.PROJECTS
+      : AUTH_MENU_URLS.ADMIN.USER_SETTINGS;
 }

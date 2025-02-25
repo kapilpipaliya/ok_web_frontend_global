@@ -5,7 +5,6 @@ import { v7 as uuidv7 } from "uuid";
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
@@ -17,7 +16,7 @@ import {
   replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";

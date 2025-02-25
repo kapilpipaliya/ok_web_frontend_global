@@ -5,9 +5,9 @@ import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 import { cssSelectorTree } from "~/features/css_editor/constants/StateSelector";
 
-import { PROPERTIES } from "../../../components/styled/constants/constant";
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";
+import {PROPERTIES} from "~/pages/settings/constants";
 
 export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);

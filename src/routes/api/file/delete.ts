@@ -1,14 +1,14 @@
 import type { APIEvent } from "@solidjs/start/server";
-import type { HTTPEvent } from "vinxi/runtime/http-types";
 
 import { getQuery } from "vinxi/http";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { deleteFile } from "~/server/upload/deleteFile";
 
-export async function DELETE({ request }: APIEvent, event: HTTPEvent) {
-  const query = getQuery(event);
+import { deleteFile } from "./functions/deleteFile";
+
+export async function DELETE({ request }: APIEvent) {
+  const query = getQuery();
   const fileId = query.fileId;
 
   if (!fileId) {

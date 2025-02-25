@@ -1,4 +1,4 @@
-import { PROPERTIES } from "~/components/styled/constants/constant";
+import {PROPERTIES} from "~/pages/settings/constants";
 
 export const Dashboard = {
   attributes: [

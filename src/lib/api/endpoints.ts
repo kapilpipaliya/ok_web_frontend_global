@@ -69,3 +69,18 @@ export const API = {
 export function generate401RedirectUrl(pathname: string): string {
   return `/auth/login?redirectUrl=${encodeURIComponent(pathname)}`;
 }
+
+// Define URL constants
+export const AUTH_MENU_URLS = {
+  ADMIN: {
+    CONTACT: "/contact-us",
+    GLOBAL_SETTINGS: "/admin/GlobalSettings",
+    LOGIN: "/auth/login",
+    USER_SETTINGS: "/admin/UserSettings",
+  },
+  SYSTEM: {
+    GLOBAL_SETTINGS: "/system/GlobalSettings",
+    PROJECTS: "/system/projects",
+    USER_SETTINGS: "/system/UserSettings",
+  },
+} as const;

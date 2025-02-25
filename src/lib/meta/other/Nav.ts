@@ -1,7 +1,7 @@
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
 import { useGraph } from "../../graph/graph";
+import {PROPERTIES} from "~/pages/settings/constants";
 
 export const Nav = {
   attributes: [

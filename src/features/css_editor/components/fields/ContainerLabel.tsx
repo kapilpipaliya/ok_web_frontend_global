@@ -3,10 +3,10 @@ import { Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { STYLES } from "~/components/styled/constants/styles";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
+import {STYLES} from "~/pages/settings/constants";
 /*
 ┌───────────┐
 │Title x ?  │

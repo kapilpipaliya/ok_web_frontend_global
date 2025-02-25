@@ -1,13 +1,13 @@
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { headerIconButtonClass } from "~/pages/constants/constant";
 
 import {
   INITIAL_WIDTHS,
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import {headerIconButtonClass} from "~/pages/settings/constants";
 
 export function ToggleButtons() {
   const [graph, setGraph] = useGraph();

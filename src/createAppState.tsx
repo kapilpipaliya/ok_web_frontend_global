@@ -27,11 +27,8 @@ export function createAppState() {
       OUT: {},
       P: {
         activeClickOutside: [],
-        globalThemeId: "",
         initialDataFetchError: "",
         isDevelopment: false,
-        isLoadingPage: false,
-        navigationData: [],
         newVertexId_: -500000,
         txnId_: 0,
         url: "",

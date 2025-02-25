@@ -20,10 +20,10 @@ import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import type { DataGridState } from "./DataGridContext";
 
 import { selectedValue } from "../../components/fields/utils/selectedValue";
-import { STYLES } from "../../components/styled/constants/styles";
 import { IconButton } from "../../components/styled/IconButton";
 import { TooltipWrapper } from "../../components/styled/TooltipWrapper";
 import { ModifyJsonButton } from "./ModifyJsonButton";
+import {STYLES} from "~/pages/settings/constants";
 
 function ImageWrapper(props: { alt?: string; class?: string; src: string }) {
   return (

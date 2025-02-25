@@ -3,10 +3,6 @@ import { Show } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import {
-  headerIconButtonClass,
-  toolBarClass,
-} from "~/pages/constants/constant";
 
 import { DebugInfo } from "../page_tabbar/DebugInfo";
 import { PreviewButton } from "../page_tabbar/PreviewButton";
@@ -15,6 +11,7 @@ import { ResizeViewButtons } from "../page_tabbar/ResizeViewButtons";
 import { SaveIconButton } from "../page_tabbar/SaveIconButton";
 import { ShareButton } from "../page_tabbar/ShareButton";
 import { UndoRedoIcons } from "../page_tabbar/UndoRedoIcons";
+import {headerIconButtonClass, toolBarClass} from "~/pages/settings/constants";
 
 export function PageTabBar(props: {
   formStoreId: Id;

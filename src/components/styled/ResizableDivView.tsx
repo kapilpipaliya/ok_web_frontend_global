@@ -12,9 +12,9 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 
-import { STYLES } from "./constants/styles";
 import { ResizeOverlay } from "./ResizeOverlay";
 import { useToast } from "./Toast";
+import {STYLES} from "~/pages/settings/constants";
 
 export const DIMENSIONS = {
   desktop: {

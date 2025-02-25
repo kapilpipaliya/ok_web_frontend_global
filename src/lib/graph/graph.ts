@@ -20,13 +20,10 @@ export type EdgeMap = { [key: string]: Edge };
 
 export interface GlobalProperties {
   activeClickOutside: string[];
-  globalThemeId: Id;
   initialDataFetchError: string;
   isDevelopment: boolean;
-  isLoadingPage?: boolean;
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
-  navigationData?: AnyObject[];
   newVertexId_: number;
   txnId_: number;
   url: string;

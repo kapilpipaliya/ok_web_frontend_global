@@ -9,10 +9,9 @@ import { Portal } from "solid-js/web";
 
 import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import {SETTINGS_CONSTANTS, STYLES} from "~/pages/settings/constants";
 
 import { useZIndex } from "../fields/ZIndex";
-import { STYLES } from "./constants/styles";
 
 interface CustomModalProps {
   bodyClass?: string;

@@ -1,6 +1,6 @@
 import type { Session } from "neo4j-driver";
 
-export async function deleteFileMetadataFromNeo4j(
+export async function deleteFileMetadata(
   dbSession: Session,
   fileId: string,
 ) {

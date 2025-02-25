@@ -1,41 +1,45 @@
 import type { Session } from "neo4j-driver";
 
-import { getUserFromSession } from "../session/getUserFromSession";
+import { Vertex } from "~/lib/graph/graph";
 
 export async function checkPermission(
   request: Request,
   permission: string | string[],
   dbSession: Session,
-): Promise<boolean> {
-  const user = await getUserFromSession(request);
+  user?: Vertex,
+  permissionKey?: string,
+): Promise<{ allowedAccessLevels: string[]; hasPermission: boolean; }> {
 
   if (!user?.id) {
-    return false;
+    return { allowedAccessLevels: [], hasPermission: false };
   }
 
   const permissions = Array.isArray(permission) ? permission : [permission];
 
-  // Check if user has any of the required permissions
+  const permKey = permissionKey || "Perm";
+  // Check if user has any of the required permissions and get allowed access levels
   const result = await dbSession.run(
-    `MATCH (u:User)-[:UserRole]->(r:Role)-[:HasPermission]->(p:Permission)
+    `MATCH (u:User)-[:UserRole]->(r:Role)-[:Role${permKey}]->(rp:Role${permKey})-[:Role${permKey}${permKey}]->(p:${permKey})
      WHERE elementId(u) = $userId AND p.key IN $permissions
-     RETURN count(p) > 0 as hasPermission`,
+     RETURN count(p) > 0 as hasPermission, collect(DISTINCT rp.access) as allowedAccessLevels`,
     {
       permissions,
       userId: user.id,
     },
   );
 
-  return result.records[0]?.get("hasPermission") || false;
+  const hasPermission = result.records[0]?.get("hasPermission") || false;
+  const allowedAccessLevels = result.records[0]?.get("allowedAccessLevels") || [];
+
+  return { allowedAccessLevels, hasPermission };
 }
 
 export async function checkRole(
   request: Request,
   role: string | string[],
   dbSession: Session,
+  user?: Vertex,
 ): Promise<boolean> {
-  const user = await getUserFromSession(request);
-
   if (!user?.id) {
     return false;
   }

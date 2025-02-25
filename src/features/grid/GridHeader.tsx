@@ -4,14 +4,13 @@ import { Dynamic } from "solid-js/web";
 
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
-import { headerIconButtonClass } from "~/pages/constants/constant";
 
 import { IconButton } from "../../components/styled/IconButton";
 import { AddNewButton } from "./AddNewButton";
 import { useDataGridContext } from "./DataGridContext";
+import {headerIconButtonClass, PROPERTIES} from "~/pages/settings/constants";
 
 interface GridHeaderProps {
   CustomAddNewButton?: (props: {

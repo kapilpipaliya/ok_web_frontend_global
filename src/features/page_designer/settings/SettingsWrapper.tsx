@@ -1,10 +1,10 @@
-import { STYLES } from "~/components/styled/constants/styles";
 import { useGraph } from "~/lib/graph/graph";
 
 import type { PageLayoutObject } from "../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { SettingTabs } from "./SettingTabs";
+import {STYLES} from "~/pages/settings/constants";
 
 export function SettingsWrapper() {
   const [graph] = useGraph();

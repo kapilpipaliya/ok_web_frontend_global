@@ -7,7 +7,8 @@ import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
-import { EMAIL_TEMPLATES } from "../auth/constants/constants";
+
+import {EMAIL_TEMPLATES} from "~/pages/settings/constants";
 
 export async function GET({ request }: APIEvent) {
   // const { email } = await request.json(); // Extract email from request body

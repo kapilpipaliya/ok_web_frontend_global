@@ -6,7 +6,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
@@ -15,6 +14,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { Label } from "../properties/formgroup/Label";
+import {PROPERTIES} from "~/pages/settings/constants";
 
 export function SEOFormGroupProperties() {
   const [graph, setGraph] = useGraph();

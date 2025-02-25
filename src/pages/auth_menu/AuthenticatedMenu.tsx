@@ -5,13 +5,11 @@ import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
-import { API } from "~/lib/api/endpoints";
+import {API, AUTH_MENU_URLS} from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { type GlobalProperties, useGraph } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-
-import { URLS } from "../constants/URLS";
+import { deleteVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
@@ -36,17 +34,17 @@ export function AuthenticatedMenu(
     return isSystemSubDomain()
       ? [
           {
-            href: URLS.SYSTEM.PROJECTS,
+            href: AUTH_MENU_URLS.SYSTEM.PROJECTS,
             icon: "ph:umbrella",
             label: "Projects",
           },
           {
-            href: URLS.SYSTEM.GLOBAL_SETTINGS,
+            href: AUTH_MENU_URLS.SYSTEM.GLOBAL_SETTINGS,
             icon: "ph:gear",
             label: "Global Settings",
           },
           {
-            href: URLS.SYSTEM.USER_SETTINGS,
+            href: AUTH_MENU_URLS.SYSTEM.USER_SETTINGS,
             icon: "ph:user-gear",
             label: "User Settings",
           },
@@ -54,12 +52,12 @@ export function AuthenticatedMenu(
         ]
       : [
           {
-            href: URLS.ADMIN.GLOBAL_SETTINGS,
+            href: AUTH_MENU_URLS.ADMIN.GLOBAL_SETTINGS,
             icon: "ph:gear",
             label: "Global Settings",
           },
           {
-            href: URLS.ADMIN.USER_SETTINGS,
+            href: AUTH_MENU_URLS.ADMIN.USER_SETTINGS,
             icon: "ph:user-gear",
             label: "User Settings",
           },
@@ -69,24 +67,19 @@ export function AuthenticatedMenu(
 
   const handleLogout = async () => {
     props.onClose();
-    mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, {
-      isLoadingPage: true,
-    });
 
     await showLoadingToast({
       loadMessage: "Logging Out...",
       onSuccess: (value) => {
         if (value?.message != null) {
-          navigate(URLS.ADMIN.LOGIN);
+          navigate(AUTH_MENU_URLS.ADMIN.LOGIN);
         }
       },
       promise: postAPI(API.auth.logOutUrl, {}),
       successMessage: "Log Out Successfully",
     });
 
-    mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, {
-      isLoadingPage: false,
-    });
+    deleteVertex(0, "member", graph, setGraph);
   };
 
   return (

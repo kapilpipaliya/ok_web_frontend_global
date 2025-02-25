@@ -16,7 +16,6 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { htmlTags } from "~/lib/dom/htmlTags";
@@ -41,6 +40,7 @@ import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
+import {PROPERTIES} from "~/pages/settings/constants";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];

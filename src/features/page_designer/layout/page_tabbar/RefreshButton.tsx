@@ -1,5 +1,6 @@
 import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass } from "~/pages/constants/constant";
+
+import {headerIconButtonClass} from "~/pages/settings/constants";
 
 export function RefreshButton(props: { handleRefresh: () => void }) {
   return (

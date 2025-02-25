@@ -2,7 +2,7 @@ import type { Session } from "neo4j-driver";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 
-import { getUserFromSession } from "../session/getUserFromSession";
+import { getUserFromSession } from "../../server/auth/session/getUserFromSession";
 import { checkRole } from "./checkPermission";
 import { SYSTEM_ROLES } from "./types";
 
@@ -27,6 +27,7 @@ export async function checkSuperUserAuthorization(
     request,
     SYSTEM_ROLES.SUPER_USER,
     dbSession,
+    user,
   );
   if (!isSuperUser) {
     return {

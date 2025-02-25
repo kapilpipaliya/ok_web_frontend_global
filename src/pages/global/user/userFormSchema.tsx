@@ -7,12 +7,11 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 export const userFormSchema = {

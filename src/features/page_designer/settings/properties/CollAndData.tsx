@@ -7,7 +7,6 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SelectField } from "~/components/fields/SelectField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { evalExpression } from "~/lib/expression_eval";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
@@ -18,6 +17,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import {PROPERTIES} from "~/pages/settings/constants";
 
 export function CollAndData() {
   const [graph, setGraph] = useGraph();

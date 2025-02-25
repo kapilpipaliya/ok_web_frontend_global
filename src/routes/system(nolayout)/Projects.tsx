@@ -24,7 +24,8 @@ export default function Projects() {
         description={
           <>
             Each project has a separate subdomain and database. Only
-            administrators can create and manage projects.
+            administrators (users with <b>Admin</b> role) can create and manage
+            projects.
             <br />
             Click on Subdomain Name or Custom Domain Name to login to that
             project in new tab.

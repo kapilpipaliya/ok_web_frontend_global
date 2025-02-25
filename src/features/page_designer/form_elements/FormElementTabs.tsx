@@ -10,14 +10,12 @@ import {
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { STYLES } from "~/components/styled/constants/styles";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
-import { headerIconButtonClass } from "~/pages/constants/constant";
 
 import {
   DesignerFormIdContext,
@@ -31,6 +29,7 @@ import { ComponentList } from "./components/ComponentList";
 import { openInNewInternalTab } from "./pages/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
+import {headerIconButtonClass, STYLES} from "~/pages/settings/constants";
 
 export const UlContainer = (props: ParentProps) => (
   <ul

@@ -3,8 +3,8 @@ import { createSignal, Show } from "solid-js";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 
-import { headerIconButtonClass } from "../constants/constant";
 import { SelectThemeMenu } from "./SelectThemeMenu";
+import {headerIconButtonClass} from "~/pages/settings/constants";
 
 export function SelectThemeButton() {
   const [isThemeOptionsOpen, setIsThemeOptionsOpen] = createSignal(false);

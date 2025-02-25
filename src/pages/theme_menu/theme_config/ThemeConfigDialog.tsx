@@ -3,7 +3,6 @@ import type * as Monaco from "monaco-editor";
 import { clientOnly } from "@solidjs/start";
 import { createSignal, Show } from "solid-js";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
@@ -16,7 +15,7 @@ import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
 
 export function ThemeConfigDialog(
   props: Readonly<{

@@ -36,3 +36,62 @@ export const SETTINGS_CONSTANTS = {
     "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
   SECTION_DIVIDER_CLASS: "my-8 border-t border-gray-200",
 } as const;
+
+export const headerIconButtonClass =
+  "b:1px|solid|base-20 bg:base-5 color:base-50 color:primary-50:hover jc:center p:6 r:7";
+export const toolBarClass = "flex bg:base-5 gap:6 r:7";
+export const profileImage = "/images/profile.png";
+
+export const EMAIL_TEMPLATES = {
+  LOGIN_NOTIFICATION: "login_notification",
+  PASSWORD_CHANGED: "password_changed",
+  PROFILE_UPDATED: "profile_updated",
+  SIGNUP_CONFIRMATION: "signup_confirmation",
+  TEST_EMAIL: "test_email",
+} as const;
+
+export const isDev = process.env.NODE_ENV === "development";
+export const CONSTANTS = {
+  fullWidth: "w:100%",
+  inputBorderRadius: "r:6",
+  inputFieldBorder: "border:1px|solid|base",
+  inputFieldPadding: "p:7", // use p:7 to make select and text input same height
+};
+export const PROPERTIES = {
+  Css: {
+    CheckBox: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
+    RadioButton: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
+    TextField: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.fullWidth} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
+  },
+};
+export const STYLES = {
+  // Common button styles
+  button: "cursor:pointer transition:transform|0.2s|linear",
+  // Container styles
+  container: {
+    base: "flex w:full",
+    section: "b:1px|solid|lightgray p:5|10 w:full",
+    withBorder: "b:1px|solid|lightgray r:5",
+  },
+
+  iconButton: "ai:center d:inline-flex",
+
+  // Input styles
+  input: {
+    base: "b:1px|solid|#ccc outline:none r:6px w:100%",
+    color: "b:none f:14 outline:none w:100%",
+    text: "f:14 p:10px",
+  },
+
+  // Label styles
+  label: "flex ai:center font-weight:400 f:14 gap:5 white-space:nowrap",
+
+  overflow: "overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin}",
+  // Tooltip styles
+  tooltip: {
+    animation:
+      "corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1",
+    content:
+      "center bg:#333 color:base-5 f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1",
+  },
+} as const;

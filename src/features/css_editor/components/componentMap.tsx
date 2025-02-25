@@ -1,7 +1,6 @@
 import { splitProps } from "solid-js";
 
 import { HtmlField } from "~/components/fields/HtmlField";
-import { PROPERTIES } from "~/components/styled/constants/constant";
 
 import { ArrayComponent } from "./fields/ArrayComponent";
 import { ButtonGroups } from "./fields/ButtonGroups";
@@ -13,6 +12,7 @@ import { Select } from "./fields/Select";
 import { TextAreaField } from "./fields/TextArea";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { ToggleButton } from "./fields/ToggleButton";
+import {PROPERTIES} from "~/pages/settings/constants";
 
 const NumberF = (props: any) => {
   const [local, others] = splitProps(props, ["onChange"]);

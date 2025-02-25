@@ -12,8 +12,8 @@ import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { updateSession } from "~/server/auth/session/updateSession";
 
-import { EMAIL_TEMPLATES } from "../constants/constants";
 import { updateRedirectUrl } from "../functions/updateRedirectUrl";
+import {EMAIL_TEMPLATES} from "~/pages/settings/constants";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {

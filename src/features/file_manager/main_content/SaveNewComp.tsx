@@ -4,7 +4,6 @@ import { createStore } from "solid-js/store";
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
@@ -18,7 +17,7 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
 
 import { useFileManagerStore } from "../FileManagerContext";
 

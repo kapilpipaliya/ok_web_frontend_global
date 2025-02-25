@@ -3,7 +3,7 @@ import { createMiddleware } from "@solidjs/start/middleware";
 // @ts-expect-error shieldwall is not typed
 import { csrfProtection } from "shieldwall/start";
 
-import { getSubDomain } from "~/server/auth/session/getSubDomain";
+import { getSubDomain } from "~/cypher/get/getSubDomain";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { SYSTEM_DB_NAME } from "./cypher/boltConstant";

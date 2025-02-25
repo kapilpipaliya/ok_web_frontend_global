@@ -4,9 +4,9 @@ import { Portal } from "solid-js/web";
 import { useZIndex, ZIndex } from "~/components/fields/ZIndex";
 import { IconButton } from "~/components/styled/IconButton";
 import { PreviewPage } from "~/components/styled/PreviewPage";
-import { headerIconButtonClass } from "~/pages/constants/constant";
 
 import { IFramePreview } from "../IFramePreview";
+import {headerIconButtonClass} from "~/pages/settings/constants";
 
 export function PreviewButton(props: { formStoreId: string }) {
   const [isModalOpen, setIsModalOpen] = createSignal(false);

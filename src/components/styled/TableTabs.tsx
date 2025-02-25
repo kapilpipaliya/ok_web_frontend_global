@@ -1,8 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, For } from "solid-js";
 
-import { STYLES } from "./constants/styles";
 import { LoaderNew } from "./LoaderSimple";
+import {STYLES} from "~/pages/settings/constants";
 
 interface TableTabProps {
   setActiveTab?: (tab: string) => string;

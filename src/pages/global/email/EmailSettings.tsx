@@ -2,14 +2,13 @@ import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "../../settings/constants";
+import {PROPERTIES, SETTINGS_CONSTANTS} from "../../settings/constants";
 
 export function EmailSettings() {
   const { showErrorToast, showSuccessToast } = useToast();

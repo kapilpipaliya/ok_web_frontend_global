@@ -7,7 +7,8 @@ import {
   splitProps,
 } from "solid-js";
 
-import { STYLES } from "../styled/constants/styles";
+
+import {STYLES} from "~/pages/settings/constants";
 
 export function JsonEditorField(
   props: JSX.HTMLAttributes<HTMLDivElement> & {

@@ -4,7 +4,6 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { STYLES } from "~/components/styled/constants/styles";
 import { themeConfig } from "~/cypher/get/themeConfig";
 import { getGlobalThemeVertex } from "~/lib/graph/get/sync/getGlobalThemeVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -21,6 +20,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatResponse } from "./ChatResponse";
 import { EXAMPLE_PROMPTS } from "./constants/EXAMPLE_PROMPTS";
 import { getChatHistory } from "./functions/getChatHistory";
+import {STYLES} from "~/pages/settings/constants";
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();

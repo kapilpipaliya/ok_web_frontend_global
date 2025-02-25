@@ -2,10 +2,10 @@ import type { Session } from "neo4j-driver";
 
 import fs from "node:fs/promises";
 
-import { getFileMetadataFromNeo4j } from "~/server/upload/functions/getFileMetadataFromNeo4j";
+import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 
 export async function downloadFile(fileId: string, dbSession: Session) {
-  const fileMetadata = await getFileMetadataFromNeo4j(dbSession, fileId);
+  const fileMetadata = await getFileMetadata(dbSession, fileId);
 
   if (!fileMetadata) {
     return new Response(JSON.stringify({ error: "File not found" }), {

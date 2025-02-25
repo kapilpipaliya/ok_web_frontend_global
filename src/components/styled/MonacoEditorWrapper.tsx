@@ -7,7 +7,8 @@ import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker"
 import { MonacoEditor } from "solid-monaco";
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
-import { PROPERTIES } from "./constants/constant";
+
+import {PROPERTIES} from "~/pages/settings/constants";
 
 // Initialize Monaco workers if not already done
 if (!window.MonacoEnvironment) {

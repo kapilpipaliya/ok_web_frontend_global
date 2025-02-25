@@ -13,7 +13,8 @@ import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { useZIndex } from "../fields/ZIndex";
-import { STYLES } from "./constants/styles";
+
+import {STYLES} from "~/pages/settings/constants";
 
 interface DrawerProps {
   children: JSX.Element;

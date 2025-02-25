@@ -1,9 +1,9 @@
+import { onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
@@ -14,7 +14,7 @@ import {
   addNewVertex,
   replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";
@@ -169,7 +169,9 @@ export function GeneralSettings() {
   };
 
   // Load settings data when component mounts
-  loadSettingsData();
+  onMount(() => {
+    loadSettingsData();
+  });
 
   return (
     <div>

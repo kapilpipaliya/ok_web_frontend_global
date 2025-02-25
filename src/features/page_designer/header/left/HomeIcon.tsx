@@ -1,7 +1,8 @@
 import { useNavigate } from "@solidjs/router";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass } from "~/pages/constants/constant";
+
+import {headerIconButtonClass} from "~/pages/settings/constants";
 
 export const HomeIcon = (props: { url: string }) => {
   const navigate = useNavigate();

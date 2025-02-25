@@ -14,7 +14,6 @@ import {
 
 import type { GenericComponentProps } from "~/components/fields/FieldType";
 
-import { STYLES } from "~/components/styled/constants/styles";
 import { AddNewButton } from "~/features/grid/AddNewButton";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/features/page_attr_render/utils/getDataVertex";
@@ -34,6 +33,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 
 import { insertNewRow } from "./insertNewRow";
 import { SortableRow } from "./SortableRow";
+import {STYLES} from "~/pages/settings/constants";
 
 export function TableInputField(
   props: Readonly<

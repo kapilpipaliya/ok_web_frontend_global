@@ -1,7 +1,7 @@
 import { getRequestURL } from "vinxi/http";
 
 import { getDriver } from "~/cypher/driver";
-import { getSubDomain } from "~/server/auth/session/getSubDomain";
+import { getSubDomain } from "~/cypher/get/getSubDomain";
 
 // unused function, To be used in the future
 // WIP

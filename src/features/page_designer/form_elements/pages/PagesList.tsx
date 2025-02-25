@@ -9,7 +9,6 @@ import {
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { STYLES } from "~/components/styled/constants/styles";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { createAppState } from "~/createAppState";
@@ -27,6 +26,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../getTreeData";
 import { PageItem } from "./PageItem";
+import {STYLES} from "~/pages/settings/constants";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();

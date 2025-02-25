@@ -70,6 +70,7 @@ Tooltip.Trigger = clientOnly(
 );
 import { Link } from "@solidjs/meta";
 import { Meta } from "@solidjs/meta";
+import { Title } from "@solidjs/meta";
 import { Portal, Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
@@ -132,6 +133,7 @@ export const componentsMap: Record<string, any> = {
   Text: TextField,
   TextArea: TextAreaField,
   TextInput: TextInputField,
+  Title,
   Transition,
   TransitionGroup,
   ZIndex,

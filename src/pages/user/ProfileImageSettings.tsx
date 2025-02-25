@@ -19,8 +19,7 @@ import {
 import { useGraph } from "~/lib/graph/graph";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
-import { profileImage } from "~/pages/constants/constant";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import {profileImage, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 

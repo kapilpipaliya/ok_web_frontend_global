@@ -1,8 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show, splitProps } from "solid-js";
 
-import { STYLES } from "./constants/styles";
 import { TooltipWrapper } from "./TooltipWrapper";
+import {STYLES} from "~/pages/settings/constants";
 
 export interface IconButtonProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {

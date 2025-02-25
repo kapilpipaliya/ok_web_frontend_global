@@ -4,7 +4,6 @@ import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/vertex";
@@ -12,8 +11,8 @@ import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "../settings/constants";
-
+import {PROPERTIES, SETTINGS_CONSTANTS} from "../settings/constants";
+import { getTitleSchema } from "./functions/getTitleSchema";
 export function ForgotPasswordForm() {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast } = useToast();
@@ -85,6 +84,7 @@ export function ForgotPasswordForm() {
         return {
           as: "div",
           attributes: [
+            getTitleSchema("Forgot Password"),
             {
               as: "div",
               attributes: [

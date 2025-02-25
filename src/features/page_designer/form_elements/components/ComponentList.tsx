@@ -3,7 +3,6 @@ import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
-import { STYLES } from "~/components/styled/constants/styles";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { createAppState } from "~/createAppState";
@@ -15,6 +14,7 @@ import { setGraphData } from "~/lib/graph/mutate/setGraphData";
 
 import { ComponentItem } from "./ComonentItem";
 import { getCompChildren } from "./getCompChildren";
+import {STYLES} from "~/pages/settings/constants";
 
 export function ComponentList(props: {
   edgeName: string;

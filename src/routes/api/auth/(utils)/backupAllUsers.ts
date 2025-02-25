@@ -6,7 +6,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 
 import { getDriver } from "~/cypher/driver";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { getSubDomain } from "~/server/auth/session/getSubDomain";
+import { getSubDomain } from "~/cypher/get/getSubDomain";
 
 export async function GET({ request }: APIEvent) {
   // const { formName, formId } = await request.json();

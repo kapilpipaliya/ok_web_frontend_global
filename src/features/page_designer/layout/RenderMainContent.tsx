@@ -2,7 +2,6 @@ import { type Component, createSignal, For, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { STYLES } from "~/components/styled/constants/styles";
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import {
   useDesignerFormIdContext,
@@ -22,6 +21,7 @@ import { FormElements } from "./main_content/FormElements";
 import { PageViewComponent } from "./main_content/PageViewComponent";
 import { PropertiesContent } from "./main_content/PropertiesContent";
 import { TabBar } from "./main_content/TabBar";
+import {STYLES} from "~/pages/settings/constants";
 
 interface ResizeHandleProps {
   activeResizeKey: null | string;

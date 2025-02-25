@@ -4,7 +4,6 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { evalExpression } from "~/lib/expression_eval";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
@@ -13,6 +12,7 @@ import {
   parentTemplateAttribute,
 } from "../base/Comp";
 import { pageAttr } from "./pageAttr";
+import {PROPERTIES} from "~/pages/settings/constants";
 
 export const wrapWithTitle = (
   title: string,

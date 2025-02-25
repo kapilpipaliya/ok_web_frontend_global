@@ -6,7 +6,7 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { checkAdminRole } from "~/server/auth/permissions/checkAdminRole";
+import { checkAdminRole } from "~/cypher/permissions/checkAdminRole";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {

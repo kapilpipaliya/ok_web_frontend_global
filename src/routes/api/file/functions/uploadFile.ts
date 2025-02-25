@@ -9,7 +9,7 @@ import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { getBaseDir } from "~/lib/files/getBaseDir";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
-import { saveFileMetadataToNeo4j } from "~/server/upload/functions/saveFileMetadataToNeo4j";
+import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
 
 export async function uploadFiles(
   data: (MultiPartData & { label?: string })[],
@@ -52,7 +52,7 @@ export async function uploadFiles(
         // username,
       };
 
-      return await saveFileMetadataToNeo4j(
+      return await saveFileMetadata(
         neo4jSession,
         metadata,
         undefined,

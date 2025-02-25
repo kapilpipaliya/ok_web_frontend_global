@@ -8,8 +8,8 @@ import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { getBaseDir } from "~/lib/files/getBaseDir";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
-import { getFileMetadataFromNeo4j } from "~/server/upload/functions/getFileMetadataFromNeo4j";
-import { saveFileMetadataToNeo4j } from "~/server/upload/functions/saveFileMetadataToNeo4j";
+import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
+import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
 
 export async function replaceFiles(
   request: Request,
@@ -33,7 +33,7 @@ export async function replaceFiles(
     return { error: "Only one file is allowed to be replaced" };
   }
 
-  const oldFileMetadata = await getFileMetadataFromNeo4j(neo4jSession, fileId);
+  const oldFileMetadata = await getFileMetadata(neo4jSession, fileId);
   if (!oldFileMetadata) {
     return { error: "File metadata not found for the provided fileId" };
   }
@@ -63,7 +63,7 @@ export async function replaceFiles(
         version: newVersion,
       };
 
-      return await saveFileMetadataToNeo4j(neo4jSession, newMetadata, fileId);
+      return await saveFileMetadata(neo4jSession, newMetadata, fileId);
     }),
   );
 

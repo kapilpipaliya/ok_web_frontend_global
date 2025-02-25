@@ -4,7 +4,6 @@ import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
-import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
@@ -17,7 +16,8 @@ import { validateUsername } from "~/lib/validation/validateUsername";
 import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { SETTINGS_CONSTANTS } from "../settings/constants";
+import {PROPERTIES, SETTINGS_CONSTANTS} from "../settings/constants";
+import { getTitleSchema } from "./functions/getTitleSchema";
 
 export function SignupForm() {
   const [graph, setGraph] = useGraph();
@@ -68,21 +68,12 @@ export function SignupForm() {
   const handleSubmit = async (formData: Vertex) => {
     if (validateFormData(formData)) {
       const globalStoreId = "globalStoreId";
-      mergeVertexProperties(0, globalStoreId, graph, setGraph, {
-        isLoadingPage: true,
-      });
 
       await showLoadingToast({
         loadMessage: "Registering User...",
         onError: () => {
-          mergeVertexProperties(0, globalStoreId, graph, setGraph, {
-            isLoadingPage: false,
-          });
         },
         onSuccess: (value) => {
-          mergeVertexProperties(0, globalStoreId, graph, setGraph, {
-            isLoadingPage: false,
-          });
           handleLoginRedirect(value, graph, navigate);
         },
         promise: postAPI(API.auth.signUpUrl, {
@@ -99,6 +90,7 @@ export function SignupForm() {
   const form = {
     as: "div",
     attributes: [
+      getTitleSchema("Sign Up"),
       {
         as: "div",
         attributes: [

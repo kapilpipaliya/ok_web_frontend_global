@@ -1,8 +1,7 @@
 import { type BrowserContext, chromium, type Page } from "playwright";
 
-import { isDev } from "~/routes/constants/constants";
-
 import { API } from "../api/endpoints";
+import {isDev} from "~/pages/settings/constants";
 
 interface BrowserSetup {
   browser: Awaited<ReturnType<typeof chromium.launch>>;
@@ -98,7 +97,7 @@ async function setupBrowserAndPage(
   const page = await context.newPage();
 
   const searchParams = new URLSearchParams(queryParams);
-  const redirectUrl = `/email-templates/${pageName}`;
+  const redirectUrl = `/internal/email-templates/${pageName}`;
 
   if (token) {
     searchParams.set("token", token);

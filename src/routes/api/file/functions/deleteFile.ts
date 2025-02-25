@@ -2,11 +2,11 @@ import type { Session } from "neo4j-driver";
 
 import fs from "node:fs/promises";
 
-import { deleteFileMetadataFromNeo4j } from "~/server/upload/functions/deleteFileMetadataFromNeo4j";
-import { getFileMetadataFromNeo4j } from "~/server/upload/functions/getFileMetadataFromNeo4j";
+import { deleteFileMetadata } from "~/routes/api/file/functions/functions/deleteFileMetadata";
+import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 
 export async function deleteFile(fileId: string, neo4jSession: Session) {
-  const fileMetadata = await getFileMetadataFromNeo4j(neo4jSession, fileId);
+  const fileMetadata = await getFileMetadata(neo4jSession, fileId);
 
   if (!fileMetadata) {
     return new Response(JSON.stringify({ error: "File not found" }), {
@@ -19,7 +19,7 @@ export async function deleteFile(fileId: string, neo4jSession: Session) {
     const filePath = fileMetadata.P.filePath;
     await fs.unlink(filePath); // Delete the file from the disk
 
-    await deleteFileMetadataFromNeo4j(neo4jSession, fileId);
+    await deleteFileMetadata(neo4jSession, fileId);
 
     return {
       graph: {
