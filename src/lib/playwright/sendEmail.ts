@@ -22,7 +22,7 @@ export async function sendEmail(options: EmailOptions) {
   const { attachmentName, attachmentPath, content, subDomain, subject, to } = options;
   const dbSettings = await getEmailSettings(subDomain);
   let emailInfo;
-
+return;
   try {
     if (dbSettings?.P.active && dbSettings.P.active !== "smtp") {
       // Use email service provider if active

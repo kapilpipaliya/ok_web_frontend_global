@@ -1,4 +1,4 @@
-import type { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/server";
 import type { HTTPEvent } from "vinxi/runtime/http-types";
 
 import { getQuery } from "vinxi/http";

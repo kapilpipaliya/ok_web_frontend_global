@@ -1,4 +1,4 @@
-import type { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/server";
 
 import { setupSuperUser } from "~/cypher/mutate/manage/setupSuperUser";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";

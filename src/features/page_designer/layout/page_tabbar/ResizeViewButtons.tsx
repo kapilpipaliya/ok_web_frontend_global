@@ -2,6 +2,7 @@ import { toTitle } from "case-switcher-js";
 import { createEffect } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+
 import { DIMENSIONS } from "~/components/styled/ResizableDivView";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";

@@ -7,13 +7,17 @@ import {
   Switch,
 } from "solid-js";
 
-import { LoaderNew } from "~/components/styled/LoaderSimple";
-import { getInitialDataAndSetToGraph } from "~/lib/graph/mutate/getInitialDataAndSetToGraph";
-import { loadUser } from "~/lib/graph/mutate/loadUser";
+import type { UserData } from "~/lib/graph/mutate/loadUser";
 
-import { useToast } from "./components/styled/Toast";
+import { LoaderNew } from "~/components/styled/LoaderSimple";
+import { ServerResult } from "~/cypher/types/ServerResult";
+import { fetchInitialData } from "~/lib/graph/mutate/getInitialDataAndSetToGraph";
+import { fetchUserData, handleUserNavigation } from "~/lib/graph/mutate/loadUser";
+import { setUserData } from "~/lib/graph/mutate/setUserData";
+
 import { getGlobalStore } from "./lib/graph/get/sync/getGlobalStore";
 import { type GlobalProperties, useGraph } from "./lib/graph/graph";
+import { setGraphData } from "./lib/graph/mutate/setGraphData";
 import { mergeVertexProperties } from "./lib/graph/mutate/vertex";
 
 interface GetInitialDataProps extends ParentProps {
@@ -25,33 +29,46 @@ export function GetInitialData(props: GetInitialDataProps) {
   const graph = useGraph();
   const [initialDataLoading, setInitialDataLoading] = createSignal(true);
   const navigate = useNavigate();
-  const { showErrorToast } = useToast();
+
+  const fetchData = async () => {
+    const [initialData, userData] = await Promise.all([
+      fetchInitialData(graph[0]),
+      props.authenticate ? fetchUserData().catch(() => {
+        handleUserNavigation(null, navigate);
+        return null; // Return null to avoid further processing
+      }) : Promise.resolve(null),
+    ]);
+    return { initialData, userData };
+  };
+
+  const setData = (initialData: ServerResult, userData: null | UserData) => {
+    setGraphData(graph[0], graph[1], initialData.graph!);
+    
+    if (userData) {
+      setUserData(graph[0], graph[1], userData);
+      handleUserNavigation(
+        userData,
+        props.dontRedirectToLogin ? undefined : navigate,
+      );
+    }
+  };
 
   onMount(async () => {
     try {
-      // Run both operations in parallel if authentication is needed
-      await Promise.all([
-        getInitialDataAndSetToGraph(graph),
-        props.authenticate
-          ? loadUser(
-              graph[0],
-              graph[1],
-              props.dontRedirectToLogin ? undefined : navigate,
-              showErrorToast,
-            )
-          : Promise.resolve(),
-      ]);
-    } catch (error: any) {
-      const globalStoreId = "globalStoreId";
-      mergeVertexProperties<GlobalProperties>(
-        0,
-        globalStoreId,
-        graph[0],
-        graph[1],
-        {
-          initialDataFetchError: `Failed to load initial data: ${error.message}`,
-        },
-      );
+      const { initialData, userData } = await fetchData();
+      setData(initialData, userData);
+    } catch (error) {
+      if (error instanceof Error) {
+        mergeVertexProperties<GlobalProperties>(
+          0,
+          "globalStoreId",
+          graph[0],
+          graph[1],
+          {
+            initialDataFetchError: `Failed to load initial data: ${error.message}`,
+          },
+        );
+      }
     } finally {
       setInitialDataLoading(false);
     }

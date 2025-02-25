@@ -59,7 +59,7 @@ export function ResizableContainer(
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const viewVertex = () =>
-    graph.vertexes[props.view] as Vertex<{ view: string; width: string; height: string }>;
+    graph.vertexes[props.view] as Vertex<{ height: string; view: string; width: string; }>;
 
   createEffect(() => {
     const view = viewVertex();

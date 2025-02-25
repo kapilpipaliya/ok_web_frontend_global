@@ -4,95 +4,38 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
-import { updateVertex } from "~/lib/graph/mutate/setGraphData";
 
-import { setSelectionValue } from "./setSelectionValue";
+import { setUserData } from "./setUserData";
 import {
   addNewVertex,
   mergeVertexProperties,
   replaceVertexProperties,
 } from "./vertex";
 
-export function handleUserData(
-  data: { [key: string]: any },
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  if (data.user) {
-    saveUser(data.user, graph, setGraph);
-  }
-
-  if (data.userSetting) {
-    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-      userSettingId: data.userSetting.id,
-    });
-    updateVertex(data.userSetting.id, data.userSetting, graph, setGraph);
-  }
-
-  if (data.roles) {
-    // To speed up we save userRoles in globalStoreId, if cause problems add edges to roles
-    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-      userRoles: data.roles.map((role: Vertex) => role.id),
-    });
-    for (const role of data.roles) {
-      updateVertex(role.id, role, graph, setGraph);
-    }
-  }
-  if (data.user && data.profileImage) {
-    if (data.profileImage.id) {
-      if (!graph.vertexes[data.profileImage.id]) {
-        addNewVertex(0, data.profileImage, graph, setGraph);
-      }
-    }
-    setSelectionValue(
-      0,
-      graph.vertexes.member,
-      graph,
-      setGraph,
-      {
-        id: "",
-        L: [],
-        P: {
-          type: "UserProfileImage",
-        },
-      } as unknown as Vertex,
-      data.profileImage.id,
-    );
-  }
+// Type for the user data response
+export interface UserData {
+  profileImage?: Vertex;
+  roles?: Vertex[];
+  user?: Vertex;
+  userSetting?: Vertex;
 }
 
-export async function loadUser(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  navigate?: (path: string) => void,
-  showErrorToast?: (message: string) => void,
-): Promise<boolean> {
-  mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-    isLoadingPage: true,
-  });
+// Function to only fetch user data
+export async function fetchUserData(): Promise<UserData> {
+  return await getAPI(API.auth.getUserUrl);
+}
 
-  try {
-    const data = await getAPI(API.auth.getUserUrl);
-    if (data) {
-      handleUserData(data, graph, setGraph);
-      if (data.user) {
-        return true;
-      }
-      // TODO: add support for redirect to same page after login
-      navigate?.("/auth/login");
-    }
+// Function to handle navigation after user data fetch
+export function handleUserNavigation(
+  userData: null | UserData,
+  navigate?: (path: string) => void,
+) {
+  if (!userData?.user) {
+    // TODO: add support for redirect to same page after login
+    navigate?.("/auth/login");
     return false;
-  } catch (err: unknown) {
-    if (err instanceof Error && err.message) {
-      showErrorToast?.(err.message);
-      navigate?.("/auth/login");
-    }
-    return false;
-  } finally {
-    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-      isLoadingPage: false,
-    });
   }
+  return true;
 }
 
 export function saveUser(

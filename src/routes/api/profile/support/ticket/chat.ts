@@ -1,4 +1,4 @@
-import type { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getSelectionOptionsAPICall } from "~/cypher/get/client/getSelectionOptionsAPICall";

@@ -1,4 +1,4 @@
-import type { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/server";
 import type { Node } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";

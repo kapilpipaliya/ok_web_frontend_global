@@ -6,6 +6,7 @@ import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
+import { ServerResult } from "../types/ServerResult";
 import { fetchFromMGAndSaveToArray } from "./fetchFromMGAndSaveToArray";
 
 // exporting this function breaks the api
@@ -51,10 +52,12 @@ export async function getInitialData(dbSession: Session) {
   }
 
   return {
-    edges: relationshipObj,
+    graph: {
+      edges: relationshipObj,
+      vertexes: nodeObj,
+    },
     timestamp: new Date().getTime(),
-    vertexes: nodeObj,
-  };
+  } as ServerResult;
 }
 
 async function fetchAndSaveFormMetaData(

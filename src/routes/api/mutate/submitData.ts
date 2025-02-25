@@ -1,4 +1,4 @@
-import type { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";

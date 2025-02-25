@@ -1,4 +1,4 @@
-import type { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/server";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { processResult } from "~/cypher/get/evaluate/processResult";
