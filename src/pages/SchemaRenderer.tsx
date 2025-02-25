@@ -1,6 +1,6 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { ServerResult } from "~/cypher/types/ServerResult";
+import type { ServerResult } from "~/cypher/types/ServerResult";
 import { useGraph } from "~/lib/graph/graph";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
@@ -9,7 +9,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 export function SchemaRenderer(props: {
   form: IFormMetaData;
   formDataId?: string;
-  getFormData?: () => Promise<ServerResult>
+  getFormData?: () => Promise<ServerResult>;
   txnId?: string;
 }) {
   const [graph, setGraph] = useGraph();

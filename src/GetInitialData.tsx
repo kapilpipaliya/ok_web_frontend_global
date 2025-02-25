@@ -1,15 +1,10 @@
 import { createAsync, useNavigate } from "@solidjs/router";
-import {
-  createEffect,
-  Match,
-  type ParentProps,
-  Switch,
-} from "solid-js";
+import { createEffect, Match, type ParentProps, Switch } from "solid-js";
 
 import type { UserData } from "~/lib/graph/mutate/loadUser";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
-import { ServerResult } from "~/cypher/types/ServerResult";
+import type { ServerResult } from "~/cypher/types/ServerResult";
 import { handleUserNavigation } from "~/lib/graph/mutate/loadUser";
 import { setUserData } from "~/lib/graph/mutate/setUserData";
 
@@ -27,10 +22,12 @@ const fetchData = async (authenticate?: boolean) => {
   "use server";
   const [initialData, userData] = await Promise.all([
     getInitialData(),
-    authenticate ? getUserRPC().catch(() => {
-      // handleUserNavigation(null, navigate);
-      return null; // Return null to avoid further processing
-    }) : Promise.resolve(null),
+    authenticate
+      ? getUserRPC().catch(() => {
+          // handleUserNavigation(null, navigate);
+          return null; // Return null to avoid further processing
+        })
+      : Promise.resolve(null),
   ]);
   return { initialData, userData };
 };
@@ -57,7 +54,6 @@ export function GetInitialData(props: GetInitialDataProps) {
       setData(data()!.initialData, data()!.userData as UserData);
     }
   });
-
 
   // onMount(async () => {
   //   try {
@@ -90,13 +86,7 @@ export function GetInitialData(props: GetInitialDataProps) {
           {getGlobalStore(graph[0]).P.initialDataFetchError}
         </div>
       </Match>
-      <Match
-        when={
-          !(
-            getGlobalStore(graph[0]).P.initialDataFetchError
-          )
-        }
-      >
+      <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
         {props.children}
       </Match>
     </Switch>

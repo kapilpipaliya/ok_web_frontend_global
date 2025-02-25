@@ -4,10 +4,9 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { Edge, Vertex } from "~/lib/graph/graph";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
-
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -29,17 +28,22 @@ export async function GET({ request }: APIEvent) {
         `MATCH (a:Account)-[:AccountUser]->(u:User {uuid: $uuid})
          MATCH (a)-[:AccountEmailSetting]->(s:EmailSetting)
          RETURN s as settings`,
-        { uuid: user?.P.uuid }
+        { uuid: user?.P.uuid },
       );
     } else {
       // Get subdomain email settings
       result = await dbSession.run(
         `MATCH (s:EmailSetting)
-         RETURN s as settings`
+         RETURN s as settings`,
       );
     }
 
-    const settings = processResult(result.records, { nodes, relationships }, "settings", "");
+    const settings = processResult(
+      result.records,
+      { nodes, relationships },
+      "settings",
+      "",
+    );
 
     return {
       graph: {

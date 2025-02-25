@@ -343,7 +343,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                 props: (options: FunctionArgumentType) => ({
                   hidden: !options.dataContext.modalState[0]?.showModal,
                 }),
-              }
+              },
             ],
             componentName: "ZIndex",
           },

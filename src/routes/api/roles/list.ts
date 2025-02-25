@@ -4,8 +4,8 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
-import { Edge } from "~/lib/graph/graph";
-import { Vertex } from "~/lib/graph/graph";
+import type { Edge } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {

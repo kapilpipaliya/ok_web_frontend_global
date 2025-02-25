@@ -182,7 +182,7 @@ export function SelectField(
     if (isStaticOptions(meta())) {
       loadOptions();
     }
-  })
+  });
 
   const onChangeSelect = (value: Option[], isRemove: boolean) => {
     runWithOwner(outerOwner, () => {

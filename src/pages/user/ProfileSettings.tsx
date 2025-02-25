@@ -4,7 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -26,7 +26,8 @@ export function ProfileSettings() {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const isSystemSubDomain = () => getMemberVertex(graph).P.subDomain === "super";
+  const isSystemSubDomain = () =>
+    getMemberVertex(graph).P.subDomain === "super";
 
   const formDataId = uuidv7();
   addNewVertex(
@@ -61,22 +62,22 @@ export function ProfileSettings() {
                   },
                   {
                     class: "ml:4 mt:4px fg:base-60",
-                    componentName: "Text", 
+                    componentName: "Text",
                     text: "Changing your username or email will update them across all your projects.",
-                  }
+                  },
                 ],
                 class: "p:16px bg:primary-5 r:8px border:1px|solid|primary-10",
-                componentName: "Box"
-              }
+                componentName: "Box",
+              },
             ],
             class: "mb:24px",
             componentName: "Box",
             props: () => ({
               hidden: !isSystemSubDomain(),
             }),
-          }
+          },
         ],
-        componentName: "Box"
+        componentName: "Box",
       },
       {
         as: "div",
@@ -181,7 +182,10 @@ export function ProfileSettings() {
                         username: user.P.username,
                         uuid: user.P.uuid,
                       };
-                      const response = await postAPI(API.auth.profileUrl, payload);
+                      const response = await postAPI(
+                        API.auth.profileUrl,
+                        payload,
+                      );
                       if (response.error) {
                         showErrorToast(response.error);
                       } else {
@@ -191,7 +195,9 @@ export function ProfileSettings() {
                       options.dataContext.saveState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                  text: options.dataContext.saveState[0]?.isLoading
+                    ? "Saving..."
+                    : "Save Changes",
                 }),
               },
               // {
@@ -226,7 +232,6 @@ export function ProfileSettings() {
       const user = data.user;
 
       replaceVertexProperties(0, formDataId, graph, setGraph, user.P);
-
     } catch (err) {
       showErrorToast((err as Error).message);
     }
@@ -240,7 +245,7 @@ export function ProfileSettings() {
         formDataId={formDataId}
       />
       <Show when={!isSystemSubDomain()}>
-      <hr class={SETTINGS_CONSTANTS.SECTION_DIVIDER_CLASS} />
+        <hr class={SETTINGS_CONSTANTS.SECTION_DIVIDER_CLASS} />
         <ProfileImageSettings />
       </Show>
     </div>

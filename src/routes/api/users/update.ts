@@ -18,21 +18,21 @@ export async function POST({ request }: APIEvent) {
     // Get existing user data to check for email change
     const existingUser = await dbSession.run(
       "MATCH (u:User {uuid: $uuid}) RETURN u",
-      { uuid }
+      { uuid },
     );
 
     if (existingUser.records.length === 0) {
       throw new APIError("User not found", 404);
     }
 
-    const oldEmail = existingUser.records[0].get('u').properties.email;
-    const oldUsername = existingUser.records[0].get('u').properties.username;
+    const oldEmail = existingUser.records[0].get("u").properties.email;
+    const oldUsername = existingUser.records[0].get("u").properties.username;
 
     // If email is being changed, check if new email already exists
     if (email !== oldEmail) {
       const existingEmailCheck = await dbSession.run(
         "MATCH (u:User {email: $email}) WHERE u.uuid <> $uuid RETURN u",
-        { email, uuid }
+        { email, uuid },
       );
 
       if (existingEmailCheck.records.length > 0) {
@@ -44,7 +44,7 @@ export async function POST({ request }: APIEvent) {
     if (username !== oldUsername) {
       const existingUsernameCheck = await dbSession.run(
         "MATCH (u:User {username: $username}) WHERE u.uuid <> $uuid RETURN u",
-        { username, uuid }
+        { username, uuid },
       );
 
       if (existingUsernameCheck.records.length > 0) {
@@ -53,7 +53,7 @@ export async function POST({ request }: APIEvent) {
     }
 
     // Update user and roles
-    const result = await dbSession.run(
+    const _result = await dbSession.run(
       `
       MATCH (u:User {uuid: $uuid})
       SET u.email = $email,
@@ -82,14 +82,14 @@ export async function POST({ request }: APIEvent) {
         roles,
         username,
         uuid,
-      }
+      },
     );
 
     // If email was changed, send confirmation emails
     if (email !== oldEmail) {
       // TODO: Send confirmation email to old address
       await sendEmailChangeNotification(oldEmail, email);
-      
+
       // TODO: Send confirmation email to new address
       await sendEmailConfirmation(email);
     }
@@ -103,14 +103,10 @@ export async function POST({ request }: APIEvent) {
 }
 
 // Helper functions for sending emails
-async function sendEmailChangeNotification(oldEmail: string, newEmail: string) {
-  // TODO: Implement email sending logic
-  console.log(`Email change notification sent to ${oldEmail} about change to ${newEmail}`);
+async function sendEmailChangeNotification(_oldEmail: string, _newEmail: string) {
 }
 
-async function sendEmailConfirmation(email: string) {
-  // TODO: Implement email confirmation logic
-  console.log(`Confirmation email sent to ${email}`);
+async function sendEmailConfirmation(_email: string) {
 }
 // Remember to:
 // 1. Implement the email sending functions

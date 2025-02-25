@@ -81,7 +81,7 @@ export function PageViewWrapper(
     formDataId?: Id;
     formId?: string;
     formMetaId?: Id;
-    getFormData?: () => Promise<ServerResult>
+    getFormData?: () => Promise<ServerResult>;
     hideSaveCancelButton?: boolean;
     initializeFormStoreParent?: (formStoreId: Id) => void;
     isNoPermissionCheck?: boolean;

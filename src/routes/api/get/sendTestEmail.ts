@@ -34,7 +34,7 @@ export async function GET({ request }: APIEvent) {
       "Test Email",
       user,
       subDomain,
-      secureToken
+      secureToken,
     );
 
     return {

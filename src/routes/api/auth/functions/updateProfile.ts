@@ -29,7 +29,7 @@ export async function updateProfile(
   if (subDomain === SYSTEM_DB_NAME) {
     // Get subdomains through Account relationship
     const subdomains = await getSubdomainsForAccount(dbSession, uuid);
-    
+
     const driver = await getDriver();
     const validationSessions = subdomains.map((subdomain) =>
       driver.session({ database: subdomain }),
@@ -181,10 +181,10 @@ async function getSubdomainsForAccount(dbSession: Session, uuid: string) {
   const subDomainsResult = await dbSession.run(
     `MATCH (u:User {uuid: $uuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
      RETURN s.key as subdomain`,
-    { uuid }
+    { uuid },
   );
-  
-  return subDomainsResult.records.map(record => record.get("subdomain"));
+
+  return subDomainsResult.records.map((record) => record.get("subdomain"));
 }
 
 async function validateField(

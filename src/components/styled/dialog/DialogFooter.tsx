@@ -16,7 +16,11 @@ export function DialogFooter(
     <div class="flex ai:center gap:0.50rem  mb:6">
       <Show when={local.children}>{local.children}</Show>
       <Show when={!local.children}>
-        <button class={ SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS  } {...buttonProps} type="button">
+        <button
+          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+          {...buttonProps}
+          type="button"
+        >
           {local.buttonText || "Save"}
         </button>
       </Show>

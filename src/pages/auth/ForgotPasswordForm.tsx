@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { useGraph } from "~/lib/graph/graph";
@@ -106,7 +106,8 @@ export function ForgotPasswordForm() {
               attributes: [
                 {
                   as: "button",
-                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class:
+                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
                   props: (options: FunctionArgumentType) => ({
                     disabled: options.dataContext.submitState[0]?.isLoading,
@@ -119,7 +120,9 @@ export function ForgotPasswordForm() {
                         options.dataContext.submitState[1]("isLoading", false);
                       }
                     },
-                    text: options.dataContext.submitState[0]?.isLoading ? "Sending..." : "Confirm",
+                    text: options.dataContext.submitState[0]?.isLoading
+                      ? "Sending..."
+                      : "Confirm",
                   }),
                 },
               ],
@@ -166,7 +169,8 @@ export function ForgotPasswordForm() {
               attributes: [
                 {
                   as: "button",
-                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class:
+                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
                   props: (options: FunctionArgumentType) => ({
                     disabled: options.dataContext.submitState[0]?.isLoading,
@@ -179,7 +183,9 @@ export function ForgotPasswordForm() {
                         options.dataContext.submitState[1]("isLoading", false);
                       }
                     },
-                    text: options.dataContext.submitState[0]?.isLoading ? "Verifying..." : "Submit",
+                    text: options.dataContext.submitState[0]?.isLoading
+                      ? "Verifying..."
+                      : "Submit",
                   }),
                 },
               ],
@@ -305,7 +311,8 @@ export function ForgotPasswordForm() {
               attributes: [
                 {
                   as: "button",
-                  class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                  class:
+                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
                   componentName: "Box",
                   props: (options: FunctionArgumentType) => ({
                     disabled: options.dataContext.submitState[0]?.isLoading,
@@ -318,7 +325,9 @@ export function ForgotPasswordForm() {
                         options.dataContext.submitState[1]("isLoading", false);
                       }
                     },
-                    text: options.dataContext.submitState[0]?.isLoading ? "Resetting..." : "Confirm",
+                    text: options.dataContext.submitState[0]?.isLoading
+                      ? "Resetting..."
+                      : "Confirm",
                   }),
                 },
               ],
@@ -339,48 +348,51 @@ export function ForgotPasswordForm() {
   };
 
   const form = {
-    attributes: [getFormByStage(), {
-      as: "div",
-      attributes: [
-        {
-          class: "color:grey",
-          componentName: "Text",
-          text: "Already have an account? ",
-        },
-        {
-          as: "a",
-          class: "color:primary text-decoration:none font-weight:bold",
-          componentName: "Box",
-          props: () => ({
-            href: "/auth/login",
-          }),
-          text: "Sign In",
-        },
-      ],
-      class: "text-align:center mt:16",
-      componentName: "Box",
-    },
-    {
-      as: "div",
-      attributes: [
-        {
-          class: "color:grey",
-          componentName: "Text",
-          text: "Don't have an account? ",
-        },
-        {
-          as: "a",
-          class: "color:primary text-decoration:none font-weight:bold",
-          componentName: "Box",
-          props: () => ({
-            href: "/auth/signup",
-          }),
-          text: "Sign Up",
-        },
-      ],
-      class: "text-align:center mt:8",
-      componentName: "Box",
-    },],
+    attributes: [
+      getFormByStage(),
+      {
+        as: "div",
+        attributes: [
+          {
+            class: "color:grey",
+            componentName: "Text",
+            text: "Already have an account? ",
+          },
+          {
+            as: "a",
+            class: "color:primary text-decoration:none font-weight:bold",
+            componentName: "Box",
+            props: () => ({
+              href: "/auth/login",
+            }),
+            text: "Sign In",
+          },
+        ],
+        class: "text-align:center mt:16",
+        componentName: "Box",
+      },
+      {
+        as: "div",
+        attributes: [
+          {
+            class: "color:grey",
+            componentName: "Text",
+            text: "Don't have an account? ",
+          },
+          {
+            as: "a",
+            class: "color:primary text-decoration:none font-weight:bold",
+            componentName: "Box",
+            props: () => ({
+              href: "/auth/signup",
+            }),
+            text: "Sign Up",
+          },
+        ],
+        class: "text-align:center mt:8",
+        componentName: "Box",
+      },
+    ],
     componentName: "Box",
   };
 

@@ -1,13 +1,16 @@
 import { createStore } from "solid-js/store";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { Vertex } from "~/lib/graph/graph";
-import { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { Vertex } from "~/lib/graph/graph";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "~/lib/meta/FormMetadataType";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
@@ -102,7 +105,6 @@ export const userFormSchema = {
 export const getUserFormSchema = (onSuccess: () => void) => {
   const { showErrorToast, showSuccessToast } = useToast();
 
-
   const validateForm = (formData: Vertex) => {
     if (!formData.P.email?.trim()) {
       showErrorToast("Please enter email");
@@ -120,13 +122,16 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     try {
       options.dataContext.modalState[1]("isLoading", true);
 
-      const roles = (evalExpression("->$0Role", {
-        graph: options.graph,
-        setGraph: options.setGraph,
-        vertexes: [formData],
-      }) as Vertex[]) || [];
+      const roles =
+        (evalExpression("->$0Role", {
+          graph: options.graph,
+          setGraph: options.setGraph,
+          vertexes: [formData],
+        }) as Vertex[]) || [];
 
-      const url = formData.id.startsWith("-") ? API.user.inviteUserUrl : API.user.updateUserUrl;
+      const url = formData.id.startsWith("-")
+        ? API.user.inviteUserUrl
+        : API.user.updateUserUrl;
       const response = await postAPI(url, {
         email: formData.P.email,
         name: formData.P.name,
@@ -138,7 +143,11 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       if (response.error) {
         showErrorToast(response.error);
       } else {
-        showSuccessToast(formData.id.startsWith("-") ? "User invited successfully" : "User updated successfully");
+        showSuccessToast(
+          formData.id.startsWith("-")
+            ? "User invited successfully"
+            : "User updated successfully",
+        );
         onSuccess();
       }
     } catch (error) {
@@ -147,7 +156,6 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       options.dataContext.modalState[1]("isLoading", false);
     }
   };
-
 
   // Modal schemas similar to SubDomainForm
   const modalHeaderSchema = {
@@ -213,7 +221,11 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                 attributes: [
                   {
                     as: "dialog",
-                    attributes: [modalHeaderSchema, userFormSchema, modalFooterSchema],
+                    attributes: [
+                      modalHeaderSchema,
+                      userFormSchema,
+                      modalFooterSchema,
+                    ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",
                     open: true,
@@ -228,7 +240,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                 props: (options: FunctionArgumentType) => ({
                   hidden: !options.dataContext.modalState[0]?.showModal,
                 }),
-              }
+              },
             ],
             componentName: "ZIndex",
           },

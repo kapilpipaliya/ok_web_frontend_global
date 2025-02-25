@@ -3,7 +3,7 @@ import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -56,7 +56,8 @@ export function PasswordChangeForm() {
             attributes: [
               {
                 as: "button",
-                class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+                class:
+                  "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
                 componentName: "Box",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
@@ -78,7 +79,9 @@ export function PasswordChangeForm() {
                       }
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Change Password",
+                  text: options.dataContext.saveState[0]?.isLoading
+                    ? "Saving..."
+                    : "Change Password",
                 }),
               },
             ],
@@ -101,9 +104,7 @@ export function PasswordChangeForm() {
   } as FieldAttribute;
 
   return (
-    <SchemaRenderer
-      form={{ attributes: [form], key: "PasswordChange" }}
-    />
+    <SchemaRenderer form={{ attributes: [form], key: "PasswordChange" }} />
   );
 }
 

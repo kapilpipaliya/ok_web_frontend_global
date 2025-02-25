@@ -1,4 +1,4 @@
-import { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 import type { EmailProvider } from "./useEmail/src/types/email-options";
 import type { EmailService } from "./useEmail/src/types/email-service";

@@ -33,12 +33,14 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
 
     try {
       options.dataContext.modalState[1]("isLoading", true);
-      const url = !formData.id.startsWith("-") ? API.subdomain.updateUrl : API.subdomain.createUrl;
+      const url = formData.id.startsWith("-")
+        ? API.subdomain.createUrl
+        : API.subdomain.updateUrl;
       const payload = {
         domain: formData.P.domain,
         key: formData.P.key,
       };
-      
+
       if (!formData.id.startsWith("-")) {
         payload.id = formData.id;
       }
@@ -48,7 +50,11 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
       if (response.error) {
         showErrorToast(response.error);
       } else {
-        showSuccessToast(!formData.id.startsWith("-") ? "Subdomain updated successfully" : "Subdomain created successfully");
+        showSuccessToast(
+          formData.id.startsWith("-")
+            ? "Subdomain created successfully"
+            : "Subdomain updated successfully",
+        );
         onSuccess();
       }
     } catch (error) {
@@ -177,7 +183,11 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 attributes: [
                   {
                     as: "dialog",
-                    attributes: [modalHeaderSchema, formSchema, modalFooterSchema],
+                    attributes: [
+                      modalHeaderSchema,
+                      formSchema,
+                      modalFooterSchema,
+                    ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",
                     open: true,
@@ -193,7 +203,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 props: (options: FunctionArgumentType) => ({
                   hidden: !options.dataContext.modalState[0]?.showModal,
                 }),
-              }
+              },
             ],
             componentName: "ZIndex",
           },

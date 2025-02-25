@@ -5,7 +5,6 @@ import type { GraphInterface } from "../../graph";
 
 import { getProfileImageVertex } from "./getMemberVertex";
 
-
 export function getProfileImageUrl(graph: GraphInterface): string {
   const profileImageVertex = getProfileImageVertex(graph);
   return getDownloadLink(profileImageVertex) || profileImage;

@@ -4,13 +4,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
-
-import { setUserData } from "./setUserData";
-import {
-  addNewVertex,
-  mergeVertexProperties,
-  replaceVertexProperties,
-} from "./vertex";
+import { addNewVertex, replaceVertexProperties } from "./vertex";
 
 // Type for the user data response
 export interface UserData {

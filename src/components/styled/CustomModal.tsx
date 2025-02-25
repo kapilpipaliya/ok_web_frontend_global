@@ -28,7 +28,7 @@ interface CustomModalProps {
 }
 
 export function CustomModal(props: Readonly<CustomModalProps>) {
-  const zIndex = useZIndex();
+  const _zIndex = useZIndex();
   const [open, setOpen] =
     props.open && props.setOpen
       ? ([props.open, props.setOpen] as [Accessor<boolean>, Setter<boolean>])

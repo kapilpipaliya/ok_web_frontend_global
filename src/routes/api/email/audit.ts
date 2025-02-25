@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
-import { Edge, Vertex } from "~/lib/graph/graph";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -23,7 +23,7 @@ export async function GET({ request }: APIEvent) {
       result.records,
       { nodes, relationships },
       "e",
-      ""
+      "",
     );
 
     return {

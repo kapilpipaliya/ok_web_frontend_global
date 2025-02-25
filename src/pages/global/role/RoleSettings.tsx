@@ -3,7 +3,7 @@ import type { DataGridStore } from "~/features/grid/DataGridContext";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
-import { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { getRoleFormSchema } from "./functions/formSchema";
@@ -37,14 +37,10 @@ export function RoleSettings() {
 
   const addSchema = getRoleFormSchema(onSuccess);
   const editSchema = getRoleFormSchema(onSuccess);
-  
+
   return (
     <DataGrid
-      CustomAddNewButton={() => (
-        <SchemaRenderer
-          form={addSchema}
-        />
-      )}
+      CustomAddNewButton={() => <SchemaRenderer form={addSchema} />}
       editSchema={editSchema}
       formSchema={RoleSchema}
       getTableData={getTableData}

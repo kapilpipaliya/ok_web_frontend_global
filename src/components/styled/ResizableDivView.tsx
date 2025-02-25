@@ -59,7 +59,11 @@ export function ResizableContainer(
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const viewVertex = () =>
-    graph.vertexes[props.view] as Vertex<{ height: string; view: string; width: string; }>;
+    graph.vertexes[props.view] as Vertex<{
+      height: string;
+      view: string;
+      width: string;
+    }>;
 
   createEffect(() => {
     const view = viewVertex();
@@ -67,7 +71,9 @@ export function ResizableContainer(
       setWidth(view.P.width);
       setHeight(view.P.height);
     } else {
-      const dimension = DIMENSIONS[view?.P.view?.toLowerCase() as keyof typeof DIMENSIONS] || DIMENSIONS.desktop;
+      const dimension =
+        DIMENSIONS[view?.P.view?.toLowerCase() as keyof typeof DIMENSIONS] ||
+        DIMENSIONS.desktop;
       setWidth(dimension.width);
       setHeight(dimension.height);
     }
@@ -97,11 +103,15 @@ export function ResizableContainer(
       if (direction === "horizontal") {
         const newWidth = `${Math.max(50, initialWidth + e.clientX - startX)}px`;
         setWidth(newWidth);
-        mergeVertexProperties(0, props.view, graph, setGraph, { width: newWidth });
+        mergeVertexProperties(0, props.view, graph, setGraph, {
+          width: newWidth,
+        });
       } else if (direction === "vertical") {
         const newHeight = `${Math.max(50, initialHeight + e.clientY - startY)}px`;
         setHeight(newHeight);
-        mergeVertexProperties(0, props.view, graph, setGraph, { height: newHeight });
+        mergeVertexProperties(0, props.view, graph, setGraph, {
+          height: newHeight,
+        });
       }
     };
 

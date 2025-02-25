@@ -1,12 +1,12 @@
 import { createStore } from "solid-js/store";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
-import { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
@@ -116,7 +116,9 @@ export function CompanySettings() {
                       if (response.error) {
                         showErrorToast(response.error);
                       } else {
-                        showSuccessToast("Company details updated successfully");
+                        showSuccessToast(
+                          "Company details updated successfully",
+                        );
                       }
                     } catch (error) {
                       showErrorToast((error as Error).message);
@@ -124,7 +126,9 @@ export function CompanySettings() {
                       options.dataContext.saveState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                  text: options.dataContext.saveState[0]?.isLoading
+                    ? "Saving..."
+                    : "Save Changes",
                 }),
               },
             ],
@@ -139,7 +143,7 @@ export function CompanySettings() {
           },
         ],
         class: "mt:24",
-        componentName: "Box"
+        componentName: "Box",
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,

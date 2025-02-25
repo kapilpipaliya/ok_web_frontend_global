@@ -4,9 +4,8 @@ import type { GraphInterface, Vertex } from "../../graph";
 
 import { getGlobalSettingVertex } from "./getGlobalThemeVertex";
 
-
 export function getCompanyLogoVertex(
-  graph: GraphInterface
+  graph: GraphInterface,
 ): undefined | Vertex {
   return evalExpression("->CompanyLogo", {
     graph,

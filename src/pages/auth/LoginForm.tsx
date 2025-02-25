@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -143,15 +143,21 @@ export function LoginForm() {
                       onKeyPress: async (e: KeyboardEvent) => {
                         if (e.key === "Enter") {
                           try {
-                            options.dataContext.submitState[1]("isLoading", true);
+                            options.dataContext.submitState[1](
+                              "isLoading",
+                              true,
+                            );
                             const formData = graph.vertexes[formDataId];
                             await handleSubmit(formData);
                           } finally {
-                            options.dataContext.submitState[1]("isLoading", false);
+                            options.dataContext.submitState[1](
+                              "isLoading",
+                              false,
+                            );
                           }
                         }
                       },
-                      type: showPassword.password ? "text" : "password"
+                      type: showPassword.password ? "text" : "password",
                     }),
                     validation: { required: true },
                   },
@@ -161,7 +167,9 @@ export function LoginForm() {
                       {
                         componentName: "Icon",
                         props: () => ({
-                          icon: showPassword.password ? "ph:eye" : "ph:eye-slash",
+                          icon: showPassword.password
+                            ? "ph:eye"
+                            : "ph:eye-slash",
                           onClick: () =>
                             setShowPassword("password", !showPassword.password),
                         }),
@@ -181,7 +189,8 @@ export function LoginForm() {
           },
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
               disabled: options.dataContext.submitState[0]?.isLoading,
@@ -194,7 +203,9 @@ export function LoginForm() {
                   options.dataContext.submitState[1]("isLoading", false);
                 }
               },
-              text: options.dataContext.submitState[0]?.isLoading ? "Logging in..." : "Log In",
+              text: options.dataContext.submitState[0]?.isLoading
+                ? "Logging in..."
+                : "Log In",
             }),
           },
         ],

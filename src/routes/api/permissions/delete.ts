@@ -35,7 +35,10 @@ export async function DELETE({ request }: APIEvent) {
 
     const incomingCount = permCheck.records[0].get("incomingCount");
     if (incomingCount > 0) {
-      throw new APIError("Cannot delete permission that is assigned to other nodes", 400);
+      throw new APIError(
+        "Cannot delete permission that is assigned to other nodes",
+        400,
+      );
     }
 
     // Check for ParentPerm outgoing edges and delete them if they exist
@@ -64,8 +67,8 @@ export async function DELETE({ request }: APIEvent) {
         deleted_edges: deletedEdges.records[0].get("deletedEdgeIds"),
         deleted_vertexes: [id],
       },
-      success: true
-    }
+      success: true,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

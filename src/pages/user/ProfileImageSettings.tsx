@@ -5,7 +5,7 @@ import { v7 as uuidv7 } from "uuid";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { useToast } from "~/components/styled/Toast";
 import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
@@ -84,26 +84,6 @@ export function ProfileImageSettings() {
     setOpenDialog(false);
   };
 
-  const onSave = async () => {
-    const selectedFile = profileImageVertex()[0];
-    if (!selectedFile) {
-      showErrorToast("Please select a profile image first");
-      return;
-    }
-
-    const memberVertex = getMemberVertex(graph);
-    const response = await postAPI(API.auth.updateProfileImageUrl, {
-      profileImage: selectedFile.id,
-      uuid: memberVertex.P.uuid,
-    });
-
-    if (response.error) {
-      showErrorToast(response.error);
-    } else {
-      showSuccessToast("Profile image updated successfully");
-    }
-  };
-
   const setFileManagerStore = (fileManagerStore_: FileManagerObject) => {
     fileManagerStore = fileManagerStore_;
   };
@@ -163,10 +143,13 @@ export function ProfileImageSettings() {
                     try {
                       options.dataContext.saveState[1]("isLoading", true);
                       const memberVertex = getMemberVertex(graph);
-                      const response = await postAPI(API.auth.updateProfileImageUrl, {
-                        profileImage: selectedFile.id,
-                        uuid: memberVertex.P.uuid,
-                      });
+                      const response = await postAPI(
+                        API.auth.updateProfileImageUrl,
+                        {
+                          profileImage: selectedFile.id,
+                          uuid: memberVertex.P.uuid,
+                        },
+                      );
 
                       if (response.error) {
                         showErrorToast(response.error);
@@ -179,7 +162,9 @@ export function ProfileImageSettings() {
                       options.dataContext.saveState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                  text: options.dataContext.saveState[0]?.isLoading
+                    ? "Saving..."
+                    : "Save Changes",
                 }),
               },
             ],

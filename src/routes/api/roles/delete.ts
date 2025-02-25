@@ -49,10 +49,10 @@ export async function DELETE({ request }: APIEvent) {
     );
     return {
       graph: {
-        deleted_vertexes: [roleCheck.records[0].get("r").identity]
+        deleted_vertexes: [roleCheck.records[0].get("r").identity],
       },
-      success: true
-    }
+      success: true,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

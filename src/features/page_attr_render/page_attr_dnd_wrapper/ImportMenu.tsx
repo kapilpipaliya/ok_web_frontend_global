@@ -2,9 +2,7 @@ import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import {
-  DialogFooter,
-} from "~/components/styled/dialog/DialogFooter";
+import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";

@@ -25,11 +25,8 @@ export async function sendNotificationEmail(
     subDomain: subDomain,
   });
 
-  if (!result.success || !result.html) {
-    throw new APIError(
-      result.error || "Failed to render page",
-      500
-    );
+  if (!(result.success && result.html)) {
+    throw new APIError(result.error || "Failed to render page", 500);
   }
 
   if (result.success && result.html) {

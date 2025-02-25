@@ -1,4 +1,4 @@
-import { Session } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 import { v7 as uuidv7 } from "uuid";
 
 import type { Vertex } from "~/lib/graph/graph";
@@ -92,7 +92,7 @@ export async function setupSuperUser(): Promise<{
 
       // Create Account and link with User
       const accountId = await createSuperAccount(dbSession, user.P.uuid);
-      
+
       // Create SubDomain and link with Account
       await createSystemSubdomain(dbSession, accountId);
 

@@ -23,14 +23,14 @@ export async function deleteFile(fileId: string, neo4jSession: Session) {
 
     return {
       graph: {
-        deleted_vertexes: [fileId]
+        deleted_vertexes: [fileId],
       },
-      success: true
-    }
+      success: true,
+    };
   } catch (error: any) {
     return {
       error: `Error deleting file ${error.message}`,
-      success: false
-    }
+      success: false,
+    };
   }
 }

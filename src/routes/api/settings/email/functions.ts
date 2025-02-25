@@ -16,19 +16,19 @@ export interface EmailSettings {
 }
 
 export async function createOrUpdateAccountEmailSettings(
-  dbSession: Session, 
-  accountId: string, 
-  settings: EmailSettings
+  dbSession: Session,
+  accountId: string,
+  settings: EmailSettings,
 ) {
   // First try to find existing EmailSetting
   const findResult = await dbSession.run(
     `MATCH (a:Account {id: $accountId})-[:AccountEmailSetting]->(s:EmailSetting)
      RETURN s.key as key`,
-    { accountId }
+    { accountId },
   );
 
   let settingsKey: string;
-  
+
   if (findResult.records.length === 0) {
     // Create new EmailSetting if not found
     settingsKey = `email_settings_${Date.now()}`;
@@ -42,7 +42,7 @@ export async function createOrUpdateAccountEmailSettings(
        CREATE (a)-[:AccountEmailSetting]->(s)
        SET s += $settings
        RETURN s.key as key`,
-      { accountId, key: settingsKey, settings }
+      { accountId, key: settingsKey, settings },
     );
   } else {
     // Update existing EmailSetting
@@ -52,18 +52,21 @@ export async function createOrUpdateAccountEmailSettings(
        SET s += $settings,
            s.updatedAt = datetime()
        RETURN s.key as key`,
-      { accountId, settings }
+      { accountId, settings },
     );
   }
 
   return settingsKey;
 }
 
-export async function getAccountEmailSettings(dbSession: Session, accountId: string) {
+export async function getAccountEmailSettings(
+  dbSession: Session,
+  accountId: string,
+) {
   const result = await dbSession.run(
     `MATCH (a:Account {id: $accountId})-[:AccountEmailSetting]->(s:EmailSetting)
      RETURN s as settings`,
-    { accountId }
+    { accountId },
   );
   return result.records[0]?.get("settings") || null;
-} 
+}

@@ -1,5 +1,5 @@
 import { useNavigate } from "@solidjs/router";
-import { SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -13,7 +13,10 @@ import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
 import type { DataGridState } from "../DataGridContext";
 
-export function useDeleteRowConfirm(gridState: DataGridState, setGridState: SetStoreFunction<DataGridState>) {
+export function useDeleteRowConfirm(
+  gridState: DataGridState,
+  setGridState: SetStoreFunction<DataGridState>,
+) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast, showSuccessToast } = useToast();
@@ -37,9 +40,9 @@ export function useDeleteRowConfirm(gridState: DataGridState, setGridState: SetS
         const result = await postAPI(
           deleteEndpoint,
           { id: gridState.deleteRowId },
-          "DELETE"
+          "DELETE",
         );
-  
+
         if (result.success) {
           if (result.graph) {
             setGraphData(graph, setGraph, result.graph);
@@ -47,7 +50,9 @@ export function useDeleteRowConfirm(gridState: DataGridState, setGridState: SetS
           showSuccessToast(`${gridState.tableId} deleted successfully`);
           gridState.fetchTableData();
         } else {
-          showErrorToast(result.error || `Failed to delete ${gridState.tableId}`);
+          showErrorToast(
+            result.error || `Failed to delete ${gridState.tableId}`,
+          );
         }
       } catch (error) {
         showErrorToast(`Error deleting ${gridState.tableId}: ${error.message}`);

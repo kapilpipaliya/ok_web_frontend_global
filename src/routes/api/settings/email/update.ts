@@ -37,18 +37,21 @@ export async function POST({ request }: APIEvent) {
       const accountResult = await dbSession.run(
         `MATCH (a:Account)-[:AccountUser]->(u:User {uuid: $uuid})
          RETURN a.id as accountId`,
-        { uuid: user?.P.uuid }
+        { uuid: user?.P.uuid },
       );
       const accountId = accountResult.records[0]?.get("accountId");
-      
+
       if (!accountId) {
         throw new APIError("Account not found", 404);
       }
 
       // Create or update account-specific email settings
-      settingsKey = await createOrUpdateAccountEmailSettings(dbSession, accountId, settings);
+      settingsKey = await createOrUpdateAccountEmailSettings(
+        dbSession,
+        accountId,
+        settings,
+      );
     } else {
-
       const result = await dbSession.run(
         `MATCH (s:EmailSetting) 
          SET s += $settings,
@@ -56,7 +59,7 @@ export async function POST({ request }: APIEvent) {
          RETURN s.key as key`,
         { settings },
       );
-  
+
       if (result.records.length === 0) {
         const newKey = `email_settings_${Date.now()}`;
         const createResult = await dbSession.run(

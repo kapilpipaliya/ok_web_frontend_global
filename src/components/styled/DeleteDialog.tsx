@@ -32,7 +32,11 @@ export function DialogWithButtons(
       footer={() => (
         <div class={SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS}>
           <Show when={props.hasPermission ?? true}>
-            <button class={SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CLASS} onClick={handleConfirm} type="button">
+            <button
+              class={SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CLASS}
+              onClick={handleConfirm}
+              type="button"
+            >
               Confirm
             </button>
           </Show>

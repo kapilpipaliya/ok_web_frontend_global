@@ -50,10 +50,10 @@ export async function DELETE({ request }: APIEvent) {
 
     return {
       graph: {
-        deleted_vertexes: [id]
+        deleted_vertexes: [id],
       },
-      success: true
-    }
+      success: true,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

@@ -21,8 +21,7 @@ export const SETTINGS_CONSTANTS = {
     CONTAINER_CLASS:
       "border:1px|solid|base-20 r:4 p:0 position:fixed top:50% left:50% transform:translate(-50%,-50%) bg:base-5",
     FOOTER: {
-      CLASS:
-        "display:flex p:16 gap:6 border-top:1px|solid|base-20 bg:base-5",
+      CLASS: "display:flex p:16 gap:6 border-top:1px|solid|base-20 bg:base-5",
     },
     HEADER: {
       CLASS: "p:16 border-bottom:1px|solid|base-20",

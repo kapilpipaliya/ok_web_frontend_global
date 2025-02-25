@@ -30,12 +30,14 @@ export function processResult(
     }
 
     // Process relationships
-    if (!typeLabel) continue;
+    if (!typeLabel) { continue; }
 
     const relationshipData = record.get(typeLabel);
-    const relationships = Array.isArray(relationshipData) 
-      ? relationshipData 
-      : relationshipData ? [relationshipData] : [];
+    const relationships = Array.isArray(relationshipData)
+      ? relationshipData
+      : relationshipData
+        ? [relationshipData]
+        : [];
 
     for (const relationship of relationships) {
       const convertedRel = convertRelationshipToJson(relationship);

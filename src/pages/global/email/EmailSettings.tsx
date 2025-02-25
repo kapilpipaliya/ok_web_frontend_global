@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -11,7 +11,7 @@ import { SchemaRenderer } from "../../SchemaRenderer";
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
 
 export function EmailSettings() {
-  const {showErrorToast, showSuccessToast} = useToast();
+  const { showErrorToast, showSuccessToast } = useToast();
   const loadSettingsData = async () => {
     return await getAPI(API.settings.email.getUrl);
   };
@@ -67,7 +67,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: () => options.data.P.active !== "smtp"
+              hidden: () => options.data.P.active !== "smtp",
             }),
           },
           {
@@ -89,7 +89,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: () => options.data.P.active !== "smtp"
+              hidden: () => options.data.P.active !== "smtp",
             }),
           },
           {
@@ -110,7 +110,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: () => options.data.P.active !== "smtp"
+              hidden: () => options.data.P.active !== "smtp",
             }),
           },
           {
@@ -132,7 +132,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: () => options.data.P.active !== "smtp"
+              hidden: () => options.data.P.active !== "smtp",
             }),
           },
           {
@@ -154,7 +154,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: () => options.data.P.active !== "sendgrid"
+              hidden: () => options.data.P.active !== "sendgrid",
             }),
           },
           {
@@ -176,7 +176,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: () => !options.data.P.active
+              hidden: () => !options.data.P.active,
             }),
           },
           {
@@ -195,7 +195,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
-              hidden: () => options.data.P.active !== "smtp"
+              hidden: () => options.data.P.active !== "smtp",
             }),
           },
           {
@@ -220,7 +220,9 @@ export function EmailSettings() {
                           if (response.error) {
                             showErrorToast(response.error);
                           } else {
-                            showSuccessToast("Email settings updated successfully");
+                            showSuccessToast(
+                              "Email settings updated successfully",
+                            );
                           }
                         } catch (error) {
                           showErrorToast((error as Error).message);
@@ -228,7 +230,9 @@ export function EmailSettings() {
                           options.dataContext.saveState[1]("isLoading", false);
                         }
                       },
-                      text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                      text: options.dataContext.saveState[0]?.isLoading
+                        ? "Saving..."
+                        : "Save Changes",
                     }),
                   },
                 ],
@@ -268,13 +272,16 @@ export function EmailSettings() {
                           options.dataContext.testState[1]("isLoading", false);
                         }
                       },
-                      text: options.dataContext.testState[0]?.isLoading ? "Testing..." : "Test Connection",
-                      title: "Please save changes and click Test Connection to send test email to current logged in user",
+                      text: options.dataContext.testState[0]?.isLoading
+                        ? "Testing..."
+                        : "Test Connection",
+                      title:
+                        "Please save changes and click Test Connection to send test email to current logged in user",
                     }),
                   },
                 ],
                 componentName: "Data",
-                name: "testState", 
+                name: "testState",
                 noRepeat: true,
                 props: () => ({
                   data: createStore({

@@ -5,7 +5,7 @@ import { v7 as uuidv7 } from "uuid";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { useToast } from "~/components/styled/Toast";
 import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
@@ -139,9 +139,12 @@ export function CompanyLogoSettings() {
 
                     try {
                       options.dataContext.saveState[1]("isLoading", true);
-                      const response = await postAPI(API.settings.company.updateLogoUrl, {
-                        logoImage: selectedFile.id,
-                      });
+                      const response = await postAPI(
+                        API.settings.company.updateLogoUrl,
+                        {
+                          logoImage: selectedFile.id,
+                        },
+                      );
 
                       if (response.error) {
                         showErrorToast(response.error);
@@ -154,7 +157,9 @@ export function CompanyLogoSettings() {
                       options.dataContext.saveState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                  text: options.dataContext.saveState[0]?.isLoading
+                    ? "Saving..."
+                    : "Save Changes",
                 }),
               },
             ],

@@ -28,8 +28,13 @@ export async function signupAdmin(
   return user;
 }
 
-async function createAccount(tx: Session | Transaction, accountId: string, username: string) {
-  await tx.run(`
+async function createAccount(
+  tx: Session | Transaction,
+  accountId: string,
+  username: string,
+) {
+  await tx.run(
+    `
     CREATE (a:Account {
       id: $accountId,
       name: $username,
@@ -37,10 +42,12 @@ async function createAccount(tx: Session | Transaction, accountId: string, usern
       lastModified: datetime()
     })
     RETURN a
-  `, {
-    accountId,
-    username,
-  });
+  `,
+    {
+      accountId,
+      username,
+    },
+  );
 }
 
 // async function createAccountSubdomainRelation(tx: Session | Transaction, accountId: string, subdomainId: string) {
@@ -53,12 +60,19 @@ async function createAccount(tx: Session | Transaction, accountId: string, usern
 //   });
 // }
 
-async function createAccountUserRelation(tx: Session | Transaction, accountId: string, userUuid: string) {
-  await tx.run(`
+async function createAccountUserRelation(
+  tx: Session | Transaction,
+  accountId: string,
+  userUuid: string,
+) {
+  await tx.run(
+    `
     MATCH (a:Account {id: $accountId}), (u:User {uuid: $userUuid})
     CREATE (a)-[:AccountUser]->(u)
-  `, {
-    accountId,
-    userUuid,
-  });
+  `,
+    {
+      accountId,
+      userUuid,
+    },
+  );
 }

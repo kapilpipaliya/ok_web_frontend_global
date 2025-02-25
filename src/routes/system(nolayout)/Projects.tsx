@@ -8,13 +8,12 @@ import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
 
-
 export default function Projects() {
   return (
     <SystemLayoutRoute>
       <Title>Projects</Title>
       <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
-        <div class="flex:1"></div>
+        <div class="flex:1" />
         <div class="ml:auto flex gap:4">
           <UserDropdownMenuDisplay />
         </div>
@@ -24,9 +23,11 @@ export default function Projects() {
         class="flex:1"
         description={
           <>
-            Each project has a separate subdomain and database. Only administrators can create and manage projects.
+            Each project has a separate subdomain and database. Only
+            administrators can create and manage projects.
             <br />
-            Click on Subdomain Name or Custom Domain Name to login to that project in new tab.
+            Click on Subdomain Name or Custom Domain Name to login to that
+            project in new tab.
           </>
         }
         title="Projects"

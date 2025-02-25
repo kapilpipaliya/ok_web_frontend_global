@@ -19,11 +19,15 @@ export async function POST({ request }: APIEvent) {
 
     const user = await validateUser(
       (await getUserFromSession(request))?.P.email,
-      dbSession
+      dbSession,
     );
 
     // Get the user's account and verify subdomain access
-    const accessResult = await getAccountAndSubdomain(dbSession, key, user.P.uuid);
+    const accessResult = await getAccountAndSubdomain(
+      dbSession,
+      key,
+      user.P.uuid,
+    );
 
     if (accessResult.records.length === 0) {
       throw new APIError("Unauthorized access to subdomain", 403);
@@ -44,7 +48,7 @@ export async function POST({ request }: APIEvent) {
       "SubDomain",
       subdomain.elementId,
       user.P.email,
-      `Deleted subdomain ${key}`
+      `Deleted subdomain ${key}`,
     );
 
     return { success: true };
@@ -55,26 +59,34 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
-async function getAccountAndSubdomain(dbSession: Session, subDomainKey: string, userUuid: string) {
+async function getAccountAndSubdomain(
+  dbSession: Session,
+  subDomainKey: string,
+  userUuid: string,
+) {
   const query = `
     MATCH (u:User {uuid: $userUuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain { key: $key })
     RETURN a, s
   `;
-  return await dbSession.run(query, { 
+  return await dbSession.run(query, {
     key: subDomainKey,
-    userUuid 
+    userUuid,
   });
 }
 
-async function removeAccountSubdomainRelation(dbSession: Session, accountId: string, subDomainKey: string) {
+async function removeAccountSubdomainRelation(
+  dbSession: Session,
+  accountId: string,
+  subDomainKey: string,
+) {
   const query = `
     MATCH (a:Account)-[r:AccountSubdomain]->(s:SubDomain { key: $key })
     WHERE a.id = $accountId
     DELETE r
   `;
-  await dbSession.run(query, { 
+  await dbSession.run(query, {
     accountId,
-    key: subDomainKey 
+    key: subDomainKey,
   });
 }
 

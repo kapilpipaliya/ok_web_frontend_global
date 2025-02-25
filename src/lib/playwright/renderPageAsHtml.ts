@@ -70,7 +70,10 @@ export async function renderPageAsHtml({
     }
 
     // Remove all script tags
-    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+    html = html.replace(
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+      "",
+    );
 
     return { html, success: true };
   } catch (error) {

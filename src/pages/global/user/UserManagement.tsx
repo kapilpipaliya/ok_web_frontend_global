@@ -58,11 +58,7 @@ export function UserManagement() {
 
   return (
     <DataGrid
-      CustomAddNewButton={() => (
-        <SchemaRenderer
-          form={addSchema}
-        />
-      )}
+      CustomAddNewButton={() => <SchemaRenderer form={addSchema} />}
       editSchema={editSchema}
       formSchema={UserSchema}
       getTableData={getTableData}

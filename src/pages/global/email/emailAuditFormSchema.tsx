@@ -1,32 +1,35 @@
 import { createStore } from "solid-js/store";
-import xss, { IFilterXSSOptions } from "xss";
+import xss, { type IFilterXSSOptions } from "xss";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { Vertex } from "~/lib/graph/graph";
-import { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { Vertex } from "~/lib/graph/graph";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "~/lib/meta/FormMetadataType";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 const whiteList = xss.whiteList;
-whiteList['html'] = [];
-whiteList['head'] = [];
-whiteList['body'] = [];
-whiteList['style'] = [];
+whiteList.html = [];
+whiteList.head = [];
+whiteList.body = [];
+whiteList.style = [];
 const xssOptions: IFilterXSSOptions = {
-  onTagAttr: (tag, name, value, isWhiteAttr) => {
-    if (name === 'style') {
+  onTagAttr: (_tag, name, value, _isWhiteAttr) => {
+    if (name === "style") {
       // Allow the style attribute
       return `${name}="${xss.escapeAttrValue(value)}"`;
     }
   },
   stripIgnoreTag: true, // Filter out tags not in the whitelist. Ignore tags like "BASE", "meta" etc. stripIgnoreTagBody: ["script"],
   stripIgnoreTagBody: ["script"],
-  whiteList
-}
+  whiteList,
+};
 
 export const emailAuditFormSchema = {
   as: "div",
@@ -118,7 +121,7 @@ export const emailAuditFormSchema = {
               options: [
                 { label: "Sent", value: "sent" },
                 { label: "Failed", value: "failed" },
-                { label: "Pending", value: "pending" }
+                { label: "Pending", value: "pending" },
               ],
               placeholder: "Select status",
             },
@@ -246,7 +249,11 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
                 attributes: [
                   {
                     as: "dialog",
-                    attributes: [modalHeaderSchema, emailAuditFormSchema, modalFooterSchema],
+                    attributes: [
+                      modalHeaderSchema,
+                      emailAuditFormSchema,
+                      modalFooterSchema,
+                    ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",
                     open: true,
@@ -261,7 +268,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
                 props: (options: FunctionArgumentType) => ({
                   hidden: !options.dataContext.modalState[0]?.showModal,
                 }),
-              }
+              },
             ],
             componentName: "ZIndex",
           },

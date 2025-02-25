@@ -15,7 +15,7 @@ export default function FormEdit() {
       >
         <PageDesignerWrapper />
       </Match>
-      <Match when={true}> 
+      <Match when={true}>
         <PageViewWrapper dataId={params.id} pageVertexName={params.entity} />
       </Match>
     </Switch>

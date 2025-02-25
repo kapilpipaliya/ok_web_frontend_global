@@ -3,5 +3,4 @@ export const headerIconButtonClass =
 
 export const toolBarClass = "flex bg:base-5 gap:6 r:7";
 
-export const profileImage =
-  "/images/profile.png";
+export const profileImage = "/images/profile.png";

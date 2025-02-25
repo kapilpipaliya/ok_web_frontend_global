@@ -23,8 +23,14 @@ export async function POST({ request }: APIEvent) {
     }
 
     // Fire and forget the email sending process
-    sendNotificationEmail(EMAIL_TEMPLATES.PROFILE_UPDATED, {}, "Your Profile Has Been Updated", result.user, subDomain).catch(error => {
-      console.error('Failed to send profile updated email:', error);
+    sendNotificationEmail(
+      EMAIL_TEMPLATES.PROFILE_UPDATED,
+      {},
+      "Your Profile Has Been Updated",
+      result.user,
+      subDomain,
+    ).catch((error) => {
+      console.error("Failed to send profile updated email:", error);
     });
 
     return result;

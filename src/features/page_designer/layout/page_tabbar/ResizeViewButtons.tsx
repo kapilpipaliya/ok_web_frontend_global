@@ -12,17 +12,21 @@ export const ResizeViewButtons = (props: {
   openIndex: number;
 }) => {
   const [graph, setGraph] = useGraph();
-  
+
   const formStoreVertex = () =>
     graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
   const openedView = () => formStoreVertex()?.P.openedViews[props.openIndex];
   const viewVertex = () =>
-    graph.vertexes[openedView()] as Vertex<{ height: string; view: string; width: string; }>;
+    graph.vertexes[openedView()] as Vertex<{
+      height: string;
+      view: string;
+      width: string;
+    }>;
 
   // Initialize dimensions if not set
   createEffect(() => {
     const view = viewVertex();
-    if (!view?.P.width || !view?.P.height) {
+    if (!(view?.P.width && view?.P.height)) {
       const defaultDimension = DIMENSIONS.desktop;
       mergeVertexProperties(0, openedView(), graph, setGraph, {
         height: defaultDimension.height,
@@ -33,7 +37,7 @@ export const ResizeViewButtons = (props: {
   });
 
   const handleDimensionSelect = (selected: string) => {
-    if (selected === 'custom') {
+    if (selected === "custom") {
       return;
     }
     const dimension = DIMENSIONS[selected as keyof typeof DIMENSIONS];
@@ -46,7 +50,7 @@ export const ResizeViewButtons = (props: {
 
   const handleWidthChange = (width: string) => {
     mergeVertexProperties(0, openedView(), graph, setGraph, {
-      view: 'custom',
+      view: "custom",
       width,
     });
   };
@@ -54,7 +58,7 @@ export const ResizeViewButtons = (props: {
   const handleHeightChange = (height: string) => {
     mergeVertexProperties(0, openedView(), graph, setGraph, {
       height,
-      view: 'custom',
+      view: "custom",
     });
   };
 

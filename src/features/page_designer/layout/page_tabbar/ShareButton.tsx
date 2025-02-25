@@ -21,7 +21,13 @@ export function ShareButton(props: { formStoreId: string }) {
         dialogClass=""
         footer={(toggle) => (
           <div class="flex ai:center jc:flex-end p:10">
-            <button class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS} onClick={() => toggle(false)} type="button">Close</button>
+            <button
+              class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS}
+              onClick={() => toggle(false)}
+              type="button"
+            >
+              Close
+            </button>
           </div>
         )}
         open={openDialog}

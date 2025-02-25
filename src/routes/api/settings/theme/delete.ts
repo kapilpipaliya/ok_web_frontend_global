@@ -20,7 +20,7 @@ export async function DELETE({ request }: APIEvent) {
        AND NOT EXISTS((:GlobalSetting)-[:GlobalSettingTheme]->(t))
        DELETE t
        RETURN count(t) as deleted`,
-      { themeId }
+      { themeId },
     );
 
     const deletedCount = result.records[0]?.get("deleted") || 0;
@@ -31,13 +31,13 @@ export async function DELETE({ request }: APIEvent) {
 
     return {
       graph: {
-        deleted_vertexes: [themeId]
+        deleted_vertexes: [themeId],
       },
-      success: true
-    }
+      success: true,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
-} 
+}

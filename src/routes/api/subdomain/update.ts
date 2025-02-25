@@ -16,36 +16,45 @@ export async function POST({ request }: APIEvent) {
     if (!id) {
       throw new APIError("Subdomain key required", 400);
     }
-    
+
     const user = await validateUser(
       (await getUserFromSession(request))?.P.email,
-      dbSession
+      dbSession,
     );
 
     // Get the user's account and verify subdomain access
-    const accessResult = await dbSession.run(`
+    const accessResult = await dbSession.run(
+      `
       MATCH (u:User {uuid: $uuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
       WHERE elementId(s) = $subdomainId
       RETURN a, s
-    `, { 
-      subdomainId: id,
-      uuid: user.P.uuid 
-    });
+    `,
+      {
+        subdomainId: id,
+        uuid: user.P.uuid,
+      },
+    );
 
     if (accessResult.records.length === 0) {
       throw new APIError("Unauthorized access to subdomain", 403);
     }
 
     await validateDomain(dbSession, id, domain);
-    const updatedSubdomain = await updateSubdomain(dbSession, id, domain, key, status);
-    
+    const updatedSubdomain = await updateSubdomain(
+      dbSession,
+      id,
+      domain,
+      key,
+      status,
+    );
+
     await createActivityLog(
       dbSession,
       "SESSION_UPDATE",
       "SubDomain",
       updatedSubdomain.id,
       user.P.email,
-      `Updated subdomain ${key} with domain ${domain}`
+      `Updated subdomain ${key} with domain ${domain}`,
     );
 
     return { subdomain: updatedSubdomain, success: true };
@@ -61,7 +70,7 @@ async function updateSubdomain(
   id: string,
   domain: string,
   key: string,
-  status?: string
+  status?: string,
 ) {
   const result = await dbSession.run(
     `MATCH (s:SubDomain) where elementId(s) = $id
@@ -69,29 +78,29 @@ async function updateSubdomain(
      s.status = $status,
      s.lastModified = datetime()
      RETURN s`,
-     // s.key = $key,
-    { domain, id, key, status: status || "active" }
+    // s.key = $key,
+    { domain, id, key, status: status || "active" },
   );
-  
+
   if (!result.records[0]) {
     throw new APIError("Subdomain not found", 404);
   }
-  
+
   return convertNodeToJson(result.records[0].get("s"));
 }
 
 async function validateDomain(
   dbSession: Session,
   currentId: string,
-  newDomain: string
+  newDomain: string,
 ) {
   const existingDomain = await dbSession.run(
     `MATCH (s:SubDomain {domain: $domain})
      WHERE elementId(s) <> $currentId
      RETURN s`,
-    { currentId, domain: newDomain }
+    { currentId, domain: newDomain },
   );
-  
+
   if (existingDomain.records.length > 0) {
     throw new APIError("Domain name is already taken", 400);
   }

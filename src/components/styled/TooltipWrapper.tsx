@@ -12,7 +12,15 @@ export function TooltipWrapper(props: {
   triggerAs?: string;
   triggerClass?: string;
 }) {
-  const [local, others] = splitProps(props, ["children", "content", "group", "openDelay", "triggerAs", "triggerClass", "arrowClass"]);
+  const [_local, others] = splitProps(props, [
+    "children",
+    "content",
+    "group",
+    "openDelay",
+    "triggerAs",
+    "triggerClass",
+    "arrowClass",
+  ]);
   return (
     <Tooltip
       closeDelay={0}
@@ -25,7 +33,11 @@ export function TooltipWrapper(props: {
       openDelay={props.openDelay ?? 200}
       placement="top"
     >
-      <Tooltip.Trigger as={props.triggerAs} class={props.triggerClass} {...others}>
+      <Tooltip.Trigger
+        as={props.triggerAs}
+        class={props.triggerClass}
+        {...others}
+      >
         {props.children}
       </Tooltip.Trigger>
       <Tooltip.Portal>
@@ -34,7 +46,7 @@ export function TooltipWrapper(props: {
         >
           {props.content}
 
-          <Tooltip.Arrow class={`color:base-20 ${props.arrowClass ?? ''}`} />
+          <Tooltip.Arrow class={`color:base-20 ${props.arrowClass ?? ""}`} />
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip>

@@ -1,4 +1,4 @@
-import { Session } from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 import nodemailer from "nodemailer";
 
 import type { Vertex } from "~/lib/graph/graph";
@@ -19,10 +19,11 @@ interface EmailOptions {
 }
 
 export async function sendEmail(options: EmailOptions) {
-  const { attachmentName, attachmentPath, content, subDomain, subject, to } = options;
+  const { attachmentName, attachmentPath, content, subDomain, subject, to } =
+    options;
   const dbSettings = await getEmailSettings(subDomain);
   let emailInfo;
-return;
+  return;
   try {
     if (dbSettings?.P.active && dbSettings.P.active !== "smtp") {
       // Use email service provider if active
@@ -56,10 +57,15 @@ return;
       const transporter = nodemailer.createTransport(transportConfig);
 
       const emailOptions: nodemailer.SendMailOptions = {
-        attachments: attachmentPath && attachmentName ? [{
-          filename: attachmentName,
-          path: attachmentPath,
-        }] : undefined,
+        attachments:
+          attachmentPath && attachmentName
+            ? [
+                {
+                  filename: attachmentName,
+                  path: attachmentPath,
+                },
+              ]
+            : undefined,
         from: dbSettings?.P.from || process.env.SMTP_FROM,
         html: content,
         subject,
@@ -86,33 +92,37 @@ return;
   return emailInfo;
 }
 
-
 async function getEmailSettings(subDomain: string): Promise<null | Vertex> {
   const driver = await getDriver();
   const dbSession = driver.session({ database: subDomain });
 
   try {
-    const emailSettingVertex = await getEmailSettingVertex(subDomain, dbSession);
+    const emailSettingVertex = await getEmailSettingVertex(
+      subDomain,
+      dbSession,
+    );
     return emailSettingVertex || getEnvEmailSettings();
   } finally {
     await dbSession.close();
   }
 }
 
-async function getEmailSettingVertex(subDomain: string, dbSession: Session): Promise<null | Vertex> {
+async function getEmailSettingVertex(
+  subDomain: string,
+  dbSession: Session,
+): Promise<null | Vertex> {
   if (subDomain === SYSTEM_DB_NAME) {
     return await getSystemEmailSettings(subDomain, dbSession);
   }
 
-  return await getSubdomainEmailSettings(dbSession) || await getParentAccountEmailSettings(subDomain);
+  return (
+    (await getSubdomainEmailSettings(dbSession)) ||
+    (await getParentAccountEmailSettings(subDomain))
+  );
 }
 function getEnvEmailSettings(): null | Vertex {
   if (
-    !process.env.SMTP_HOST ||
-    !process.env.SMTP_PORT ||
-    !process.env.SMTP_USER ||
-    !process.env.SMTP_PASS ||
-    !process.env.SMTP_FROM
+    !((((process.env.SMTP_HOST &&process.env.SMTP_PORT ) &&process.env.SMTP_USER ) &&process.env.SMTP_PASS ) &&process.env.SMTP_FROM)
   ) {
     return null;
   }
@@ -130,11 +140,13 @@ function getEnvEmailSettings(): null | Vertex {
       smtpPassword: process.env.SMTP_PASS,
       smtpPort: Number(process.env.SMTP_PORT),
       smtpUsername: process.env.SMTP_USER,
-    }
+    },
   };
 }
 
-async function getParentAccountEmailSettings(subDomain: string): Promise<null | Vertex> {
+async function getParentAccountEmailSettings(
+  subDomain: string,
+): Promise<null | Vertex> {
   const driver = await getDriver();
   const systemSession = driver.session({ database: SYSTEM_DB_NAME });
 
@@ -145,12 +157,14 @@ async function getParentAccountEmailSettings(subDomain: string): Promise<null | 
   }
 }
 
-async function getSubdomainEmailSettings(dbSession: Session): Promise<null | Vertex> {
+async function getSubdomainEmailSettings(
+  dbSession: Session,
+): Promise<null | Vertex> {
   const result = await dbSession.run(
     `MATCH (e:EmailSetting)
      WHERE e.active IS NOT NULL AND e.active <> ''
      RETURN e as settings
-     LIMIT 1`
+     LIMIT 1`,
   );
 
   return result.records.length > 0
@@ -158,38 +172,44 @@ async function getSubdomainEmailSettings(dbSession: Session): Promise<null | Ver
     : null;
 }
 
-async function getSystemEmailSettings(subDomain: string, dbSession: Session): Promise<null | Vertex> {
+async function getSystemEmailSettings(
+  subDomain: string,
+  dbSession: Session,
+): Promise<null | Vertex> {
   const result = await dbSession.run(
     `MATCH (s:SubDomain {key: $subDomain})<-[:AccountSubdomain]-(a:Account)
      MATCH (a)-[:AccountEmailSetting]->(e:EmailSetting)
      WHERE e.active IS NOT NULL AND e.active <> ''
      RETURN e as settings
      LIMIT 1`,
-    { subDomain }
+    { subDomain },
   );
 
-  return result.records.length > 0 
+  return result.records.length > 0
     ? convertNodeToJson(result.records[0].get("settings"))
     : null;
 }
 
-async function saveEmailToDatabase(subDomain: string, {
-  attachmentName,
-  attachmentPath,
-  content,
-  dbSettings,
-  emailInfo,
-  subject,
-  to,
-}: {
-  attachmentName?: string;
-  attachmentPath?: string;
-  content: string;
-  dbSettings: null | Vertex;
-  emailInfo: Record<string, unknown>;
-  subject: string;
-  to: string;
-}) {
+async function saveEmailToDatabase(
+  subDomain: string,
+  {
+    attachmentName,
+    attachmentPath,
+    content,
+    dbSettings,
+    emailInfo,
+    subject,
+    to,
+  }: {
+    attachmentName?: string;
+    attachmentPath?: string;
+    content: string;
+    dbSettings: null | Vertex;
+    emailInfo: Record<string, unknown>;
+    subject: string;
+    to: string;
+  },
+) {
   const dbSession = (await getDriver()).session({ database: subDomain });
   try {
     await dbSession.run(
@@ -210,10 +230,10 @@ async function saveEmailToDatabase(subDomain: string, {
         content,
         from: dbSettings?.P.from || process.env.SMTP_FROM || null,
         messageId: emailInfo?.messageId || null,
-        status: emailInfo ? 'sent' : 'failed',
+        status: emailInfo ? "sent" : "failed",
         subject,
         to,
-      }
+      },
     );
   } finally {
     await dbSession.close();

@@ -24,9 +24,9 @@ export default function App() {
         const location = useLocation();
         return (
           <GraphContext.Provider value={graph}>
-          <CSSRuntimeProvider
-            config={themeConfig(getGlobalThemeVertex(graph[0]))}
-          >
+            <CSSRuntimeProvider
+              config={themeConfig(getGlobalThemeVertex(graph[0]))}
+            >
               <MetaProvider>
                 <Suspense fallback={<LoaderNew />}>
                   {/* <ErrorBoundary fallback={(error) => {

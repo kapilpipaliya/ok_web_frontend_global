@@ -52,8 +52,14 @@ export async function POST({ request }: APIEvent) {
     );
 
     // Send email notification
-    sendNotificationEmail(EMAIL_TEMPLATES.PASSWORD_CHANGED,{}, "Your Password Has Been Changed", user, subDomain).catch(error => {
-      console.error('Failed to send password changed email:', error);
+    sendNotificationEmail(
+      EMAIL_TEMPLATES.PASSWORD_CHANGED,
+      {},
+      "Your Password Has Been Changed",
+      user,
+      subDomain,
+    ).catch((error) => {
+      console.error("Failed to send password changed email:", error);
     });
 
     return new Response(JSON.stringify({ success: true }), {

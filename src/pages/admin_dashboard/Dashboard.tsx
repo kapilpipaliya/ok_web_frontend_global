@@ -1,11 +1,7 @@
-import { toTitle } from "case-switcher-js";
 import { createSignal } from "solid-js";
 
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { DataGrid } from "~/features/grid/DataGrid";
-import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
-
-import { UserDropdownMenuDisplay } from "../auth_menu/DropdownMenuDisplay";
 
 export default function AdminDashboard() {
   const [selectedIndex, setSelectedIndex] = createSignal(0);

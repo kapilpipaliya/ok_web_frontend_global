@@ -1,7 +1,7 @@
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -110,7 +110,9 @@ export function GeneralSettings() {
                       options.dataContext.saveState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save Changes",
+                  text: options.dataContext.saveState[0]?.isLoading
+                    ? "Saving..."
+                    : "Save Changes",
                 }),
               },
             ],

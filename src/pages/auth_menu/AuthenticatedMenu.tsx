@@ -17,37 +17,60 @@ export interface AuthenticatedMenuProps {
   onClose: () => void;
 }
 
-export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.Element {
+export function AuthenticatedMenu(
+  props: Readonly<AuthenticatedMenuProps>,
+): JSX.Element {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showLoadingToast } = useToast();
   const globalStoreId = "globalStoreId";
 
-  const isSystemSubDomain = () => getMemberVertex(graph).P.subDomain === "super";
+  const isSystemSubDomain = () =>
+    getMemberVertex(graph).P.subDomain === "super";
 
   const getMenuItems = () => {
     const commonItems = [
       // { href: URLS.ADMIN.CONTACT, icon: "ph:question", label: "Help" },
-    ] as { href: string, icon: string, label: string }[];
+    ] as { href: string; icon: string; label: string }[];
 
     return isSystemSubDomain()
       ? [
-          { href: URLS.SYSTEM.PROJECTS, icon: "ph:umbrella", label: "Projects" },
-          { href: URLS.SYSTEM.GLOBAL_SETTINGS, icon: "ph:gear", label: "Global Settings" },
-          { href: URLS.SYSTEM.USER_SETTINGS, icon: "ph:user-gear", label: "User Settings" },
+          {
+            href: URLS.SYSTEM.PROJECTS,
+            icon: "ph:umbrella",
+            label: "Projects",
+          },
+          {
+            href: URLS.SYSTEM.GLOBAL_SETTINGS,
+            icon: "ph:gear",
+            label: "Global Settings",
+          },
+          {
+            href: URLS.SYSTEM.USER_SETTINGS,
+            icon: "ph:user-gear",
+            label: "User Settings",
+          },
           ...commonItems,
         ]
       : [
-          { href: URLS.ADMIN.GLOBAL_SETTINGS, icon: "ph:gear", label: "Global Settings" },
-          { href: URLS.ADMIN.USER_SETTINGS, icon: "ph:user-gear", label: "User Settings" },
+          {
+            href: URLS.ADMIN.GLOBAL_SETTINGS,
+            icon: "ph:gear",
+            label: "Global Settings",
+          },
+          {
+            href: URLS.ADMIN.USER_SETTINGS,
+            icon: "ph:user-gear",
+            label: "User Settings",
+          },
           ...commonItems,
         ];
   };
 
   const handleLogout = async () => {
     props.onClose();
-    mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, { 
-      isLoadingPage: true 
+    mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, {
+      isLoadingPage: true,
     });
 
     await showLoadingToast({
@@ -61,8 +84,8 @@ export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.
       successMessage: "Log Out Successfully",
     });
 
-    mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, { 
-      isLoadingPage: false 
+    mergeVertexProperties<GlobalProperties>(0, globalStoreId, graph, setGraph, {
+      isLoadingPage: false,
     });
   };
 
@@ -83,10 +106,10 @@ export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.
               href={item.href}
               onclick={props.onClose}
             >
-              <Icon 
-                class="mr:10px color:primary-60" 
-                icon={item.icon} 
-                width="20" 
+              <Icon
+                class="mr:10px color:primary-60"
+                icon={item.icon}
+                width="20"
               />
               {item.label}
             </a>
@@ -108,11 +131,7 @@ export function AuthenticatedMenu(props: Readonly<AuthenticatedMenuProps>): JSX.
           "
           onclick={handleLogout}
         >
-          <Icon 
-            class="mr:10px" 
-            icon="ph:sign-out" 
-            width="20" 
-          />
+          <Icon class="mr:10px" icon="ph:sign-out" width="20" />
           Sign Out
         </button>
       </li>

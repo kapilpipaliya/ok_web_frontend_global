@@ -3,7 +3,7 @@ import { createStore } from "solid-js/store";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
@@ -187,7 +187,9 @@ export function SaveNewComp(
                 onClick: saveAsTemplate,
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
-                  text: options.dataContext.saveState[0]?.isLoading ? "Saving..." : "Save",
+                  text: options.dataContext.saveState[0]?.isLoading
+                    ? "Saving..."
+                    : "Save",
                 }),
               },
             ],
@@ -205,7 +207,7 @@ export function SaveNewComp(
             componentName: "Button",
             onClick: props.onClose,
             text: "Cancel",
-          }
+          },
         ],
         class: "d:flex gap:8",
         componentName: "Box",

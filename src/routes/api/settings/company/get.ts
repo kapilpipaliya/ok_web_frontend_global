@@ -1,10 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
-
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { Edge, Vertex } from "~/lib/graph/graph";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 import { checkAdminRole } from "~/server/session/checkAdminRole";
 
 export async function GET({ request }: APIEvent) {
@@ -25,7 +23,12 @@ export async function GET({ request }: APIEvent) {
        RETURN s as settings`,
     );
 
-    const settings = processResult(result.records, { nodes, relationships }, "settings", "");
+    const settings = processResult(
+      result.records,
+      { nodes, relationships },
+      "settings",
+      "",
+    );
 
     return {
       graph: {

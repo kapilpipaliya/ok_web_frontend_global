@@ -20,10 +20,13 @@ export async function POST({ request }: APIEvent) {
     );
 
     // Get the user's account
-    const accountResult = await dbSession.run(`
+    const accountResult = await dbSession.run(
+      `
       MATCH (a:Account)-[:AccountUser]->(u:User {uuid: $uuid})
       RETURN a
-    `, { uuid: user.P.uuid });
+    `,
+      { uuid: user.P.uuid },
+    );
 
     if (accountResult.records.length === 0) {
       throw new APIError("Account not found", 404);
@@ -35,7 +38,11 @@ export async function POST({ request }: APIEvent) {
     const newSubdomain = await createSubdomain(dbSession, key, domain);
 
     // Create AccountSubdomain relationship
-    await createAccountSubdomainRelation(dbSession, account.id, newSubdomain.id);
+    await createAccountSubdomainRelation(
+      dbSession,
+      account.id,
+      newSubdomain.id,
+    );
 
     await createActivityLog(
       dbSession,
@@ -66,14 +73,17 @@ async function createAccountSubdomainRelation(
   accountId: string,
   subdomainId: string,
 ) {
-  await dbSession.run(`
+  await dbSession.run(
+    `
     MATCH (a:Account), (s:SubDomain)
     WHERE elementId(a) = $accountId AND elementId(s) = $subdomainId
     CREATE (a)-[:AccountSubdomain]->(s)
-  `, {
-    accountId,
-    subdomainId,
-  });
+  `,
+    {
+      accountId,
+      subdomainId,
+    },
+  );
 }
 
 async function createSubdomain(

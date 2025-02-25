@@ -3,11 +3,8 @@ import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, For, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
-import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
 import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
@@ -15,7 +12,7 @@ export default function UserSettings() {
   const [graph] = useGraph();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMenu, setSelectedMenu] = createSignal(
-    searchParams.tab || "profile"
+    searchParams.tab || "profile",
   );
 
   createEffect(() => {
@@ -45,7 +42,10 @@ export default function UserSettings() {
 
   return (
     <div class="">
-      <Title>Account Settings - {menuItems.find(item => item.id === selectedMenu())?.label}</Title>
+      <Title>
+        Account Settings -{" "}
+        {menuItems.find((item) => item.id === selectedMenu())?.label}
+      </Title>
       <HeaderWithDescription
         class=""
         description="Manage your account settings and preferences."
@@ -58,10 +58,11 @@ export default function UserSettings() {
             {(item) => (
               <Show when={!item.adminOnly || isAdminRole(graph)}>
                 <div
-                  class={`p:12px cursor:pointer r:4px mb:8px ${selectedMenu() === item.id
+                  class={`p:12px cursor:pointer r:4px mb:8px ${
+                    selectedMenu() === item.id
                       ? "bg:primary fg:base-5"
                       : "bg:primary-10:hover fg:#374151"
-                    }`}
+                  }`}
                   onClick={() => handleMenuSelect(item.id)}
                 >
                   {item.label}
@@ -82,4 +83,3 @@ export default function UserSettings() {
     </div>
   );
 }
-

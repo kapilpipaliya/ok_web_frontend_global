@@ -43,11 +43,11 @@ export function EmailAudit() {
         componentName: "TextInput",
         displayName: "Message ID",
         key: "messageId",
-      }
+      },
     ],
     isInlineEditable: true,
     key: "Email",
-    title: "Email Audit Log"
+    title: "Email Audit Log",
   };
 
   const onSuccess = () => {
@@ -58,7 +58,7 @@ export function EmailAudit() {
 
   return (
     <DataGrid
-      CustomAddNewButton={() => <div></div>}
+      CustomAddNewButton={() => <div />}
       editSchema={editSchema}
       formSchema={EmailAuditSchema}
       getTableData={getTableData}
@@ -71,4 +71,4 @@ export function EmailAudit() {
       tableId="emails"
     />
   );
-} 
+}

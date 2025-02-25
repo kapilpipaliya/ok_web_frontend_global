@@ -67,10 +67,15 @@ async function handleSignup(
     updateRedirectUrl(user, subDomain);
 
     // Fire and forget the email sending process
-    sendNotificationEmail(EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,{}, "Welcome to Our Platform - Please Confirm Your Email", user, subDomain).catch(error => {
-      console.error('Failed to send signup confirmation email:', error);
+    sendNotificationEmail(
+      EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,
+      {},
+      "Welcome to Our Platform - Please Confirm Your Email",
+      user,
+      subDomain,
+    ).catch((error) => {
+      console.error("Failed to send signup confirmation email:", error);
     });
-
 
     return user;
   } catch (error) {

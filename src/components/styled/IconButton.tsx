@@ -44,14 +44,25 @@ export function IconButton(props: Readonly<IconButtonProps>) {
   );
 
   return (
-    <Show fallback={<button
-      class={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
-      type="button"
-      {...others}
+    <Show
+      fallback={
+        <button
+          class={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
+          type="button"
+          {...others}
+        >
+          <ButtonContent />
+        </button>
+      }
+      when={local.title}
     >
-      <ButtonContent />
-    </button>} when={local.title}>
-      <TooltipWrapper content={local.title!} group={local.tooltipGroup} openDelay={300} triggerClass={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`} {...others}>
+      <TooltipWrapper
+        content={local.title!}
+        group={local.tooltipGroup}
+        openDelay={300}
+        triggerClass={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
+        {...others}
+      >
         <ButtonContent />
       </TooltipWrapper>
     </Show>

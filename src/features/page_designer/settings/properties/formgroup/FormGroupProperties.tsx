@@ -127,7 +127,12 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           />
         )}
       </For>
-      <Show when={selectedAttr()?.P.componentName === "Html" || selectedAttr()?.P.componentName === "Icon"}>
+      <Show
+        when={
+          selectedAttr()?.P.componentName === "Html" ||
+          selectedAttr()?.P.componentName === "Icon"
+        }
+      >
         <ClassesComponent
           metaAttributes={props.metaAttributes}
           onChange={props.onChange}

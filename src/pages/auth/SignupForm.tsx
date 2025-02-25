@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -168,7 +168,8 @@ export function SignupForm() {
         attributes: [
           {
             as: "button",
-            class: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
             componentName: "Box",
             props: (options: FunctionArgumentType) => ({
               disabled: options.dataContext.submitState[0]?.isLoading,
@@ -181,7 +182,9 @@ export function SignupForm() {
                   options.dataContext.submitState[1]("isLoading", false);
                 }
               },
-              text: options.dataContext.submitState[0]?.isLoading ? "Signing up..." : "Sign Up",
+              text: options.dataContext.submitState[0]?.isLoading
+                ? "Signing up..."
+                : "Sign Up",
             }),
           },
         ],
