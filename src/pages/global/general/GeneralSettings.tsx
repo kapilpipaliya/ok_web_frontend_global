@@ -14,7 +14,7 @@ import {
   addNewVertex,
   replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";

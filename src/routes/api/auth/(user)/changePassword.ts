@@ -4,13 +4,21 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
-
-
-import {EMAIL_TEMPLATES} from "~/pages/settings/constants";
+import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { currentPassword, newPassword, uuid } = await request.json();
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+
+  const user = await getUserFromSession(request);
+
+  if (!user) {
+    throw new APIError("User not found", 404);
+  }
+  if (user.P.uuid !== uuid) {
+    throw new APIError("User not authorized", 401);
+  }
 
   try {
     const userResult = await dbSession.run(

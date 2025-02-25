@@ -15,6 +15,10 @@ import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
+import {
+  headerIconButtonClass,
+  toolBarClass,
+} from "~/pages/settings/constants";
 
 import {
   type PageLayoutObject,
@@ -25,7 +29,6 @@ import {
   insertAtPosition,
   insertComponents,
 } from "./functions/insertAtPosition";
-import {headerIconButtonClass, toolBarClass} from "~/pages/settings/constants";
 
 export function Preview(props: {
   message: Vertex;

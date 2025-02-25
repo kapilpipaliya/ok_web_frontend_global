@@ -1,7 +1,6 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-
-import {PROPERTIES} from "~/pages/settings/constants";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 export const collectionAttr = [
   {

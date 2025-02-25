@@ -1,8 +1,7 @@
 import type { Vertex } from "~/lib/graph/graph";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
-
-import {AUTH_MENU_URLS} from "~/lib/api/endpoints";
+import { AUTH_MENU_URLS } from "~/lib/api/endpoints";
 
 export function updateRedirectUrl(
   user: Vertex,

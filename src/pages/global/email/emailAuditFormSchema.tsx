@@ -11,7 +11,7 @@ import type {
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 const whiteList = xss.whiteList;

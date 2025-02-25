@@ -10,10 +10,9 @@ import { signupUser } from "~/cypher/mutate/signup/signupUser";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
+import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
+import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
-
-import { updateRedirectUrl } from "../functions/updateRedirectUrl";
-import {EMAIL_TEMPLATES} from "~/pages/settings/constants";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {

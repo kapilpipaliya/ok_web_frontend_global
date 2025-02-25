@@ -16,6 +16,7 @@ import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
+import { headerIconButtonClass, STYLES } from "~/pages/settings/constants";
 
 import {
   DesignerFormIdContext,
@@ -29,7 +30,6 @@ import { ComponentList } from "./components/ComponentList";
 import { openInNewInternalTab } from "./pages/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
-import {headerIconButtonClass, STYLES} from "~/pages/settings/constants";
 
 export const UlContainer = (props: ParentProps) => (
   <ul

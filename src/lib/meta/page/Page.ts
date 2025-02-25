@@ -6,13 +6,13 @@ import type {
 
 import { evalExpression } from "~/lib/expression_eval";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 import {
   parentComponentAttribute,
   parentTemplateAttribute,
 } from "../base/Comp";
 import { pageAttr } from "./pageAttr";
-import {PROPERTIES} from "~/pages/settings/constants";
 
 export const wrapWithTitle = (
   title: string,

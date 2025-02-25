@@ -2,7 +2,7 @@ export const API = {
   auth: {
     autoLoginUrl: "/api/auth/autoLogin",
     changePasswordUrl: "/api/auth/changePassword",
-    getUserUrl: "/api/auth/getUser",
+    // getUserUrl: "/api/auth/getUserRPC",
     loginUrl: "/api/auth/login",
     logOutUrl: "/api/auth/logout",
     prepareAutoLoginUrl: "/api/auth/prepare-auto-login",
@@ -20,7 +20,7 @@ export const API = {
     uploadFileUrl: "/api/file/upload",
   },
   // Other endpoints
-  getInitialDataUrl: "/api/get/getInitialData",
+  // getInitialDataUrl: "/api/get/getInitialData",
   permission: {
     deletePermissionUrl: "/api/permissions/delete",
   },
@@ -32,6 +32,9 @@ export const API = {
     upsertRoleUrl: "/api/roles/upsert",
   },
   settings: {
+    activity: {
+      getUrl: "/api/settings/activity/list",
+    },
     company: {
       getUrl: "/api/settings/company/get",
       updateLogoUrl: "/api/settings/updateCompanyLogo",
@@ -57,7 +60,7 @@ export const API = {
     listUrl: "/api/subdomain/list",
     updateUrl: "/api/subdomain/update",
   },
-  submitDataUrl: "/api/mutate/submitData",
+  submitDataUrl: "/api/submit/submitData",
   user: {
     deleteUserUrl: "/api/users/delete",
     getUsersListUrl: "/api/users/list",

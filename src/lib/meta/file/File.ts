@@ -3,8 +3,7 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-
-import {PROPERTIES} from "~/pages/settings/constants";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 export const parentDirectory: FieldAttribute = {
   // TODO: Display Tree Information in options.

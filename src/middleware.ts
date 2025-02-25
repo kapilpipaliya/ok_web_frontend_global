@@ -1,7 +1,6 @@
 import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
-// @ts-expect-error shieldwall is not typed
-import { csrfProtection } from "shieldwall/start";
+import { csrf } from "shieldwall/start";
 
 import { getSubDomain } from "~/cypher/get/getSubDomain";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
@@ -13,9 +12,9 @@ import { generate401RedirectUrl } from "./lib/api/endpoints";
 // https://github.com/atilafassina/shieldwall
 export default createMiddleware({
   onRequest: [
-    csrfProtection,
+    csrf,
     // temporary disable secureRequest
-    // secureRequest({
+    // securityHeaders({
     //   csp: {
     //     dev: {
     //       value: {

@@ -5,9 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/styled/Toast";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { syncNodesAPICall } from "~/cypher/mutate/sync";
-
-
-import {profileImage} from "~/pages/settings/constants";
+import { profileImage } from "~/pages/settings/constants";
 
 const transferNodes = [{ key: "Component", value: "Comp" }];
 

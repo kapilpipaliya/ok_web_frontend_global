@@ -1,7 +1,6 @@
 import type { JSX } from "solid-js";
 
-
-import {STYLES} from "~/pages/settings/constants";
+import { STYLES } from "~/pages/settings/constants";
 
 export function Table(
   props: Readonly<{ children: JSX.Element; class?: string; headers: number }>,

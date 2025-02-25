@@ -10,9 +10,8 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { verifyPassword } from "~/lib/auth/password";
+import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
-
-import { updateRedirectUrl } from "../functions/updateRedirectUrl";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {

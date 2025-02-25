@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
-import {STYLES} from "~/pages/settings/constants";
+import { STYLES } from "~/pages/settings/constants";
 /*
 ┌───────────┐
 │Title x ?  │

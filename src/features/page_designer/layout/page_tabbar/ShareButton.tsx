@@ -2,7 +2,10 @@ import { createSignal } from "solid-js";
 
 import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
-import {headerIconButtonClass, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
+import {
+  headerIconButtonClass,
+  SETTINGS_CONSTANTS,
+} from "~/pages/settings/constants";
 
 import { PageShare } from "./PageShare";
 export function ShareButton(props: { formStoreId: string }) {

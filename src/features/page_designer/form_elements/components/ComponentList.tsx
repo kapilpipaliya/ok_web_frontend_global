@@ -11,10 +11,10 @@ import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { STYLES } from "~/pages/settings/constants";
 
 import { ComponentItem } from "./ComonentItem";
 import { getCompChildren } from "./getCompChildren";
-import {STYLES} from "~/pages/settings/constants";
 
 export function ComponentList(props: {
   edgeName: string;

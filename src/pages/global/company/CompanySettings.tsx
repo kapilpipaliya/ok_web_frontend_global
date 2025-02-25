@@ -9,7 +9,7 @@ import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "../../settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 
 export function CompanySettings() {
   const { showErrorToast, showSuccessToast } = useToast();

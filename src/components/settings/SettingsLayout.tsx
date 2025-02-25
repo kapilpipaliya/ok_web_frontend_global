@@ -1,24 +1,26 @@
 import { Title } from "@solidjs/meta";
 import { For, Show } from "solid-js";
+
+import type { Graph } from "~/lib/graph/graph";
+
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
-import { Graph } from "~/lib/graph/graph";
 
 export interface MenuItem {
+  adminOnly?: boolean;
   component: string;
   id: string;
   label: string;
-  adminOnly?: boolean;
 }
 
 interface SettingsLayoutProps {
-  title: string;
-  description: string;
-  menuItems: MenuItem[];
-  selectedMenu: () => string;
-  onMenuSelect: (id: string) => void;
-  graph: Graph;
   children: any;
+  description: string;
+  graph: Graph;
+  menuItems: MenuItem[];
+  onMenuSelect: (id: string) => void;
+  selectedMenu: () => string;
+  title: string;
 }
 
 export function SettingsLayout(props: SettingsLayoutProps) {
@@ -26,7 +28,10 @@ export function SettingsLayout(props: SettingsLayoutProps) {
     <div class="">
       <Title>
         {props.title} -{" "}
-        {props.menuItems.find((item) => item.id === props.selectedMenu())?.label}
+        {
+          props.menuItems.find((item) => item.id === props.selectedMenu())
+            ?.label
+        }
       </Title>
 
       <HeaderWithDescription
@@ -54,10 +59,8 @@ export function SettingsLayout(props: SettingsLayoutProps) {
             )}
           </For>
         </div>
-        <div class="flex:1 p:6">
-          {props.children}
-        </div>
+        <div class="flex:1 p:6">{props.children}</div>
       </div>
     </div>
   );
-} 
+}

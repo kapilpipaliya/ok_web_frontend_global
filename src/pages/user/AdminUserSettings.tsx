@@ -1,5 +1,6 @@
 import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, Show } from "solid-js";
+
 import { SettingsLayout } from "~/components/settings/SettingsLayout";
 import { useGraph } from "~/lib/graph/graph";
 import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
@@ -39,12 +40,12 @@ export default function AdminUserSettings() {
 
   return (
     <SettingsLayout
-      title="Account Settings"
       description="Manage your account settings and preferences."
-      menuItems={menuItems}
-      selectedMenu={selectedMenu}
-      onMenuSelect={handleMenuSelect}
       graph={graph}
+      menuItems={menuItems}
+      onMenuSelect={handleMenuSelect}
+      selectedMenu={selectedMenu}
+      title="Account Settings"
     >
       <Show when={selectedMenu() === "profile"}>
         <ProfileSettings />

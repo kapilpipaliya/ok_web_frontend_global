@@ -9,7 +9,7 @@ import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import {PROPERTIES} from "~/pages/settings/constants";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();

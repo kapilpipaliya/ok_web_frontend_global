@@ -1,40 +1,23 @@
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
-import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
 import { useToast } from "~/components/styled/Toast";
-import { useGraph } from "~/lib/graph/graph";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "../settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
+
 export function ForgotPasswordForm() {
-  const [graph, setGraph] = useGraph();
-  const { showErrorToast, showLoadingToast } = useToast();
+  const { showErrorToast } = useToast();
   const [stage, setStage] = createSignal(0); // 0: Email, 1: OTP, 2: New Passwords
   const [showPassword, setShowPassword] = createStore({
     confirmPassword: false,
     newPassword: false,
   });
-
-  const formDataId = uuidv7();
-  addNewVertex(
-    0,
-    {
-      id: formDataId,
-      IN: {},
-      L: ["ForgotPassword"],
-      OUT: {},
-      P: {},
-    },
-    graph,
-    setGraph,
-  );
 
   const handleEmailSubmit = async (formData: any) => {
     const { email } = formData.P;
@@ -115,7 +98,7 @@ export function ForgotPasswordForm() {
                     onClick: async () => {
                       try {
                         options.dataContext.submitState[1]("isLoading", true);
-                        const formData = graph.vertexes[formDataId];
+                        const formData = options.data;
                         await handleEmailSubmit(formData);
                       } finally {
                         options.dataContext.submitState[1]("isLoading", false);
@@ -178,7 +161,7 @@ export function ForgotPasswordForm() {
                     onClick: async () => {
                       try {
                         options.dataContext.submitState[1]("isLoading", true);
-                        const formData = graph.vertexes[formDataId];
+                        const formData = options.data;
                         handleOtpSubmit(formData);
                       } finally {
                         options.dataContext.submitState[1]("isLoading", false);
@@ -320,7 +303,7 @@ export function ForgotPasswordForm() {
                     onClick: async () => {
                       try {
                         options.dataContext.submitState[1]("isLoading", true);
-                        const formData = graph.vertexes[formDataId];
+                        const formData = options.data;
                         handlePasswordResetSubmit(formData);
                       } finally {
                         options.dataContext.submitState[1]("isLoading", false);
@@ -400,7 +383,6 @@ export function ForgotPasswordForm() {
   return (
     <SchemaRenderer
       form={{ attributes: [wrapFormInCard(form)], key: "ForgotPassword" }}
-      formDataId={formDataId}
     />
   );
 }

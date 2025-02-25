@@ -17,11 +17,11 @@ export async function fetchDataFromMG(
     relationships: {} as { [key: string]: Edge },
     vertexes: undefined as any,
   },
-  permissionCheck = true,
+  _permissionCheck = true,
 ): Promise<ServerResult> {
   "use server";
   let dbSession: Session;
-  let subDomain = "";
+  let _subDomain = "";
   // @ts-expect-error ignore
   if (expression.adminui) {
     context.adminui = true;
@@ -30,7 +30,7 @@ export async function fetchDataFromMG(
   if (context.dbSession) {
     dbSession = context.dbSession;
   } else {
-    ({ dbSession, subDomain } = await getDBSessionForSubdomain(
+    ({ _subDomain, dbSession } = await getDBSessionForSubdomain(
       context.adminui
         ? ({ url: "http://localhost/?adminui=true" } as Request)
         : undefined,

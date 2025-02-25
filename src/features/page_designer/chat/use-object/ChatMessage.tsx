@@ -3,9 +3,9 @@ import { Icon } from "@iconify-icon/solid";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
+import { headerIconButtonClass } from "~/pages/settings/constants";
 
 import type { DBMessage } from "./types";
-import {headerIconButtonClass} from "~/pages/settings/constants";
 
 interface ChatMessageProps {
   index: number;

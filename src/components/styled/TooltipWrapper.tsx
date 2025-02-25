@@ -1,8 +1,7 @@
 import Tooltip from "@corvu/tooltip";
 import { type JSX, splitProps } from "solid-js";
 
-
-import {STYLES} from "~/pages/settings/constants";
+import { STYLES } from "~/pages/settings/constants";
 
 export function TooltipWrapper(props: {
   arrowClass?: string;

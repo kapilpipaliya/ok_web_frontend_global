@@ -12,7 +12,7 @@ import { getInitialData } from "./cypher/get/getInitialData";
 import { getGlobalStore } from "./lib/graph/get/sync/getGlobalStore";
 import { useGraph } from "./lib/graph/graph";
 import { setGraphData } from "./lib/graph/mutate/setGraphData";
-import { getUserRPC } from "./routes/api/auth/(utils)/getUserRPC";
+import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
 
 interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;

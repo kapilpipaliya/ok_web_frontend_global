@@ -5,11 +5,11 @@ import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
-import {API, AUTH_MENU_URLS} from "~/lib/api/endpoints";
+import { API, AUTH_MENU_URLS } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
-import { type GlobalProperties, useGraph } from "~/lib/graph/graph";
-import { deleteVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { useGraph } from "~/lib/graph/graph";
+import { deleteVertex } from "~/lib/graph/mutate/vertex";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
@@ -21,7 +21,7 @@ export function AuthenticatedMenu(
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showLoadingToast } = useToast();
-  const globalStoreId = "globalStoreId";
+  const _globalStoreId = "globalStoreId";
 
   const isSystemSubDomain = () =>
     getMemberVertex(graph).P.subDomain === "super";

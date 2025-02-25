@@ -3,8 +3,9 @@ import type { APIEvent } from "@solidjs/start/server";
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { checkRole } from "~/cypher/permissions/checkPermission";
+import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { checkAdminRole } from "~/cypher/permissions/checkAdminRole";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { createOrUpdateAccountEmailSettings } from "./functions";
@@ -13,13 +14,24 @@ export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
-    const isAdmin = await checkAdminRole(request);
+    const user = await getUserFromSession(request);
+
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+
+    const isAdmin = await checkRole(
+      request,
+      SYSTEM_ROLES.ADMIN,
+      dbSession,
+      user,
+    );
+
     if (!isAdmin) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
     const settings = await request.json();
-    const user = await getUserFromSession(request);
 
     // Test email sending with the new settings
     // TODO: temporary comment out

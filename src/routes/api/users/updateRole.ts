@@ -1,19 +1,31 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { handleAPIError } from "~/lib/api/apiErrorHandler";
+import { checkRole } from "~/cypher/permissions/checkPermission";
+import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    const _user = await getUserFromSession(request);
-    // const [graph] = useGraph();
+    const user = await getUserFromSession(request);
 
-    // if (!(user?.P?.email && isAdminRole(graph))) {
-    //   throw new APIError("Unauthorized", 401);
-    // }
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+
+    const isAdmin = await checkRole(
+      request,
+      SYSTEM_ROLES.ADMIN,
+      dbSession,
+      user,
+    );
+
+    if (!isAdmin) {
+      throw new APIError("Unauthorized. Admin access required.", 403);
+    }
 
     const { roleName, userId } = await request.json();
 

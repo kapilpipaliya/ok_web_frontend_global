@@ -2,8 +2,9 @@ import type { JSX } from "solid-js";
 
 import { Popover } from "@kobalte/core/popover";
 
+import { STYLES } from "~/pages/settings/constants";
+
 import { IconButton } from "./IconButton";
-import {STYLES} from "~/pages/settings/constants";
 
 export function CustomPopover(
   props: Readonly<{

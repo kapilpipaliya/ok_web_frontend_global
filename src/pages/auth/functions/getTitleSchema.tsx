@@ -1,19 +1,17 @@
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { getTitle } from "~/components/getTitle";
-import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 export function getTitleSchema(title: string) {
   return {
     attributes: [
       {
-        componentName: "Html",
+        componentName: "Title",
         props: (options: FunctionArgumentType) => ({
           text: getTitle(title, options.graph),
         }),
-      },
+      } as FieldAttribute,
     ],
-    children: "Login",
-    componentName: "Title",
-  } as FieldAttribute;
+  };
 }

@@ -17,7 +17,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import {PROPERTIES} from "~/pages/settings/constants";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 export function CollAndData() {
   const [graph, setGraph] = useGraph();

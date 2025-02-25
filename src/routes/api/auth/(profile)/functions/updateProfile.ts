@@ -1,5 +1,7 @@
 import type { Session } from "neo4j-driver";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
@@ -12,13 +14,14 @@ type ProfilePayload = {
 };
 
 export async function updateProfile(
+  currentUser: Vertex,
   payload: ProfilePayload,
   dbSession: Session,
   subDomain: string,
 ) {
-  const { email, username, uuid } = payload;
+  const { email, username } = payload;
 
-  const userValidation = await validateUser(dbSession, uuid);
+  const userValidation = await validateUser(dbSession, currentUser.P.uuid);
   if ("error" in userValidation) {
     return userValidation;
   }
@@ -28,7 +31,10 @@ export async function updateProfile(
 
   if (subDomain === SYSTEM_DB_NAME) {
     // Get subdomains through Account relationship
-    const subdomains = await getSubdomainsForAccount(dbSession, uuid);
+    const subdomains = await getSubdomainsForAccount(
+      dbSession,
+      currentUser.P.uuid,
+    );
 
     const driver = await getDriver();
     const validationSessions = subdomains.map((subdomain) =>
@@ -42,7 +48,7 @@ export async function updateProfile(
           dbSession,
           "email",
           email,
-          uuid,
+          currentUser.P.uuid,
         );
         if (emailExists) {
           throw new Error("Email address already exists in super database");
@@ -54,7 +60,7 @@ export async function updateProfile(
           dbSession,
           "username",
           username,
-          uuid,
+          currentUser.P.uuid,
         );
         if (usernameExists) {
           throw new Error("Username already exists in super database");
@@ -68,7 +74,7 @@ export async function updateProfile(
             session,
             "email",
             email,
-            uuid,
+            currentUser.P.uuid,
           );
           if (emailExists) {
             throw new Error("Email address already exists in subdomain");
@@ -80,7 +86,7 @@ export async function updateProfile(
             session,
             "username",
             username,
-            uuid,
+            currentUser.P.uuid,
           );
           if (usernameExists) {
             throw new Error("Username already exists in subdomain");
@@ -90,9 +96,17 @@ export async function updateProfile(
 
       // Perform updates
       const updatePromises = [
-        dbSession.run(basicQuery, { email, username, uuid }),
+        dbSession.run(basicQuery, {
+          email,
+          username,
+          uuid: currentUser.P.uuid,
+        }),
         ...validationSessions.map((session) =>
-          session.run(basicQuery, { email, username, uuid }),
+          session.run(basicQuery, {
+            email,
+            username,
+            uuid: currentUser.P.uuid,
+          }),
         ),
       ];
 
@@ -103,13 +117,13 @@ export async function updateProfile(
         throw new Error("Failed to update profile");
       }
 
-      const user = convertNodeToJson(mainResult.records[0].get("u"));
+      const userNew = convertNodeToJson(mainResult.records[0].get("u"));
 
       if (email) {
-        await updateSession(user);
+        await updateSession(userNew);
       }
 
-      return { message: "Profile updated successfully", user: user };
+      return { message: "Profile updated successfully", user: userNew };
     } catch (err) {
       return {
         error: err instanceof Error ? err.message : "Failed to update profile",
@@ -121,7 +135,12 @@ export async function updateProfile(
   } else {
     // Single subdomain update
     if (email && email !== oldUser.properties.email) {
-      const emailExists = await validateField(dbSession, "email", email, uuid);
+      const emailExists = await validateField(
+        dbSession,
+        "email",
+        email,
+        currentUser.P.uuid,
+      );
       if (emailExists) {
         return { error: "Email address already exists", status: 500 };
       }
@@ -132,7 +151,7 @@ export async function updateProfile(
         dbSession,
         "username",
         username,
-        uuid,
+        currentUser.P.uuid,
       );
       if (usernameExists) {
         return { error: "Username already exists", status: 500 };
@@ -142,20 +161,20 @@ export async function updateProfile(
     const basicResult = await dbSession.run(basicQuery, {
       email,
       username,
-      uuid,
+      uuid: currentUser.P.uuid,
     });
 
     if (basicResult.records.length === 0) {
       return { error: "Failed to update profile", status: 500 };
     }
 
-    const user = convertNodeToJson(basicResult.records[0].get("u"));
+    const userNew = convertNodeToJson(basicResult.records[0].get("u"));
 
     if (email) {
-      await updateSession(user);
+      await updateSession(userNew);
     }
 
-    return { message: "Profile updated successfully", user: user };
+    return { message: "Profile updated successfully", user: userNew };
   }
 }
 

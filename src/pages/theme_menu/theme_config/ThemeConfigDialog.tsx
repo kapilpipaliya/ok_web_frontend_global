@@ -15,7 +15,7 @@ import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function ThemeConfigDialog(
   props: Readonly<{

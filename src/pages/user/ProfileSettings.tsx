@@ -7,7 +7,6 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
@@ -16,7 +15,8 @@ import {
   replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { getUserRPC } from "~/routes/api/auth/(user)/getUserRPC";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";
@@ -227,7 +227,7 @@ export function ProfileSettings() {
   // Get user data and update vertex properties
   const loadUserData = async () => {
     try {
-      const data = await getAPI(API.auth.getUserUrl);
+      const data = await getUserRPC();
       const user = data.user;
 
       replaceVertexProperties(0, formDataId, graph, setGraph, user.P);

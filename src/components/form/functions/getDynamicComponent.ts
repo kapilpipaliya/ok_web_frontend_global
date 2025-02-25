@@ -70,7 +70,6 @@ Tooltip.Trigger = clientOnly(
 );
 import { Link } from "@solidjs/meta";
 import { Meta } from "@solidjs/meta";
-import { Title } from "@solidjs/meta";
 import { Portal, Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
@@ -95,6 +94,7 @@ import { HtmlField } from "../../fields/HtmlField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../styled/FileUploader";
+import { MetaTitle } from "./MetaTitle";
 
 export const corvuComponents = {
   // Accordion,
@@ -133,7 +133,7 @@ export const componentsMap: Record<string, any> = {
   Text: TextField,
   TextArea: TextAreaField,
   TextInput: TextInputField,
-  Title,
+  Title: MetaTitle,
   Transition,
   TransitionGroup,
   ZIndex,

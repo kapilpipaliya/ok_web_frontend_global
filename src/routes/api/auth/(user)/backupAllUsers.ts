@@ -5,9 +5,10 @@ import { format } from "date-fns";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 import { getDriver } from "~/cypher/driver";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getSubDomain } from "~/cypher/get/getSubDomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
+// deprecated
 export async function GET({ request }: APIEvent) {
   // const { formName, formId } = await request.json();
   const _subdomain = await getSubDomain(request.headers.get("host")!);

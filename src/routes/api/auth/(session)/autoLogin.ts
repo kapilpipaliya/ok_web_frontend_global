@@ -5,9 +5,8 @@ import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
+import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
-
-import { updateRedirectUrl } from "../functions/updateRedirectUrl";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

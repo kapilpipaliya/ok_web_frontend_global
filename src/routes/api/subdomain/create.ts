@@ -5,19 +5,32 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
-import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
+import { checkRole } from "~/cypher/permissions/checkPermission";
+import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
   try {
-    const { domain, key } = await request.json();
+    const user = await getUserFromSession(request);
 
-    const user = await validateUser(
-      (await getUserFromSession(request))?.P.email,
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+
+    const isAdmin = await checkRole(
+      request,
+      SYSTEM_ROLES.ADMIN,
       dbSession,
+      user,
     );
+
+    if (!isAdmin) {
+      throw new APIError("Unauthorized. Admin access required.", 403);
+    }
+
+    const { domain, key } = await request.json();
 
     // Get the user's account
     const accountResult = await dbSession.run(
@@ -124,15 +137,4 @@ async function validateKeyAndDomain(
   if (existingDomain.records.length > 0) {
     throw new APIError("Domain name is already taken", 400);
   }
-}
-
-async function validateUser(email: null | string, dbSession: Session) {
-  if (!email) {
-    throw new APIError("Unauthorized", 401);
-  }
-  const user = await findUserByEmailSimple(dbSession, email);
-  if (!user) {
-    throw new APIError("Unauthorized", 401);
-  }
-  return user;
 }

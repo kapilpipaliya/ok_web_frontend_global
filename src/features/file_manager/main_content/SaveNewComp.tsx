@@ -17,7 +17,7 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { useFileManagerStore } from "../FileManagerContext";
 

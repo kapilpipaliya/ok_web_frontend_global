@@ -1,12 +1,9 @@
-import { Title } from "@solidjs/meta";
 import { useSearchParams } from "@solidjs/router";
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 
-import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
+import { SettingsLayout } from "~/components/settings/SettingsLayout";
 import { useGraph } from "~/lib/graph/graph";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
-import { SettingsLayout } from "~/components/settings/SettingsLayout";
 
 export default function SystemGlobalSettings() {
   const [graph] = useGraph();
@@ -37,12 +34,12 @@ export default function SystemGlobalSettings() {
 
   return (
     <SettingsLayout
-      title="Global Settings"
       description="Manage global application settings"
-      menuItems={menuItems}
-      selectedMenu={selectedMenu}
-      onMenuSelect={handleMenuSelect}
       graph={graph}
+      menuItems={menuItems}
+      onMenuSelect={handleMenuSelect}
+      selectedMenu={selectedMenu}
+      title="Global Settings"
     >
       <Show when={selectedMenu() === "email"}>
         <EmailSettings />

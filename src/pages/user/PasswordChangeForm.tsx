@@ -11,7 +11,7 @@ import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validation/validatePassword";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 

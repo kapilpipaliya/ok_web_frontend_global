@@ -6,11 +6,11 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
+import { headerIconButtonClass, PROPERTIES } from "~/pages/settings/constants";
 
 import { IconButton } from "../../components/styled/IconButton";
 import { AddNewButton } from "./AddNewButton";
 import { useDataGridContext } from "./DataGridContext";
-import {headerIconButtonClass, PROPERTIES} from "~/pages/settings/constants";
 
 interface GridHeaderProps {
   CustomAddNewButton?: (props: {

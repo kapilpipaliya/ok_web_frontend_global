@@ -30,10 +30,10 @@ import {
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { STYLES } from "~/pages/settings/constants";
 
 import { insertNewRow } from "./insertNewRow";
 import { SortableRow } from "./SortableRow";
-import {STYLES} from "~/pages/settings/constants";
 
 export function TableInputField(
   props: Readonly<

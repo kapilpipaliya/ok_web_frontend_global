@@ -19,8 +19,7 @@ import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
 import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
-
-import {headerIconButtonClass} from "~/pages/settings/constants";
+import { headerIconButtonClass } from "~/pages/settings/constants";
 
 export function SaveIconButton(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();

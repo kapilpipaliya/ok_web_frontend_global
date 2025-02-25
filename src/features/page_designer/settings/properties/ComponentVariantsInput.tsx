@@ -5,9 +5,9 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import {PROPERTIES} from "~/pages/settings/constants";
 
 export function ComponentVariantsInput(props: {
   compVertex: Vertex;

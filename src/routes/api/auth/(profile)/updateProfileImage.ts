@@ -2,10 +2,20 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { profileImage, uuid } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);
+
+  const user = await getUserFromSession(request);
+
+  if (!user) {
+    throw new APIError("User not found", 404);
+  }
+  if (user.P.uuid !== uuid) {
+    throw new APIError("User not authorized", 401);
+  }
 
   try {
     if (!profileImage) {

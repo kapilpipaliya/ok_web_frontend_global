@@ -8,6 +8,7 @@ import { themeConfig } from "~/cypher/get/themeConfig";
 import { getGlobalThemeVertex } from "~/lib/graph/get/sync/getGlobalThemeVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
+import { STYLES } from "~/pages/settings/constants";
 
 import type { DBMessage } from "./types";
 
@@ -20,7 +21,6 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatResponse } from "./ChatResponse";
 import { EXAMPLE_PROMPTS } from "./constants/EXAMPLE_PROMPTS";
 import { getChatHistory } from "./functions/getChatHistory";
-import {STYLES} from "~/pages/settings/constants";
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();

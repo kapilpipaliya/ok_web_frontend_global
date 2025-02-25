@@ -16,6 +16,7 @@ import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesig
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
+import { STYLES } from "~/pages/settings/constants";
 
 import type { DataGridState } from "./DataGridContext";
 
@@ -23,7 +24,6 @@ import { selectedValue } from "../../components/fields/utils/selectedValue";
 import { IconButton } from "../../components/styled/IconButton";
 import { TooltipWrapper } from "../../components/styled/TooltipWrapper";
 import { ModifyJsonButton } from "./ModifyJsonButton";
-import {STYLES} from "~/pages/settings/constants";
 
 function ImageWrapper(props: { alt?: string; class?: string; src: string }) {
   return (

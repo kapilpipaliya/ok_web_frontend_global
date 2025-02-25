@@ -4,6 +4,7 @@ import { parse } from "tldts";
 
 import type { Vertex } from "~/lib/graph/graph";
 
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
@@ -16,7 +17,15 @@ export async function GET({ request }: APIEvent) {
     const url = new URL(request.url);
     const { targetDomain, targetSubdomain } = validateRequest(url);
 
-    const { dbSession } = await getDBSessionForSubdomain(request);
+    const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+
+    if (subDomain !== SYSTEM_DB_NAME) {
+      throw new APIError(
+        "Only system database can be used for auto login",
+        400,
+      );
+    }
+
     const user = await getUserFromSession(request);
     const existingUser = await findUserByEmailSimple(dbSession, user?.P?.email);
 

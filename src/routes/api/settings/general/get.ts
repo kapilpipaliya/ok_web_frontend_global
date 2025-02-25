@@ -2,18 +2,32 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { checkRole } from "~/cypher/permissions/checkPermission";
+import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { checkAdminRole } from "~/cypher/permissions/checkAdminRole";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    const isAdmin = await checkAdminRole(request);
+    const user = await getUserFromSession(request);
+
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+
+    const isAdmin = await checkRole(
+      request,
+      SYSTEM_ROLES.ADMIN,
+      dbSession,
+      user,
+    );
 
     if (!isAdmin) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
+
     const result = await dbSession.run(
       `MATCH (s:GlobalSetting)
        OPTIONAL MATCH (s)-[:CompanyLogo]->(logo:File)

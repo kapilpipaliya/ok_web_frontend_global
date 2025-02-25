@@ -7,7 +7,6 @@ import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 import { downloadFile } from "./functions/downloadFile";
 
-
 export async function GET({ request }: APIEvent) {
   const query = getQuery();
   const fileId = query.fileId;

@@ -1,9 +1,6 @@
 import type { Session } from "neo4j-driver";
 
-export async function deleteFileMetadata(
-  dbSession: Session,
-  fileId: string,
-) {
+export async function deleteFileMetadata(dbSession: Session, fileId: string) {
   try {
     const query = "MATCH (f:File) WHERE elementId(f) = $fileId DELETE f";
     await dbSession.run(query, { fileId: fileId });

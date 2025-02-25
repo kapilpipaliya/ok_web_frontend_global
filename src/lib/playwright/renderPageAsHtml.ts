@@ -1,7 +1,8 @@
 import { type BrowserContext, chromium, type Page } from "playwright";
 
+import { isDev } from "~/pages/settings/constants";
+
 import { API } from "../api/endpoints";
-import {isDev} from "~/pages/settings/constants";
 
 interface BrowserSetup {
   browser: Awaited<ReturnType<typeof chromium.launch>>;

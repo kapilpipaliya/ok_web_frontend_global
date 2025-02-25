@@ -22,11 +22,11 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { STYLES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../getTreeData";
 import { PageItem } from "./PageItem";
-import {STYLES} from "~/pages/settings/constants";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();

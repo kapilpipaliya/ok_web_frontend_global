@@ -1,4 +1,4 @@
-import {PROPERTIES} from "~/pages/settings/constants";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 export const Import = {
   attributes: [

@@ -1,10 +1,9 @@
-import { Title } from "@solidjs/meta";
 import { useSearchParams } from "@solidjs/router";
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 
-import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
+import { SettingsLayout } from "~/components/settings/SettingsLayout";
 import { useGraph } from "~/lib/graph/graph";
+import { ActivityLog } from "~/pages/global/activity/ActivityLog";
 import { CompanySettings } from "~/pages/global/company/CompanySettings";
 import { EmailAudit } from "~/pages/global/email/EmailAudit";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
@@ -13,7 +12,6 @@ import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettin
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
 import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
-import { SettingsLayout } from "~/components/settings/SettingsLayout";
 
 export default function AdminGlobalSettings() {
   const [graph] = useGraph();
@@ -70,6 +68,11 @@ export default function AdminGlobalSettings() {
       id: "email-audit",
       label: "Email Audit",
     },
+    {
+      component: "ActivityLog",
+      id: "activity-log",
+      label: "Activity Log",
+    },
   ];
 
   const handleMenuSelect = (id: string) => {
@@ -78,12 +81,12 @@ export default function AdminGlobalSettings() {
 
   return (
     <SettingsLayout
-      title="Global Settings"
       description="Manage global application settings"
-      menuItems={menuItems}
-      selectedMenu={selectedMenu}
-      onMenuSelect={handleMenuSelect}
       graph={graph}
+      menuItems={menuItems}
+      onMenuSelect={handleMenuSelect}
+      selectedMenu={selectedMenu}
+      title="Global Settings"
     >
       <Show when={selectedMenu() === "general"}>
         <GeneralSettings />
@@ -108,6 +111,9 @@ export default function AdminGlobalSettings() {
       </Show>
       <Show when={selectedMenu() === "email-audit"}>
         <EmailAudit />
+      </Show>
+      <Show when={selectedMenu() === "activity-log"}>
+        <ActivityLog />
       </Show>
     </SettingsLayout>
   );

@@ -1,15 +1,14 @@
 import type { Session } from "neo4j-driver";
 
-import { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 export async function checkPermission(
-  request: Request,
+  _request: Request,
   permission: string | string[],
   dbSession: Session,
   user?: Vertex,
   permissionKey?: string,
-): Promise<{ allowedAccessLevels: string[]; hasPermission: boolean; }> {
-
+): Promise<{ allowedAccessLevels: string[]; hasPermission: boolean }> {
   if (!user?.id) {
     return { allowedAccessLevels: [], hasPermission: false };
   }
@@ -28,14 +27,15 @@ export async function checkPermission(
     },
   );
 
-  const hasPermission = result.records[0]?.get("hasPermission") || false;
-  const allowedAccessLevels = result.records[0]?.get("allowedAccessLevels") || [];
+  const hasPermission = result.records[0]?.get("hasPermission");
+  const allowedAccessLevels =
+    result.records[0]?.get("allowedAccessLevels") || [];
 
   return { allowedAccessLevels, hasPermission };
 }
 
 export async function checkRole(
-  request: Request,
+  _request: Request,
   role: string | string[],
   dbSession: Session,
   user?: Vertex,
@@ -56,5 +56,5 @@ export async function checkRole(
     },
   );
 
-  return result.records[0]?.get("hasRole") || false;
+  return result.records[0]?.get("hasRole");
 }

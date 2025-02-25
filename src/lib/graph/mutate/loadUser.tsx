@@ -2,9 +2,6 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/getApi";
-
 import { addNewVertex, replaceVertexProperties } from "./vertex";
 
 // Type for the user data response
@@ -13,11 +10,6 @@ export interface UserData {
   roles?: Vertex[];
   user?: Vertex;
   userSetting?: Vertex;
-}
-
-// Function to only fetch user data
-export async function fetchUserData(): Promise<UserData> {
-  return await getAPI(API.auth.getUserUrl);
 }
 
 // Function to handle navigation after user data fetch

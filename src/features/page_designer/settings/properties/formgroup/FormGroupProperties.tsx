@@ -31,6 +31,7 @@ import {
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
@@ -40,7 +41,6 @@ import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
-import {PROPERTIES} from "~/pages/settings/constants";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];

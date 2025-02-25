@@ -10,6 +10,7 @@ import {
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { GraphView } from "~/pages/debug/GraphView";
+import { STYLES } from "~/pages/settings/constants";
 
 import type { PageLayoutObject } from "../context/LayoutContext";
 
@@ -21,7 +22,6 @@ import { FormElements } from "./main_content/FormElements";
 import { PageViewComponent } from "./main_content/PageViewComponent";
 import { PropertiesContent } from "./main_content/PropertiesContent";
 import { TabBar } from "./main_content/TabBar";
-import {STYLES} from "~/pages/settings/constants";
 
 interface ResizeHandleProps {
   activeResizeKey: null | string;

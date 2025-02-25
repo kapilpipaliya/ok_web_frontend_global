@@ -1,12 +1,12 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";
 import { useGraph } from "../../graph/graph";
 import { FormMetaData } from "../formMetaData";
 import { collectionAttr } from "./collectionAttr";
-import {PROPERTIES} from "~/pages/settings/constants";
 
 export const Coll: IFormMetaData = {
   attributes: [

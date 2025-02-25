@@ -1,6 +1,5 @@
 import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
-import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
@@ -8,7 +7,6 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
@@ -16,30 +14,16 @@ import { validateUsername } from "~/lib/validation/validateUsername";
 import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "../settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
 
 export function LoginForm() {
-  const [graph, setGraph] = useGraph();
+  const [graph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [showPassword, setShowPassword] = createStore({
     password: false,
   });
-
-  const formDataId = uuidv7();
-  addNewVertex(
-    0,
-    {
-      id: formDataId,
-      IN: {},
-      L: ["Login"],
-      OUT: {},
-      P: {},
-    },
-    graph,
-    setGraph,
-  );
 
   const validateFormData = (formData: any) => {
     const { email, password } = formData.P;
@@ -69,12 +53,9 @@ export function LoginForm() {
 
   const handleSubmit = async (formData: Vertex) => {
     if (validateFormData(formData)) {
-      const globalStoreId = "globalStoreId";
-
       await showLoadingToast({
         loadMessage: "Logging In...",
-        onError: () => {
-        },
+        onError: () => {},
         onSuccess: (value) => {
           handleLoginRedirect(value, graph, navigate);
         },
@@ -110,7 +91,7 @@ export function LoginForm() {
                     if (e.key === "Enter") {
                       try {
                         options.dataContext.submitState[1]("isLoading", true);
-                        const formData = graph.vertexes[formDataId];
+                        const formData = options.data;
                         await handleSubmit(formData);
                       } finally {
                         options.dataContext.submitState[1]("isLoading", false);
@@ -140,7 +121,7 @@ export function LoginForm() {
                               "isLoading",
                               true,
                             );
-                            const formData = graph.vertexes[formDataId];
+                            const formData = options.data;
                             await handleSubmit(formData);
                           } finally {
                             options.dataContext.submitState[1](
@@ -190,7 +171,7 @@ export function LoginForm() {
               onClick: async () => {
                 try {
                   options.dataContext.submitState[1]("isLoading", true);
-                  const formData = graph.vertexes[formDataId];
+                  const formData = options.data;
                   await handleSubmit(formData);
                 } finally {
                   options.dataContext.submitState[1]("isLoading", false);
@@ -256,7 +237,6 @@ export function LoginForm() {
   return (
     <SchemaRenderer
       form={{ attributes: [wrapFormInCard(form)], key: "Login" }}
-      formDataId={formDataId}
     />
   );
 }

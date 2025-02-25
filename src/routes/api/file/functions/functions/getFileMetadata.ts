@@ -2,10 +2,7 @@ import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
-export async function getFileMetadata(
-  dbSession: Session,
-  fileId: string,
-) {
+export async function getFileMetadata(dbSession: Session, fileId: string) {
   try {
     const query = "MATCH (f:File) WHERE elementId(f) = $fileId RETURN f";
     const result = await dbSession.run(query, { fileId: fileId });
