@@ -1,3 +1,4 @@
+import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
@@ -8,9 +9,11 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { ServerResult } from "../types/ServerResult";
 import { fetchFromMGAndSaveToArray } from "./fetchFromMGAndSaveToArray";
+import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
 
-// exporting this function breaks the api
-export async function getInitialData(dbSession: Session) {
+export async function getInitialData(request?: APIEvent["request"]) {
+  "use server";
+  const { dbSession } = await getDBSessionForSubdomain(request);
   const nodeObj: Record<string, Vertex> = {};
   const relationshipObj: Record<string, Edge> = {};
 
@@ -49,6 +52,8 @@ export async function getInitialData(dbSession: Session) {
     // );
   } catch (error: any) {
     return { error: error.message };
+  } finally {
+    await dbSession.close();
   }
 
   return {

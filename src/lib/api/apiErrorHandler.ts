@@ -11,16 +11,10 @@ export class APIError extends Error {
 
 export function handleAPIError(error: unknown) {
   if (error instanceof APIError) {
-    return new Response(
-      JSON.stringify({
-        details: error.details,
-        error: error.message,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: error.status,
-      },
-    );
+    return {
+      details: error.details,
+      error: error.message,
+    };
   }
 
   const message =

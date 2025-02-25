@@ -12,6 +12,7 @@ import {
   Switch,
   untrack,
 } from "solid-js";
+import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
@@ -500,7 +501,9 @@ export function PageViewWrapper(
       event.returnValue = ""; // Chrome requires returnValue to be set
     }
   };
-  makeEventListener(window, "beforeunload", beforeunload);
+  if (!isServer) {
+    makeEventListener(window, "beforeunload", beforeunload);
+  }
 
   const Content = () => (
     <PageView

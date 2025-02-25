@@ -39,7 +39,7 @@ export default createMiddleware({
           return redirect(generate401RedirectUrl(url.pathname));
         }
       } else if (url.pathname.includes("/admin")) {
-        if (!sessionUser) {
+        if (isSuperSubDomain || !sessionUser) {
           // Redirect to the login page if not authorized
           return redirect(generate401RedirectUrl(url.pathname));
         }
