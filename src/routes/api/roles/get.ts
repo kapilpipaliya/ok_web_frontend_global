@@ -5,7 +5,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
 import { roleFormSchema } from "~/pages/global/role/functions/formSchema";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);

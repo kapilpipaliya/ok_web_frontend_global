@@ -3,7 +3,7 @@ import type { Session } from "neo4j-driver";
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
-import { updateSession } from "~/server/session/updateSession";
+import { updateSession } from "~/server/auth/session/updateSession";
 
 type ProfilePayload = {
   email?: string;

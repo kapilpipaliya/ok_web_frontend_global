@@ -5,7 +5,7 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 // Not used in the system yet
 export async function POST({ request }: APIEvent) {

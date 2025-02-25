@@ -1,10 +1,10 @@
 import { createAsync, useNavigate } from "@solidjs/router";
 import { createEffect, Match, type ParentProps, Switch } from "solid-js";
 
+import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/loadUser";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
-import type { ServerResult } from "~/cypher/types/ServerResult";
 import { handleUserNavigation } from "~/lib/graph/mutate/loadUser";
 import { setUserData } from "~/lib/graph/mutate/setUserData";
 

@@ -28,7 +28,9 @@ export function CSSRuntimeProvider(props: {
 
   const initialize = async (signal: AbortSignal) => {
     const resolvedConfig = await resolveConfig();
-    if (signal.aborted) { return; }
+    if (signal.aborted) {
+      return;
+    }
     setRuntimeCSS(
       new RuntimeCSS(props.root ?? document, resolvedConfig).observe(),
     );
@@ -48,13 +50,17 @@ export function CSSRuntimeProvider(props: {
   // Watch config changes
   let prevConfig = props.config;
   createEffect(() => {
-    if (props.config === prevConfig) { return; }
+    if (props.config === prevConfig) {
+      return;
+    }
     prevConfig = props.config;
 
     const controller = new AbortController();
     (async () => {
       const resolvedConfig = await resolveConfig();
-      if (controller.signal.aborted) { return; }
+      if (controller.signal.aborted) {
+        return;
+      }
       runtimeCSS()?.refresh(resolvedConfig); // NOTE: dont know why setTimeout is needed to make this working.
       // setTimeout(() => runtimeCSS()?.refresh(resolvedConfig), 500);
     })();
@@ -67,12 +73,16 @@ export function CSSRuntimeProvider(props: {
   // Watch root changes
   let prevRoot = props.root;
   createEffect(() => {
-    if (props.root === prevRoot) { return; }
+    if (props.root === prevRoot) {
+      return;
+    }
     prevRoot = props.root;
 
     const controller = new AbortController();
     (async () => {
-      if (controller.signal.aborted) { return; }
+      if (controller.signal.aborted) {
+        return;
+      }
       if (runtimeCSS()) {
         runtimeCSS()?.destroy();
         setRuntimeCSS(undefined);

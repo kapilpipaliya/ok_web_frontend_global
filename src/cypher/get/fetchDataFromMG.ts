@@ -4,7 +4,6 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { evalExpressionAsync } from "~/lib/expression_eval";
-import { checkSuperUserAuthorization } from "~/server/session/checkSuperUserAuthorization";
 
 import type { ContextType } from "../types/ContextType";
 import type { NestedExpression } from "../types/NestedExpression";
@@ -39,15 +38,15 @@ export async function fetchDataFromMG(
     context.dbSession = dbSession;
   }
 
-  if (permissionCheck) {
-    const authorizationError = await checkSuperUserAuthorization(
-      subDomain,
-      dbSession,
-    );
-    if (authorizationError) {
-      return authorizationError;
-    }
-  }
+  // if (permissionCheck) {
+  //   const authorizationError = await checkSuperUserAuthorization(
+  //     subDomain,
+  //     dbSession,
+  //   );
+  //   if (authorizationError) {
+  //     return authorizationError;
+  //   }
+  // }
   try {
     const mainResult = await evalExpressionAsync(
       expression.expression,

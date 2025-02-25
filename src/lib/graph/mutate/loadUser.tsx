@@ -4,6 +4,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
+
 import { addNewVertex, replaceVertexProperties } from "./vertex";
 
 // Type for the user data response

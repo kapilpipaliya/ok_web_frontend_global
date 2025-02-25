@@ -10,7 +10,7 @@ import { signupUser } from "~/cypher/mutate/signup/signupUser";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
-import { updateSession } from "~/server/session/updateSession";
+import { updateSession } from "~/server/auth/session/updateSession";
 
 import { EMAIL_TEMPLATES } from "../constants/constants";
 import { updateRedirectUrl } from "../functions/updateRedirectUrl";

@@ -30,7 +30,9 @@ export function processResult(
     }
 
     // Process relationships
-    if (!typeLabel) { continue; }
+    if (!typeLabel) {
+      continue;
+    }
 
     const relationshipData = record.get(typeLabel);
     const relationships = Array.isArray(relationshipData)

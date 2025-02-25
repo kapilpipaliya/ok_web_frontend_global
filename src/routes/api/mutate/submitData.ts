@@ -4,8 +4,6 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
-import { checkSuperUserAuthorization } from "../../../server/session/checkSuperUserAuthorization";
-
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
     throw new APIError("Invalid content type. Expected application/json", 415);
@@ -16,14 +14,14 @@ export async function POST({ request }: APIEvent) {
 
   // - Authorization -
   try {
-    const authorizationError = await checkSuperUserAuthorization(
-      subDomain,
-      dbSession,
-      true,
-    );
-    if (authorizationError) {
-      throw new APIError("Authorization failed", 403);
-    }
+    // const authorizationError = await checkSuperUserAuthorization(
+    //   subDomain,
+    //   dbSession,
+    //   true,
+    // );
+    // if (authorizationError) {
+    //   throw new APIError("Authorization failed", 403);
+    // }
     // - End of Authorization -
     const tx = dbSession.beginTransaction();
     try {

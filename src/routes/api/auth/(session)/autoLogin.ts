@@ -5,7 +5,7 @@ import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
-import { updateSession } from "~/server/session/updateSession";
+import { updateSession } from "~/server/auth/session/updateSession";
 
 import { updateRedirectUrl } from "../functions/updateRedirectUrl";
 

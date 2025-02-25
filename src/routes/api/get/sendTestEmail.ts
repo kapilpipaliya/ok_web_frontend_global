@@ -5,7 +5,7 @@ import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { EMAIL_TEMPLATES } from "../auth/constants/constants";
 

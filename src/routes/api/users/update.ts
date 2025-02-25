@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -103,11 +103,12 @@ export async function POST({ request }: APIEvent) {
 }
 
 // Helper functions for sending emails
-async function sendEmailChangeNotification(_oldEmail: string, _newEmail: string) {
-}
+async function sendEmailChangeNotification(
+  _oldEmail: string,
+  _newEmail: string,
+) {}
 
-async function sendEmailConfirmation(_email: string) {
-}
+async function sendEmailConfirmation(_email: string) {}
 // Remember to:
 // 1. Implement the email sending functions
 // 2. Add proper email templates for both notification types

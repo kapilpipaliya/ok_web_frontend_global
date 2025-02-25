@@ -23,4 +23,4 @@ UNWIND [
 ] AS perm
 MERGE (p:Permission {key: perm.key})
 SET p += perm;
-`; 
+`;

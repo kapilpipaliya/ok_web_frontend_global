@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { findUserByEmail } from "~/cypher/mutate/user/findUserByEmail";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

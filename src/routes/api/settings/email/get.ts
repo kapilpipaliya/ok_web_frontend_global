@@ -1,12 +1,13 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import type { Edge, Vertex } from "~/lib/graph/graph";
-import { checkAdminRole } from "~/server/session/checkAdminRole";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { checkAdminRole } from "~/server/auth/permissions/checkAdminRole";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

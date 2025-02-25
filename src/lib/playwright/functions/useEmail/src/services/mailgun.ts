@@ -17,7 +17,7 @@ export const MailgunService = (apiKey?: string): EmailService => {
     }
 
     const { from, html, subject, text, to } = emailOptions;
-    if (!(to && from ) || (!(text || html))) {
+    if (!(to && from) || !(text || html)) {
       throw new Error("Required email fields are missing");
     }
 
@@ -25,8 +25,12 @@ export const MailgunService = (apiKey?: string): EmailService => {
     formData.append("from", from);
     formData.append("to", Array.isArray(to) ? to.join(",") : to);
     formData.append("subject", subject);
-    if (text) { formData.append("text", text); }
-    if (html) { formData.append("html", html); }
+    if (text) {
+      formData.append("text", text);
+    }
+    if (html) {
+      formData.append("html", html);
+    }
 
     try {
       await $fetch(MAILGUN_API_URL, {

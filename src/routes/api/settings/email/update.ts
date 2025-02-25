@@ -4,8 +4,8 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { checkAdminRole } from "~/server/session/checkAdminRole";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { checkAdminRole } from "~/server/auth/permissions/checkAdminRole";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { createOrUpdateAccountEmailSettings } from "./functions";
 

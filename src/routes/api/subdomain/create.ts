@@ -7,7 +7,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);

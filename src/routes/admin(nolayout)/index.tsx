@@ -1,5 +1,6 @@
-import { Link } from "@solidjs/meta";
 import type { JSX } from "solid-js";
+
+import { Link } from "@solidjs/meta";
 
 import { GetInitialData } from "~/GetInitialData";
 import { getCompanyLogoUrl } from "~/lib/graph/get/sync/getCompanyLogoUrl";

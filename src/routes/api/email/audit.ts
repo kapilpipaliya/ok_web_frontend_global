@@ -1,9 +1,10 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
-import type { Edge, Vertex } from "~/lib/graph/graph";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);

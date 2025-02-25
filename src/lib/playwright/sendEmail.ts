@@ -1,4 +1,5 @@
 import type { Session } from "neo4j-driver";
+
 import nodemailer from "nodemailer";
 
 import type { Vertex } from "~/lib/graph/graph";
@@ -47,7 +48,10 @@ export async function sendEmail(options: EmailOptions) {
         },
         host: dbSettings?.P.smtpHost || process.env.SMTP_HOST,
         port: dbSettings?.P.smtpPort || Number(process.env.SMTP_PORT),
-        secure: dbSettings?.P.secure ?? process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true,
+        secure:
+          (dbSettings?.P.secure ?? process.env.SMTP_SECURE)
+            ? process.env.SMTP_SECURE === "true"
+            : true,
         tls: {
           rejectUnauthorized: false,
         },
@@ -119,7 +123,13 @@ async function getEmailSettingVertex(
 }
 function getEnvEmailSettings(): null | Vertex {
   if (
-    !((((process.env.SMTP_HOST &&process.env.SMTP_PORT ) &&process.env.SMTP_USER ) &&process.env.SMTP_PASS ) &&process.env.SMTP_FROM)
+    !(
+      process.env.SMTP_HOST &&
+      process.env.SMTP_PORT &&
+      process.env.SMTP_USER &&
+      process.env.SMTP_PASS &&
+      process.env.SMTP_FROM
+    )
   ) {
     return null;
   }

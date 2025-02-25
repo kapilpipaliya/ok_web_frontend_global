@@ -1,16 +1,15 @@
+import type { MultiPartData } from "h3";
 import type { Session } from "neo4j-driver";
-import type { MultiPartData } from "vinxi/runtime/http-types";
 
 import path from "node:path";
 
 import { processResult } from "~/cypher/get/evaluate/processResult";
-import { calculateChecksum } from "~/server/upload/utils/calculateChecksum";
-import { ensureDirectoryExists } from "~/server/upload/utils/ensureDirectoryExists";
-import { getFileMetadataFromNeo4j } from "~/server/upload/utils/getFileMetadataFromNeo4j";
-import { saveFileMetadataToNeo4j } from "~/server/upload/utils/saveFileMetadataToNeo4j";
-import { saveFileToDisk } from "~/server/upload/utils/saveFileToDisk";
-
-import { getBaseDir } from "./getBaseDir";
+import { calculateChecksum } from "~/lib/files/calculateChecksum";
+import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
+import { getBaseDir } from "~/lib/files/getBaseDir";
+import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
+import { getFileMetadataFromNeo4j } from "~/server/upload/functions/getFileMetadataFromNeo4j";
+import { saveFileMetadataToNeo4j } from "~/server/upload/functions/saveFileMetadataToNeo4j";
 
 export async function replaceFiles(
   request: Request,

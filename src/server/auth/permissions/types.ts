@@ -1,7 +1,7 @@
 export type Permission = {
+  description: string;
   key: string;
   name: string;
-  description: string;
 };
 
 export type Role = {
@@ -11,19 +11,20 @@ export type Role = {
 };
 
 export const SYSTEM_ROLES = {
-  ADMIN: 'Admin',
-  SUPER_USER: 'SuperUser',
-  USER: 'User',
+  ADMIN: "Admin",
+  GUEST: "Guest",
+  SUPER_USER: "SuperUser",
+  USER: "User",
 } as const;
 
 export const PERMISSIONS = {
-  CREATE_USER: 'create:user',
-  DELETE_USER: 'delete:user',
-  EDIT_USER: 'edit:user',
-  VIEW_USER: 'view:user',
-  MANAGE_ROLES: 'manage:roles',
-  MANAGE_SYSTEM: 'manage:system',
-  UPLOAD_FILES: 'upload:files',
-  DELETE_FILES: 'delete:files',
-  VIEW_FILES: 'view:files',
-} as const; 
+  CREATE_USER: "create:user",
+  DELETE_FILES: "delete:files",
+  DELETE_USER: "delete:user",
+  EDIT_USER: "edit:user",
+  MANAGE_ROLES: "manage:roles",
+  MANAGE_SYSTEM: "manage:system",
+  UPLOAD_FILES: "upload:files",
+  VIEW_FILES: "view:files",
+  VIEW_USER: "view:user",
+} as const;

@@ -2,7 +2,7 @@ import type { Session } from "neo4j-driver";
 
 import fs from "node:fs/promises";
 
-import { getFileMetadataFromNeo4j } from "~/server/upload/utils/getFileMetadataFromNeo4j";
+import { getFileMetadataFromNeo4j } from "~/server/upload/functions/getFileMetadataFromNeo4j";
 
 export async function downloadFile(fileId: string, dbSession: Session) {
   const fileMetadata = await getFileMetadataFromNeo4j(dbSession, fileId);

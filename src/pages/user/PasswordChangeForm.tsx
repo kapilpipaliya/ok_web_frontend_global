@@ -1,9 +1,9 @@
 import { useNavigate } from "@solidjs/router";
 import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";

@@ -1,9 +1,9 @@
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { PROPERTIES } from "~/components/styled/constants/constant";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";

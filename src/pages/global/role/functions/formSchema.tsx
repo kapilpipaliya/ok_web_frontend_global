@@ -15,6 +15,7 @@ import { onMutatDataGet } from "~/lib/graph/mutate/onMutatDataGet";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
+import { SYSTEM_ROLES } from "~/server/auth/permissions/types";
 
 import { loadingIconSchema } from "./loadingIconSchema";
 
@@ -66,6 +67,11 @@ export const roleFormSchema = {
               componentName: "TextInput",
               key: "key",
               placeholder: "Enter role name",
+              props: (options: FunctionArgumentType) => ({
+                disabled:
+                  !options.data.id.startsWith("-") &&
+                  Object.values(SYSTEM_ROLES).includes(options.data.P.key),
+              }),
               validation: { required: true },
             },
           ],

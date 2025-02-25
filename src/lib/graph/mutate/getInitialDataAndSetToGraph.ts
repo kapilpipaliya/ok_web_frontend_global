@@ -1,6 +1,6 @@
+import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { GraphInterface } from "~/lib/graph/graph";
 
-import type { ServerResult } from "~/cypher/types/ServerResult";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 

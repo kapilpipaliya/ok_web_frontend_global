@@ -2,10 +2,10 @@ import { createMemo, createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { useToast } from "~/components/styled/Toast";
 import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";

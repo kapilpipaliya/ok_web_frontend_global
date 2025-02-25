@@ -97,7 +97,9 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   };
 
   const handleDeleteConfirmation = async () => {
-    if (confirmDelete() === null) { return; }
+    if (confirmDelete() === null) {
+      return;
+    }
 
     const themeId = confirmDelete();
     setConfirmDelete(null);

@@ -8,7 +8,6 @@ import { getCompanyLogoUrl } from "~/lib/graph/get/sync/getCompanyLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { SystemLayout } from "~/pages/SystemLayout";
 
 export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
@@ -21,7 +20,7 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
           <UserDropdownMenuDisplay />
         </div>
       </header>
-      <SystemLayout>{props.children}</SystemLayout>
+      {props.children}
     </GetInitialData>
   );
 }

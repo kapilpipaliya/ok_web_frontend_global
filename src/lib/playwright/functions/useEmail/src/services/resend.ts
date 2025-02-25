@@ -21,7 +21,7 @@ export class ResendService implements EmailService {
     }
 
     const { from, html, subject, text, to } = emailOptions;
-    if (!(to && from ) || (!(text || html))) {
+    if (!(to && from) || !(text || html)) {
       throw new Error("Required email fields are missing");
     }
 

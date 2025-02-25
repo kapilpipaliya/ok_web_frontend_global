@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { getUserFromSession } from "~/server/session/getUserFromSession";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -26,6 +26,8 @@ export async function POST({ request }: APIEvent) {
     if (existingRole.records.length > 0) {
       throw new APIError("Role with this name already exists", 400);
     }
+
+    // added frontend validation so system role keys are not updated
 
     const tx = dbSession.beginTransaction();
     try {
