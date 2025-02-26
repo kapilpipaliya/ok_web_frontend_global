@@ -7,7 +7,7 @@ import { getGlobalSettingVertex } from "~/lib/graph/get/sync/getGlobalThemeVerte
 
 export function getTitle(title: string, graph: GraphInterface) {
   const appName = createMemo(
-    () => getGlobalSettingVertex(graph)?.P.appName || APP_NAME,
+    () => graph ? getGlobalSettingVertex(graph)?.P.appName || APP_NAME : APP_NAME,
   );
 
   return `${title.trim()} | ${appName()} v${APP_VERSION}`;

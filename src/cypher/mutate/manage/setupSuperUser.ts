@@ -9,6 +9,7 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
 import { hashPassword } from "~/lib/auth/password";
+import { saveAllEmailTemplates } from "~/lib/email/saveEmailTemplates";
 
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";
@@ -106,6 +107,13 @@ export async function setupSuperUser(): Promise<{
           status: 500,
           user: null,
         };
+      }
+
+      try {
+        await saveAllEmailTemplates(dbSession);
+      } catch (error) {
+        console.error("Failed to save email templates:", error);
+        // Continue even if email template creation fails
       }
 
       return { status: 200, user };

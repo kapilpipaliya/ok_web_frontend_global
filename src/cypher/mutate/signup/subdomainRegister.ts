@@ -3,6 +3,7 @@ import type { Node, Session, Transaction } from "neo4j-driver";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { syncNodesAPICall } from "~/cypher/mutate/sync";
+import { saveAllEmailTemplates } from "~/lib/email/saveEmailTemplates";
 
 import { createDatabase } from "./createDatabase";
 import { createRootFolder } from "./createRootFolder";
@@ -47,6 +48,14 @@ export async function subdomainRegister(
   // await insertDataTypes(userDbSession);
 
   await insertComponents(userDbSession);
+
+  // After successful subdomain creation and registration
+  try {
+    await saveAllEmailTemplates(userDbSession);
+  } catch (error) {
+    console.error("Failed to save email templates:", error);
+    // Continue even if email template creation fails
+  }
 
   syncNodesAPICall({
     // This is not syncing Root to child relationship.
