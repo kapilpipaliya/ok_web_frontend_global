@@ -9,26 +9,31 @@ import { getHttpsSession } from "~/server/auth/session/getHttpsSession";
 export async function getUserFromSession(
   request?: APIEvent["request"],
 ): Promise<undefined | Vertex> {
-  const httpSession = await getHttpsSession();
-  const sessionUser = httpSession?.data?.user;
+  try {
+    const httpSession = await getHttpsSession();
+    const sessionUser = httpSession?.data?.user;
 
-  if (!sessionUser) {
+    if (!sessionUser) {
+      return;
+    }
+
+    // Get user password from database
+    const { dbSession } = await getDBSessionForSubdomain(request);
+    const query = "MATCH (u:User) WHERE elementId(u) = $id RETURN u as u";
+    const result = await dbSession.run(query, { id: sessionUser.id });
+    const userFromDb =
+      result.records.length > 0
+        ? convertNodeToJson(result.records[0].get("u"))
+        : null;
+
+    // Return undefined if passwords don't match
+    if (!userFromDb || userFromDb.P.password !== sessionUser.P.password) {
+      return;
+    }
+
+    return sessionUser;
+  } catch {
+    // Handle the error silently, returning undefined
     return;
   }
-
-  // Get user password from database
-  const { dbSession } = await getDBSessionForSubdomain(request);
-  const query = "MATCH (u:User) WHERE elementId(u) = $id RETURN u as u";
-  const result = await dbSession.run(query, { id: sessionUser.id });
-  const userFromDb =
-    result.records.length > 0
-      ? convertNodeToJson(result.records[0].get("u"))
-      : null;
-
-  // Return undefined if passwords don't match
-  if (!userFromDb || userFromDb.P.password !== sessionUser.P.password) {
-    return;
-  }
-
-  return sessionUser;
 }

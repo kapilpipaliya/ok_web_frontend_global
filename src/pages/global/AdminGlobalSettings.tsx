@@ -10,6 +10,7 @@ import { EmailSettings } from "~/pages/global/email/EmailSettings";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
 import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
+import { SupportTickets } from "~/pages/global/support/SupportTickets";
 import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
 
@@ -82,6 +83,12 @@ export default function AdminGlobalSettings() {
       id: "activity-log",
       label: "Activity Log"
     },
+    {
+      component: "SupportTickets",
+      group: "Support",
+      id: "support-tickets",
+      label: "Support Tickets"
+    },
   ];
 
   const handleMenuSelect = (id: string) => {
@@ -123,6 +130,9 @@ export default function AdminGlobalSettings() {
       </Show>
       <Show when={selectedMenu() === "activity-log"}>
         <ActivityLog />
+      </Show>
+      <Show when={selectedMenu() === "support-tickets"}>
+        <SupportTickets />
       </Show>
     </SettingsLayout>
   );

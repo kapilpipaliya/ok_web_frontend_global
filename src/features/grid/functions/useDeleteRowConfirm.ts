@@ -95,6 +95,8 @@ function getDeleteEndpoint(tableId: string) {
       return API.permission.deletePermissionUrl;
     case "Role":
       return API.role.deleteRoleUrl;
+    case "SupportTicket":
+      return API.support.deleteTicketUrl;
     case "User":
       return API.user.deleteUserUrl;
     default:

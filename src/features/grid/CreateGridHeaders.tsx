@@ -212,6 +212,9 @@ export function CreateGridHeaders(
             }
           >
             <Switch>
+             <Match when={formNew.isInlineEditable && !gridState.editSchema}>
+                No Schema Found
+              </Match>
               <Match when={formNew.isInlineEditable}>
                 <SchemaRenderer
                   form={gridState.editSchema!}

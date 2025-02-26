@@ -60,6 +60,14 @@ export const API = {
     updateUrl: "/api/subdomain/update",
   },
   submitDataUrl: "/api/submit/submitData",
+  support: {
+    createTicketUrl: "/api/support/ticket/create",
+    deleteTicketUrl: "/api/support/ticket/delete",
+    getTicketsUrl: "/api/support/ticket/list",
+    getTicketUrl: "/api/support/ticket/get",
+    replyUrl: "/api/support/ticket/reply",
+    upsertTicketUrl: "/api/support/ticket/upsert",
+  },
   user: {
     deleteUserUrl: "/api/users/delete",
     getUsersListUrl: "/api/users/list",

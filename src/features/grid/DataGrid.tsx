@@ -225,28 +225,34 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
     setGridState("filteredData", filtered);
   };
-
+  
   async function fetchTableData(
     skip?: number,
     limit?: number,
     isLoadMore?: boolean,
   ) {
     setGridState("isLoading", true);
-    const data = await (props.getTableData || defaultGetTableData)(
-      graph,
-      formMetaData()!,
-      props.tableId,
-      skip,
-      limit,
-    );
+    try {
+      const data = await (props.getTableData || defaultGetTableData)(
+        graph,
+        formMetaData()!,
+        props.tableId,
+        skip,
+        limit,
+      );
 
-    if (isValidResponse(data)) {
-      onTableDataGet(data, isLoadMore);
-    } else {
-      setGridState("error", getErrorMessage(data));
+      if (isValidResponse(data)) {
+        onTableDataGet(data, isLoadMore);
+      } else {
+        setGridState("error", getErrorMessage(data));
+      }
+      return data;
+    } catch (error) {
+      setGridState("error", error instanceof Error ? error.message : "An unknown error occurred");
+    } finally {
+      setGridState("isLoading", false);
     }
-    setGridState("isLoading", false);
-    return data;
+
   }
 
   function onTableDataGet(data: ServerResult, isLoadMore?: boolean) {
