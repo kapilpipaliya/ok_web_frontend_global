@@ -70,7 +70,13 @@ export async function POST({ request }: APIEvent) {
       `Updated subdomain ${key} with domain ${domain}`,
     );
 
-    return { subdomain: updatedSubdomain, success: true };
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [updatedSubdomain.id]: updatedSubdomain },
+      },
+      result: updatedSubdomain,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

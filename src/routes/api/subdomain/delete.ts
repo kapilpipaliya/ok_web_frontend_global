@@ -64,7 +64,12 @@ export async function POST({ request }: APIEvent) {
       `Deleted subdomain ${key}`,
     );
 
-    return { success: true };
+    return {
+      graph: {
+        deleted_vertexes: [subdomain.elementId],
+      },
+      success: true,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

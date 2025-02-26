@@ -25,7 +25,7 @@ export async function POST({ request }: APIEvent) {
     const result = await updateProfile(user, payload, dbSession, subDomain);
 
     if ("error" in result) {
-      throw new APIError(result.error, result.status || 500);
+      throw new APIError(result.error || "Failed to update profile", result.status || 500);
     }
 
     // Fire and forget the email sending process
@@ -33,7 +33,7 @@ export async function POST({ request }: APIEvent) {
       EMAIL_TEMPLATES.PROFILE_UPDATED,
       {},
       "Your Profile Has Been Updated",
-      result.user,
+      result.result,
       subDomain,
     ).catch((error) => {
       console.error("Failed to send profile updated email:", error);

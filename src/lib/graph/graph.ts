@@ -67,7 +67,7 @@ export interface Vertex<P extends object = { [key: string]: any }> {
   P: P;
 }
 
-export type VertexMap = { [key: string]: Vertex };
+export type VertexMap = { [Id: string]: Vertex };
 
 type AnyObject = { [key: string]: any };
 

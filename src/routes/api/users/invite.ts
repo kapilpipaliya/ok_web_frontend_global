@@ -80,7 +80,13 @@ export async function POST({ request }: APIEvent) {
 
     // TODO: Send invitation email
 
-    return { success: true };
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [user.id]: user },
+      },
+      result: user,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

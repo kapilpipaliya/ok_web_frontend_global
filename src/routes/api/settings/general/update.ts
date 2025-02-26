@@ -1,10 +1,12 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { Vertex } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -33,10 +35,14 @@ export async function POST({ request }: APIEvent) {
     // First check if GlobalSetting exists
     const checkResult = await dbSession.run(
       `MATCH (s:GlobalSetting) 
-       RETURN s.key as key`,
+       RETURN s`,
     );
 
-    let settingsKey: string;
+    let settingsVertex: Vertex;
+
+    if (checkResult.records.length > 1) {
+      throw new APIError("Multiple global settings found", 500);
+    }
 
     if (checkResult.records.length === 0) {
       // Create new GlobalSetting if none exists
@@ -48,35 +54,38 @@ export async function POST({ request }: APIEvent) {
           updatedAt: datetime()
         })
         SET s += $settings
-        RETURN s.key as key`,
+        RETURN s`,
         { key: newKey, settings },
       );
-      settingsKey = createResult.records[0].get("key");
+      settingsVertex = convertNodeToJson(createResult.records[0].get("s"));
     } else {
       // Update existing GlobalSetting
       const result = await dbSession.run(
         `MATCH (s:GlobalSetting)
          SET s += $settings,
              s.updatedAt = datetime()
-         RETURN s.key as key`,
+         RETURN s`,
         { settings: settings },
       );
-      settingsKey = result.records[0].get("key");
+      settingsVertex = convertNodeToJson(result.records[0].get("s"));
     }
 
     await createActivityLog(
       dbSession,
       "UPDATE_GLOBAL_SETTING",
       "GlobalSetting",
-      settingsKey,
+      settingsVertex.P.key,
       user?.P?.email ?? "",
       "Updated global settings",
     );
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [settingsVertex.id]: settingsVertex },
+      },
+      result: settingsVertex,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

@@ -47,7 +47,13 @@ export async function POST({ request }: APIEvent) {
     //   console.error('Failed to send login notification email:', error);
     // });
 
-    return user;
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [user.id]: user },
+      },
+      result: user,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

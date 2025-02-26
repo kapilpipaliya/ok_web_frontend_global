@@ -84,7 +84,7 @@ Styling System:
     }
   }
 
-- Valid states are ONLY:
+- Valid states are like:
   - '' (empty string for default state)
   - ':active'
   - ':hover'

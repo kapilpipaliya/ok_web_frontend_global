@@ -57,7 +57,7 @@ export function SignupForm() {
         loadMessage: "Registering User...",
         onError: () => {},
         onSuccess: (value) => {
-          handleLoginRedirect(value, graph, navigate);
+          handleLoginRedirect(value?.result, graph, navigate);
         },
         promise: postAPI(API.auth.signUpUrl, {
           email: formData.P.email.toLowerCase(),

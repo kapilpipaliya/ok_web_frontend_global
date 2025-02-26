@@ -1,4 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
@@ -62,10 +63,16 @@ export async function POST({ request }: APIEvent) {
     if (!(result.records[0]?.get("u") && result.records[0]?.get("f"))) {
       throw new APIError("User or file not found", 404);
     }
+    const file = convertNodeToJson(result.records[0]?.get("f"));
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-    });
+    return {
+      graph: {
+        edges: [],
+        vertexes: [file],
+      },
+      result: file,
+      timestamp: new Date().getTime(),
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

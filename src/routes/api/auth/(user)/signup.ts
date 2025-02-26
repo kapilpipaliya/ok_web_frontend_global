@@ -76,7 +76,13 @@ async function handleSignup(
       console.error("Failed to send signup confirmation email:", error);
     });
 
-    return user;
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [user.id]: user },
+      },
+      result: user,
+    };
   } catch (error) {
     await tx.rollback();
     const errorMessage =

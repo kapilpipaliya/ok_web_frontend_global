@@ -1,10 +1,12 @@
 import type { APIEvent } from "@solidjs/start/server";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { Vertex } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -32,13 +34,16 @@ export async function POST({ request }: APIEvent) {
 
     const result = await dbSession.run(
       `MATCH (s:CompanySetting) 
-       SET s += $settings,
-           s.updatedAt = datetime() 
        RETURN s.key as key`,
       { settings },
     );
 
+    if (result.records.length > 1) {
+      throw new APIError("Multiple company settings found", 500);
+    }
+
     let settingsKey: string;
+    let updatedSettings: Vertex;
     if (result.records.length === 0) {
       const newKey = `company_settings_${Date.now()}`;
       const createResult = await dbSession.run(
@@ -48,12 +53,21 @@ export async function POST({ request }: APIEvent) {
           updatedAt: datetime()
         })
         SET s += $settings
-        RETURN s.key as key`,
+        RETURN s.key as key, s`,
         { key: newKey, settings },
       );
       settingsKey = createResult.records[0].get("key");
+      updatedSettings = convertNodeToJson(createResult.records[0].get("s"));
     } else {
       settingsKey = result.records[0].get("key");
+      const updatedResult = await dbSession.run(
+        `MATCH (s:CompanySetting)
+         SET s += $settings,
+             s.updatedAt = datetime() 
+         RETURN s`,
+        { key: settingsKey, settings },
+      );
+      updatedSettings = convertNodeToJson(updatedResult.records[0].get("s"));
     }
 
     await createActivityLog(
@@ -65,10 +79,13 @@ export async function POST({ request }: APIEvent) {
       "Updated company settings",
     );
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [updatedSettings.id]: updatedSettings },
+      },
+      result: updatedSettings,
+    }
   } catch (error) {
     return handleAPIError(error);
   } finally {

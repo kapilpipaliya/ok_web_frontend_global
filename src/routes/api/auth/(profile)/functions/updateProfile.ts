@@ -5,6 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
+import { ServerResult } from "~/cypher/types/ServerResult";
 import { updateSession } from "~/server/auth/session/updateSession";
 
 type ProfilePayload = {
@@ -18,7 +19,7 @@ export async function updateProfile(
   payload: ProfilePayload,
   dbSession: Session,
   subDomain: string,
-) {
+): Promise<ServerResult | { error: string; status: number }> {
   const { email, username } = payload;
 
   const userValidation = await validateUser(dbSession, currentUser.P.uuid);
@@ -123,7 +124,13 @@ export async function updateProfile(
         await updateSession(userNew);
       }
 
-      return { message: "Profile updated successfully", user: userNew };
+      return {
+        graph: {
+          edges: {},
+          vertexes: { [userNew.id]: userNew },
+        },
+        result: userNew,
+      };
     } catch (err) {
       return {
         error: err instanceof Error ? err.message : "Failed to update profile",
@@ -174,7 +181,13 @@ export async function updateProfile(
       await updateSession(userNew);
     }
 
-    return { message: "Profile updated successfully", user: userNew };
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [userNew.id]: userNew },
+      },
+      result: userNew,
+    };
   }
 }
 

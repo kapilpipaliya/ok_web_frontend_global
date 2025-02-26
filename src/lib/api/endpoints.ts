@@ -28,7 +28,6 @@ export const API = {
     deleteRoleUrl: "/api/roles/delete",
     getRolesUrl: "/api/roles/list",
     getRoleUrl: "/api/roles/get",
-    updateRoleUrl: "/api/roles/update",
     upsertRoleUrl: "/api/roles/upsert",
   },
   settings: {

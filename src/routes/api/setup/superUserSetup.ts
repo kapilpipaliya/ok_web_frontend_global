@@ -11,10 +11,13 @@ export async function GET({ request }: APIEvent) {
       throw new APIError(error, status);
     }
 
-    return new Response(JSON.stringify(user), {
-      headers: { "Content-Type": "application/json" },
-      status,
-    });
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [user!.id]: user! },
+      },
+      result: user!,
+    };
   } catch (error: unknown) {
     return handleAPIError(error);
   }

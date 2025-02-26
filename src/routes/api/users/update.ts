@@ -1,5 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
@@ -67,7 +68,7 @@ export async function POST({ request }: APIEvent) {
     }
 
     // Update user and roles
-    const _result = await dbSession.run(
+    const result = await dbSession.run(
       `
       MATCH (u:User {uuid: $uuid})
       SET u.email = $email,
@@ -99,6 +100,8 @@ export async function POST({ request }: APIEvent) {
       },
     );
 
+    const updatedUser = convertNodeToJson(result.records[0].get("u"));
+
     // If email was changed, send confirmation emails
     if (email !== oldEmail) {
       // TODO: Send confirmation email to old address
@@ -108,7 +111,13 @@ export async function POST({ request }: APIEvent) {
       await sendEmailConfirmation(email);
     }
 
-    return { success: true };
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [updatedUser.id]: updatedUser },
+      },
+      result: updatedUser,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

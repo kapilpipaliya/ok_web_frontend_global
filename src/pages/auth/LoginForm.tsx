@@ -57,7 +57,7 @@ export function LoginForm() {
         loadMessage: "Logging In...",
         onError: () => {},
         onSuccess: (value) => {
-          handleLoginRedirect(value, graph, navigate);
+          handleLoginRedirect(value?.result, graph, navigate);
         },
         promise: postAPI(API.auth.loginUrl, {
           email: formData.P.email.toLowerCase(),

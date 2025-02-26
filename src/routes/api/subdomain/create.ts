@@ -73,7 +73,13 @@ export async function POST({ request }: APIEvent) {
       subDomain: key,
     });
 
-    return { subdomain: newSubdomain, success: true };
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [newSubdomain.id]: newSubdomain },
+      },
+      result: newSubdomain,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

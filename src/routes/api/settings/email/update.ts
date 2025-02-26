@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
@@ -99,10 +100,20 @@ export async function POST({ request }: APIEvent) {
       "Updated email settings",
     );
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    // Fetch the updated settings to return
+    const updatedSettingsResult = await dbSession.run(
+      `MATCH (s:EmailSetting {key: $key}) RETURN s`,
+      { key: settingsKey }
+    );
+    const updatedSettings = convertNodeToJson(updatedSettingsResult.records[0]?.get("s"));
+
+    return {
+      graph: {
+        edges: {},
+        vertexes: { [settingsKey]: updatedSettings },
+      },
+      result: updatedSettings,
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

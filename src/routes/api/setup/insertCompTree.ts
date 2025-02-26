@@ -13,10 +13,13 @@ export async function GET({ request }: APIEvent) {
       throw new APIError("Failed to insert component tree", 500);
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    return {
+      graph: {
+        edges: {},
+        vertexes: {},
+      },
+      result: {},
+    };
   } catch (error: unknown) {
     return handleAPIError(error);
   } finally {

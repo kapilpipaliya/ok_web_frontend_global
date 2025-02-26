@@ -157,10 +157,7 @@ You have access to the following theme color variables:
 \`\`\`json
 ${JSON.stringify(globalTheme)}
 \`\`\`
-When specifying colors in css properties, you can use either:
-1. Theme color variables from above (preferred for consistency)
-2. Direct color values like hex codes, rgb(), etc when needed
-3. CSS color keywords
+you can use above theme variables in css properties, dont use css variables like 'var(--color-primary)'.
 
 Choose colors that work well for the context and maintain good contrast ratios.
 `.trim(),

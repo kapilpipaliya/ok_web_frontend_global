@@ -1,5 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
@@ -88,9 +89,22 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("GlobalSetting or file not found", 404);
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-    });
+    const updatedGlobalSetting = convertNodeToJson(result.records[0].get("g"));
+    const updatedFile = convertNodeToJson(result.records[0].get("f"));
+
+    return {
+      graph: {
+        edges: {},
+        vertexes: {
+          [updatedFile.id]: updatedFile,
+          [updatedGlobalSetting.id]: updatedGlobalSetting,
+        },
+      },
+      result: {
+        file: updatedFile,
+        globalSetting: updatedGlobalSetting,
+      },
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {
