@@ -1,22 +1,11 @@
-import { createStore } from "solid-js/store";
+import {createStore} from "solid-js/store";
 
-import type {
-  EdgeMap,
-  GlobalProperties,
-  GraphInterface,
-  Id,
-  VertexMap,
-} from "~/lib/graph/graph";
+import type {EdgeMap, GlobalProperties, GraphInterface, Id, VertexMap,} from "~/lib/graph/graph";
 
-import { addNewVertex } from "./lib/graph/mutate/vertex";
+import {addNewVertex} from "./lib/graph/mutate/vertex";
 
 export function createAppState() {
-  const graph = createStore<GraphInterface>({
-    broadcastChannels: [],
-    edges: {} as EdgeMap,
-    vertexes: {} as VertexMap,
-    vertexLabelIdMap: {} as { [key: string]: Id[] },
-  });
+  const graph = createGraph();
 
   addNewVertex(
     0,
@@ -67,4 +56,13 @@ export function createAppState() {
   );
 
   return graph;
+}
+
+export function createGraph() {
+  return createStore<GraphInterface>({
+    broadcastChannels: [],
+    edges: {} as EdgeMap,
+    vertexes: {} as VertexMap,
+    vertexLabelIdMap: {} as { [key: string]: Id[] },
+  });
 }

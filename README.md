@@ -4,6 +4,17 @@ http://localhost:3000/admin/GlobalSettings
 http://localhost:3000/admin/
 http://localhost:3000/admin/Page
 
+email templates:
+http://localhost:3000/internal/page/AccountDeletion
+http://localhost:3000/internal/page/TwoFactorAuth
+http://localhost:3000/internal/page/VerificationCode
+http://localhost:3000/internal/page/TestEmail
+http://localhost:3000/internal/page/PasswordChanged
+http://localhost:3000/internal/page/ProfileUpdated
+http://localhost:3000/internal/page/SignupConfirmation
+http://localhost:3000/internal/page/WelcomeEmail
+
+
 ##Development
 # Getting Started Neo4j
 https://neo4j.com/docs/getting-started/whats-neo4j/

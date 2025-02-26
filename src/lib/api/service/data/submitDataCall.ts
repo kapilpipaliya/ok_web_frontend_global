@@ -2,15 +2,16 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface } from "~/lib/graph/graph";
 
+import { MutationArgs } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { onMutatDataGet } from "~/lib/graph/mutate/onMutatDataGet";
 
-import { updateSubmittedIndex } from "../../../graph/transaction/updateSubmittedIndex";
+import { updateSubmittedIndex } from "~/lib/graph/transaction/updateSubmittedIndex";
 
 // Submit generic data to the server
 export async function submitDataCall(
-  data: any,
+  data: MutationArgs,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,

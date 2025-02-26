@@ -2,6 +2,8 @@ import type { Store } from "solid-js/store";
 
 import { klona } from "klona";
 
+import type { MutationArgs } from "~/cypher/types/MutationArgs";
+
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
 import type { GraphInterface } from "../graph";
@@ -14,7 +16,7 @@ import {
 import { updateEdgeIdsToNew } from "../mutate/edge";
 import { updateVertexIdsToNew } from "../mutate/vertex";
 
-export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
+export function commitTxn(txnId: number, graph: Store<GraphInterface>): MutationArgs | undefined {
   if (!txnId) {
     return;
   }

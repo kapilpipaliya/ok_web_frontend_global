@@ -53,3 +53,8 @@ Use CreateResource to fetch initial data.
 
 Group <a> tag with proper categories
 make save all button save preview too.
+
+
+Future Tasks:
+- add filters on users page (roles)
+- maek advanced filter form generation for data grid.

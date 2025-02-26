@@ -68,8 +68,7 @@ Tooltip.Portal = clientOnly(
 Tooltip.Trigger = clientOnly(
   () => import("~/components/ssr/tooltip/TooltipTrigger"),
 );
-import { Link } from "@solidjs/meta";
-import { Meta } from "@solidjs/meta";
+
 import { Portal, Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
@@ -94,7 +93,7 @@ import { HtmlField } from "../../fields/HtmlField";
 import { PageField } from "../../fields/PageField";
 import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../styled/FileUploader";
-import { MetaTitle } from "./MetaTitle";
+import { MetaLink, MetaMeta, MetaTitle } from "./MetaTitle";
 
 export const corvuComponents = {
   // Accordion,
@@ -121,8 +120,8 @@ export const componentsMap: Record<string, any> = {
   Fragment: FragmentField,
   Html: HtmlField,
   Icon: IconField,
-  Link,
-  Meta,
+  Link: MetaLink,
+  Meta: MetaMeta,
   MultiSelect: SelectField,
   Page: PageField,
   Portal,

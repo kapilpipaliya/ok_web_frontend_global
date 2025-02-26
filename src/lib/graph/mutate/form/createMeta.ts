@@ -61,12 +61,13 @@ export function createMeta(
   metaTxnId: number,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  mainLabel?: string,
 ): { error: string; txnId?: number; vertex?: Vertex } {
   const { attributes, ...custom } = form;
   // save attributes to vertexes
   const metaMainVertex = newVertex(
     generateNewVertexId(graph, setGraph),
-    ["Temp"],
+    [mainLabel ?? "Temp"],
     custom,
   );
   const { error } = addNewVertex(metaTxnId, metaMainVertex, graph, setGraph);
