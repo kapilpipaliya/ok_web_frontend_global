@@ -7,6 +7,7 @@ import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 import { accountDeletionForm } from "~/routes/internal/page/(email)/(templates)/(account)/accountDeletionSchema";
+import { passwordResetForm } from "~/routes/internal/page/(email)/(templates)/(auth)/passwordResetSchema";
 import { twoFactorAuthForm } from "~/routes/internal/page/(email)/(templates)/(auth)/twoFactorAuthSchema";
 import { verificationCodeForm } from "~/routes/internal/page/(email)/(templates)/(auth)/verificationCodeSchema";
 import { testEmailForm } from "~/routes/internal/page/(email)/(templates)/(other)/testEmailSchema";
@@ -26,6 +27,7 @@ const EMAIL_TEMPLATES = {
   EmailConfirmation: emailConfirmationForm,
   InvitationEmail: invitationEmailForm,
   PasswordChanged: passwordChangedForm,
+  PasswordReset: passwordResetForm,
   ProfileUpdated: profileUpdatedForm,
   SignupConfirmation: signupConfirmationForm,
   TestEmail: testEmailForm,

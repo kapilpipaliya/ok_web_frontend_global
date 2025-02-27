@@ -5,6 +5,11 @@ export const API = {
     // getUserUrl: "/api/auth/getUserRPC",
     loginUrl: "/api/auth/login",
     logOutUrl: "/api/auth/logout",
+    passwordReset: {
+      completeUrl: "/api/auth/password-reset/complete",
+      requestUrl: "/api/auth/password-reset/request",
+      verifyOtpUrl: "/api/auth/password-reset/verify-otp",
+    },
     prepareAutoLoginUrl: "/api/auth/prepare-auto-login",
     profileUrl: "/api/auth/updateProfile",
     signUpUrl: "/api/auth/signup",

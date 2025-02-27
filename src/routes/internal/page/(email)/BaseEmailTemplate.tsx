@@ -13,6 +13,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             as: "img",
             class: "w:100px mb:24",
             componentName: "Html",
+            pos: 1,
             props: `return {
             alt: "Logo",
             src: \`\${window.location.origin}${API.file.downloadCompanyLogoUrl}\`
@@ -22,9 +23,13 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             as: "hr",
             class: "fg:base-20 my:24",
             componentName: "Html",
+            pos: 2,
           },
-
-          ...content,
+          {
+            attributes: content,
+            componentName: "Fragment",
+            pos: 3,
+          },
           {
             as: "div",
             attributes: [
@@ -32,11 +37,13 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
                 as: "p",
                 class: "color:grey font-size:12px",
                 componentName: "Html",
+                pos: 1,
                 text: "© 2024 Your Company. All rights reserved.",
               },
             ],
             class: "mt:32 text-align:center",
             componentName: "Html",
+            pos: 4,
           },
         ],
         class: "max-w:600px m:auto p:32 bg:base-1",

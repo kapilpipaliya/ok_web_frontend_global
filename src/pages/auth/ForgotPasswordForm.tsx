@@ -1,9 +1,11 @@
-import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
 import { useToast } from "~/components/styled/Toast";
+import { API } from "~/lib/api/endpoints";
+import { postAPI } from "~/lib/api/postApi";
+import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { wrapFormInCard } from "~/lib/utils/formWrapper";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
@@ -12,41 +14,102 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
 
 export function ForgotPasswordForm() {
-  const { showErrorToast } = useToast();
-  const [stage, setStage] = createSignal(0); // 0: Email, 1: OTP, 2: New Passwords
+  const { showErrorToast, showSuccessToast } = useToast();
   const [showPassword, setShowPassword] = createStore({
     confirmPassword: false,
     newPassword: false,
   });
+  
+  // Store user data and session data for the entire flow
+  const [userState, setUserState] = createStore({
+    email: '', // Keep email for display purposes only
+    resetSessionToken: '',
+    userUuid: '', // Store UUID instead of relying on email for identification
+  });
 
-  const handleEmailSubmit = async (formData: any) => {
-    const { email } = formData.P;
-    if (!email?.trim()) {
-      showErrorToast("Enter email");
+  const handleIdentifierSubmit = async (options: FunctionArgumentType) => {
+    const { identifier } = options.data.P;
+    if (!identifier?.trim()) {
+      showErrorToast("Enter email or username");
       return;
     }
-    // Todo: This function should not be called from frontend side.
-    //   await sendEmail({
-    //     content: "Reset Password",
-    //     subDomain: subDomain,
-    //     subject: "Reset Password",
-    //     to: email,
-    //   });
-    //   setStage(1);
+    
+    try {
+      // Send password reset request
+      const result = await postAPI(API.auth.passwordReset.requestUrl, { identifier });
+      
+      if (!result.success) {
+        showErrorToast(result.message || 'Failed to send reset email');
+        return;
+      }
+      
+      // Store the email for display purposes
+      if (result.email) {
+        setUserState('email', result.email);
+      }
+      
+      // Store the UUID for secure identification in subsequent requests
+      if (result.userUuid) {
+        setUserState('userUuid', result.userUuid);
+        
+        // For additional security, store in sessionStorage (cleared when browser is closed)
+        sessionStorage.setItem('resetUserUuid', result.userUuid);
+      }
+      
+      // Store the session token for later verification steps
+      if (result.resetSessionToken) {
+        setUserState('resetSessionToken', result.resetSessionToken);
+        
+        // For additional security, store in sessionStorage (cleared when browser is closed)
+        sessionStorage.setItem('resetSessionToken', result.resetSessionToken);
+      }
+      
+      showSuccessToast("Reset instructions sent to your email");
+      options.dataContext.stageData[1]("name", 1);
+    } catch (error) {
+      showErrorToast(error instanceof Error ? error.message : 'An unexpected error occurred');
+    }
   };
 
-  const handleOtpSubmit = (formData: any) => {
-    const { otp } = formData.P;
+  const handleOtpSubmit = async (options: FunctionArgumentType) => {
+    const { otp } = options.data.P;
     if (!otp?.trim()) {
       showErrorToast("Please enter OTP");
       return;
     }
-    setStage(2);
+    
+    // Get user UUID and session token from state or session storage as fallback
+    const userUuid = userState.userUuid || sessionStorage.getItem('resetUserUuid');
+    const resetSessionToken = userState.resetSessionToken || sessionStorage.getItem('resetSessionToken');
+    
+    if (!userUuid || !resetSessionToken) {
+      showErrorToast('Session expired. Please restart the password reset process.');
+      return;
+    }
+    
+    try {
+      // Verify the OTP
+      const result = await postAPI(API.auth.passwordReset.verifyOtpUrl, {
+        otp,
+        resetSessionToken,
+        userUuid
+      });
+      
+      if (!result.success) {
+        showErrorToast(result.message || 'Invalid or expired OTP');
+        return;
+      }
+      
+      showSuccessToast("OTP verified successfully");
+      options.dataContext.stageData[1]("name", 2);
+    } catch (error) {
+      showErrorToast(error instanceof Error ? error.message : 'An unexpected error occurred');
+    }
   };
 
-  const handlePasswordResetSubmit = (formData: any) => {
-    const { confirmPassword, newPassword } = formData.P;
-
+  const handlePasswordResetSubmit = async (options: FunctionArgumentType) => {
+    const { confirmPassword, newPassword } = options.data.P;
+    
     if (newPassword !== confirmPassword) {
       showErrorToast("Passwords do not match");
       return;
@@ -58,282 +121,383 @@ export function ForgotPasswordForm() {
       return;
     }
 
-    showErrorToast("Password has been reset successfully");
-  };
+    // Get user UUID and session token from state or session storage as fallback
+    const userUuid = userState.userUuid || sessionStorage.getItem('resetUserUuid');
+    const resetSessionToken = userState.resetSessionToken || sessionStorage.getItem('resetSessionToken');
+    
+    if (!userUuid || !resetSessionToken) {
+      showErrorToast('Session expired. Please restart the password reset process.');
+      return;
+    }
+    
+    try {
+      // Reset the password
+      const result = await postAPI(API.auth.passwordReset.completeUrl, {
+        newPassword,
+        resetSessionToken,
+        userUuid
+      });
+      
+      if (!result.success) {
+        showErrorToast(result.message || 'Failed to reset password');
+        return;
+      }
+      
+      // Clear session storage
+      sessionStorage.removeItem('resetUserUuid');
+      sessionStorage.removeItem('resetSessionToken');
 
-  const getFormByStage = () => {
-    switch (stage()) {
-      case 0:
-        return {
-          as: "div",
-          attributes: [
-            getTitleSchema("Forgot Password"),
-            {
-              as: "div",
-              attributes: [
-                {
-                  class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                  componentName: "Text",
-                  text: "Email",
-                },
-                {
-                  class: PROPERTIES.Css.TextField,
-                  componentName: "TextInput",
-                  key: "email",
-                  validation: { required: true },
-                },
-              ],
-              class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-              componentName: "Box",
-            },
-            {
-              attributes: [
-                {
-                  as: "button",
-                  class:
-                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-                  componentName: "Box",
-                  props: (options: FunctionArgumentType) => ({
-                    disabled: options.dataContext.submitState[0]?.isLoading,
-                    onClick: async () => {
-                      try {
-                        options.dataContext.submitState[1]("isLoading", true);
-                        const formData = options.data;
-                        await handleEmailSubmit(formData);
-                      } finally {
-                        options.dataContext.submitState[1]("isLoading", false);
-                      }
-                    },
-                    text: options.dataContext.submitState[0]?.isLoading
-                      ? "Sending..."
-                      : "Confirm",
-                  }),
-                },
-              ],
-              componentName: "Data",
-              name: "submitState",
-              noRepeat: true,
-              props: () => ({
-                data: createStore({
-                  isLoading: false,
-                }),
-              }),
-            },
-          ],
-          class: SETTINGS_CONSTANTS.FORM_CLASS,
-          componentName: "Box",
-        };
-
-      case 1:
-        return {
-          as: "div",
-          attributes: [
-            {
-              as: "div",
-              attributes: [
-                {
-                  class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                  componentName: "Text",
-                  text: "One Time Password (OTP)",
-                },
-                {
-                  class: PROPERTIES.Css.TextField,
-                  componentName: "TextInput",
-                  key: "otp",
-                  props: () => ({
-                    maxLength: 6,
-                  }),
-                  validation: { required: true },
-                },
-              ],
-              class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-              componentName: "Box",
-            },
-            {
-              attributes: [
-                {
-                  as: "button",
-                  class:
-                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-                  componentName: "Box",
-                  props: (options: FunctionArgumentType) => ({
-                    disabled: options.dataContext.submitState[0]?.isLoading,
-                    onClick: async () => {
-                      try {
-                        options.dataContext.submitState[1]("isLoading", true);
-                        const formData = options.data;
-                        handleOtpSubmit(formData);
-                      } finally {
-                        options.dataContext.submitState[1]("isLoading", false);
-                      }
-                    },
-                    text: options.dataContext.submitState[0]?.isLoading
-                      ? "Verifying..."
-                      : "Submit",
-                  }),
-                },
-              ],
-              componentName: "Data",
-              name: "submitState",
-              noRepeat: true,
-              props: () => ({
-                data: createStore({
-                  isLoading: false,
-                }),
-              }),
-            },
-          ],
-          class: SETTINGS_CONSTANTS.FORM_CLASS,
-          componentName: "Box",
-        };
-
-      case 2:
-        return {
-          as: "div",
-          attributes: [
-            {
-              as: "div",
-              attributes: [
-                {
-                  class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                  componentName: "Text",
-                  text: "New Password",
-                },
-                {
-                  as: "div",
-                  attributes: [
-                    {
-                      class: PROPERTIES.Css.TextField,
-                      componentName: "TextInput",
-                      key: "newPassword",
-                      props: () => ({
-                        type: showPassword.newPassword ? "text" : "password",
-                      }),
-                      validation: { required: true },
-                    },
-                    {
-                      as: "div",
-                      attributes: [
-                        {
-                          componentName: "Icon",
-                          props: () => ({
-                            icon: showPassword.newPassword
-                              ? "ph:eye"
-                              : "ph:eye-slash",
-                            onClick: () =>
-                              setShowPassword(
-                                "newPassword",
-                                !showPassword.newPassword,
-                              ),
-                          }),
-                        },
-                      ],
-                      class:
-                        "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                      componentName: "Box",
-                    },
-                  ],
-                  class: "position:rel",
-                  componentName: "Box",
-                },
-              ],
-              class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-              componentName: "Box",
-            },
-            {
-              as: "div",
-              attributes: [
-                {
-                  class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                  componentName: "Text",
-                  text: "Confirm Password",
-                },
-                {
-                  as: "div",
-                  attributes: [
-                    {
-                      class: PROPERTIES.Css.TextField,
-                      componentName: "TextInput",
-                      key: "confirmPassword",
-                      props: () => ({
-                        type: showPassword.confirmPassword
-                          ? "text"
-                          : "password",
-                      }),
-                      validation: { required: true },
-                    },
-                    {
-                      as: "div",
-                      attributes: [
-                        {
-                          componentName: "Icon",
-                          props: () => ({
-                            icon: showPassword.confirmPassword
-                              ? "ph:eye"
-                              : "ph:eye-slash",
-                            onClick: () =>
-                              setShowPassword(
-                                "confirmPassword",
-                                !showPassword.confirmPassword,
-                              ),
-                          }),
-                        },
-                      ],
-                      class:
-                        "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                      componentName: "Box",
-                    },
-                  ],
-                  class: "position:rel",
-                  componentName: "Box",
-                },
-              ],
-              class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-              componentName: "Box",
-            },
-            {
-              attributes: [
-                {
-                  as: "button",
-                  class:
-                    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-                  componentName: "Box",
-                  props: (options: FunctionArgumentType) => ({
-                    disabled: options.dataContext.submitState[0]?.isLoading,
-                    onClick: async () => {
-                      try {
-                        options.dataContext.submitState[1]("isLoading", true);
-                        const formData = options.data;
-                        handlePasswordResetSubmit(formData);
-                      } finally {
-                        options.dataContext.submitState[1]("isLoading", false);
-                      }
-                    },
-                    text: options.dataContext.submitState[0]?.isLoading
-                      ? "Resetting..."
-                      : "Confirm",
-                  }),
-                },
-              ],
-              componentName: "Data",
-              name: "submitState",
-              noRepeat: true,
-              props: () => ({
-                data: createStore({
-                  isLoading: false,
-                }),
-              }),
-            },
-          ],
-          class: SETTINGS_CONSTANTS.FORM_CLASS,
-          componentName: "Box",
-        };
+      showSuccessToast("Password has been reset successfully");
+      
+      // Redirect to login page after successful reset
+      setTimeout(() => {
+        window.location.href = '/auth/login';
+      }, 3000);
+    } catch (error) {
+      showErrorToast(error instanceof Error ? error.message : 'An unexpected error occurred');
     }
   };
 
+  const stepUserNameSchema = {
+    as: "div",
+    attributes: [
+      getTitleSchema("Forgot Password"),
+      {
+        as: "div",
+        attributes: [
+          {
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Text",
+            text: "Email or Username",
+          },
+          {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            key: "identifier",
+            props: (options: FunctionArgumentType) => ({
+              onKeyPress: async (e: KeyboardEvent) => {
+                if (e.key === "Enter") {
+                  if (e.target instanceof HTMLInputElement) {
+                    options.updateValue(e.target.value);
+                  }
+                  try {
+                    options.dataContext.submitState[1]("isLoading", true);
+                    await handleIdentifierSubmit(options);
+                  } finally {
+                    options.dataContext.submitState[1]("isLoading", false);
+                  }
+                }
+              }
+            }),
+            validation: { required: true }
+          },
+        ],
+        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
+        componentName: "Box",
+      },
+      {
+        attributes: [
+          {
+            as: "button",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+            componentName: "Box",
+            props: (options: FunctionArgumentType) => ({
+              disabled: options.dataContext.submitState[0]?.isLoading,
+              onClick: async () => {
+                try {
+                  options.dataContext.submitState[1]("isLoading", true);
+                  await handleIdentifierSubmit(options);
+                } finally {
+                  options.dataContext.submitState[1]("isLoading", false);
+                }
+              },
+              text: options.dataContext.submitState[0]?.isLoading
+                ? "Sending..."
+                : "Confirm",
+            }),
+          },
+        ],
+        componentName: "Fragment",
+      },
+    ],
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    componentName: "Box",
+  } as FieldAttribute;
+
+  const stepOTPSchema = {
+    as: "div",
+    attributes: [
+      {
+        as: "div",
+        attributes: [
+          {
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Text",
+            text: "One Time Password (OTP)",
+          },
+          {
+            class: PROPERTIES.Css.TextField,
+            componentName: "TextInput",
+            key: "otp",
+            props: (options: FunctionArgumentType) => ({
+              maxLength: 6,
+              onKeyPress: async (e: KeyboardEvent) => {
+                if (e.key === "Enter") {
+                  if (e.target instanceof HTMLInputElement) {
+                    options.updateValue(e.target.value);
+                  }
+                  try {
+                    options.dataContext.submitState[1]("isLoading", true);
+                    await handleOtpSubmit(options);
+                  } finally {
+                    options.dataContext.submitState[1]("isLoading", false);
+                  }
+                }
+              }
+            }),
+            validation: { required: true },
+          },
+        ],
+        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
+        componentName: "Box",
+      },
+      {
+        attributes: [
+          {
+            as: "button",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+            componentName: "Box",
+            props: (options: FunctionArgumentType) => ({
+              disabled: options.dataContext.submitState[0]?.isLoading,
+              onClick: async () => {
+                try {
+                  options.dataContext.submitState[1]("isLoading", true);
+                  await handleOtpSubmit(options);
+                } finally {
+                  options.dataContext.submitState[1]("isLoading", false);
+                }
+              },
+              text: options.dataContext.submitState[0]?.isLoading
+                ? "Verifying..."
+                : "Submit",
+            }),
+          },
+        ],
+        componentName: "Fragment",
+      },
+    ],
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    componentName: "Box",
+  } as FieldAttribute;
+
+  const stepNewPasswordSchema = {
+    as: "div",
+    attributes: [
+      {
+        as: "div",
+        attributes: [
+          {
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Text",
+            text: "New Password",
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                class: PROPERTIES.Css.TextField,
+                componentName: "TextInput",
+                key: "newPassword",
+                props: (options: FunctionArgumentType) => ({
+                  onKeyPress: async (e: KeyboardEvent) => {
+                    if (e.key === "Enter") {
+                      if (e.target instanceof HTMLInputElement) {
+                        options.updateValue(e.target.value);
+                      }
+                      try {
+                        options.dataContext.submitState[1]("isLoading", true);
+                        await handlePasswordResetSubmit(options);
+                      } finally {
+                        options.dataContext.submitState[1]("isLoading", false);
+                      }
+                    }
+                  },
+                  type: showPassword.newPassword ? "text" : "password"
+                }),
+                validation: { required: true },
+              },
+              {
+                as: "div",
+                attributes: [
+                  {
+                    componentName: "Icon",
+                    props: () => ({
+                      icon: showPassword.newPassword
+                        ? "ph:eye"
+                        : "ph:eye-slash",
+                      onClick: () =>
+                        setShowPassword(
+                          "newPassword",
+                          !showPassword.newPassword,
+                        ),
+                    }),
+                  },
+                ],
+                class:
+                  "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                componentName: "Box",
+              },
+            ],
+            class: "position:rel",
+            componentName: "Box",
+          },
+        ],
+        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
+        componentName: "Box",
+      },
+      {
+        as: "div",
+        attributes: [
+          {
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Text",
+            text: "Confirm Password",
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                class: PROPERTIES.Css.TextField,
+                componentName: "TextInput",
+                key: "confirmPassword",
+                props: (options: FunctionArgumentType) => ({
+                  onKeyPress: async (e: KeyboardEvent) => {
+                    if (e.key === "Enter") {
+                      if (e.target instanceof HTMLInputElement) {
+                        options.updateValue(e.target.value);
+                      }
+                      try {
+                        options.dataContext.submitState[1]("isLoading", true);
+                        await handlePasswordResetSubmit(options);
+                      } finally {
+                        options.dataContext.submitState[1]("isLoading", false);
+                      }
+                    }
+                  },
+                  type: showPassword.confirmPassword
+                    ? "text"
+                    : "password"
+                }),
+                validation: { required: true },
+              },
+              {
+                as: "div",
+                attributes: [
+                  {
+                    componentName: "Icon",
+                    props: () => ({
+                      icon: showPassword.confirmPassword
+                        ? "ph:eye"
+                        : "ph:eye-slash",
+                      onClick: () =>
+                        setShowPassword(
+                          "confirmPassword",
+                          !showPassword.confirmPassword,
+                        ),
+                    }),
+                  },
+                ],
+                class:
+                  "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                componentName: "Box",
+              },
+            ],
+            class: "position:rel",
+            componentName: "Box",
+          },
+        ],
+        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
+        componentName: "Box",
+      },
+      {
+        attributes: [
+          {
+            as: "button",
+            class:
+              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+            componentName: "Box",
+            props: (options: FunctionArgumentType) => ({
+              disabled: options.dataContext.submitState[0]?.isLoading,
+              onClick: async () => {
+                try {
+                  options.dataContext.submitState[1]("isLoading", true);
+                  await handlePasswordResetSubmit(options);
+                } finally {
+                  options.dataContext.submitState[1]("isLoading", false);
+                }
+              },
+              text: options.dataContext.submitState[0]?.isLoading
+                ? "Resetting..."
+                : "Confirm",
+            }),
+          },
+        ],
+        componentName: "Fragment",
+      },
+    ],
+    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    componentName: "Box",
+  } as FieldAttribute;
+
   const form = {
     attributes: [
-      getFormByStage(),
+      {
+        attributes: [
+          {
+            attributes: [
+              {
+                attributes: [stepUserNameSchema],
+                name: "Fragment",
+                props: (options: FunctionArgumentType) => ({
+                  hidden: options.dataContext.stageData?.[0]?.name !== 0,
+                }),
+              },
+              {
+                attributes: [stepOTPSchema],
+                name: "Fragment",
+                props: (options: FunctionArgumentType) => ({
+                  hidden: options.dataContext.stageData?.[0]?.name !== 1,
+                }),
+              },
+              {
+                attributes: [stepNewPasswordSchema],
+                name: "Fragment",
+                props: (options: FunctionArgumentType) => ({
+                  hidden: options.dataContext.stageData?.[0]?.name !== 2,
+                }),
+              },
+            ],
+            componentName: "Data",
+            name: "stageData",
+            noRepeat: true,
+            props: () => ({
+              data: createStore({
+                name: 0, // Initial stage
+              }),
+            }),
+          },
+        ],
+        componentName: "Data",
+        name: "submitState",
+        noRepeat: true,
+        props: () => ({
+          data: createStore({
+            isLoading: false,
+          }),
+        }),
+      },
       {
         as: "div",
         attributes: [

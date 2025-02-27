@@ -1,3 +1,4 @@
+import { getErrorMessage } from "./getErrorMessage";
 import { isValidResponse } from "./isValidResponse";
 
 /**
@@ -24,7 +25,7 @@ export async function postAPI(
   if (!response.ok) {
     // Attempt to parse error message from JSON or default to status text
     const errorMessage = contentType?.includes("application/json")
-      ? (await response.json()).error
+      ? getErrorMessage(await response.json())
       : contentType?.includes("text/plain")
         ? await response.text()
         : response.statusText;
@@ -35,7 +36,7 @@ export async function postAPI(
 
   const responseData = await response.json();
   if (!isValidResponse(responseData)) {
-    throw responseData;
+    throw new Error(getErrorMessage(responseData));
   }
 
   return responseData;

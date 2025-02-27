@@ -49,6 +49,7 @@ export const EMAIL_TEMPLATES = {
   EmailConfirmation: "EmailConfirmation",
   InvitationEmail: "InvitationEmail",
   PasswordChanged: "PasswordChanged",
+  PasswordReset: "PasswordReset",
   ProfileUpdated: "ProfileUpdated",
   SignupConfirmation: "SignupConfirmation",
   TestEmail: "TestEmail",

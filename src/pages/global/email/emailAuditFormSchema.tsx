@@ -99,7 +99,8 @@ export const emailAuditFormSchema = {
               componentName: "Html",
               key: "content",
               props: (options: FunctionArgumentType) => ({
-                srcdoc: xss(options.data.P.content, xssOptions),
+                // srcdoc: xss(options.data.P.content, xssOptions),
+                srcdoc: (options.data.P.content),
               }),
               validation: { required: true },
             },
