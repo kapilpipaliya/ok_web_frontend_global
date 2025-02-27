@@ -6,7 +6,7 @@ import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 
 export async function GET({ request }: APIEvent) {
-  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
     const url = new URL(request.url);

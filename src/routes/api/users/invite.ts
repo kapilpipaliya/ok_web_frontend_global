@@ -2,14 +2,16 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { v7 as uuidv7 } from "uuid";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { sendInvitationEmail } from "~/routes/api/users/functions/sendInvitationEmail";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     const user = await getUserFromSession(request);
@@ -52,7 +54,7 @@ export async function POST({ request }: APIEvent) {
     }
 
     // Create new user
-    const _result = await dbSession.run(
+    const result = await dbSession.run(
       `
       CREATE (u:User {
         uuid: $uuid,
@@ -78,7 +80,16 @@ export async function POST({ request }: APIEvent) {
       },
     );
 
-    // TODO: Send invitation email
+    // Extract the created user from the result
+    const createdUser = convertNodeToJson(result.records[0].get("u"));
+
+    // Send invitation email
+    await sendInvitationEmail(
+      request,
+      createdUser,
+      subDomain,
+      dbSession
+    );
 
     return {
       graph: {

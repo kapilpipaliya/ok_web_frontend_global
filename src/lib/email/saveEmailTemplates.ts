@@ -17,12 +17,14 @@ import { passwordChangedForm } from "~/routes/internal/page/(email)/(templates)/
 import { profileUpdatedForm } from "~/routes/internal/page/(email)/(templates)/(profile)/profileUpdatedSchema";
 import { signupConfirmationForm } from "~/routes/internal/page/(email)/(templates)/(signup)/signupConfirmationSchema";
 import { welcomeEmailForm } from "~/routes/internal/page/(email)/(templates)/(signup)/welcomeEmailSchema";
+import { invitationEmailForm } from "~/routes/internal/page/(email)/(templates)/(user)/invitationEmailSchema";
 
 const EMAIL_TEMPLATES = {
   AccountDeletion: accountDeletionForm,
   EmailChanged: emailChangedForm,
   EmailChangeSuccessful: emailChangeSuccessfulForm,
   EmailConfirmation: emailConfirmationForm,
+  InvitationEmail: invitationEmailForm,
   PasswordChanged: passwordChangedForm,
   ProfileUpdated: profileUpdatedForm,
   SignupConfirmation: signupConfirmationForm,

@@ -47,6 +47,7 @@ export const EMAIL_TEMPLATES = {
   EmailChanged: "EmailChanged",
   EmailChangeSuccessful: "EmailChangeSuccessful",
   EmailConfirmation: "EmailConfirmation",
+  InvitationEmail: "InvitationEmail",
   PasswordChanged: "PasswordChanged",
   ProfileUpdated: "ProfileUpdated",
   SignupConfirmation: "SignupConfirmation",
