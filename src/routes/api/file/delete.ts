@@ -13,26 +13,25 @@ import { deleteFile } from "./functions/deleteFile";
 export async function DELETE({ request }: APIEvent) {
   const query = getQuery();
   const fileId = query.fileId;
-
-  if (!fileId) {
-    throw new APIError("File ID is required", 400);
-  }
-
   const { dbSession } = await getDBSessionForSubdomain(request);
 
-  const user = await getUserFromSession(request);
-
-  if (!user) {
-    throw new APIError("User not found", 404);
-  }
-
-  const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession, user);
-
-  if (!isAdmin) {
-    throw new APIError("Unauthorized. Admin access required.", 403);
-  }
-
   try {
+    if (!fileId) {
+      throw new APIError("File ID is required", 400);
+    }
+
+    const user = await getUserFromSession(request);
+
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+
+    const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession, user);
+
+    if (!isAdmin) {
+      throw new APIError("Unauthorized. Admin access required.", 403);
+    }
+
     return await deleteFile(fileId as string, dbSession, user);
   } catch (error) {
     return handleAPIError(error);

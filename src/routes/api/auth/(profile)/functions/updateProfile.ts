@@ -8,6 +8,7 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import {getSubdomainsForAccount} from "~/cypher/permissions/getSubdomainsForAccount";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import {
   validateUniqueFields,
@@ -187,16 +188,6 @@ function buildUpdateQuery(
     RETURN u
   `
     : "";
-}
-
-async function getSubdomainsForAccount(dbSession: Session, uuid: string) {
-  const subDomainsResult = await dbSession.run(
-    `MATCH (u:User {uuid: $uuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
-     RETURN s.key as subdomain`,
-    { uuid },
-  );
-
-  return subDomainsResult.records.map((record) => record.get("subdomain"));
 }
 
 async function saveActivityLog(

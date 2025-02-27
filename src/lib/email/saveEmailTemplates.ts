@@ -17,6 +17,7 @@ import { emailConfirmationForm } from "~/routes/internal/page/(email)/(templates
 import { passwordChangedForm } from "~/routes/internal/page/(email)/(templates)/(profile)/passwordChangedSchema";
 import { profileUpdatedForm } from "~/routes/internal/page/(email)/(templates)/(profile)/profileUpdatedSchema";
 import { signupConfirmationForm } from "~/routes/internal/page/(email)/(templates)/(signup)/signupConfirmationSchema";
+import { signupEmailVerificationForm } from "~/routes/internal/page/(email)/(templates)/(signup)/signupEmailVerificationSchema";
 import { welcomeEmailForm } from "~/routes/internal/page/(email)/(templates)/(signup)/welcomeEmailSchema";
 import { invitationEmailForm } from "~/routes/internal/page/(email)/(templates)/(user)/invitationEmailSchema";
 
@@ -30,6 +31,7 @@ const EMAIL_TEMPLATES = {
   PasswordReset: passwordResetForm,
   ProfileUpdated: profileUpdatedForm,
   SignupConfirmation: signupConfirmationForm,
+  SignupEmailVerification: signupEmailVerificationForm,
   TestEmail: testEmailForm,
   TwoFactorAuth: twoFactorAuthForm,
   VerificationCode: verificationCodeForm,

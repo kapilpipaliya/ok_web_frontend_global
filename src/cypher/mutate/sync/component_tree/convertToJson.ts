@@ -9,7 +9,6 @@ export function getComponentTree(): ComponentNode[] {
   - Html
   - Table
   - Icon
-  - Page
   - Portal
   - Data
   - Form

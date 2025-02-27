@@ -7,16 +7,16 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { signupUser } from "~/cypher/mutate/signup/signupUser";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { sendConfirmationEmail } from "~/lib/email/sendConfirmationEmail";
+import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
+import { sendEmailVerification } from "~/routes/api/auth/(profile)/functions/sendEmailVerification";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
-    throw new APIError("Invalid content type. Expected application/json", 415);
+    return { error: "Invalid content type. Expected application/json", success: false };
   }
 
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -24,13 +24,7 @@ export async function POST({ request }: APIEvent) {
 
   try {
     const data: SignupRequestData = await request.json();
-    const user = await handleSignup(data, tx, subDomain);
-
-    if (user?.id) {
-      // TODO: do not send duplicate email, use mhtml email only. TEST the confirmation email is working.
-      await sendConfirmationEmail(data.email, data.username, request);
-    }
-
+    const user = await handleSignup(request, data, tx, subDomain);
     await tx.commit();
     return user;
   } catch (error) {
@@ -43,6 +37,7 @@ export async function POST({ request }: APIEvent) {
 }
 
 async function handleSignup(
+  request: APIEvent["request"],
   data: SignupRequestData,
   tx: Transaction,
   subDomain: string,
@@ -65,16 +60,23 @@ async function handleSignup(
     delete user.P.password;
     updateRedirectUrl(user, subDomain);
 
-    // Fire and forget the email sending process
+    // Welcome email
     sendNotificationEmail(
-      EMAIL_TEMPLATES.SIGNUP_CONFIRMATION,
+      EMAIL_TEMPLATES.WelcomeEmail,
       {},
-      "Welcome to Our Platform - Please Confirm Your Email",
+      "Welcome to Our Platform",
       user,
       subDomain,
-    ).catch((error) => {
-      console.error("Failed to send signup confirmation email:", error);
-    });
+    );
+    
+    // by default, emailVerified is false
+    // Send email verification
+    sendEmailVerification(
+      request,
+      tx,
+      user, 
+      subDomain
+    );
 
     return {
       graph: {

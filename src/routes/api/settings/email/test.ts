@@ -2,14 +2,14 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
-import {generateSecureToken} from "~/lib/auth/secureToken";
-import {encodeUserData, type UserData} from "~/lib/auth/userDataEncoder";
-import {sendNotificationEmail} from "~/lib/playwright/sendNotificationEmail";
-import {EMAIL_TEMPLATES} from "~/pages/settings/constants";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { generateSecureToken } from "~/lib/auth/secureToken";
+import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
+import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export interface SMTPSettings {
   fromEmail: string;
@@ -28,19 +28,14 @@ export async function POST({ request }: APIEvent) {
     if (!user) {
       throw new APIError("User not found", 404);
     }
-  
-    const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession, user );
-  
+
+    const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession, user);
+
     if (!isAdmin) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
     const settings = (await request.json()) as SMTPSettings;
-
-
-    if (!user) {
-      throw new APIError("User not found", 404);
-    }
 
     // Generate a secure token instead of passing user data directly
     const secureToken = user
@@ -60,21 +55,22 @@ export async function POST({ request }: APIEvent) {
         secureToken,
       );
 
-    await createActivityLog(
-      dbSession,
-      "TEST_EMAIL_SETTINGS",
-      "EmailSetting",
-      "email",
-      user?.P?.email ?? "",
-      `Tested email settings with SMTP host: ${settings.smtpHost}`,
-    );
+      await createActivityLog(
+        dbSession,
+        "TEST_EMAIL_SETTINGS",
+        "EmailSetting",
+        "email",
+        user?.P?.email ?? "",
+        `Tested email settings with SMTP host: ${settings.smtpHost}`,
+      );
 
-    return {
-      success: true,
-      message: "Test email sent successfully",
-    };
-  } catch (error) {
-    return handleAPIError(error);
+      return {
+        message: "Test email sent successfully",
+        success: true,
+      };
+    } catch (error) {
+      return handleAPIError(error);
+    }
   } finally {
     await dbSession.close();
   }

@@ -52,6 +52,7 @@ export const EMAIL_TEMPLATES = {
   PasswordReset: "PasswordReset",
   ProfileUpdated: "ProfileUpdated",
   SignupConfirmation: "SignupConfirmation",
+  SignupEmailVerification: "SignupEmailVerification",
   TestEmail: "TestEmail",
   TwoFactorAuth: "TwoFactorAuth",
   VerificationCode: "VerificationCode",

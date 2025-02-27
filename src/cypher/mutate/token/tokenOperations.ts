@@ -1,4 +1,4 @@
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 interface TokenData {
   createdAt: number;
@@ -8,7 +8,7 @@ interface TokenData {
 }
 
 export async function deleteExpiredTokens(
-  session: Session,
+  session: Session | Transaction,
   expiryTime: number,
 ): Promise<void> {
   const query = `
@@ -23,7 +23,7 @@ export async function deleteExpiredTokens(
 }
 
 export async function getAndConsumeToken(
-  session: Session,
+  session: Session | Transaction,
   hashedToken: string,
 ): Promise<null | TokenData> {
   const query = `
@@ -42,7 +42,7 @@ export async function getAndConsumeToken(
 }
 
 export async function saveToken(
-  session: Session,
+  session: Session | Transaction,
   hashedToken: string,
   data: string,
 ): Promise<void> {

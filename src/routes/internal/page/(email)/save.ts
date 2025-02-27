@@ -11,6 +11,7 @@ import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { commitTxn } from "~/lib/graph/transaction/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
 
+// used for saving email templates for future use
 export default async function GET({ request }: APIEvent) {
   const query = getQuery();
   const templateName = query.templatename;

@@ -13,19 +13,19 @@ import { replaceFiles } from "./functions/replaceFiles";
 export async function PUT({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
-  const user = await getUserFromSession(request);
-
-  if (!user) {
-    throw new APIError("User not found", 404);
-  }
-
-  const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession, user);
-
-  if (!isAdmin) {
-    throw new APIError("Unauthorized. Admin access required.", 403);
-  }
-
   try {
+    const user = await getUserFromSession(request);
+
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+
+    const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession, user);
+
+    if (!isAdmin) {
+      throw new APIError("Unauthorized. Admin access required.", 403);
+    }
+    
     const data = await readMultipartFormData();
 
     if (!data || data.length === 0) {

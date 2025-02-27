@@ -1,4 +1,4 @@
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import { createHash, randomBytes } from "node:crypto";
 
@@ -12,7 +12,7 @@ const TOKEN_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 export async function generateSecureToken(
   data: string,
-  dbSession: Session,
+  dbSession: Session | Transaction,
 ): Promise<string> {
   // Create a random token
   const randomToken = randomBytes(32).toString("hex");
@@ -49,6 +49,6 @@ export async function validateAndConsumeToken(
   return tokenData.data;
 }
 
-async function cleanupOldTokens(dbSession: Session): Promise<void> {
+async function cleanupOldTokens(dbSession: Session | Transaction): Promise<void> {
   await deleteExpiredTokens(dbSession, TOKEN_EXPIRY);
 }

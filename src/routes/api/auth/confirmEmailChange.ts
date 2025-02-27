@@ -1,19 +1,19 @@
-import type { APIEvent } from "@solidjs/start/server";
-import type { Session } from "neo4j-driver";
+import type {APIEvent} from "@solidjs/start/server";
 
-import { getQuery } from "vinxi/http";
+import {getQuery} from "vinxi/http";
 
-import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDriver } from "~/cypher/driver";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { validateAndConsumeToken } from "~/lib/auth/secureToken";
-import { decodeUserData } from "~/lib/auth/userDataEncoder";
-import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
-import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
-import { updateSession } from "~/server/auth/session/updateSession";
+import {convertNodeToJson} from "~/cypher/convertNodeToJson";
+import {getDriver} from "~/cypher/driver";
+import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
+import {createActivityLog} from "~/cypher/mutate/activity/createActivityLog";
+import {checkIsSystemUser} from "~/cypher/permissions/checkIsSystemUser";
+import {getSubdomainsForAccount} from "~/cypher/permissions/getSubdomainsForAccount";
+import {APIError, handleAPIError} from "~/lib/api/apiErrorHandler";
+import {validateAndConsumeToken} from "~/lib/auth/secureToken";
+import {decodeUserData} from "~/lib/auth/userDataEncoder";
+import {sendNotificationEmail} from "~/lib/playwright/sendNotificationEmail";
+import {EMAIL_TEMPLATES} from "~/pages/settings/constants";
+import {updateSession} from "~/server/auth/session/updateSession";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -45,7 +45,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     // Determine if we need to update across multiple databases
-    const isSystemUser = await checkSystemUser(dbSession, uuid, subDomain);
+    const isSystemUser = await checkIsSystemUser(dbSession, uuid, subDomain);
 
     if (isSystemUser) {
       // Get all subdomains this user belongs to
@@ -173,29 +173,3 @@ export async function GET({ request }: APIEvent) {
   }
 }
 
-// Helper function to check if a user is a system user
-async function checkSystemUser(
-  session: Session,
-  uuid: string,
-  subDomain: string,
-) {
-  return subDomain === SYSTEM_DB_NAME;
-  const result = await session.run(
-    `MATCH (u:User {uuid: $uuid}) 
-     RETURN EXISTS(u.isSuper) as isSystemUser`,
-    { uuid },
-  );
-
-  return result.records.length > 0 && result.records[0].get("isSystemUser");
-}
-
-// Helper function to get all subdomains for a user
-async function getSubdomainsForAccount(session: Session, uuid: string) {
-  const subDomainsResult = await session.run(
-    `MATCH (u:User {uuid: $uuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
-     RETURN s.key as subdomain`,
-    { uuid },
-  );
-
-  return subDomainsResult.records.map((record) => record.get("subdomain"));
-}

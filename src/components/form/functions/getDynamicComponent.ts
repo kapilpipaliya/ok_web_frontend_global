@@ -123,7 +123,7 @@ export const componentsMap: Record<string, any> = {
   Link: MetaLink,
   Meta: MetaMeta,
   MultiSelect: SelectField,
-  Page: PageField,
+  // Page: PageField,
   Portal,
   Select: SelectField,
   Show,
