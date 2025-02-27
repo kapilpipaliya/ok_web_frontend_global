@@ -11,6 +11,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 1,
     text: "Test Email"
   },
   {
@@ -21,6 +22,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 2,
     text: "This is a test email to verify that your email configuration is working correctly."
   },
   {
@@ -31,8 +33,9 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 3,
     text: "If you received this email, your email settings are configured properly."
   }
 ];
 
-export const testEmailForm = {attributes: [createEmailTemplate(content)], key: "TestEmail"}
+export const testEmailForm = {attributes: [createEmailTemplate(content)], key: "TestEmail", title: "Test Email"}

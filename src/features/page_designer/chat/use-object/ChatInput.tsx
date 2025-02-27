@@ -5,6 +5,7 @@ import { createSignal, For, type JSX, Match, Show, Switch } from "solid-js";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
+import { STYLES } from "~/pages/settings/constants";
 
 interface ChatInputProps {
   chatMessages: Message[];
@@ -223,16 +224,18 @@ function MessagesCount(props: {
     <Show when={props.chatMessages.length > 0}>
       <div class="display:flex justify-content:space-between align-items:center">
         <TooltipWrapper
-          arrowClass="text:rgb(243,244,246)"
+          arrowClass={STYLES.tooltip.arrow}
           content={
-            <For each={props.chatMessages}>
-              {(msg) => (
-                <div class="display:flex gap:8px max-width:800px">
-                  <span class="font-weight:bold">{msg.role}:</span>
-                  <span>{msg.content}</span>
-                </div>
-              )}
-            </For>
+            <div class={`${STYLES.tooltip.content} max-h:600 ${STYLES.overflow} grid grid-template-columns:auto|1fr gap:2`}>
+              <For each={props.chatMessages}>
+                {(msg) => (
+                  <>
+                    <span class="font-weight:bold">{msg.role}:</span>
+                    <span class="white-space:pre-wrap">{msg.content}</span>
+                  </>
+                )}
+              </For>
+            </div>
           }
           triggerClass="color:rgb(107,114,128)"
         >

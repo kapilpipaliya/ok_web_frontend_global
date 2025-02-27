@@ -7,9 +7,11 @@ export function TooltipWrapper(props: {
   arrowClass?: string;
   children: JSX.Element;
   content: JSX.Element;
+  contentClass?: string;
   group?: string;
   openDelay?: number;
   triggerAs?: string;
+  
   triggerClass?: string;
 }) {
   const [_local, others] = splitProps(props, [
@@ -42,11 +44,11 @@ export function TooltipWrapper(props: {
       </Tooltip.Trigger>
       <Tooltip.Portal>
         <Tooltip.Content
-          class={`r:8 bg:base-20 text:base-90 p:8 font-medium ${STYLES.tooltip.animation}`}
+          class={`${STYLES.tooltip.animation} ${props.contentClass ?? ""}`}
         >
           {props.content}
 
-          <Tooltip.Arrow class={`color:base-20 ${props.arrowClass ?? ""}`} />
+          <Tooltip.Arrow class={`${props.arrowClass ?? ""}`} />
         </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip>

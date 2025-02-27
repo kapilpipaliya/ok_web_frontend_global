@@ -11,6 +11,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 1,
     text: "Two-Factor Authentication Code"
   },
   {
@@ -21,6 +22,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 2,
     text: "Here is your two-factor authentication code:"
   },
   {
@@ -36,6 +38,7 @@ const content = [
           }
         }),
         componentName: "Html",
+        pos: 1,
         text: "847291"
       }
     ],
@@ -48,7 +51,8 @@ const content = [
         'text-align': 'center'
       }
     }),
-    componentName: "Html"
+    componentName: "Html",
+    pos: 3
   },
   {
     as: "p",
@@ -58,8 +62,9 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 4,
     text: "This code will expire in 5 minutes. Do not share this code with anyone."
   }
 ];
 
-export const twoFactorAuthForm = {attributes: [createEmailTemplate(content)], key: "TwoFactorAuth"}
+export const twoFactorAuthForm = {attributes: [createEmailTemplate(content)], key: "TwoFactorAuth", title: "Two-Factor Authentication Code"}

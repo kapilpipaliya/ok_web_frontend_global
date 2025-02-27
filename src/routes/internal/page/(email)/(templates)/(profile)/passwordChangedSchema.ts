@@ -11,6 +11,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 1,
     text: "Password Changed Successfully"
   },
   {
@@ -21,6 +22,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 2,
     text: "Your password has been successfully changed. If you did not make this change, please contact our support team immediately."
   },
   {
@@ -39,8 +41,9 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 3,
     text: "Contact Support"
   }
 ];
 
-export const passwordChangedForm = {attributes: [createEmailTemplate(content)], key: "PasswordChanged"}
+export const passwordChangedForm = {attributes: [createEmailTemplate(content)], key: "PasswordChanged", title: "Password Changed Successfully"}

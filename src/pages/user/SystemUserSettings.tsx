@@ -34,7 +34,6 @@ export default function SystemUserSettings() {
   ];
 
   const handleMenuSelect = (id: string) => {
-    setSelectedMenu(id);
     setSearchParams({ tab: id });
   };
 

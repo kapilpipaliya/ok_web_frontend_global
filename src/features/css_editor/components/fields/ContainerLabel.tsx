@@ -37,6 +37,7 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
       {props.title}
       <Show when={props.info}>
         <TooltipWrapper
+          arrowClass={STYLES.tooltip.arrow}
           content={
             <div class={STYLES.tooltip.content}>
               <Show when={props.title}>

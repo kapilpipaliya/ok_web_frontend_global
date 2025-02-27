@@ -12,12 +12,10 @@ import { Import } from "./other/Import";
 import { Nav } from "./other/Nav";
 import { Coll } from "./page/Coll";
 import { CollCategory } from "./page/CollCategory";
-import { Dashboard } from "./page/Dashboard";
 import { FormCategory } from "./page/FormCategory";
 import { Page, variantAttributes } from "./page/Page";
 
 const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
-  Dashboard: Dashboard,
   Import: Import,
   Nav: Nav,
   Perm: Perm,

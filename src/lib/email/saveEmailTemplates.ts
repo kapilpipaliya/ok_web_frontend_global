@@ -10,6 +10,9 @@ import { accountDeletionForm } from "~/routes/internal/page/(email)/(templates)/
 import { twoFactorAuthForm } from "~/routes/internal/page/(email)/(templates)/(auth)/twoFactorAuthSchema";
 import { verificationCodeForm } from "~/routes/internal/page/(email)/(templates)/(auth)/verificationCodeSchema";
 import { testEmailForm } from "~/routes/internal/page/(email)/(templates)/(other)/testEmailSchema";
+import { emailChangedForm } from "~/routes/internal/page/(email)/(templates)/(profile)/emailChangedSchema";
+import { emailChangeSuccessfulForm } from "~/routes/internal/page/(email)/(templates)/(profile)/emailChangeSuccessfulSchema";
+import { emailConfirmationForm } from "~/routes/internal/page/(email)/(templates)/(profile)/emailConfirmationSchema";
 import { passwordChangedForm } from "~/routes/internal/page/(email)/(templates)/(profile)/passwordChangedSchema";
 import { profileUpdatedForm } from "~/routes/internal/page/(email)/(templates)/(profile)/profileUpdatedSchema";
 import { signupConfirmationForm } from "~/routes/internal/page/(email)/(templates)/(signup)/signupConfirmationSchema";
@@ -17,6 +20,9 @@ import { welcomeEmailForm } from "~/routes/internal/page/(email)/(templates)/(si
 
 const EMAIL_TEMPLATES = {
   AccountDeletion: accountDeletionForm,
+  EmailChanged: emailChangedForm,
+  EmailChangeSuccessful: emailChangeSuccessfulForm,
+  EmailConfirmation: emailConfirmationForm,
   PasswordChanged: passwordChangedForm,
   ProfileUpdated: profileUpdatedForm,
   SignupConfirmation: signupConfirmationForm,

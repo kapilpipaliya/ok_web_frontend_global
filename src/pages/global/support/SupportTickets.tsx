@@ -5,9 +5,9 @@ import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { Vertex } from "~/lib/graph/graph";
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { getSupportTicketFormSchema } from "./functions/formSchema";
-import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 export function SupportTickets() {
   let gridStore: DataGridStore;

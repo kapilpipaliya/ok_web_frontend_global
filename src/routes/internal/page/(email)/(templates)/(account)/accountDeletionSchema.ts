@@ -11,6 +11,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 1,
     text: "Account Deletion Confirmation"
   },
   {
@@ -21,6 +22,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 2,
     text: "Your account has been successfully deleted. We're sorry to see you go!"
   },
   {
@@ -31,6 +33,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 3,
     text: "If you didn't request this deletion, please contact our support team immediately."
   },
   {
@@ -49,8 +52,9 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 4,
     text: "Contact Support"
   }
 ];
 
-export const accountDeletionForm = {attributes: [createEmailTemplate(content)], key: "AccountDeletion"}
+export const accountDeletionForm = {attributes: [createEmailTemplate(content)], key: "AccountDeletion", title: "Account Deleted"}

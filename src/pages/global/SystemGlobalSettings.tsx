@@ -28,7 +28,6 @@ export default function SystemGlobalSettings() {
   ];
 
   const handleMenuSelect = (id: string) => {
-    setSelectedMenu(id);
     setSearchParams({ tab: id });
   };
 

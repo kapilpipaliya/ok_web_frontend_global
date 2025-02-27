@@ -11,6 +11,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 1,
     text: "Your Verification Code"
   },
   {
@@ -21,6 +22,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 2,
     text: "Use the following code to verify your account:"
   },
   {
@@ -36,6 +38,7 @@ const content = [
           }
         }),
         componentName: "Html",
+        pos: 1,
         text: "123456"
       }
     ],
@@ -48,7 +51,8 @@ const content = [
         'text-align': 'center'
       }
     }),
-    componentName: "Html"
+    componentName: "Html",
+    pos: 3
   },
   {
     as: "p",
@@ -58,8 +62,9 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 4,
     text: "This code will expire in 10 minutes."
   }
 ];
 
-export const verificationCodeForm = {attributes: [createEmailTemplate(content)], key: "VerificationCode"}
+export const verificationCodeForm = {attributes: [createEmailTemplate(content)], key: "VerificationCode", title: "Verification Code"}

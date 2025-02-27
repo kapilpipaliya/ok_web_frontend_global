@@ -11,6 +11,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 1,
     text: "Profile Updated Successfully"
   },
   {
@@ -21,6 +22,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 2,
     text: "Your profile information has been successfully updated."
   },
   {
@@ -39,8 +41,9 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 3,
     text: "View Profile"
   }
 ];
 
-export const profileUpdatedForm = {attributes: [createEmailTemplate(content)], key: "ProfileUpdated"}
+export const profileUpdatedForm = {attributes: [createEmailTemplate(content)], key: "ProfileUpdated", title: "Profile Updated Successfully"}

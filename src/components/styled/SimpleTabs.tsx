@@ -6,8 +6,8 @@ import { evalExpression } from "~/lib/expression_eval";
 export function TabsWithUnderline(
   props: Readonly<{
     displayValueKey: string;
-    onTabClick: (index: number) => void;
-    selectedIndex: number;
+    onTabClick: (key: string) => void;
+    selectedKey: string;
     tabs: Array<{ key: string }>;
   }>,
 ) {
@@ -21,6 +21,7 @@ export function TabsWithUnderline(
 
     return isObject(option) ? option.label : option;
   };
+
   return (
     <div>
       {/* Mobile view */}
@@ -31,14 +32,14 @@ export function TabsWithUnderline(
         <select
           class="lh:1.5rem lh:1.25rem@sm border-color:base-5 border-color:primary:focus border-radius:0.375rem display:block outline-offset:2px:focus outline:2px|solid|transparent pl:0.75rem pr:2.5rem py:0.5rem width:100%"
           id="tabs"
-          onChange={(e) => props.onTabClick(e.currentTarget.selectedIndex)}
-          value={props.selectedIndex}
+          onChange={(e) => props.onTabClick(e.currentTarget.value)}
+          value={props.selectedKey}
         >
           <For each={props.tabs}>
-            {(tab, index) => (
+            {(tab) => (
               <option
-                selected={index() === props.selectedIndex}
-                value={index()}
+                selected={tab.key === props.selectedKey}
+                value={tab.key}
               >
                 {getOptionLabel(tab)}
               </option>
@@ -51,13 +52,13 @@ export function TabsWithUnderline(
         <div class="border-bottom-width:1px border-color:base-5">
           <nav aria-label="Tabs" class="flex gap:0.5rem margin-bottom:-1px">
             <For each={props.tabs}>
-              {(tab, index) => (
+              {(tab) => (
                 <button
                   aria-current={
-                    index() === props.selectedIndex ? "page" : undefined
+                    tab.key === props.selectedKey ? "page" : undefined
                   }
-                  class={`lh:1.25rem ${index() === props.selectedIndex ? "border:primary-50 text:primary-60" : "border-color:transparent border:base-30:hover color:secondary-50 color:secondary-70:hover"} border-bottom-width:2px font-weight:500 px:0.25rem py:0.5rem white-space:nowrap`}
-                  onClick={() => props.onTabClick(index())}
+                  class={`lh:1.25rem ${tab.key === props.selectedKey ? "border:primary-50 text:primary-60" : "border-color:transparent border:base-30:hover color:secondary-50 color:secondary-70:hover"} border-bottom-width:2px font-weight:500 px:0.25rem py:0.5rem white-space:nowrap`}
+                  onClick={() => props.onTabClick(tab.key)}
                   type="button"
                 >
                   {getOptionLabel(tab)}

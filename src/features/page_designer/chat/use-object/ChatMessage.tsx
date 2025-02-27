@@ -22,6 +22,14 @@ export function ChatMessage(props: ChatMessageProps) {
         onDelete={props.onDelete}
       />
       <div>{props.message.P?.prompt}</div>
+      {props.message.P?.timestamp && (
+        <div class="font-size:10px color:rgb(107,114,128)">
+          {new Date(props.message.P.timestamp).toLocaleTimeString()}
+        </div>
+      )}
+      <div class="font-size:10px color:rgb(107,114,128)">
+        Model: {props.message.P?.model}
+      </div>
       {/* Commenting out file attachments for now
       // The file handling functionality can be revisited later when we have a proper solution for file storage.
       <Show when={props.message.P?.attachments?.length}>
@@ -50,30 +58,24 @@ function MessageHeader(props: {
   onDelete: (message: Vertex) => void;
 }) {
   return (
-    <div class="display:flex justify-content:space-between align-items:center font-weight:500 margin-bottom:4px">
-      <div class="display:flex gap:8px align-items:center">
-        <span>Prompt #{props.index}</span>
-        {props.message.P?.timestamp && (
-          <span class="font-size:12px color:rgb(107,114,128)">
-            {new Date(props.message.P.timestamp).toLocaleTimeString()}
-          </span>
-        )}
-        <span class="font-size:12px color:rgb(107,114,128)">
-          Model: {props.message.P?.model}
-        </span>
-        {props.message.P?.hasFile && (
-          <Icon
-            class="font-size:12px color:rgb(107,114,128)"
-            icon="ph:paperclip"
-          />
-        )}
+    <>
+      <div class="display:flex justify-content:space-between align-items:center font-weight:500 margin-bottom:4px">
+        <div class="display:flex gap:8px align-items:center">
+          <span>Prompt #{props.index}</span>
+          {props.message.P?.hasFile && (
+            <Icon
+              class="font-size:12px color:rgb(107,114,128)"
+              icon="ph:paperclip"
+            />
+          )}
+        </div>
+        <IconButton
+          class={`${headerIconButtonClass} color:rgb(239,68,68)`}
+          icon="ph:trash"
+          onClick={() => props.onDelete(props.message)}
+          title="Delete"
+        />
       </div>
-      <IconButton
-        class={`${headerIconButtonClass} color:rgb(239,68,68)`}
-        icon="ph:trash"
-        onClick={() => props.onDelete(props.message)}
-        title="Delete"
-      />
-    </div>
+    </>
   );
 }

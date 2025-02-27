@@ -5,10 +5,12 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
+import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
     const user = await getUserFromSession(request);
@@ -104,11 +106,11 @@ export async function POST({ request }: APIEvent) {
 
     // If email was changed, send confirmation emails
     if (email !== oldEmail) {
-      // TODO: Send confirmation email to old address
-      await sendEmailChangeNotification(oldEmail, email);
+      // Send notification to old email about the change
+      sendNotificationEmail(EMAIL_TEMPLATES.EmailChanged, { email: oldEmail }, "Email Change Notification", user, subDomain);
 
-      // TODO: Send confirmation email to new address
-      await sendEmailConfirmation(email);
+      // Send confirmation to new email for verification
+      sendNotificationEmail(EMAIL_TEMPLATES.EmailConfirmation, { email }, "Confirm Your New Email Address", user, subDomain);
     }
 
     return {
@@ -124,16 +126,12 @@ export async function POST({ request }: APIEvent) {
     await dbSession.close();
   }
 }
-
-// Helper functions for sending emails
-async function sendEmailChangeNotification(
-  _oldEmail: string,
-  _newEmail: string,
-) {}
-
-async function sendEmailConfirmation(_email: string) {}
 // Remember to:
 // 1. Implement the email sending functions
 // 2. Add proper email templates for both notification types
 // 3. Consider adding email verification for the new email address before making it active
 // 4. Add rate limiting to prevent abuse
+
+// Create an "EmailChanged" template for notification to the old email
+// Create an "EmailConfirmation" template for verification sent to new email
+// 3. Create an "EmailChangeSuccessful" template for final confirmation after verification

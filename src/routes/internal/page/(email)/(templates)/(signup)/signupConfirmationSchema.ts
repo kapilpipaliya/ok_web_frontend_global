@@ -11,6 +11,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 1,
     text: "Confirm Your Email Address"
   },
   {
@@ -21,6 +22,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 2,
     text: "Thank you for signing up! Please confirm your email address to activate your account."
   },
   {
@@ -40,6 +42,7 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 3,
     text: "Confirm Email"
   },
   {
@@ -50,8 +53,9 @@ const content = [
       }
     }),
     componentName: "Html",
+    pos: 4,
     text: "If you didn't create an account, you can safely ignore this email."
   }
 ];
 
-export const signupConfirmationForm = {attributes: [createEmailTemplate(content)], key: "SignupConfirmation"}
+export const signupConfirmationForm = {attributes: [createEmailTemplate(content)], key: "SignupConfirmation", title: "Confirm Your Email Address"}

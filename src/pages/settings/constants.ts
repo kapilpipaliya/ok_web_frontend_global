@@ -43,11 +43,17 @@ export const toolBarClass = "flex bg:base-5 gap:6 r:7";
 export const profileImage = "/images/profile.png";
 
 export const EMAIL_TEMPLATES = {
-  LOGIN_NOTIFICATION: "login_notification",
-  PASSWORD_CHANGED: "password_changed",
-  PROFILE_UPDATED: "profile_updated",
-  SIGNUP_CONFIRMATION: "signup_confirmation",
-  TEST_EMAIL: "test_email",
+  AccountDeletion: "AccountDeletion",
+  EmailChanged: "EmailChanged",
+  EmailChangeSuccessful: "EmailChangeSuccessful",
+  EmailConfirmation: "EmailConfirmation",
+  PasswordChanged: "PasswordChanged",
+  ProfileUpdated: "ProfileUpdated",
+  SignupConfirmation: "SignupConfirmation",
+  TestEmail: "TestEmail",
+  TwoFactorAuth: "TwoFactorAuth",
+  VerificationCode: "VerificationCode",
+  WelcomeEmail: "WelcomeEmail",
 } as const;
 
 export const isDev = process.env.NODE_ENV === "development";
@@ -89,9 +95,9 @@ export const STYLES = {
   overflow: "overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin}",
   // Tooltip styles
   tooltip: {
-    animation:
-      "corvu-open:animate-in corvu-open:fade-in-50 corvu-open:slide-in-from-bottom-1 corvu-closed:animate-out corvu-closed:fade-out-50 corvu-closed:slide-out-to-bottom-1",
+    animation: "",
+    arrow: "color:base-60",
     content:
-      "center bg:#333 color:base-5 f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1",
+      "center bg:base-60 color:base-5 f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1",
   },
 } as const;

@@ -39,23 +39,28 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
     ...getClassVertices(),
   ]);
 
-  const [selectedIndex, setSelectedIndex] = createSignal(0);
-  const handleTabClick = (index: number) => setSelectedIndex(index);
+  const [selectedId, setSelectedId] = createSignal(
+    metaClasses()[0]?.id || "",
+  );
+  const handleTabClick = (id: string) => setSelectedId(id);
 
   return (
     <>
       <TabsWithUnderline
         displayValueKey="::'P.displayName'||::'P.key'||::'P.id'||::'label'"
         onTabClick={handleTabClick}
-        selectedIndex={selectedIndex()}
+        selectedKey={selectedId()}
         tabs={metaClasses() as unknown as { key: string }[]}
       />
-      <Show keyed when={selectedIndex() + 1}>
+      <Show keyed when={selectedId()}>
         <CSSPropertiesEditorWrapper
           data={props.selectedLayout}
-          meta={metaClasses()[selectedIndex()]}
+          meta={metaClasses().find((vertex) => vertex.id === selectedId())!}
           onChange={(data) =>
-            props.onChange(metaClasses()[selectedIndex()], data)
+            props.onChange(
+              metaClasses().find((vertex) => vertex.id === selectedId())!,
+              data,
+            )
           }
         />
       </Show>

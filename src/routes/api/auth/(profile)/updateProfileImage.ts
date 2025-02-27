@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";

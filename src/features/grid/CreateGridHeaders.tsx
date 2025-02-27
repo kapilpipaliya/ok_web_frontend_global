@@ -95,6 +95,7 @@ export function CreateGridHeaders(
               }
             >
               <TooltipWrapper
+                arrowClass={STYLES.tooltip.arrow}
                 content={
                   <div class={STYLES.tooltip.content}>
                     <Show when={info.getValue<string>()}>
@@ -159,6 +160,7 @@ export function CreateGridHeaders(
             </Match>
             <Match when={tableId === "File" && attribute.key === "fileName"}>
               <TooltipWrapper
+                arrowClass={STYLES.tooltip.arrow}
                 content={
                   <div class={STYLES.tooltip.content}>
                     <Show when={info.getValue<string>()}>

@@ -2,7 +2,7 @@ import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { openDB } from "idb";
+import { IDBPDatabase, openDB } from "idb";
 import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
@@ -39,11 +39,14 @@ export function PageDesignerWrapper(): JSX.Element {
   const initialStore = getInitialDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
 
-  const dbPromise = openDB("keyval-store", 1, {
-    upgrade(db) {
-      db.createObjectStore("keyval");
-    },
-  });
+  let dbPromise: Promise<IDBPDatabase<unknown>> | undefined;
+  if (!isServer) {
+    dbPromise = openDB("keyval-store", 1, {
+      upgrade(db) {
+        db.createObjectStore("keyval");
+      },
+    });
+  }
 
   const formId = uuidv7();
 
@@ -148,7 +151,9 @@ export function PageDesignerWrapper(): JSX.Element {
     };
 
     (async () => {
-      await (await dbPromise).put("keyval", widthProps, "page_designer_layout");
+      if (!isServer) {
+        await (await dbPromise)?.put("keyval", widthProps, "page_designer_layout");
+      }
     })();
   });
 

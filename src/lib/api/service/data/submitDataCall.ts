@@ -6,7 +6,6 @@ import { MutationArgs } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { onMutatDataGet } from "~/lib/graph/mutate/onMutatDataGet";
-
 import { updateSubmittedIndex } from "~/lib/graph/transaction/updateSubmittedIndex";
 
 // Submit generic data to the server
