@@ -20,7 +20,7 @@ export async function POST({ request }: APIEvent) {
         message: $message,
         createdAt: datetime(),
         createdBy: $userId
-      })-[:SupportReply]->(t)
+      })<-[:ParentSupport]-(t)
       RETURN r
     `;
 

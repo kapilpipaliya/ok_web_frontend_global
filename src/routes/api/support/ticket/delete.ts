@@ -24,7 +24,7 @@ export async function DELETE({ request }: APIEvent) {
     const query = `
       MATCH (t:Support)
       WHERE elementId(t) = $id
-      OPTIONAL MATCH (t)<-[r:SupportReply]-(reply:Reply)
+      OPTIONAL MATCH (t)<-[r:ParentSupport]-(reply:Reply)
       DETACH DELETE t, reply
     `;
 

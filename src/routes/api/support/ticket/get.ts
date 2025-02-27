@@ -65,8 +65,10 @@ export async function POST({ request }: APIEvent) {
       },
       {
         componentName: "DynamicTable",
+        inward: true,
         key: "Reply",
         label: "Reply",
+        type: "ParentSupport"
       },
     ]);
     const data = await fetchDataFromMG({

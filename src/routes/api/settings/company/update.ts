@@ -45,7 +45,7 @@ export async function POST({ request }: APIEvent) {
     let settingsKey: string;
     let updatedSettings: Vertex;
     if (result.records.length === 0) {
-      const newKey = `company_settings_${Date.now()}`;
+      const newKey = `Default`;
       const createResult = await dbSession.run(
         `CREATE (s:CompanySetting {
           key: $key,

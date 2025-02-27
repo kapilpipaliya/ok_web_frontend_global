@@ -23,9 +23,9 @@ export async function POST({ request }: APIEvent) {
 
   try {
     const query = `
-      MATCH (t:Support)
+      MATCH (t:Support), (s:SupportStatus {key: 'Open'})
       WHERE elementId(t) = $ticketId
-      SET t.status = $status
+      MERGE (t)-[:SupportSupportStatus]->(s)
       RETURN t
     `;
 

@@ -16,6 +16,7 @@ http://localhost:3000/internal/page/WelcomeEmail
 http://localhost:3000/internal/page/EmailChanged
 http://localhost:3000/internal/page/EmailChangeSuccessful
 http://localhost:3000/internal/page/EmailConfirmation
+http://localhost:3000/internal/page/InvitationEmail
 
 
 ##Development

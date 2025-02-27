@@ -74,7 +74,7 @@ export async function POST({ request }: APIEvent) {
       );
 
       if (result.records.length === 0) {
-        const newKey = `email_settings_${Date.now()}`;
+        const newKey = `Default`;
         const createResult = await dbSession.run(
           `CREATE (s:EmailSetting {
             key: $key,

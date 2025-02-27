@@ -35,7 +35,7 @@ export async function POST({ request }: APIEvent) {
     const query = isAdmin
       ? `
         MATCH (s:Support)
-        OPTIONAL MATCH (s)<-[r:SupportReply]-(reply:Reply)
+        OPTIONAL MATCH (s)<-[r:ParentSupport]-(reply:Reply)
         WITH s, collect(reply)[0..5] as replies
         RETURN s as support, replies
         ORDER BY s.createdAt DESC
@@ -43,7 +43,7 @@ export async function POST({ request }: APIEvent) {
       : `
         MATCH (s:Support)
         WHERE s.email = $email
-        OPTIONAL MATCH (s)<-[r:SupportReply]-(reply:Reply)
+        OPTIONAL MATCH (s)<-[r:ParentSupport]-(reply:Reply)
         WITH s, collect(reply)[0..5] as replies
         RETURN s as support, replies
         ORDER BY s.createdAt DESC

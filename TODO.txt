@@ -58,3 +58,7 @@ make save all button save preview too.
 Future Tasks:
 - add filters on users page (roles)
 - maek advanced filter form generation for data grid.
+
+
+Idea?:
+- Remove isSuper variable? but need to check complex validations.
