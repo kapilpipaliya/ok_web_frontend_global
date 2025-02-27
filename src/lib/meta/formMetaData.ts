@@ -28,10 +28,10 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
   ...FormMetaDataAuth,
   // TODO: Coll has only one Attr. Add validation for that.
   Coll: Coll,
-  CollCategory: CollCategory,
+  // CollCategory: CollCategory,
   Comp: Comp,
-  CompCategory: CompCategory,
-  DataType: DataType,
+  // CompCategory: CompCategory,
+  // DataType: DataType,
   File: File,
   FileTag: FileTag,
   Folder: Folder,

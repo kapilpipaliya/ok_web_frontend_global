@@ -6,7 +6,7 @@ import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { wrapFormInCard } from "~/lib/utils/formWrapper";
+import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 

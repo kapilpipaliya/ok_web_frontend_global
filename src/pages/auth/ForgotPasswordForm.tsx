@@ -6,7 +6,7 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { FieldAttribute } from "~/lib/meta/FormMetadataType";
-import { wrapFormInCard } from "~/lib/utils/formWrapper";
+import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";

@@ -3,8 +3,11 @@ import { createEffect, createSignal, onCleanup } from "solid-js";
 
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { DataGrid } from "~/features/grid/DataGrid";
+import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
+import { useGraph } from "~/lib/graph/graph";
 
 export default function AdminDashboard() {
+  const [graph] = useGraph();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialKey = (searchParams.tab as string) || "Page";
   const [selectedKey, setSelectedKey] = createSignal(initialKey);
@@ -22,13 +25,21 @@ export default function AdminDashboard() {
     setSearchParams({ tab: key });
   };
 
-  const tabs = [
-    { key: "Page", label: "Pages" },
-    { key: "Form", label: "Forms" },
-    { key: "Component", label: "Components" },
-    { key: "TemplatePage", label: "Templates" },
-    { key: "EmailTemplate", label: "Email Templates" },
-  ];
+  const tabs = () => {
+    const baseTabs = [
+      { key: "Page", label: "Pages" },
+      { key: "Form", label: "Forms" },
+      { key: "Component", label: "Components" },
+      { key: "TemplatePage", label: "Templates" },
+    ];
+    
+    // Only add the EmailTemplate tab if the user has admin role
+    if (isAdminRole(graph)) {
+      baseTabs.push({ key: "EmailTemplate", label: "Email Templates" });
+    }
+    
+    return baseTabs;
+  };
 
   onCleanup(() => {
     setSearchParams({ tab: selectedKey() });
@@ -40,7 +51,7 @@ export default function AdminDashboard() {
         displayValueKey="label"
         onTabClick={handleTabClick}
         selectedKey={selectedKey()}
-        tabs={tabs}
+        tabs={tabs()}
       />
       <DataGrid isShowPagination={true} tableId={selectedKey()} />
     </div>

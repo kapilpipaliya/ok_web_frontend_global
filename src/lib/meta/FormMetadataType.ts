@@ -3,14 +3,9 @@ export interface FieldAttribute {
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes?: FieldAttribute[];
   componentName: string;
-  // group?: string;
-  dataType?: string;
   displayName?: string;
   key?: string;
-
   meta?: string;
-  tab?: string;
-
   validationRules?: Array<{}>;
 }
 

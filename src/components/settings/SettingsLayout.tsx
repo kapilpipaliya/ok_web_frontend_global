@@ -1,10 +1,9 @@
 import { Title } from "@solidjs/meta";
-import { For, Show } from "solid-js";
-
-import type { Graph } from "~/lib/graph/graph";
+import { For, JSX, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
+import { useGraph } from "~/lib/graph/graph";
 import { STYLES } from "~/pages/settings/constants";
 
 export interface MenuItem {
@@ -16,9 +15,8 @@ export interface MenuItem {
 }
 
 interface SettingsLayoutProps {
-  children: any;
+  children: JSX.Element;
   description: string;
-  graph: Graph;
   menuItems: MenuItem[];
   onMenuSelect: (id: string) => void;
   selectedMenu: () => string;
@@ -26,6 +24,7 @@ interface SettingsLayoutProps {
 }
 
 export function SettingsLayout(props: SettingsLayoutProps) {
+  const [graph] = useGraph();
   const groupedMenuItems = () => {
     const groups: Record<string, MenuItem[]> = {};
     props.menuItems.forEach((item) => {
@@ -62,7 +61,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
             {([group, items]) => (
               <Show
                 when={items.some(
-                  (item) => !item.adminOnly || isAdminRole(props.graph),
+                  (item) => !item.adminOnly || isAdminRole(graph),
                 )}
               >
                 <div class="mb:16px">
@@ -73,7 +72,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                   </Show>
                   <For each={items}>
                     {(item) => (
-                      <Show when={!item.adminOnly || isAdminRole(props.graph)}>
+                      <Show when={!item.adminOnly || isAdminRole(graph)}>
                         <div
                           class={`p:12px cursor:pointer r:4px mb:8px ${
                             props.selectedMenu() === item.id

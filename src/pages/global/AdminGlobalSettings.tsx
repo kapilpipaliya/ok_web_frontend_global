@@ -98,7 +98,6 @@ export default function AdminGlobalSettings() {
   return (
     <SettingsLayout
       description="Manage global application settings"
-      graph={graph}
       menuItems={menuItems}
       onMenuSelect={handleMenuSelect}
       selectedMenu={selectedMenu}

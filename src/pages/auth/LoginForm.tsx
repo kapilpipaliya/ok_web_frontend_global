@@ -7,7 +7,7 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { wrapFormInCard } from "~/lib/utils/formWrapper";
+import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
@@ -24,8 +24,11 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = createStore({
     password: false,
   });
+  const [formRefs, setFormRefs] = createStore({
+    passwordRef: null as HTMLInputElement | null,
+  });
 
-  const validateFormData = (formData: any) => {
+  const validateFormData = (formData: Vertex) => {
     const { email, password } = formData.P;
 
     if (email.includes("@")) {
@@ -92,12 +95,20 @@ export function LoginForm() {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
                       }
-                      try {
-                        options.dataContext.submitState[1]("isLoading", true);
-                        const formData = options.data;
-                        await handleSubmit(formData);
-                      } finally {
-                        options.dataContext.submitState[1]("isLoading", false);
+
+                      // Check if password is empty
+                      if (!options.data.P.password && formRefs.passwordRef) {
+                        // Focus password field if empty
+                        formRefs.passwordRef.focus();
+                      } else {
+                        // Otherwise submit the form
+                        try {
+                          options.dataContext.submitState[1]("isLoading", true);
+                          const formData = options.data;
+                          await handleSubmit(formData);
+                        } finally {
+                          options.dataContext.submitState[1]("isLoading", false);
+                        }
                       }
                     }
                   },
@@ -116,29 +127,39 @@ export function LoginForm() {
                     class: PROPERTIES.Css.TextField,
                     componentName: "TextInput",
                     key: "password",
-                    props: (options: FunctionArgumentType) => ({
-                      onKeyPress: async (e: KeyboardEvent) => {
-                        if (e.key === "Enter") {
-                          if (e.target instanceof HTMLInputElement) {
-                            options.updateValue(e.target.value);
+                    props: (options: FunctionArgumentType) => {
+                      return {
+                        onKeyPress: async (e: KeyboardEvent) => {
+                          if (e.key === "Enter") {
+                            if (e.target instanceof HTMLInputElement) {
+                              options.updateValue(e.target.value);
+                            }
+                            try {
+                              options.dataContext.submitState[1](
+                                "isLoading",
+                                true,
+                              );
+                              const formData = options.data;
+                              await handleSubmit(formData);
+                            } finally {
+                              options.dataContext.submitState[1](
+                                "isLoading",
+                                false,
+                              );
+                            }
                           }
-                          try {
-                            options.dataContext.submitState[1](
-                              "isLoading",
-                              true,
-                            );
-                            const formData = options.data;
-                            await handleSubmit(formData);
-                          } finally {
-                            options.dataContext.submitState[1](
-                              "isLoading",
-                              false,
-                            );
+                        },
+                        onMount: () => {
+                          if (options.ref && options.ref instanceof HTMLInputElement) {
+                            setFormRefs("passwordRef", options.ref);
                           }
-                        }
-                      },
-                      type: showPassword.password ? "text" : "password",
-                    }),
+                        },
+                        ref: (el: HTMLInputElement) => {
+                          setFormRefs("passwordRef", el);
+                        },
+                        type: showPassword.password ? "text" : "password"
+                      };
+                    },
                     validation: { required: true },
                   },
                   {

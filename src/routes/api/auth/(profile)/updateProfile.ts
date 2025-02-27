@@ -10,16 +10,16 @@ export async function POST({ request }: APIEvent) {
   const payload = await request.json();
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
-  const user = await getUserFromSession(request);
-
-  if (!user) {
-    throw new APIError("User not found", 404);
-  }
-  if (user.P.uuid !== payload.uuid) {
-    throw new APIError("User not authorized", 401);
-  }
-
   try {
+    const user = await getUserFromSession(request);
+
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+    if (user.P.uuid !== payload.uuid) {
+      throw new APIError("User not authorized", 401);
+    }
+
     const result = await updateProfile(
       request,
       user,

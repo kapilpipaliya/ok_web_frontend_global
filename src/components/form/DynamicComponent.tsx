@@ -631,9 +631,7 @@ export function DynamicComponent(
       setMounted(true);
       // props.meta.mounted = true;
       runWithOwner(owner, () => {
-        const onMountResult = dynamicProps().onMount?.(
-          getFunctionArgumentWithValue(),
-        );
+        const onMountResult = dynamicProps().onMount?.();
         if (typeof onMountResult === "function") {
           onCleanup(onMountResult);
         }

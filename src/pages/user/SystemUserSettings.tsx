@@ -40,7 +40,6 @@ export default function SystemUserSettings() {
   return (
     <SettingsLayout
       description="Manage your account settings and preferences."
-      graph={graph}
       menuItems={menuItems}
       onMenuSelect={handleMenuSelect}
       selectedMenu={selectedMenu}

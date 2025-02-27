@@ -34,7 +34,6 @@ export default function SystemGlobalSettings() {
   return (
     <SettingsLayout
       description="Manage global application settings"
-      graph={graph}
       menuItems={menuItems}
       onMenuSelect={handleMenuSelect}
       selectedMenu={selectedMenu}

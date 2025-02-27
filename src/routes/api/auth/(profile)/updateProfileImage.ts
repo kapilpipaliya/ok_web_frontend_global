@@ -10,16 +10,16 @@ export async function POST({ request }: APIEvent) {
   const { profileImage, uuid } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);
 
-  const user = await getUserFromSession(request);
-
-  if (!user) {
-    throw new APIError("User not found", 404);
-  }
-  if (user.P.uuid !== uuid) {
-    throw new APIError("User not authorized", 401);
-  }
-
   try {
+    const user = await getUserFromSession(request);
+
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+    if (user.P.uuid !== uuid) {
+      throw new APIError("User not authorized", 401);
+    }
+
     if (!profileImage) {
       throw new APIError("Profile image is required", 400);
     }
