@@ -4,6 +4,7 @@ import { Link } from "@solidjs/meta";
 
 import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
 import { GetInitialData } from "~/GetInitialData";
+import { API } from "~/lib/api/endpoints";
 import { getCompanyLogoUrl } from "~/lib/graph/get/sync/getCompanyLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
@@ -15,7 +16,7 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
     <GetInitialData authenticate>
       <Link href={getCompanyLogoUrl(graph) || ""} rel="icon" />
       <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
-        <HomeIcon url="/system/projects" />
+        <HomeIcon url={API.urls.system.root} />
         <div class="ml:auto flex gap:4">
           <UserDropdownMenuDisplay />
         </div>

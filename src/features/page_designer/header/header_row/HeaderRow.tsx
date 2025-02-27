@@ -15,6 +15,7 @@ import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { HomeIcon } from "../left/HomeIcon";
 import { SaveAllButton } from "../right/SaveAllButton";
 import { ToggleButtons } from "../right/ToggleButtons";
+import { API } from "~/lib/api/endpoints";
 
 interface HeaderProps {
   children?: JSX.Element;
@@ -45,17 +46,9 @@ export function Header(props: HeaderProps) {
 }
 
 export function HeaderRow(props: HeaderProps) {
-  const [graph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-  const _layoutStore = () =>
-    graph.vertexes[layoutStoreId].P as PageLayoutObject;
-  const formStoreId = useDesignerFormIdContext();
-  const _formStoreVertex = () =>
-    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-
   return (
     <Header class={props.class} style={props.style}>
-      <HomeIcon url="/admin" />
+      <HomeIcon url={API.urls.admin.root} />
       <RightSection />
     </Header>
   );

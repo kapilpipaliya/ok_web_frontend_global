@@ -5,7 +5,7 @@ import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
-import { API, AUTH_MENU_URLS } from "~/lib/api/endpoints";
+import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
@@ -21,30 +21,29 @@ export function AuthenticatedMenu(
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
   const { showLoadingToast } = useToast();
-  const _globalStoreId = "globalStoreId";
 
   const isSystemSubDomain = () =>
     getMemberVertex(graph).P.subDomain === "super";
 
   const getMenuItems = () => {
     const commonItems = [
-      // { href: URLS.ADMIN.CONTACT, icon: "ph:question", label: "Help" },
+      // { href: API.urls.admin.contact, icon: "ph:question", label: "Help" },
     ] as { href: string; icon: string; label: string }[];
 
     return isSystemSubDomain()
       ? [
           {
-            href: AUTH_MENU_URLS.SYSTEM.PROJECTS,
+            href: API.urls.system.projects,
             icon: "ph:umbrella",
             label: "Projects",
           },
           {
-            href: AUTH_MENU_URLS.SYSTEM.GLOBAL_SETTINGS,
+            href: API.urls.system.globalSettings,
             icon: "ph:gear",
             label: "Global Settings",
           },
           {
-            href: AUTH_MENU_URLS.SYSTEM.USER_SETTINGS,
+            href: API.urls.system.userSettings,
             icon: "ph:user-gear",
             label: "User Settings",
           },
@@ -52,12 +51,12 @@ export function AuthenticatedMenu(
         ]
       : [
           {
-            href: AUTH_MENU_URLS.ADMIN.GLOBAL_SETTINGS,
+            href: API.urls.admin.globalSettings,
             icon: "ph:gear",
             label: "Global Settings",
           },
           {
-            href: AUTH_MENU_URLS.ADMIN.USER_SETTINGS,
+            href: API.urls.admin.userSettings,
             icon: "ph:user-gear",
             label: "User Settings",
           },
@@ -72,7 +71,7 @@ export function AuthenticatedMenu(
       loadMessage: "Logging Out...",
       onSuccess: (value) => {
         if (value?.message != null) {
-          navigate(AUTH_MENU_URLS.ADMIN.LOGIN);
+          navigate(API.urls.admin.login);
         }
       },
       promise: postAPI(API.auth.logOutUrl, {}),

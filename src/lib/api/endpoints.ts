@@ -77,6 +77,22 @@ export const API = {
     replyUrl: "/api/support/ticket/reply",
     upsertTicketUrl: "/api/support/ticket/upsert",
   },
+  urls: {
+    admin: {
+      contact: "/contact-us",
+      globalSettings: "/admin/GlobalSettings",
+      login: "/auth/login",
+      // it's name is admin, but its for subdomains
+      root: "/admin",
+      userSettings: "/admin/UserSettings",
+    },
+    system: {
+      globalSettings: "/system/GlobalSettings",
+      projects: "/system/projects",
+      root: "/system/projects",
+      userSettings: "/system/UserSettings",
+    },
+  },
   user: {
     deleteUserUrl: "/api/users/delete",
     getUsersListUrl: "/api/users/list",
@@ -88,18 +104,3 @@ export const API = {
 export function generate401RedirectUrl(pathname: string): string {
   return `/auth/login?redirectUrl=${encodeURIComponent(pathname)}`;
 }
-
-// Define URL constants
-export const AUTH_MENU_URLS = {
-  ADMIN: {
-    CONTACT: "/contact-us",
-    GLOBAL_SETTINGS: "/admin/GlobalSettings",
-    LOGIN: "/auth/login",
-    USER_SETTINGS: "/admin/UserSettings",
-  },
-  SYSTEM: {
-    GLOBAL_SETTINGS: "/system/GlobalSettings",
-    PROJECTS: "/system/projects",
-    USER_SETTINGS: "/system/UserSettings",
-  },
-} as const;
