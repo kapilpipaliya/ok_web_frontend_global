@@ -38,7 +38,7 @@ export function ContactForm() {
         componentName: "Box",
       },
       {
-        as: "div", 
+        as: "div",
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
@@ -113,13 +113,16 @@ export function ContactForm() {
                     try {
                       options.dataContext.saveState[1]("isLoading", true);
                       const formData = options.data.P;
-                      const response = await postAPI(API.support.createTicketUrl, {
-                        email: formData.email.toLowerCase(),
-                        message: formData.message,
-                        name: formData.name,
-                        subject: formData.subject,
-                      });
-                      
+                      const response = await postAPI(
+                        API.support.createTicketUrl,
+                        {
+                          email: formData.email.toLowerCase(),
+                          message: formData.message,
+                          name: formData.name,
+                          subject: formData.subject,
+                        },
+                      );
+
                       if (response.error) {
                         showErrorToast(response.error);
                       } else {

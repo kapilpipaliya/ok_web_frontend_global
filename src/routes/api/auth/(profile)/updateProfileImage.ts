@@ -65,7 +65,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("User or file not found", 404);
     }
     const file = convertNodeToJson(result.records[0]?.get("f"));
-    
+
     // Log the profile image update activity
     await createActivityLog(
       dbSession,
@@ -73,7 +73,7 @@ export async function POST({ request }: APIEvent) {
       "User",
       uuid,
       user.P.email,
-      `Profile image updated to ${file.P.fileName || file.id}`
+      `Profile image updated to ${file.P.fileName || file.id}`,
     );
 
     return {

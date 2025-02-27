@@ -20,10 +20,19 @@ export async function POST({ request }: APIEvent) {
   }
 
   try {
-    const result = await updateProfile(request, user, payload, dbSession, subDomain);
+    const result = await updateProfile(
+      request,
+      user,
+      payload,
+      dbSession,
+      subDomain,
+    );
 
     if ("error" in result) {
-      throw new APIError(result.error || "Failed to update profile", result.status || 500);
+      throw new APIError(
+        result.error || "Failed to update profile",
+        result.status || 500,
+      );
     }
 
     return result;

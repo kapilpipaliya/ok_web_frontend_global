@@ -31,7 +31,7 @@ export async function createOrUpdateAccountEmailSettings(
 
   if (findResult.records.length === 0) {
     // Create new EmailSetting if not found
-    settingsKey = `Default`;
+    settingsKey = "Default";
     await dbSession.run(
       `MATCH (a:Account {id: $accountId})
        CREATE (s:EmailSetting {

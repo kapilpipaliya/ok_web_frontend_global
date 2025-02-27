@@ -73,7 +73,9 @@ export async function DELETE({ request }: APIEvent) {
     `,
       { id },
     );
-    const deletedRole = convertNodeToJson(deletedRoleResult.records[0].get("r"));
+    const deletedRole = convertNodeToJson(
+      deletedRoleResult.records[0].get("r"),
+    );
     // Log role deletion activity
     await createActivityLog(
       dbSession,
@@ -81,9 +83,9 @@ export async function DELETE({ request }: APIEvent) {
       "Role",
       id,
       user.P.email,
-      `Deleted role: ${deletedRole.P.key}`
+      `Deleted role: ${deletedRole.P.key}`,
     );
-    
+
     return {
       graph: {
         deleted_vertexes: [roleCheck.records[0].get("r").identity],

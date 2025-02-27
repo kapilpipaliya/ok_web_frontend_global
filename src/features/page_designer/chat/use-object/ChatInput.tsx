@@ -226,7 +226,9 @@ function MessagesCount(props: {
         <TooltipWrapper
           arrowClass={STYLES.tooltip.arrow}
           content={
-            <div class={`${STYLES.tooltip.content} max-h:600 ${STYLES.overflow} grid grid-template-columns:auto|1fr gap:2`}>
+            <div
+              class={`${STYLES.tooltip.content} max-h:600 ${STYLES.overflow} grid grid-template-columns:auto|1fr gap:2`}
+            >
               <For each={props.chatMessages}>
                 {(msg) => (
                   <>

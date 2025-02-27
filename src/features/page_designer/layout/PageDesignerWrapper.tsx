@@ -2,7 +2,7 @@ import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
 import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { IDBPDatabase, openDB } from "idb";
+import { type IDBPDatabase, openDB } from "idb";
 import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
@@ -152,7 +152,11 @@ export function PageDesignerWrapper(): JSX.Element {
 
     (async () => {
       if (!isServer) {
-        await (await dbPromise)?.put("keyval", widthProps, "page_designer_layout");
+        await (await dbPromise)?.put(
+          "keyval",
+          widthProps,
+          "page_designer_layout",
+        );
       }
     })();
   });

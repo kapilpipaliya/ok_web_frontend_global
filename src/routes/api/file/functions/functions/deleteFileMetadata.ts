@@ -4,7 +4,8 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 
 export async function deleteFileMetadata(dbSession: Session, fileId: string) {
   try {
-    const query = "MATCH (f:File) WHERE elementId(f) = $fileId DELETE f return f";
+    const query =
+      "MATCH (f:File) WHERE elementId(f) = $fileId DELETE f return f";
     const result = await dbSession.run(query, { fileId: fileId });
     if (result.records.length === 0) {
       return null;

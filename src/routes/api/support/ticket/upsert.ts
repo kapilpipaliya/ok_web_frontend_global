@@ -35,7 +35,6 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Unauthorized.", 403);
     }
 
-
     const tx = dbSession.beginTransaction();
     try {
       const res = await mutateData(data, tx);

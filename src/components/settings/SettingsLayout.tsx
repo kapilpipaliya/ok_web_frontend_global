@@ -29,8 +29,10 @@ export function SettingsLayout(props: SettingsLayoutProps) {
   const groupedMenuItems = () => {
     const groups: Record<string, MenuItem[]> = {};
     props.menuItems.forEach((item) => {
-      const group = item.group || 'default';
-      if (!groups[group]) groups[group] = [];
+      const group = item.group || "default";
+      if (!groups[group]) {
+        groups[group] = [];
+      }
       groups[group].push(item);
     });
     return groups;
@@ -40,7 +42,10 @@ export function SettingsLayout(props: SettingsLayoutProps) {
     <div class="">
       <Title>
         {props.title} -{" "}
-        {props.menuItems.find((item) => item.id === props.selectedMenu())?.label}
+        {
+          props.menuItems.find((item) => item.id === props.selectedMenu())
+            ?.label
+        }
       </Title>
 
       <HeaderWithDescription
@@ -50,13 +55,21 @@ export function SettingsLayout(props: SettingsLayoutProps) {
       />
 
       <div class="display:grid grid-template-columns:250px|1fr  p:6">
-        <div class={`${STYLES.overflow} h:calc(100vh-140px) border-right:1px|solid|#eee`}>
+        <div
+          class={`${STYLES.overflow} h:calc(100vh-140px) border-right:1px|solid|#eee`}
+        >
           <For each={Object.entries(groupedMenuItems())}>
             {([group, items]) => (
-              <Show when={items.some(item => !item.adminOnly || isAdminRole(props.graph))}>
+              <Show
+                when={items.some(
+                  (item) => !item.adminOnly || isAdminRole(props.graph),
+                )}
+              >
                 <div class="mb:16px">
-                  <Show when={group !== 'default'}>
-                    <div class="text:14px fg:#6B7280 font-weight:500 mb:8px">{group}</div>
+                  <Show when={group !== "default"}>
+                    <div class="text:14px fg:#6B7280 font-weight:500 mb:8px">
+                      {group}
+                    </div>
                   </Show>
                   <For each={items}>
                     {(item) => (

@@ -1,12 +1,13 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { Vertex } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -45,7 +46,7 @@ export async function POST({ request }: APIEvent) {
     let settingsKey: string;
     let updatedSettings: Vertex;
     if (result.records.length === 0) {
-      const newKey = `Default`;
+      const newKey = "Default";
       const createResult = await dbSession.run(
         `CREATE (s:CompanySetting {
           key: $key,
@@ -85,7 +86,7 @@ export async function POST({ request }: APIEvent) {
         vertexes: { [updatedSettings.id]: updatedSettings },
       },
       result: updatedSettings,
-    }
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {

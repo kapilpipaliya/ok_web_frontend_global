@@ -1,16 +1,19 @@
-import type {APIEvent} from "@solidjs/start/server";
-import type {Session} from "neo4j-driver";
+import type { APIEvent } from "@solidjs/start/server";
+import type { Session } from "neo4j-driver";
 
-import type {Vertex} from "~/lib/graph/graph";
+import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { Vertex } from "~/lib/graph/graph";
 
-import {SYSTEM_DB_NAME} from "~/cypher/boltConstant";
-import {convertNodeToJson} from "~/cypher/convertNodeToJson";
-import {getDriver} from "~/cypher/driver";
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { getDriver } from "~/cypher/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import {ServerResult} from "~/cypher/types/ServerResult";
-import {sendEmailConfirmation} from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
-import {validateUniqueFields, validateUser} from "~/routes/api/auth/(profile)/functions/validateField";
-import {updateSession} from "~/server/auth/session/updateSession";
+import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
+import {
+  validateUniqueFields,
+  validateUser,
+} from "~/routes/api/auth/(profile)/functions/validateField";
+import { updateSession } from "~/server/auth/session/updateSession";
 
 type ProfilePayload = {
   email?: string;
@@ -28,41 +31,75 @@ export async function updateProfile(
   const { email, username } = payload;
 
   const userValidation = await validateUser(dbSession, currentUser.P.uuid);
-  if ("error" in userValidation) return userValidation;
+  if ("error" in userValidation) {
+    return userValidation;
+  }
 
   const oldUser = userValidation.user;
   const isEmailChanged = !!email && email !== oldUser.P.email;
   const isUsernameChanged = !!username && username !== oldUser.P.username;
 
   if (subDomain === SYSTEM_DB_NAME) {
-    const subdomains = await getSubdomainsForAccount(dbSession, currentUser.P.uuid);
+    const subdomains = await getSubdomainsForAccount(
+      dbSession,
+      currentUser.P.uuid,
+    );
     const driver = await getDriver();
-    const validationSessions = subdomains.map((subdomain) => driver.session({ database: subdomain }));
+    const validationSessions = subdomains.map((subdomain) =>
+      driver.session({ database: subdomain }),
+    );
 
     try {
-      await validateUniqueFields(dbSession, currentUser.P.uuid, oldUser, email, username);
+      await validateUniqueFields(
+        dbSession,
+        currentUser.P.uuid,
+        oldUser,
+        email,
+        username,
+      );
 
       for (const session of validationSessions) {
-        await validateUniqueFields(session, currentUser.P.uuid, oldUser, email, username);
+        await validateUniqueFields(
+          session,
+          currentUser.P.uuid,
+          oldUser,
+          email,
+          username,
+        );
       }
 
       const updateQuery = buildUpdateQuery(isEmailChanged, isUsernameChanged);
-      if (!updateQuery) throw new Error("No updates to perform");
+      if (!updateQuery) {
+        throw new Error("No updates to perform");
+      }
       const updatePromises = [
         dbSession.run(updateQuery, { username, uuid: currentUser.P.uuid }),
-        ...validationSessions.map((session) => session.run(updateQuery, { username, uuid: currentUser.P.uuid })),
+        ...validationSessions.map((session) =>
+          session.run(updateQuery, { username, uuid: currentUser.P.uuid }),
+        ),
       ];
 
       const results = await Promise.all(updatePromises);
       const mainResult = results[0];
 
-      if (mainResult.records.length === 0) throw new Error("Failed to update profile");
+      if (mainResult.records.length === 0) {
+        throw new Error("Failed to update profile");
+      }
 
       const userNew = convertNodeToJson(mainResult.records[0].get("u"));
       await updateSession(userNew);
 
-      if (isEmailChanged) await sendEmailConfirmation(request, oldUser, email, userNew, subDomain, dbSession);
-   
+      if (isEmailChanged) {
+        await sendEmailConfirmation(
+          request,
+          oldUser,
+          email,
+          userNew,
+          subDomain,
+          dbSession,
+        );
+      }
+
       await saveActivityLog(dbSession, userNew, payload);
 
       return {
@@ -82,17 +119,40 @@ export async function updateProfile(
     }
   } else {
     // Single subdomain update
-    await validateUniqueFields(dbSession, currentUser.P.uuid, oldUser, email, username);
+    await validateUniqueFields(
+      dbSession,
+      currentUser.P.uuid,
+      oldUser,
+      email,
+      username,
+    );
 
     const finalQuery = buildUpdateQuery(isEmailChanged, isUsernameChanged);
-    if (!finalQuery) throw new Error("No updates to perform");
-    
-    const updateResult = await dbSession.run(finalQuery, { email, username, uuid: currentUser.P.uuid });
+    if (!finalQuery) {
+      throw new Error("No updates to perform");
+    }
 
-    if (updateResult.records.length === 0) return { error: "User not found", status: 404 };
+    const updateResult = await dbSession.run(finalQuery, {
+      email,
+      username,
+      uuid: currentUser.P.uuid,
+    });
+
+    if (updateResult.records.length === 0) {
+      return { error: "User not found", status: 404 };
+    }
 
     const userNew = convertNodeToJson(updateResult.records[0].get("u"));
-    if (isEmailChanged) await sendEmailConfirmation(request, oldUser, email, userNew, subDomain, dbSession);
+    if (isEmailChanged) {
+      await sendEmailConfirmation(
+        request,
+        oldUser,
+        email,
+        userNew,
+        subDomain,
+        dbSession,
+      );
+    }
 
     await saveActivityLog(dbSession, userNew, payload);
 
@@ -106,18 +166,27 @@ export async function updateProfile(
   }
 }
 
-function buildUpdateQuery(isEmailChanged: boolean, isUsernameChanged: boolean): string {
+function buildUpdateQuery(
+  isEmailChanged: boolean,
+  isUsernameChanged: boolean,
+): string {
   const updates = [];
-  if (isEmailChanged) updates.push('u.pendingEmail = $email');
-  if (isUsernameChanged) updates.push('u.username = $username');
+  if (isEmailChanged) {
+    updates.push("u.pendingEmail = $email");
+  }
+  if (isUsernameChanged) {
+    updates.push("u.username = $username");
+  }
 
-  const updateString = updates.length ? updates.join(', ') : '';
-  return updateString ? `
+  const updateString = updates.length ? updates.join(", ") : "";
+  return updateString
+    ? `
     MATCH (u:User {uuid: $uuid})
     SET ${updateString}
         u.updatedAt = datetime()
     RETURN u
-  ` : '';
+  `
+    : "";
 }
 
 async function getSubdomainsForAccount(dbSession: Session, uuid: string) {
@@ -130,18 +199,26 @@ async function getSubdomainsForAccount(dbSession: Session, uuid: string) {
   return subDomainsResult.records.map((record) => record.get("subdomain"));
 }
 
-async function saveActivityLog(dbSession: Session, user: Vertex, payload: ProfilePayload) {
-    let details = "Profile updated";
-    if (payload.username) details += ` - username: ${payload.username}`;
-    if (payload.email) details += ` - pending email: ${payload.email}`;
-    
-    // Log the profile update activity
-    await createActivityLog(
-      dbSession,
-      "profile_update",
-      "User",
-      user.P.uuid,
-      user.P.email,
-      details
-    );
+async function saveActivityLog(
+  dbSession: Session,
+  user: Vertex,
+  payload: ProfilePayload,
+) {
+  let details = "Profile updated";
+  if (payload.username) {
+    details += ` - username: ${payload.username}`;
   }
+  if (payload.email) {
+    details += ` - pending email: ${payload.email}`;
+  }
+
+  // Log the profile update activity
+  await createActivityLog(
+    dbSession,
+    "profile_update",
+    "User",
+    user.P.uuid,
+    user.P.email,
+    details,
+  );
+}

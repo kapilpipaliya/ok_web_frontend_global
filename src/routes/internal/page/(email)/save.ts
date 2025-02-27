@@ -27,9 +27,15 @@ export default async function GET({ request }: APIEvent) {
     }
 
     const [graph, setGraph] = createAppState();
-    
+
     const txnId = generateNewTxnId(graph, setGraph);
-    const { error } = createMeta(emailTemplateSchema, txnId, graph, setGraph, "EmailTemplate");
+    const { error } = createMeta(
+      emailTemplateSchema,
+      txnId,
+      graph,
+      setGraph,
+      "EmailTemplate",
+    );
     if (error) {
       throw new APIError("Failed to create meta", 500);
     }
@@ -38,7 +44,7 @@ export default async function GET({ request }: APIEvent) {
     if (!commitData) {
       throw new APIError("Failed to upload Email Template", 500);
     }
-    
+
     const res = await mutateData(commitData, tx);
     await tx.commit();
     return res;

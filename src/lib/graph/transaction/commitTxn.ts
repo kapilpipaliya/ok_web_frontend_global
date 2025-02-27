@@ -16,7 +16,10 @@ import {
 import { updateEdgeIdsToNew } from "../mutate/edge";
 import { updateVertexIdsToNew } from "../mutate/vertex";
 
-export function commitTxn(txnId: number, graph: Store<GraphInterface>): MutationArgs | undefined {
+export function commitTxn(
+  txnId: number,
+  graph: Store<GraphInterface>,
+): MutationArgs | undefined {
   if (!txnId) {
     return;
   }

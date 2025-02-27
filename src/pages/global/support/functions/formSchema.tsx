@@ -2,10 +2,7 @@ import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { Vertex } from "~/lib/graph/graph";
-import type {
-  FieldAttribute,
-  IFormMetaData,
-} from "~/lib/meta/FormMetadataType";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";

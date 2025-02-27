@@ -39,9 +39,7 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
     ...getClassVertices(),
   ]);
 
-  const [selectedId, setSelectedId] = createSignal(
-    metaClasses()[0]?.id || "",
-  );
+  const [selectedId, setSelectedId] = createSignal(metaClasses()[0]?.id || "");
   const handleTabClick = (id: string) => setSelectedId(id);
 
   return (

@@ -6,7 +6,11 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
-import { headerIconButtonClass, PROPERTIES, STYLES } from "~/pages/settings/constants";
+import {
+  headerIconButtonClass,
+  PROPERTIES,
+  STYLES,
+} from "~/pages/settings/constants";
 
 import { IconButton } from "../../components/styled/IconButton";
 import { AddNewButton } from "./AddNewButton";
@@ -54,7 +58,10 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           title={`Switch to ${isTableLayout() ? "Card" : "Table"} Layout`}
         />
         <Show when={!isTableLayout()}>
-          <TooltipWrapper arrowClass={STYLES.tooltip.arrow} content="Column Size">
+          <TooltipWrapper
+            arrowClass={STYLES.tooltip.arrow}
+            content="Column Size"
+          >
             <input
               class={`${PROPERTIES.Css.TextField.replace("w:100%", "")}`}
               max="10"

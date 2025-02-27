@@ -33,61 +33,61 @@ export default function AdminGlobalSettings() {
       component: "GeneralSettings",
       group: "Basic Settings",
       id: "general",
-      label: "General"
+      label: "General",
     },
     {
       component: "CompanySettings",
       group: "Basic Settings",
       id: "company",
-      label: "Company Details"
+      label: "Company Details",
     },
     {
       component: "EmailSettings",
       group: "Communication",
       id: "email",
-      label: "Email Settings"
+      label: "Email Settings",
     },
     {
       component: "ThemeSettings",
       group: "Appearance",
       id: "theme",
-      label: "Theme Settings"
+      label: "Theme Settings",
     },
     {
       component: "Permissions",
       group: "Access Control",
       id: "permissions",
-      label: "Permissions"
+      label: "Permissions",
     },
     {
       component: "RoleSettings",
       group: "Access Control",
       id: "roles",
-      label: "Roles"
+      label: "Roles",
     },
     {
       component: "UserManagement",
       group: "Access Control",
       id: "users",
-      label: "Users"
+      label: "Users",
     },
     {
       component: "EmailAudit",
       group: "Monitoring",
       id: "email-audit",
-      label: "Email Audit"
+      label: "Email Audit",
     },
     {
       component: "ActivityLog",
       group: "Monitoring",
       id: "activity-log",
-      label: "Activity Log"
+      label: "Activity Log",
     },
     {
       component: "SupportTickets",
       group: "Support",
       id: "support-tickets",
-      label: "Support Tickets"
+      label: "Support Tickets",
     },
   ];
 

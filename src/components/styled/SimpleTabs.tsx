@@ -37,10 +37,7 @@ export function TabsWithUnderline(
         >
           <For each={props.tabs}>
             {(tab) => (
-              <option
-                selected={tab.key === props.selectedKey}
-                value={tab.key}
-              >
+              <option selected={tab.key === props.selectedKey} value={tab.key}>
                 {getOptionLabel(tab)}
               </option>
             )}

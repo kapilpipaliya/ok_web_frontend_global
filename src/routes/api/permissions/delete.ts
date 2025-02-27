@@ -25,9 +25,9 @@ export async function DELETE({ request }: APIEvent) {
       user,
     );
 
-  if (!isAdmin) {
-    throw new APIError("Unauthorized. Admin access required.", 403);
-  }
+    if (!isAdmin) {
+      throw new APIError("Unauthorized. Admin access required.", 403);
+    }
 
     // const [graph] = useGraph();
 
@@ -81,17 +81,19 @@ export async function DELETE({ request }: APIEvent) {
     `,
       { id },
     );
-    const deletedPermVertex = convertNodeToJson(deletedPerm.records[0].get("p"));
+    const deletedPermVertex = convertNodeToJson(
+      deletedPerm.records[0].get("p"),
+    );
 
-        // Log permission deletion
-        await createActivityLog(
-          dbSession,
-          "permission_delete",
-          "Permission",
-          id,
-          user.P.email,
-          `Permission deleted ${deletedPermVertex.P.key}`
-        );
+    // Log permission deletion
+    await createActivityLog(
+      dbSession,
+      "permission_delete",
+      "Permission",
+      id,
+      user.P.email,
+      `Permission deleted ${deletedPermVertex.P.key}`,
+    );
     return {
       graph: {
         deleted_edges: deletedEdges.records[0].get("deletedEdgeIds"),

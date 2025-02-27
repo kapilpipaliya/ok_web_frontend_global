@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
+import type { Session } from "neo4j-driver";
 
-import { Session } from "neo4j-driver";
 import { getQuery } from "vinxi/http";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
@@ -37,7 +37,7 @@ export async function GET({ request }: APIEvent) {
 
     const { email, newEmail, uuid } = decodeUserData(userData);
 
-    if (!uuid || !email || !newEmail) {
+    if (!(uuid && email && newEmail)) {
       return new Response(null, {
         headers: { Location: "/auth/settings?error=invalid_data" },
         status: 302,
@@ -53,7 +53,7 @@ export async function GET({ request }: APIEvent) {
 
       const driver = await getDriver();
       const updateSessions = subdomains.map((subdomain) =>
-        driver.session({ database: subdomain })
+        driver.session({ database: subdomain }),
       );
 
       try {
@@ -64,7 +64,7 @@ export async function GET({ request }: APIEvent) {
                u.pendingEmail = null,
                u.updatedAt = datetime()
            RETURN u`,
-          { email, newEmail, uuid }
+          { email, newEmail, uuid },
         );
 
         if (systemResult.records.length === 0) {
@@ -82,8 +82,8 @@ export async function GET({ request }: APIEvent) {
                  u.pendingEmail = null,
                  u.updatedAt = datetime()
              RETURN u`,
-            { newEmail, uuid }
-          )
+            { newEmail, uuid },
+          ),
         );
 
         await Promise.all(updatePromises);
@@ -97,7 +97,7 @@ export async function GET({ request }: APIEvent) {
           "User",
           uuid,
           newEmail,
-          `Email changed from ${email} to ${newEmail}`
+          `Email changed from ${email} to ${newEmail}`,
         );
 
         // Update session with new email
@@ -109,7 +109,7 @@ export async function GET({ request }: APIEvent) {
           {},
           "Email Change Successful",
           updatedUser,
-          subDomain
+          subDomain,
         );
 
         return new Response(null, {
@@ -127,7 +127,7 @@ export async function GET({ request }: APIEvent) {
              u.pendingEmail = null,
              u.updatedAt = datetime()
          RETURN u`,
-        { email, newEmail, uuid }
+        { email, newEmail, uuid },
       );
 
       if (result.records.length === 0) {
@@ -146,7 +146,7 @@ export async function GET({ request }: APIEvent) {
         "User",
         uuid,
         newEmail,
-        `Email changed from ${email} to ${newEmail}`
+        `Email changed from ${email} to ${newEmail}`,
       );
 
       // Update session with new email
@@ -158,7 +158,7 @@ export async function GET({ request }: APIEvent) {
         {},
         "Email Change Successful",
         updatedUser,
-        subDomain
+        subDomain,
       );
 
       return new Response(null, {
@@ -177,13 +177,13 @@ export async function GET({ request }: APIEvent) {
 async function checkSystemUser(
   session: Session,
   uuid: string,
-  subDomain: string
+  subDomain: string,
 ) {
   return subDomain === SYSTEM_DB_NAME;
   const result = await session.run(
     `MATCH (u:User {uuid: $uuid}) 
      RETURN EXISTS(u.isSuper) as isSystemUser`,
-    { uuid }
+    { uuid },
   );
 
   return result.records.length > 0 && result.records[0].get("isSystemUser");
@@ -194,7 +194,7 @@ async function getSubdomainsForAccount(session: Session, uuid: string) {
   const subDomainsResult = await session.run(
     `MATCH (u:User {uuid: $uuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
      RETURN s.key as subdomain`,
-    { uuid }
+    { uuid },
   );
 
   return subDomainsResult.records.map((record) => record.get("subdomain"));

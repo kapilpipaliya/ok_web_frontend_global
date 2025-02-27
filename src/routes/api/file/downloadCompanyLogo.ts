@@ -21,10 +21,9 @@ export async function GET({ request }: APIEvent) {
 
     const fileId = result.records[0].get("fileId");
     return await downloadFile(fileId, dbSession);
-    
   } catch (error) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
-} 
+}

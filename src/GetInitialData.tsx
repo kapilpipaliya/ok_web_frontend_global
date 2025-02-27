@@ -10,7 +10,7 @@ import { setUserData } from "~/lib/graph/mutate/setUserData";
 
 import { getInitialData } from "./cypher/get/getInitialData";
 import { getGlobalStore } from "./lib/graph/get/sync/getGlobalStore";
-import { GlobalProperties, useGraph } from "./lib/graph/graph";
+import { type GlobalProperties, useGraph } from "./lib/graph/graph";
 import { setGraphData } from "./lib/graph/mutate/setGraphData";
 import { mergeVertexProperties } from "./lib/graph/mutate/vertex";
 import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";

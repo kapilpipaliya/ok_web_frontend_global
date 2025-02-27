@@ -51,14 +51,14 @@ export async function POST({ request }: APIEvent) {
     // Determine if this is a new role or an update
     const isNewRole = !role.id || role.id.startsWith("-");
     const action = isNewRole ? "role_create" : "role_update";
-    const details = isNewRole 
-      ? `Created new role: ${role.P.key}` 
+    const details = isNewRole
+      ? `Created new role: ${role.P.key}`
       : `Updated role: ${role.P.key}`;
 
     const tx = dbSession.beginTransaction();
     try {
       const res = await mutateData(data, tx);
-      
+
       // Log role creation/update activity
       await createActivityLog(
         dbSession,
@@ -66,9 +66,9 @@ export async function POST({ request }: APIEvent) {
         "Role",
         isNewRole ? res.result.id : role.id,
         user.P.email,
-        details
+        details,
       );
-      
+
       await tx.commit();
       return res;
     } catch (error: unknown) {

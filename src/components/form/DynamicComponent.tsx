@@ -306,9 +306,7 @@ export function DynamicComponent(
         return;
       }
       if (existingValue === undefined && !hasInsertPermission()) {
-        showErrorToast(
-          "You do not have insert permission to set this value.",
-        );
+        showErrorToast("You do not have insert permission to set this value.");
         return;
       }
 

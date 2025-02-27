@@ -1,6 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError } from "~/lib/api/apiErrorHandler";
@@ -49,6 +51,8 @@ export async function DELETE({ request }: APIEvent) {
       throw new APIError("User not found", 404);
     }
 
+    const deletedUser = convertNodeToJson(userCheck.records[0].get("u"));
+
     // Delete user and all relationships
     await dbSession.run(
       `
@@ -58,6 +62,16 @@ export async function DELETE({ request }: APIEvent) {
       DELETE u, r
     `,
       { id },
+    );
+
+    // Log the user deletion
+    await createActivityLog(
+      dbSession,
+      "user_delete",
+      "User",
+      deletedUser.P.uuid,
+      user.P.email,
+      `Deleted user: ${deletedUser.P.name} (${deletedUser.P.email})`,
     );
 
     return {

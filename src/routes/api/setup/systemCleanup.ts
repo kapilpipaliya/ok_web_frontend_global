@@ -22,8 +22,8 @@ export async function GET({ request }: APIEvent) {
     try {
       // Get all databases
       const result = await session.run("SHOW DATABASES");
-      const databases = result.records.map(record => record.get("name"));
-      
+      const databases = result.records.map((record) => record.get("name"));
+
       // Delete each database except system and neo4j
       const deletedDatabases = [];
       for (const dbName of databases) {
@@ -38,12 +38,10 @@ export async function GET({ request }: APIEvent) {
         message: "System cleanup completed successfully",
         success: true,
       };
-
     } finally {
       await session.close();
     }
-
   } catch (error: unknown) {
     return handleAPIError(error);
   }
-} 
+}

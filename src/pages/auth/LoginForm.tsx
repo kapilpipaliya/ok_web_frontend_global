@@ -55,7 +55,7 @@ export function LoginForm() {
     if (validateFormData(formData)) {
       await showLoadingToast({
         loadMessage: "Logging In...",
-        onError: () => { },
+        onError: () => {},
         onSuccess: (value) => {
           handleLoginRedirect(value?.result, graph, navigate);
         },

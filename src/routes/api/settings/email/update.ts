@@ -74,7 +74,7 @@ export async function POST({ request }: APIEvent) {
       );
 
       if (result.records.length === 0) {
-        const newKey = `Default`;
+        const newKey = "Default";
         const createResult = await dbSession.run(
           `CREATE (s:EmailSetting {
             key: $key,
@@ -102,10 +102,12 @@ export async function POST({ request }: APIEvent) {
 
     // Fetch the updated settings to return
     const updatedSettingsResult = await dbSession.run(
-      `MATCH (s:EmailSetting {key: $key}) RETURN s`,
-      { key: settingsKey }
+      "MATCH (s:EmailSetting {key: $key}) RETURN s",
+      { key: settingsKey },
     );
-    const updatedSettings = convertNodeToJson(updatedSettingsResult.records[0]?.get("s"));
+    const updatedSettings = convertNodeToJson(
+      updatedSettingsResult.records[0]?.get("s"),
+    );
 
     return {
       graph: {

@@ -68,7 +68,7 @@ export async function POST({ request }: APIEvent) {
       "User",
       uuid,
       user.email,
-      "User password was changed"
+      "User password was changed",
     );
 
     // Send email notification

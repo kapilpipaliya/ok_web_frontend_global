@@ -11,7 +11,7 @@ export function TooltipWrapper(props: {
   group?: string;
   openDelay?: number;
   triggerAs?: string;
-  
+
   triggerClass?: string;
 }) {
   const [_local, others] = splitProps(props, [

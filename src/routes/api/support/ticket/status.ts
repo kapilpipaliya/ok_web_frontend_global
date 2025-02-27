@@ -10,7 +10,7 @@ import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
   const { status, ticketId } = await request.json();
-  
+
   const user = await getUserFromSession(request);
   if (!user) {
     throw new APIError("User not found", 404);
@@ -31,7 +31,7 @@ export async function POST({ request }: APIEvent) {
 
     const result = await dbSession.run(query, { status, ticketId });
 
-    const ticket = convertNodeToJson(result.records[0].get('t'));
+    const ticket = convertNodeToJson(result.records[0].get("t"));
 
     return {
       graph: {
@@ -47,4 +47,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

@@ -7,7 +7,7 @@ export function MetaLink(props: { href: string }) {
   return <Link {...props} />;
 }
 
-export function MetaMeta(props: { content: string; name: string; }) {
+export function MetaMeta(props: { content: string; name: string }) {
   return <Meta {...props} />;
 }
 

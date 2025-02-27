@@ -10,11 +10,11 @@ export async function POST({ request }: APIEvent) {
   try {
     // Get user before we log them out
     const user = await getUserFromSession(request);
-    
+
     // If we have a user, log the logout activity
     if (user) {
       const { dbSession } = await getDBSessionForSubdomain(request);
-      
+
       try {
         await createActivityLog(
           dbSession,
@@ -22,16 +22,16 @@ export async function POST({ request }: APIEvent) {
           "User",
           user.P.uuid,
           user.P.email,
-          "User logged out"
+          "User logged out",
         );
       } finally {
         await dbSession.close();
       }
     }
-    
+
     // Complete the logout process
     await logout();
-    
+
     return {
       message: "Logout successful",
     };

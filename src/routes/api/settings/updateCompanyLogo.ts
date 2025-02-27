@@ -92,7 +92,7 @@ export async function POST({ request }: APIEvent) {
 
     const updatedGlobalSetting = convertNodeToJson(result.records[0].get("g"));
     const updatedFile = convertNodeToJson(result.records[0].get("f"));
-    
+
     // Log company logo update
     await createActivityLog(
       dbSession,
@@ -100,7 +100,7 @@ export async function POST({ request }: APIEvent) {
       "GlobalSetting",
       updatedGlobalSetting.id,
       user.P.email,
-      `Company logo updated to ${updatedFile.P.fileName} (${updatedFile.P.contentType})`
+      `Company logo updated to ${updatedFile.P.fileName} (${updatedFile.P.contentType})`,
     );
 
     return {

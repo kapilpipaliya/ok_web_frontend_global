@@ -52,4 +52,4 @@ export async function GET({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

@@ -4,6 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
@@ -53,6 +54,8 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Username already taken", 400);
     }
 
+    const newUserUuid = uuidv7();
+
     // Create new user
     const result = await dbSession.run(
       `
@@ -76,27 +79,43 @@ export async function POST({ request }: APIEvent) {
         name,
         roles,
         username,
-        uuid: uuidv7(),
+        uuid: newUserUuid,
       },
     );
 
     // Extract the created user from the result
     const createdUser = convertNodeToJson(result.records[0].get("u"));
 
-    // Send invitation email
-    await sendInvitationEmail(
-      request,
-      createdUser,
-      subDomain,
-      dbSession
+    // Get role names for logging
+    const rolesResult = await dbSession.run(
+      `MATCH (r:Role) WHERE elementId(r) IN $roles
+       RETURN r.key`,
+      { roles },
     );
+
+    const roleNames = rolesResult.records
+      .map((record) => record.get("r.key"))
+      .join(", ");
+
+    // Log the user invitation
+    await createActivityLog(
+      dbSession,
+      "user_invite",
+      "User",
+      newUserUuid,
+      user.P.email,
+      `Invited user ${name} (${email}) with roles: ${roleNames}`,
+    );
+
+    // Send invitation email
+    await sendInvitationEmail(request, createdUser, subDomain, dbSession);
 
     return {
       graph: {
         edges: {},
-        vertexes: { [user.id]: user },
+        vertexes: { [createdUser.id]: createdUser },
       },
-      result: user,
+      result: createdUser,
     };
   } catch (error) {
     return handleAPIError(error);

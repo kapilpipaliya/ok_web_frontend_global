@@ -1,14 +1,15 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Node } from "neo4j-driver";
 
+import type { Vertex } from "~/lib/graph/graph";
+import type { Edge } from "~/lib/graph/graph";
+
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { processResult } from "~/cypher/get/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { Vertex } from "~/lib/graph/graph";
-import { Edge } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -19,12 +20,7 @@ export async function POST({ request }: APIEvent) {
     throw new APIError("User not found", 404);
   }
 
-  const isAdmin = await checkRole(
-    request,
-    SYSTEM_ROLES.ADMIN,
-    dbSession,
-    user,
-  );
+  const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession, user);
 
   if (!isAdmin) {
     throw new APIError("Unauthorized. Admin access required.", 403);
@@ -59,9 +55,7 @@ export async function POST({ request }: APIEvent) {
     const tickets = result.records.map((record) => {
       const supportNode = convertNodeToJson(record.get("support"));
       const replies = record.get("replies")
-        ? record
-            .get("replies")
-            .map((reply: Node) => convertNodeToJson(reply))
+        ? record.get("replies").map((reply: Node) => convertNodeToJson(reply))
         : [];
 
       return {
@@ -75,16 +69,16 @@ export async function POST({ request }: APIEvent) {
 
     processResult(result.records, { nodes, relationships }, "support", "");
     return {
-        graph: {
-          edges: relationships,
-          vertexes: nodes,
-        },
-        result: tickets,
-        timestamp: new Date().getTime(),
-      };
+      graph: {
+        edges: relationships,
+        vertexes: nodes,
+      },
+      result: tickets,
+      timestamp: new Date().getTime(),
+    };
   } catch (error) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
-} 
+}

@@ -1,10 +1,10 @@
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { DataGridStore } from "~/features/grid/DataGridContext";
+import type { Vertex } from "~/lib/graph/graph";
 
-import { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { Vertex } from "~/lib/graph/graph";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { getSupportTicketFormSchema } from "./functions/formSchema";
@@ -76,7 +76,7 @@ export function SupportTickets() {
   const addSchema = getSupportTicketFormSchema(onSuccess);
   const editSchema = getSupportTicketFormSchema(onSuccess);
   return (
-      <DataGrid
+    <DataGrid
       CustomAddNewButton={() => <SchemaRenderer form={addSchema} />}
       editSchema={editSchema}
       formSchema={SupportTicketSchema}
@@ -89,4 +89,4 @@ export function SupportTickets() {
       tableId="SupportTicket"
     />
   );
-} 
+}

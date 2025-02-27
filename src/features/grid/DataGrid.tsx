@@ -225,7 +225,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
     setGridState("filteredData", filtered);
   };
-  
+
   async function fetchTableData(
     skip?: number,
     limit?: number,
@@ -248,11 +248,13 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       }
       return data;
     } catch (error) {
-      setGridState("error", error instanceof Error ? error.message : "An unknown error occurred");
+      setGridState(
+        "error",
+        error instanceof Error ? error.message : "An unknown error occurred",
+      );
     } finally {
       setGridState("isLoading", false);
     }
-
   }
 
   function onTableDataGet(data: ServerResult, isLoadMore?: boolean) {

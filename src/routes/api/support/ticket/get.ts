@@ -36,7 +36,7 @@ export async function POST({ request }: APIEvent) {
     if (!user?.P?.email) {
       throw new Error("Unauthorized");
     }
-    
+
     const { incoming, outgoing } = getEdgesFromRowsAttr([
       {
         componentName: "Text",
@@ -68,7 +68,7 @@ export async function POST({ request }: APIEvent) {
         inward: true,
         key: "Reply",
         label: "Reply",
-        type: "ParentSupport"
+        type: "ParentSupport",
       },
     ]);
     const data = await fetchDataFromMG({

@@ -23,14 +23,14 @@ export async function POST({ request }: APIEvent) {
       RETURN t, status
     `;
 
-    const result = await dbSession.run(query, { 
-      email, 
-      message, 
-      name, 
-      subject 
+    const result = await dbSession.run(query, {
+      email,
+      message,
+      name,
+      subject,
     });
 
-    const ticket = convertNodeToJson(result.records[0].get('t'));
+    const ticket = convertNodeToJson(result.records[0].get("t"));
 
     return {
       graph: {
@@ -46,4 +46,4 @@ export async function POST({ request }: APIEvent) {
   } finally {
     await dbSession.close();
   }
-} 
+}

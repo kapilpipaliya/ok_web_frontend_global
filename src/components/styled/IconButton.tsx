@@ -59,7 +59,11 @@ export function IconButton(props: Readonly<IconButtonProps>) {
     >
       <TooltipWrapper
         arrowClass={STYLES.tooltip.arrow}
-        content={<div class={STYLES.tooltip.content}><div class={"f:14 font-weight:500"}>{local.title}</div></div>}
+        content={
+          <div class={STYLES.tooltip.content}>
+            <div class={"f:14 font-weight:500"}>{local.title}</div>
+          </div>
+        }
         group={local.tooltipGroup}
         openDelay={300}
         triggerClass={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}

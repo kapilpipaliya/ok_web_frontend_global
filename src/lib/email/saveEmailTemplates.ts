@@ -44,8 +44,14 @@ export async function saveAllEmailTemplates(dbSession: Session) {
     for (const [templateName, schema] of Object.entries(EMAIL_TEMPLATES)) {
       const [graph, setGraph] = createAppState();
       const txnId = generateNewTxnId(graph, setGraph);
-      
-      const { error } = createMeta(schema, txnId, graph, setGraph, "EmailTemplate");
+
+      const { error } = createMeta(
+        schema,
+        txnId,
+        graph,
+        setGraph,
+        "EmailTemplate",
+      );
       if (error) {
         throw new APIError(`Failed to create meta for ${templateName}`, 500);
       }
@@ -64,4 +70,4 @@ export async function saveAllEmailTemplates(dbSession: Session) {
     await tx.rollback();
     throw error;
   }
-} 
+}

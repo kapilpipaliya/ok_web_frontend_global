@@ -2,12 +2,17 @@ import type { Session } from "neo4j-driver";
 
 import fs from "node:fs/promises";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { Vertex } from "~/lib/graph/graph";
 import { deleteFileMetadata } from "~/routes/api/file/functions/functions/deleteFileMetadata";
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 
-export async function deleteFile(fileId: string, neo4jSession: Session, user: Vertex) {
+export async function deleteFile(
+  fileId: string,
+  neo4jSession: Session,
+  user: Vertex,
+) {
   const fileMetadata = await getFileMetadata(neo4jSession, fileId);
 
   if (!fileMetadata) {
@@ -30,7 +35,7 @@ export async function deleteFile(fileId: string, neo4jSession: Session, user: Ve
         "File",
         fileId as string,
         user.P.email,
-        `File deleted: ${deletedFile?.P.fileName} (${deletedFile?.P.contentType})`
+        `File deleted: ${deletedFile?.P.fileName} (${deletedFile?.P.contentType})`,
       );
     }
     return {

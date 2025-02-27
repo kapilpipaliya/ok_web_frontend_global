@@ -1,7 +1,6 @@
+import type { useSearchParams } from "@solidjs/router";
 import type { Accessor, Owner } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
-
-import { useSearchParams } from "@solidjs/router";
 
 import type {
   PageRenderObject,

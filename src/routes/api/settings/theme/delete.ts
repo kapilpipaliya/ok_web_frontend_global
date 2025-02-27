@@ -49,7 +49,7 @@ export async function DELETE({ request }: APIEvent) {
     if (deletedCount === 0) {
       throw new APIError("Theme not found or is currently selected", 404);
     }
-    
+
     const themeName = result.records[0]?.get("t").P.key || "Unknown theme";
     // Log theme deletion
     await createActivityLog(
@@ -58,7 +58,7 @@ export async function DELETE({ request }: APIEvent) {
       "Theme",
       themeId,
       user.P.email,
-      `Deleted theme: ${themeName}`
+      `Deleted theme: ${themeName}`,
     );
 
     return {
