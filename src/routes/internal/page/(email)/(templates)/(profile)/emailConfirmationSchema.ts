@@ -26,7 +26,7 @@ const content = [
     text: "Please confirm your new email address by clicking the button below:"
   },
   {
-    as: "button",
+    as: "a",
     class: JSON.stringify({
       '': {
         'background-color': 'primary',
@@ -34,8 +34,10 @@ const content = [
         'border-radius': '4',
         'color': 'base-5',
         'cursor': 'pointer',
+        'display': 'inline-block',
         'margin-bottom': '16',
-        'padding': '8 16'
+        'padding': '8 16',
+        'text-decoration': 'none'
       },
       ':hover': {
         'opacity': '0.9'
@@ -43,6 +45,10 @@ const content = [
     }),
     componentName: "Html",
     pos: 3,
+    props: `return {
+      href: args.searchParams.url,
+    }`,
+    target: "_blank",
     text: "Confirm Email Change"
   },
   {

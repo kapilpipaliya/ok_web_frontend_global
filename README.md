@@ -13,6 +13,9 @@ http://localhost:3000/internal/page/PasswordChanged
 http://localhost:3000/internal/page/ProfileUpdated
 http://localhost:3000/internal/page/SignupConfirmation
 http://localhost:3000/internal/page/WelcomeEmail
+http://localhost:3000/internal/page/EmailChanged
+http://localhost:3000/internal/page/EmailChangeSuccessful
+http://localhost:3000/internal/page/EmailConfirmation
 
 
 ##Development

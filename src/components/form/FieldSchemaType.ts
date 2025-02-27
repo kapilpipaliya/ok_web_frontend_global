@@ -1,6 +1,8 @@
 import type { Accessor, Owner } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 
+import { useSearchParams } from "@solidjs/router";
+
 import type {
   PageRenderObject,
   PageRenderStore,
@@ -37,17 +39,19 @@ export interface FunctionArgumentBaseType {
   ref: Accessor<HTMLDivElement | null>;
   runWithOwner: <T>(fn: () => T) => T | undefined;
   runWithParentOwner: <T>(fn: () => T) => T | undefined;
+  // setFormValueStore: SetStoreFunction<FormStoreObject>;
+  // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
+  searchParams?: ReturnType<typeof useSearchParams>[0];
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
     args: Parameters<typeof setGraphData>[2],
     options: Parameters<typeof setGraphData>[3],
   ) => void;
+  setSearchParams?: ReturnType<typeof useSearchParams>[1];
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
   txnId: number;
   updateValue: (value: unknown) => void;
-  // setFormValueStore: SetStoreFunction<FormStoreObject>;
-  // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   zIndex: number;
 }
 

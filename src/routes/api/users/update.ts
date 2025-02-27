@@ -5,6 +5,8 @@ import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { generateSecureToken } from "~/lib/auth/secureToken";
+import { encodeUserData } from "~/lib/auth/userDataEncoder";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
@@ -69,11 +71,16 @@ export async function POST({ request }: APIEvent) {
       }
     }
 
+    // Store the pending email if changing
+    const setEmail = email !== oldEmail 
+      ? 'u.pendingEmail = $email,' 
+      : '';
+
     // Update user and roles
     const result = await dbSession.run(
       `
       MATCH (u:User {uuid: $uuid})
-      SET u.email = $email,
+      SET ${setEmail}
           u.username = $username,
           u.name = $name,
           u.updatedAt = datetime()
@@ -106,11 +113,25 @@ export async function POST({ request }: APIEvent) {
 
     // If email was changed, send confirmation emails
     if (email !== oldEmail) {
-      // Send notification to old email about the change
+      // Send notification to old email about the pending change
       sendNotificationEmail(EMAIL_TEMPLATES.EmailChanged, { email: oldEmail }, "Email Change Notification", user, subDomain);
 
+      // Generate confirmation token with original and new email data
+      const userData = encodeUserData({
+        email: oldEmail,
+        newEmail: email,
+        uuid: uuid
+      });
+      
+      const confirmToken = await generateSecureToken(userData, dbSession);
+      
+      // Generate confirmation URL
+      const protocol = request.url.startsWith('https') ? 'https' : 'http';
+      const host = request.headers.get("host") || "";
+      const url = `${protocol}://${host}/api/auth/confirmEmailChange?token=${confirmToken}`;
+      
       // Send confirmation to new email for verification
-      sendNotificationEmail(EMAIL_TEMPLATES.EmailConfirmation, { email }, "Confirm Your New Email Address", user, subDomain);
+      sendNotificationEmail(EMAIL_TEMPLATES.EmailConfirmation, { email, url }, "Confirm Your New Email Address", user, subDomain);
     }
 
     return {

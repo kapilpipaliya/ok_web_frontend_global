@@ -1,0 +1,180 @@
+import type { APIEvent } from "@solidjs/start/server";
+
+import { Session } from "neo4j-driver";
+import { getQuery } from "vinxi/http";
+
+import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { getDriver } from "~/cypher/getDriver";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { validateAndConsumeToken } from "~/lib/auth/secureToken";
+import { decodeUserData } from "~/lib/auth/userDataEncoder";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
+import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
+import { updateSession } from "~/server/auth/session/updateSession";
+
+export async function GET({ request }: APIEvent) {
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+
+  try {
+    const query = getQuery();
+    const token = query.token as string;
+
+    if (!token) {
+      throw new APIError("Invalid or missing token", 400);
+    }
+
+    // Validate and consume the token
+    const userData = await validateAndConsumeToken(token, dbSession);
+    if (!userData) {
+      return new Response(null, {
+        headers: { Location: "/auth/settings?error=invalid_token" },
+        status: 302,
+      });
+    }
+
+    const { email, newEmail, uuid } = decodeUserData(userData);
+
+    if (!uuid || !email || !newEmail) {
+      return new Response(null, {
+        headers: { Location: "/auth/settings?error=invalid_data" },
+        status: 302,
+      });
+    }
+
+    // Determine if we need to update across multiple databases
+    const isSystemUser = await checkSystemUser(dbSession, uuid, subDomain);
+
+    if (isSystemUser) {
+      // Get all subdomains this user belongs to
+      const subdomains = await getSubdomainsForAccount(dbSession, uuid);
+
+      const driver = await getDriver();
+      const updateSessions = subdomains.map((subdomain) =>
+        driver.session({ database: subdomain })
+      );
+
+      try {
+        // Update in system DB
+        const systemResult = await dbSession.run(
+          `MATCH (u:User {uuid: $uuid, email: $email, pendingEmail: $newEmail})
+           SET u.email = $newEmail, 
+               u.pendingEmail = null,
+               u.updatedAt = datetime()
+           RETURN u`,
+          { email, newEmail, uuid }
+        );
+
+        if (systemResult.records.length === 0) {
+          return new Response(null, {
+            headers: { Location: "/auth/settings?error=user_not_found" },
+            status: 302,
+          });
+        }
+
+        // Update in all subdomains
+        const updatePromises = updateSessions.map((session) =>
+          session.run(
+            `MATCH (u:User {uuid: $uuid})
+             SET u.email = $newEmail, 
+                 u.pendingEmail = null,
+                 u.updatedAt = datetime()
+             RETURN u`,
+            { newEmail, uuid }
+          )
+        );
+
+        await Promise.all(updatePromises);
+
+        const updatedUser = convertNodeToJson(systemResult.records[0].get("u"));
+
+        // Update session with new email
+        await updateSession(updatedUser);
+
+        // Send success email
+        sendNotificationEmail(
+          EMAIL_TEMPLATES.EmailChangeSuccessful,
+          {},
+          "Email Change Successful",
+          updatedUser,
+          subDomain
+        );
+
+        return new Response(null, {
+          headers: { Location: "/auth/settings?message=email_confirmed" },
+          status: 302,
+        });
+      } finally {
+        await Promise.all(updateSessions.map((session) => session.close()));
+      }
+    } else {
+      // Handle regular subdomain case (existing code)
+      const result = await dbSession.run(
+        `MATCH (u:User {uuid: $uuid, email: $email, pendingEmail: $newEmail})
+         SET u.email = $newEmail, 
+             u.pendingEmail = null,
+             u.updatedAt = datetime()
+         RETURN u`,
+        { email, newEmail, uuid }
+      );
+
+      if (result.records.length === 0) {
+        return new Response(null, {
+          headers: { Location: "/auth/settings?error=user_not_found" },
+          status: 302,
+        });
+      }
+
+      const updatedUser = convertNodeToJson(result.records[0].get("u"));
+
+      // Update session with new email
+      await updateSession(updatedUser);
+
+      // Send success email
+      sendNotificationEmail(
+        EMAIL_TEMPLATES.EmailChangeSuccessful,
+        {},
+        "Email Change Successful",
+        updatedUser,
+        subDomain
+      );
+
+      return new Response(null, {
+        headers: { Location: "/auth/settings?message=email_confirmed" },
+        status: 302,
+      });
+    }
+  } catch (error) {
+    return handleAPIError(error);
+  } finally {
+    await dbSession.close();
+  }
+}
+
+// Helper function to check if a user is a system user
+async function checkSystemUser(
+  session: Session,
+  uuid: string,
+  subDomain: string
+) {
+  return subDomain === SYSTEM_DB_NAME;
+  const result = await session.run(
+    `MATCH (u:User {uuid: $uuid}) 
+     RETURN EXISTS(u.isSuper) as isSystemUser`,
+    { uuid }
+  );
+
+  return result.records.length > 0 && result.records[0].get("isSystemUser");
+}
+
+// Helper function to get all subdomains for a user
+async function getSubdomainsForAccount(session: Session, uuid: string) {
+  const subDomainsResult = await session.run(
+    `MATCH (u:User {uuid: $uuid})<-[:AccountUser]-(a:Account)-[:AccountSubdomain]->(s:SubDomain)
+     RETURN s.key as subdomain`,
+    { uuid }
+  );
+
+  return subDomainsResult.records.map((record) => record.get("subdomain"));
+}

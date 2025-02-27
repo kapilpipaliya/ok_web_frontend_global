@@ -1,4 +1,5 @@
 import { createLazyMemo } from "@solid-primitives/memo";
+import { useSearchParams } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
 import {
   createMemo,
@@ -81,6 +82,7 @@ export function DynamicComponent(
   const { showErrorToast, showSuccessToast } = useToast();
   const [ref, setRef] = createSignal(null);
   const [mounted, setMounted] = createSignal(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const zIndex = useZIndex();
 
   // const [parentItems] = usePageRenderVertexContext();
@@ -259,6 +261,7 @@ export function DynamicComponent(
       ref,
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
+      searchParams,
       get setGraph() {
         return setGraph;
       },
@@ -268,6 +271,7 @@ export function DynamicComponent(
       ) => {
         setGraphData(graph, setGraph, args, options);
       },
+      setSearchParams,
       showErrorToast,
       showSuccessToast,
       get txnId() {

@@ -1,3 +1,4 @@
+import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
@@ -6,6 +7,10 @@ import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { ServerResult } from "~/cypher/types/ServerResult";
+import { generateSecureToken } from "~/lib/auth/secureToken";
+import { encodeUserData } from "~/lib/auth/userDataEncoder";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
+import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { updateSession } from "~/server/auth/session/updateSession";
 
 type ProfilePayload = {
@@ -15,6 +20,7 @@ type ProfilePayload = {
 };
 
 export async function updateProfile(
+  request: APIEvent["request"],
   currentUser: Vertex,
   payload: ProfilePayload,
   dbSession: Session,
@@ -27,8 +33,6 @@ export async function updateProfile(
     return userValidation;
   }
   const oldUser = userValidation.user;
-
-  const basicQuery = await buildUpdateQuery(email, username);
 
   if (subDomain === SYSTEM_DB_NAME) {
     // Get subdomains through Account relationship
@@ -95,15 +99,43 @@ export async function updateProfile(
         }
       }
 
+      // Only modify the query construction for email change
+      // For email, we'll set pendingEmail instead of directly updating email
+      let updateQuery = '';
+      if (email && email !== oldUser.properties.email) {
+        updateQuery += 'u.pendingEmail = $email,';
+      } else if (email) {
+        // If email is provided but it's the same as the existing one, don't update
+        // This avoids overwriting with the same value
+        email = undefined;
+      }
+      
+      if (username) {
+        updateQuery += 'u.username = $username,';
+      }
+      
+      // Ensure we have something to update
+      if (updateQuery) {
+        updateQuery = `
+          MATCH (u:User {uuid: $uuid})
+          SET ${updateQuery}
+              u.updatedAt = datetime()
+          RETURN u
+        `;
+      } else {
+        // If nothing to update, just return the user
+        updateQuery = `MATCH (u:User {uuid: $uuid}) RETURN u`;
+      }
+
       // Perform updates
       const updatePromises = [
-        dbSession.run(basicQuery, {
+        dbSession.run(updateQuery, {
           email,
           username,
           uuid: currentUser.P.uuid,
         }),
         ...validationSessions.map((session) =>
-          session.run(basicQuery, {
+          session.run(updateQuery, {
             email,
             username,
             uuid: currentUser.P.uuid,
@@ -122,6 +154,42 @@ export async function updateProfile(
 
       if (email) {
         await updateSession(userNew);
+      }
+
+      // Only send email confirmation if email is actually changing
+      if (email && email !== oldUser.properties.email) {
+        // Generate token and send emails
+        // After validation but before committing the transaction
+        // Generate a confirmation token and URL
+        const userData = encodeUserData({
+          email: oldUser.properties.email,
+          newEmail: email,
+          uuid: userNew.P.uuid
+        });
+        
+        const confirmToken = await generateSecureToken(userData, dbSession);
+        
+        // Generate confirmation URL
+        const protocol = request.url.startsWith('https') ? 'https' : 'http';
+        const host = request.headers.get("host") || "";
+        const url = `${protocol}://${host}/api/auth/confirmEmailChange?token=${confirmToken}`;
+        
+        // Send confirmation emails
+        sendNotificationEmail(
+          EMAIL_TEMPLATES.EmailChanged, 
+          { email: oldUser.properties.email }, 
+          "Email Change Notification", 
+          userNew, 
+          subDomain
+        );
+        
+        sendNotificationEmail(
+          EMAIL_TEMPLATES.EmailConfirmation, 
+          { email, url }, 
+          "Confirm Your New Email Address", 
+          userNew, 
+          subDomain
+        );
       }
 
       return {
@@ -165,20 +233,67 @@ export async function updateProfile(
       }
     }
 
-    const basicResult = await dbSession.run(basicQuery, {
+    // Modify query building to use pendingEmail for email changes
+    let finalQuery = '';
+    
+    if (email && email !== oldUser.properties.email) {
+      finalQuery = `
+        MATCH (u:User {uuid: $uuid})
+        SET u.pendingEmail = $email,
+            ${username ? 'u.username = $username,' : ''}
+            u.updatedAt = datetime()
+        RETURN u`;
+    } else {
+      // Standard update or no changes
+      finalQuery = username
+        ? `MATCH (u:User {uuid: $uuid}) SET u.username = $username, u.updatedAt = datetime() RETURN u`
+        : `MATCH (u:User {uuid: $uuid}) RETURN u`;
+    }
+
+    const updateResult = await dbSession.run(finalQuery, {
       email,
       username,
       uuid: currentUser.P.uuid,
     });
 
-    if (basicResult.records.length === 0) {
-      return { error: "Failed to update profile", status: 500 };
+    if (updateResult.records.length === 0) {
+      return { error: "User not found", status: 404 };
     }
 
-    const userNew = convertNodeToJson(basicResult.records[0].get("u"));
+    const userNew = convertNodeToJson(updateResult.records[0].get("u"));
 
-    if (email) {
-      await updateSession(userNew);
+    // Only send email confirmation if email is actually changing
+    if (email && email !== oldUser.properties.email) {
+      // Generate token and send emails
+      const userData = encodeUserData({
+        email: oldUser.properties.email,
+        newEmail: email,
+        uuid: userNew.P.uuid
+      });
+      
+      const confirmToken = await generateSecureToken(userData, dbSession);
+      
+      // Generate confirmation URL
+      const protocol = request.url.startsWith('https') ? 'https' : 'http';
+      const host = request.headers.get("host") || "";
+      const url = `${protocol}://${host}/api/auth/confirmEmailChange?token=${confirmToken}`;
+      
+      // Send confirmation emails
+      sendNotificationEmail(
+        EMAIL_TEMPLATES.EmailChanged, 
+        { email: oldUser.properties.email }, 
+        "Email Change Notification", 
+        userNew, 
+        subDomain
+      );
+      
+      sendNotificationEmail(
+        EMAIL_TEMPLATES.EmailConfirmation, 
+        { email, url }, 
+        "Confirm Your New Email Address", 
+        userNew, 
+        subDomain
+      );
     }
 
     return {
@@ -248,6 +363,8 @@ async function validateUser(dbSession: Session, uuid: string) {
       status: 404,
     };
   }
+
+  // TODO: also check if same url is in super then also its not allowed.
 
   return { user };
 }

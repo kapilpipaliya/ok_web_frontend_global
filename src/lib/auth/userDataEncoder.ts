@@ -1,6 +1,7 @@
 export interface UserData {
   email: string;
-  username: string;
+  newEmail?: string;
+  username?: string;
   uuid: string;
 }
 
