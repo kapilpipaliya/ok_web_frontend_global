@@ -3,7 +3,7 @@ import type { Transaction } from "neo4j-driver";
 
 import { v7 as uuidv7 } from "uuid";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { hashPassword } from "~/lib/auth/password";
 
 export async function createUserInSuperDB(

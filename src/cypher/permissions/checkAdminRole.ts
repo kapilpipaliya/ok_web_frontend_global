@@ -1,4 +1,4 @@
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { checkRole } from "./checkPermission";

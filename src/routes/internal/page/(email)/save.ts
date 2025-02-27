@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { getQuery } from "vinxi/http";
 
 import { createAppState } from "~/createAppState";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getEmailTemplateSchema } from "~/lib/email/saveEmailTemplates";

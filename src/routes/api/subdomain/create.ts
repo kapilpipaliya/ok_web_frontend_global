@@ -1,8 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
 import { checkRole } from "~/cypher/permissions/checkPermission";

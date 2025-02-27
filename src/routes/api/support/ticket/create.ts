@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function POST({ request }: APIEvent) {

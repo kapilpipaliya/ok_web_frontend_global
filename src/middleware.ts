@@ -2,10 +2,10 @@ import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
 import { csrf } from "shieldwall/start";
 
-import { getSubDomain } from "~/cypher/get/getSubDomain";
+import { getSubDomain } from "~/cypher/session/getSubDomain";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
-import { SYSTEM_DB_NAME } from "./cypher/boltConstant";
+import { SYSTEM_DB_NAME } from "./cypher/core/boltConstant";
 import { generate401RedirectUrl } from "./lib/api/endpoints";
 
 // https://docs.solidjs.com/solid-start/guides/security

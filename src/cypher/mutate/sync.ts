@@ -1,7 +1,7 @@
 import { transferNodeTypes } from "~/cypher/mutate/sync/transferNodeTypes";
 
-import { SYSTEM_DB_NAME } from "../boltConstant";
-import { getDriver } from "../driver";
+import { SYSTEM_DB_NAME } from "../core/boltConstant";
+import { getDriver } from "../core/driver";
 
 // Main function to initiate the migration process.
 export async function syncNodesAPICall(args: {

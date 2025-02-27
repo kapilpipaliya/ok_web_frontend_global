@@ -2,7 +2,7 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { evalExpressionAsync } from "~/lib/expression_eval";
 
-import { getDBSessionForSubdomain } from "../getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 
 interface TreeNode {
   children?: TreeNode[];

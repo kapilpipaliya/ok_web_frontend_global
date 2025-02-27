@@ -1,6 +1,6 @@
 import type { Session } from "neo4j-driver";
 
-import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 
 import { getUserFromSession } from "../../server/auth/session/getUserFromSession";
 import { checkRole } from "./checkPermission";

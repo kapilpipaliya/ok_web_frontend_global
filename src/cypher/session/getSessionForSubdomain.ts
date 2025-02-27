@@ -2,8 +2,8 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { getRequestURL } from "vinxi/http";
 
-import { getDriver } from "~/cypher/driver";
-import { getSubDomain } from "~/cypher/get/getSubDomain";
+import { getDriver } from "~/cypher/core/driver";
+import { getSubDomain } from "~/cypher/session/getSubDomain";
 
 // TODO: This should not throw error, else its not captured by the API error handler and sent to the client, or either handle erroor in API Endpoints.
 export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {

@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";

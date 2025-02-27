@@ -3,7 +3,7 @@ import type { Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 export async function updateNodeProperties(
   dbSession: Session,

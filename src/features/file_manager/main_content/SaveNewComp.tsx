@@ -8,7 +8,7 @@ import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useToast } from "~/components/styled/Toast";
-import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
+import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";

@@ -11,8 +11,8 @@ import {
   evalGetParents,
   evalGlobalColl,
   evalVertexById,
-} from "~/cypher/get/evaluate/evalFunctions";
-import { getLabelFilterSkipLimit } from "~/cypher/get/evaluate/getLabelFilterSkipLimit";
+} from "~/cypher/queries/evaluate/evalFunctions";
+import { getLabelFilterSkipLimit } from "~/cypher/queries/evaluate/getLabelFilterSkipLimit";
 import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
 

@@ -1,6 +1,6 @@
 import type { Driver } from "neo4j-driver";
 
-import { getDriver } from "~/cypher/driver";
+import { getDriver } from "~/cypher/core/driver";
 
 export async function createDatabase(subdomain: string) {
   let neo4JDriver: Driver | undefined = undefined;

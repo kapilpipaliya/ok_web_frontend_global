@@ -2,8 +2,8 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { evalExpressionAsync } from "~/lib/expression_eval";
 
-import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
-import { isReservedKeyword } from "./reservedKeywords";
+import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
+import { isReservedKeyword } from "../get/reservedKeywords";
 export async function checkUniqueConstrains(vertex: Vertex) {
   "use server";
   const { dbSession } = await getDBSessionForSubdomain();

@@ -7,7 +7,7 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 import {
   convertNodeToJson,
   convertRelationshipToJson,
-} from "~/cypher/convertNodeToJson";
+} from "~/cypher/conversion/convertNodeToJson";
 
 export async function fetchFromMGAndSaveToArray(
   dbSession: Session,

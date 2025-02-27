@@ -5,7 +5,7 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 import {
   convertNodeToJson,
   convertRelationshipToJson,
-} from "~/cypher/convertNodeToJson";
+} from "~/cypher/conversion/convertNodeToJson";
 
 import type { ContextType } from "../../types/ContextType";
 

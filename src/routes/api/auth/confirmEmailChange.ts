@@ -2,9 +2,9 @@ import type {APIEvent} from "@solidjs/start/server";
 
 import {getQuery} from "vinxi/http";
 
-import {convertNodeToJson} from "~/cypher/convertNodeToJson";
-import {getDriver} from "~/cypher/driver";
-import {getDBSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
+import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
+import {getDriver} from "~/cypher/core/driver";
+import {getDBSessionForSubdomain} from "~/cypher/session/getSessionForSubdomain";
 import {createActivityLog} from "~/cypher/mutate/activity/createActivityLog";
 import {checkIsSystemUser} from "~/cypher/permissions/checkIsSystemUser";
 import {getSubdomainsForAccount} from "~/cypher/permissions/getSubdomainsForAccount";

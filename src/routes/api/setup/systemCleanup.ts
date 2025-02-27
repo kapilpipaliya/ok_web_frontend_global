@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { getDriver } from "~/cypher/driver";
+import { getDriver } from "~/cypher/core/driver";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { validateSuperUser } from "~/lib/auth/validateSuperUser";
 

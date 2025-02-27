@@ -1,7 +1,7 @@
 // Function to create a new node.
 import type { Session } from "neo4j-driver";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 export async function createNode(
   dbSession: Session,

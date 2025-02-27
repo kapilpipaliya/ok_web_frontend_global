@@ -1,7 +1,7 @@
 import tld from "tldts";
 
-import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
-import { getDriver } from "~/cypher/driver";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { getDriver } from "~/cypher/core/driver";
 
 export async function getSubDomain(host: string) {
   const { domain, subdomain } = tld.parse(host);

@@ -8,7 +8,7 @@ import { evalExpressionAsync } from "~/lib/expression_eval";
 import type { ContextType } from "../types/ContextType";
 import type { NestedExpression } from "../types/NestedExpression";
 
-import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 
 export async function fetchDataFromMG(
   expression: NestedExpression,

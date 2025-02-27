@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
+import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrains";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";

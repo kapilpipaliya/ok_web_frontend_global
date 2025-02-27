@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { readMultipartFormData } from "vinxi/http";
 
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";

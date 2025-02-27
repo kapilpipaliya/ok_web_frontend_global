@@ -7,7 +7,7 @@ import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useToast } from "~/components/styled/Toast";
-import { checkUniqueConstrains } from "~/cypher/get/checkUniqueConstrains";
+import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrains";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { cloneLayoutAndChildren } from "~/features/page_designer/functions/cloneLayoutAndChildren";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";

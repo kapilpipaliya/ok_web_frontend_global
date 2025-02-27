@@ -1,7 +1,7 @@
 import type { ContextType } from "~/cypher/types/ContextType";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { evalGetRelatedNodes } from "~/cypher/get/evaluate/evalGetRelatedNodes";
+import { evalGetRelatedNodes } from "~/cypher/queries/evaluate/evalGetRelatedNodes";
 
 export async function evalGetChildren(
   vertexes: Vertex[],

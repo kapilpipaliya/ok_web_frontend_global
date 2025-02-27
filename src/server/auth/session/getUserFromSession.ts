@@ -2,8 +2,8 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getHttpsSession } from "~/server/auth/session/getHttpsSession";
 
 export async function getUserFromSession(

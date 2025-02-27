@@ -3,10 +3,10 @@ import type { Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDriver } from "~/cypher/driver";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { getDriver } from "~/cypher/core/driver";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { verifyPassword } from "~/lib/auth/password";

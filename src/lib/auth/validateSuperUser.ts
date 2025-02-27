@@ -1,4 +1,4 @@
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 
 export async function validateSuperUser(request: Request): Promise<boolean> {
   return true;

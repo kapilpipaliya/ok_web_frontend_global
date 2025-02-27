@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
-import { getSelectionOptionsAPICall } from "~/cypher/get/client/getSelectionOptionsAPICall";
+import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsAPICall";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getCollection } from "~/features/page_attr_render/utils/getCollection";

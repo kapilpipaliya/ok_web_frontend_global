@@ -9,8 +9,8 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import type { ServerResult } from "../types/ServerResult";
 
-import { fetchFromMGAndSaveToArray } from "./fetchFromMGAndSaveToArray";
-import { getDBSessionForSubdomain } from "./getSessionForSubdomain";
+import { fetchFromMGAndSaveToArray } from "../conversion/fetchFromMGAndSaveToArray";
+import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 
 export async function getInitialData(request?: APIEvent["request"]) {
   "use server";

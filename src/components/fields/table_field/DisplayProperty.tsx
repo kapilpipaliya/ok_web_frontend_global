@@ -13,7 +13,7 @@ import {
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { getSelectionOptionsAPICall } from "~/cypher/get/client/getSelectionOptionsAPICall";
+import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsAPICall";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { evalExpression } from "~/lib/expression_eval";

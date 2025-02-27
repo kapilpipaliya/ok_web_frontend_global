@@ -2,7 +2,7 @@ import type { Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 import { mutateData } from "../mutate/mutation_handlers/mutateData";
 

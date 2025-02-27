@@ -5,7 +5,7 @@ import path from "node:path";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { processResult } from "~/cypher/get/evaluate/processResult";
+import { processResult } from "~/cypher/queries/evaluate/processResult";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";

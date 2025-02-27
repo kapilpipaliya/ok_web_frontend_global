@@ -1,7 +1,7 @@
 // Helper function to check if a user is a system user
 import type {Session} from "neo4j-driver";
 
-import {SYSTEM_DB_NAME} from "~/cypher/boltConstant";
+import {SYSTEM_DB_NAME} from "~/cypher/core/boltConstant";
 
 export async function checkIsSystemUser(
   session: Session,

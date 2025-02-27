@@ -4,7 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import type { ContextType } from "../../types/ContextType";
 
-import { getDBSessionForSubdomain } from "../getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "../../session/getSessionForSubdomain";
 import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
 import { mongoToCypher } from "./mongoToCypher";
 import { processResult } from "./processResult";

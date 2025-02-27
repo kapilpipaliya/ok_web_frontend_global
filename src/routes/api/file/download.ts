@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { getQuery } from "vinxi/http";
 
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 import { downloadFile } from "./functions/downloadFile";

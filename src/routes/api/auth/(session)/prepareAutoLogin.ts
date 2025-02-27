@@ -4,8 +4,8 @@ import { parse } from "tldts";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";

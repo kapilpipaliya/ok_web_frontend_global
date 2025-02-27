@@ -4,8 +4,8 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { retryTransaction } from "~/cypher/mutate/mutation_handlers/retryTransaction";
 
-import { getSelectionOptionsBase } from "../getSelectionOptionsBase";
-import { handleMutationData } from "../handleMutationData";
+import { getSelectionOptionsBase } from "../get/getSelectionOptionsBase";
+import { handleMutationData } from "../get/handleMutationData";
 
 export async function getPropsFromMetaExpressionAPICall(
   metaVertex: Vertex,

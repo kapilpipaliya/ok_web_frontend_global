@@ -1,7 +1,7 @@
 // Function to find an existing node by key.
 import type { Session } from "neo4j-driver";
 
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 export async function findExistingNode(
   dbSession: Session,

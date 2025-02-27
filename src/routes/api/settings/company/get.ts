@@ -2,8 +2,8 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import { processResult } from "~/cypher/get/evaluate/processResult";
-import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { processResult } from "~/cypher/queries/evaluate/processResult";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
