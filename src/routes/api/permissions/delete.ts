@@ -1,10 +1,11 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
-import { APIError } from "~/lib/api/apiErrorHandler";
-import { handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function DELETE({ request }: APIEvent) {
@@ -24,9 +25,9 @@ export async function DELETE({ request }: APIEvent) {
       user,
     );
 
-    if (!isAdmin) {
-      throw new APIError("Unauthorized. Admin access required.", 403);
-    }
+  if (!isAdmin) {
+    throw new APIError("Unauthorized. Admin access required.", 403);
+  }
 
     // const [graph] = useGraph();
 
@@ -71,20 +72,32 @@ export async function DELETE({ request }: APIEvent) {
     );
 
     // Delete the Perm vertex
-    await dbSession.run(
+    const deletedPerm = await dbSession.run(
       `
       MATCH (p:Perm)
       WHERE elementId(p) = $id
       DELETE p
+      RETURN p
     `,
       { id },
     );
+    const deletedPermVertex = convertNodeToJson(deletedPerm.records[0].get("p"));
 
+        // Log permission deletion
+        await createActivityLog(
+          dbSession,
+          "permission_delete",
+          "Permission",
+          id,
+          user.P.email,
+          `Permission deleted ${deletedPermVertex.P.key}`
+        );
     return {
       graph: {
         deleted_edges: deletedEdges.records[0].get("deletedEdgeIds"),
         deleted_vertexes: [id],
       },
+      message: "Permission deleted successfully",
       success: true,
     };
   } catch (error) {

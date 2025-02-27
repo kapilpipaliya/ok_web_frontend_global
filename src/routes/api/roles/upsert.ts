@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
@@ -47,9 +48,27 @@ export async function POST({ request }: APIEvent) {
 
     // added frontend validation so system role keys are not updated
 
+    // Determine if this is a new role or an update
+    const isNewRole = !role.id || role.id.startsWith("-");
+    const action = isNewRole ? "role_create" : "role_update";
+    const details = isNewRole 
+      ? `Created new role: ${role.P.key}` 
+      : `Updated role: ${role.P.key}`;
+
     const tx = dbSession.beginTransaction();
     try {
       const res = await mutateData(data, tx);
+      
+      // Log role creation/update activity
+      await createActivityLog(
+        dbSession,
+        action,
+        "Role",
+        isNewRole ? res.result.id : role.id,
+        user.P.email,
+        details
+      );
+      
       await tx.commit();
       return res;
     } catch (error: unknown) {

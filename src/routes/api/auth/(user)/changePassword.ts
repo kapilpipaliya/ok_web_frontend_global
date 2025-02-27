@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
@@ -60,9 +61,19 @@ export async function POST({ request }: APIEvent) {
       { hashedPassword, salt, uuid: user.uuid },
     );
 
+    // Log the password change activity
+    await createActivityLog(
+      dbSession,
+      "password_change",
+      "User",
+      uuid,
+      user.email,
+      "User password was changed"
+    );
+
     // Send email notification
     sendNotificationEmail(
-      EMAIL_TEMPLATES.PASSWORD_CHANGED,
+      EMAIL_TEMPLATES.PasswordChanged,
       {},
       "Your Password Has Been Changed",
       user,

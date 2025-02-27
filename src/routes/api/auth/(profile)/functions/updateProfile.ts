@@ -6,6 +6,7 @@ import type {Vertex} from "~/lib/graph/graph";
 import {SYSTEM_DB_NAME} from "~/cypher/boltConstant";
 import {convertNodeToJson} from "~/cypher/convertNodeToJson";
 import {getDriver} from "~/cypher/driver";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import {ServerResult} from "~/cypher/types/ServerResult";
 import {sendEmailConfirmation} from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import {validateUniqueFields, validateUser} from "~/routes/api/auth/(profile)/functions/validateField";
@@ -61,6 +62,8 @@ export async function updateProfile(
       await updateSession(userNew);
 
       if (isEmailChanged) await sendEmailConfirmation(request, oldUser, email, userNew, subDomain, dbSession);
+   
+      await saveActivityLog(dbSession, userNew, payload);
 
       return {
         graph: {
@@ -90,6 +93,8 @@ export async function updateProfile(
 
     const userNew = convertNodeToJson(updateResult.records[0].get("u"));
     if (isEmailChanged) await sendEmailConfirmation(request, oldUser, email, userNew, subDomain, dbSession);
+
+    await saveActivityLog(dbSession, userNew, payload);
 
     return {
       graph: {
@@ -125,3 +130,18 @@ async function getSubdomainsForAccount(dbSession: Session, uuid: string) {
   return subDomainsResult.records.map((record) => record.get("subdomain"));
 }
 
+async function saveActivityLog(dbSession: Session, user: Vertex, payload: ProfilePayload) {
+    let details = "Profile updated";
+    if (payload.username) details += ` - username: ${payload.username}`;
+    if (payload.email) details += ` - pending email: ${payload.email}`;
+    
+    // Log the profile update activity
+    await createActivityLog(
+      dbSession,
+      "profile_update",
+      "User",
+      user.P.uuid,
+      user.P.email,
+      details
+    );
+  }

@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
@@ -39,15 +40,26 @@ export async function DELETE({ request }: APIEvent) {
        WHERE elementId(t) = $themeId
        AND NOT EXISTS((:GlobalSetting)-[:GlobalSettingTheme]->(t))
        DELETE t
-       RETURN count(t) as deleted`,
+       RETURN t`,
       { themeId },
     );
 
-    const deletedCount = result.records[0]?.get("deleted") || 0;
+    const deletedCount = result.records.length;
 
     if (deletedCount === 0) {
       throw new APIError("Theme not found or is currently selected", 404);
     }
+    
+    const themeName = result.records[0]?.get("t").P.key || "Unknown theme";
+    // Log theme deletion
+    await createActivityLog(
+      dbSession,
+      "theme_delete",
+      "Theme",
+      themeId,
+      user.P.email,
+      `Deleted theme: ${themeName}`
+    );
 
     return {
       graph: {

@@ -4,10 +4,12 @@ import type { Session } from "neo4j-driver";
 import path from "node:path";
 
 import { processResult } from "~/cypher/get/evaluate/processResult";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { getBaseDir } from "~/lib/files/getBaseDir";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
+import { Vertex } from "~/lib/graph/graph";
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
 
@@ -16,6 +18,7 @@ export async function replaceFiles(
   data: MultiPartData[],
   neo4jSession: Session,
   subDomain: string,
+  user: Vertex,
 ) {
   const currentDate = new Date().toISOString();
   const [year, month, day] = currentDate.split("T")[0].split("-");
@@ -76,6 +79,15 @@ export async function replaceFiles(
     context,
     "f",
   );
+      // Log file replacement
+    await createActivityLog(
+      neo4jSession,
+      "file_replace",
+      "File",
+      fileId,
+      user.P.email,
+      `File replaced: ${oldFileMetadata.P.fileName} -> ${data[0]?.filename}`
+    );
   return {
     graph: {
       edges: context.relationships,

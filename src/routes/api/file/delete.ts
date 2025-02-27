@@ -33,7 +33,7 @@ export async function DELETE({ request }: APIEvent) {
   }
 
   try {
-    return await deleteFile(fileId as string, dbSession);
+    return await deleteFile(fileId as string, dbSession, user);
   } catch (error) {
     return handleAPIError(error);
   } finally {

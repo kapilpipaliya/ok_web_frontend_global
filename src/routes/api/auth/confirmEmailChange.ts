@@ -5,8 +5,9 @@ import { getQuery } from "vinxi/http";
 
 import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
+import { getDriver } from "~/cypher/driver";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { getDriver } from "~/cypher/getDriver";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
@@ -89,6 +90,16 @@ export async function GET({ request }: APIEvent) {
 
         const updatedUser = convertNodeToJson(systemResult.records[0].get("u"));
 
+        // Log the email change activity
+        await createActivityLog(
+          dbSession,
+          "email_change",
+          "User",
+          uuid,
+          newEmail,
+          `Email changed from ${email} to ${newEmail}`
+        );
+
         // Update session with new email
         await updateSession(updatedUser);
 
@@ -127,6 +138,16 @@ export async function GET({ request }: APIEvent) {
       }
 
       const updatedUser = convertNodeToJson(result.records[0].get("u"));
+
+      // Log the email change activity
+      await createActivityLog(
+        dbSession,
+        "email_change",
+        "User",
+        uuid,
+        newEmail,
+        `Email changed from ${email} to ${newEmail}`
+      );
 
       // Update session with new email
       await updateSession(updatedUser);

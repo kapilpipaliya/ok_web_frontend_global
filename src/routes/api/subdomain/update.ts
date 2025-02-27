@@ -63,7 +63,7 @@ export async function POST({ request }: APIEvent) {
 
     await createActivityLog(
       dbSession,
-      "SESSION_UPDATE",
+      "subdomain_update",
       "SubDomain",
       updatedSubdomain.id,
       user.P.email,

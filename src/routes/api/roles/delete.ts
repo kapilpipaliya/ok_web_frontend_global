@@ -1,6 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError } from "~/lib/api/apiErrorHandler";
@@ -62,14 +64,26 @@ export async function DELETE({ request }: APIEvent) {
     }
 
     // Delete the role
-    await dbSession.run(
+    const deletedRoleResult = await dbSession.run(
       `
       MATCH (r:Role)
       WHERE elementId(r) = $id
       DELETE r
+      RETURN r
     `,
       { id },
     );
+    const deletedRole = convertNodeToJson(deletedRoleResult.records[0].get("r"));
+    // Log role deletion activity
+    await createActivityLog(
+      dbSession,
+      "role_delete",
+      "Role",
+      id,
+      user.P.email,
+      `Deleted role: ${deletedRole.P.key}`
+    );
+    
     return {
       graph: {
         deleted_vertexes: [roleCheck.records[0].get("r").identity],

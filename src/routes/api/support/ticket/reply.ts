@@ -1,13 +1,20 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
-import { handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
-  const { message, ticketId, userId } = await request.json();
+  const { message, ticketId } = await request.json();
 
   try {
+    const user = await getUserFromSession(request);
+
+    if (!user) {
+      throw new APIError("User not found", 404);
+    }
+
     // const data = await newRowAPICall(
     //     parentVertexId,
     //     "SupportUser",
@@ -19,12 +26,12 @@ export async function POST({ request }: APIEvent) {
       CREATE (r:Reply {
         message: $message,
         createdAt: datetime(),
-        createdBy: $userId
+        email: $email
       })<-[:ParentSupport]-(t)
       RETURN r
     `;
 
-    await dbSession.run(query, { message, ticketId, userId });
+    await dbSession.run(query, { email: user.P.email, message, ticketId });
 
     return {
       graph: {

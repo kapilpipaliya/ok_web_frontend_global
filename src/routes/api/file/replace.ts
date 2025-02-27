@@ -31,7 +31,7 @@ export async function PUT({ request }: APIEvent) {
     if (!data || data.length === 0) {
       throw new APIError("No file data available", 400);
     }
-    return await replaceFiles(request, data, dbSession, subDomain);
+    return await replaceFiles(request, data, dbSession, subDomain, user);
   } catch (error) {
     return handleAPIError(error);
   } finally {

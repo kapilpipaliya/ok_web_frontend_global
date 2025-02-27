@@ -5,7 +5,7 @@ export async function createActivityLog(
   action: string,
   entityType: string,
   entityId: string,
-  updatedBy: string,
+  updatedByEmail: string,
   details?: string,
 ) {
   await dbSession.run(
@@ -13,7 +13,7 @@ export async function createActivityLog(
       action: $action,
       entityType: $entityType,
       entityId: $entityId,
-      updatedBy: $updatedBy,
+      updatedBy: $updatedByEmail,
       createdAt: datetime(),
       details: $details
     })`,
@@ -22,7 +22,7 @@ export async function createActivityLog(
       details: details ?? null,
       entityId,
       entityType,
-      updatedBy,
+      updatedByEmail,
     },
   );
 }

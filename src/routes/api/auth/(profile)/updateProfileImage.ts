@@ -2,6 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
@@ -64,6 +65,16 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("User or file not found", 404);
     }
     const file = convertNodeToJson(result.records[0]?.get("f"));
+    
+    // Log the profile image update activity
+    await createActivityLog(
+      dbSession,
+      "profile_image_update",
+      "User",
+      uuid,
+      user.P.email,
+      `Profile image updated to ${file.P.fileName || file.id}`
+    );
 
     return {
       graph: {

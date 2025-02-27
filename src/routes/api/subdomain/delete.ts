@@ -57,7 +57,7 @@ export async function POST({ request }: APIEvent) {
 
     await createActivityLog(
       dbSession,
-      "SESSION_DELETE",
+      "subdomain_delete",
       "SubDomain",
       subdomain.elementId,
       user.P.email,

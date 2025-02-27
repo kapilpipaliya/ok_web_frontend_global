@@ -2,6 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDBSessionForSubdomain } from "~/cypher/get/getSessionForSubdomain";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
@@ -91,6 +92,16 @@ export async function POST({ request }: APIEvent) {
 
     const updatedGlobalSetting = convertNodeToJson(result.records[0].get("g"));
     const updatedFile = convertNodeToJson(result.records[0].get("f"));
+    
+    // Log company logo update
+    await createActivityLog(
+      dbSession,
+      "company_logo_update",
+      "GlobalSetting",
+      updatedGlobalSetting.id,
+      user.P.email,
+      `Company logo updated to ${updatedFile.P.fileName} (${updatedFile.P.contentType})`
+    );
 
     return {
       graph: {
