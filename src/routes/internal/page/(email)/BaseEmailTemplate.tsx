@@ -1,3 +1,4 @@
+import {API} from "~/lib/api/endpoints";
 import {FieldAttribute} from "~/lib/meta/FormMetadataType";
 
 export const createEmailTemplate = (content: FieldAttribute[]) => ({
@@ -8,11 +9,11 @@ export const createEmailTemplate = (content: FieldAttribute[]) => ({
       attributes: [
         {
           as: "img",
-          class: "w:200px mb:24",
+          class: "w:100px mb:24",
           componentName: "Html",
           props: `return {
             alt: "Logo",
-            src: "/logo.png"
+            src: \`\${window.location.origin}/${API.file.downloadCompanyLogoUrl}\`
           }`
         },
         {

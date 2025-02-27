@@ -27,7 +27,7 @@ const content = [
     as: "p",
     class: {
       '': {
-        'color': 'base-20'
+        'color': 'primary'
       }
     },
     componentName: "Html",

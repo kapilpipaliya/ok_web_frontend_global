@@ -46,7 +46,7 @@ const content = [
     as: "p",
     class: {
       '': {
-        'color': 'base-20'
+        'color': 'base'
       }
     },
     componentName: "Html",

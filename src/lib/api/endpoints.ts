@@ -15,6 +15,7 @@ export const API = {
   },
   file: {
     deleteFileUrl: "/api/file/delete",
+    downloadCompanyLogoUrl: "/api/file/downloadCompanyLogo",
     downloadFileUrl: "/api/file/download",
     replaceFileUrl: "/api/file/replace",
     uploadFileUrl: "/api/file/upload",
