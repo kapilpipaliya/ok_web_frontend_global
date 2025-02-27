@@ -55,7 +55,7 @@ export function LoginForm() {
     if (validateFormData(formData)) {
       await showLoadingToast({
         loadMessage: "Logging In...",
-        onError: () => {},
+        onError: () => { },
         onSuccess: (value) => {
           handleLoginRedirect(value?.result, graph, navigate);
         },
@@ -89,6 +89,9 @@ export function LoginForm() {
                 props: (options: FunctionArgumentType) => ({
                   onKeyPress: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
+                      if (e.target instanceof HTMLInputElement) {
+                        options.updateValue(e.target.value);
+                      }
                       try {
                         options.dataContext.submitState[1]("isLoading", true);
                         const formData = options.data;
@@ -116,6 +119,9 @@ export function LoginForm() {
                     props: (options: FunctionArgumentType) => ({
                       onKeyPress: async (e: KeyboardEvent) => {
                         if (e.key === "Enter") {
+                          if (e.target instanceof HTMLInputElement) {
+                            options.updateValue(e.target.value);
+                          }
                           try {
                             options.dataContext.submitState[1](
                               "isLoading",

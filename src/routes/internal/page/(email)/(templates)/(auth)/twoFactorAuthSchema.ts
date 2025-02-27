@@ -3,23 +3,23 @@ import {createEmailTemplate} from "~/routes/internal/page/(email)/BaseEmailTempl
 const content = [
   {
     as: "h1",
-    class: {
+    class: JSON.stringify({
       '': {
         'font-size': '24px',
         'font-weight': 'bold',
         'margin-bottom': '16'
       }
-    },
+    }),
     componentName: "Html",
     text: "Two-Factor Authentication Code"
   },
   {
     as: "p",
-    class: {
+    class: JSON.stringify({
       '': {
         'margin-bottom': '16'
       }
-    },
+    }),
     componentName: "Html",
     text: "Here is your two-factor authentication code:"
   },
@@ -28,18 +28,18 @@ const content = [
     attributes: [
       {
         as: "p",
-        class: {
+        class: JSON.stringify({
           '': {
             'font-size': '32px',
             'font-weight': 'bold',
             'letter-spacing': '4px'
           }
-        },
+        }),
         componentName: "Html",
         text: "847291"
       }
     ],
-    class: {
+    class: JSON.stringify({
       '': {
         'background-color': 'base-5',
         'border-radius': '4',
@@ -47,16 +47,16 @@ const content = [
         'padding': '16',
         'text-align': 'center'
       }
-    },
+    }),
     componentName: "Html"
   },
   {
     as: "p",
-    class: {
+    class: JSON.stringify({
       '': {
         'color': 'base'
       }
-    },
+    }),
     componentName: "Html",
     text: "This code will expire in 5 minutes. Do not share this code with anyone."
   }

@@ -273,6 +273,7 @@ export function DynamicComponent(
       get txnId() {
         return props.txnId!;
       },
+      updateValue,
       zIndex,
     }) as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 
@@ -282,54 +283,58 @@ export function DynamicComponent(
     return Object.assign(baseArguments, {});
   };
 
+  function updateValue(value: unknown) {
+    const existingValue = props.data?.P[props.meta.P.key];
+    // Check if the user has the appropriate permissions for the specific field
+    /*if (!hasFieldPermission(props.meta.P.key)) {
+      showErrorToast("You do not have permission to modify this field.");
+      return;
+    }*/
+
+    if (!isNoPermissionCheck()) {
+      if (previewStore.isViewOnly) {
+        showErrorToast("You do not have permission to modify this field.");
+        return;
+      }
+
+      if (!(hasInsertPermission() || hasEditPermission())) {
+        showErrorToast("You do not have permission to set this value.");
+        return;
+      }
+      if (existingValue === undefined && !hasInsertPermission()) {
+        showErrorToast(
+          "You do not have insert permission to set this value.",
+        );
+        return;
+      }
+
+      // Additional checks, e.g., role-based or context-sensitive permissions
+      /*if (!hasRolePermission('editor') || !isOwnerOfData(props.data)) {
+        showErrorToast("You do not have the necessary permissions to modify this data.");
+        return;
+      }*/
+    }
+
+    // Log the action for auditing purposes
+    // logAction('modify', props.meta.P.key, value, currentUser);
+
+    // TODO: if only insert permission, and value is set dont display it.
+    setValueGlobal(
+      graph,
+      setGraph,
+      props.txnId!,
+      props.meta,
+      props.data!,
+      value,
+      false,
+    );
+  }
+
   const onChange = (value: unknown) => {
     if (props.onChange) {
       props.onChange(value);
     } else {
-      const existingValue = props.data?.P[props.meta.P.key];
-      // Check if the user has the appropriate permissions for the specific field
-      /*if (!hasFieldPermission(props.meta.P.key)) {
-        showErrorToast("You do not have permission to modify this field.");
-        return;
-      }*/
-
-      if (!isNoPermissionCheck()) {
-        if (previewStore.isViewOnly) {
-          showErrorToast("You do not have permission to modify this field.");
-          return;
-        }
-
-        if (!(hasInsertPermission() || hasEditPermission())) {
-          showErrorToast("You do not have permission to set this value.");
-          return;
-        }
-        if (existingValue === undefined && !hasInsertPermission()) {
-          showErrorToast(
-            "You do not have insert permission to set this value.",
-          );
-          return;
-        }
-
-        // Additional checks, e.g., role-based or context-sensitive permissions
-        /*if (!hasRolePermission('editor') || !isOwnerOfData(props.data)) {
-          showErrorToast("You do not have the necessary permissions to modify this data.");
-          return;
-        }*/
-      }
-
-      // Log the action for auditing purposes
-      // logAction('modify', props.meta.P.key, value, currentUser);
-
-      // TODO: if only insert permission, and value is set dont display it.
-      setValueGlobal(
-        graph,
-        setGraph,
-        props.txnId!,
-        props.meta,
-        props.data!,
-        value,
-        false,
-      );
+      updateValue(value);
     }
   };
 

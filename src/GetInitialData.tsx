@@ -10,8 +10,9 @@ import { setUserData } from "~/lib/graph/mutate/setUserData";
 
 import { getInitialData } from "./cypher/get/getInitialData";
 import { getGlobalStore } from "./lib/graph/get/sync/getGlobalStore";
-import { useGraph } from "./lib/graph/graph";
+import { GlobalProperties, useGraph } from "./lib/graph/graph";
 import { setGraphData } from "./lib/graph/mutate/setGraphData";
+import { mergeVertexProperties } from "./lib/graph/mutate/vertex";
 import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
 
 interface GetInitialDataProps extends ParentProps {
@@ -24,7 +25,6 @@ const fetchData = async (authenticate?: boolean) => {
     getInitialData(),
     authenticate
       ? getUserRPC().catch(() => {
-          // handleUserNavigation(null, navigate);
           return null; // Return null to avoid further processing
         })
       : Promise.resolve(null),
@@ -37,6 +37,19 @@ export function GetInitialData(props: GetInitialDataProps) {
   const navigate = useNavigate();
 
   const setData = (initialData: ServerResult, userData: null | UserData) => {
+    if (initialData.error) {
+      mergeVertexProperties<GlobalProperties>(
+        0,
+        "globalStoreId",
+        graph[0],
+        graph[1],
+        {
+          initialDataFetchError: `Failed to load initial data: ${initialData.error}`,
+        },
+      );
+      return; // Exit early if there's an error
+    }
+
     setGraphData(graph[0], graph[1], initialData.graph!);
 
     if (userData) {
@@ -54,27 +67,6 @@ export function GetInitialData(props: GetInitialDataProps) {
       setData(data()!.initialData, data()!.userData as UserData);
     }
   });
-
-  // onMount(async () => {
-  //   try {
-  //     const { initialData, userData } = await fetchData();
-  //     setData(initialData, userData);
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       mergeVertexProperties<GlobalProperties>(
-  //         0,
-  //         "globalStoreId",
-  //         graph[0],
-  //         graph[1],
-  //         {
-  //           initialDataFetchError: `Failed to load initial data: ${error.message}`,
-  //         },
-  //       );
-  //     }
-  //   } finally {
-  //     setInitialDataLoading(false);
-  //   }
-  // });
 
   return (
     <Switch>

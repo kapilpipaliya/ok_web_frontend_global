@@ -3,29 +3,29 @@ import {createEmailTemplate} from "~/routes/internal/page/(email)/BaseEmailTempl
 const content = [
   {
     as: "h1",
-    class: {
+    class: JSON.stringify({
       '': {
         'font-size': '24px',
         'font-weight': 'bold',
         'margin-bottom': '16'
       }
-    },
+    }),
     componentName: "Html",
     text: "Confirm Your Email Address"
   },
   {
     as: "p",
-    class: {
+    class: JSON.stringify({
       '': {
         'margin-bottom': '16'
       }
-    },
+    }),
     componentName: "Html",
     text: "Thank you for signing up! Please confirm your email address to activate your account."
   },
   {
     as: "button",
-    class: {
+    class: JSON.stringify({
       '': {
         'background-color': 'primary',
         'border': 'none',
@@ -38,17 +38,17 @@ const content = [
       ':hover': {
         'opacity': '0.9'
       }
-    },
+    }),
     componentName: "Html",
     text: "Confirm Email"
   },
   {
     as: "p",
-    class: {
+    class: JSON.stringify({
       '': {
         'color': 'base'
       }
-    },
+    }),
     componentName: "Html",
     text: "If you didn't create an account, you can safely ignore this email."
   }

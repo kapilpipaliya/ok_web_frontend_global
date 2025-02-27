@@ -45,6 +45,7 @@ export interface FunctionArgumentBaseType {
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
   txnId: number;
+  updateValue: (value: unknown) => void;
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   zIndex: number;

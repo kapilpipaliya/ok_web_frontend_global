@@ -37,6 +37,9 @@ server.default_listen_address=0.0.0.0
      auth.basic("neo4j", "12345678"),
 
 http://localhost:3000/api/setup/superUserSetup
+# System Cleanup
+http://localhost:3000/api/setup/systemCleanup
+
 
 ## Building
 Solid apps are built with _presets_, which optimise your project for deployment to different environments.

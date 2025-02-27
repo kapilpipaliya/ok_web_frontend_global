@@ -3,29 +3,29 @@ import {createEmailTemplate} from "~/routes/internal/page/(email)/BaseEmailTempl
 const content = [
   {
     as: "h1",
-    class: {
+    class: JSON.stringify({
       '': {
         'font-size': '24px',
         'font-weight': 'bold',
         'margin-bottom': '16'
       }
-    },
+    }),
     componentName: "Html",
     text: "Password Changed Successfully"
   },
   {
     as: "p",
-    class: {
+    class: JSON.stringify({
       '': {
         'margin-bottom': '24'
       }
-    },
+    }),
     componentName: "Html",
     text: "Your password has been successfully changed. If you did not make this change, please contact our support team immediately."
   },
   {
     as: "button",
-    class: {
+    class: JSON.stringify({
       '': {
         'background-color': 'primary',
         'border': 'none',
@@ -37,7 +37,7 @@ const content = [
       ':hover': {
         'opacity': '0.9'
       }
-    },
+    }),
     componentName: "Html",
     text: "Contact Support"
   }

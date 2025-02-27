@@ -10,6 +10,9 @@ export const API = {
     signUpUrl: "/api/auth/signup",
     updateProfileImageUrl: "/api/auth/updateProfileImage",
   },
+  developer: {
+    systemCleanupUrl: "/api/setup/systemCleanup",
+  },
   email: {
     auditUrl: "/api/email/audit",
   },

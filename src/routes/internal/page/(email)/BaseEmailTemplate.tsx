@@ -13,7 +13,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) => ({
           componentName: "Html",
           props: `return {
             alt: "Logo",
-            src: \`\${window.location.origin}/${API.file.downloadCompanyLogoUrl}\`
+            src: \`\${window.location.origin}${API.file.downloadCompanyLogoUrl}\`
           }`
         },
         {

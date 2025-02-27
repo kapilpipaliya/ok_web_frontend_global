@@ -3,39 +3,39 @@ import {createEmailTemplate} from "~/routes/internal/page/(email)/BaseEmailTempl
 const content = [
   {
     as: "h1",
-    class: {
+    class: JSON.stringify({
       '': {
         'font-size': '24px',
         'font-weight': 'bold',
         'margin-bottom': '16'
       }
-    },
+    }),
     componentName: "Html",
     text: "Account Deletion Confirmation"
   },
   {
     as: "p",
-    class: {
+    class: JSON.stringify({
       '': {
         'margin-bottom': '16'
       }
-    },
+    }),
     componentName: "Html",
     text: "Your account has been successfully deleted. We're sorry to see you go!"
   },
   {
     as: "p",
-    class: {
+    class: JSON.stringify({
       '': {
         'margin-bottom': '16'
       }
-    },
+    }),
     componentName: "Html",
     text: "If you didn't request this deletion, please contact our support team immediately."
   },
   {
     as: "button",
-    class: {
+    class: JSON.stringify({
       '': {
         'background-color': 'primary',
         'border': 'none',
@@ -47,7 +47,7 @@ const content = [
       ':hover': {
         'opacity': '0.9'
       }
-    },
+    }),
     componentName: "Html",
     text: "Contact Support"
   }
