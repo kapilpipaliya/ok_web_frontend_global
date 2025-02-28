@@ -2,6 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
@@ -10,8 +11,12 @@ import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
+    if (subDomain !== SYSTEM_DB_NAME) {
+      throw new APIError("Unauthorized. System subdomain access required.", 403);
+    }
+
     const user = await getUserFromSession(request);
 
     if (!user) {

@@ -288,9 +288,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   return (
     <DataGridProvider value={gridStore}>
       <Switch>
-        <Match when={gridState.isLoading}>
+        {/* <Match when={gridState.isLoading}>
           <LoaderNew loaderHeight="55vh" />
-        </Match>
+        </Match> */}
         <Match when={gridState.error}>
           {/* TODO: CSS */}
           <div>Error: {gridState.error}</div>

@@ -32,6 +32,10 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
 
   const isTableLayout = () => gridState.layout === "table";
 
+  const handleRefresh = async () => {
+    await gridState.fetchTableData();
+  };
+
   return (
     <div class="flex ai:center jc:space-between p:4|10">
       <Dynamic
@@ -48,6 +52,14 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           handleChange={props.onSearch}
           placeholder="Search Data..."
           value={gridState.search}
+        />
+        <IconButton
+          class={headerIconButtonClass}
+          disabled={gridState.isLoading}
+          icon={gridState.isLoading ? "ph:spinner-gap" : "ph:arrows-clockwise"}
+          iconClass={gridState.isLoading ? "@rotate|1s|infinite|linear" : ""}
+          onClick={handleRefresh}
+          title="Refresh Data"
         />
         <IconButton
           class={headerIconButtonClass}

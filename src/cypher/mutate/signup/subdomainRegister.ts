@@ -19,7 +19,7 @@ export interface SubdomainRegisterRequestData {
 }
 
 export async function subdomainRegister(
-  tx: Session | Transaction,
+  superTx: Session | Transaction,
   data: SubdomainRegisterRequestData,
 ) {
   // validation is done on the parent function
@@ -27,7 +27,7 @@ export async function subdomainRegister(
   await createDatabase(data.subDomain);
 
   const query = "Match (u:User {uuid: $uuid}) RETURN u";
-  const result = await tx.run(query, { uuid: data.uuid });
+  const result = await superTx.run(query, { uuid: data.uuid });
   const user = convertNodeToJson(result.records[0].get("u") as Node);
 
   const userDbSession = (await getDriver()).session({
