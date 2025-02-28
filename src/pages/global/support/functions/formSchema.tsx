@@ -259,6 +259,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 componentName: "Select",
                 key: "SupportStatus",
                 labelKey: "::'P.name'",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: !isAdminRole(options.graph),
+                }),
                 title: "Status",
               },
             ],

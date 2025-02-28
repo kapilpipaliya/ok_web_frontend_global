@@ -7,6 +7,7 @@ import { For } from "solid-js";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
+import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
@@ -28,7 +29,23 @@ export function AuthenticatedMenu(
   const getMenuItems = () => {
     const commonItems = [
       // { href: API.urls.admin.contact, icon: "ph:question", label: "Help" },
-    ] as { href: string; icon: string; label: string }[];
+    ] as { href: string; icon: string; label: string; target?: string }[];
+
+    if (!isSystemSubDomain() && !isAdminRole(graph)) {
+      commonItems.push({
+        href: API.urls.admin.support,
+        icon: "ph:question",
+        label: "Support",
+        target: "_blank"
+      });
+    } else if (isSystemSubDomain()) {
+      commonItems.push({
+        href: `${window.location.origin.replace(`${getMemberVertex(graph).P.subDomain}.`, "")}/support/contact`,
+        icon: "ph:question",
+        label: "Support",
+        target: "_blank"
+      });
+    }
 
     return isSystemSubDomain()
       ? [
@@ -97,6 +114,7 @@ export function AuthenticatedMenu(
               "
               href={item.href}
               onclick={props.onClose}
+              target={item.target}
             >
               <Icon
                 class="mr:10px color:primary-60"
