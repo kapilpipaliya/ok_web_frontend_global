@@ -25,9 +25,9 @@ export async function POST({ request }: APIEvent) {
       user,
     );
 
-    // if (!isAdmin) {
-    //   throw new APIError("Unauthorized. Admin access required.", 403);
-    // }
+    if (!isAdmin) {
+      throw new APIError("Unauthorized. Admin access required.", 403);
+    }
 
     const { data, ticket } = await request.json();
 

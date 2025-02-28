@@ -1,3 +1,6 @@
+import { CellContext } from "@tanstack/solid-table";
+import { For } from "solid-js";
+
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { DataGridStore } from "~/features/grid/DataGridContext";
 import type { Vertex } from "~/lib/graph/graph";
@@ -50,20 +53,22 @@ export function SupportTickets() {
         key: "createdAt",
       },
       {
+        cell: (info: CellContext<Vertex, unknown>) => {
+          return (
+            <div>
+              <For each={info.row.original.P.replies}>
+                {(reply: Vertex) => (
+                  <div class="white-space:nowrap overflow:hidden text-overflow:ellipsis">
+                    {new Date(reply.P.createdAt).toLocaleDateString()} {new Date(reply.P.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {reply.P.message.slice(0, 10)}... (by {reply.P.email.slice(0, 5)}...)
+                  </div>
+                )}
+              </For>
+            </div>
+          );
+        },
         componentName: "TextArea",
         displayName: "Replies",
         key: "replies",
-        props: (options: FunctionArgumentType) => ({
-          readonly: true,
-          value: options.data.P.replies
-            ?.map(
-              (reply: Vertex) =>
-                `${new Date(reply.P.createdAt).toLocaleString()} - ${
-                  reply.P.message
-                } (by ${reply.P.createdBy})`,
-            )
-            .join("\n"),
-        }),
       },
     ],
     isInlineEditable: true,

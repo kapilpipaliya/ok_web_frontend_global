@@ -9,6 +9,7 @@ import type {
 
 import { useToast } from "~/components/styled/Toast";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { MutationResult } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
@@ -254,7 +255,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
       if (response.error) {
         showErrorToast(response.error);
       } else {
-        onMutatDataGet(options.graph, options.setGraph, response);
+        onMutatDataGet(options.graph, options.setGraph, response as MutationResult);
         showSuccessToast("Role created successfully");
         onSuccess();
       }

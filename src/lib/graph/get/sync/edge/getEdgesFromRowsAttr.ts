@@ -47,19 +47,32 @@ export function getEdgesFromRowsAttr(
         if (ignoreTables) {
           continue;
         }
-        const expression: NestedExpression = {
-          expression: `->${getToEdge(
-            { P: attribute } as unknown as Vertex,
-            { L: ["$0"] } as unknown as Vertex,
-          )}`,
-        };
+        
+        const expression: NestedExpression = attribute.inward
+          ? {
+              expression: `<-${getInEdge(
+                { P: attribute } as unknown as Vertex,
+                { L: ["$0"] } as unknown as Vertex,
+              )}`,
+            }
+          : {
+              expression: `->${getToEdge(
+                { P: attribute } as unknown as Vertex,
+                { L: ["$0"] } as unknown as Vertex,
+              )}`,
+            };
 
         if (attribute.attributes) {
           const nested = getEdgesFromRowsAttr(attribute.attributes);
           expression.incoming = nested.incoming;
           expression.outgoing = nested.outgoing;
         }
-        outgoing.push(expression);
+        
+        if (attribute.inward) {
+          incoming.push(expression);
+        } else {
+          outgoing.push(expression);
+        }
       } else if (attribute.attributes) {
         processAttributes(attribute.attributes);
       }

@@ -5,6 +5,7 @@ import { batch } from "solid-js";
 import type { GraphInterface } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/Toast";
+import { MutationResult } from "~/cypher/types/MutationArgs";
 import { updateEdgeId } from "~/lib/graph/mutate/core/edge";
 import {
   mergeVertexProperties,
@@ -14,20 +15,7 @@ import {
 export function onMutatDataGet(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  d: {
-    data: {
-      [key in
-        | "deleteEdge"
-        | "deleteVertex"
-        | "insert"
-        | "insertEdge"
-        | "replace"
-        | "replaceEdge"
-        | "replaceEdgeEnd"
-        | "replaceEdgeStart"]?: any;
-    }[];
-    txnId: number;
-  },
+  d: MutationResult,
 ) {
   const { showErrorToast } = useToast();
   batch(() => {

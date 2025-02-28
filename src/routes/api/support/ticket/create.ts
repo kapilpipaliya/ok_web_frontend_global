@@ -18,9 +18,11 @@ export async function POST({ request }: APIEvent) {
         createdAt: datetime()
       })
       WITH t
-      MATCH (status:SupportStatus {key: 'Open'})
-      CREATE (t)-[:SupportSupportStatus]->(status)
-      RETURN t, status
+      OPTIONAL MATCH (status:SupportStatus {key: 'Open'})
+      FOREACH(s IN CASE WHEN status IS NOT NULL THEN [status] ELSE [] END | 
+        CREATE (t)-[:SupportSupportStatus]->(s)
+      )
+      RETURN t
     `;
 
     const result = await dbSession.run(query, {

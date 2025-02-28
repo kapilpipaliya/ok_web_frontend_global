@@ -1,6 +1,6 @@
 import type { Transaction } from "neo4j-driver";
 
-import type { MutationArgs } from "../../types/MutationArgs";
+import type { MutationArgs, MutationResult } from "../../types/MutationArgs";
 
 import { fillOldIdToNewIdMap } from "./fillOldIdToNewIdMap";
 import { handleMutationObject } from "./handleMutationObject";
@@ -36,5 +36,5 @@ export async function mutateData(args: MutationArgs, tx: Transaction) {
     clientToServerVertexIdMap,
     data: txnResult,
     txnId: args.txnId,
-  };
+  } as MutationResult;
 }

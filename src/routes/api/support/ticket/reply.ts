@@ -1,7 +1,10 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { processResult } from "~/cypher/queries/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { Vertex } from "~/lib/graph/graph";
+import { Edge } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -14,7 +17,8 @@ export async function POST({ request }: APIEvent) {
     if (!user) {
       throw new APIError("User not found", 404);
     }
-
+    const nodes: { [key: string]: Vertex } = {};
+    const relationships: { [key: string]: Edge } = {};
     // const data = await newRowAPICall(
     //     parentVertexId,
     //     "SupportUser",
@@ -27,20 +31,18 @@ export async function POST({ request }: APIEvent) {
         message: $message,
         createdAt: datetime(),
         email: $email
-      })<-[:ParentSupport]-(t)
-      RETURN r
+      })-[tr:ParentSupport]->(t)
+      RETURN t, tr, r
     `;
-
-    await dbSession.run(query, { email: user.P.email, message, ticketId });
-
+    const result = await dbSession.run(query, { email: user.P.email, message, ticketId });
+    processResult(result.records, { nodes, relationships }, ["t", "r"], "tr");
     return {
       graph: {
-        edges: {},
-        vertexes: {},
+        edges: relationships,
+        vertexes: nodes,
       },
-      result: {
-        message: "Reply added successfully",
-      },
+      result: [],
+      timestamp: new Date().getTime(),
     };
   } catch (error) {
     return handleAPIError(error);

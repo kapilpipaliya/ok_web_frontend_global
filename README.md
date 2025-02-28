@@ -18,6 +18,8 @@ http://localhost:3000/internal/page/EmailChangeSuccessful
 http://localhost:3000/internal/page/EmailConfirmation
 http://localhost:3000/internal/page/InvitationEmail
 
+http://localhost:3000/support/contact
+
 
 ##Development
 # Getting Started Neo4j

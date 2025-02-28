@@ -1,184 +1,28 @@
+import animateScrollTo from 'animated-scroll-to';
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
+import { MutationResult } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
+import { evalExpression } from "~/lib/expression_eval";
+import { Vertex } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { loadingIconSchema } from "../../role/functions/loadingIconSchema";
-
-export const supportTicketFormSchema = {
-  as: "div",
-  attributes: [
-    loadingIconSchema(),
-    {
-      as: "div",
-      attributes: [
-        {
-          as: "div",
-          attributes: [
-            {
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
-              text: "Status",
-            },
-            {
-              class: PROPERTIES.Css.TextField,
-              collection: "g:'SupportStatus'",
-              componentName: "Select",
-              key: "SupportStatus",
-              labelKey: "::'P.name'",
-              title: "Status",
-            },
-          ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
-        },
-        {
-          as: "div",
-          attributes: [
-            {
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
-              text: "Message",
-            },
-            {
-              class: PROPERTIES.Css.TextField,
-              componentName: "TextArea",
-              key: "message",
-              props: (options: FunctionArgumentType) => ({
-                readonly: true,
-                value: options.data.P.message,
-              }),
-            },
-          ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
-        },
-        {
-          as: "div",
-          attributes: [
-            {
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
-              text: "Previous Replies",
-            },
-            {
-              class: PROPERTIES.Css.TextField,
-              componentName: "TextArea",
-              key: "replies",
-              props: (options: FunctionArgumentType) => ({
-                readonly: true,
-                value: options.data.P.replies
-                  ?.map(
-                    (reply: Vertex) =>
-                      `${new Date(reply.P.createdAt).toLocaleString()} - ${
-                        reply.P.message
-                      } (by ${reply.P.createdBy})`,
-                  )
-                  .join("\n"),
-              }),
-            },
-          ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
-        },
-        {
-          as: "div",
-          attributes: [
-            {
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
-              text: "Add Reply",
-            },
-            {
-              class: PROPERTIES.Css.TextField,
-              componentName: "TextArea",
-              key: "newReply",
-              placeholder: "Enter your reply",
-            },
-          ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
-        },
-      ],
-      class: SETTINGS_CONSTANTS.FORM_CLASS,
-      componentName: "Box",
-    },
-  ],
-  componentName: "Box",
-  props: () => {
-    return {
-      onMount: async (options: FunctionArgumentType) => {
-        try {
-          options.dataContext.modalState[1]("isLoading", true);
-          const response = await postAPI(API.support.getTicketUrl, {
-            id: options.data.id,
-          });
-          if (response.error) {
-            throw new Error(response.error);
-          }
-          options.setGraphData(response.graph, {});
-        } catch (error) {
-          options.showErrorToast((error as Error).message);
-        } finally {
-          options.dataContext.modalState[1]("isLoading", false);
-        }
-      },
-    };
-  },
-};
+import { isAdminRole } from '~/lib/graph/get/sync/auth/isAdminRole';
 
 export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const handleSave = async (options: FunctionArgumentType) => {
-    try {
-      options.dataContext.modalState[1]("isLoading", true);
-      const data = commitTxn(options.txnId, options.graph);
-      if (!data) {
-        return;
-      }
-      const response = await postAPI(API.support.upsertTicketUrl, {
-        data,
-        ticket: options.data,
-      });
-
-      if (response.error) {
-        showErrorToast(response.error);
-      } else {
-        onMutatDataGet(options.graph, options.setGraph, response);
-        showSuccessToast("Support ticket updated successfully");
-        onSuccess();
-      }
-    } catch (error) {
-      showErrorToast((error as Error).message);
-    } finally {
-      options.dataContext.modalState[1]("isLoading", false);
-    }
-  };
-
-  const modalHeaderSchema = {
-    as: "div",
-    attributes: [
-      {
-        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
-        text: "Edit Support Ticket",
-      },
-    ],
-    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box",
-  };
-
-  const modalFooterSchema = {
+  const actionButtonsSchema = {
     as: "div",
     attributes: [
       {
@@ -203,7 +47,336 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         }),
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
+    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS.replace("top", "bottom"),
+    componentName: "Box",
+    props: (options: FunctionArgumentType) => ({
+      hidden: !isAdminRole(options.graph)
+    }),
+  };
+  const chatHistorySchema = {
+    attributes: [
+      {
+        class: SETTINGS_CONSTANTS.LABEL_CLASS,
+        componentName: "Text",
+        text: "Replies",
+      },
+      {
+        as: "div",
+        attributes: [
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "div",
+                attributes: [
+                  {
+                    as: "div",
+                    attributes: [
+                      {
+                        as: "div",
+                        attributes: [
+                          {
+                            as: "div",
+                            attributes: [
+                              {
+                                as: "div",
+                                attributes: [
+                                  {
+                                    as: "div",
+                                    class: "font-weight:bold",
+                                    componentName: "Text",
+                                    props: (options: FunctionArgumentType) => ({
+                                      text: options.data.P.email || "Anonymous",
+                                    }),
+                                  },
+                                  {
+                                    as: "div",
+                                    componentName: "Text",
+                                    props: (options: FunctionArgumentType) => ({
+                                      text: options.data.P.message,
+                                    }),
+                                  },
+                                  {
+                                    as: "div",
+                                    class: "font-size:12px color:base-50",
+                                    componentName: "Text",
+                                    props: (options: FunctionArgumentType) => ({
+                                      text: new Date(options.data.P.createdAt).toLocaleString(),
+                                    }),
+                                  }
+                                ],
+                                componentName: "Box",
+                                props: () => {
+                                  // const isUser = options.data.P.email !== "Support";
+                                  // ${isUser ? 'bg:primary-10' : 'bg:base-10'}
+                                  return {
+                                    class: `display:inline-block p:8 r:6 bg:base-10`,
+                                  };
+                                },
+                              }
+                            ],
+                            componentName: "Box",
+                            props: () => {
+                              // const isUser = options.data.P.email !== "Support";
+                              // isUser ? 'text-align:right' : ''}`
+                              return {
+                                class: `mb:12`,
+                              };
+                            },
+                          }
+                        ],
+                        componentName: "Box",
+                      }
+                    ],
+                    componentName: "Data",
+                    props: (options: FunctionArgumentType) => ({
+                      data: () =>
+                        evalExpression("<-ParentSupport", {
+                          graph: options.graph,
+                          setGraph: options.setGraph,
+                          vertexes: [options.graph.vertexes[options.data.id]],
+                        }).sort((a: Vertex, b: Vertex) => new Date(a.P.createdAt).getTime() - new Date(b.P.createdAt).getTime()),
+                    }),
+                    // emptyState: {
+                    //   as: "div",
+                    //   class: "p:8 text-align:center color:base-50",
+                    //   componentName: "Text",
+                    //   text: "No messages yet",
+                    // },
+                  },
+                ],
+                class: "max-h:300px overflow-y:auto border:1px|solid|base-20 r:6 p:12 bg:base-5 chat-history-container",
+                componentName: "Box",
+              },
+              {
+                as: "div",
+                attributes: [
+                  {
+                    as: "div",
+                    attributes: [
+                      {
+                        class: PROPERTIES.Css.TextField + " flex-grow:1 mr:8",
+                        componentName: "TextArea",
+                        key: "newReply",
+                        placeholder: "Type your reply here...",
+                        props: (options: FunctionArgumentType) => ({
+                          onInput: (e: { target: HTMLTextAreaElement }) => {
+                            options.dataContext.replyState[1]("replyText", e.target.value);
+                          },
+                          value: options.dataContext.replyState[0]?.replyText || "",
+                        }),
+                      },
+                      {
+                        class: "bg:primary color:white p:8|16 r:6",
+                        componentName: "Button",
+                        props: (options: FunctionArgumentType) => ({
+                          disabled: !options.dataContext.replyState[0]?.replyText?.trim(),
+                          onClick: async () => {
+                            const replyText = options.dataContext.replyState[0]?.replyText;
+                            if (!replyText?.trim()) return;
+
+                            try {
+                              options.dataContext.modalState[1]("isLoading", true);
+
+                              // Add reply to the ticket
+                              const response = await postAPI(API.support.replyUrl, {
+                                message: replyText,
+                                ticketId: options.data.id,
+                              });
+
+                              if (response.error) {
+                                throw new Error(response.error);
+                              }
+
+                              // Update the graph with the new data
+                              setGraphData(options.graph, options.setGraph, response.graph, { skipExisting: true });
+
+                              // Clear the input field
+                              options.dataContext.replyState[1]("replyText", "");
+
+                              // Show success message
+                              options.showSuccessToast("Reply sent successfully");
+
+                              // Scroll chat history to the bottom
+                              setTimeout(() => {
+                                const chatHistory = document.querySelector('.chat-history-container');
+                                if (chatHistory) {
+                                  animateScrollTo(chatHistory.scrollHeight, {
+                                    elementToScroll: chatHistory,
+                                  });
+                                }
+                              }, 100);
+                            } catch (error) {
+                              options.showErrorToast((error as Error).message);
+                            } finally {
+                              options.dataContext.modalState[1]("isLoading", false);
+                            }
+                          },
+                        }),
+                        text: "Send",
+                      },
+                    ],
+                    class: "display:flex mt:8",
+                    componentName: "Box",
+                  },
+                ],
+                componentName: "Box",
+              },
+            ],
+            componentName: "Box",
+          },
+        ],
+        componentName: "Box",
+      },
+    ],
+    componentName: "Data",
+    name: "replyState",
+    noRepeat: true,
+    props: () => ({
+      data: createStore({
+        replyText: "",
+      }),
+    }),
+  } as IFormMetaData;
+  const supportTicketFormSchema = {
+    as: "div",
+    attributes: [
+      loadingIconSchema(),
+      {
+        as: "div",
+        attributes: [
+          {
+            as: "div",
+            attributes: [
+              {
+                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                componentName: "Text",
+                text: "Status",
+              },
+              {
+                class: PROPERTIES.Css.TextField,
+                collection: "g:'SupportStatus'",
+                componentName: "Select",
+                key: "SupportStatus",
+                labelKey: "::'P.name'",
+                title: "Status",
+              },
+            ],
+            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            componentName: "Box",
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                componentName: "Text",
+                text: "Message",
+              },
+              {
+                class: PROPERTIES.Css.TextField,
+                componentName: "TextArea",
+                key: "message",
+                props: (options: FunctionArgumentType) => ({
+                  readonly: true,
+                  value: options.data.P.message,
+                }),
+              },
+            ],
+            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            componentName: "Box",
+          },
+          actionButtonsSchema,
+
+        ],
+        class: SETTINGS_CONSTANTS.FORM_CLASS,
+        componentName: "Box",
+      },
+    ],
+    componentName: "Box",
+    props: (options: FunctionArgumentType) => {
+      return {
+        onMount: async () => {
+          try {
+            options.dataContext.modalState[1]("isLoading", true);
+            const response = await postAPI(API.support.getTicketUrl, {
+              id: options.data.id,
+            });
+            if (response.error) {
+              throw new Error(response.error);
+            }
+            options.setGraphData(response.graph, {});
+          } catch (error) {
+            options.showErrorToast((error as Error).message);
+          } finally {
+            options.dataContext.modalState[1]("isLoading", false);
+            // Scroll chat history to the bottom on mount
+            setTimeout(() => {
+              const chatHistory = document.querySelector('.chat-history-container');
+              if (chatHistory) {
+                animateScrollTo(chatHistory.scrollHeight, {
+                  elementToScroll: chatHistory,
+                });
+              }
+            }, 100);
+          }
+        },
+      };
+    },
+  };
+
+  const handleSave = async (options: FunctionArgumentType) => {
+    try {
+      options.dataContext.modalState[1]("isLoading", true);
+      const data = commitTxn(options.txnId, options.graph);
+      if (!data) {
+        return;
+      }
+      const response = await postAPI(API.support.upsertTicketUrl, {
+        data,
+        ticket: options.data,
+      });
+
+      if (response.error) {
+        showErrorToast(response.error);
+      } else {
+        onMutatDataGet(options.graph, options.setGraph, response as MutationResult);
+        showSuccessToast("Support ticket updated successfully");
+        onSuccess();
+      }
+    } catch (error) {
+      showErrorToast((error as Error).message);
+    } finally {
+      options.dataContext.modalState[1]("isLoading", false);
+    }
+  };
+
+  const modalHeaderSchema = {
+    as: "div",
+    attributes: [
+      {
+        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
+        componentName: "Text",
+        text: "Edit Support Ticket",
+      },
+      {
+        as: "button",
+        attributes: [
+          {
+            componentName: "Icon",
+            icon: "ph:x",
+          },
+        ],
+        class: "border:none bg:transparent cursor:pointer color:base-50 hover:color:primary font-size:20px",
+        componentName: "Html",
+        props: (options: FunctionArgumentType) => ({
+          onClick: () => {
+            options.dataContext.modalState[1]("showModal", false);
+          },
+        }),
+      }
+    ],
+    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS + " flex ai:center justify-content:space-between",
     componentName: "Box",
   };
 
@@ -231,7 +404,12 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     attributes: [
                       modalHeaderSchema,
                       supportTicketFormSchema,
-                      modalFooterSchema,
+                      {
+                        as: "div",
+                        attributes: [chatHistorySchema],
+                        class: "p:4",
+                        componentName: "Box",
+                      },
                     ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",
