@@ -60,7 +60,4 @@ Future Tasks:
 - maek advanced filter form generation for data grid.
 
 
-Idea?:
-- Remove isSuper variable? but need to check complex validations.
-
 use https://www.npmjs.com/package/solid-hot-toast instead of solid-toast.

@@ -43,12 +43,12 @@ export async function createUserInSuperDB(
 export async function createUserInUserDB(
   sessionOrTx: Session | Transaction,
   params: Record<string, unknown>,
-  isSuper?: boolean,
+  isSystemUser?: boolean,
 ) {
   // If password is provided, hash it
   let hashedPassword = null;
   let salt = null;
-  if (typeof params.password === "string" && !isSuper) {
+  if (typeof params.password === "string" && !isSystemUser) {
     const hashResult = await hashPassword(params.password);
     hashedPassword = hashResult.hashedPassword;
     salt = hashResult.salt;
@@ -60,15 +60,14 @@ export async function createUserInUserDB(
                 email: $email,
                 password: $hashedPassword,
                 salt: $salt,
-                isSuper: $isSuper,
-                avatar: '',
+                isSystemUser: $isSystemUser,
                 emailConfirmed: false
             }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserResult = await sessionOrTx.run(createUserQuery2, {
     ...params,
     hashedPassword,
-    isSuper: isSuper ?? null,
+    isSystemUser: isSystemUser ?? null,
     salt,
   });
   return convertNodeToJson(createUserResult.records[0].get("u"));

@@ -41,7 +41,7 @@ export async function validateUser(dbSession: Session, uuid: string) {
   }
 
   const user = convertNodeToJson(userExists.records[0].get("u"));
-  if (user.P.isSuper) {
+  if (user.P.isSystemUser) {
     return {
       error: "Super Admin cannot update profile in subdomain",
       status: 404,

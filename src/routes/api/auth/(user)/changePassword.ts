@@ -33,7 +33,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("User not found", 404);
     }
 
-    if (user.isSuper) {
+    if (user.isSystemUser) {
       throw new APIError(
         "Super user password changes not allowed through this interface",
         403,

@@ -109,7 +109,7 @@ async function authenticateUser(
   }
 
   // when system user, check password from system db
-  if (user.P.isSuper) {
+  if (user.P.isSystemUser) {
     return await authenticateSuperUser(user, password);
   }
   return comparePassword(user, password);

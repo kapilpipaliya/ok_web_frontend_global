@@ -3,9 +3,9 @@ import type { APIEvent } from "@solidjs/start/server";
 import { getQuery } from "vinxi/http";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { checkIsSystemUser } from "~/cypher/permissions/checkIsSystemUser";
 import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAccount";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
@@ -45,9 +45,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     // Determine if we need to update across multiple databases
-    const isSystemUser = await checkIsSystemUser(dbSession, uuid, subDomain);
-
-    if (isSystemUser) {
+    if (subDomain === SYSTEM_DB_NAME) {
       // Get all subdomains this user belongs to
       const subdomains = await getSubdomainsForAccount(dbSession, uuid);
 
