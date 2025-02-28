@@ -14,7 +14,7 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";
-import { CommonAddComponent } from "./CommonAddComponent";
+import { CommonAddComponent } from "../variants/header/CommonAddComponent";
 
 export function AddNewRule(
   props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>,

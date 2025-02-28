@@ -14,7 +14,7 @@ import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
-import { CommonAddComponent } from "../../rules/CommonAddComponent";
+import { CommonAddComponent } from "./CommonAddComponent";
 
 export function AddNewVariant(
   props: Readonly<{ onClose: (rowVertex?: Vertex) => void }>,
