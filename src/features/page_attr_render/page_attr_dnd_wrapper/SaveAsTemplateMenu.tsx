@@ -21,6 +21,7 @@ import {
   parentComponentAttribute,
   parentTemplateAttribute,
 } from "~/lib/meta/base/Comp";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -167,6 +168,8 @@ export function SaveAsTemplateMenu(
       </Show>
 
       <DialogFooter
+        buttonText="Save"
+        class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
         disabled={!templateName()}
         onClick={() => saveAsTemplate(templateName())}
       />

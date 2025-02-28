@@ -3,12 +3,12 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { updateVertex } from "../core/setGraphData";
-import { setSelectionValue } from "../selection/setSelectionValue";
 import {
   addNewVertex,
   mergeVertexProperties,
   replaceVertexProperties,
 } from "../core/vertex";
+import { setSelectionValue } from "../selection/setSelectionValue";
 
 interface UserData {
   profileImage?: Vertex;

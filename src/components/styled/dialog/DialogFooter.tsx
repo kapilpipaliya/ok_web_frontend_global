@@ -7,17 +7,17 @@ export function DialogFooter(
   props: JSX.IntrinsicElements["button"] & {
     buttonText?: string;
     children?: any;
+    containerClass?: string;
     disabled?: boolean;
   },
 ) {
-  const [local, buttonProps] = splitProps(props, ["children", "buttonText"]);
+  const [local, buttonProps] = splitProps(props, ["children", "buttonText", "containerClass"]);
 
   return (
-    <div class="flex ai:center gap:0.50rem  mb:6">
+    <div class={`flex ai:center gap:0.50rem ${local.containerClass} mb:6`}>
       <Show when={local.children}>{local.children}</Show>
       <Show when={!local.children}>
         <button
-          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
           {...buttonProps}
           type="button"
         >

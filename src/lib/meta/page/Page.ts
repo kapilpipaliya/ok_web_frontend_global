@@ -54,6 +54,7 @@ export const Page: IFormMetaData = {
         {
           collection: "g:'File'",
           componentName: "Select",
+          hidden: true,
           // hidden: true,
           key: "Preview",
           label: "File",
@@ -143,11 +144,13 @@ export const Page: IFormMetaData = {
         },
         {
           ...parentComponentAttribute,
+          hidden: true,
           hideInGrid: true,
           inward: true,
         },
         {
           ...parentTemplateAttribute,
+          hidden: true,
           hideInGrid: true,
           inward: true,
         },

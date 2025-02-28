@@ -19,7 +19,7 @@ export function SettingsWrapper() {
     // }}
     >
       <div
-        class={`border:1|solid|lightgrey flex:column ${STYLES.overflow} p:5 r:5|5|5|5`}
+        class={`px:2`}
       >
         <SettingTabs />
       </div>

@@ -2,6 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { type JSXElement, Show } from "solid-js";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
@@ -43,7 +44,7 @@ export function SaveCancelButton(
       class={`${props.buttonAlign ? `jc:${props.buttonAlign}` : "jc:start"} flex`}
     >
       <button
-        class="danger border-red color-red mr-7"
+        class={`${SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS} mr:7`}
         onClick={onCancel}
         type="button"
       >
@@ -51,7 +52,12 @@ export function SaveCancelButton(
       </button>
       <Show
         fallback={
-          <button disabled={props.disabled} onClick={onSubmit} type="button">
+          <button
+            class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+            disabled={props.disabled}
+            onClick={onSubmit}
+            type="button"
+          >
             Save
           </button>
         }

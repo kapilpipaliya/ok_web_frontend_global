@@ -28,7 +28,7 @@ export const SETTINGS_CONSTANTS = {
       TEXT_CLASS: "font-size:18 font-weight:500",
     },
     OVERLAY_CLASS:
-      "position:fixed top:0 left:0 w:100% h:100% bg:base-10 opacity:50 z:1",
+      "position:fixed top:0 left:0 w:100% h:100% bg:base-10 opacity:0.5",
   },
   SAVE_BUTTON_CLASS:
     "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",

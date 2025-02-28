@@ -8,8 +8,8 @@ import { TableInputField } from "~/components/fields/table_field/TableInputField
 import { useZIndex } from "~/components/fields/ZIndex";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
+import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 

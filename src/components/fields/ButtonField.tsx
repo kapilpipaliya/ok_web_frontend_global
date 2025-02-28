@@ -18,9 +18,9 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
-import { getNamedIndex } from "~/lib/graph/transaction/value/getNamedIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
+import { getNamedIndex } from "~/lib/graph/transaction/value/getNamedIndex";
 import { createLongPress } from "~/lib/hooks/createLongPress";
 
 import type { FunctionArgumentType } from "../form/FieldSchemaType";

@@ -18,16 +18,16 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { htmlTags } from "~/lib/dom/htmlTags";
+import {  htmlTagsTree } from "~/lib/dom/htmlTags";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/expression/getPropsFromMetaExpression";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
-import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import {
   addNewVertex,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/core/vertex";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
@@ -195,7 +195,8 @@ function createVertices(
         componentName: "Select",
         displayName: "As",
         key: "as",
-        options: htmlTags.map((element) => ({ id: element, label: element })),
+        // options: htmlTags.map((element) => ({ id: element, label: element })),
+        options: htmlTagsTree.children,
         saveValue: true,
       },
     },

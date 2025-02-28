@@ -8,8 +8,8 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex, deleteVertex } from "~/lib/graph/mutate/core/vertex";
 import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
-import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
+import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 

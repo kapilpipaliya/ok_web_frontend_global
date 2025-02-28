@@ -2,6 +2,7 @@ import { createSignal, Show } from "solid-js";
 
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 
+import { SETTINGS_CONSTANTS } from "../settings/constants";
 import { ThemeConfigDialog } from "./theme_config/ThemeConfigDialog";
 
 export function AddNewThemeDialog() {
@@ -11,6 +12,7 @@ export function AddNewThemeDialog() {
     <>
       <DialogFooter
         buttonText="Add New Theme"
+        class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
         onClick={() => setShowDialog(true)}
         ref={setButtonRef}
       />

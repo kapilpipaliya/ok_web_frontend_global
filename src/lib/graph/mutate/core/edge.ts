@@ -10,8 +10,8 @@ import {
   getEdgeOldIdToNewIdMap,
   getVertexOldIdToNewIdMap,
 } from "../../get/sync/store/getGlobalStore";
-import { getLastTxnIndex } from "../../transaction/value/getLastTxnIndex";
 import { transactionDetailAdd } from "../../transaction/core/transactionDetailAdd";
+import { getLastTxnIndex } from "../../transaction/value/getLastTxnIndex";
 
 // TODO: is error is handle in all functions?
 export function addNewEdge(

@@ -46,24 +46,24 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { createCompContextVertex } from "~/lib/graph/mutate/vertex/createCompContextVertex";
-import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
-import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
-import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
-import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import {
   addNewVertex,
   deleteVertex,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/core/vertex";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
+import { createMeta } from "~/lib/graph/mutate/form/createMeta";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { createCompContextVertex } from "~/lib/graph/mutate/vertex/createCompContextVertex";
+import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { saveStepIndex } from "~/lib/graph/transaction/steps/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/steps/setPreventUndoAtOrBeforeIndex";
+import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import {
   parentComponentAttribute,
   parentTemplateAttribute,

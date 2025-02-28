@@ -45,8 +45,8 @@ import {
   useGraph,
   type Vertex,
 } from "~/lib/graph/graph";
-import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 import type {
   ComponentNameType,

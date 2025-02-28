@@ -1,8 +1,8 @@
 import { createSignal, For, type JSX, onCleanup } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
-import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
+import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
 
 import { IconButton } from "./IconButton";
 import { DIMENSIONS, ResizableContainer } from "./ResizableDivView";

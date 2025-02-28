@@ -9,7 +9,6 @@ import { usePreviewContext } from "~/features/page_designer/context/PreviewConte
 import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import {
   addNewVertex,
@@ -17,6 +16,7 @@ import {
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/core/vertex";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 import {

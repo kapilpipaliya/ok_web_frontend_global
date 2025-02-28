@@ -10,6 +10,7 @@ import { generate401RedirectUrl } from "./lib/api/endpoints";
 
 // https://docs.solidjs.com/solid-start/guides/security
 // https://github.com/atilafassina/shieldwall
+// Note: this authorization will not work in client side
 export default createMiddleware({
   onRequest: [
     csrf,

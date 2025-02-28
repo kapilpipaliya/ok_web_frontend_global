@@ -8,8 +8,8 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
-import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";

@@ -14,8 +14,8 @@ import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import { getCompanyLogoVertex } from "~/lib/graph/get/sync/company/getCompanyLogoVertex";
 import { useGraph } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { profileImage, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";

@@ -4,7 +4,9 @@ import type { FileManagerObject } from "~/features/file_manager/FileManagerConte
 import type { Vertex } from "~/lib/graph/graph";
 
 import { CustomModal } from "~/components/styled/CustomModal";
+import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import FileManager from "~/features/file_manager/FileManager";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function FilePickerModal(props: {
   onFileSelected: (selectedFile: Vertex) => void;
@@ -17,17 +19,15 @@ export function FilePickerModal(props: {
     <CustomModal
       dialogClass="w:90vw r:10px p:0 h:90vh flex flex:column"
       footer={() => (
-        <div class="flex ai:center jc:center mt:auto">
-          <div class="b:1.5px|solid|lightseagreen ml:auto r:5">
-            <button
-              class=""
-              onClick={() => props.onFileSelected(props.selectedFileVertex[0])}
-              type="button"
-            >
-              Select
-            </button>
-          </div>
-        </div>
+        <DialogFooter
+          buttonText="Select"
+          class={`${SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS} ml:auto mr:8`}
+          containerClass="mt:auto"
+          onClick={() => {
+            return props.onFileSelected(props.selectedFileVertex[0]);
+          }}
+          type="button"
+        />
       )}
       isCloseOnOutsideClick={false}
       open={props.open}

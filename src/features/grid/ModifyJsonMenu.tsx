@@ -11,6 +11,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function ModifyJsonMenu(props: {
   item: Vertex;
@@ -102,6 +103,8 @@ export function ModifyJsonMenu(props: {
       </Show>
 
       <DialogFooter
+        buttonText="Save"
+        class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
         disabled={!jsonData()}
         onClick={() => modifyJson(jsonData())}
       />

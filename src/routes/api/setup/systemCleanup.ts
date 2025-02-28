@@ -1,8 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDriver } from "~/cypher/core/driver";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { validateSuperUser } from "~/cypher/permissions/validateSuperUser";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 // Important security notes:
 // This is a destructive operation that cannot be undone

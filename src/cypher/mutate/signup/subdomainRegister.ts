@@ -2,8 +2,8 @@ import type { Node, Session, Transaction } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { getDriver } from "~/cypher/core/driver";
-import { syncNodesAPICall } from "~/cypher/mutate/sync";
 import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
+import { syncNodesAPICall } from "~/cypher/mutate/sync";
 
 import { createDatabase } from "./createDatabase";
 import { createRootFolder } from "./createRootFolder";

@@ -207,18 +207,21 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         attributes: [
           addEditButtonSchema("User"),
           {
-            as: "div",
-            attributes: [],
-            class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
-            componentName: "Box",
-            props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.showModal,
-            }),
-          },
-          {
             attributes: [
               {
                 attributes: [
+                  {
+                    as: "div",
+                    attributes: [],
+                    class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+                    componentName: "Box",
+                    props: (options: FunctionArgumentType) => ({
+                      hidden: !options.dataContext.modalState[0]?.showModal,
+                      style: {
+                        "z-index": options.zIndex,
+                      },
+                    }),
+                  },
                   {
                     as: "dialog",
                     attributes: [

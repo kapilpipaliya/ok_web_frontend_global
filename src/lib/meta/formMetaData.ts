@@ -54,7 +54,10 @@ FormMetaData.Page.attributes.push({
   hidden: true,
 });
 // To load all the rules when the page is loaded.
-FormMetaData.Page.attributes.push(rulesMetaAttribute!);
+FormMetaData.Page.attributes.push({
+  ...rulesMetaAttribute!,
+  hidden: true,
+});
 
 FormMetaData.Form = {
   attributes: [

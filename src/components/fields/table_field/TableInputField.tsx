@@ -21,12 +21,12 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/entity/sortVertexesByPosition";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
 import {
   addNewVertex,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/core/vertex";
+import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";

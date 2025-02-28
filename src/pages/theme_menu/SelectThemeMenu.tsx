@@ -11,9 +11,9 @@ import {
   getGlobalThemeVertex,
 } from "~/lib/graph/get/sync/theme/getGlobalThemeVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
 import { handleDataSubmission } from "~/lib/graph/mutate/data/handleDataSubmission";
-import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { GlobalSetting } from "~/lib/meta/base/GlobalSetting";

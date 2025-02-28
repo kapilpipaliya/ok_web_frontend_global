@@ -24,7 +24,7 @@ export function FormElementsWrapper() {
           onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isLeftOpen: false })}
         />
       </ZIndex> */}
-      <div class={"border:1px|solid|lightgrey r:5|5|5|5"}>
+      <div class={"px:2"}>
         <FormElementTabs />
       </div>
     </aside>

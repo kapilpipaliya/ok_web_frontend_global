@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { batch, createSignal, Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
+import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { TextEditor } from "~/features/css_editor/CSSEditor/TextEditor";
 import { StyleEditor } from "~/features/css_editor/StyleEditor/StyleEditor";
@@ -25,7 +26,6 @@ import { cssStateToString } from "../utils/cssStateToString";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { AddNewCssState } from "./AddNewCssState";
 import { ResetButton } from "./ResetButton";
-
 const defaultStateLabel = "Default";
 
 export function CSSPropertiesEditor() {
@@ -37,6 +37,7 @@ export function CSSPropertiesEditor() {
   const formId = useFormContext();
   const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   let buttonRef: HTMLInputElement;
+  let addNewStateButtonRef: HTMLButtonElement;
 
   function getSelectedValues() {
     const label =
@@ -134,6 +135,7 @@ export function CSSPropertiesEditor() {
         <button
           class="ai:center d:inline-flex"
           onClick={handleAddNewClick}
+          ref={addNewStateButtonRef!}
           title="Add New State"
         >
           <Icon height={21} icon="ph:plus" noobserver width={21} />
@@ -146,12 +148,7 @@ export function CSSPropertiesEditor() {
           title="State Selectors"
         />
         <Show when={showDropdown()}>
-          <ZIndex>
-            <div
-              class={
-                "b:1px|solid|secondary color:#333 my:6 p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"
-              }
-            >
+          <DropdownMenu parentRef={addNewStateButtonRef!} placement="bottom-end">
               <div
                 class={`${
                   Object.keys(cssState[state()] || {}).length > 0
@@ -161,8 +158,7 @@ export function CSSPropertiesEditor() {
               >
                 <AddNewCssState onClose={() => setShowDropdown(false)} />
               </div>
-            </div>
-          </ZIndex>
+          </DropdownMenu>
         </Show>
       </div>
       <StyleEditor />

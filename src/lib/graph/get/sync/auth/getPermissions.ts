@@ -1,6 +1,6 @@
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { evalExpression } from "~/lib/expression_eval";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
+import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 
 export function getPermissions(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];

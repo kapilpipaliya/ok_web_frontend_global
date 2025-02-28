@@ -25,7 +25,7 @@ export function PageTabBar(props: {
 }) {
   return (
     <header class={toolBarClass}>
-      <div class="flex ai:center gap:6">
+      <div class="flex ai:center gap:2">
         <UndoRedoIcons formStoreId={props.formStoreId} />
         <ResizeViewButtons
           formStoreId={props.formStoreId}
@@ -40,7 +40,7 @@ export function PageTabBar(props: {
                 <MiddleSectionButtons />
               </div>
             </Show> */}
-      <div class="flex ai:center gap:6">
+      <div class="flex ai:center gap:2">
         <SaveIconButton formStoreId={props.formStoreId} />
         <PreviewButton formStoreId={props.formStoreId} />
         <RefreshButton handleRefresh={props.handleRefresh} />

@@ -11,8 +11,8 @@ import {
   getEdgeOldIdToNewIdMap,
   getVertexOldIdToNewIdMap,
 } from "../../get/sync/store/getGlobalStore";
-import { getLastTxnIndex } from "../../transaction/value/getLastTxnIndex";
 import { transactionDetailAdd } from "../../transaction/core/transactionDetailAdd";
+import { getLastTxnIndex } from "../../transaction/value/getLastTxnIndex";
 
 // add a new vertex to the graph
 export function addNewVertex(

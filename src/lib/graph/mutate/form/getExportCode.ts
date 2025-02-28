@@ -7,9 +7,9 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/styled/Toast";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
+import { getToEdge } from "../../get/sync/edge/getToEdge";
 import { findVertexByLabelAndUniqueId } from "../../get/sync/entity/findVertex";
 import { getPkForCollection } from "../../get/sync/entity/getPkForCollection";
-import { getToEdge } from "../../get/sync/edge/getToEdge";
 import { getSublistRows, getSublistRowsForType } from "./addNewRow";
 
 export function getExportCode(

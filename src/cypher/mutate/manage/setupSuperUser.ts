@@ -4,12 +4,12 @@ import { v7 as uuidv7 } from "uuid";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { SYSTEM_DB_NAME } from "~/cypher/boltConstant";
-import { convertNodeToJson } from "~/cypher/convertNodeToJson";
-import { getDriver } from "~/cypher/driver";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { getDriver } from "~/cypher/core/driver";
+import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
 import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
 import { hashPassword } from "~/lib/auth/password";
-import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
 
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";

@@ -1,7 +1,9 @@
 import { createSignal, Show } from "solid-js";
 
 import { CustomModal } from "~/components/styled/CustomModal";
+import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { IconButton } from "~/components/styled/IconButton";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 interface IframeHelpDialogProps {
   icon?: string;
@@ -30,13 +32,15 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
           bodyClass="h:100%"
           dialogClass="w:90vw r:10px p:0 h:90vh flex flex:column"
           footer={() => (
-            <div class="flex ai:center jc:center mt:auto">
-              <div class="b:1.5px|solid|lightseagreen ml:auto r:5">
-                <button class="" onClick={() => setOpen(false)} type="button">
-                  Close
-                </button>
-              </div>
-            </div>
+            <DialogFooter
+              buttonText="Close"
+              class={`${SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS} ml:auto mr:8 mt:4`}
+              containerClass="mt:auto"
+              onClick={() => {
+                setOpen(false);
+              }}
+              type="button"
+            />
           )}
           isCloseOnOutsideClick={true}
           open={open}
