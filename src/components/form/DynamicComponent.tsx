@@ -34,7 +34,6 @@ import {
   usePreviewContext,
 } from "~/features/page_designer/context/PreviewContext";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
-import { evaluateRule } from "~/features/page_designer/rules/functions/evaluateRule";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
@@ -361,27 +360,6 @@ export function DynamicComponent(
       }
       if (property === "hidden" && previewStore.isDesignMode) {
         continue;
-      }
-      if (formVertex()?.P.formDataId && rule) {
-        try {
-          values[property] = evaluateRule(
-            rule,
-            graph.vertexes[formVertex()?.P.formDataId!],
-            graph,
-            setGraph,
-          );
-          if (property.toLowerCase().endsWith("class")) {
-            values[property] = cssStateToString(
-              values[property],
-              { P: { key: property } } as unknown as Vertex,
-              props.meta,
-              graph,
-            );
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_e) {
-          /* empty */
-        }
       }
     }
 

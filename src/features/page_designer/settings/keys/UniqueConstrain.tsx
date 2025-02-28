@@ -7,8 +7,8 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { generateTableInputMeta } from "../../rules/functions/generateTableInputMeta";
-import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
+import { generateTableInputMeta } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/generateTableInputMeta";
+import { modifyFieldMetaAllFields } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/modifyFieldMetaAllFields";
 
 export function UniqueConstrains() {
   const [graph, setGraph] = useGraph();

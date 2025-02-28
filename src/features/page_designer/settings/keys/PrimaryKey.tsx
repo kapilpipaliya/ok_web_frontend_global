@@ -5,7 +5,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { modifyFieldMetaAllFields } from "../../rules/functions/modifyFieldMetaAllFields";
+import { modifyFieldMetaAllFields } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/modifyFieldMetaAllFields";
 
 export function PrimaryKey() {
   const [graph, setGraph] = useGraph();

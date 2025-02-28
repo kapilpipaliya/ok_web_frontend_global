@@ -13,8 +13,8 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 
-import { generateTableInputMeta } from "../rules/functions/generateTableInputMeta";
-import { Overlay } from "../rules/Overlay";
+import { generateTableInputMeta } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/generateTableInputMeta";
+import { Overlay } from "../settings/properties/formgroup/permission_field/Overlay";
 
 const getMetaAttributes = (selectedVariant?: null | Vertex) => {
   let metaAttribute = klona(

@@ -4,8 +4,8 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { Label } from "../Label";
-import { SelectRelation } from "../rule_field/SelectRelation";
 import { ConfigurePermissionButton } from "./ConfigurePermissionButton";
+import {DynamicComponent} from "~/components/form/DynamicComponent";
 
 interface SelectPermissionFieldProps {
   meta: Vertex;
@@ -39,9 +39,12 @@ export function SelectPermissionField(props: SelectPermissionFieldProps) {
         <Label meta={props.meta} />
       </span>
       <div class="flex f:15 flex:1 gap:1px">
-        <SelectRelation
+        <DynamicComponent
           data={props.selectedLayout}
+          isNoPermissionCheck={true}
+          isRealTime={false}
           meta={meta}
+          noLabel
           txnId={props.txnId}
         />
         <ConfigurePermissionButton title="All Permissions" />

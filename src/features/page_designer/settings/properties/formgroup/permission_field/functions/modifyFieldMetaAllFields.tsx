@@ -4,7 +4,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { generateFormMetaAttributes } from "../../functions/generateFormMetaAttributes";
+import { generateFormMetaAttributes } from "../../../../../functions/generateFormMetaAttributes";
 
 export function modifyFieldMetaAllFields(
   attribute: FieldAttribute,

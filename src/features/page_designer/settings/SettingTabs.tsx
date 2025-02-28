@@ -20,7 +20,6 @@ import { NameKey } from "./keys/NameKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Permission } from "./permission/Permission";
-import { Rules } from "./rules/Rules";
 import { FormStatus } from "./status/FormStatus";
 import { TabButton } from "./TabButton";
 import { Variants } from "./variants/Variants";
@@ -68,7 +67,7 @@ export function SettingTabs() {
       baseTabs.push("Variants");
     }
     if (formType === "Form" || formType === "Page") {
-      baseTabs.push("Rules", "Permission");
+      baseTabs.push("Permission");
     }
     return baseTabs;
   });
@@ -156,9 +155,6 @@ export function SettingTabs() {
             </Show>
             <Show when={layoutStore().selectedTab === "Permission"}>
               <Permission />
-            </Show>
-            <Show when={layoutStore().selectedTab === "Rules"}>
-              <Rules />
             </Show>
             <Show when={layoutStore().selectedTab === "Variants"}>
               <Variants />
