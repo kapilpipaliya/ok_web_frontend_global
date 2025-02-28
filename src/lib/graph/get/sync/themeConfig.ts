@@ -1,6 +1,6 @@
 import { variables } from "@master/css";
 
-import type { Vertex } from "../../lib/graph/graph";
+import type { Vertex } from "../../graph";
 
 export function themeConfig(themeVertex?: Vertex) {
   const themeConfig = themeVertex?.P?.data;

@@ -10,7 +10,7 @@ import { createAppState } from "~/createAppState";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/styled/LoaderSimple";
 import { Toaster } from "./components/styled/solid-toast/src";
-import { themeConfig } from "./cypher/get/themeConfig";
+import { themeConfig } from "./lib/graph/get/sync/themeConfig";
 import { getGlobalThemeVertex } from "./lib/graph/get/sync/getGlobalThemeVertex";
 import { GraphContext } from "./lib/graph/graph";
 
