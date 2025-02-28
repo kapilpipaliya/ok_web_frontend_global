@@ -2,17 +2,17 @@ import { createAsync, useNavigate } from "@solidjs/router";
 import { createEffect, Match, type ParentProps, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { UserData } from "~/lib/graph/mutate/loadUser";
+import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
-import { handleUserNavigation } from "~/lib/graph/mutate/loadUser";
-import { setUserData } from "~/lib/graph/mutate/setUserData";
+import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
+import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 
 import { getInitialData } from "./cypher/get/getInitialData";
-import { getGlobalStore } from "./lib/graph/get/sync/getGlobalStore";
+import { getGlobalStore } from "./lib/graph/get/sync/store/getGlobalStore";
 import { type GlobalProperties, useGraph } from "./lib/graph/graph";
-import { setGraphData } from "./lib/graph/mutate/setGraphData";
-import { mergeVertexProperties } from "./lib/graph/mutate/vertex";
+import { setGraphData } from "./lib/graph/mutate/core/setGraphData";
+import { mergeVertexProperties } from "./lib/graph/mutate/core/vertex";
 import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
 
 interface GetInitialDataProps extends ParentProps {

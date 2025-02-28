@@ -4,10 +4,10 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { getGlobalThemeVertex } from "~/lib/graph/get/sync/getGlobalThemeVertex";
-import { themeConfig } from "~/lib/graph/get/sync/themeConfig";
+import { getGlobalThemeVertex } from "~/lib/graph/get/sync/theme/getGlobalThemeVertex";
+import { themeConfig } from "~/lib/graph/get/sync/theme/themeConfig";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { deleteRow } from "~/lib/graph/mutate/deleteRow";
+import { deleteRow } from "~/lib/graph/mutate/vertex/deleteRow";
 import { STYLES } from "~/pages/settings/constants";
 
 import type { DBMessage } from "./types";

@@ -4,10 +4,10 @@ import { batch } from "solid-js";
 
 import { validateInput } from "~/features/page_designer/settings/properties/validations/validateInput";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
-import { commitTxn } from "../../transaction/commitTxn";
-import { generateNewTxnId } from "../../transaction/generateNewTxnId";
+import { commitTxn } from "../../transaction/core/commitTxn";
+import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
 import { onChangeHandler } from "./onChangeHandler";
 
 export function setValueGlobal(

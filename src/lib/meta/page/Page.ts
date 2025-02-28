@@ -5,7 +5,7 @@ import type {
 } from "~/lib/meta/FormMetadataType";
 
 import { evalExpression } from "~/lib/expression_eval";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 import {

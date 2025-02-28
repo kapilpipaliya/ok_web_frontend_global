@@ -12,10 +12,10 @@ import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { getCompanyLogoVertex } from "~/lib/graph/get/sync/getCompanyLogoVertex";
+import { getCompanyLogoVertex } from "~/lib/graph/get/sync/company/getCompanyLogoVertex";
 import { useGraph } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { profileImage, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
@@ -26,6 +26,7 @@ export function CompanyLogoSettings() {
   const { showErrorToast, showSuccessToast } = useToast();
   let fileManagerStore: FileManagerObject;
 
+  // because we are loading custom settings, we need to create a new vertex
   const formDataId = uuidv7();
   addNewVertex(
     0,

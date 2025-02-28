@@ -12,8 +12,11 @@ import {
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { getChannel, handleChannelMessage } from "~/lib/graph/mutate/channel";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import {
+  getChannel,
+  handleChannelMessage,
+} from "~/lib/graph/mutate/core/channel";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 export default function PageShareView() {
   const queryParams = new URLSearchParams(window.location.search);

@@ -4,8 +4,8 @@ import type { GraphInterface } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 
 export async function getTableData(
   graph: Store<GraphInterface>,

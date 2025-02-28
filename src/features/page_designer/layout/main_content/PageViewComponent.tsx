@@ -4,7 +4,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {
   type PageLayoutObject,

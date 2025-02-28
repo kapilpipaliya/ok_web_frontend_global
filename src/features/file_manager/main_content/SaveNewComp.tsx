@@ -12,9 +12,9 @@ import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrain
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";

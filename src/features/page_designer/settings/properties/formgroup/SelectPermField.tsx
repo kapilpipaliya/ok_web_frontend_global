@@ -7,10 +7,10 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { getToEdge } from "~/lib/graph/get/sync/edge/getToEdge";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import { addNewEdge, newEdge } from "~/lib/graph/mutate/core/edge";
+import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 
 import { RulesModal } from "../../../rules/RulesModal";
 import { AddNewRule } from "../../rules/AddNewRule";

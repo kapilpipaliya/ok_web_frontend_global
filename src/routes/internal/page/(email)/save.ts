@@ -6,10 +6,10 @@ import { createAppState } from "~/createAppState";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { getEmailTemplateSchema } from "~/lib/email/saveEmailTemplates";
+import { getEmailTemplateSchema } from "~/cypher/mutate/email/saveEmailTemplates";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 // used for saving email templates for future use
 export default async function GET({ request }: APIEvent) {

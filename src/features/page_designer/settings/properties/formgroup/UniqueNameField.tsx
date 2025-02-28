@@ -4,7 +4,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";
 import { isUniqueIdUsed } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { Label } from "./Label";

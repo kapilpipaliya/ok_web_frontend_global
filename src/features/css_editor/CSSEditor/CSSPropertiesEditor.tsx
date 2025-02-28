@@ -5,9 +5,9 @@ import { reconcile } from "solid-js/store";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { TextEditor } from "~/features/css_editor/CSSEditor/TextEditor";
 import { StyleEditor } from "~/features/css_editor/StyleEditor/StyleEditor";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { deleteEdge } from "~/lib/graph/mutate/edge";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge";
 
 import type { CSSStore } from "../context/CssEditorContext";
 

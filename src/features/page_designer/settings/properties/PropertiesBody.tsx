@@ -7,7 +7,7 @@ import { FunctionEditor } from "~/features/page_designer/settings/properties/Fun
 import { JsonEditorFieldComponent } from "~/features/page_designer/settings/properties/JsonEditorField";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";

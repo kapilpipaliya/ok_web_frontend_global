@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useGraph } from "~/lib/graph/graph";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { STYLES } from "~/pages/settings/constants";

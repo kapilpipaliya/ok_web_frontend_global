@@ -11,7 +11,7 @@ import {
   useDesignerFormIdContext,
 } from "~/features/page_designer/context/LayoutContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { AttrConfigPopOver } from "./AttrConfigPopOver";

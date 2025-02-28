@@ -7,10 +7,10 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { deleteVertex } from "~/lib/graph/mutate/vertex";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 import type { DataGridState } from "../DataGridContext";
 

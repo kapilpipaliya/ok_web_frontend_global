@@ -104,3 +104,5 @@ export const STYLES = {
       "center bg:base-60 color:base-5 f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1",
   },
 } as const;
+export const APP_VERSION = "1.0.0";
+export const APP_NAME = "DecodeUI";

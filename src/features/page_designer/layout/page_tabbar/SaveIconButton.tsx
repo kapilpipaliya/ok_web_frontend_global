@@ -10,14 +10,14 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { evalExpression } from "~/lib/expression_eval";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { getToEdge } from "~/lib/graph/get/sync/edge/getToEdge";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+import { addNewEdge, newEdge } from "~/lib/graph/mutate/core/edge";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
+import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 
 export function SaveIconButton(props: { formStoreId: string }) {

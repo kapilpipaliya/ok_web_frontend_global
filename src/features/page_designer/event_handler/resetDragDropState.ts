@@ -5,7 +5,7 @@ import { batch } from "solid-js";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 export function resetDragDropState(
   layoutStoreVertex: Vertex<PageLayoutObject>,

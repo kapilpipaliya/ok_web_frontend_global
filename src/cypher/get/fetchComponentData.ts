@@ -3,9 +3,9 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 export async function fetchComponentData(

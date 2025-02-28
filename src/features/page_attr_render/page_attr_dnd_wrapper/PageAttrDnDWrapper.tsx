@@ -24,7 +24,7 @@ import { resetDragDropState } from "~/features/page_designer/event_handler/reset
 import { getBoundingRectChildren } from "~/features/page_designer/functions/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/getChildrenAttrs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
 import { BorderOverlay } from "./BorderOverlay";

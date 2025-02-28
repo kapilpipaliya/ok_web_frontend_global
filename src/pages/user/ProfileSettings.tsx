@@ -8,12 +8,12 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
+import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,
   replaceVertexProperties,
-} from "~/lib/graph/mutate/vertex";
+} from "~/lib/graph/mutate/core/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { getUserRPC } from "~/routes/api/auth/(user)/getUserRPC";

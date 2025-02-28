@@ -21,7 +21,7 @@ import {
 } from "~/components/form/context/FormContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import type { FormField, GenericField } from "../constants/FieldSchemaType";
 

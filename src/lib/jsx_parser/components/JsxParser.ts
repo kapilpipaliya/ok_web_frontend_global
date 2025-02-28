@@ -8,7 +8,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { componentDrop } from "~/features/page_designer/functions/drop/componentDrop";
 import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPropertyValueGlobal";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
 import {
   canHaveChildren,

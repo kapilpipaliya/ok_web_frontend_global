@@ -9,11 +9,10 @@ import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import {
   addNewVertex,
   replaceVertexProperties,
-} from "~/lib/graph/mutate/vertex";
+} from "~/lib/graph/mutate/core/vertex";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
@@ -23,6 +22,7 @@ export function GeneralSettings() {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
+  // because we are loading custom settings, we need to create a new vertex
   const formDataId = uuidv7();
   addNewVertex(
     0,
@@ -146,21 +146,6 @@ export function GeneralSettings() {
           graph,
           setGraph,
           data.settings.P,
-        );
-      }
-
-      // Create company logo vertex and edge if exists
-      if (data.companyLogo) {
-        if (!graph.vertexes[data.companyLogo.id]) {
-          addNewVertex(0, data.companyLogo, graph, setGraph);
-        }
-        setSelectionValue(
-          0,
-          graph.vertexes[formDataId],
-          graph,
-          setGraph,
-          { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanyLogo" } },
-          data.companyLogo.id,
         );
       }
     } catch (err) {

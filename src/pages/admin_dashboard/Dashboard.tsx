@@ -3,7 +3,7 @@ import { createEffect, createSignal, onCleanup } from "solid-js";
 
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { DataGrid } from "~/features/grid/DataGrid";
-import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
+import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
 
 export default function AdminDashboard() {

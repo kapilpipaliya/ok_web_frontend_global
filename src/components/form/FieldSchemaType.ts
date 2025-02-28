@@ -7,7 +7,7 @@ import type {
   PageRenderStore,
 } from "~/features/page_attr_render/context/PageRenderContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import type { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import type { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 import type { FormStoreObject } from "./context/FormContext";
 

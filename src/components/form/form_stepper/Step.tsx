@@ -3,7 +3,7 @@ import { type Accessor, createMemo } from "solid-js";
 import { useToast } from "~/components/styled/Toast";
 import { getChildrenAttrs } from "~/features/page_designer/functions/getChildrenAttrs";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import type { FormStoreObject } from "../context/FormContext";
 

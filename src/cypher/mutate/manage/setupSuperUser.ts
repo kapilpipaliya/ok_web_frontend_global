@@ -9,7 +9,7 @@ import { convertNodeToJson } from "~/cypher/convertNodeToJson";
 import { getDriver } from "~/cypher/driver";
 import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
 import { hashPassword } from "~/lib/auth/password";
-import { saveAllEmailTemplates } from "~/lib/email/saveEmailTemplates";
+import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
 
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";

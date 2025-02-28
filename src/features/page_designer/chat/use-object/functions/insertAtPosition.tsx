@@ -8,10 +8,10 @@ import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
 import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/openInNewInternalTab";
 import { handleDropAtPosition } from "~/features/page_designer/functions/handleDropAtPosition";
 import { evalExpression } from "~/lib/expression_eval";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
+import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/steps/setPreventUndoAtOrBeforeIndex";
 
 export function insertAtPosition(
   fromStoreVertex: Vertex,

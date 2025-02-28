@@ -7,7 +7,7 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { getIndicatorPosition } from "~/features/page_designer/functions/getIndicatorPosition";
 import { validateDragOver } from "~/features/page_designer/functions/validateDragOver";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 export function handleDragOverAndSetDropPosition(
   e: DragEvent,

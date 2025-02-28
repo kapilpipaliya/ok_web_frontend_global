@@ -7,9 +7,9 @@ import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrain
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 
 export function formSubmit(
   formStoreVertex: () => Vertex<FormStoreObject>,

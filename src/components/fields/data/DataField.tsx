@@ -9,7 +9,7 @@ import { isValidResponse } from "~/lib/api/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 import { RepeaterInternal } from "./RepeaterInternal";
 

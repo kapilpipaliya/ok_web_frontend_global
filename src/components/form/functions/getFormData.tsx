@@ -7,8 +7,8 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 
 export const getFormData = async (
   graph: Store<GraphInterface>,

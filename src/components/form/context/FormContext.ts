@@ -7,7 +7,7 @@ import type { GraphInterface, Id } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
 

@@ -7,10 +7,10 @@ import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { createAppState } from "~/createAppState";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { STYLES } from "~/pages/settings/constants";
 
 import { ComponentItem } from "./ComonentItem";

@@ -8,7 +8,7 @@ import {
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { STYLES } from "~/pages/settings/constants";
 
 import type { FormStoreObject } from "../form/context/FormContext";

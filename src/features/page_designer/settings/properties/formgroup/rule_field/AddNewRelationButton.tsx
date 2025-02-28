@@ -4,10 +4,10 @@ import { Dynamic } from "solid-js/web";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { getToEdge } from "~/lib/graph/get/sync/edge/getToEdge";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { addNewEdge, newEdge } from "~/lib/graph/mutate/edge";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
+import { addNewEdge, newEdge } from "~/lib/graph/mutate/core/edge";
+import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 
 export interface AddNewRelationButtonProps {
   component: Component<{ onClose: (rowVertex?: Vertex) => void }>;

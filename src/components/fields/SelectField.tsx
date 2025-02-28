@@ -24,8 +24,8 @@ import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 import { useFormContext } from "../form/context/FormContext";
 import { isStaticOptions } from "./utils/isStaticOptions";

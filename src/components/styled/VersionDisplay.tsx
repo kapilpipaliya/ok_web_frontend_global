@@ -1,4 +1,4 @@
-import { APP_NAME, APP_VERSION } from "~/constants/version";
+import { APP_NAME, APP_VERSION } from "~/pages/settings/constants";
 
 export function VersionDisplay() {
   return (

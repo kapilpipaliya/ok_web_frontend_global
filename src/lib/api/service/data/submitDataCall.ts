@@ -5,8 +5,8 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { onMutatDataGet } from "~/lib/graph/mutate/onMutatDataGet";
-import { updateSubmittedIndex } from "~/lib/graph/transaction/updateSubmittedIndex";
+import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
+import { updateSubmittedIndex } from "~/lib/graph/transaction/core/updateSubmittedIndex";
 
 // Submit generic data to the server
 export async function submitDataCall(

@@ -8,7 +8,7 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { postAPI } from "~/lib/api/postApi";
-import { getMemberVertex } from "~/lib/graph/get/sync/getMemberVertex";
+import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";

@@ -43,27 +43,27 @@ import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesig
 import { getPageTitle } from "~/features/page_designer/layout/getPageTitle";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { createCompContextVertex } from "~/lib/graph/mutate/createCompContextVertex";
-import { createViewVertex } from "~/lib/graph/mutate/createViewVertex";
+import { createCompContextVertex } from "~/lib/graph/mutate/vertex/createCompContextVertex";
+import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import {
   addNewVertex,
   deleteVertex,
   mergeVertexProperties,
   newVertex,
-} from "~/lib/graph/mutate/vertex";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { saveStepIndex } from "~/lib/graph/transaction/saveStepIndex";
-import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
-import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/setPreventUndoAtOrBeforeIndex";
+} from "~/lib/graph/mutate/core/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import { saveStepIndex } from "~/lib/graph/transaction/steps/saveStepIndex";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
+import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/steps/setPreventUndoAtOrBeforeIndex";
 import {
   parentComponentAttribute,
   parentTemplateAttribute,

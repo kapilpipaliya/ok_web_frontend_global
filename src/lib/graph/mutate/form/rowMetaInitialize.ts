@@ -5,12 +5,12 @@ import { batch, onCleanup } from "solid-js";
 
 import type { GraphInterface, Id, Vertex } from "../../graph";
 
-import { cloneVertexWithEdges } from "../../get/sync/cloneVertexWithEdges";
-import { generateNewTxnId } from "../../transaction/generateNewTxnId";
-import { generateNewVertexId } from "../../transaction/generateNewVertexId";
-import { revertTransaction } from "../../transaction/revertTransaction";
-import { addNewEdge, newEdge } from "../edge";
-import { mergeVertexProperties } from "../vertex";
+import { cloneVertexWithEdges } from "../../get/sync/entity/cloneVertexWithEdges";
+import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
+import { generateNewVertexId } from "../../transaction/core/generateNewVertexId";
+import { revertTransaction } from "../../transaction/revert/revertTransaction";
+import { addNewEdge, newEdge } from "../core/edge";
+import { mergeVertexProperties } from "../core/vertex";
 import { newRow } from "./addNewRow";
 
 export function createNewMetaInstance(

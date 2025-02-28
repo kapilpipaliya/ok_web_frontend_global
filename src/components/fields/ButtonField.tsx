@@ -17,10 +17,10 @@ import { isAnyFieldInvalid } from "~/features/page_designer/functions/generateFo
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { getNamedIndex } from "~/lib/graph/transaction/getNamedIndex";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
-import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { getNamedIndex } from "~/lib/graph/transaction/value/getNamedIndex";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { createLongPress } from "~/lib/hooks/createLongPress";
 
 import type { FunctionArgumentType } from "../form/FieldSchemaType";

@@ -15,10 +15,10 @@ import { evalExpression } from "~/lib/expression_eval";
 import {
   getMemberVertex,
   getProfileImageVertex,
-} from "~/lib/graph/get/sync/getMemberVertex";
+} from "~/lib/graph/get/sync/user/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { addNewVertex } from "~/lib/graph/mutate/vertex";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { profileImage, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../SchemaRenderer";

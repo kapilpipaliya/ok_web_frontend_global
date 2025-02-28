@@ -5,7 +5,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { JsonEditorField } from "~/components/fields/JsonEditorField";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 export function JsonEditorFieldComponent() {
   const [graph, setGraph] = useGraph();

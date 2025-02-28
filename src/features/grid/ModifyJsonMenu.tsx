@@ -8,9 +8,9 @@ import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useToast } from "~/components/styled/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 export function ModifyJsonMenu(props: {
   item: Vertex;

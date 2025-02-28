@@ -10,8 +10,8 @@ import { QuickEditModal } from "~/features/grid/QuickEditModal";
 import { CommonAddComponent } from "~/features/page_designer/settings/rules/CommonAddComponent";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 import { useFileManagerStore } from "../FileManagerContext"; // Import QuickEditModal
 import { getDownloadLink, openInNewTab } from "./getDownloadLink";

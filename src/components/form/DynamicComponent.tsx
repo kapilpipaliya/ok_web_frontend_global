@@ -38,7 +38,7 @@ import { evaluateRule } from "~/features/page_designer/rules/functions/evaluateR
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import {
   type GraphInterface,
   IdAttr,
@@ -46,7 +46,7 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 import type {
   ComponentNameType,

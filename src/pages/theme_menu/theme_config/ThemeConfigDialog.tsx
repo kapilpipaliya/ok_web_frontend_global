@@ -12,9 +12,9 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export function ThemeConfigDialog(

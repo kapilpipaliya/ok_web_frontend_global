@@ -30,10 +30,10 @@ import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { isObject } from "~/lib/data_structure/object/isObject";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/getEdgesFromRowsAttr";
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { createInputFilteredFormMetaData } from "~/lib/meta/functions/createInputFilteredFormMetaData";
 

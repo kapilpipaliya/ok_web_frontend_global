@@ -7,7 +7,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 
 export type DataGridState = ReturnType<typeof getInitialGridState>;
 export type DataGridStore = ReturnType<typeof createStore<DataGridState>>;

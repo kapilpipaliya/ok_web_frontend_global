@@ -4,7 +4,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { componentDrop } from "~/features/page_designer/functions/drop/componentDrop";
 import { evalExpression } from "~/lib/expression_eval";
-import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import { sortChildren } from "./sortChildren";
 

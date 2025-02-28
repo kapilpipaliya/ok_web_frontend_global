@@ -19,17 +19,17 @@ import { genericInputComponents } from "~/components/form/functions/genericInput
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { htmlTags } from "~/lib/dom/htmlTags";
-import { cloneVertexWithEdges } from "~/lib/graph/get/sync/cloneVertexWithEdges";
-import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/getPropsFromMetaExpression";
+import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
+import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/expression/getPropsFromMetaExpression";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import {
   addNewVertex,
   mergeVertexProperties,
   newVertex,
-} from "~/lib/graph/mutate/vertex";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+} from "~/lib/graph/mutate/core/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { PROPERTIES } from "~/pages/settings/constants";
 

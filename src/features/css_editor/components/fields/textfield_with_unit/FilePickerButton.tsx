@@ -16,7 +16,7 @@ import { getCssSelectedFileEdgeName } from "~/features/css_editor/utils/getCssSe
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { FilePickerModal } from "./FilePickerModal";
 

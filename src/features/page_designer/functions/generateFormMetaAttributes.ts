@@ -11,7 +11,7 @@ import type {
   IFormMetaData,
 } from "../../../lib/meta/FormMetadataType";
 
-import { mergeVertexProperties } from "../../../lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "../../../lib/graph/mutate/core/vertex";
 import { uniqueNameKey } from "../constants/constant";
 import { getChildrenAttrs } from "./getChildrenAttrs";
 import { getComponentLabel } from "./getComponentLabel";

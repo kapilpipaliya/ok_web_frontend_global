@@ -3,8 +3,8 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { sortChildren } from "~/features/page_designer/functions/sortChildren";
-import { setParentValue } from "~/lib/graph/mutate/setParentValue";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { setParentValue } from "~/lib/graph/mutate/selection/setParentValue";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 export async function handleParentChange(
   graph: GraphInterface,

@@ -1,6 +1,6 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
+import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/entity/findVertex";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";

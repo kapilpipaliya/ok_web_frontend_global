@@ -4,8 +4,8 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { redo, redoAllowed } from "~/lib/graph/transaction/redo";
-import { undo, undoAllowed } from "~/lib/graph/transaction/undo";
+import { redo, redoAllowed } from "~/lib/graph/transaction/history/redo";
+import { undo, undoAllowed } from "~/lib/graph/transaction/history/undo";
 
 export function UndoRedoIcons(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();

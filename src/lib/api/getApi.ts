@@ -1,3 +1,5 @@
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
+
 /**
  * Common function to make GET requests to a specified URL.
  * @param {string} url - The URL to which the GET request is sent.
@@ -16,7 +18,7 @@ export async function getAPI(url: string): Promise<{ [key: string]: any }> {
   if (!response.ok) {
     // Attempt to parse error message from JSON or default to status text
     const errorMessage = contentType?.includes("application/json")
-      ? (await response.json()).error
+      ? getErrorMessage(await response.json())
       : contentType?.includes("text/plain")
         ? await response.text()
         : response.statusText;

@@ -3,7 +3,7 @@ import type { JSX } from "solid-js";
 import { Link } from "@solidjs/meta";
 
 import { GetInitialData } from "~/GetInitialData";
-import { getCompanyLogoUrl } from "~/lib/graph/get/sync/getCompanyLogoUrl";
+import { getCompanyLogoUrl } from "~/lib/graph/get/sync/company/getCompanyLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";

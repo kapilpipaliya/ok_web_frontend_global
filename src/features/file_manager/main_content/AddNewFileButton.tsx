@@ -2,11 +2,11 @@ import { FileUploader } from "~/components/styled/FileUploader";
 import { useToast } from "~/components/styled/Toast";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { parentDirectory } from "~/lib/meta/file/File";
 
-import { handleDataSubmission } from "../../../lib/graph/mutate/handleDataSubmission";
+import { handleDataSubmission } from "../../../lib/graph/mutate/data/handleDataSubmission";
 import { useFileManagerStore } from "../FileManagerContext";
 
 export function AddNewFileButton() {

@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
-import { saveUndoPoint } from "~/lib/graph/transaction/saveUndoPoint";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import { componentDrop } from "./drop/componentDrop";
 import { sortChildren } from "./sortChildren";

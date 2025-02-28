@@ -15,7 +15,7 @@ import { useToast } from "~/components/styled/Toast";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
+import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
 import { headerIconButtonClass, STYLES } from "~/pages/settings/constants";
 
 import {

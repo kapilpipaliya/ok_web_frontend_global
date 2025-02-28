@@ -6,7 +6,7 @@ import {
 } from "~/components/form/context/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {
   DesignerFormIdContext,

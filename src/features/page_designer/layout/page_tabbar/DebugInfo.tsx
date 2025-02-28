@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { getGlobalStore } from "~/lib/graph/get/sync/getGlobalStore";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import {
   type TransactionDetail,
   useGraph,

@@ -5,14 +5,14 @@ import { batch, untrack } from "solid-js";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
 
-import { getInEdge } from "../../get/sync/getInEdge";
-import { getToEdge } from "../../get/sync/getToEdge";
-import { commitTxn } from "../../transaction/commitTxn";
-import { generateNewTxnId } from "../../transaction/generateNewTxnId";
-import { generateNewVertexId } from "../../transaction/generateNewVertexId";
-import { addNewEdge, newEdge } from "../edge";
+import { getInEdge } from "../../get/sync/edge/getInEdge";
+import { getToEdge } from "../../get/sync/edge/getToEdge";
+import { commitTxn } from "../../transaction/core/commitTxn";
+import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
+import { generateNewVertexId } from "../../transaction/core/generateNewVertexId";
+import { addNewEdge, newEdge } from "../core/edge";
 
 export function addNewRow(
   txnId: number,

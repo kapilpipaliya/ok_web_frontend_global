@@ -3,7 +3,7 @@ import type { RouteSectionProps } from "@solidjs/router";
 import { Link } from "@solidjs/meta";
 
 import { GetInitialData } from "~/GetInitialData";
-import { getCompanyLogoUrl } from "~/lib/graph/get/sync/getCompanyLogoUrl";
+import { getCompanyLogoUrl } from "~/lib/graph/get/sync/company/getCompanyLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 
 export default function AuthLayout(props: Readonly<RouteSectionProps>) {

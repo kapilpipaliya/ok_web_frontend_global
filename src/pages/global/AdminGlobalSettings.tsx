@@ -2,7 +2,6 @@ import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, Show } from "solid-js";
 
 import { SettingsLayout } from "~/components/settings/SettingsLayout";
-import { useGraph } from "~/lib/graph/graph";
 import { ActivityLog } from "~/pages/global/activity/ActivityLog";
 import { CompanySettings } from "~/pages/global/company/CompanySettings";
 import { EmailAudit } from "~/pages/global/email/EmailAudit";

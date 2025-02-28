@@ -21,13 +21,13 @@ import {
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import {
   addNewVertex,
   deleteVertex,
   mergeVertexProperties,
   newVertex,
-} from "~/lib/graph/mutate/vertex";
+} from "~/lib/graph/mutate/core/vertex";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { getPageTitle } from "./getPageTitle";

@@ -10,8 +10,8 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { generateTableInputMeta } from "~/features/page_designer/rules/functions/generateTableInputMeta";
 import { Overlay } from "~/features/page_designer/rules/Overlay";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
-import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revertTransactionUpToIndex";
+import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 

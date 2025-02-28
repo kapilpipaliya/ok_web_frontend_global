@@ -1,7 +1,10 @@
 import { onCleanup, onMount } from "solid-js";
 
 import { useGraph } from "~/lib/graph/graph";
-import { getChannel, handleChannelMessage } from "~/lib/graph/mutate/channel";
+import {
+  getChannel,
+  handleChannelMessage,
+} from "~/lib/graph/mutate/core/channel";
 
 import { useDesignerLayoutStore } from "../context/LayoutContext";
 

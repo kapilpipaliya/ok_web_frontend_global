@@ -5,11 +5,11 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { getLastTxnIndex } from "~/lib/graph/transaction/getLastTxnIndex";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
+import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";

@@ -7,8 +7,8 @@ import { IconButton } from "~/components/styled/IconButton";
 import { SimpleWithDismissButton } from "~/components/styled/SimpleModal";
 import { evalExpression } from "~/lib/expression_eval";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { deleteRow } from "~/lib/graph/mutate/deleteRow";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { deleteRow } from "~/lib/graph/mutate/vertex/deleteRow";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { RulesModal } from "../../rules/RulesModal";

@@ -6,7 +6,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { getComponentFromLayoutRow } from "~/features/page_designer/functions/drop/getComponentFromLayoutRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { uniqueNameKey } from "../../constants/constant";
 import { getUniqueName } from "../generateFormMetaAttributes";

@@ -3,7 +3,7 @@ import { type Setter, Show } from "solid-js";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { Drawer } from "~/components/styled/Drawer";
 import { useGraph } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {
   type PageLayoutObject,

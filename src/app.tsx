@@ -11,8 +11,8 @@ import { createAppState } from "~/createAppState";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/styled/LoaderSimple";
 import { Toaster } from "./components/styled/solid-toast/src";
-import { getGlobalThemeVertex } from "./lib/graph/get/sync/getGlobalThemeVertex";
-import { themeConfig } from "./lib/graph/get/sync/themeConfig";
+import { getGlobalThemeVertex } from "./lib/graph/get/sync/theme/getGlobalThemeVertex";
+import { themeConfig } from "./lib/graph/get/sync/theme/themeConfig";
 import { GraphContext } from "./lib/graph/graph";
 
 // Note: When we use createResource, it will temporary display Suspense fallback

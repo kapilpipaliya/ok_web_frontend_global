@@ -8,7 +8,7 @@ import type {
   VertexMap,
 } from "~/lib/graph/graph";
 
-import { addNewVertex } from "./lib/graph/mutate/vertex";
+import { addNewVertex } from "./lib/graph/mutate/core/vertex";
 
 export function createAppState() {
   const graph = createGraph();

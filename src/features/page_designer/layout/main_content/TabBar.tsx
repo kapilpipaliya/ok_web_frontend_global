@@ -5,9 +5,12 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { createViewVertex } from "~/lib/graph/mutate/createViewVertex";
-import { deleteVertex, mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { isDisabledTxn } from "~/lib/graph/transaction/isDisabledTxn";
+import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
+import {
+  deleteVertex,
+  mergeVertexProperties,
+} from "~/lib/graph/mutate/core/vertex";
+import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 
 import {
   type PageLayoutObject,

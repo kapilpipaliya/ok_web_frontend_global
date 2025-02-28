@@ -9,7 +9,7 @@ import { useToast } from "~/components/styled/Toast";
 import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drop/createAttrCompMetaVertex";
 import { createAttrMetaVertex } from "~/features/page_designer/functions/drop/createAttrMetaVertex";
 import { processChildrenAttrs } from "~/features/page_designer/functions/drop/processChildrenAttrs";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { addNewRow } from "../../../../lib/graph/mutate/form/addNewRow";
 import { uniqueNameKey } from "../../constants/constant";

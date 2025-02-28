@@ -2,8 +2,8 @@ import type { Store } from "solid-js/store";
 
 import { untrack } from "solid-js";
 
-import { getParentVertexValue } from "~/lib/graph/get/sync/getParentVertexValue";
-import { getSelectedVertexValue } from "~/lib/graph/get/sync/getSelectedVertexValue";
+import { getParentVertexValue } from "~/lib/graph/get/sync/edge/getParentVertexValue";
+import { getSelectedVertexValue } from "~/lib/graph/get/sync/edge/getSelectedVertexValue";
 import {
   type GraphInterface,
   type Id,

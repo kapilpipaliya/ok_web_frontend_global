@@ -16,7 +16,7 @@ import {
   useGraph,
   type Vertex,
 } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import type { NavItem } from "../getTreeData";
 

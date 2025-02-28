@@ -2,7 +2,7 @@ import { Title } from "@solidjs/meta";
 import { For, type JSX, Show } from "solid-js";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { isAdminRole } from "~/lib/graph/get/sync/isAdminRole";
+import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
 import { STYLES } from "~/pages/settings/constants";
 

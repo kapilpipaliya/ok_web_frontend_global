@@ -12,7 +12,7 @@ import {
   addNewVertex,
   mergeVertexProperties,
   newVertex,
-} from "~/lib/graph/mutate/vertex";
+} from "~/lib/graph/mutate/core/vertex";
 
 export function openInNewInternalTab(
   layoutStoreId: Id,

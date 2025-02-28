@@ -7,8 +7,8 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { onMutatDataGet } from "~/lib/graph/mutate/onMutatDataGet";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 

@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, Match, Switch } from "solid-js";
 
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 export function OpenComponentURL(

@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { evalExpression } from "~/lib/expression_eval";
-import { sortVertexesByPosition } from "~/lib/graph/get/sync/sortVertexesByPosition";
+import { sortVertexesByPosition } from "~/lib/graph/get/sync/entity/sortVertexesByPosition";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,

@@ -13,11 +13,11 @@ import {
   evalVertexById,
 } from "~/cypher/queries/evaluate/evalFunctions";
 import { getLabelFilterSkipLimit } from "~/cypher/queries/evaluate/getLabelFilterSkipLimit";
-import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
+import { findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
 
 import { isObject } from "./data_structure/object/isObject";
-import { getTextValue } from "./graph/get/sync/getTextValue";
+import { getTextValue } from "./graph/get/sync/format/getTextValue";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

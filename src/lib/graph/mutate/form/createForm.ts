@@ -2,11 +2,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
 
-import { commitTxn } from "../../transaction/commitTxn";
-import { generateNewTxnId } from "../../transaction/generateNewTxnId";
-import { generateNewVertexId } from "../../transaction/generateNewVertexId";
+import { commitTxn } from "../../transaction/core/commitTxn";
+import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
+import { generateNewVertexId } from "../../transaction/core/generateNewVertexId";
 
 export function createFormVertex(
   graph: Store<GraphInterface>,

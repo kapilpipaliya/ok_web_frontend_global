@@ -2,7 +2,7 @@ import type { createStore } from "solid-js/store";
 
 import { createContext, useContext } from "solid-js";
 
-import type { TransactionValue } from "~/lib/graph/transaction/TransactionType";
+import type { TransactionValue } from "~/lib/graph/transaction/types/TransactionType";
 
 export type Id = string;
 

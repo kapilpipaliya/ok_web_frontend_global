@@ -9,13 +9,13 @@ import { postAPI } from "~/lib/api/postApi";
 import {
   getGlobalSettingVertex,
   getGlobalThemeVertex,
-} from "~/lib/graph/get/sync/getGlobalThemeVertex";
+} from "~/lib/graph/get/sync/theme/getGlobalThemeVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
-import { fetchAndSetGraphData } from "~/lib/graph/mutate/fetchAndSetGraphData";
-import { handleDataSubmission } from "~/lib/graph/mutate/handleDataSubmission";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
+import { handleDataSubmission } from "~/lib/graph/mutate/data/handleDataSubmission";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { GlobalSetting } from "~/lib/meta/base/GlobalSetting";
 
 import { SETTINGS_CONSTANTS } from "../settings/constants";

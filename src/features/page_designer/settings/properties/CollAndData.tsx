@@ -12,11 +12,11 @@ import { evalExpression } from "~/lib/expression_eval";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/generateNewVertexId";
-import { revertTransaction } from "~/lib/graph/transaction/revertTransaction";
+import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 export function CollAndData() {

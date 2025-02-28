@@ -10,14 +10,14 @@ import { generateFormMetaAttributes } from "~/features/page_designer/functions/g
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
-import { setGraphData } from "~/lib/graph/mutate/setGraphData";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import {
   addNewVertex,
   deleteVertex,
   mergeVertexProperties,
   newVertex,
-} from "~/lib/graph/mutate/vertex";
-import { generateNewTxnId } from "~/lib/graph/transaction/generateNewTxnId";
+} from "~/lib/graph/mutate/core/vertex";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 import {
   FormContext,

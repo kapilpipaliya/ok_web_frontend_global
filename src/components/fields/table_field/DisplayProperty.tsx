@@ -17,9 +17,9 @@ import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsA
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
 import { isValidResponse } from "~/lib/api/isValidResponse";
 import { evalExpression } from "~/lib/expression_eval";
-import { getStringComponent } from "~/lib/graph/get/sync/getStringComponent";
+import { getStringComponent } from "~/lib/graph/get/sync/format/getStringComponent";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
-import { commitTxn } from "~/lib/graph/transaction/commitTxn";
+import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 
 import {
   type FormStoreObject,

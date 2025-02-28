@@ -2,7 +2,7 @@ import { Link, Title } from "@solidjs/meta";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { GetInitialData } from "~/GetInitialData";
-import { getCompanyLogoUrl } from "~/lib/graph/get/sync/getCompanyLogoUrl";
+import { getCompanyLogoUrl } from "~/lib/graph/get/sync/company/getCompanyLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
