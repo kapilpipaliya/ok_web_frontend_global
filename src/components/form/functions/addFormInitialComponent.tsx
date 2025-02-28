@@ -37,8 +37,8 @@ export function addFormInitialComponent(
     formVertex.id,
     txnId,
     setGraph,
-    "Box",
-    { class: JSON.stringify({ "": { padding: "10px" } }) },
+    "Html",
+    { as: "div", class: JSON.stringify({ "": { padding: "10px" } }) },
   );
   if (layoutRowId === -1) {
     return -1;
@@ -56,14 +56,15 @@ export function addFormInitialComponent(
     return -1;
   }
 
-  const boxCompIndex = addComponent(
+  const HtmlCompIndex = addComponent(
     graph,
     formVertex,
     formCompVertex,
     txnId,
     setGraph,
-    "Box",
+    "Html",
     {
+      as: "div",
       class: JSON.stringify({
         "": {
           display: "flex",
@@ -74,14 +75,14 @@ export function addFormInitialComponent(
     },
   );
 
-  if (boxCompIndex === -1) {
+  if (HtmlCompIndex === -1) {
     return -1;
   }
 
-  const textBoxCompIndex = addComponent(
+  const textHtmlCompIndex = addComponent(
     graph,
     formVertex,
-    boxCompIndex,
+    HtmlCompIndex,
     txnId,
     setGraph,
     "TextInput",
@@ -98,7 +99,7 @@ export function addFormInitialComponent(
     },
   );
 
-  if (textBoxCompIndex === -1) {
+  if (textHtmlCompIndex === -1) {
     return -1;
   }
 
@@ -108,8 +109,9 @@ export function addFormInitialComponent(
     formCompVertex,
     txnId,
     setGraph,
-    "Box",
+    "Html",
     {
+      as: "div",
       class: JSON.stringify({
         "": {
           display: "flex",
