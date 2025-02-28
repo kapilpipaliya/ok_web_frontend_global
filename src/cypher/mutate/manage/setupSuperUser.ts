@@ -13,6 +13,7 @@ import { hashPassword } from "~/lib/auth/password";
 
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";
+import {addAdminRoleToUser} from "~/cypher/mutate/signup/addAdminRoleToUser";
 
 export const superUserData = {
   email: "superuser@easyformforge.com",
@@ -98,7 +99,8 @@ export async function setupSuperUser(): Promise<{
       // Create SubDomain and link with Account
       await createSystemSubdomain(dbSession, accountId);
 
-      await createRootFolder(dbSession, user.P.uuid);
+      await createRootFolder(dbSession);
+      await addAdminRoleToUser(dbSession, user.P.uuid);
 
       const response = await insertComponents(dbSession);
       if (!response.success) {

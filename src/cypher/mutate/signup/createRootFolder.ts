@@ -1,29 +1,9 @@
-import type { Session, Transaction } from "neo4j-driver";
+import type {Session, Transaction} from "neo4j-driver";
 
-import { getDefaultTheme } from "~/lib/theme/getDefaultTheme";
-
-export async function addAdminRoleToUser(
-  sessionOrTx: Session | Transaction,
-  uuid: string,
-) {
-  const query = `
-    MATCH (u:User {uuid: $uuid}), (r:Role {key: 'Admin'})
-    CREATE (u)-[:UserRole]->(r)
-  `;
-
-  const params = { uuid };
-
-  try {
-    await sessionOrTx.run(query, params);
-  } catch (error) {
-    console.error("Error adding Admin role to user:", error);
-    throw error;
-  }
-}
+import {getDefaultTheme} from "~/lib/theme/getDefaultTheme";
 
 export async function createRootFolder(
   tx: Session | Transaction,
-  uuid: string,
 ): Promise<void> {
   const query = `
     MERGE (:Folder {key: 'Root'})
@@ -44,7 +24,6 @@ export async function createRootFolder(
     await createDefaultPermissions(tx);
     await createDefaultRoles(tx);
     await createSupportStatus(tx);
-    await addAdminRoleToUser(tx, uuid);
   } catch (error) {
     console.error("Error creating root folder or root comp:", error);
     throw error;

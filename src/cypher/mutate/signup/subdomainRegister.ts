@@ -9,6 +9,7 @@ import { createDatabase } from "./createDatabase";
 import { createRootFolder } from "./createRootFolder";
 import { createUserInUserDB } from "./createUserInDB";
 import { insertComponents } from "./insertComponents";
+import {addAdminRoleToUser} from "~/cypher/mutate/signup/addAdminRoleToUser";
 
 export interface SubdomainRegisterRequestData {
   email: string;
@@ -43,7 +44,8 @@ export async function subdomainRegister(
     true,
   );
 
-  await createRootFolder(userDbSession, user.P.uuid);
+  await createRootFolder(userDbSession);
+  await addAdminRoleToUser(userDbSession, user.P.uuid);
 
   // await insertDataTypes(userDbSession);
 
