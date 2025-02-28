@@ -1,3 +1,6 @@
+// import { TextFieldWithSelect } from "./TextFieldWithSelect";
+import type { JSXElement } from "solid-js";
+
 import { mergeRefs } from "@solid-primitives/refs";
 import {
   createSignal,
@@ -45,8 +48,6 @@ export interface TextInputFieldMeta extends FormInputField {
   type?: string;
   unitOptions?: string[];
 }
-// import { TextFieldWithSelect } from "./TextFieldWithSelect";
-import type { JSXElement } from "solid-js";
 
 interface TextInputFieldProps
   extends Omit<

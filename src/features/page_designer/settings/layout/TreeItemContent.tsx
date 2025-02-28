@@ -12,6 +12,7 @@ import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
 import { getComponentName } from "../../functions/getComponentLabel";
 import { nameExpr } from "../utils/nameExpr";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
+
 export function TreeItemContent(
   props: Readonly<{
     collapsedKeys: Accessor<Id[]>;

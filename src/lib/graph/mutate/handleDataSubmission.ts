@@ -5,6 +5,7 @@ import type { GraphInterface } from "~/lib/graph/graph";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 
 import { commitTxn } from "../transaction/commitTxn";
+
 export async function handleDataSubmission(
   newFormTxnId: number,
   graph: Store<GraphInterface>,

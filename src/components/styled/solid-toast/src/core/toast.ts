@@ -2,17 +2,15 @@ import { createRoot, createSignal, untrack } from "solid-js";
 
 import {
   ActionType,
+  type DefaultToastOptions,
   type Message,
+  type Renderable,
+  resolveValue,
   type Toast,
   type ToasterProps,
   type ToastHandler,
   type ToastOptions,
   type ToastType,
-} from "../types";
-import {
-  type DefaultToastOptions,
-  type Renderable,
-  resolveValue,
   type ValueOrFunction,
 } from "../types";
 import { generateID } from "../util";

@@ -15,7 +15,6 @@ import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
 
 export default function AdminGlobalSettings() {
-  const [graph] = useGraph();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMenu, setSelectedMenu] = createSignal(
     searchParams.tab || "general",

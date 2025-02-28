@@ -32,12 +32,12 @@ export default function AdminDashboard() {
       { key: "Component", label: "Components" },
       { key: "TemplatePage", label: "Templates" },
     ];
-    
+
     // Only add the EmailTemplate tab if the user has admin role
     if (isAdminRole(graph)) {
       baseTabs.push({ key: "EmailTemplate", label: "Email Templates" });
     }
-    
+
     return baseTabs;
   };
 

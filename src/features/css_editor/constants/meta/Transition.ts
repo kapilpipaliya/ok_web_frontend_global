@@ -4,8 +4,7 @@ import type {
 } from "../FieldSchemaType";
 
 import { timesTypes } from "../csseditor_constants";
-import { createGridOptions } from "../FieldSchemaType";
-import { createSelectOptions } from "../FieldSchemaType";
+import { createGridOptions, createSelectOptions } from "../FieldSchemaType";
 
 export const Transition = {
   transition: {

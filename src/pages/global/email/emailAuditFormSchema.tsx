@@ -19,7 +19,7 @@ whiteList.html = [];
 whiteList.head = [];
 whiteList.body = [];
 whiteList.style = [];
-const xssOptions: IFilterXSSOptions = {
+const _xssOptions: IFilterXSSOptions = {
   onTagAttr: (_tag, name, value, _isWhiteAttr) => {
     if (name === "style") {
       // Allow the style attribute
@@ -100,7 +100,7 @@ export const emailAuditFormSchema = {
               key: "content",
               props: (options: FunctionArgumentType) => ({
                 // srcdoc: xss(options.data.P.content, xssOptions),
-                srcdoc: (options.data.P.content),
+                srcdoc: options.data.P.content,
               }),
               validation: { required: true },
             },

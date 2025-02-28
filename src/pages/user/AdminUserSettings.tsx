@@ -2,12 +2,10 @@ import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, Show } from "solid-js";
 
 import { SettingsLayout } from "~/components/settings/SettingsLayout";
-import { useGraph } from "~/lib/graph/graph";
 import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
 import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
 export default function AdminUserSettings() {
-  const [graph] = useGraph();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMenu, setSelectedMenu] = createSignal(
     searchParams.tab || "profile",

@@ -4,6 +4,7 @@ import type { MutationArgs } from "../../../types/MutationArgs";
 
 import { validateIdMap } from "./validateIdMap";
 import { validateMutationObjects } from "./validateMutationObjects";
+
 export function mutateArgsValidation(args: MutationArgs): any {
   const responseResult = [] as any[];
 

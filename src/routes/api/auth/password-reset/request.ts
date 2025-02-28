@@ -1,10 +1,10 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { v7 as uuidv7 } from 'uuid';
+import { v7 as uuidv7 } from "uuid";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
@@ -22,7 +22,7 @@ export async function POST({ request }: APIEvent) {
     // Check if user exists by either email or username
     const userResult = await dbSession.run(
       "MATCH (u:User) WHERE u.email = $identifier OR u.username = $identifier RETURN u",
-      { identifier }
+      { identifier },
     );
 
     if (userResult.records.length === 0) {
@@ -35,10 +35,10 @@ export async function POST({ request }: APIEvent) {
 
     // Generate a random 6-digit OTP on the server side
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
     // Set expiry time (10 minutes from now)
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-    
+
     // Generate a unique reset session token
     const resetSessionToken = uuidv7();
 
@@ -49,7 +49,7 @@ export async function POST({ request }: APIEvent) {
            u.resetOTPExpiry = datetime($expiresAt),
            u.resetSessionToken = $resetSessionToken
        RETURN u`,
-      { expiresAt, otp, resetSessionToken, uuid: userUuid }
+      { expiresAt, otp, resetSessionToken, uuid: userUuid },
     );
 
     // Send the password reset email with OTP
@@ -58,7 +58,7 @@ export async function POST({ request }: APIEvent) {
       { otp },
       "Password Reset Request",
       user,
-      subDomain
+      subDomain,
     );
 
     // Log the password reset request
@@ -68,7 +68,7 @@ export async function POST({ request }: APIEvent) {
       "User",
       userUuid,
       email,
-      "Password reset requested"
+      "Password reset requested",
     );
 
     return {
@@ -76,11 +76,11 @@ export async function POST({ request }: APIEvent) {
       message: "Password reset instructions sent to your email",
       resetSessionToken: resetSessionToken,
       success: true,
-      userUuid: userUuid // Return UUID for more secure identification
+      userUuid: userUuid, // Return UUID for more secure identification
     };
   } catch (error) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
-} 
+}

@@ -1,12 +1,12 @@
 import { autofocus } from "@solid-primitives/autofocus";
 import { createSignal } from "solid-js";
-// prevents from being tree-shaken by TS
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-autofocus;
 
 import { CustomModal } from "~/components/styled/CustomModal";
 
 import { FormStatus } from "./FormStatus";
+// prevents from being tree-shaken by TS
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+autofocus;
 
 /**
  * @deprecated This function is deprecated and will be deleted in future versions.

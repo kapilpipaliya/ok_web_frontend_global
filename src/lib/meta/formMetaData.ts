@@ -4,14 +4,11 @@ import { Perm } from "./auth/Perm";
 import { Role } from "./auth/Role";
 import { User } from "./auth/User";
 import { Comp } from "./base/Comp";
-import { CompCategory } from "./base/CompCategory";
-import { DataType } from "./base/DataType";
 import { GlobalSetting } from "./base/GlobalSetting";
 import { File, FileTag, Folder } from "./file/File";
 import { Import } from "./other/Import";
 import { Nav } from "./other/Nav";
 import { Coll } from "./page/Coll";
-import { CollCategory } from "./page/CollCategory";
 import { FormCategory } from "./page/FormCategory";
 import { Page, variantAttributes } from "./page/Page";
 

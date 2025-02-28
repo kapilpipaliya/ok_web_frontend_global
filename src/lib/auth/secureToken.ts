@@ -49,6 +49,8 @@ export async function validateAndConsumeToken(
   return tokenData.data;
 }
 
-async function cleanupOldTokens(dbSession: Session | Transaction): Promise<void> {
+async function cleanupOldTokens(
+  dbSession: Session | Transaction,
+): Promise<void> {
   await deleteExpiredTokens(dbSession, TOKEN_EXPIRY);
 }

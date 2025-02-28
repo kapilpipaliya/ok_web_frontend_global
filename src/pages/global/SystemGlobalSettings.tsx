@@ -6,7 +6,6 @@ import { useGraph } from "~/lib/graph/graph";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
 
 export default function SystemGlobalSettings() {
-  const [graph] = useGraph();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMenu, setSelectedMenu] = createSignal(
     searchParams.tab || "email",

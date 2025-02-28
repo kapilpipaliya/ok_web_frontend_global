@@ -1,8 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { hashPassword } from "~/lib/auth/password";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
@@ -14,7 +14,7 @@ export async function POST({ request }: APIEvent) {
   try {
     const { newPassword, resetSessionToken, userUuid } = await request.json();
 
-    if (!userUuid || !newPassword || !resetSessionToken) {
+    if (!(userUuid && newPassword && resetSessionToken)) {
       throw new APIError("Missing required fields", 400);
     }
 
@@ -24,11 +24,14 @@ export async function POST({ request }: APIEvent) {
        WHERE u.resetOTPVerified = true
          AND u.resetSessionToken = $resetSessionToken
        RETURN u`,
-      { resetSessionToken, userUuid }
+      { resetSessionToken, userUuid },
     );
 
     if (userResult.records.length === 0) {
-      throw new APIError("User not found, OTP not verified, or invalid session", 401);
+      throw new APIError(
+        "User not found, OTP not verified, or invalid session",
+        401,
+      );
     }
 
     const user = convertNodeToJson(userResult.records[0].get("u"));
@@ -47,7 +50,7 @@ export async function POST({ request }: APIEvent) {
            u.resetSessionToken = null,
            u.updatedAt = datetime()
        RETURN u`,
-      { hashedPassword, salt, uuid: user.P.uuid }
+      { hashedPassword, salt, uuid: user.P.uuid },
     );
 
     // Log the password reset
@@ -57,7 +60,7 @@ export async function POST({ request }: APIEvent) {
       "User",
       user.P.uuid,
       user.P.email,
-      "Password was reset successfully"
+      "Password was reset successfully",
     );
 
     // Send notification email
@@ -66,18 +69,18 @@ export async function POST({ request }: APIEvent) {
       {},
       "Your Password Has Been Reset",
       user,
-      subDomain
-    ).catch(error => {
+      subDomain,
+    ).catch((error) => {
       console.error("Failed to send password reset confirmation email:", error);
     });
 
     return {
       message: "Password has been reset successfully",
-      success: true
+      success: true,
     };
   } catch (error) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
-} 
+}

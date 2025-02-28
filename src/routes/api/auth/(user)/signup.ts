@@ -4,9 +4,9 @@ import type { Transaction } from "neo4j-driver";
 import type { SignupRequestData } from "~/cypher/mutate/signup/SignupRequestData";
 
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { signupUser } from "~/cypher/mutate/signup/signupUser";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
@@ -16,7 +16,10 @@ import { updateSession } from "~/server/auth/session/updateSession";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {
-    return { error: "Invalid content type. Expected application/json", success: false };
+    return {
+      error: "Invalid content type. Expected application/json",
+      success: false,
+    };
   }
 
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -68,15 +71,10 @@ async function handleSignup(
       user,
       subDomain,
     );
-    
+
     // by default, emailVerified is false
     // Send email verification
-    sendEmailVerification(
-      request,
-      tx,
-      user, 
-      subDomain
-    );
+    sendEmailVerification(request, tx, user, subDomain);
 
     return {
       graph: {

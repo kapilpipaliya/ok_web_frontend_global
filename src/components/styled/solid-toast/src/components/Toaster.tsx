@@ -4,8 +4,7 @@ import type { ToasterProps } from "..";
 import type { Toast } from "../types";
 
 import { ToastContainer } from ".";
-import { defaultContainerStyle } from "../core";
-import { createTimers, store } from "../core";
+import { createTimers, defaultContainerStyle, store } from "../core";
 import { mergeContainerOptions } from "../util";
 
 export const Toaster: Component<ToasterProps> = (props) => {

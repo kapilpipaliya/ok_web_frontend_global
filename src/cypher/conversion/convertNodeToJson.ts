@@ -3,6 +3,8 @@ import type { Node, Relationship } from "neo4j-driver";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { types } from "neo4j-driver";
 
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
 // typed-neo4j/src/convert.ts
 export const convert = {
   /** Convert Neo4j types to JS types */
@@ -50,8 +52,6 @@ export const convert = {
     return value;
   },
 };
-
-import type { Edge, Vertex } from "~/lib/graph/graph";
 
 /*function unwrapProperties(
   properties: Record<string, any>,

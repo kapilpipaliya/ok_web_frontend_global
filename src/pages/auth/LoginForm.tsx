@@ -107,7 +107,10 @@ export function LoginForm() {
                           const formData = options.data;
                           await handleSubmit(formData);
                         } finally {
-                          options.dataContext.submitState[1]("isLoading", false);
+                          options.dataContext.submitState[1](
+                            "isLoading",
+                            false,
+                          );
                         }
                       }
                     }
@@ -150,14 +153,17 @@ export function LoginForm() {
                           }
                         },
                         onMount: () => {
-                          if (options.ref && options.ref instanceof HTMLInputElement) {
+                          if (
+                            options.ref &&
+                            options.ref instanceof HTMLInputElement
+                          ) {
                             setFormRefs("passwordRef", options.ref);
                           }
                         },
                         ref: (el: HTMLInputElement) => {
                           setFormRefs("passwordRef", el);
                         },
-                        type: showPassword.password ? "text" : "password"
+                        type: showPassword.password ? "text" : "password",
                       };
                     },
                     validation: { required: true },

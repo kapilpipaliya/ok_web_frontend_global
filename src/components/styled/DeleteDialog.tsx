@@ -1,12 +1,12 @@
 import { autofocus } from "@solid-primitives/autofocus";
 import { type Accessor, Show } from "solid-js";
-// prevents from being tree-shaken by TS
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-autofocus;
 
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { CustomModal } from "./CustomModal";
+// prevents from being tree-shaken by TS
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+autofocus;
 
 export function DialogWithButtons(
   props: Readonly<{

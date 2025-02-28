@@ -8,6 +8,7 @@ import {
 } from "~/pages/settings/constants";
 
 import { PageShare } from "./PageShare";
+
 export function ShareButton(props: { formStoreId: string }) {
   const [openDialog, setOpenDialog] = createSignal(false);
   return (

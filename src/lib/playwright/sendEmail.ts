@@ -4,8 +4,8 @@ import nodemailer from "nodemailer";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 
 import { useEmail } from "./functions/getEmailService";

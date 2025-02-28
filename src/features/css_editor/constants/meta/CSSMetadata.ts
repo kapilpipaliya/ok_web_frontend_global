@@ -42,6 +42,7 @@
 // https://drafts.csswg.org/css-cascade-5/#revert-layer
 
 import { BORDER_STYLE_VALUES } from "@master/css";
+
 export const CSSWideKeywords = [
   "inherit",
   "initial",

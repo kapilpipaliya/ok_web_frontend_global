@@ -1,6 +1,5 @@
 import type { MultiPartData } from "h3";
-import type { Transaction } from "neo4j-driver";
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import path from "node:path";
 

@@ -1,6 +1,6 @@
-import type { GraphInterface, Vertex } from "../../graph";
-
 import { evalExpression } from "~/lib/expression_eval";
+
+import type { GraphInterface, Vertex } from "../../graph";
 
 export function getGlobalSettingVertex(
   graph: GraphInterface,

@@ -3,6 +3,7 @@ import { Router, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 
 import "~/base.css";
+
 import { Show, Suspense } from "solid-js";
 
 import { createAppState } from "~/createAppState";
@@ -10,8 +11,8 @@ import { createAppState } from "~/createAppState";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/styled/LoaderSimple";
 import { Toaster } from "./components/styled/solid-toast/src";
-import { themeConfig } from "./lib/graph/get/sync/themeConfig";
 import { getGlobalThemeVertex } from "./lib/graph/get/sync/getGlobalThemeVertex";
+import { themeConfig } from "./lib/graph/get/sync/themeConfig";
 import { GraphContext } from "./lib/graph/graph";
 
 // Note: When we use createResource, it will temporary display Suspense fallback

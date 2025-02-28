@@ -1,6 +1,7 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/pages/settings/constants";
+
 export const parentCompAttribute = {
   collection: "g:'Comp'",
   componentName: "Select",

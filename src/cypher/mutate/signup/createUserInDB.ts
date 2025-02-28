@@ -1,5 +1,4 @@
-import type { Session } from "neo4j-driver";
-import type { Transaction } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import { v7 as uuidv7 } from "uuid";
 

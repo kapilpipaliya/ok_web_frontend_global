@@ -69,4 +69,4 @@ export const signupEmailVerificationForm = {
   attributes: [createEmailTemplate(content)],
   key: "SignupEmailVerification",
   title: "Verify Your Email Address",
-}; 
+};

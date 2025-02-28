@@ -1,8 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 
 export async function POST({ request }: APIEvent) {
@@ -11,7 +11,7 @@ export async function POST({ request }: APIEvent) {
   try {
     const { otp, resetSessionToken, userUuid } = await request.json();
 
-    if (!userUuid || !otp || !resetSessionToken) {
+    if (!(userUuid && otp && resetSessionToken)) {
       throw new APIError("Missing required fields", 400);
     }
 
@@ -22,7 +22,7 @@ export async function POST({ request }: APIEvent) {
          AND u.resetOTPExpiry > datetime() 
          AND u.resetSessionToken = $resetSessionToken
        RETURN u`,
-      { otp, resetSessionToken, userUuid }
+      { otp, resetSessionToken, userUuid },
     );
 
     if (result.records.length === 0) {
@@ -36,7 +36,7 @@ export async function POST({ request }: APIEvent) {
       `MATCH (u:User {uuid: $uuid})
        SET u.resetOTPVerified = true
        RETURN u`,
-      { uuid: user.P.uuid }
+      { uuid: user.P.uuid },
     );
 
     // Log the OTP verification
@@ -46,16 +46,16 @@ export async function POST({ request }: APIEvent) {
       "User",
       user.P.uuid,
       user.P.email,
-      "Password reset OTP was verified successfully"
+      "Password reset OTP was verified successfully",
     );
 
     return {
       message: "OTP verified successfully",
-      success: true
+      success: true,
     };
   } catch (error) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
-} 
+}

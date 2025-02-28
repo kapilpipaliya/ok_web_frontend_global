@@ -4,11 +4,11 @@ import type { Session } from "neo4j-driver";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import {getSubdomainsForAccount} from "~/cypher/permissions/getSubdomainsForAccount";
+import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAccount";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import {
   validateUniqueFields,

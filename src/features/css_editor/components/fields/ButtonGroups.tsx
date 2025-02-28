@@ -2,6 +2,8 @@ import { Icon } from "@iconify-icon/solid";
 import { clientOnly } from "@solidjs/start";
 import { For, type JSX, splitProps } from "solid-js";
 
+import type { ButtonGroupField } from "../../constants/FieldSchemaType";
+
 const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
 const TooltipTrigger = clientOnly(
   () => import("~/components/ssr/tooltip/TooltipTrigger"),
@@ -15,8 +17,6 @@ const TooltipContent = clientOnly(
 const TooltipArrow = clientOnly(
   () => import("~/components/ssr/tooltip/TooltipArrow"),
 );
-
-import type { ButtonGroupField } from "../../constants/FieldSchemaType";
 
 export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
   const [local, _others] = splitProps(props, ["componentName", "onChange"]);

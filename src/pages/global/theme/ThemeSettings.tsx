@@ -9,10 +9,19 @@ export function ThemeSettings() {
           Customize the look and feel of your application by managing themes.
         </p>
         <p class="fg:neutral-60">
-          We are using the master CSS engine to compile class names to CSS. 
-          You can customize the theme of the master CSS by specifying variables 
-          in the config file. For more information, visit: 
-          <a class="text:primary" href="https://rc.css.master.co/guide/variables" target="_blank"> this guide</a>.
+          We are using the master CSS engine to compile class names to CSS. You
+          can customize the theme of the master CSS by specifying variables in
+          the config file. For more information, visit:
+          <a
+            class="text:primary"
+            href="https://rc.css.master.co/guide/variables"
+            rel="noreferrer"
+            target="_blank"
+          >
+            {" "}
+            this guide
+          </a>
+          .
         </p>
       </div>
       <div class="bg:base-1 r:md p:1rem">

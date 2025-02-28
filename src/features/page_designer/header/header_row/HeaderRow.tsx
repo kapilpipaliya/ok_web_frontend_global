@@ -1,21 +1,13 @@
 import type { JSX } from "solid-js";
 
-import type { FormStoreObject } from "~/components/form/context/FormContext";
-
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { API } from "~/lib/api/endpoints";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 
-import {
-  type PageLayoutObject,
-  useDesignerFormIdContext,
-} from "../../context/LayoutContext";
-import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { HomeIcon } from "../left/HomeIcon";
 import { SaveAllButton } from "../right/SaveAllButton";
 import { ToggleButtons } from "../right/ToggleButtons";
-import { API } from "~/lib/api/endpoints";
 
 interface HeaderProps {
   children?: JSX.Element;

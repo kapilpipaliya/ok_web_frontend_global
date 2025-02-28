@@ -59,7 +59,7 @@ export function SignupForm() {
 
       await showLoadingToast({
         loadMessage: "Registering User...",
-        onError: () => { },
+        onError: () => {},
         onSuccess: (value) => {
           handleLoginRedirect(value?.result, graph, navigate);
         },
@@ -129,7 +129,10 @@ export function SignupForm() {
                     }
                   },
                   onMount: () => {
-                    if (options.ref && options.ref instanceof HTMLInputElement) {
+                    if (
+                      options.ref &&
+                      options.ref instanceof HTMLInputElement
+                    ) {
                       setFormRefs("emailRef", options.ref);
                     }
                   },
@@ -159,16 +162,25 @@ export function SignupForm() {
                           }
                           // Submit form when Enter is pressed in password field
                           try {
-                            options.dataContext.submitState[1]("isLoading", true);
+                            options.dataContext.submitState[1](
+                              "isLoading",
+                              true,
+                            );
                             const formData = options.data;
                             await handleSubmit(formData);
                           } finally {
-                            options.dataContext.submitState[1]("isLoading", false);
+                            options.dataContext.submitState[1](
+                              "isLoading",
+                              false,
+                            );
                           }
                         }
                       },
                       onMount: () => {
-                        if (options.ref && options.ref instanceof HTMLInputElement) {
+                        if (
+                          options.ref &&
+                          options.ref instanceof HTMLInputElement
+                        ) {
                           setFormRefs("passwordRef", options.ref);
                         }
                       },
@@ -185,7 +197,9 @@ export function SignupForm() {
                       {
                         componentName: "Icon",
                         props: () => ({
-                          icon: showPassword.password ? "ph:eye" : "ph:eye-slash",
+                          icon: showPassword.password
+                            ? "ph:eye"
+                            : "ph:eye-slash",
                           onClick: () =>
                             setShowPassword("password", !showPassword.password),
                         }),

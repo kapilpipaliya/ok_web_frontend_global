@@ -7,8 +7,7 @@ import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
 import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
 export default function SystemUserSettings() {
-  const [graph] = useGraph();
-  const [searchParams, setSearchParams] = useSearchParams();
+ const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMenu, setSelectedMenu] = createSignal(
     searchParams.tab || "profile",
   );

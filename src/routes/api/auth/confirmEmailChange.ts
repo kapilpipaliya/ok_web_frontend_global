@@ -1,19 +1,19 @@
-import type {APIEvent} from "@solidjs/start/server";
+import type { APIEvent } from "@solidjs/start/server";
 
-import {getQuery} from "vinxi/http";
+import { getQuery } from "vinxi/http";
 
-import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
-import {getDriver} from "~/cypher/core/driver";
-import {getDBSessionForSubdomain} from "~/cypher/session/getSessionForSubdomain";
-import {createActivityLog} from "~/cypher/mutate/activity/createActivityLog";
-import {checkIsSystemUser} from "~/cypher/permissions/checkIsSystemUser";
-import {getSubdomainsForAccount} from "~/cypher/permissions/getSubdomainsForAccount";
-import {APIError, handleAPIError} from "~/lib/api/apiErrorHandler";
-import {validateAndConsumeToken} from "~/lib/auth/secureToken";
-import {decodeUserData} from "~/lib/auth/userDataEncoder";
-import {sendNotificationEmail} from "~/lib/playwright/sendNotificationEmail";
-import {EMAIL_TEMPLATES} from "~/pages/settings/constants";
-import {updateSession} from "~/server/auth/session/updateSession";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { getDriver } from "~/cypher/core/driver";
+import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { checkIsSystemUser } from "~/cypher/permissions/checkIsSystemUser";
+import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAccount";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { validateAndConsumeToken } from "~/lib/auth/secureToken";
+import { decodeUserData } from "~/lib/auth/userDataEncoder";
+import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
+import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
+import { updateSession } from "~/server/auth/session/updateSession";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -172,4 +172,3 @@ export async function GET({ request }: APIEvent) {
     await dbSession.close();
   }
 }
-

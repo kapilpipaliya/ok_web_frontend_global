@@ -1,11 +1,11 @@
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validatePassword } from "~/lib/validation/validatePassword";
 
@@ -19,12 +19,12 @@ export function ForgotPasswordForm() {
     confirmPassword: false,
     newPassword: false,
   });
-  
+
   // Store user data and session data for the entire flow
   const [userState, setUserState] = createStore({
-    email: '', // Keep email for display purposes only
-    resetSessionToken: '',
-    userUuid: '', // Store UUID instead of relying on email for identification
+    email: "", // Keep email for display purposes only
+    resetSessionToken: "",
+    userUuid: "", // Store UUID instead of relying on email for identification
   });
 
   const handleIdentifierSubmit = async (options: FunctionArgumentType) => {
@@ -33,41 +33,45 @@ export function ForgotPasswordForm() {
       showErrorToast("Enter email or username");
       return;
     }
-    
+
     try {
       // Send password reset request
-      const result = await postAPI(API.auth.passwordReset.requestUrl, { identifier });
-      
+      const result = await postAPI(API.auth.passwordReset.requestUrl, {
+        identifier,
+      });
+
       if (!result.success) {
-        showErrorToast(result.message || 'Failed to send reset email');
+        showErrorToast(result.message || "Failed to send reset email");
         return;
       }
-      
+
       // Store the email for display purposes
       if (result.email) {
-        setUserState('email', result.email);
+        setUserState("email", result.email);
       }
-      
+
       // Store the UUID for secure identification in subsequent requests
       if (result.userUuid) {
-        setUserState('userUuid', result.userUuid);
-        
+        setUserState("userUuid", result.userUuid);
+
         // For additional security, store in sessionStorage (cleared when browser is closed)
-        sessionStorage.setItem('resetUserUuid', result.userUuid);
+        sessionStorage.setItem("resetUserUuid", result.userUuid);
       }
-      
+
       // Store the session token for later verification steps
       if (result.resetSessionToken) {
-        setUserState('resetSessionToken', result.resetSessionToken);
-        
+        setUserState("resetSessionToken", result.resetSessionToken);
+
         // For additional security, store in sessionStorage (cleared when browser is closed)
-        sessionStorage.setItem('resetSessionToken', result.resetSessionToken);
+        sessionStorage.setItem("resetSessionToken", result.resetSessionToken);
       }
-      
+
       showSuccessToast("Reset instructions sent to your email");
       options.dataContext.stageData[1]("name", 1);
     } catch (error) {
-      showErrorToast(error instanceof Error ? error.message : 'An unexpected error occurred');
+      showErrorToast(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+      );
     }
   };
 
@@ -77,39 +81,46 @@ export function ForgotPasswordForm() {
       showErrorToast("Please enter OTP");
       return;
     }
-    
+
     // Get user UUID and session token from state or session storage as fallback
-    const userUuid = userState.userUuid || sessionStorage.getItem('resetUserUuid');
-    const resetSessionToken = userState.resetSessionToken || sessionStorage.getItem('resetSessionToken');
-    
-    if (!userUuid || !resetSessionToken) {
-      showErrorToast('Session expired. Please restart the password reset process.');
+    const userUuid =
+      userState.userUuid || sessionStorage.getItem("resetUserUuid");
+    const resetSessionToken =
+      userState.resetSessionToken ||
+      sessionStorage.getItem("resetSessionToken");
+
+    if (!(userUuid && resetSessionToken)) {
+      showErrorToast(
+        "Session expired. Please restart the password reset process.",
+      );
       return;
     }
-    
+
     try {
       // Verify the OTP
       const result = await postAPI(API.auth.passwordReset.verifyOtpUrl, {
         otp,
         resetSessionToken,
-        userUuid
+        userUuid,
       });
-      
+
       if (!result.success) {
-        showErrorToast(result.message || 'Invalid or expired OTP');
+        showErrorToast(result.message || "Invalid or expired OTP");
         return;
       }
-      
+
       showSuccessToast("OTP verified successfully");
       options.dataContext.stageData[1]("name", 2);
     } catch (error) {
-      showErrorToast(error instanceof Error ? error.message : 'An unexpected error occurred');
+      showErrorToast(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+      );
     }
   };
 
   const handlePasswordResetSubmit = async (options: FunctionArgumentType) => {
     const { confirmPassword, newPassword } = options.data.P;
-    
+
     if (newPassword !== confirmPassword) {
       showErrorToast("Passwords do not match");
       return;
@@ -122,39 +133,46 @@ export function ForgotPasswordForm() {
     }
 
     // Get user UUID and session token from state or session storage as fallback
-    const userUuid = userState.userUuid || sessionStorage.getItem('resetUserUuid');
-    const resetSessionToken = userState.resetSessionToken || sessionStorage.getItem('resetSessionToken');
-    
-    if (!userUuid || !resetSessionToken) {
-      showErrorToast('Session expired. Please restart the password reset process.');
+    const userUuid =
+      userState.userUuid || sessionStorage.getItem("resetUserUuid");
+    const resetSessionToken =
+      userState.resetSessionToken ||
+      sessionStorage.getItem("resetSessionToken");
+
+    if (!(userUuid && resetSessionToken)) {
+      showErrorToast(
+        "Session expired. Please restart the password reset process.",
+      );
       return;
     }
-    
+
     try {
       // Reset the password
       const result = await postAPI(API.auth.passwordReset.completeUrl, {
         newPassword,
         resetSessionToken,
-        userUuid
+        userUuid,
       });
-      
+
       if (!result.success) {
-        showErrorToast(result.message || 'Failed to reset password');
+        showErrorToast(result.message || "Failed to reset password");
         return;
       }
-      
+
       // Clear session storage
-      sessionStorage.removeItem('resetUserUuid');
-      sessionStorage.removeItem('resetSessionToken');
+      sessionStorage.removeItem("resetUserUuid");
+      sessionStorage.removeItem("resetSessionToken");
 
       showSuccessToast("Password has been reset successfully");
-      
+
       // Redirect to login page after successful reset
       setTimeout(() => {
-        window.location.href = '/auth/login';
+        window.location.href = "/auth/login";
       }, 3000);
     } catch (error) {
-      showErrorToast(error instanceof Error ? error.message : 'An unexpected error occurred');
+      showErrorToast(
+        error instanceof Error ? error.message : "An unexpected error occurred",
+      );
     }
   };
 
@@ -187,9 +205,9 @@ export function ForgotPasswordForm() {
                     options.dataContext.submitState[1]("isLoading", false);
                   }
                 }
-              }
+              },
             }),
-            validation: { required: true }
+            validation: { required: true },
           },
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
@@ -254,7 +272,7 @@ export function ForgotPasswordForm() {
                     options.dataContext.submitState[1]("isLoading", false);
                   }
                 }
-              }
+              },
             }),
             validation: { required: true },
           },
@@ -324,7 +342,7 @@ export function ForgotPasswordForm() {
                       }
                     }
                   },
-                  type: showPassword.newPassword ? "text" : "password"
+                  type: showPassword.newPassword ? "text" : "password",
                 }),
                 validation: { required: true },
               },
@@ -386,9 +404,7 @@ export function ForgotPasswordForm() {
                       }
                     }
                   },
-                  type: showPassword.confirmPassword
-                    ? "text"
-                    : "password"
+                  type: showPassword.confirmPassword ? "text" : "password",
                 }),
                 validation: { required: true },
               },

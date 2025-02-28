@@ -1,5 +1,3 @@
-import type { JSX } from "solid-js";
-
 import { createWritableMemo } from "@solid-primitives/memo";
 
 interface TextAreaProps

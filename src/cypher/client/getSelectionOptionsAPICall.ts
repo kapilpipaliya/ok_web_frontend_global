@@ -6,9 +6,9 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import type { ServerResult } from "../types/ServerResult";
 
-import { retryTransaction } from "../mutate/mutation_handlers/retryTransaction";
 import { getSelectionOptionsBase } from "../get/getSelectionOptionsBase";
 import { handleMutationData } from "../get/handleMutationData";
+import { retryTransaction } from "../mutate/mutation_handlers/retryTransaction";
 
 export async function getSelectionOptionsAPICall(
   vertex: Vertex[],

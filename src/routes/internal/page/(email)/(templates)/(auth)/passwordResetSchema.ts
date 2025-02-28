@@ -73,4 +73,4 @@ export const passwordResetForm = {
   attributes: [createEmailTemplate(content)],
   key: "PasswordReset",
   title: "Reset Your Password",
-}; 
+};
