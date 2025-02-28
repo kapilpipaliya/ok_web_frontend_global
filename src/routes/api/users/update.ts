@@ -10,9 +10,10 @@ import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import {
   validateUniqueFields,
-  validateUser,
+
 } from "~/routes/api/auth/(profile)/functions/validateField";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import {validateNonSystemUser} from "~/routes/api/auth/(profile)/functions/validateNonSystemUser";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
@@ -37,7 +38,7 @@ export async function POST({ request }: APIEvent) {
 
     const { email, name, roles, username, uuid } = await request.json();
 
-    const userValidation = await validateUser(dbSession, uuid);
+    const userValidation = await validateNonSystemUser(dbSession, uuid);
     if ("error" in userValidation) {
       return userValidation;
     }

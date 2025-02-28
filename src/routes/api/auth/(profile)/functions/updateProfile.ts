@@ -12,9 +12,10 @@ import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAc
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import {
   validateUniqueFields,
-  validateUser,
+
 } from "~/routes/api/auth/(profile)/functions/validateField";
 import { updateSession } from "~/server/auth/session/updateSession";
+import {validateNonSystemUser} from "~/routes/api/auth/(profile)/functions/validateNonSystemUser";
 
 type ProfilePayload = {
   email?: string;
@@ -31,7 +32,7 @@ export async function updateProfile(
 ): Promise<ServerResult | { error: string; status: number }> {
   const { email, username } = payload;
 
-  const userValidation = await validateUser(dbSession, currentUser.P.uuid);
+  const userValidation = await validateNonSystemUser(dbSession, currentUser.P.uuid);
   if ("error" in userValidation) {
     return userValidation;
   }
