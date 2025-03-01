@@ -4,7 +4,7 @@ export function loadingIconSchema() {
   return {
     attributes: [
       {
-        class: "@rotate|2s|linear|reverse|infinite",
+        class: "@rotate|2s|linear|infinite",
         componentName: "Icon",
         height: 32,
         icon: "ph:spinner",

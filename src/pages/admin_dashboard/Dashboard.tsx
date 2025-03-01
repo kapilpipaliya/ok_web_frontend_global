@@ -1,5 +1,5 @@
 import { useSearchParams } from "@solidjs/router";
-import { createEffect, createSignal, onCleanup } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { DataGrid } from "~/features/grid/DataGrid";
@@ -12,13 +12,15 @@ export default function AdminDashboard() {
   const initialKey = (searchParams.tab as string) || "Page";
   const [selectedKey, setSelectedKey] = createSignal(initialKey);
 
+  // Only run this effect if the route hasn't changed
   createEffect(() => {
-    const tab = searchParams.tab as string;
-    if (!tab) {
-      setSelectedKey("Page");
-    } else if (tab !== selectedKey()) {
-      setSelectedKey(tab);
-    }
+      const tab = searchParams.tab as string;
+      if (!tab) {
+        setSelectedKey("Page");
+      } else if (tab !== selectedKey()) {
+        setSelectedKey(tab);
+      }
+    
   });
 
   const handleTabClick = (key: string) => {
@@ -40,10 +42,6 @@ export default function AdminDashboard() {
 
     return baseTabs;
   };
-
-  onCleanup(() => {
-    setSearchParams({ tab: selectedKey() });
-  });
 
   return (
     <div>

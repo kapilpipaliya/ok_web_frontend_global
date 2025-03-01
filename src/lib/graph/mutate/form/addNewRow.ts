@@ -57,10 +57,10 @@ export function getSublistRows(
   if (!vertex) {
     return [];
   }
-  // This should check for inward edges too
-  const type = getToEdge(meta, vertex);
+  
+  const type = meta.P.inward ? getInEdge(meta, vertex) : getToEdge(meta, vertex);
   return (
-    evalExpression(`->${type}`, {
+    evalExpression(meta.P.inward ? `<-${type}` : `->${type}`, {
       graph,
       vertexes: [vertex],
     }) || []
@@ -71,6 +71,7 @@ export function getSublistRowsForType(
   graph: Store<GraphInterface>,
   type: string,
   vertex: Vertex,
+  inward?: boolean,
 ) {
   return (
     evalExpression(`->${type}`, {

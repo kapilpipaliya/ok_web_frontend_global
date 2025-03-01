@@ -44,18 +44,15 @@ export function addNewEdge(
     if (!graph.vertexes[actualEndVertexId]) {
       return { error: "Edge End Vertex not exist while adding new edge" };
     }
-    if (
-      Array.isArray(graph.vertexes[actualStartVertexId].OUT[edge.T]) &&
-      graph.vertexes[actualStartVertexId].OUT[edge.T].includes(actualEdgeId)
-    ) {
+    const startVertexOutEdges = graph.vertexes[actualStartVertexId].OUT[edge.T];
+    if (Array.isArray(startVertexOutEdges) && startVertexOutEdges.includes(actualEdgeId)) {
       return {
         error: `Edge ID ${actualEdgeId} already exist in out_edges of the Start vertex ${actualStartVertexId}`,
       };
     }
-    if (
-      Array.isArray(graph.vertexes[actualEndVertexId].IN[edge.T]) &&
-      graph.vertexes[actualEndVertexId].IN[edge.T].includes(actualEdgeId)
-    ) {
+    
+    const endVertexInEdges = graph.vertexes[actualEndVertexId].IN[edge.T];
+    if (Array.isArray(endVertexInEdges) && endVertexInEdges.includes(actualEdgeId)) {
       return {
         error: `Edge ID ${actualEdgeId} already exist in in_edges of the End vertex ${actualEndVertexId}`,
       };
@@ -67,12 +64,12 @@ export function addNewEdge(
         actualStartVertexId,
         "OUT",
         edge.T,
-        (out_edges: any) =>
+        (out_edges) =>
           Array.isArray(out_edges)
             ? [...out_edges, actualEdgeId]
             : [actualEdgeId],
       );
-      setGraph("vertexes", actualEndVertexId, "IN", edge.T, (in_edges: any) =>
+      setGraph("vertexes", actualEndVertexId, "IN", edge.T, (in_edges) =>
         Array.isArray(in_edges) ? [...in_edges, actualEdgeId] : [actualEdgeId],
       );
     });
@@ -124,14 +121,15 @@ export function deleteEdge(
         const filteredIds = Array.isArray(ids)
           ? ids.filter((id_) => id_ !== actualEdgeId)
           : ids;
-        return filteredIds.length ? filteredIds : undefined;
+        return filteredIds.length ? filteredIds : undefined as unknown as Id[];
       });
       setGraph("vertexes", graph.edges[actualEdgeId].E, "IN", type, (ids) => {
         const filteredIds = Array.isArray(ids)
           ? ids.filter((id_) => id_ !== actualEdgeId)
           : ids;
-        return filteredIds.length ? filteredIds : undefined;
+        return filteredIds.length ? filteredIds : undefined as unknown as Id[];
       });
+      // @ts-expect-error intentionally setting edge to undefined to remove it
       setGraph("edges", actualEdgeId, undefined);
     });
 
@@ -164,12 +162,16 @@ export function deleteEdge(
 export function newEdge(
   edgeId: Id,
   type: string,
-  properties: { [key: string]: any },
+  properties: { [key: string]: unknown },
   startVertexId: Id,
   endVertexId: Id,
 ): Edge {
-  !startVertexId && console.error("edge startId should not be empty");
-  !endVertexId && console.error("edge endId should not be empty");
+  if (!startVertexId) {
+    console.error("edge startId should not be empty");
+  }
+  if (!endVertexId) {
+    console.error("edge endId should not be empty");
+  }
   return {
     E: endVertexId,
     id: edgeId,
@@ -207,9 +209,9 @@ export function replaceEdgeEnd(
         const filteredV = Array.isArray(v)
           ? v.filter((e) => e !== actualEdgeId)
           : v;
-        return filteredV.length ? filteredV : undefined;
+        return filteredV.length ? filteredV : undefined as unknown as Id[];
       });
-      setGraph("vertexes", actualNewEndVertexId, "IN", edge.T, (v: any) =>
+      setGraph("vertexes", actualNewEndVertexId, "IN", edge.T, (v) =>
         Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
       );
     });
@@ -243,7 +245,7 @@ export function replaceEdgeProperties(
   edgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  properties: { [key: string]: any },
+  properties: { [key: string]: unknown },
   options?: { skipPostMessage?: string },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
@@ -307,9 +309,9 @@ export function replaceEdgeStart(
         const filteredV = Array.isArray(v)
           ? v.filter((e) => e !== actualEdgeId)
           : v;
-        return filteredV.length ? filteredV : undefined;
+        return filteredV.length ? filteredV : undefined as unknown as Id[];
       });
-      setGraph("vertexes", actualNewStartVertexId, "OUT", edge.T, (v: any) =>
+      setGraph("vertexes", actualNewStartVertexId, "OUT", edge.T, (v) =>
         Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
       );
     });
@@ -338,6 +340,7 @@ export function replaceEdgeStart(
   });
 }
 
+// no transaction detail add
 export function updateEdgeId(
   oldEdgeId: Id,
   newEdgeId: Id,
@@ -361,16 +364,16 @@ export function updateEdgeId(
       graph.edges[oldEdgeId].S,
       "OUT",
       graph.edges[oldEdgeId].T,
-      (ids: any) => [...ids.filter((id: any) => id !== oldEdgeId), newEdgeId],
+      (ids) => [...ids.filter((id) => id !== oldEdgeId), newEdgeId],
     );
     setGraph(
       "vertexes",
       graph.edges[oldEdgeId].E,
       "IN",
       graph.edges[oldEdgeId].T,
-      (ids: any) => [...ids.filter((id: any) => id !== oldEdgeId), newEdgeId],
+      (ids) => [...ids.filter((id) => id !== oldEdgeId), newEdgeId],
     );
-    // @ts-ignore
+    // @ts-expect-error intentionally setting edge to undefined to remove it
     setGraph("edges", oldEdgeId, undefined);
     broadcastToAllChannels(
       graph.broadcastChannels,
@@ -381,6 +384,7 @@ export function updateEdgeId(
   });
 }
 
+// no transaction detail add
 // make sure to use klona to avoid cant mutate edge issues
 export function updateEdgeIdsToNew(edge: Edge, graph: Store<GraphInterface>) {
   return untrack(() => {

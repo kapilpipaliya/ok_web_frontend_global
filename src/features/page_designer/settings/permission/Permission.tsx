@@ -6,11 +6,11 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
+import { generateTableInputMeta } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/generateTableInputMeta";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { generateTableInputMeta } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/generateTableInputMeta";
 
 export function Permission() {
   const [graph] = useGraph();
@@ -20,8 +20,8 @@ export function Permission() {
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const uniqueConstrainsMetaAttribute = klona(
-    FormMetaData.Form.attributes,
-  ).find((meta) => meta.key === "Perm");
+    FormMetaData[formStoreVertex()?.P.formId as keyof typeof FormMetaData].attributes,
+  ).find((meta) => meta.key === "PermGlobal");
   if (!uniqueConstrainsMetaAttribute) {
     return <></>;
   }
@@ -39,30 +39,7 @@ export function Permission() {
       />
 
       <div class="mt:.5rem px:0.25rem">
-        <DynamicComponent
-          componentName={"MultiSelect"}
-          data={graph.vertexes[formStoreVertex()?.P.formDataId!]}
-          isNoPermissionCheck={true}
-          isRealTime={false}
-          meta={
-            {
-              P: {
-                collection: "->$0Perm",
-                key: "globalPerm",
-              } as unknown as FieldAttribute,
-            } as unknown as Vertex
-          }
-          txnId={formStoreVertex()?.P.txnId}
-        />
-      </div>
-
-      <HeaderWithDescription
-        description="All the permissions that are used in the form."
-        paddingXSm="0.25rem"
-        title="All Form Permissions"
-      />
-      <div class="mt:.5rem px:0.25rem">
-        <TableInputField
+      <TableInputField
           data={graph.vertexes[formStoreVertex()?.P.formDataId!]}
           isNoPermissionCheck={true}
           isRealTime={false}

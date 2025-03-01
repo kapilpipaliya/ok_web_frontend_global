@@ -38,6 +38,7 @@ import { SortableRow } from "./SortableRow";
 export function TableInputField(
   props: Readonly<
     GenericComponentProps & {
+      addNewButtonText?: string;
       data?: Vertex;
       isNoPermissionCheck?: boolean;
       isRealTime?: boolean;
@@ -126,6 +127,7 @@ export function TableInputField(
         {/*</Show>*/}
         {/* <Show when={props.isTableInside}> */}
         <AddNewButton
+          buttonText={props.addNewButtonText}
           onClick={() =>
             runWithOwner(owner, () =>
               insertNewRow(

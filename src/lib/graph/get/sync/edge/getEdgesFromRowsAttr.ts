@@ -21,6 +21,9 @@ export function getEdgesFromRowsAttr(
       if (ignoreTables && attribute.hideInGrid) {
         continue;
       }
+      if (attribute.ignoreFetch) {
+        continue;
+      }
       if (
         attribute.componentName === "Select" ||
         attribute.componentName === "MultiSelect"

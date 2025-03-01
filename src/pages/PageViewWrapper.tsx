@@ -521,7 +521,7 @@ export function PageViewWrapper(
 
   return (
     <Show keyed when={formStore().P.count}>
-      <Show when={props.enableSEO}>
+      {/* <Show when={props.enableSEO}>
         <Show when={graph.vertexes[formStore().P.formMetaId!]?.P.seoTitle}>
           <SiteTitle>
             {getPageTitle(graph.vertexes[formStore().P.formMetaId!]!)}
@@ -537,7 +537,7 @@ export function PageViewWrapper(
             name="description"
           />
         </Show>
-      </Show>
+      </Show> */}
 
       <Switch>
         <Match when={formStore().P.error}>

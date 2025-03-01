@@ -24,7 +24,7 @@ const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
 export const FormMetaData: { [key: string]: IFormMetaData } = {
   ...FormMetaDataAuth,
   // TODO: Coll has only one Attr. Add validation for that.
-  Coll: Coll,
+  // Coll: Coll("Page"),
   // CollCategory: CollCategory,
   Comp: Comp,
   // CompCategory: CompCategory,
@@ -43,34 +43,23 @@ for (const key in FormMetaData) {
   FormMetaData[key].addActionButtons = true;
 }
 
-const rulesMetaAttribute = FormMetaData.Coll.attributes.find(
-  (x) => x.key === "Rule",
-);
-const permissionMetaAttribute = FormMetaData.Coll.attributes.find(
-  (x) => x.key === "Perm",
-);
-FormMetaData.Page.attributes.push({
-  ...permissionMetaAttribute!,
-  hidden: true,
-});
-// To load all the rules when the page is loaded.
-FormMetaData.Page.attributes.push({
-  ...rulesMetaAttribute!,
-  hidden: true,
-});
+
 
 FormMetaData.Form = {
   attributes: [
     ...FormMetaData.Page.attributes,
-    {
-      collection: "g:'FormCategory'",
-      componentName: "Select",
-      displayName: "Form Category",
-      hideInGrid: true,
-      inward: true,
-      key: "form",
-      parentLabel: "FormCategory",
-    },
+    Coll("Form").attributes.find(
+      (x) => x.key === "PermGlobal",
+    )!,
+    // {
+    //   collection: "g:'FormCategory'",
+    //   componentName: "Select",
+    //   displayName: "Form Category",
+    //   hideInGrid: true,
+    //   inward: true,
+    //   key: "form",
+    //   parentLabel: "FormCategory",
+    // },
     {
       attributes: [
         {
@@ -79,6 +68,7 @@ FormMetaData.Form = {
         },
       ],
       componentName: "DynamicTable",
+      hidden: true,
       key: "Unique",
     },
     // rulesMetaAttribute!,
@@ -86,6 +76,12 @@ FormMetaData.Form = {
   key: "Form",
   title: "Form",
 };
+
+FormMetaData.Page.attributes.push({
+  ...Coll("Page").attributes.find(
+    (x) => x.key === "PermGlobal",
+  )!,
+});
 
 export const ComponentLabel = "Component";
 FormMetaData.Component = {
@@ -105,7 +101,6 @@ FormMetaData.CompExample = {
       key: "Comp",
       // validation: { required: true },
     },
-    rulesMetaAttribute!,
   ],
   key: "CompExample",
   title: "Comp Example",

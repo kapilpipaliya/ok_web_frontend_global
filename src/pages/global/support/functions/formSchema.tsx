@@ -9,6 +9,7 @@ import { MutationResult } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
+import { isAdminRole } from '~/lib/graph/get/sync/auth/isAdminRole';
 import { Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
@@ -17,7 +18,6 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { loadingIconSchema } from "../../role/functions/loadingIconSchema";
-import { isAdminRole } from '~/lib/graph/get/sync/auth/isAdminRole';
 
 export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -308,7 +308,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             if (response.error) {
               throw new Error(response.error);
             }
-            options.setGraphData(response.graph, {});
+            options.setGraphData(0, response.graph, {});
           } catch (error) {
             options.showErrorToast((error as Error).message);
           } finally {
@@ -324,6 +324,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             }, 100);
           }
         },
+        onUnmount: () => {
+          options.revertTransactionUpToIndex(options.txnId, -1);
+        }
       };
     },
   };

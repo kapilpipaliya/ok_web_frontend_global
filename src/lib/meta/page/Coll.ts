@@ -8,363 +8,373 @@ import { useGraph } from "../../graph/graph";
 import { FormMetaData } from "../formMetaData";
 import { collectionAttr } from "./collectionAttr";
 
-export const Coll: IFormMetaData = {
-  attributes: [
-    {
-      componentName: "TextInput",
-      key: "title",
-      // onchange: '{"new": ["key","id"]}', // TODO: fix now its giving error Error: Failed to execute 'addEventListener' on 'EventTarget': parameter 2 is not of type 'Object'.
-    },
-    {
-      componentName: "TextInput",
-      key: "key",
-      validationRules: [
-        {
-          message: "ID is required",
-          type: "required",
-        },
-        {
-          ignoreEmptyValue: true,
-          message: "This ID is already taken",
-          type: "custom",
-          validationCallback: (options: any) => {
-            const { formData } =
-              (options.validator.context as IFormContext) ||
-              ({} as IFormContext);
-            const [graph, _setGraph] = useGraph();
-            const val = options.value;
-            if (Object.keys(FormMetaData).includes(val)) {
-              return false;
-            }
-            return !findVertexByLabelAndUniqueIdWithSkip(
-              "Form",
-              "id",
-              val,
-              formData.id,
-              graph,
-            );
+export const Coll: (key: string) => IFormMetaData = (key) => {
+  return {
+    attributes: [
+      {
+        componentName: "TextInput",
+        key: "title",
+        // onchange: '{"new": ["key","id"]}', // TODO: fix now its giving error Error: Failed to execute 'addEventListener' on 'EventTarget': parameter 2 is not of type 'Object'.
+      },
+      {
+        componentName: "TextInput",
+        key: "key",
+        validationRules: [
+          {
+            message: "ID is required",
+            type: "required",
           },
-        },
-        // , {
-        //   type: 'email',
-        //   message: 'Email is invalid',
-        // }
-      ],
-    },
-    {
-      collection: "g:'CollCategory'",
-      componentName: "Select",
+          {
+            ignoreEmptyValue: true,
+            message: "This ID is already taken",
+            type: "custom",
+            validationCallback: (options: any) => {
+              const { formData } =
+                (options.validator.context as IFormContext) ||
+                ({} as IFormContext);
+              const [graph, _setGraph] = useGraph();
+              const val = options.value;
+              if (Object.keys(FormMetaData).includes(val)) {
+                return false;
+              }
+              return !findVertexByLabelAndUniqueIdWithSkip(
+                "Form",
+                "id",
+                val,
+                formData.id,
+                graph,
+              );
+            },
+          },
+          // , {
+          //   type: 'email',
+          //   message: 'Email is invalid',
+          // }
+        ],
+      },
+      {
+        collection: "g:'CollCategory'",
+        componentName: "Select",
 
-      inward: true,
-      key: "category",
-      parentLabel: "CollCategory",
-    },
-    {
-      collection: "g:'Dashboard'",
-      componentName: "MultiSelect",
+        inward: true,
+        key: "category",
+        parentLabel: "CollCategory",
+      },
+      {
+        collection: "g:'Dashboard'",
+        componentName: "MultiSelect",
 
-      inward: true,
-      key: "dashboard",
-      parentLabel: "Dashboard",
-    },
-    {
-      class: PROPERTIES.Css.TextField,
-      componentName: "TextArea",
-      key: "description",
-    },
-    { componentName: "CheckBox", key: "public" },
-    { componentName: "CheckBox", key: "isInlineEditable" },
-    // { key: "supportCustomFields", componentName: "CheckBox" },
-    // { key: "searchOnly", componentName: "CheckBox" },
-    // { key: "supportDeletedRecordSearch", componentName: "CheckBox" },
-    {
-      collection: "->Attr",
-      componentName: "MultiSelect",
-      displayName: "Primary Key",
+        inward: true,
+        key: "dashboard",
+        parentLabel: "Dashboard",
+      },
+      {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextArea",
+        key: "description",
+      },
+      { componentName: "CheckBox", key: "public" },
+      { componentName: "CheckBox", key: "isInlineEditable" },
+      // { key: "supportCustomFields", componentName: "CheckBox" },
+      // { key: "searchOnly", componentName: "CheckBox" },
+      // { key: "supportDeletedRecordSearch", componentName: "CheckBox" },
+      {
+        collection: "->Attr",
+        componentName: "MultiSelect",
+        displayName: "Primary Key",
 
-      key: "pk",
-      // TODO: add validation
-      // If there is not key attribute,
-      // then this field is required.
-    },
-    {
-      collection: "->Attr",
-      componentName: "MultiSelect",
+        key: "pk",
+        // TODO: add validation
+        // If there is not key attribute,
+        // then this field is required.
+      },
+      {
+        collection: "->Attr",
+        componentName: "MultiSelect",
 
-      key: "nameKey",
-      // TODO: add validation
-      // If there is not key attribute,
-      // then this field is required.
-    },
+        key: "nameKey",
+        // TODO: add validation
+        // If there is not key attribute,
+        // then this field is required.
+      },
 
-    {
-      attributes: collectionAttr,
-      componentName: "DynamicTable",
-      key: "Attr",
+      {
+        attributes: collectionAttr,
+        componentName: "DynamicTable",
+        key: "Attr",
 
-      label: "Attr",
-      tab: "Attribute",
+        label: "Attr",
+        tab: "Attribute",
 
-      type: "Attr",
-    },
-    {
-      attributes: [
-        {
-          componentName: "TextInput",
-          key: "key",
-        },
-        // {
-        //   componentName: "TextInput",
-        //   key: "label",
-        // },
-        {
-          attributes: [
-            {
-              componentName: "Select",
-              displayName: "Paren",
-              key: "leftParen",
+        type: "Attr",
+      },
+      {
+        attributes: [
+          {
+            componentName: "TextInput",
+            key: "key",
+          },
+          // {
+          //   componentName: "TextInput",
+          //   key: "label",
+          // },
+          {
+            attributes: [
+              {
+                componentName: "Select",
+                displayName: "Paren",
+                key: "leftParen",
 
-              options: `(
+                options: `(
 ((
 (((`,
-            },
-            {
-              componentName: "Select",
-              displayName: "Field",
-              key: "leftField",
-              // collection: "g:'DataType'",
-            },
-            // {
-            //   componentName: "TextInput",
-            //   displayName: "Value",
-            //   key: "leftValue",
-            // },
-            {
-              componentName: "Select",
-              displayName: "Operator",
-              key: "operator",
-              options: `${Object.keys(unaryOperatorsInitial).join("\n")}
+              },
+              {
+                componentName: "Select",
+                displayName: "Field",
+                key: "leftField",
+                // collection: "g:'DataType'",
+              },
+              // {
+              //   componentName: "TextInput",
+              //   displayName: "Value",
+              //   key: "leftValue",
+              // },
+              {
+                componentName: "Select",
+                displayName: "Operator",
+                key: "operator",
+                options: `${Object.keys(unaryOperatorsInitial).join("\n")}
 ${Object.keys(binopsInitial).join("\n")}`,
-            },
-            {
-              componentName: "Select",
-              displayName: "Field",
-              key: "rightField",
-              // collection: "g:'DataType'",
-            },
-            /*{
-              componentName: "TextInput",
-              displayName: "Value",
-              key: "rightValue",
-            },
-            {
-              collection: "g:'DataType'",
-              componentName: "Select",
-              displayName: "DataType",
-              
-                key: "dataType",
-              
-            },
-            {
-              collection: "->$0DataType->$0Comp||Comp",
-              componentName: "Select",
-              displayName: "Component",
-              
-                key: "comp",
-              
-            },*/
-            {
-              componentName: `->$0RightField->$0Comp<-CompChild::'P.key'||->$0RightField->$0Comp::'P.key'||->$0RightField->$0DataType->$0Default::'P.key'`,
-              displayName: "Value",
-              key: "rightValue",
-              meta: "(->$0Comp<-CompChild->$0Prop)++(->$0Comp->$0Prop)++(->$0ValueProp)",
-            },
-            {
-              componentName: "Select",
-              displayName: "Paren",
-              key: "rightParen",
+              },
+              {
+                componentName: "Select",
+                displayName: "Field",
+                key: "rightField",
+                // collection: "g:'DataType'",
+              },
+              /*{
+                componentName: "TextInput",
+                displayName: "Value",
+                key: "rightValue",
+              },
+              {
+                collection: "g:'DataType'",
+                componentName: "Select",
+                displayName: "DataType",
+                
+                  key: "dataType",
+                
+              },
+              {
+                collection: "->$0DataType->$0Comp||Comp",
+                componentName: "Select",
+                displayName: "Component",
+                
+                  key: "comp",
+                
+              },*/
+              {
+                componentName: `->$0RightField->$0Comp<-CompChild::'P.key'||->$0RightField->$0Comp::'P.key'||->$0RightField->$0DataType->$0Default::'P.key'`,
+                displayName: "Value",
+                key: "rightValue",
+                meta: "(->$0Comp<-CompChild->$0Prop)++(->$0Comp->$0Prop)++(->$0ValueProp)",
+              },
+              {
+                componentName: "Select",
+                displayName: "Paren",
+                key: "rightParen",
 
-              options: `)
+                options: `)
 ))
 )))`,
-            },
-            {
-              componentName: "Select",
-              displayName: "AndOr",
-              key: "andOr",
+              },
+              {
+                componentName: "Select",
+                displayName: "AndOr",
+                key: "andOr",
 
-              options: `${Object.keys(binopsInitial).join("\n")}`,
-            },
-          ],
-          componentName: "DynamicTable",
-          displayName: "Conditions",
-          key: "cond",
-        },
-      ],
-      componentName: "DynamicTable",
-      key: "Rule",
+                options: `${Object.keys(binopsInitial).join("\n")}`,
+              },
+            ],
+            componentName: "DynamicTable",
+            displayName: "Conditions",
+            key: "cond",
+          },
+        ],
+        componentName: "DynamicTable",
+        key: "Rule",
 
-      label: "Rule",
-      tab: "Rules",
+        label: "Rule",
+        tab: "Rules",
 
-      type: "Rule",
-    },
+        type: "Rule",
+      },
 
-    /*      {
-                  key: "Child",
-                  componentName: "DynamicTable",
-                  tab: "Child",
-                  attributes: [
-                    {
-                      key: "coll",
-                      componentName: "Select",
-                      
- 
-                        collection: "g:'Coll'",
-                      
-                    },
-                    {
-                      key: "displayName",
-                      componentName: "TextInput",
-                      
-                        onchange: '{"new": ["key","id"], "edit": ["key","id"]}',
-                      
-                    },
-                    {
-                      key: "key",
-                      componentName: "TextInput",
-                    },
-                    {
-                      key: "tab",
-                      componentName: "Select",
-                      
- 
-                        collection: "-CollChild->$0Tab",
-                      
-                    },
-                    {
-                      key: "group",
-                      componentName: "Select",
-                      
-                        collection: "-CollChild->$0Group",
- 
-                      
-                    },
-                    {
-                      key: "Prop",
-                      displayName: "Property",
-                      componentName: "DynamicTable",
-                      attributes: [
-                        {
-                          key: "key",
-                          componentName: "Select",
-                          
-                            displayExpr: "::'P.key'",
-                            collection: "g:'Comp[Table]'->$0Prop",
-                          
-                        },
-                        {
-                          key: "value",
-                          meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
-                          componentName: "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'",
-                        },
-                      ],
-                    },
-                  ],
-                },*/
-    {
-      attributes: [
-        {
-          collection: "g:'Coll'",
-          componentName: "Select",
+      /*      {
+                    key: "Child",
+                    componentName: "DynamicTable",
+                    tab: "Child",
+                    attributes: [
+                      {
+                        key: "coll",
+                        componentName: "Select",
+                        
+   
+                          collection: "g:'Coll'",
+                        
+                      },
+                      {
+                        key: "displayName",
+                        componentName: "TextInput",
+                        
+                          onchange: '{"new": ["key","id"], "edit": ["key","id"]}',
+                        
+                      },
+                      {
+                        key: "key",
+                        componentName: "TextInput",
+                      },
+                      {
+                        key: "tab",
+                        componentName: "Select",
+                        
+   
+                          collection: "-CollChild->$0Tab",
+                        
+                      },
+                      {
+                        key: "group",
+                        componentName: "Select",
+                        
+                          collection: "-CollChild->$0Group",
+   
+                        
+                      },
+                      {
+                        key: "Prop",
+                        displayName: "Property",
+                        componentName: "DynamicTable",
+                        attributes: [
+                          {
+                            key: "key",
+                            componentName: "Select",
+                            
+                              displayExpr: "::'P.key'",
+                              collection: "g:'Comp[Table]'->$0Prop",
+                            
+                          },
+                          {
+                            key: "value",
+                            meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
+                            componentName: "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'",
+                          },
+                        ],
+                      },
+                    ],
+                  },*/
+      {
+        attributes: [
+          {
+            collection: "g:'Coll'",
+            componentName: "Select",
 
-          key: "coll",
-        },
-        {
-          componentName: "TextInput",
-          key: "displayName",
-        },
-        {
-          componentName: "TextInput",
-          key: "fieldDefaults",
-        },
-        {
-          attributes: [
-            {
-              collection: "g:'Comp[Table]'->$0Prop",
-              componentName: "Select",
+            key: "coll",
+          },
+          {
+            componentName: "TextInput",
+            key: "displayName",
+          },
+          {
+            componentName: "TextInput",
+            key: "fieldDefaults",
+          },
+          {
+            attributes: [
+              {
+                collection: "g:'Comp[Table]'->$0Prop",
+                componentName: "Select",
 
-              displayExpr: "::'P.key'",
-              key: "key",
-            },
-            {
-              componentName:
-                "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'",
-              key: "value",
-              meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
-            },
-          ],
-          componentName: "DynamicTable",
-          displayName: "Property",
-          key: "Prop",
-        },
-      ],
-      componentName: "DynamicTable",
-      key: "Transform",
-      tab: "Transform",
-    },
-    {
-      attributes: [
-        {
-          componentName: "TextInput",
-          key: "key",
-          validation: { required: true },
-        },
-        {
-          collection: "g:'Role'",
-          componentName: "MultiSelect",
-          key: "role",
-        },
-        // This will be hidden in the UI
-        // {
-        //   collection: "g:'Perm'",
-        //   componentName: "MultiSelect",
-        //   key: "perm",
-        // },
-        {
-          componentName: "Select",
-          displayName: "Access Level",
-          key: "access",
-          options: `NONE
+                displayExpr: "::'P.key'",
+                key: "key",
+              },
+              {
+                componentName:
+                  "->$0Name->$0Comp<-CompChild::'P.key'||->$0Name->$0Comp::'P.key'",
+                key: "value",
+                meta: "(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)",
+              },
+            ],
+            componentName: "DynamicTable",
+            displayName: "Property",
+            key: "Prop",
+          },
+        ],
+        componentName: "DynamicTable",
+        key: "Transform",
+        tab: "Transform",
+      },
+      {
+        attributes: [
+          {
+            componentName: "TextInput",
+            key: "key",
+            validation: { required: true },
+          },
+          {
+            childLabel: key,
+            collection: "g:'Role'",
+            componentName: "Select",
+            inward: true,
+            key: "role",
+            parentLabel: "Role",
+          },
+          // This will be hidden in the UI
+          // {
+          //   collection: "g:'Perm'",
+          //   componentName: "MultiSelect",
+          //   key: "perm",
+          // },
+          {
+            componentName: "Select",
+            displayName: "Access Level",
+            ignoreFetch: true,
+            key: "access",
+            options: `NONE
   VIEW
   CREATE
   EDIT
   FULL`,
-        },
-        {
-          componentName: "TextInput",
-          key: "scope",
-        },
-      ],
-      componentName: "DynamicTable",
-      key: "Perm",
-      tab: "Permission",
-    },
-    {
-      attributes: [
-        {
-          collection: "<-$0->Attr",
-          componentName: "MultiSelect",
-          displayName: "Unique Constrain Keys",
+          },
+          {
+            componentName: "TextInput",
+            key: "scope",
+          },
+        ],
+        componentName: "DynamicTable",
+        hidden: true,
+        inward: true,
+        key: "PermGlobal",
+        label: `Role${key}`, // row Label
+        parentLabel: `Role${key}`, // Edge label: parentLabel+ vertex Label
+      },
+      {
+        attributes: [
+          {
+            collection: "<-$0->Attr",
+            componentName: "MultiSelect",
+            displayName: "Unique Constrain Keys",
 
-          key: "pk",
-        },
-      ],
-      componentName: "DynamicTable",
-      key: "uniqueConstrain",
-      tab: "Unique Constrain",
-    },
-  ],
-  key: "Coll",
-  title: "Collection",
+            key: "pk",
+          },
+        ],
+        componentName: "DynamicTable",
+        hidden: true,
+        key: "uniqueConstrain",
+        tab: "Unique Constrain",
+      },
+    ],
+    key: "Coll",
+    title: "Collection",
+  };
 };

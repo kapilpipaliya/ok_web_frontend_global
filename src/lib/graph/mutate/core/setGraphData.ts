@@ -1,19 +1,12 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type {SetStoreFunction} from "solid-js/store";
 
-import { batch } from "solid-js";
+import {batch} from "solid-js";
 
-import type {
-  Edge,
-  EdgeMap,
-  GraphInterface,
-  Id,
-  Vertex,
-  VertexMap,
-} from "~/lib/graph/graph";
+import type {Edge, EdgeMap, GraphInterface, Id, Vertex, VertexMap,} from "~/lib/graph/graph";
 
-import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel";
-import { deleteEdge } from "~/lib/graph/mutate/core/edge";
-import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
+import {broadcastToAllChannels} from "~/lib/graph/mutate/core/channel";
+import {deleteEdge} from "~/lib/graph/mutate/core/edge";
+import {deleteVertex} from "~/lib/graph/mutate/core/vertex";
 
 export interface UpdateOptions {
   skipExisting?: boolean;
@@ -59,7 +52,7 @@ export function updateEdge(
   setGraph: SetStoreFunction<GraphInterface>,
   options: UpdateOptions = {},
 ) {
-  const { skipExisting = false, skipPostMessage = "" } = options;
+  const { skipExisting = false } = options;
 
   if (skipExisting && graph.edges[edgeId]) {
     return;
@@ -96,7 +89,7 @@ export function updateVertex(
   setGraph: SetStoreFunction<GraphInterface>,
   options: UpdateOptions = {},
 ) {
-  const { skipExisting = false, skipPostMessage = false } = options;
+  const { skipExisting = false } = options;
 
   if (skipExisting && graph.vertexes[vertexId]) {
     return;
@@ -112,7 +105,7 @@ export function updateVertex(
   });
 
   for (const label of vertexData.L) {
-    setGraph("vertexLabelIdMap", label, (vertexIds) => {
+    setGraph("vertexLabelIdMap", label, (vertexIds: Id[]) => {
       return Array.isArray(vertexIds)
         ? [...new Set([vertexData.id, ...vertexIds])]
         : [vertexData.id];

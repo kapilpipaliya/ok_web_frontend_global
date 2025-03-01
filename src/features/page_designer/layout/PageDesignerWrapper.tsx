@@ -115,7 +115,7 @@ export function PageDesignerWrapper(): JSX.Element {
 
     handleResize(); // Initial check
     makeEventListener(window, "resize", debouncedHandleResize);
-    fetchCompExamples();
+    // fetchCompExamples();
   });
 
   // Save layout properties on change
@@ -161,42 +161,39 @@ export function PageDesignerWrapper(): JSX.Element {
     })();
   });
 
-  const fetchCompExamples = async () => {
-    // setGridState("isLoading", true);
-    const data = await getTableData(
-      graph,
-      FormMetaData.CompExample,
-      "CompExample",
-      undefined,
-      undefined,
-      false,
-    );
-    if (isValidResponse(data)) {
-      setGraphData(graph, setGraph, data.graph!);
-    } else {
-      console.error("error", getErrorMessage(data));
-    }
-  };
+  // Now we are not have comp examples
+  // const fetchCompExamples = async () => {
+  //   // setGridState("isLoading", true);
+  //   const data = await getTableData(
+  //     graph,
+  //     FormMetaData.CompExample,
+  //     "CompExample",
+  //     undefined,
+  //     undefined,
+  //     false,
+  //   );
+  //   if (isValidResponse(data)) {
+  //     setGraphData(graph, setGraph, data.graph!);
+  //   } else {
+  //     console.error("error", getErrorMessage(data));
+  //   }
+  // };
 
-  const layoutStore = () =>
-    graph.vertexes[initialStore.id].P as PageLayoutObject;
-  const formStoreId = useDesignerFormIdContext();
-  const formStoreVertex = () =>
-    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+
+  // const layoutStore = () =>
+  //   graph.vertexes[initialStore.id].P as PageLayoutObject;
 
   return (
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
-        <SiteTitle>
-          {getPageTitle(graph.vertexes[formStoreVertex()?.P.formDataId!])}
-        </SiteTitle>
-        <div
+        <SiteTitle>{`${params.entity} Builder`}</SiteTitle>
+        {/* <div
           classList={{
             "display:none": layoutStore().selectedSection === "setting",
           }}
-        >
-          <RenderMainContent />
-        </div>
+        > */}
+        <RenderMainContent />
+        {/* </div> */}
       </DesignerLayoutStoreContext.Provider>
     </ZIndex>
   );

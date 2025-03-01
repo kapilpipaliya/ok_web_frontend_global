@@ -61,10 +61,10 @@ export async function POST({ request }: APIEvent) {
 
       // Log role creation/update activity
       await createActivityLog(
-        dbSession,
+        tx,
         action,
         "Role",
-        isNewRole ? res.result.id : role.id,
+        isNewRole ? res.clientToServerVertexIdMap.get(role.id) : role.id,
         user.P.email,
         details,
       );

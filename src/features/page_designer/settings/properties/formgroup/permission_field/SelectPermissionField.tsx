@@ -1,11 +1,13 @@
+import { klona } from "klona";
+
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
+import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { pageAttr } from "~/lib/meta/page/pageAttr";
 
-import { Label } from "../Label";
-import { ConfigurePermissionButton } from "./ConfigurePermissionButton";
-import {DynamicComponent} from "~/components/form/DynamicComponent";
+import { generateTableInputMeta } from "./functions/generateTableInputMeta";
 
 interface SelectPermissionFieldProps {
   meta: Vertex;
@@ -14,41 +16,26 @@ interface SelectPermissionFieldProps {
 }
 
 export function SelectPermissionField(props: SelectPermissionFieldProps) {
-  const [graph, _setGraph] = useGraph();
+  const [graph] = useGraph();
 
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const meta = {
-    P: {
-      class: "flex:1",
-      collection: () => `id:'${formStoreVertex()?.P.formDataId}'->$0Perm`,
-      componentName: "MultiSelect",
-      displayName: props.meta.P.displayName,
-      key: props.meta.P.key,
-      useLocalStorage: true,
-    },
-  } as unknown as Vertex;
 
+  const metaAttribute = klona(pageAttr.find((meta) => meta.key === "Perm"));
+  const { metaVertexId } = generateTableInputMeta(metaAttribute!,);
   return (
-    <div
-      // fix class for select
-      class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
-    >
-      <span class="f:15 flex:.5">
-        <Label meta={props.meta} />
-      </span>
-      <div class="flex f:15 flex:1 gap:1px">
-        <DynamicComponent
-          data={props.selectedLayout}
-          isNoPermissionCheck={true}
-          isRealTime={false}
-          meta={meta}
-          noLabel
-          txnId={props.txnId}
-        />
-        <ConfigurePermissionButton title="All Permissions" />
-      </div>
-    </div>
+    // <div
+      // class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
+    // >
+      <TableInputField
+        addNewButtonText="Add New Permission"
+        data={props.selectedLayout}
+        isNoPermissionCheck={true}
+        isRealTime={false}
+        meta={graph.vertexes[metaVertexId]}
+        txnId={formStoreVertex()?.P.txnId}
+      />
+    // </div>
   );
 }

@@ -39,19 +39,20 @@ export function addNewVertex(
     if (existedVertexes.length) {
       return { error: "vertex ID already exist while adding new vertex" };
     }
+    const actualVertex = updateVertexIdsToNew(klona(vertex), graph, true);
     setGraph(
       "vertexes",
       actualVertexId,
-      updateVertexIdsToNew(klona(vertex), graph),
+      {...actualVertex, IN: {}, OUT: {}},
     );
     for (const label of vertex.L) {
-      setGraph("vertexLabelIdMap", label, (vertexIds: any) =>
+      setGraph("vertexLabelIdMap", label, (vertexIds: Id[]) =>
         Array.isArray(vertexIds)
           ? [...vertexIds, actualVertexId]
           : [actualVertexId],
       );
     }
-    const data = updateVertexIdsToNew(klona(vertex), graph);
+    const data = klona(actualVertex);
     transactionDetailAdd(
       txnId,
       {
@@ -204,14 +205,13 @@ export function isVertex(vertex: unknown): vertex is Vertex {
 }
 
 // mergeVertexProperties(0, vertexId, {props: { title }}) } }} will replace props.
-export function mergeVertexProperties<T extends { [key: string]: any }>(
+export function mergeVertexProperties<T extends { [key: string]: unknown }>(
   txnId: number,
   vertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: Partial<T>,
   options?: { cloneProperties?: boolean; skipPostMessage?: string },
-  _types?: { [key: string]: any },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId =
@@ -220,7 +220,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
     if (!vertex) {
       return { error: `Vertex ID is not valid ${actualVertexId}` };
     }
-    const originalProperties = {} as { [key: string]: any };
+    const originalProperties = {} as { [key: string]: unknown };
     for (const property in properties) {
       // clonning json will remove undefined value, so used null as default.
       originalProperties[property] = vertex.P[property] ?? null;
@@ -230,7 +230,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
       : properties;
     // It will only merge top level properties.
     setGraph("vertexes", actualVertexId, "P", clonedProperties);
-    const data = updateVertexIdsToNew(klona(vertex), graph);
+    const data = updateVertexIdsToNew(klona(vertex), graph, true);
     data.P = clonedProperties;
 
     transactionDetailAdd(
@@ -258,7 +258,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
 }
 
 // return a new Vertex
-export function newVertex<T extends { [key: string]: any }>(
+export function newVertex<T extends { [key: string]: unknown }>(
   id: Id,
   labels: string[],
   properties?: T,
@@ -272,7 +272,7 @@ export function replaceVertexProperties(
   vertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  properties: { [key: string]: any },
+  properties: { [key: string]: unknown },
   // clonning will reduce performance, so we can use this flag to disable it.
   options?: { cloneProperties?: boolean; skipPostMessage?: string },
 ): { error: boolean | string; txnDetailIndex?: number } {
@@ -296,6 +296,7 @@ export function replaceVertexProperties(
       const data = updateVertexIdsToNew(
         klona(graph.vertexes[actualVertexId]),
         graph,
+        true,
       );
       transactionDetailAdd(
         txnId,
@@ -346,7 +347,7 @@ export function updateVertexId(
       );
     }
     for (const label of graph.vertexes[newVertexId as string].L) {
-      setGraph("vertexLabelIdMap", label, (vertexIds) =>
+      setGraph("vertexLabelIdMap", label, (vertexIds: Id[]) =>
         Array.isArray(vertexIds) ? [...vertexIds, newVertexId] : [newVertexId],
       );
     }
@@ -361,7 +362,7 @@ export function updateVertexId(
     )) {
       setGraph("edges", edgeIds, "E", newVertexId);
     }
-    // @ts-ignore
+    // @ts-expect-error intentionally setting vertex to undefined to remove it
     setGraph("vertexes", oldVertexId, undefined);
     broadcastToAllChannels(
       graph.broadcastChannels,
@@ -376,19 +377,22 @@ export function updateVertexId(
 export function updateVertexIdsToNew(
   vertex: Vertex,
   graph: Store<GraphInterface>,
+  ignoreEdges: boolean,
 ) {
   return untrack(() => {
     vertex.id = getVertexOldIdToNewIdMap(graph)[vertex.id] || vertex.id;
-    for (const [edgeType, edgeIds] of Object.entries(vertex.IN)) {
-      vertex.IN[edgeType] = edgeIds.map(
-        (id) => getEdgeOldIdToNewIdMap(graph)[id] || id,
-      );
-    }
+    if (!ignoreEdges) {
+      for (const [edgeType, edgeIds] of Object.entries(vertex.IN)) {
+        vertex.IN[edgeType] = edgeIds.map(
+          (id) => getEdgeOldIdToNewIdMap(graph)[id] || id,
+        );
+      }
 
-    for (const [edgeType, edgeIds] of Object.entries(vertex.OUT)) {
-      vertex.OUT[edgeType] = edgeIds.map(
-        (id) => getEdgeOldIdToNewIdMap(graph)[id] || id,
-      );
+      for (const [edgeType, edgeIds] of Object.entries(vertex.OUT)) {
+        vertex.OUT[edgeType] = edgeIds.map(
+          (id) => getEdgeOldIdToNewIdMap(graph)[id] || id,
+        );
+      }
     }
     return vertex;
   });

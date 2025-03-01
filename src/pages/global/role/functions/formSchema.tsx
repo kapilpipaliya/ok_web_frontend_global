@@ -12,6 +12,7 @@ import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { MutationResult } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
+import { evalExpression } from "~/lib/expression_eval";
 import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
@@ -108,41 +109,56 @@ export const roleFormSchema = {
             {
               class: "cursor:pointer p:8|16 ",
               componentName: "Button",
-              props: (options: FunctionArgumentType) => ({
-                class:
-                  options.dataContext.tabState[0]?.activeTab === "Perm"
+              props: (options: FunctionArgumentType) => {
+                const permissions = evalExpression("->RolePerm", {
+                  graph: options.graph,
+                  setGraph: options.setGraph,
+                  vertexes: [options.data],
+                });
+                return ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Perm"
                     ? "bb:2px|solid|primary"
                     : "bb:2px|solid|transparent",
-                onClick: () =>
-                  options.dataContext.tabState[1]("activeTab", "Perm"),
-                text: "Permissions",
-              }),
+                  onClick: () => options.dataContext.tabState[1]("activeTab", "Perm"),
+                  text: `Permissions ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
+                });
+              },
             },
             {
               class: "cursor:pointer p:8|16 ",
               componentName: "Button",
-              props: (options: FunctionArgumentType) => ({
-                class:
-                  options.dataContext.tabState[0]?.activeTab === "Page"
+              props: (options: FunctionArgumentType) => {
+                const permissions = evalExpression("->RolePage", {
+                  graph: options.graph,
+                  setGraph: options.setGraph,
+                  vertexes: [options.data],
+                });
+                return ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Page"
                     ? "bb:2px|solid|primary"
                     : "bb:2px|solid|transparent",
-                onClick: () =>
-                  options.dataContext.tabState[1]("activeTab", "Page"),
-                text: "Pages",
-              }),
+                  onClick: () => options.dataContext.tabState[1]("activeTab", "Page"),
+                  text: `Pages ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
+                });
+              },
             },
             {
               class: "cursor:pointer p:8|16 ",
               componentName: "Button",
-              props: (options: FunctionArgumentType) => ({
-                class:
-                  options.dataContext.tabState[0]?.activeTab === "Form"
+              props: (options: FunctionArgumentType) => {
+                const permissions = evalExpression("->RoleForm", {
+                  graph: options.graph,
+                  setGraph: options.setGraph,
+                  vertexes: [options.data],
+                });
+                return ({
+                  class: options.dataContext.tabState[0]?.activeTab === "Form"
                     ? "bb:2px|solid|primary"
                     : "bb:2px|solid|transparent",
-                onClick: () =>
-                  options.dataContext.tabState[1]("activeTab", "Form"),
-                text: "Forms",
-              }),
+                  onClick: () => options.dataContext.tabState[1]("activeTab", "Form"),
+                  text: `Forms ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
+                });
+              },
             },
           ],
           class: "display:flex bb:1px|solid|base-20",
@@ -173,6 +189,7 @@ export const roleFormSchema = {
                     : "d:none",
               }),
             },
+
             {
               as: "div",
               attributes: [permissionsTableSchema("Form")],
@@ -200,9 +217,9 @@ export const roleFormSchema = {
     },
   ],
   componentName: "Box",
-  props: () => {
+  props: (options: FunctionArgumentType) => {
     return {
-      onMount: async (options: FunctionArgumentType) => {
+      onMount: async () => {
         if (!options.data.id.startsWith("-")) {
           try {
             options.dataContext.modalState[1]("isLoading", true);
@@ -212,7 +229,7 @@ export const roleFormSchema = {
             if (response.error) {
               throw new Error(response.error);
             }
-            options.setGraphData(response.graph, {});
+            options.setGraphData(0, response.graph, {});
           } catch (error) {
             options.showErrorToast((error as Error).message);
           } finally {
@@ -220,6 +237,9 @@ export const roleFormSchema = {
           }
         }
       },
+      onUnmount: () => {
+        options.revertTransactionUpToIndex(options.txnId, -1);
+      }
     };
   },
 };

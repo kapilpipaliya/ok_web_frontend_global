@@ -44,7 +44,7 @@ import {
   useGraph,
   type Vertex,
 } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 
 import type {
@@ -57,6 +57,8 @@ import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -258,6 +260,8 @@ export function DynamicComponent(
         return isReadOnly();
       },
       ref,
+      revertTransaction: (txnId: number) => revertTransaction(txnId, graph, setGraph),
+      revertTransactionUpToIndex: (txnId: number, txnIndex: number) => revertTransactionUpToIndex(txnId, txnIndex, graph, setGraph),
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
       searchParams,
@@ -265,10 +269,11 @@ export function DynamicComponent(
         return setGraph;
       },
       setGraphData: (
-        args: Parameters<typeof setGraphData>[2],
-        options: Parameters<typeof setGraphData>[3],
+        txnId: number,
+        args: Parameters<typeof setGraphDataWithTransaction>[3],
+        options: Parameters<typeof setGraphDataWithTransaction>[4],
       ) => {
-        setGraphData(graph, setGraph, args, options);
+        setGraphDataWithTransaction(txnId, graph, setGraph, args, options);
       },
       setSearchParams,
       showErrorToast,

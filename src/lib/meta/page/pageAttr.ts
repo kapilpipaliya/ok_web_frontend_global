@@ -72,6 +72,33 @@ export const pageAttr = [
     key: "Role",
   },
   {
+    attributes: [
+      {
+        collection: "g:'Role'",
+        componentName: "Select",
+        key: "role",
+        parentLabel: "Role",
+      },
+      {
+        componentName: "Select",
+        displayName: "Access Level",
+        ignoreFetch: true,
+        key: "access",
+        options: `NONE
+VIEW
+CREATE
+EDIT
+FULL`,
+      },
+      // {
+      //   componentName: "TextInput",
+      //   key: "scope",
+      // },
+    ],
+    componentName: "DynamicTable",
+    key: "Perm",
+  },
+  {
     componentName: "DynamicTable",
     key: "Attr",
     label: "Attr",

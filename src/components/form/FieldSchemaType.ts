@@ -7,9 +7,10 @@ import type {
   PageRenderStore,
 } from "~/features/page_attr_render/context/PageRenderContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import type { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import type { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 
 import type { FormStoreObject } from "./context/FormContext";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 
 export type ComponentNameType = (options: FunctionArgumentType) => string;
 
@@ -36,6 +37,8 @@ export interface FunctionArgumentBaseType {
   parentRenderContext: PageRenderObject;
   readOnly: boolean | null | undefined;
   ref: Accessor<HTMLDivElement | null>;
+  revertTransaction: (txnId: number) => void;
+  revertTransactionUpToIndex: (txnId: number, txnIndex: number) => void;
   runWithOwner: <T>(fn: () => T) => T | undefined;
   runWithParentOwner: <T>(fn: () => T) => T | undefined;
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
@@ -43,8 +46,9 @@ export interface FunctionArgumentBaseType {
   searchParams?: ReturnType<typeof useSearchParams>[0];
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
-    args: Parameters<typeof setGraphData>[2],
-    options: Parameters<typeof setGraphData>[3],
+    txnId: number,
+    args: Parameters<typeof setGraphDataWithTransaction>[3],
+    options: Parameters<typeof setGraphDataWithTransaction>[4],
   ) => void;
   setSearchParams?: ReturnType<typeof useSearchParams>[1];
   showErrorToast: (message: string) => void;

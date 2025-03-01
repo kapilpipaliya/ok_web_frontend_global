@@ -7,8 +7,10 @@ import {
   type IconButtonProps,
 } from "../../components/styled/IconButton";
 
-export function AddNewButton(props: IconButtonProps) {
-  const [_local, rest] = splitProps(props, ["children"]);
+export function AddNewButton(props: IconButtonProps & {
+  buttonText?: string;
+}) {
+  const [local, rest] = splitProps(props, ["children", "buttonText"]);
 
   return (
     <IconButton
@@ -19,7 +21,7 @@ export function AddNewButton(props: IconButtonProps) {
       title="Add New"
       {...rest}
     >
-      <span>Add New</span>
+      <span>{local.buttonText || "Add New"}</span>
     </IconButton>
   );
 }
