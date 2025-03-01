@@ -1,17 +1,11 @@
 import { getErrorMessage } from "./getErrorMessage";
 import { isValidResponse } from "./isValidResponse";
 
-/**
- * Common function to make POST requests to a specified URL with given data.
- * @param {string} url - The URL to which the POST request is sent.
- * @param {object} data - The payload for the POST request.
- * @returns {Promise<any>} - The promise that resolves to the response data.
- */
 export async function postAPI(
   url: string,
   data: object,
   action: "DELETE" | "POST" = "POST",
-): Promise<{ [key: string]: any }> {
+): Promise<Record<string, unknown>> {
   const response = await fetch(url, {
     body: JSON.stringify(data),
     headers: {

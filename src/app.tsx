@@ -6,45 +6,69 @@ import { ToastProvider } from "solid-hot-toast";
 
 import "~/base.css";
 
-import { Show, Suspense } from "solid-js";
+import { ErrorBoundary, onMount, Show, Suspense } from "solid-js";
+import {isServer} from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
 
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/styled/LoaderSimple";
+import { logError } from "./lib/error/errorLogger";
+import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
 import { getGlobalThemeVertex } from "./lib/graph/get/sync/theme/getGlobalThemeVertex";
 import { themeConfig } from "./lib/graph/get/sync/theme/themeConfig";
 import { GraphContext } from "./lib/graph/graph";
 import { toastValue } from "./toastValue";
 
+// Create a generic error fallback component
+const ErrorFallback = (props: { error: Error; resetErrorBoundary: () => void }) => {
+  return (
+    <div class="error-boundary-fallback">
+      <h2>Something went wrong</h2>
+      <p>{props.error.message}</p>
+      <button onClick={props.resetErrorBoundary}>Try again</button>
+    </div>
+  );
+};
+
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
   const graph = createAppState();
   const Toaster = clientOnly(() => import("./Toaster"));
+  
+  // Set up global error handlers on client-side only
+  onMount(() => {
+    if (!isServer) {
+      setupGlobalErrorHandlers();
+    }
+  });
 
   return (
     <ToastProvider {...toastValue}>
       <Router
         root={(props) => {
-          const location = useLocation();
+          // <A> and 'use' router primitives can be only used inside a Route.
+          // const location = useLocation();
           return (
             <GraphContext.Provider value={graph}>
               <CSSRuntimeProvider
                 config={themeConfig(getGlobalThemeVertex(graph[0]))}
               >
                 <MetaProvider>
-
-                  <Suspense fallback={<LoaderNew />}>
-                    {/* <ErrorBoundary fallback={(error) => {
-                        return <div>Something went wrong: {error.message}</div>;
-                      }}> */}
-                    {props.children}
-                    {/* </ErrorBoundary> */}
-                  </Suspense>
-                  <Show when={!location.pathname.startsWith("/email-templates")}>
+                  <ErrorBoundary 
+                    fallback={(error, reset) => {
+                      // Log the UI error
+                      logError(error, { location: location.pathname });
+                      return <ErrorFallback error={error} resetErrorBoundary={reset} />;
+                    }}
+                  >
+                    <Suspense fallback={<LoaderNew />}>
+                      {props.children}
+                    </Suspense>
+                  </ErrorBoundary>
+                  {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
                     <Toaster />
-                  </Show>
-
+                  {/* </Show> */}
                 </MetaProvider>
               </CSSRuntimeProvider>
             </GraphContext.Provider>

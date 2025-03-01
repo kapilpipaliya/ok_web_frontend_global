@@ -1,14 +1,12 @@
 import type { APIEvent } from "@solidjs/start/server";
-import type { Node } from "neo4j-driver";
 
-import type { Edge, Vertex } from "~/lib/graph/graph";
-
-import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
-import { processResult } from "~/cypher/queries/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { getSupportTicketFormSchema } from "~/pages/global/support/functions/formSchema";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -26,55 +24,32 @@ export async function POST({ request }: APIEvent) {
   }
 
   try {
-    // Query based on user role
-    const query = isAdmin
-      ? `
-        MATCH (s:Support)
-        OPTIONAL MATCH (s)<-[r:ParentSupport]-(reply:Reply)
-        WITH s, collect(reply)[0..5] as replies
-        RETURN s as support, replies
-        ORDER BY s.createdAt DESC
-      `
-      : `
-        MATCH (s:Support)
-        WHERE s.email = $email
-        OPTIONAL MATCH (s)<-[r:ParentSupport]-(reply:Reply)
-        WITH s, collect(reply)[0..5] as replies
-        RETURN s as support, replies
-        ORDER BY s.createdAt DESC
-      `;
+    // Query based on user role, for admin we show all tickets, for non-admin we show only tickets created by the user
+    const { incoming, outgoing } = getEdgesFromRowsAttr(
+      getSupportTicketFormSchema(() => {}).attributes!
+    );
 
-    const result = await dbSession.run(query, {
-      email: user.P.email, // Using email as userId for non-admin users
-    });
+    let expression = `g:'Support'`;
+    if (!isAdmin) {
+      expression = `g:'Support[$0]'`;
+    }
 
-    const nodes: { [key: string]: Vertex } = {};
-    const relationships: { [key: string]: Edge } = {};
-
-    const tickets = result.records.map((record) => {
-      const supportNode = convertNodeToJson(record.get("support"));
-      const replies = record.get("replies")
-        ? record.get("replies").map((reply: Node) => convertNodeToJson(reply))
-        : [];
-
-      return {
-        ...supportNode,
-        P: {
-          ...supportNode.P,
-          replies: replies,
-        },
-      };
-    });
-
-    processResult(result.records, { nodes, relationships }, "support", "");
-    return {
-      graph: {
-        edges: relationships,
-        vertexes: nodes,
+    const data = await fetchDataFromMG(
+      {
+        expression,
+        incoming,
+        outgoing,
       },
-      result: tickets,
-      timestamp: new Date().getTime(),
-    };
+      {
+        $0: {
+          filter: { email: user.P.email },
+        },
+        nodes: {},
+        relationships: {},
+      }
+    );
+
+    return data;
   } catch (error) {
     return handleAPIError(error);
   } finally {

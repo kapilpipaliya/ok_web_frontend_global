@@ -21,11 +21,17 @@ export function processResult(
 
   for (const record of records) {
     // Process nodes
-    for (const label of labels) {
-      const vertex = convertNodeToJson(record.get(label));
-      vertices.push(vertex);
-      if (nodes) {
-        nodes[vertex.id] = vertex;
+    for (let index = 0; index < labels.length; index++) {
+      const label = labels[index];
+      const node = record.get(label);
+      if (node) {
+        const vertex = convertNodeToJson(node);
+        if (index === 0) {
+          vertices.push(vertex);
+        }
+        if (nodes) {
+          nodes[vertex.id] = vertex;
+        }
       }
     }
 

@@ -301,26 +301,32 @@ export function DataGrid(props: Readonly<DataGridProps>) {
             formMetaData={formMetaData()}
             onSearch={handleSearch}
           />
-          <CommonTable
-            allConfiguredPermission={allConfiguredPermission()}
-            cardSize={gridState.cardSize}
-            data={gridState.filteredData}
-            defaultRowsPerPage={10}
-            enableMultiRowSelection={props.enableMultiRowSelection}
-            enableRowSelection={props.enableRowSelection}
-            headers={gridState.tableStore.tableColumns}
-            isSearching={gridState.isSearching}
-            isShowLoadMore={gridState.isShowLoadMore}
-            isShowPagination={props.isShowPagination}
-            layout={gridState.layout}
-            onLoadMore={(skip, limit) => fetchTableData(skip, limit, true)}
-            rowsPerPageOptions={[5, 10, 15]}
-            selectedRows={gridState.selectedRows}
-            setSelectedRows={(rows: Vertex[]) =>
-              setGridState("selectedRows", rows)
-            }
-            totalItems={gridState.filteredData.length}
-          />
+          <Show when={gridState.isLoading}>
+            <LoaderNew loaderHeight="55vh" />
+          </Show>
+          {/* IF we not reload table Inline schmea renderer form gives error, because its not properly reloaded */}
+          <Show when={!gridState.isLoading}>
+            <CommonTable
+              allConfiguredPermission={allConfiguredPermission()}
+              cardSize={gridState.cardSize}
+              data={gridState.filteredData}
+              defaultRowsPerPage={10}
+              enableMultiRowSelection={props.enableMultiRowSelection}
+              enableRowSelection={props.enableRowSelection}
+              headers={gridState.tableStore.tableColumns}
+              isSearching={gridState.isSearching}
+              isShowLoadMore={gridState.isShowLoadMore}
+              isShowPagination={props.isShowPagination}
+              layout={gridState.layout}
+              onLoadMore={(skip, limit) => fetchTableData(skip, limit, true)}
+              rowsPerPageOptions={[5, 10, 15]}
+              selectedRows={gridState.selectedRows}
+              setSelectedRows={(rows: Vertex[]) =>
+                setGridState("selectedRows", rows)
+              }
+              totalItems={gridState.filteredData.length}
+            />
+          </Show>
           <Show when={gridState.deleteRowId}>
             <DialogWithButtons
               message="Are you sure you want to delete this item?"

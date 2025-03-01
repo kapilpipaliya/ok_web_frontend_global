@@ -9,7 +9,7 @@ export async function createActivityLog(
   details?: string,
 ) {
   await dbSession.run(
-    `CREATE (a:Activity {
+    `CREATE (a:ActivityLog {
       action: $action,
       entityType: $entityType,
       entityId: $entityId,

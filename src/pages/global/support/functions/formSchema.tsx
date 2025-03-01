@@ -4,7 +4,6 @@ import { createStore } from "solid-js/store";
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { useToast } from "~/components/styled/Toast";
 import { MutationResult } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
@@ -20,8 +19,6 @@ import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSc
 import { loadingIconSchema } from "../../role/functions/loadingIconSchema";
 
 export const getSupportTicketFormSchema = (onSuccess: () => void) => {
-  const { showErrorToast, showSuccessToast } = useToast();
-
   const actionButtonsSchema = {
     as: "div",
     attributes: [
@@ -55,6 +52,17 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   };
   const chatHistorySchema = {
     attributes: [
+      {
+        collection: "g:'Reply'",
+        componentName: "MultiSelect",
+        displayName: "Parent Support",
+        inward: true,
+        key: "ParentSupport",
+        props: () => ({
+          hidden: true,
+        }),
+        type: "ParentSupport",
+      },
       {
         class: SETTINGS_CONSTANTS.LABEL_CLASS,
         componentName: "Text",
@@ -145,7 +153,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     // },
                   },
                 ],
-                class: "max-h:300px overflow-y:auto border:1px|solid|base-20 r:6 p:12 bg:base-5 chat-history-container",
+                class: "max-h:300px min-h:100px overflow-y:auto border:1px|solid|base-20 r:6 p:12 bg:base-5 chat-history-container",
                 componentName: "Box",
               },
               {
@@ -281,7 +289,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 componentName: "TextArea",
                 key: "message",
                 props: (options: FunctionArgumentType) => ({
-                  readonly: true,
+                  disabled: true,
                   value: options.data.P.message,
                 }),
               },
@@ -344,14 +352,14 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       });
 
       if (response.error) {
-        showErrorToast(response.error);
+        options.showErrorToast(response.error as string);
       } else {
         onMutatDataGet(options.graph, options.setGraph, response as MutationResult);
-        showSuccessToast("Support ticket updated successfully");
+        options.showSuccessToast("Support ticket updated successfully");
         onSuccess();
       }
     } catch (error) {
-      showErrorToast((error as Error).message);
+      options.showErrorToast((error as Error).message);
     } finally {
       options.dataContext.modalState[1]("isLoading", false);
     }
@@ -391,7 +399,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       {
         as: "div",
         attributes: [
-          addEditButtonSchema("SupportTicket"),
+          addEditButtonSchema("Support"),
           {
             as: "div",
             attributes: [],
@@ -450,5 +458,5 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     }),
   };
 
-  return { attributes: [schema], key: "SupportTicket" } as IFormMetaData;
+  return { attributes: [schema], key: "Support" } as IFormMetaData;
 };

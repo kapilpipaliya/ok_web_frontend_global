@@ -60,7 +60,7 @@ export function ActivityLog() {
         _gridStore = gridStore_;
       }}
       isShowPagination={true}
-      tableId="activity-log"
+      tableId="ActivityLog"
     />
   );
 }

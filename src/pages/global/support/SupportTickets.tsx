@@ -3,7 +3,7 @@ import { For } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { DataGridStore } from "~/features/grid/DataGridContext";
-import type { Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
@@ -11,8 +11,10 @@ import { postAPI } from "~/lib/api/postApi";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { getSupportTicketFormSchema } from "./functions/formSchema";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function SupportTickets() {
+  const [graph, setGraph] = useGraph();
   let gridStore: DataGridStore;
 
   const getTableData = async () => {
@@ -46,6 +48,7 @@ export function SupportTickets() {
         componentName: "Select",
         displayName: "Status",
         key: "SupportStatus",
+        labelKey: "::'P.name'",
       },
       {
         componentName: "TextInput",
@@ -54,9 +57,16 @@ export function SupportTickets() {
       },
       {
         cell: (info: CellContext<Vertex, unknown>) => {
+          const getReplies = () => {
+            return evalExpression("<-ParentSupport", {
+              graph: graph,
+              setGraph: setGraph,
+              vertexes: [graph.vertexes[info.row.original.id]],
+            }).sort((a: Vertex, b: Vertex) => new Date(a.P.createdAt).getTime() - new Date(b.P.createdAt).getTime())
+          }
           return (
             <div>
-              <For each={info.row.original.P.replies}>
+              <For each={getReplies()}>
                 {(reply: Vertex) => (
                   <div class="white-space:nowrap overflow:hidden text-overflow:ellipsis">
                     {new Date(reply.P.createdAt).toLocaleDateString()} {new Date(reply.P.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {reply.P.message.slice(0, 10)}... (by {reply.P.email.slice(0, 5)}...)
@@ -72,17 +82,18 @@ export function SupportTickets() {
       },
     ],
     isInlineEditable: true,
-    key: "SupportTicket",
+    key: "Support",
     title: "Support Tickets",
   };
   const onSuccess = () => {
     gridStore?.[0].fetchTableData();
   };
-  const addSchema = getSupportTicketFormSchema(onSuccess);
+
   const editSchema = getSupportTicketFormSchema(onSuccess);
   return (
     <DataGrid
-      CustomAddNewButton={() => <SchemaRenderer form={addSchema} />}
+      // user should not create new support ticket himself, so we hide the add new button
+      CustomAddNewButton={() => <div></div>}
       editSchema={editSchema}
       formSchema={SupportTicketSchema}
       getTableData={getTableData}
@@ -91,7 +102,7 @@ export function SupportTickets() {
         gridStore = gridStore_;
       }}
       isShowPagination={true}
-      tableId="SupportTicket"
+      tableId="Support"
     />
   );
 }

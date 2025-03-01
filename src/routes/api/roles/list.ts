@@ -44,11 +44,7 @@ export async function GET({ request }: APIEvent) {
       ORDER BY r.name ASC
     `);
 
-    processResult(result.records, { nodes, relationships }, "r", "");
-
-    const roles = result.records.map((record) =>
-      convertNodeToJson(record.get("r")),
-    );
+    const roles = processResult(result.records, { nodes, relationships }, "r", "");
 
     return {
       graph: {
