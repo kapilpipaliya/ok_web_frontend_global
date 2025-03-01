@@ -76,7 +76,7 @@ const Panel: Component<PanelProps> = (props) => {
           <div class="background:rgb(243,244,246) border-bottom:1px|solid|rgb(229,231,235) padding:4">
             <h1 class="font-weight:600">{props.title}</h1>
           </div>
-          <div class="overflow-y:auto">{props.children}</div>
+          <div class={`${STYLES.overflow}`}>{props.children}</div>
         </div>
       </Show>
     );

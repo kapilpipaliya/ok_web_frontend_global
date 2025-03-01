@@ -57,8 +57,12 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
         lineNumbers: "off",
         lineNumbersMinChars: 0,
         minimap: { enabled: props.showMinimap ?? false },
-        // https://github.com/kubernetes-sigs/kui/issues/6480
-        scrollbar: { alwaysConsumeMouseWheel: false },
+        scrollbar: {
+          // https://github.com/kubernetes-sigs/kui/issues/6480
+          alwaysConsumeMouseWheel: false,
+          horizontalScrollbarSize: 5,
+          verticalScrollbarSize: 5,
+        },
         tabSize: 2,
       }}
       value={props.value}

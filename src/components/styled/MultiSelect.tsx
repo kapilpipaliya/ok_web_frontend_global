@@ -315,60 +315,74 @@ export function MultiSelectField(
 
   return (
     <div
-      class={`pos:relative b:1px|solid|base  p:0px|3px r:4px text-align:left w:100% ${props.class}`}
+      class={`b:1px|solid|base p:0px|3px r:4px text-align:left w:100% ${props.class}`}
       classList={{
         "b:1px|solid|error": !!props.error,
       }}
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
     >
-      <div
-        class={`${props.selectionLimit !== 1 ? "flex:wrap" : ""} ai:center d:flex gap:5px p:4px|0px w:100%`}
-      >
-        <For each={selectedValue()}>
-          {(tag) => (
-            <div class="ai:center bg:primary-20 cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
-              <span class="white-space:nowrap">
-                {props.renderLabel
-                  ? props.renderLabel(tag, true)
-                  : getOptionLabel(tag)}
-              </span>
-              <IconButton
-                icon="ph:x"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopImmediatePropagation();
-                  return handleRemoveTag(getOptionValue(tag));
-                }}
-                size={16}
-              />
-            </div>
-          )}
-        </For>
-        <div class="flex ai:center flex:1">
-          <input
-            auto-complete="off"
-            class={`${props.selectionLimit === 1 && selectedValue().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
-            data-lpignore="true"
-            disabled={props.disable}
-            onFocus={handleInputFocus}
-            onInput={(e) => setInputValue(e.target.value)}
-            placeholder={props.placeholder ?? "Select options"}
-            ref={inputRef}
-            type="text"
-            value={inputValue()}
-          />
+      {/* Main grid container */}
+      <div class="d:grid grid-template-columns:1fr|auto ai:center">
+        {/* Tags and input area */}
+        <div class={`${props.selectionLimit !== 1 ? "flex:wrap" : ""} ai:center d:flex gap:5px p:4px|6px w:100%`}>
+          <For each={selectedValue()}>
+            {(tag) => (
+              <div class="ai:center bg:primary-20 cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
+                <span class="white-space:nowrap">
+                  {props.renderLabel
+                    ? props.renderLabel(tag, true)
+                    : getOptionLabel(tag)}
+                </span>
+                <IconButton
+                  icon="ph:x"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return handleRemoveTag(getOptionValue(tag));
+                  }}
+                  size={16}
+                />
+              </div>
+            )}
+          </For>
+          <div class="flex ai:center flex:1">
+            <input
+              auto-complete="off"
+              class={`${props.selectionLimit === 1 && selectedValue().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
+              data-lpignore="true"
+              disabled={props.disable}
+              onFocus={handleInputFocus}
+              onInput={(e) => setInputValue(e.target.value)}
+              placeholder={props.placeholder ?? "Select options"}
+              ref={inputRef}
+              type="text"
+              value={inputValue()}
+            />
+          </div>
+        </div>
+        
+        {/* Dropdown icon area */}
+        <div class="d:flex ai:center jc:center h:100% p:0|8px">
           <Icon
-            class="mr:5 fg:base-50 cursor:pointer"
+            class="fg:base-50 cursor:pointer"
             icon={dropdownVisible() ? "ph:caret-up-bold" : "ph:caret-down-bold"}
             noobserver
-            onClick={() => setDropdownVisible(!dropdownVisible())}
+            onClick={() => {
+              const newState = !dropdownVisible();
+              setDropdownVisible(newState);
+              if (newState && !props.isLoadingOptions) {
+                props.loadOptions?.();
+              }
+            }}
             width={20}
           />
         </div>
       </div>
+      
       <Show when={props.error}>
         <div class="fg:error f:12 p:2px">{props.error}</div>
       </Show>
+      
       <Show when={dropdownVisible()}>
         <ZIndex>
           <DropdownMenu
