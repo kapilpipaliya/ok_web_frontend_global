@@ -58,6 +58,3 @@ make save all button save preview too.
 Future Tasks:
 - add filters on users page (roles)
 - maek advanced filter form generation for data grid.
-
-
-use https://www.npmjs.com/package/solid-hot-toast instead of solid-toast.
