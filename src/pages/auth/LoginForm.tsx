@@ -1,4 +1,5 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useSearchParams } from "@solidjs/router";
+import { onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
@@ -18,6 +19,7 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
 
 export function LoginForm() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [graph] = useGraph();
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
@@ -26,6 +28,13 @@ export function LoginForm() {
   });
   const [formRefs, setFormRefs] = createStore({
     passwordRef: null as HTMLInputElement | null,
+  });
+
+  onMount(() => {
+    if (searchParams.error) {
+      showErrorToast(searchParams.error as string);
+      setSearchParams({ error: null }, { replace: true });
+    }
   });
 
   const validateFormData = (formData: Vertex) => {

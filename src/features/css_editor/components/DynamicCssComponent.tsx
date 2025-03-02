@@ -37,6 +37,7 @@ import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName"
 import { componentMap } from "./componentMap";
 import { LabelWrapper } from "./fields/LabelWrapper";
 import { RenderChildren } from "./RenderChildren";
+import { useCssState } from "../context/CssStateContext";
 
 // similar to DynamicComponent in Seller Dorsey
 export function DynamicCSSComponent(
@@ -55,6 +56,7 @@ export function DynamicCSSComponent(
   );
   const [, otherProps] = splitProps(props, ["meta", "projections"]);
 
+  const [state] = useCssState();
   const [cssState, setCssState] = useCssEditor();
 
   const [graph, setGraph] = useGraph();
@@ -233,6 +235,20 @@ export function DynamicCSSComponent(
     }
     return !!value_;
   });
+  const hasConfiguredFields = createMemo(() => {
+    const currentState = cssState[state()] || {};
+
+    // Check custom properties for fieldWithCustomProperty components
+    if (props.meta.componentName === 'fieldWithCustomProperty' && props.meta.customProperty) {
+      for (const customProp of props.meta.customProperty) {
+        if (currentState[customProp.key] !== undefined) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  });
   return (
     <RenderContextProvider store={repeaterStore as RenderStore}>
       <Switch>
@@ -241,7 +257,7 @@ export function DynamicCSSComponent(
           <Content />
         </Match>
         <Match when={props.meta.isLabelOnTop}>
-          <Show when={!showConfiguredOnly() || isValueConfigured()}>
+          <Show when={!showConfiguredOnly() || isValueConfigured() || hasConfiguredFields()}>
             <div class={"w:full"}>
               <LabelWrapper
                 meta={props.meta}
@@ -253,7 +269,7 @@ export function DynamicCSSComponent(
           </Show>
         </Match>
         <Match when={props.meta.label}>
-          <Show when={!showConfiguredOnly() || isValueConfigured()}>
+          <Show when={!showConfiguredOnly() || isValueConfigured() || hasConfiguredFields()}>
             <div class={"flex ai:center jc:space-between w:full"}>
               <LabelWrapper
                 meta={props.meta}

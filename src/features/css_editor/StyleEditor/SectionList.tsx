@@ -5,6 +5,7 @@ import {
   createSignal,
   For,
   Show,
+  useContext,
 } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
@@ -15,6 +16,7 @@ import type {
 } from "../constants/FieldSchemaType";
 
 import { DynamicCSSComponent } from "../components/DynamicCssComponent";
+import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";
 import { ShowConfiguredOnlyContext } from "../context/ShowConfiguredOnlyContext";
 
@@ -31,6 +33,34 @@ export const CollapsibleSection = (
   // dont used createWritableMemo here, because props.isOpen is not a state.
   const [isOpen, setIsOpen] = createSignal(props.isOpen ?? true);
   const [state] = useCssState();
+  const [cssState] = useCssEditor();
+  const showConfiguredOnly = useContext(ShowConfiguredOnlyContext);
+
+  // Check if section has any configured fields
+  const hasConfiguredFields = createMemo(() => {
+    if (!showConfiguredOnly()) return true;
+    
+    const currentState = cssState[state()] || {};
+    
+    // Check all properties in this section
+    for (const [, field] of Object.entries(props.propertyFieldMap)) {
+      // Check main field
+      if (currentState[field.key || ''] !== undefined) {
+        return true;
+      }
+      
+      // Check custom properties for fieldWithCustomProperty components
+      if (field.componentName === 'fieldWithCustomProperty' && field.customProperty) {
+        for (const customProp of field.customProperty) {
+          if (currentState[customProp.key] !== undefined) {
+            return true;
+          }
+        }
+      }
+    }
+    
+    return false;
+  });
 
   // Sync with setAllOpen signal
   createEffect(() => {
@@ -40,32 +70,34 @@ export const CollapsibleSection = (
   });
 
   return (
-    <div
-      class="b:1px|solid|lightgray p:5|10 w:full"
-      classList={{
-        "r:0|0|5|5": props.index === props.sectionCount() - 1,
-        "r:5": props.index === 0 && props.sectionCount() === 1,
-        "r:5|5|0|0": props.index === 0 && props.sectionCount() > 1,
-      }}
-    >
-      <IconButton
-        class="w:full"
-        icon="ph:caret-up"
-        iconClass={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
-        onClick={() => setIsOpen(!isOpen())}
-        type="button"
+    <Show when={hasConfiguredFields()}>
+      <div
+        class="b:1px|solid|lightgray p:5|10 w:full"
+        classList={{
+          "r:0|0|5|5": props.index === props.sectionCount() - 1,
+          "r:5": props.index === 0 && props.sectionCount() === 1,
+          "r:5|5|0|0": props.index === 0 && props.sectionCount() > 1,
+        }}
       >
-        <span class="f:15 font-weight:600">{props.title}</span>
-      </IconButton>
-      <Show when={isOpen()}>
-        <hr class="color:#e1e1e1 m:2" />
-        <For each={Object.entries(props.propertyFieldMap)}>
-          {([, value]) => (
-            <DynamicCSSComponent meta={value} projections={[state() || ""]} />
-          )}
-        </For>
-      </Show>
-    </div>
+        <IconButton
+          class="w:full"
+          icon="ph:caret-up"
+          iconClass={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
+          onClick={() => setIsOpen(!isOpen())}
+          type="button"
+        >
+          <span class="f:15 font-weight:600">{props.title}</span>
+        </IconButton>
+        <Show when={isOpen()}>
+          <hr class="color:#e1e1e1 m:2" />
+          <For each={Object.entries(props.propertyFieldMap)}>
+            {([, value]) => (
+              <DynamicCSSComponent meta={value} projections={[state() || ""]} />
+            )}
+          </For>
+        </Show>
+      </div>
+    </Show>
   );
 };
 
@@ -83,6 +115,14 @@ export const SectionList = (
   const collapseAll = () => setSetAllOpen(false);
   const expandAll = () => setSetAllOpen(true);
   const toggleConfigured = () => setShowConfiguredOnly((prev) => !prev);
+
+  // Add effect to auto-expand sections when showing configured fields only
+  createEffect(() => {
+    if (showConfiguredOnly()) {
+      // When toggling to "configured only", expand all sections
+      setSetAllOpen(true);
+    }
+  });
 
   return (
     <ShowConfiguredOnlyContext.Provider value={showConfiguredOnly}>

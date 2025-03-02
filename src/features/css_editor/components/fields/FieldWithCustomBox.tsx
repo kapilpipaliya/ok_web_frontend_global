@@ -23,20 +23,26 @@ export const FieldWithCustomBox = (
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () =>
     parentRenderContext()?.context.meta as unknown as GenericField;
-
-  createEffect(() => {
-    if (props.customProperty && props.customProperty.length > 0) {
-      let isValueSet = false;
-      for (const property of props.customProperty) {
-        if (cssState[state()]?.[property.key] !== undefined) {
-          isValueSet = true;
-        }
-      }
-      if (isValueSet) {
-        setOptionType("custom");
+  // Check if any custom property has a configured value
+  const hasConfiguredFields = () => {
+    if (!props.customProperty || props.customProperty.length === 0) return false;
+    
+    const currentState = cssState[state()] || {};
+    for (const property of props.customProperty) {
+      if (currentState[property.key] !== undefined) {
+        return true;
       }
     }
+    return false;
+  };
+
+  // Initial auto-switch to custom view if values are already set
+  createEffect(() => {
+    if (hasConfiguredFields()) {
+      setOptionType("custom");
+    }
   });
+
   return (
     <div>
       <div class="grid gap:5px grid-template-columns:1fr|63px">
