@@ -41,17 +41,11 @@ export const themeFormSchema = {
               componentName: "TextInput",
               key: "key",
               placeholder: "Enter theme name",
-              props: (options: FunctionArgumentType) => ({
-                disabled: options.data.id && !options.data.id.startsWith("-"),
-              }),
               validation: { required: true },
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
           componentName: "Box",
-          props: (options: FunctionArgumentType) => ({
-            hidden: options.data.id && !options.data.id.startsWith("-"),
-          }),
         },
         {
           as: "div",
