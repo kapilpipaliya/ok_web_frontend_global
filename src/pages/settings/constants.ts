@@ -43,7 +43,7 @@ export const toolBarClass = "flex bg:base-5 gap:6 r:7";
 export const profileImage = "/images/profile.png";
 
 export const EMAIL_TEMPLATES = {
-  AccountDeletion: "AccountDeletion",
+  AccountDeletionRequest: "AccountDeletionRequest",
   EmailChanged: "EmailChanged",
   EmailChangeSuccessful: "EmailChangeSuccessful",
   EmailConfirmation: "EmailConfirmation",

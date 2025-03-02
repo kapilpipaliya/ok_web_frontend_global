@@ -6,7 +6,7 @@ import { APIError } from "~/lib/api/apiErrorHandler";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { accountDeletionForm } from "~/routes/internal/page/(email)/(templates)/(account)/accountDeletionSchema";
+import { accountDeletionRequestForm } from "~/routes/internal/page/(email)/(templates)/(account)/accountDeletionSchema";
 import { passwordResetForm } from "~/routes/internal/page/(email)/(templates)/(auth)/passwordResetSchema";
 import { twoFactorAuthForm } from "~/routes/internal/page/(email)/(templates)/(auth)/twoFactorAuthSchema";
 import { verificationCodeForm } from "~/routes/internal/page/(email)/(templates)/(auth)/verificationCodeSchema";
@@ -22,7 +22,7 @@ import { welcomeEmailForm } from "~/routes/internal/page/(email)/(templates)/(si
 import { invitationEmailForm } from "~/routes/internal/page/(email)/(templates)/(user)/invitationEmailSchema";
 
 const EMAIL_TEMPLATES = {
-  AccountDeletion: accountDeletionForm,
+  AccountDeletionRequest: accountDeletionRequestForm,
   EmailChanged: emailChangedForm,
   EmailChangeSuccessful: emailChangeSuccessfulForm,
   EmailConfirmation: emailConfirmationForm,

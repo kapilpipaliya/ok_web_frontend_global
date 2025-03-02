@@ -6,14 +6,14 @@ import { EmailSettings } from "~/pages/global/email/EmailSettings";
 
 export default function SystemGlobalSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedMenu, setSelectedMenu] = createSignal(
-    searchParams.tab || "email",
+  const [selectedMenu, setSelectedMenu] = createSignal<string>(
+    (searchParams.tab as string) || "email",
   );
 
   createEffect(() => {
     const tab = searchParams.tab;
     if (tab && tab !== selectedMenu()) {
-      setSelectedMenu(tab);
+      setSelectedMenu(typeof tab === 'string' ? tab : 'email');
     }
   });
 

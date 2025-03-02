@@ -5,7 +5,7 @@ http://localhost:3000/admin/
 http://localhost:3000/admin/Page
 
 email templates:
-http://localhost:3000/internal/page/AccountDeletion
+http://localhost:3000/internal/page/AccountDeletionRequest
 http://localhost:3000/internal/page/TwoFactorAuth
 http://localhost:3000/internal/page/VerificationCode
 http://localhost:3000/internal/page/TestEmail

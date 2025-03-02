@@ -12,7 +12,7 @@ const content = [
     }),
     componentName: "Html",
     pos: 1,
-    text: "Account Deletion Confirmation",
+    text: "Account Deletion Request",
   },
   {
     as: "p",
@@ -23,7 +23,7 @@ const content = [
     }),
     componentName: "Html",
     pos: 2,
-    text: "Your account has been successfully deleted. We're sorry to see you go!",
+    text: "We've received a request to delete your account. Your account will be scheduled for deletion and will be permanently removed after 48 hours from now.",
   },
   {
     as: "p",
@@ -34,7 +34,18 @@ const content = [
     }),
     componentName: "Html",
     pos: 3,
-    text: "If you didn't request this deletion, please contact our support team immediately.",
+    text: "During this 48-hour period, you will no longer be able to log in to your account. If you change your mind, please contact our support team immediately to cancel the deletion process.",
+  },
+  {
+    as: "p",
+    class: JSON.stringify({
+      "": {
+        "margin-bottom": "16",
+      },
+    }),
+    componentName: "Html",
+    pos: 4,
+    text: "Please note that once your account is deleted, all your data will be permanently removed and cannot be recovered.",
   },
   {
     as: "button",
@@ -46,19 +57,20 @@ const content = [
         color: "base-5",
         cursor: "pointer",
         padding: "8 16",
+        "margin-top": "16",
       },
       ":hover": {
         opacity: "0.9",
       },
     }),
     componentName: "Html",
-    pos: 4,
+    pos: 5,
     text: "Contact Support",
   },
 ];
 
-export const accountDeletionForm = {
+export const accountDeletionRequestForm = {
   attributes: [createEmailTemplate(content)],
-  key: "AccountDeletion",
-  title: "Account Deleted",
+  key: "AccountDeletionRequest",
+  title: "Account Deletion Request",
 };
