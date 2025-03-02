@@ -4,10 +4,10 @@ import type { GraphInterface, Vertex } from "../../../graph";
 
 import { getGlobalSettingVertex } from "../theme/getGlobalThemeVertex";
 
-export function getCompanyLogoVertex(
+export function getCompanyRectangularLogoVertex(
   graph: GraphInterface,
 ): undefined | Vertex {
-  return evalExpression("->CompanyLogo", {
+  return evalExpression("->CompanyRectangularLogo", {
     graph,
     vertexes: [getGlobalSettingVertex(graph)],
   })?.[0];

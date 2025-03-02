@@ -23,7 +23,8 @@ export const API = {
   },
   file: {
     deleteFileUrl: "/api/file/delete",
-    downloadCompanyLogoUrl: "/api/file/downloadCompanyLogo",
+    downloadCompanyCircularLogoUrl: "/api/file/downloadCompanyCircularLogo",
+    downloadCompanyRectangularLogoUrl: "/api/file/downloadCompanyRectangularLogo",
     downloadFileUrl: "/api/file/download",
     replaceFileUrl: "/api/file/replace",
     uploadFileUrl: "/api/file/upload",

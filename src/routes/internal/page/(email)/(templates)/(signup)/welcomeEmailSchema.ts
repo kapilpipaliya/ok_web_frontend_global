@@ -40,12 +40,6 @@ const content = [
         pos: 2,
         text: "Explore our features",
       },
-      {
-        as: "li",
-        componentName: "Html",
-        pos: 3,
-        text: "Connect with others",
-      },
     ],
     class: JSON.stringify({
       "": {

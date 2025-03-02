@@ -11,12 +11,12 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
         attributes: [
           {
             as: "img",
-            class: "w:100px mb:24",
+            class: "h:80px mb:24",
             componentName: "Html",
             pos: 1,
             props: `return {
             alt: "Logo",
-            src: \`\${window.location.origin}${API.file.downloadCompanyLogoUrl}\`
+            src: \`\${window.location.origin}${API.file.downloadCompanyRectangularLogoUrl}\`
           }`,
           },
           {

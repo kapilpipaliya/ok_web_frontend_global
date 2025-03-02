@@ -29,9 +29,9 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
-    const { logoImage } = await request.json();
-    if (!logoImage) {
-      throw new APIError("Company logo is required", 400);
+    const { circularLogo, rectangularLogo } = await request.json();
+    if (!rectangularLogo && !circularLogo) {
+      throw new APIError("At least one company logo is required", 400);
     }
 
     // First ensure GlobalSetting exists
@@ -50,70 +50,99 @@ export async function POST({ request }: APIEvent) {
       );
     }
 
-    // First check if the relationship already exists
-    const existingResult = await dbSession.run(
-      `MATCH (g:GlobalSetting)-[r:CompanyLogo]->(f:File)
-       WHERE elementId(f) = $logoImage
-       RETURN r`,
-      { logoImage },
-    );
-
-    // If relationship exists, delete other relationships and return
-    if (existingResult.records.length > 0) {
-      await dbSession.run(
-        `MATCH (g:GlobalSetting)-[r:CompanyLogo]->(f:File)
-         WHERE elementId(f) <> $logoImage
-         DELETE r`,
-        { logoImage },
-      );
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-      });
-    }
-
-    // Delete all existing CompanyLogo relationships
+    // Delete all existing CompanyRectangularLogo relationships
     await dbSession.run(
-      `MATCH (g:GlobalSetting)-[r:CompanyLogo]->(f:File)
+      `MATCH (g:GlobalSetting)-[r:CompanyRectangularLogo]->(f:File)
        DELETE r`,
     );
 
-    // Create new relationship
-    const result = await dbSession.run(
-      `MATCH (g:GlobalSetting)
-       MATCH (f:File) WHERE elementId(f) = $logoImage
-       MERGE (g)-[:CompanyLogo]->(f)
-       RETURN g, f`,
-      { logoImage },
+    // Handle rectangular logo
+    if (rectangularLogo) {
+      // Create new relationship
+      await dbSession.run(
+        `MATCH (g:GlobalSetting)
+         MATCH (f:File) WHERE elementId(f) = $rectangularLogo
+         MERGE (g)-[:CompanyRectangularLogo]->(f)`,
+        { rectangularLogo },
+      );
+    }
+
+    // Delete all existing CompanyCircularLogo relationships
+    await dbSession.run(
+      `MATCH (g:GlobalSetting)-[r:CompanyCircularLogo]->(f:File)
+       DELETE r`,
     );
 
-    if (!(result.records[0]?.get("g") && result.records[0]?.get("f"))) {
-      throw new APIError("GlobalSetting or file not found", 404);
+    // Handle circular logo
+    if (circularLogo) {
+      // Create new relationship
+      await dbSession.run(
+        `MATCH (g:GlobalSetting)
+         MATCH (f:File) WHERE elementId(f) = $circularLogo
+         MERGE (g)-[:CompanyCircularLogo]->(f)`,
+        { circularLogo },
+      );
+    }
+
+    // Get updated GlobalSetting with both logos
+    const result = await dbSession.run(
+      `MATCH (g:GlobalSetting)
+       OPTIONAL MATCH (g)-[:CompanyRectangularLogo]->(rectLogo:File)
+       OPTIONAL MATCH (g)-[:CompanyCircularLogo]->(circLogo:File)
+       RETURN g, rectLogo, circLogo`,
+    );
+
+    if (!result.records[0]?.get("g")) {
+      throw new APIError("GlobalSetting not found", 404);
     }
 
     const updatedGlobalSetting = convertNodeToJson(result.records[0].get("g"));
-    const updatedFile = convertNodeToJson(result.records[0].get("f"));
+    const rectangularLogoFile = result.records[0].get("rectLogo") 
+      ? convertNodeToJson(result.records[0].get("rectLogo")) 
+      : null;
+    const circularLogoFile = result.records[0].get("circLogo") 
+      ? convertNodeToJson(result.records[0].get("circLogo")) 
+      : null;
 
-    // Log company logo update
+    // Log company logo updates
+    const logDetails = [];
+    if (rectangularLogo) {
+      logDetails.push(`rectangular logo: ${rectangularLogoFile?.P.fileName} (${rectangularLogoFile?.P.contentType})`);
+    }
+    if (circularLogo) {
+      logDetails.push(`circular logo: ${circularLogoFile?.P.fileName} (${circularLogoFile?.P.contentType})`);
+    }
+    
     await createActivityLog(
       dbSession,
       "company_logo_update",
       "GlobalSetting",
       updatedGlobalSetting.id,
       user.P.email,
-      `Company logo updated to ${updatedFile.P.fileName} (${updatedFile.P.contentType})`,
+      `Company logos updated: ${logDetails.join(', ')}`,
     );
+
+    const vertexes = {
+      [updatedGlobalSetting.id]: updatedGlobalSetting,
+    };
+    
+    if (rectangularLogoFile) {
+      vertexes[rectangularLogoFile.id] = rectangularLogoFile;
+    }
+    
+    if (circularLogoFile) {
+      vertexes[circularLogoFile.id] = circularLogoFile;
+    }
 
     return {
       graph: {
         edges: {},
-        vertexes: {
-          [updatedFile.id]: updatedFile,
-          [updatedGlobalSetting.id]: updatedGlobalSetting,
-        },
+        vertexes: vertexes,
       },
       result: {
-        file: updatedFile,
+        circularLogoFile,
         globalSetting: updatedGlobalSetting,
+        rectangularLogoFile,
       },
     };
   } catch (error) {

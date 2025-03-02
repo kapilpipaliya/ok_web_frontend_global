@@ -30,16 +30,19 @@ export async function GET({ request }: APIEvent) {
 
     const result = await dbSession.run(
       `MATCH (s:GlobalSetting)
-       OPTIONAL MATCH (s)-[:CompanyLogo]->(logo:File)
-       RETURN s as settings, logo as companyLogo`,
+       OPTIONAL MATCH (s)-[:CompanyRectangularLogo]->(companyRectangularLogo:File)
+       OPTIONAL MATCH (s)-[:CompanyCircularLogo]->(companyCircularLogo:File)
+       RETURN s as settings, companyRectangularLogo, companyCircularLogo`,
     );
 
     const node = result.records[0]?.get("settings");
-    const logoNode = result.records[0]?.get("companyLogo");
+    const companyRectangularLogoNode = result.records[0]?.get("companyRectangularLogo");
+    const companyCircularLogoNode = result.records[0]?.get("companyCircularLogo");
     const settings = node ? convertNodeToJson(node) : null;
-    const companyLogo = logoNode ? convertNodeToJson(logoNode) : null;
+    const companyRectangularLogo = companyRectangularLogoNode ? convertNodeToJson(companyRectangularLogoNode) : null;
+    const companyCircularLogo = companyCircularLogoNode ? convertNodeToJson(companyCircularLogoNode) : null;
 
-    return { companyLogo, settings };
+    return { companyCircularLogo, companyRectangularLogo, settings };
   } catch (error) {
     return handleAPIError(error);
   } finally {
