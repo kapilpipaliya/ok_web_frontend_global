@@ -11,6 +11,7 @@ import type { CSSStore } from "../context/CssEditorContext";
 import { CssEditorContext } from "../context/CssEditorContext";
 import { CssEditorPropsProvider } from "../context/CSSEditorPropsContext";
 import { CssStateContext } from "../context/CssStateContext";
+import { createSearchContext, SearchContext } from "../context/SearchContext";
 import { parseAndApplyCssRules } from "../utils/parseAndApplyCssRules";
 import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
 
@@ -23,6 +24,7 @@ export function CSSPropertiesEditorWrapper(
 ) {
   const [cssState, setCssState] = createStore({ "": {} } as CSSStore);
   const [state, setState] = createSignal("");
+  const searchContext = createSearchContext();
 
   const cssValue = () => {
     const value = props.data?.P[props.meta.P.key];
@@ -79,6 +81,7 @@ export function CSSPropertiesEditorWrapper(
           [cssState, onCSSStateChange as SetStoreFunction<CSSStore>],
         ],
         [CssStateContext, [state, setState]],
+        [SearchContext, searchContext],
         [
           CssEditorPropsProvider,
           {

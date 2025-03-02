@@ -1,18 +1,23 @@
-import { createSignal } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 
+import { useSearchContext } from "../context/SearchContext";
 import { filterSections } from "../utils/filterSections";
 import { SearchBar } from "./SearchBar";
 import { SectionList } from "./SectionList";
 
 export function StyleEditor() {
-  const [searchQuery, setSearchQuery] = createSignal("");
+  const [searchQuery, setSearchQuery] = useSearchContext();
   const [filteredSections, setFilteredSections] = createSignal(
     filterSections(searchQuery()),
   );
 
+  // Update filtered sections whenever search query changes
+  createEffect(() => {
+    setFilteredSections(filterSections(searchQuery()));
+  });
+
   function handleSearch(value: string) {
     setSearchQuery(value);
-    setFilteredSections(filterSections(value));
   }
 
   return (
@@ -22,7 +27,7 @@ export function StyleEditor() {
         placeholder="Search Style..."
         value={searchQuery()}
       />
-      <SectionList filteredSections={filteredSections} />
+      <SectionList filteredSections={filteredSections} searchQuery={searchQuery()} />
     </div>
   );
 }

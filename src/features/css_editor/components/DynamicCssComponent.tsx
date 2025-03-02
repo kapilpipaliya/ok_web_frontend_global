@@ -27,6 +27,7 @@ import type { FormField, GenericField } from "../constants/FieldSchemaType";
 
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssEditorProps } from "../context/CSSEditorPropsContext";
+import { useCssState } from "../context/CssStateContext";
 import {
   RenderContextProvider,
   type RenderStore,
@@ -37,7 +38,6 @@ import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName"
 import { componentMap } from "./componentMap";
 import { LabelWrapper } from "./fields/LabelWrapper";
 import { RenderChildren } from "./RenderChildren";
-import { useCssState } from "../context/CssStateContext";
 
 // similar to DynamicComponent in Seller Dorsey
 export function DynamicCSSComponent(

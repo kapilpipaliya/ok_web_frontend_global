@@ -11,6 +11,7 @@ import type {
 import { useCssEditor } from "../../context/CssEditorContext";
 import { useCssState } from "../../context/CssStateContext";
 import { useRenderContext } from "../../context/RenderContext";
+import { useSearchContext } from "../../context/SearchContext";
 import { ButtonGroups } from "./ButtonGroups";
 
 export const FieldWithCustomBox = (
@@ -19,6 +20,7 @@ export const FieldWithCustomBox = (
   const [optionType, setOptionType] = createSignal("all");
   const [cssState] = useCssEditor();
   const [state] = useCssState();
+  const [searchQuery] = useSearchContext();
   const parentItems = useRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () =>
@@ -39,6 +41,13 @@ export const FieldWithCustomBox = (
   // Initial auto-switch to custom view if values are already set
   createEffect(() => {
     if (hasConfiguredFields()) {
+      setOptionType("custom");
+    }
+  });
+
+  // Auto-expand when search query is active
+  createEffect(() => {
+    if (searchQuery() && searchQuery().length > 0) {
       setOptionType("custom");
     }
   });

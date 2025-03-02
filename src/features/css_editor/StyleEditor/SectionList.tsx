@@ -104,6 +104,7 @@ export const CollapsibleSection = (
 export const SectionList = (
   props: Readonly<{
     filteredSections: () => CSSJSONSchemaSearchType;
+    searchQuery: string;
   }>,
 ) => {
   const sectionCount = createMemo(
@@ -120,6 +121,12 @@ export const SectionList = (
   createEffect(() => {
     if (showConfiguredOnly()) {
       // When toggling to "configured only", expand all sections
+      setSetAllOpen(true);
+    }
+  });
+
+  createEffect(() => {
+    if (props.searchQuery) {
       setSetAllOpen(true);
     }
   });
