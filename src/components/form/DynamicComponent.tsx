@@ -80,7 +80,7 @@ export function DynamicComponent(
   const formId = useFormContext();
   const formVertex = () =>
     formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
-  const { showErrorToast, showSuccessToast } = useToast();
+  const { showErrorToast, showSuccessToast, showWarningToast } = useToast();
   const [ref, setRef] = createSignal(null);
   const [mounted, setMounted] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -280,6 +280,7 @@ export function DynamicComponent(
       setSearchParams,
       showErrorToast,
       showSuccessToast,
+      showWarningToast,
       get txnId() {
         return props.txnId!;
       },
@@ -555,9 +556,7 @@ export function DynamicComponent(
       if (typeof componentLabel === "string") {
         return componentLabel;
       }
-      return typeof componentLabel === "function"
-        ? (componentLabel as ComponentNameType)(getFunctionArgumentWithValue())
-        : componentLabel;
+      return componentLabel;
     } catch (error) {
       console.error("Error in componentName:", error);
       return "NotFoundComponent";
@@ -565,7 +564,7 @@ export function DynamicComponent(
   });
 
   const component = createMemo(
-    () => getDynamicComponent(componentName()) || NotFoundComponent,
+    () => typeof componentName() === "function" ? componentName() : getDynamicComponent(componentName()) || NotFoundComponent,
   );
 
   const isHidden = () => {
@@ -769,6 +768,7 @@ export function DynamicComponent(
           <Match when={isHidden()} />
           <Match
             when={
+              typeof componentName() !== "function" &&
               componentName()?.startsWith("System") &&
               !props.noLabel &&
               !props.meta.P.noLabel

@@ -3,16 +3,22 @@ import { createSignal, Show } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
-import { ThemeConfigDialog } from "./ThemeConfigDialog";
+import { getThemeFormSchema } from "./themeFormSchema";
 
 export function ThemeConfigButton(props: {
   class?: string;
   item: Vertex;
   size: number;
 }) {
-  let saveAsTemplateRef: HTMLElement;
+  let buttonRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
+  
+  const handleSuccess = () => {
+    setShowModal(false);
+  };
+  
   return (
     <>
       <IconButton
@@ -22,17 +28,15 @@ export function ThemeConfigButton(props: {
           e.stopPropagation();
           setShowModal(true);
         }}
-        ref={(el) => (saveAsTemplateRef = el)}
+        ref={(el) => (buttonRef = el)}
         size={props.size}
         title="Edit Theme"
         tooltipGroup="theme-actions"
       />
       <Show when={showModal()}>
-        <ThemeConfigDialog
-          item={props.item}
-          onClose={() => setShowModal(false)}
-          onMouseLeave={() => setShowModal(false)}
-          parentRef={saveAsTemplateRef!}
+        <SchemaRenderer
+          form={getThemeFormSchema(handleSuccess, () => setShowModal(false))}
+          formDataId={props.item.id}
         />
       </Show>
     </>

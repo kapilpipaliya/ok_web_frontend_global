@@ -1,13 +1,19 @@
 import { createSignal, Show } from "solid-js";
 
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { SETTINGS_CONSTANTS } from "../settings/constants";
-import { ThemeConfigDialog } from "./theme_config/ThemeConfigDialog";
+import { getThemeFormSchema } from "./theme_config/themeFormSchema";
 
 export function AddNewThemeDialog() {
   const [showDialog, setShowDialog] = createSignal(false);
   const [buttonRef, setButtonRef] = createSignal<HTMLElement>();
+
+  const handleSuccess = () => {
+    setShowDialog(false);
+  };
+
   return (
     <>
       <DialogFooter
@@ -17,10 +23,8 @@ export function AddNewThemeDialog() {
         ref={setButtonRef}
       />
       <Show when={showDialog()}>
-        <ThemeConfigDialog
-          onClose={() => setShowDialog(false)}
-          onMouseLeave={() => setShowDialog(false)}
-          parentRef={buttonRef()!}
+        <SchemaRenderer
+          form={getThemeFormSchema(handleSuccess, () => setShowDialog(false))}
         />
       </Show>
     </>

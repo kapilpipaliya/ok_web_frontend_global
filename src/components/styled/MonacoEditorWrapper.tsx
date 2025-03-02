@@ -34,7 +34,7 @@ export interface MonacoEditorWrapperProps {
   height?: string;
   language?: string;
   onChange: (value: string) => void;
-  onMount?: (editor: typeof Monaco) => void;
+  onMount?: (monaco: typeof Monaco, editor: typeof Monaco.editor.IStandaloneCodeEditor) => void;
   showMinimap?: boolean;
   value: string;
 }
@@ -46,7 +46,7 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
       height={props.height ?? "200px"}
       language={props.language ?? "javascript"}
       onChange={(value) => props.onChange(value)}
-      onMount={(editor) => props.onMount?.(editor)}
+      onMount={(monaco, editor) => props.onMount?.(monaco, editor)}
       options={{
         autoIndent: "full",
         folding: false,

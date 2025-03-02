@@ -54,6 +54,7 @@ export interface FunctionArgumentBaseType {
   setSearchParams?: ReturnType<typeof useSearchParams>[1];
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
+  showWarningToast: (message: string) => void;
   txnId: number;
   updateValue: (value: unknown) => void;
   zIndex: number;
