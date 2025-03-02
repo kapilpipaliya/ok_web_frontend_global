@@ -558,6 +558,11 @@ export function ForgotPasswordForm() {
       },
     ],
     componentName: "Box",
+    props: (options: FunctionArgumentType) => ({
+      onUnmount: () => {
+        options.revertTransactionUpToIndex(options.txnId, -1);
+      }
+    }),
   };
 
   return (

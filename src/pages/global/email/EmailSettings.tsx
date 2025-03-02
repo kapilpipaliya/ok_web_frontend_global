@@ -299,6 +299,12 @@ export function EmailSettings() {
       },
     ],
     componentName: "Fragment",
+    props: (options: FunctionArgumentType) => ({
+      // TODO: if not saved, revert to previous state
+      // onUnmount: () => {
+      //   options.revertTransactionUpToIndex(options.txnId, -1);
+      // }
+    }),
   };
 
   return (

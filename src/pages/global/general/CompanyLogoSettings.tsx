@@ -277,6 +277,12 @@ export function CompanyLogoSettings() {
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
+    props: (options: FunctionArgumentType) => ({
+      // TODO: if not saved, revert to previous state
+      // onUnmount: () => {
+      //   options.revertTransactionUpToIndex(options.txnId, -1);
+      // }
+    }),
   } as FieldAttribute;
 
   const rectangularCompanyLogoVertex = createMemo(() => {

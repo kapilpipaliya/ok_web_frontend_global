@@ -228,6 +228,7 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
           disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
             onClose();
           },
           text: "Cancel",
@@ -308,8 +309,12 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
     componentName: "Data",
     name: "editorState",
     noRepeat: true,
-    props: () => ({
+    props: (options: FunctionArgumentType) => ({
       data: createSignal(),
+      // TODO: if not saved, revert to previous state
+      // onUnmount: () => {
+      //   options.revertTransactionUpToIndex(options.txnId, -1);
+      // }
     }),
   }], key: "Theme" } as IFormMetaData;
 }; 

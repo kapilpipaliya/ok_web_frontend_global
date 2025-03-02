@@ -232,13 +232,16 @@ export function AccountDeletionForm() {
     componentName: "Data",
     name: "deleteState",
     noRepeat: true,
-    props: () => ({
+    props: (options: FunctionArgumentType) => ({
       data: createStore({
         errorMessage: "",
         isLoading: false,
         showConfirmDialog: false,
         successMessage: "",
       }),
+      onUnmount: () => {
+        options.revertTransactionUpToIndex(options.txnId, -1);
+      }
     })
   };
 

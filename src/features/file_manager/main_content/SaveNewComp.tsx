@@ -204,7 +204,12 @@ export function SaveNewComp(
           {
             class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
             componentName: "Button",
-            onClick: props.onClose,
+            props: (options: FunctionArgumentType) => ({
+              onClick: () => {
+                options.revertTransactionUpToIndex(options.txnId, -1);
+                props.onClose();
+              },
+            }),
             text: "Cancel",
           },
         ],

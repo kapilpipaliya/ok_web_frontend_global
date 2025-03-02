@@ -254,11 +254,15 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     componentName: "Data",
     name: "modalState",
     noRepeat: true,
-    props: () => ({
+    props: (options: FunctionArgumentType) => ({
       data: createStore({
         isLoading: false,
         showModal: false,
       }),
+      // TODO: if not saved, revert to previous state
+      // onUnmount: () => {
+      //   options.revertTransactionUpToIndex(options.txnId, -1);
+      // }
     }),
   };
 

@@ -274,6 +274,11 @@ export function LoginForm() {
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
+    props: (options: FunctionArgumentType) => ({
+      onUnmount: () => {
+        options.revertTransactionUpToIndex(options.txnId, -1);
+      }
+    }),
   };
 
   return (

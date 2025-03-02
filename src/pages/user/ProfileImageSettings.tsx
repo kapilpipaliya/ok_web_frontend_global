@@ -179,6 +179,12 @@ export function ProfileImageSettings() {
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
         componentName: "Box",
+        props: (options: FunctionArgumentType) => ({
+          // TODO: if not saved, revert to previous state
+          // onUnmount: () => {
+          //   options.revertTransactionUpToIndex(options.txnId, -1);
+          // }
+        }),
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
