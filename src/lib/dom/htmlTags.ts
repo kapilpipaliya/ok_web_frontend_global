@@ -122,8 +122,8 @@ export const editingElements = ["del", "ins"];
 
 // All HTML tags combined
 export const htmlTags = [
-  ...rootElements,
-  ...metadataElements,
+  // ...rootElements,
+  // ...metadataElements,
   ...sectioningElements,
   ...textContentElements,
   ...inlineTextElements,
@@ -139,16 +139,16 @@ export const htmlTags = [
 // HTML tags tree structure
 export const htmlTagsTree = {
   children: [
-    {
-      children: rootElements.map(tag => ({ children: [], id: tag, label: tag })),
-      id: "root-elements",
-      label: "Root Elements"
-    },
-    {
-      children: metadataElements.map(tag => ({ children: [], id: tag, label: tag })),
-      id: "metadata-elements",
-      label: "Metadata Elements"
-    },
+    // {
+    //   children: rootElements.map(tag => ({ children: [], id: tag, label: tag })),
+    //   id: "root-elements",
+    //   label: "Root Elements"
+    // },
+    // {
+    //   children: metadataElements.map(tag => ({ children: [], id: tag, label: tag })),
+    //   id: "metadata-elements",
+    //   label: "Metadata Elements"
+    // },
     {
       children: sectioningElements.map(tag => ({ children: [], id: tag, label: tag })),
       id: "sectioning-elements",
@@ -189,16 +189,16 @@ export const htmlTagsTree = {
       id: "interactive-elements",
       label: "Interactive Elements"
     },
-    {
-      children: webComponentElements.map(tag => ({ children: [], id: tag, label: tag })),
-      id: "web-component-elements",
-      label: "Web Component Elements"
-    },
-    {
-      children: scriptingElements.map(tag => ({ children: [], id: tag, label: tag })),
-      id: "scripting-elements",
-      label: "Scripting Elements"
-    },
+    // {
+    //   children: webComponentElements.map(tag => ({ children: [], id: tag, label: tag })),
+    //   id: "web-component-elements",
+    //   label: "Web Component Elements"
+    // },
+    // {
+    //   children: scriptingElements.map(tag => ({ children: [], id: tag, label: tag })),
+    //   id: "scripting-elements",
+    //   label: "Scripting Elements"
+    // },
     {
       children: editingElements.map(tag => ({ children: [], id: tag, label: tag })),
       id: "editing-elements",

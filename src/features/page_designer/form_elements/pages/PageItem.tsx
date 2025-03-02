@@ -149,7 +149,7 @@ export function PageItem(
     <Show when={props.child.key}>
       <div // NOSONAR
         class={`relative ${itemStyle()}`}
-        draggable={true}
+        draggable={"true"}
         ondblclick={handleDoubleClick}
         onDragStart={handleDragStart}
         onMouseEnter={handleMouseEnter}

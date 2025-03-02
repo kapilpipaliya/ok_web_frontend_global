@@ -1,0 +1,124 @@
+import {
+  computePosition,
+  flip,
+  offset,
+  shift,
+} from '@floating-ui/dom';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { createStore } from 'solid-js/store';
+
+import type { FunctionArgumentType } from '~/components/form/FieldSchemaType';
+
+/**
+ * Creates a wrapper that displays a popover when the user hovers over an action element
+ * 
+ * @param action - The element that triggers the popover
+ * @param popoverSchema - The schema for the popover content
+ * @returns A schema that wraps the action with popover functionality
+ */
+export const popoverWrapperSchema = (action: any, popoverSchema: any) => {
+
+  return {
+    attributes: [
+      {
+        attributes: [
+          {
+            as: 'div',
+            attributes: [action],
+            componentName: 'Box',
+            props: (options: FunctionArgumentType) => {
+              return {
+                onMount: () => {
+                  options.dataContext.popoverState[1](action, options.ref());
+                  const popoverState = options.dataContext.popoverState;
+                  const actionEl = options.dataContext.popoverState[0][action];
+                  const handleMouseEnter = () => {
+                    popoverState[1]('isVisible', true);
+                  };
+    
+                  const handleMouseLeave = () => {
+                    popoverState[1]('isVisible', false);
+                  };
+    
+                  actionEl.addEventListener('mouseenter', handleMouseEnter);
+                  actionEl.addEventListener('mouseleave', handleMouseLeave);
+    
+                  onCleanup(() => {
+                    actionEl.removeEventListener('mouseenter', handleMouseEnter);
+                    actionEl.removeEventListener('mouseleave', handleMouseLeave);
+                  });
+                }
+              }
+            },
+          },
+          {
+            as: 'div',
+            attributes: [popoverSchema],
+            componentName: 'Box',
+            props: (options: FunctionArgumentType) => {
+              const popoverState = options.dataContext.popoverState;
+
+              return {
+                class: popoverState[0]?.isVisible ? 'position:fixed z:9999' : 'd:none',
+                onMount: () => {
+                  const actionEl = options.dataContext.popoverState[0][action];
+
+                  if (!actionEl) {
+                    console.error('Action element not found');
+                    return;
+                  }
+                  const el = options.ref() as HTMLElement;
+
+                  const updatePosition = () => {
+                    computePosition(actionEl, el, {
+                      middleware: [offset(6), flip(), shift({ padding: 5 })],
+                      placement: 'top',
+                    }).then(({ x, y }) => {
+                      popoverState[1]('x', x);
+                      popoverState[1]('y', y);
+                    });
+                  };
+
+                  // Update position when popover becomes visible
+                  createEffect(() => {
+                    if (popoverState[0]?.isVisible) {
+                      updatePosition();
+                    }
+                  });
+
+                  // Update position on window resize
+                  const handleResize = () => {
+                    if (popoverState[0]?.isVisible) {
+                      updatePosition();
+                    }
+                  };
+                  window.addEventListener('resize', handleResize);
+
+                  onCleanup(() => {
+                    window.removeEventListener('resize', handleResize);
+                  });
+                },
+                style: {
+                  left: `${popoverState[0]?.x}px`,
+                  top: `${popoverState[0]?.y}px`,
+                },
+              };
+            },
+          },
+        ],
+        class: 'position:relative',
+        componentName: 'Box',
+      }
+    ],
+    componentName: 'Data',
+    name: 'popoverState',
+    noRepeat: true,
+    props: () => ({
+      data: createStore({
+        isVisible: false,
+        x: 0,
+        y: 0,
+      }),
+    }),
+  };
+}; 

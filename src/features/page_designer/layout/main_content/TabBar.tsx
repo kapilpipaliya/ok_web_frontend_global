@@ -126,18 +126,20 @@ export function TabBar(props: { mainPanel: Id }) {
       >
         {(openedFormId, index) => (
           <div
-            class={`align-items:center border-radius:4px cursor:pointer display:flex gap:5px padding:5px ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""} ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "bb:2px|solid|red" : ""} cursor:move`}
-            draggable={true}
+            class={`align-items:center border-radius:4px display:flex gap:5px padding:5px ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""} ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "bb:2px|solid|red" : ""} cursor:move`}
+            draggable={"true"}
             onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
             onDragOver={(e) => e.preventDefault()}
-            onDragStart={() =>
+            onDragStart={(e) => {
+              // Set required data for drag operation
+              e.dataTransfer?.setData("text/plain", openedFormId);
               mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
                 draggedTab: openedFormId,
               })
-            }
+            }}
             onDrop={() => moveTab(props.mainPanel)}
           >
-            <span>
+            <span class="user-select:none;">
               {graph.vertexes[openedFormId].P.label}
               {isUnsaved(graph.vertexes[openedFormId].P.formId) && "*"}
             </span>

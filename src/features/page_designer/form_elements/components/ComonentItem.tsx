@@ -113,7 +113,7 @@ export function ComponentItem(
     <>
       <TreeItemContainer
         class={isNegative(props.child.id) ? "bg:#e8ffe8" : ""}
-        draggable={true}
+        draggable={"true"}
         hasChildren={!!children().length}
         isHovered={isHovered()}
         onClick={() => props.toggleExpand(props.child.id)}

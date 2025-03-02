@@ -166,7 +166,7 @@ export function LayoutTreeItem(
     <>
       <TreeItemContainer
         class={getBorder()}
-        draggable={true}
+        draggable={"true"}
         hasChildren={!!children().length}
         isDragOver={isActiveTargetItem()}
         isHovered={isSelectedHoverId(props.metaVertex.id)}
