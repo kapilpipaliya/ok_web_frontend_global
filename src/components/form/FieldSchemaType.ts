@@ -1,4 +1,4 @@
-import type { useSearchParams } from "@solidjs/router";
+import type { useNavigate, useSearchParams } from "@solidjs/router";
 import type { Accessor, Owner } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 
@@ -30,6 +30,7 @@ export interface FunctionArgumentBaseType {
   // formValueStore: FormStoreObject;
   meta: Vertex;
   mounted: Accessor<boolean>;
+  navigate: ReturnType<typeof useNavigate>;
   onChange: (value: any) => void;
   owner: Owner;
   parentItems: PageRenderStore[];

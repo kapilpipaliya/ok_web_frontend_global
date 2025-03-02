@@ -2,6 +2,7 @@ import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, Show } from "solid-js";
 
 import { SettingsLayout } from "~/components/settings/SettingsLayout";
+import { AccountDeletionForm } from "~/pages/user/AccountDeletionForm";
 import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
 import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
@@ -29,6 +30,11 @@ export default function SystemUserSettings() {
       id: "password",
       label: "Change Password",
     },
+    {
+      component: "AccountDeletion",
+      id: "delete-account",
+      label: "Delete Account",
+    },
   ];
 
   const handleMenuSelect = (id: string) => {
@@ -48,6 +54,9 @@ export default function SystemUserSettings() {
       </Show>
       <Show when={selectedMenu() === "password"}>
         <PasswordChangeForm />
+      </Show>
+      <Show when={selectedMenu() === "delete-account"}>
+        <AccountDeletionForm />
       </Show>
     </SettingsLayout>
   );

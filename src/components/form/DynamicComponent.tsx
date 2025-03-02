@@ -1,5 +1,5 @@
 import { createLazyMemo } from "@solid-primitives/memo";
-import { useSearchParams } from "@solidjs/router";
+import { useNavigate, useSearchParams } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
 import {
   createMemo,
@@ -46,6 +46,8 @@ import {
 } from "~/lib/graph/graph";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
 import type {
   ComponentNameType,
@@ -57,8 +59,6 @@ import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
-import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
-import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -85,6 +85,7 @@ export function DynamicComponent(
   const [mounted, setMounted] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const zIndex = useZIndex();
+  const navigate = useNavigate();
 
   // const [parentItems] = usePageRenderVertexContext();
   // const parentComponent = createMemo(() => getComponentLabel(graph, getLastItem(parentItems?.vertexes || [], 2))?.P[IdAttr]);
@@ -249,6 +250,7 @@ export function DynamicComponent(
         return props.meta;
       },
       mounted,
+      navigate,
       onChange,
       owner,
       parentItems,

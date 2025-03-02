@@ -93,11 +93,15 @@ export const API = {
       root: "/system/projects",
       userSettings: "/system/UserSettings",
     },
+    user: {
+      logout: "/auth/logout",
+    },
   },
   user: {
     deleteUserUrl: "/api/users/delete",
     getUsersListUrl: "/api/users/list",
     inviteUserUrl: "/api/users/invite",
+    selfDeleteUrl: "/api/users/self-delete",
     updateUserUrl: "/api/users/update",
   },
 } as const;
