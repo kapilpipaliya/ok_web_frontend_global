@@ -10,7 +10,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { handleAPIError } from "~/lib/api/apiErrorHandler";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
-import { sendEmailVerification } from "~/routes/api/auth/(profile)/functions/sendEmailVerification";
+import { sendSignupEmailVerification } from "~/routes/api/auth/(profile)/functions/sendSignupEmailVerification";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
 
@@ -74,7 +74,7 @@ async function handleSignup(
 
     // by default, emailVerified is false
     // Send email verification
-    sendEmailVerification(request, tx, user, subDomain);
+    sendSignupEmailVerification(request, tx, user, subDomain);
 
     return {
       graph: {

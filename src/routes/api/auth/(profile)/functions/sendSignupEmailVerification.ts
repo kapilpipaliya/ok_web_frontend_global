@@ -8,7 +8,7 @@ import { encodeUserData } from "~/lib/auth/userDataEncoder";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 
-export async function sendEmailVerification(
+export async function sendSignupEmailVerification(
   request: APIEvent["request"],
   dbSession: Session | Transaction,
   user: Vertex,

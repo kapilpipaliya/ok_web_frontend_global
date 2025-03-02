@@ -48,7 +48,7 @@ const content = [
     text: "Please note that once your account is deleted, all your data will be permanently removed and cannot be recovered.",
   },
   {
-    as: "button",
+    as: "a",
     class: JSON.stringify({
       "": {
         "background-color": "primary",
@@ -58,6 +58,8 @@ const content = [
         cursor: "pointer",
         padding: "8 16",
         "margin-top": "16",
+        "text-decoration": "none",
+        display: "inline-block",
       },
       ":hover": {
         opacity: "0.9",
@@ -65,6 +67,10 @@ const content = [
     }),
     componentName: "Html",
     pos: 5,
+    props: `return {
+      href: window.location.origin + "/support/contact",
+    }`,
+    target: "_blank",
     text: "Contact Support",
   },
 ];

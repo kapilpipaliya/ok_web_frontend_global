@@ -80,7 +80,7 @@ export const API = {
   },
   urls: {
     admin: {
-      contact: "/contact-us",
+      contact: "/support/contact",
       globalSettings: "/admin/GlobalSettings",
       login: "/auth/login",
       // it's name is admin, but its for subdomains

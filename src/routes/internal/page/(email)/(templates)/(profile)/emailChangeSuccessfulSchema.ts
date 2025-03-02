@@ -37,7 +37,7 @@ const content = [
     text: "If you need to make any additional changes to your account, please visit your account settings.",
   },
   {
-    as: "button",
+    as: "a",
     class: JSON.stringify({
       "": {
         "background-color": "primary",
@@ -46,6 +46,8 @@ const content = [
         color: "base-5",
         cursor: "pointer",
         padding: "8 16",
+        "text-decoration": "none",
+        display: "inline-block",
       },
       ":hover": {
         opacity: "0.9",
@@ -53,6 +55,11 @@ const content = [
     }),
     componentName: "Html",
     pos: 4,
+    props: `return {
+      // href: window.location.origin + "/admin/UserSettings",
+      href: window.location.origin
+    }`,
+    target: "_blank",
     text: "Go to Account Settings",
   },
 ];

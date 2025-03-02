@@ -26,7 +26,7 @@ const content = [
     text: "Thank you for signing up! Please confirm your email address to activate your account.",
   },
   {
-    as: "button",
+    as: "a",
     class: JSON.stringify({
       "": {
         "background-color": "primary",
@@ -36,6 +36,8 @@ const content = [
         cursor: "pointer",
         "margin-bottom": "16",
         padding: "8 16",
+        "text-decoration": "none",
+        display: "inline-block",
       },
       ":hover": {
         opacity: "0.9",
@@ -43,6 +45,10 @@ const content = [
     }),
     componentName: "Html",
     pos: 3,
+    props: `return {
+      href: args.searchParams.url,
+    }`,
+    target: "_blank",
     text: "Confirm Email",
   },
   {

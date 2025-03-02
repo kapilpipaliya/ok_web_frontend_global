@@ -50,7 +50,7 @@ const content = [
     text: "If you did not request this change, please contact our support team immediately.",
   },
   {
-    as: "button",
+    as: "a",
     class: JSON.stringify({
       "": {
         "background-color": "primary",
@@ -59,6 +59,8 @@ const content = [
         color: "base-5",
         cursor: "pointer",
         padding: "8 16",
+        "text-decoration": "none",
+        display: "inline-block",
       },
       ":hover": {
         opacity: "0.9",
@@ -66,6 +68,10 @@ const content = [
     }),
     componentName: "Html",
     pos: 5,
+    props: `return {
+      href: window.location.origin + "/support/contact",
+    }`,
+    target: "_blank",
     text: "Contact Support",
   },
 ];
