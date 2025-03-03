@@ -3,11 +3,12 @@ import { createEffect, createMemo, createSignal, For } from "solid-js";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { getFilesData } from "../sidebar/getFilesData";
-import { AddNewCompButton } from "./AddNewCompButtton";
 import { AddNewFileButton } from "./AddNewFileButton";
+import { getComponentFormSchema } from "./getComponentFormSchema";
 
 export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
   const [graph, setGraph] = useGraph();
@@ -74,13 +75,21 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
             fileManagerStore.parentVertexLabel === "Comp" ||
             fileManagerStore.parentVertexLabel === "Perm"
               ? () => (
-                  <AddNewCompButton
-                    saveAsLabel={
-                      fileManagerStore.parentVertexLabel as "Comp" | "Perm"
-                    }
-                  />
+                <SchemaRenderer
+                form={getComponentFormSchema(()=>{}, ()=>{}, fileManagerStore.parentVertexLabel as "Comp" | "Perm")}
+              />
                 )
               : AddNewFileButton
+          }
+          editSchema={
+            fileManagerStore.parentVertexLabel === "Comp" ||
+            fileManagerStore.parentVertexLabel === "Perm"
+              ? getComponentFormSchema(
+                  () => {},
+                  () => {},
+                  fileManagerStore.parentVertexLabel as "Comp" | "Perm"
+                )
+              : undefined
           }
           enableRowSelection={fileManagerStore.enableRowSelection}
           getTableData={() => fetchChildren(props.item)}

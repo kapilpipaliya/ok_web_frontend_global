@@ -63,7 +63,7 @@ export function useToast() {
   }
 
   function showSuccessToast(message: string) {
-    toastValue.toast(message, { duration: 3000 });
+    toastValue.toast.success(message, { duration: 3000 });
   }
 
   async function showLoadingToast<T extends { [key: string]: any }>({

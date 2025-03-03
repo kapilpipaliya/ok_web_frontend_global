@@ -17,6 +17,8 @@ export const validations = {
   TextInputField: "required|email|minLength|maxLength|regex",
 };
 
+export type ValidateFunction = (value: string) => string | undefined;
+
 export interface ValidationConfigType {
   email: boolean;
   maxLength: number;
@@ -27,6 +29,7 @@ export interface ValidationConfigType {
     value: string;
   }[];
   required: boolean;
+  validate?: ValidateFunction | ValidateFunction[];
 }
 
 export function ValidationConfig(props: Readonly<ValidationProps>) {
@@ -196,7 +199,7 @@ export const ValidationConfigTest = (validations: ValidationConfigType) => {
     const value = target.value;
     setValues(value);
     setError("");
-    const error = validateInput(validations, value);
+    const error = validateInput(validations, value, "test");
     if (error) {
       setError(error);
     }

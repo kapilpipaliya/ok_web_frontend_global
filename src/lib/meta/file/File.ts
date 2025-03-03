@@ -102,7 +102,7 @@ export const File: IFormMetaData = {
     },
     parentDirectory,
   ],
-  isInlineEditable: false,
+  isInlineEditable: true,
   key: "File",
   title: "File",
 };
@@ -153,7 +153,7 @@ export const Folder: IFormMetaData = {
     },
     parentDirectory,
   ],
-  isInlineEditable: false,
+  isInlineEditable: true,
   key: "Folder",
   title: "Folder",
 };

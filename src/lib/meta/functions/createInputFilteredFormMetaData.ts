@@ -30,8 +30,7 @@ export function createInputFilteredFormMetaData(
   };
 
   return {
+    ...inputMetaData,
     attributes: filterAttributes(inputMetaData.attributes),
-    key: inputMetaData.key,
-    title: inputMetaData.title,
   };
 }

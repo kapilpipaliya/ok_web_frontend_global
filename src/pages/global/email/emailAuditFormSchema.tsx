@@ -51,7 +51,14 @@ export const emailAuditFormSchema = {
               componentName: "TextInput",
               key: "subject",
               placeholder: "Enter email subject",
-              validation: { required: true },
+              validation: { 
+                regex: {
+                  enabled: true,
+                  message: "Subject must be between 1 and 200 characters",
+                  value: "^.{1,200}$"
+                },
+                required: true
+              },
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -71,7 +78,14 @@ export const emailAuditFormSchema = {
               componentName: "TextInput",
               key: "recipients",
               placeholder: "Enter recipients",
-              validation: { required: true },
+              validation: { 
+                regex: {
+                  enabled: true,
+                  message: "Please enter valid email addresses",
+                  value: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+                },
+                required: true
+              },
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -102,7 +116,14 @@ export const emailAuditFormSchema = {
                 // srcdoc: xss(options.data.P.content, xssOptions),
                 srcdoc: options.data.P.content,
               }),
-              validation: { required: true },
+              validation: { 
+                regex: {
+                  enabled: true,
+                  message: "Content cannot be empty",
+                  value: "^.{1,}$"
+                },
+                required: true
+              },
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -120,9 +141,9 @@ export const emailAuditFormSchema = {
               componentName: "Select",
               key: "status",
               options: [
-                { label: "Sent", value: "sent" },
-                { label: "Failed", value: "failed" },
-                { label: "Pending", value: "pending" },
+                { id: "sent", label: "Sent" },
+                { id: "failed", label: "Failed" },
+                { id: "pending", label: "Pending" },
               ],
               placeholder: "Select status",
             },

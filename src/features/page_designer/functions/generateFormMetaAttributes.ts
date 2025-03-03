@@ -218,7 +218,7 @@ export function isAnyFieldInvalid(
   function checkVertex(attrVertex: Vertex) {
     if (attrVertex.P.validation) {
       const value = data.P[attrVertex.P[uniqueNameKey]];
-      const error = validateInput(attrVertex.P.validation, value);
+      const error = validateInput(attrVertex.P.validation, value, attrVertex.P.key);
       mergeVertexProperties(0, attrVertex.id, graph, setGraph, {
         error: error || "",
       });

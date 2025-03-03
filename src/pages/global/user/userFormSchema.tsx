@@ -13,6 +13,8 @@ import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
+import { validateEmail } from "~/lib/validation/validateEmail";
+import { validateUsername } from "~/lib/validation/validateUsername";
 
 export const userFormSchema = {
   as: "div",
@@ -34,7 +36,10 @@ export const userFormSchema = {
               componentName: "TextInput",
               key: "email",
               placeholder: "Enter email",
-              validation: { required: true },
+              validation: { 
+                required: true,
+                validate: validateEmail
+              },
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -53,6 +58,14 @@ export const userFormSchema = {
               componentName: "TextInput",
               key: "name",
               placeholder: "Enter name",
+              validation: { 
+                regex: [{
+                  enabled: true,
+                  message: "Name must be between 2 and 100 characters and contain only letters, spaces, and hyphens",
+                  value: "^[a-zA-Z\\s-]{2,100}$"
+                }],
+                required: true 
+              },
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -71,6 +84,10 @@ export const userFormSchema = {
               componentName: "TextInput",
               key: "username",
               placeholder: "Enter username",
+              validation: { 
+                required: true,
+                validate: validateUsername
+              },
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -89,6 +106,7 @@ export const userFormSchema = {
               componentName: "MultiSelect",
               key: "role",
               placeholder: "Select roles",
+              validation: { required: true },
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -108,6 +126,28 @@ export const getUserFormSchema = (onSuccess: () => void) => {
   const validateForm = (formData: Vertex) => {
     if (!formData.P.email?.trim()) {
       showErrorToast("Please enter email");
+      return false;
+    }
+    const emailError = validateEmail(formData.P.email);
+    if (emailError) {
+      showErrorToast(emailError);
+      return false;
+    }
+    if (!formData.P.name?.trim()) {
+      showErrorToast("Please enter name");
+      return false;
+    }
+    if (!formData.P.username?.trim()) {
+      showErrorToast("Please enter username");
+      return false;
+    }
+    const usernameError = validateUsername(formData.P.username);
+    if (usernameError) {
+      showErrorToast(usernameError);
+      return false;
+    }
+    if (!formData.P.role?.length) {
+      showErrorToast("Please select at least one role");
       return false;
     }
     return true;

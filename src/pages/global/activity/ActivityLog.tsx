@@ -43,7 +43,7 @@ export function ActivityLog() {
         key: "createdAt",
       },
     ],
-    isInlineEditable: false,
+    isInlineEditable: true,
     key: "ActivityLog",
     title: "Activity Log",
   };
@@ -54,7 +54,6 @@ export function ActivityLog() {
       formSchema={ActivityLogSchema}
       getTableData={getTableData}
       hideDeleteAction={true}
-      hideEditAction={true}
       hideEditJsonAction={true}
       initializeGridStoreParent={(gridStore_) => {
         _gridStore = gridStore_;
