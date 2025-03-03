@@ -1,13 +1,15 @@
-import {createLazyMemo} from "@solid-primitives/memo";
-import {createPropsPredicate, filterProps} from "@solid-primitives/props";
-import {useNavigate, useSearchParams} from "@solidjs/router";
-import {toTitle} from "case-switcher-js";
+import { createLazyMemo } from "@solid-primitives/memo";
+import { createPropsPredicate, filterProps } from "@solid-primitives/props";
+import { useNavigate, useSearchParams } from "@solidjs/router";
+import { toTitle } from "case-switcher-js";
 import {
+  createEffect,
   createMemo,
   createSignal,
   ErrorBoundary,
   getOwner,
   Match,
+  on,
   onCleanup,
   onMount,
   runWithOwner,
@@ -16,34 +18,34 @@ import {
   Switch,
   untrack,
 } from "solid-js";
-import {createStore, type SetStoreFunction} from "solid-js/store";
-import {Dynamic} from "solid-js/web";
+import { createStore, unwrap, type SetStoreFunction } from "solid-js/store";
+import { Dynamic } from "solid-js/web";
 
-import {Label} from "~/features/css_editor/components/fields/Label";
-import {cssStateToString} from "~/features/css_editor/utils/cssStateToString";
-import {useRepeaterVertexContext} from "~/features/page_attr_render/context/PageAttrContext";
-import {PageRenderContextProvider, usePageRenderContext,} from "~/features/page_attr_render/context/PageRenderContext";
-import {PageAttrRender} from "~/features/page_attr_render/PageAttrRender";
-import {getConfiguredPermissions, hasPermissions,} from "~/features/page_attr_render/permissions";
-import {PreviewContext, usePreviewContext,} from "~/features/page_designer/context/PreviewContext";
-import {getComponentLabel} from "~/features/page_designer/functions/getComponentLabel";
-import {getLastItem} from "~/lib/data_structure/array/getLastItem";
-import {ifNotNull} from "~/lib/data_structure/ifNotNull";
-import {evalExpression} from "~/lib/expression_eval";
-import {getGlobalStore} from "~/lib/graph/get/sync/store/getGlobalStore";
-import {type GraphInterface, IdAttr, useGraph, type Vertex,} from "~/lib/graph/graph";
-import {setGraphDataWithTransaction} from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
-import {setValueGlobal} from "~/lib/graph/mutate/form/setValueGlobal";
-import {revertTransaction} from "~/lib/graph/transaction/revert/revertTransaction";
-import {revertTransactionUpToIndex} from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
+import { Label } from "~/features/css_editor/components/fields/Label";
+import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
+import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
+import { PageRenderContextProvider, usePageRenderContext, } from "~/features/page_attr_render/context/PageRenderContext";
+import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
+import { getConfiguredPermissions, hasPermissions, } from "~/features/page_attr_render/permissions";
+import { PreviewContext, usePreviewContext, } from "~/features/page_designer/context/PreviewContext";
+import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { ifNotNull } from "~/lib/data_structure/ifNotNull";
+import { evalExpression } from "~/lib/expression_eval";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import { type GraphInterface, IdAttr, useGraph, type Vertex, } from "~/lib/graph/graph";
+import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
-import type {FunctionArgumentType,} from "./FieldSchemaType";
+import type { FunctionArgumentType, } from "./FieldSchemaType";
 
-import {NotFoundComponent} from "../fields/NotFoundComponent";
-import {useZIndex} from "../fields/ZIndex";
-import {useToast} from "../styled/Toast";
-import {type FormStoreObject, useFormContext} from "./context/FormContext";
-import {getDynamicComponent} from "./functions/getDynamicComponent";
+import { NotFoundComponent } from "../fields/NotFoundComponent";
+import { useZIndex } from "../fields/ZIndex";
+import { useToast } from "../styled/Toast";
+import { type FormStoreObject, useFormContext } from "./context/FormContext";
+import { getDynamicComponent } from "./functions/getDynamicComponent";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -267,18 +269,18 @@ export function DynamicComponent(
       showErrorToast("You do not have permission to modify this field.");
       return;
       }*/
-     
-     if (!isNoPermissionCheck()) {
-       if (previewStore.isViewOnly) {
-         showErrorToast("You do not have permission to modify this field.");
-         return;
-        }
-        
-        if (!(hasInsertPermission() || hasEditPermission())) {
-          showErrorToast("You do not have permission to set this value.");
-          return;
-        }
-        const existingValue = props.data?.P[props.meta.P.key];
+
+    if (!isNoPermissionCheck()) {
+      if (previewStore.isViewOnly) {
+        showErrorToast("You do not have permission to modify this field.");
+        return;
+      }
+
+      if (!(hasInsertPermission() || hasEditPermission())) {
+        showErrorToast("You do not have permission to set this value.");
+        return;
+      }
+      const existingValue = props.data?.P[props.meta.P.key];
       if (existingValue === undefined && !hasInsertPermission()) {
         showErrorToast("You do not have insert permission to set this value.");
         return;
@@ -554,16 +556,43 @@ export function DynamicComponent(
     "props",
     "mounted",
     "hideLabel",
-
+    "class",
     "validation",
     "labelClass",
   ];
-  // no splitProps works, no filterProps works with Data component.
-  // const [local, otherProps] = splitProps(props, ignoreMetaKeys);
-  // const otherProps = filterProps(props, (key) => !ignoreMetaKeys.includes(key));
+  const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
 
-  const predicate = createPropsPredicate(props, key => key.endsWith("class"));
-  const classProps = filterProps(props, predicate);
+  // break the cyclic dependency by creating an intermediate state for the classes.
+  const [mergedClasses, setMergedClasses] = createSignal({} as Record<string, string>);
+
+  createEffect(on([() => props.meta.P, dynamicProps], ([metaProps, dynamicPropsValues]) => {
+    const classes = [
+      ...Object.keys(metaProps).filter((key) =>
+        key.toLowerCase().endsWith("class"),
+      ),
+      ...Object.keys(dynamicPropsValues).filter((key) =>
+        key.toLowerCase().endsWith("class"),
+      ),
+    ].reduce(
+      (acc, key) => {
+        if (acc[key]) {
+          return acc;
+        }
+        const cssValue = metaProps[key]
+        acc[key] =
+          `${cssStateToString(
+            cssValue,
+            { P: { key: key } } as unknown as Vertex,
+            props.meta,
+            graph,
+          ) || ""} ${dynamicPropsValues[key] || ""}`.trim();
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+    setMergedClasses(classes);
+  }));
+
   const Content = () => (
     <>
       <ErrorBoundary
@@ -573,8 +602,7 @@ export function DynamicComponent(
         }}
       >
         <Dynamic
-          // no splitProps works, no filterProps works with Data component.
-          {...props.meta.P}
+          {...otherProps}
           component={component()}
           disabled={
             isNoPermissionCheck()
@@ -584,11 +612,9 @@ export function DynamicComponent(
                 isDisabledByPermissions() ??
                 props.meta.P.disabled)
           }
-          // componentName={componentName()}
           isNoPermissionCheck={isNoPermissionCheck()}
           isRealTime={props.isRealTime}
           isTableInside={props.isTableInside}
-          // added:
           isViewMode={isViewMode()}
           onChange={onChange}
           props={null}
@@ -597,34 +623,9 @@ export function DynamicComponent(
           txnId={props.txnId}
           value={value()}
           {...dynamicProps()}
-          {...permissions()}
           hidden={null}
-          // merged class
-          // Object.keys(props.meta.P) create issue, that it will lose focus on the input when meta is changed.
-          {...[
-            ...Object.keys(classProps).filter((key) =>
-              key.toLowerCase().endsWith("class"),
-            ),
-            ...Object.keys(dynamicProps()).filter((key) =>
-              key.toLowerCase().endsWith("class"),
-            ),
-          ].reduce(
-            (acc, key) => {
-              if (acc[key]) {
-                return acc;
-              }
-              const cssValue = props.meta.P[key]
-              acc[key] =
-                `${cssStateToString(
-                  cssValue,
-                  { P: { key: key } } as unknown as Vertex,
-                  props.meta,
-                  graph,
-                ) || ""} ${dynamicProps()[key] || ""}`.trim();
-              return acc;
-            },
-            {} as Record<string, any>,
-          )}
+          {...mergedClasses()}
+          {...permissions()}
         >
           <Show
             fallback={
@@ -636,10 +637,10 @@ export function DynamicComponent(
                 />
               </Show>
             }
-            // @ts-ignore
+            // @ts-expect-error
             when={props.children}
           >
-            {/* @ts-ignore */}
+            {/* @ts-expect-error */}
             {props.children}
           </Show>
         </Dynamic>
@@ -711,7 +712,7 @@ export function DynamicComponent(
               required={
                 props.meta.P.validation?.required
               }
-              //tooltip={(props.meta).P.tooltip}
+            //tooltip={(props.meta).P.tooltip}
             >
               <ContentWrapper />
             </Label>

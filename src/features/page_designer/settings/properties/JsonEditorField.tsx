@@ -55,7 +55,7 @@ export function JsonEditorFieldComponent() {
           style={{ height: "200px" }}
         /> */}
       <JsonEditorField
-        json={graph.vertexes[formStoreVertex()?.P.selectedId].P}
+        json={graph.vertexes[formStoreVertex()?.P.selectedId]?.P ?? {}}
         onChange={replacePropertyValue}
       />
       {!isJsonValid() && <span class="fg:error">Invalid JSON</span>}
