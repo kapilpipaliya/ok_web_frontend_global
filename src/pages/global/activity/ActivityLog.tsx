@@ -4,8 +4,11 @@ import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
 
+import { SchemaRenderer } from "../../SchemaRenderer";
+import { getActivityLogFormSchema } from "./functions/getActivityLogFormSchema";
+
 export function ActivityLog() {
-  let _gridStore: DataGridStore;
+  let gridStore: DataGridStore;
   const getTableData = async () => {
     return await getAPI(API.settings.activity.getUrl);
   };
@@ -48,15 +51,23 @@ export function ActivityLog() {
     title: "Activity Log",
   };
 
+  const onSuccess = () => {
+    gridStore?.[0].fetchTableData();
+  };
+
+  const addSchema = getActivityLogFormSchema(onSuccess);
+  const editSchema = getActivityLogFormSchema(onSuccess);
+
   return (
     <DataGrid
-      CustomAddNewButton={() => <div />}
+      CustomAddNewButton={() => <SchemaRenderer form={addSchema} />}
+      editSchema={editSchema}
       formSchema={ActivityLogSchema}
       getTableData={getTableData}
       hideDeleteAction={true}
       hideEditJsonAction={true}
       initializeGridStoreParent={(gridStore_) => {
-        _gridStore = gridStore_;
+        gridStore = gridStore_;
       }}
       isShowPagination={true}
       tableId="ActivityLog"

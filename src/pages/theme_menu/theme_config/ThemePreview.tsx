@@ -24,7 +24,7 @@ export function ThemePreview(props: { item: Vertex }) {
       <For each={colorVariables}>
         {(variable) => (
           <div
-            class={`${getColorClass(themeData().variables?.[variable])} h:20px w:0.5rem`}
+            class={`${getColorClass(themeData()?.variables?.[variable])} h:20px w:0.5rem`}
           />
         )}
       </For>
