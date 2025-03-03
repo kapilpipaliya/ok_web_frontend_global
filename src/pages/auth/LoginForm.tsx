@@ -8,7 +8,6 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { popoverWrapperSchema } from "~/lib/schema/popoverWrapperSchema";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
@@ -68,7 +67,7 @@ export function LoginForm() {
     if (validateFormData(formData)) {
       await showLoadingToast({
         loadMessage: "Logging In...",
-        onError: () => {},
+        onError: () => { },
         onSuccess: (value) => {
           handleLoginRedirect(value?.result, graph, navigate);
         },
@@ -79,56 +78,6 @@ export function LoginForm() {
         successMessage: "Logged In Successfully",
       });
     }
-  };
-  const passwordHintPopoverContent = {
-    as: "div",
-    attributes: [
-      {
-        as: "h3",
-        class: "font-size:16px color:primary m:0 mb:8",
-        componentName: "Text",
-        text: "Password Requirements",
-      },
-      {
-        as: "ul",
-        attributes: [
-          {
-            as: "li",
-            class: "font-size:14px color:base-80 mb:4",
-            componentName: "Text",
-            text: "At least 8 characters long",
-          },
-          {
-            as: "li",
-            class: "font-size:14px color:base-80 mb:4",
-            componentName: "Text",
-            text: "At least one uppercase letter",
-          },
-          {
-            as: "li",
-            class: "font-size:14px color:base-80 mb:4",
-            componentName: "Text",
-            text: "At least one lowercase letter",
-          },
-          {
-            as: "li",
-            class: "font-size:14px color:base-80 mb:4",
-            componentName: "Text",
-            text: "At least one number",
-          },
-          {
-            as: "li",
-            class: "font-size:14px color:base-80",
-            componentName: "Text",
-            text: "At least one special character (!@#$%^&*(),.?\":{}|<>)",
-          }
-        ],
-        class: "m:0 pl:16 list-style:disc",
-        componentName: "Box"
-      }
-    ],
-    class: "p:12 bg:white shadow:lg r:4 max-width:300px",
-    componentName: "Box",
   };
 
   const form = {
@@ -150,7 +99,7 @@ export function LoginForm() {
                 componentName: "TextInput",
                 key: "email",
                 props: (options: FunctionArgumentType) => ({
-                  onKeyPress: async (e: KeyboardEvent) => {
+                  onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
@@ -178,12 +127,11 @@ export function LoginForm() {
                 }),
                 validation: { required: true },
               },
-              
-              popoverWrapperSchema({
+              {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
                 componentName: "Text",
                 text: "Password",
-              }, passwordHintPopoverContent),
+              },
               {
                 as: "div",
                 attributes: [
@@ -193,7 +141,12 @@ export function LoginForm() {
                     key: "password",
                     props: (options: FunctionArgumentType) => {
                       return {
-                        onKeyPress: async (e: KeyboardEvent) => {
+                        onInput: (e: Event) => {
+                          if (e.target instanceof HTMLInputElement) {
+                            options.updateValue(e.target.value);
+                          }
+                        },
+                        onKeyDown: async (e: KeyboardEvent) => {
                           if (e.key === "Enter") {
                             if (e.target instanceof HTMLInputElement) {
                               options.updateValue(e.target.value);

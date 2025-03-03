@@ -31,9 +31,15 @@ export function setValueGlobal(
   batch(() => {
     if (metaVertex.P.validation) {
       error = validateInput(metaVertex.P.validation, data);
-      mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-        error: error || "",
-      });
+      if (error && metaVertex.P.error !== error) {
+        // This was causing issue when we have onInput event on the field, It lose focus from the field, its fixed now.
+        mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+          error: error || "",
+        });
+        setGraph("vertexes", metaVertex.id, "P", {
+          error: error || "",
+        });
+      }
     }
 
     mergeVertexProperties(txnId, dataVertex.id, graph, setGraph, {

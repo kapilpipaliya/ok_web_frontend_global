@@ -7,6 +7,7 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
@@ -93,7 +94,7 @@ export function SignupForm() {
                 componentName: "TextInput",
                 key: "username",
                 props: (options: FunctionArgumentType) => ({
-                  onKeyPress: async (e: KeyboardEvent) => {
+                  onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
@@ -117,7 +118,7 @@ export function SignupForm() {
                 componentName: "TextInput",
                 key: "email",
                 props: (options: FunctionArgumentType) => ({
-                  onKeyPress: async (e: KeyboardEvent) => {
+                  onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
@@ -142,11 +143,7 @@ export function SignupForm() {
                 }),
                 validation: { required: true },
               },
-              {
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
-                text: "Password",
-              },
+              wrapPasswordLabelWithHint("Password", "password"),
               {
                 as: "div",
                 attributes: [
@@ -155,7 +152,12 @@ export function SignupForm() {
                     componentName: "TextInput",
                     key: "password",
                     props: (options: FunctionArgumentType) => ({
-                      onKeyPress: async (e: KeyboardEvent) => {
+                      onInput: (e: Event) => {
+                        if (e.target instanceof HTMLInputElement) {
+                          options.updateValue(e.target.value);
+                        }
+                      },
+                      onKeyDown: async (e: KeyboardEvent) => {
                         if (e.key === "Enter") {
                           if (e.target instanceof HTMLInputElement) {
                             options.updateValue(e.target.value);

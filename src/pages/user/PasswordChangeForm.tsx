@@ -10,6 +10,7 @@ import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { postAPI } from "~/lib/api/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
+import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
@@ -29,19 +30,19 @@ export function PasswordChangeForm() {
   const form = {
     as: "div",
     attributes: [
-      createPasswordField(
+      createPasswordFieldWithHint(
         "Current Password",
         "currentPassword",
         showPassword,
         setShowPassword,
       ),
-      createPasswordField(
+      createPasswordFieldWithHint(
         "New Password",
         "newPassword",
         showPassword,
         setShowPassword,
       ),
-      createPasswordField(
+      createPasswordFieldWithHint(
         "Confirm New Password",
         "confirmPassword",
         showPassword,
@@ -112,7 +113,7 @@ export function PasswordChangeForm() {
   );
 }
 
-function createPasswordField(
+function createPasswordFieldWithHint(
   label: string,
   key: string,
   showPassword: Store<{ [key: string]: boolean }>,
@@ -122,11 +123,7 @@ function createPasswordField(
   return {
     as: "div",
     attributes: [
-      {
-        class: SETTINGS_CONSTANTS.LABEL_CLASS,
-        componentName: "Text",
-        text: label,
-      },
+      wrapPasswordLabelWithHint(label, key),
       {
         as: "div",
         attributes: [
@@ -135,7 +132,12 @@ function createPasswordField(
             componentName: "TextInput",
             key,
             placeholder: placeholder || `Enter ${label.toLowerCase()}`,
-            props: () => ({
+            props: (options: FunctionArgumentType) => ({
+              onInput: (e: Event) => {
+                if (e.target instanceof HTMLInputElement) {
+                  options.updateValue(e.target.value);
+                }
+              },
               type: showPassword[key] ? "text" : "password",
             }),
             validation: { required: true },

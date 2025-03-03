@@ -9,6 +9,8 @@ import { createStore } from 'solid-js/store';
 
 import type { FunctionArgumentType } from '~/components/form/FieldSchemaType';
 
+import { FieldAttribute } from '../meta/FormMetadataType';
+
 /**
  * Creates a wrapper that displays a popover when the user hovers over an action element
  * 
@@ -16,7 +18,7 @@ import type { FunctionArgumentType } from '~/components/form/FieldSchemaType';
  * @param popoverSchema - The schema for the popover content
  * @returns A schema that wraps the action with popover functionality
  */
-export const popoverWrapperSchema = (action: any, popoverSchema: any) => {
+export const popoverWrapperSchema = (action: FieldAttribute, popoverSchema: FieldAttribute) => {
 
   return {
     attributes: [
@@ -29,9 +31,14 @@ export const popoverWrapperSchema = (action: any, popoverSchema: any) => {
             props: (options: FunctionArgumentType) => {
               return {
                 onMount: () => {
-                  options.dataContext.popoverState[1](action, options.ref());
-                  const popoverState = options.dataContext.popoverState;
-                  const actionEl = options.dataContext.popoverState[0][action];
+                  const popoverState = options.dataContext.popoverState as ReturnType<typeof createStore<{
+                    action: HTMLElement | null;
+                    isVisible: boolean;
+                    x: number;
+                    y: number;
+                  }>>;
+                  const actionEl = options.ref() as HTMLElement;
+                  popoverState[1]("action", actionEl);
                   const handleMouseEnter = () => {
                     popoverState[1]('isVisible', true);
                   };
@@ -56,12 +63,17 @@ export const popoverWrapperSchema = (action: any, popoverSchema: any) => {
             attributes: [popoverSchema],
             componentName: 'Box',
             props: (options: FunctionArgumentType) => {
-              const popoverState = options.dataContext.popoverState;
+              const popoverState = options.dataContext.popoverState as ReturnType<typeof createStore<{
+                action: HTMLElement | null;
+                isVisible: boolean;
+                x: number;
+                y: number;
+              }>>;
 
               return {
                 class: popoverState[0]?.isVisible ? 'position:fixed z:9999' : 'd:none',
                 onMount: () => {
-                  const actionEl = options.dataContext.popoverState[0][action];
+                  const actionEl = popoverState[0]?.action;
 
                   if (!actionEl) {
                     console.error('Action element not found');

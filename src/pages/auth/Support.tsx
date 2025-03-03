@@ -195,7 +195,7 @@ export const SupportTicketSection = (
                 <input
                   class="background:none border:none line-height:40px outline:none padding:0|25px|0px|10px width:calc(100%|-|40px)"
                   onInput={(e) => setInputMessage(e.currentTarget.value)}
-                  onKeyPress={(e) => {
+                  onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       sendMessage(props.id);
                     }

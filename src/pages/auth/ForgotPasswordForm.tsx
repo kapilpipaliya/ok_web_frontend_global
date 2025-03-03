@@ -8,6 +8,7 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validatePassword } from "~/lib/validation/validatePassword";
+import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
@@ -193,7 +194,7 @@ export function ForgotPasswordForm() {
             componentName: "TextInput",
             key: "identifier",
             props: (options: FunctionArgumentType) => ({
-              onKeyPress: async (e: KeyboardEvent) => {
+              onKeyDown: async (e: KeyboardEvent) => {
                 if (e.key === "Enter") {
                   if (e.target instanceof HTMLInputElement) {
                     options.updateValue(e.target.value);
@@ -260,7 +261,7 @@ export function ForgotPasswordForm() {
             key: "otp",
             props: (options: FunctionArgumentType) => ({
               maxLength: 6,
-              onKeyPress: async (e: KeyboardEvent) => {
+              onKeyDown: async (e: KeyboardEvent) => {
                 if (e.key === "Enter") {
                   if (e.target instanceof HTMLInputElement) {
                     options.updateValue(e.target.value);
@@ -316,11 +317,7 @@ export function ForgotPasswordForm() {
       {
         as: "div",
         attributes: [
-          {
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
-            text: "New Password",
-          },
+          wrapPasswordLabelWithHint("New Password", "newPassword"),
           {
             as: "div",
             attributes: [
@@ -329,7 +326,12 @@ export function ForgotPasswordForm() {
                 componentName: "TextInput",
                 key: "newPassword",
                 props: (options: FunctionArgumentType) => ({
-                  onKeyPress: async (e: KeyboardEvent) => {
+                  onInput: (e: Event) => {
+                    if (e.target instanceof HTMLInputElement) {
+                      options.updateValue(e.target.value);
+                    }
+                  },
+                  onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
@@ -378,11 +380,7 @@ export function ForgotPasswordForm() {
       {
         as: "div",
         attributes: [
-          {
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
-            text: "Confirm Password",
-          },
+          wrapPasswordLabelWithHint("Confirm Password", "confirmPassword"),
           {
             as: "div",
             attributes: [
@@ -391,7 +389,12 @@ export function ForgotPasswordForm() {
                 componentName: "TextInput",
                 key: "confirmPassword",
                 props: (options: FunctionArgumentType) => ({
-                  onKeyPress: async (e: KeyboardEvent) => {
+                  onInput: (e: Event) => {
+                    if (e.target instanceof HTMLInputElement) {
+                      options.updateValue(e.target.value);
+                    }
+                  },
+                  onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
