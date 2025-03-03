@@ -12,6 +12,7 @@ import {
   onMount,
   runWithOwner,
   Show,
+  splitProps,
   Switch,
   untrack,
 } from "solid-js";
@@ -330,21 +331,6 @@ export function DynamicComponent(
     } as Record<string, any>;
   });
 
-  const ignoreMetaKeys = [
-    "hidden",
-    "children",
-    "onChange",
-    "projections",
-    "props",
-    "onMount",
-    "beforeMount",
-    "mounted",
-    "hideLabel",
-
-    "validation",
-    "labelClass",
-  ];
-
   const DisplayError = () => (
     <Show when={props.meta.P.error}>
       <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
@@ -427,9 +413,9 @@ export function DynamicComponent(
       }
       if (typeof props.meta.P.props === "string") {
         try {
-          const otherPropsFunction = new Function("args", props.meta.P.props);
+          const propsFunction = new Function("args", props.meta.P.props);
           const dynamicPropsObj =
-            otherPropsFunction(getFunctionArgumentWithValue()) || {};
+            propsFunction(getFunctionArgumentWithValue()) || {};
           return getMetaProps(dynamicPropsObj, []);
         } catch (error) {
           console.error("Error evaluating props function:", error);
@@ -559,8 +545,25 @@ export function DynamicComponent(
       return target[prop as keyof typeof target];
     },
   });
+
+  const ignoreMetaKeys = [
+    "hidden",
+    "children",
+    "onChange",
+    "projections",
+    "props",
+    "mounted",
+    "hideLabel",
+
+    "validation",
+    "labelClass",
+  ];
+  // no splitProps works, no filterProps works with Data component.
+  // const [local, otherProps] = splitProps(props, ignoreMetaKeys);
+  // const otherProps = filterProps(props, (key) => !ignoreMetaKeys.includes(key));
+
   const predicate = createPropsPredicate(props, key => key.endsWith("class"));
-  const classProps = filterProps(predicate);
+  const classProps = filterProps(props, predicate);
   const Content = () => (
     <>
       <ErrorBoundary
@@ -570,6 +573,7 @@ export function DynamicComponent(
         }}
       >
         <Dynamic
+          // no splitProps works, no filterProps works with Data component.
           {...props.meta.P}
           component={component()}
           disabled={
@@ -587,6 +591,7 @@ export function DynamicComponent(
           // added:
           isViewMode={isViewMode()}
           onChange={onChange}
+          props={null}
           readOnly={isReadOnly()}
           ref={setRef}
           txnId={props.txnId}
