@@ -565,9 +565,9 @@ export function DynamicComponent(
   // break the cyclic dependency by creating an intermediate state for the classes.
   const [mergedClasses, setMergedClasses] = createSignal({} as Record<string, string>);
 
-  createEffect(on([() => props.meta.P, dynamicProps], ([metaProps, dynamicPropsValues]) => {
+  createEffect(on([() => Object.keys(props.meta.P), dynamicProps], ([metaPropsKeys, dynamicPropsValues]) => {
     const classes = [
-      ...Object.keys(metaProps).filter((key) =>
+      ...metaPropsKeys.filter((key) =>
         key.toLowerCase().endsWith("class"),
       ),
       ...Object.keys(dynamicPropsValues).filter((key) =>
@@ -578,7 +578,7 @@ export function DynamicComponent(
         if (acc[key]) {
           return acc;
         }
-        const cssValue = metaProps[key]
+        const cssValue = props.meta.P[key]
         acc[key] =
           `${cssStateToString(
             cssValue,
@@ -603,6 +603,10 @@ export function DynamicComponent(
       >
         <Dynamic
           {...otherProps}
+          {...dynamicProps()}
+          hidden={null}
+          {...mergedClasses()}
+          {...permissions()}
           component={component()}
           disabled={
             isNoPermissionCheck()
@@ -622,10 +626,7 @@ export function DynamicComponent(
           ref={setRef}
           txnId={props.txnId}
           value={value()}
-          {...dynamicProps()}
-          hidden={null}
-          {...mergedClasses()}
-          {...permissions()}
+  
         >
           <Show
             fallback={
