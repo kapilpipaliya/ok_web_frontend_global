@@ -120,6 +120,106 @@ export const scriptingElements = ["script", "noscript"];
 // Editing elements
 export const editingElements = ["del", "ins"];
 
+// SVG Basic Shape Elements
+export const svgBasicShapeElements = [
+  "circle",
+  "rect",
+  "line",
+  "path",
+  "polygon",
+  "polyline",
+  "ellipse",
+  "switch"
+];
+
+// SVG Text Elements
+export const svgTextElements = [
+  "text",
+  "tspan",
+  "textPath",
+  "title",
+  "desc"
+];
+
+// SVG Container Elements
+export const svgContainerElements = [
+  "svg",
+  "g",
+  "defs",
+  "use",
+  "symbol",
+  "metadata"
+];
+
+// SVG Gradient Elements
+export const svgGradientElements = [
+  "linearGradient",
+  "radialGradient",
+  "stop"
+];
+
+// SVG Filter Elements
+export const svgFilterElements = [
+  "filter",
+  "feGaussianBlur",
+  "feColorMatrix",
+  "feBlend",
+  "feComposite",
+  "feOffset",
+  "feFlood",
+  "feImage",
+  "feMerge",
+  "feMergeNode",
+  "feMorphology",
+  "feSpecularLighting",
+  "feTurbulence",
+  "feComponentTransfer",
+  "feConvolveMatrix",
+  "feDiffuseLighting",
+  "feDisplacementMap",
+  "feDistantLight",
+  "feDropShadow",
+  "feFuncA",
+  "feFuncB",
+  "feFuncG",
+  "feFuncR",
+  "fePointLight",
+  "feSpotLight",
+  "feTile"
+];
+
+// SVG Animation Elements
+export const svgAnimationElements = [
+  "animate",
+  "animateTransform",
+  "animateMotion",
+  "set",
+  "mpath"
+];
+
+// SVG Other Elements
+export const svgOtherElements = [
+  "view",
+  "marker",
+  "pattern",
+  "image",
+  "foreignObject",
+  "mask",
+  "clipPath"
+];
+
+// All SVG elements combined
+// https://developer.mozilla.org/en-US/docs/Web/SVG/Element
+export const svgElements = [
+  ...svgBasicShapeElements,
+  ...svgTextElements,
+  ...svgContainerElements,
+  ...svgGradientElements,
+  ...svgFilterElements,
+  ...svgAnimationElements,
+  ...svgOtherElements
+];
+
 // All HTML tags combined
 export const htmlTags = [
   // ...rootElements,
@@ -135,7 +235,9 @@ export const htmlTags = [
   ...webComponentElements,
   ...scriptingElements,
   ...editingElements,
+  ...svgElements,
 ];
+
 // HTML tags tree structure
 export const htmlTagsTree = {
   children: [
@@ -203,6 +305,47 @@ export const htmlTagsTree = {
       children: editingElements.map(tag => ({ children: [], id: tag, label: tag })),
       id: "editing-elements",
       label: "Editing Elements"
+    },
+    {
+      children: [
+        {
+          children: svgBasicShapeElements.map(tag => ({ children: [], id: tag, label: tag })),
+          id: "svg-basic-shapes",
+          label: "Basic Shapes"
+        },
+        {
+          children: svgTextElements.map(tag => ({ children: [], id: tag, label: tag })),
+          id: "svg-text",
+          label: "Text Elements"
+        },
+        {
+          children: svgContainerElements.map(tag => ({ children: [], id: tag, label: tag })),
+          id: "svg-containers",
+          label: "Containers"
+        },
+        {
+          children: svgGradientElements.map(tag => ({ children: [], id: tag, label: tag })),
+          id: "svg-gradients",
+          label: "Gradients"
+        },
+        {
+          children: svgFilterElements.map(tag => ({ children: [], id: tag, label: tag })),
+          id: "svg-filters",
+          label: "Filters"
+        },
+        {
+          children: svgAnimationElements.map(tag => ({ children: [], id: tag, label: tag })),
+          id: "svg-animation",
+          label: "Animation"
+        },
+        {
+          children: svgOtherElements.map(tag => ({ children: [], id: tag, label: tag })),
+          id: "svg-other",
+          label: "Other Elements"
+        }
+      ],
+      id: "svg-elements",
+      label: "SVG Elements"
     }
   ],
   id: "html-tags",
