@@ -69,6 +69,14 @@ export function HtmlField(
     }
   };
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      (e.target as HTMLElement).blur();
+      handleTextChange(e);
+    }
+  };
+
   const Content = () => {
     const isPageDesigner = !!layoutStoreId;
 
@@ -78,6 +86,7 @@ export function HtmlField(
           <span 
             contentEditable={true}
             onBlur={handleTextChange}
+            onKeyDown={handleKeyDown}
             style={{ display: "inline-block", "min-width": "1em" }}
           >
             {local.text}

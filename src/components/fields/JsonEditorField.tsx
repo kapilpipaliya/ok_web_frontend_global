@@ -9,6 +9,7 @@ import {
 
 import { STYLES } from "~/pages/settings/constants";
 
+// deprecated
 export function JsonEditorField(
   props: JSX.HTMLAttributes<HTMLDivElement> & {
     json: any;

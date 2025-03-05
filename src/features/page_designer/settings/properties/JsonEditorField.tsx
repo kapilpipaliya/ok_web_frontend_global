@@ -2,7 +2,7 @@ import { createEffect, createSignal, on } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { JsonEditorField } from "~/components/fields/JsonEditorField";
+import { VanilaJsonEditor } from "~/components/fields/VanilaJsonEditor";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
@@ -45,7 +45,7 @@ export function JsonEditorFieldComponent() {
   );
 
   return (
-    <label class="mt:5">
+    <div class="mt:5">
       JSON
       {/* <textarea
           placeholder="Enter value here"
@@ -54,11 +54,11 @@ export function JsonEditorFieldComponent() {
           class={`${PROPERTIES.Css.TextField} ${!isJsonValid() ? 'b:error' : ''}`}
           style={{ height: "200px" }}
         /> */}
-      <JsonEditorField
+      <VanilaJsonEditor
         json={graph.vertexes[formStoreVertex()?.P.selectedId]?.P ?? {}}
         onChange={replacePropertyValue}
       />
       {!isJsonValid() && <span class="fg:error">Invalid JSON</span>}
-    </label>
+    </div>
   );
 }
