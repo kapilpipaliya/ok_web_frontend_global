@@ -32,6 +32,7 @@ function ImageWrapper(props: { alt?: string; class?: string; src: string }) {
     </Show>
   );
 }
+
 const getPreviewVertex = (
   attribute: FieldAttribute,
   data: Vertex,
@@ -57,6 +58,7 @@ const getPreviewURL = (
   }
   return "";
 };
+
 export function CreateGridHeaders(
   gridState: DataGridState,
   formNew: IFormMetaData,

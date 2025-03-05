@@ -133,7 +133,7 @@ export function GeneralSettings() {
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
-    props: (options: FunctionArgumentType) => ({
+    props: () => ({
       // TODO: if not saved, revert to previous state
       // onUnmount: () => {
       //   options.revertTransactionUpToIndex(options.txnId, -1);

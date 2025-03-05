@@ -8,12 +8,12 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
+import { addAdminRoleToUser } from "~/cypher/mutate/signup/addAdminRoleToUser";
 import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
 import { hashPassword } from "~/lib/auth/password";
 
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";
-import {addAdminRoleToUser} from "~/cypher/mutate/signup/addAdminRoleToUser";
 
 export const superUserData = {
   email: "superuser@easyformforge.com",

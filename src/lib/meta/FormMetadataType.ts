@@ -6,6 +6,7 @@ export interface FieldAttribute {
   displayName?: string;
   key?: string;
   meta?: string;
+
   validationRules?: Array<{}>;
 }
 

@@ -26,7 +26,7 @@ export async function POST({ request }: APIEvent) {
   try {
     // Query based on user role, for admin we show all tickets, for non-admin we show only tickets created by the user
     const { incoming, outgoing } = getEdgesFromRowsAttr(
-      getSupportTicketFormSchema(() => {}).attributes!
+      getSupportTicketFormSchema(() => {}).attributes!,
     );
 
     let expression = `g:'Support'`;
@@ -46,7 +46,7 @@ export async function POST({ request }: APIEvent) {
         },
         nodes: {},
         relationships: {},
-      }
+      },
     );
 
     return data;

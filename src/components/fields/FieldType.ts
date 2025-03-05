@@ -11,5 +11,6 @@ export interface GenericComponentProps {
   onChange?(data: any): void;
   title?: string;
   txnId: number;
+
   value?: any;
 }

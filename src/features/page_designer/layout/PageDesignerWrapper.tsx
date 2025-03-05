@@ -7,30 +7,20 @@ import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
-import type { FormStoreObject } from "~/components/form/context/FormContext";
-
 import { ZIndex } from "~/components/fields/ZIndex";
 import { SiteTitle } from "~/components/SiteTitle";
-import { getTableData } from "~/features/grid/functions/getTableData";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
   type PageLayoutObject,
-  useDesignerFormIdContext,
 } from "~/features/page_designer/context/LayoutContext";
-import { getErrorMessage } from "~/lib/api/getErrorMessage";
-import { isValidResponse } from "~/lib/api/isValidResponse";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import {
   addNewVertex,
   deleteVertex,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/core/vertex";
-import { FormMetaData } from "~/lib/meta/formMetaData";
-
-import { getPageTitle } from "./getPageTitle";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
@@ -178,7 +168,6 @@ export function PageDesignerWrapper(): JSX.Element {
   //     console.error("error", getErrorMessage(data));
   //   }
   // };
-
 
   // const layoutStore = () =>
   //   graph.vertexes[initialStore.id].P as PageLayoutObject;

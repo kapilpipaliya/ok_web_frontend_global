@@ -17,6 +17,7 @@ interface ClassesComponentProps {
   txnId: number;
   vertexIds: ReturnType<typeof createVertexIds>;
 }
+
 export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
   const [graph] = useGraph();
 

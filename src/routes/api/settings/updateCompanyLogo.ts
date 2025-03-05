@@ -30,7 +30,7 @@ export async function POST({ request }: APIEvent) {
     }
 
     const { circularLogo, rectangularLogo } = await request.json();
-    if (!rectangularLogo && !circularLogo) {
+    if (!(rectangularLogo || circularLogo)) {
       throw new APIError("At least one company logo is required", 400);
     }
 
@@ -97,39 +97,43 @@ export async function POST({ request }: APIEvent) {
     }
 
     const updatedGlobalSetting = convertNodeToJson(result.records[0].get("g"));
-    const rectangularLogoFile = result.records[0].get("rectLogo") 
-      ? convertNodeToJson(result.records[0].get("rectLogo")) 
+    const rectangularLogoFile = result.records[0].get("rectLogo")
+      ? convertNodeToJson(result.records[0].get("rectLogo"))
       : null;
-    const circularLogoFile = result.records[0].get("circLogo") 
-      ? convertNodeToJson(result.records[0].get("circLogo")) 
+    const circularLogoFile = result.records[0].get("circLogo")
+      ? convertNodeToJson(result.records[0].get("circLogo"))
       : null;
 
     // Log company logo updates
     const logDetails = [];
     if (rectangularLogo) {
-      logDetails.push(`rectangular logo: ${rectangularLogoFile?.P.fileName} (${rectangularLogoFile?.P.contentType})`);
+      logDetails.push(
+        `rectangular logo: ${rectangularLogoFile?.P.fileName} (${rectangularLogoFile?.P.contentType})`,
+      );
     }
     if (circularLogo) {
-      logDetails.push(`circular logo: ${circularLogoFile?.P.fileName} (${circularLogoFile?.P.contentType})`);
+      logDetails.push(
+        `circular logo: ${circularLogoFile?.P.fileName} (${circularLogoFile?.P.contentType})`,
+      );
     }
-    
+
     await createActivityLog(
       dbSession,
       "company_logo_update",
       "GlobalSetting",
       updatedGlobalSetting.id,
       user.P.email,
-      `Company logos updated: ${logDetails.join(', ')}`,
+      `Company logos updated: ${logDetails.join(", ")}`,
     );
 
     const vertexes = {
       [updatedGlobalSetting.id]: updatedGlobalSetting,
     };
-    
+
     if (rectangularLogoFile) {
       vertexes[rectangularLogoFile.id] = rectangularLogoFile;
     }
-    
+
     if (circularLogoFile) {
       vertexes[circularLogoFile.id] = circularLogoFile;
     }

@@ -1,12 +1,19 @@
-import type {SetStoreFunction} from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
-import {batch} from "solid-js";
+import { batch } from "solid-js";
 
-import type {Edge, EdgeMap, GraphInterface, Id, Vertex, VertexMap,} from "~/lib/graph/graph";
+import type {
+  Edge,
+  EdgeMap,
+  GraphInterface,
+  Id,
+  Vertex,
+  VertexMap,
+} from "~/lib/graph/graph";
 
-import {broadcastToAllChannels} from "~/lib/graph/mutate/core/channel";
-import {deleteEdge} from "~/lib/graph/mutate/core/edge";
-import {deleteVertex} from "~/lib/graph/mutate/core/vertex";
+import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 
 export interface UpdateOptions {
   skipExisting?: boolean;

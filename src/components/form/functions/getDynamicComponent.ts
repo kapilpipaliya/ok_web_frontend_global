@@ -22,7 +22,7 @@ import { componentMap } from "~/features/css_editor/components/componentMap";
 import { CheckboxField } from "~/features/css_editor/components/fields/CheckboxField";
 import { TextAreaField } from "~/features/css_editor/components/fields/TextArea";
 
-import { ButtonField } from "../../fields/ButtonField";
+// import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
 import { HtmlField } from "../../fields/HtmlField";
 import { MetaLink, MetaMeta, MetaTitle } from "../../fields/MetaTitle";
@@ -106,7 +106,7 @@ export const corvuComponents = {
 
 export const componentsMap: Record<string, any> = {
   Box: HtmlField,
-  Button: ButtonField,
+  // Button: ButtonField,
   CheckBox: CheckboxField,
   Component: ComponentField,
   ComponentChildren: ComponentChildrenField,

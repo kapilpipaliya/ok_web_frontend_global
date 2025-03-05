@@ -1,19 +1,25 @@
-import { createEffect, createSignal } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createEffect } from "solid-js";
+import { createStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from '~/components/form/FieldSchemaType';
-import type { FieldAttribute } from '~/lib/meta/FormMetadataType';
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { PASSWORD_CONDITIONS, validatePasswordConditions } from '../validation/validatePassword';
-import { popoverWrapperSchema } from './popoverWrapperSchema';
-import { SETTINGS_CONSTANTS } from '~/pages/settings/constants';
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+
+import {
+  PASSWORD_CONDITIONS,
+  validatePasswordConditions,
+} from "../validation/validatePassword";
+import { popoverWrapperSchema } from "./popoverWrapperSchema";
 
 /**
  * Creates a popover content component that dynamically shows password validation status
  * @param passwordFieldKey The key of the password field to validate
  * @returns A field attribute for the popover content
  */
-export function createPasswordHintPopoverContent(passwordFieldKey: string): FieldAttribute {
+export function createPasswordHintPopoverContent(
+  passwordFieldKey: string,
+): FieldAttribute {
   return {
     as: "div",
     attributes: [
@@ -32,58 +38,72 @@ export function createPasswordHintPopoverContent(passwordFieldKey: string): Fiel
               componentName: "Icon",
               props: (options: FunctionArgumentType) => {
                 const validationState = options.dataContext.validationState;
-                const isValid = validationState?.[0]?.conditions?.[index]?.isValid;
+                const isValid =
+                  validationState?.[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
-                const iconName = !fieldValue ? "ph:circle" : (isValid ? "ph:check-circle-fill" : "ph:x-circle-fill");
-                const iconColor = !fieldValue ? "color:grey" : (isValid ? "color:success" : "color:danger");
-                
+                const iconName = fieldValue
+                  ? isValid
+                    ? "ph:check-circle-fill"
+                    : "ph:x-circle-fill"
+                  : "ph:circle";
+                const iconColor = fieldValue
+                  ? isValid
+                    ? "color:success"
+                    : "color:danger"
+                  : "color:grey";
+
                 return {
                   class: iconColor,
                   icon: iconName,
                 };
-              }
+              },
             },
             {
               componentName: "Text",
               props: (options: FunctionArgumentType) => {
                 const validationState = options.dataContext.validationState;
-                const isValid = validationState?.[0]?.conditions?.[index]?.isValid;
+                const isValid =
+                  validationState?.[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
-                const textColor = !fieldValue ? "color:base-80" : (isValid ? "color:success" : "color:base-80");
-                
+                const textColor = fieldValue
+                  ? isValid
+                    ? "color:success"
+                    : "color:base-80"
+                  : "color:base-80";
+
                 return {
                   class: textColor,
                   text: condition.message,
                 };
-              }
-            }
+              },
+            },
           ],
           class: "font-size:14px mb:4 d:flex align-items:center gap:8",
-          componentName: "Box"
+          componentName: "Box",
         })),
         class: "m:0 pl:16 list-style:none",
         componentName: "Box",
         props: (options: FunctionArgumentType) => {
           createEffect(() => {
-            const password = options.data?.P?.[passwordFieldKey] || '';
+            const password = options.data?.P?.[passwordFieldKey] || "";
             const conditions = validatePasswordConditions(password);
-            const isValid = conditions.every(condition => condition.isValid);
+            const isValid = conditions.every((condition) => condition.isValid);
             const hasContent = password.length > 0;
-            
+
             // Update validation state
-            options.dataContext.validationState[1]('conditions', conditions);
-            options.dataContext.validationState[1]('isValid', isValid);
-            
+            options.dataContext.validationState[1]("conditions", conditions);
+            options.dataContext.validationState[1]("isValid", isValid);
+
             // Update help icon state
             if (options.dataContext.helpIconState) {
-              options.dataContext.helpIconState[1]('isValid', isValid);
-              options.dataContext.helpIconState[1]('hasContent', hasContent);
+              options.dataContext.helpIconState[1]("isValid", isValid);
+              options.dataContext.helpIconState[1]("hasContent", hasContent);
             }
           });
-          
+
           return {};
-        }
-      }
+        },
+      },
     ],
     class: "p:12 bg:white shadow:lg r:4 max-width:300px",
     componentName: "Box",
@@ -110,23 +130,27 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
             componentName: "Icon",
             props: (options: FunctionArgumentType) => {
               const helpIconState = options.dataContext.helpIconState;
-              const iconName = helpIconState?.[0]?.isValid 
-                ? "ph:check-circle" 
-                : (helpIconState?.[0]?.hasContent ? "ph:warning-circle" : "ph:question-circle");
-              const iconColor = helpIconState?.[0]?.isValid 
-                ? "color:success" 
-                : (helpIconState?.[0]?.hasContent ? "color:warning" : "color:grey");
-              
+              const iconName = helpIconState?.[0]?.isValid
+                ? "ph:check-circle"
+                : helpIconState?.[0]?.hasContent
+                  ? "ph:warning-circle"
+                  : "ph:question-circle";
+              const iconColor = helpIconState?.[0]?.isValid
+                ? "color:success"
+                : helpIconState?.[0]?.hasContent
+                  ? "color:warning"
+                  : "color:grey";
+
               return {
                 class: iconColor,
                 icon: iconName,
               };
-            }
-          }
+            },
+          },
         ],
         class: "d:flex gap:4 align-items:center",
-        componentName: "Box"
-      }
+        componentName: "Box",
+      },
     ],
     componentName: "Data",
     name: "helpIconState",
@@ -134,7 +158,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
     props: () => ({
       data: createStore({
         hasContent: false,
-        isValid: false
+        isValid: false,
       }),
     }),
   };
@@ -146,10 +170,13 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
  * @param passwordFieldKey The key of the password field to validate
  * @returns A field attribute with the label wrapped in a popover
  */
-export function wrapPasswordLabelWithHint(label: string, passwordFieldKey: string): FieldAttribute {
+export function wrapPasswordLabelWithHint(
+  label: string,
+  passwordFieldKey: string,
+): FieldAttribute {
   const actionElement = createPasswordLabelWithHint(label);
   const popoverContent = createPasswordHintPopoverContent(passwordFieldKey);
-  
+
   return {
     as: "div",
     attributes: [
@@ -160,15 +187,15 @@ export function wrapPasswordLabelWithHint(label: string, passwordFieldKey: strin
         noRepeat: true,
         props: () => ({
           data: createStore({
-            conditions: PASSWORD_CONDITIONS.map(condition => ({
+            conditions: PASSWORD_CONDITIONS.map((condition) => ({
               isValid: false,
               message: condition.message,
             })),
             isValid: false,
           }),
         }),
-      }
+      },
     ],
     componentName: "Box",
   };
-} 
+}

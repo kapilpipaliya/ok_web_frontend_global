@@ -34,6 +34,7 @@ export function filterSections(query: string) {
     {} as CSSJSONSchemaSearchType,
   );
 }
+
 function shouldIncludeProperty(field: GenericField, query: string): boolean {
   if (query === "") {
     return true;
@@ -47,8 +48,11 @@ function shouldIncludeProperty(field: GenericField, query: string): boolean {
   }
   if (
     field.componentName === "fieldWithCustomProperty" &&
-    (field.customProperty.some((prop) => prop.label?.toLowerCase().includes(query.toLowerCase()) ||
-      prop.key?.toLowerCase().includes(query.toLowerCase())))
+    field.customProperty.some(
+      (prop) =>
+        prop.label?.toLowerCase().includes(query.toLowerCase()) ||
+        prop.key?.toLowerCase().includes(query.toLowerCase()),
+    )
   ) {
     return true;
   }

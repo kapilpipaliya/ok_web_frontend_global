@@ -14,7 +14,10 @@ export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
     if (subDomain !== SYSTEM_DB_NAME) {
-      throw new APIError("Unauthorized. System subdomain access required.", 403);
+      throw new APIError(
+        "Unauthorized. System subdomain access required.",
+        403,
+      );
     }
     const user = await getUserFromSession(request);
 

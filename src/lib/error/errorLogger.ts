@@ -1,10 +1,10 @@
 import { postAPI } from "../api/postApi";
 
 interface ErrorLogData {
+  additionalData?: Record<string, unknown>;
+  location?: string;
   message: string;
   stack?: string;
-  location?: string;
-  additionalData?: Record<string, unknown>;
 }
 
 /**
@@ -14,17 +14,17 @@ interface ErrorLogData {
  */
 export async function logError(
   error: Error | string,
-  additionalData?: Record<string, unknown>
+  additionalData?: Record<string, unknown>,
 ): Promise<void> {
   try {
     const errorMessage = typeof error === "string" ? error : error.message;
     const errorStack = error instanceof Error ? error.stack : undefined;
 
     const errorData: ErrorLogData = {
+      additionalData,
+      location: window.location.href,
       message: errorMessage,
       stack: errorStack,
-      location: window.location.href,
-      additionalData
     };
 
     await postAPI("/api/error/logError", errorData);
@@ -32,4 +32,4 @@ export async function logError(
     // Silently fail if error logging itself fails
     console.error("Failed to log error:", loggingError);
   }
-} 
+}

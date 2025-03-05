@@ -8,7 +8,7 @@ export function useZIndex(): number {
 }
 
 export function ZIndex(
-  props: Readonly<{ 
+  props: Readonly<{
     children: JSX.Element;
     increaseCount?: number;
   }>,

@@ -1,19 +1,30 @@
-import type {SetStoreFunction} from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 
-import {batch} from "solid-js";
+import { batch } from "solid-js";
 
-import type {Edge, EdgeMap, GraphInterface, Id, Vertex, VertexMap} from "~/lib/graph/graph";
+import type {
+  Edge,
+  EdgeMap,
+  GraphInterface,
+  Id,
+  Vertex,
+  VertexMap,
+} from "~/lib/graph/graph";
+import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 
 import {
   addNewEdge,
   deleteEdge,
   replaceEdgeEnd,
   replaceEdgeProperties,
-  replaceEdgeStart
+  replaceEdgeStart,
 } from "~/lib/graph/mutate/core/edge";
-import {UpdateOptions} from "~/lib/graph/mutate/core/setGraphData";
-import {addNewVertex, deleteVertex, replaceVertexProperties} from "~/lib/graph/mutate/core/vertex";
-import {getLastTxnIndex} from "~/lib/graph/transaction/value/getLastTxnIndex";
+import {
+  addNewVertex,
+  deleteVertex,
+  replaceVertexProperties,
+} from "~/lib/graph/mutate/core/vertex";
+import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 export function setGraphDataWithTransaction(
   txnId: number,
@@ -40,7 +51,7 @@ export function setGraphDataWithTransaction(
         args.vertexes[vertexId],
         graph,
         setGraph,
-        options
+        options,
       );
       if (result.error) {
         error = result.error;
@@ -57,7 +68,7 @@ export function setGraphDataWithTransaction(
         args.edges[edgeId],
         graph,
         setGraph,
-        options
+        options,
       );
       if (result.error) {
         error = result.error;
@@ -85,7 +96,7 @@ export function setGraphDataWithTransaction(
     }
   });
 
-  return {error, txnDetailIndex};
+  return { error, txnDetailIndex };
 }
 
 export function updateEdgeWithTransaction(
@@ -96,18 +107,25 @@ export function updateEdgeWithTransaction(
   setGraph: SetStoreFunction<GraphInterface>,
   options: UpdateOptions = {},
 ): { error: boolean | string; txnDetailIndex?: number } {
-  const {skipExisting = false} = options;
+  const { skipExisting = false } = options;
 
   const originalEdge = graph.edges[edgeId];
 
   // NOTE: this skipExisting may cause bug in rare cases here
   if (skipExisting && originalEdge) {
-    return {error: false};
+    return { error: false };
   }
 
   if (originalEdge) {
     if (JSON.stringify(originalEdge.P) !== JSON.stringify(edge.P)) {
-      const result = replaceEdgeProperties(txnId, edgeId, graph, setGraph, originalEdge.P, options);
+      const result = replaceEdgeProperties(
+        txnId,
+        edgeId,
+        graph,
+        setGraph,
+        originalEdge.P,
+        options,
+      );
       if (result.error) {
         return result;
       }
@@ -136,15 +154,24 @@ export function updateVertexWithTransaction(
   setGraph: SetStoreFunction<GraphInterface>,
   options: UpdateOptions = {},
 ): { error: boolean | string; txnDetailIndex?: number } {
-  const {skipExisting = false} = options;
+  const { skipExisting = false } = options;
 
   const originalVertex = graph.vertexes[vertexId];
 
   if (skipExisting && originalVertex) {
-    return {error: false};
+    return { error: false };
   }
 
-  return originalVertex ? replaceVertexProperties(txnId, vertexId, graph, setGraph, originalVertex.P, options) : addNewVertex(txnId, vertexData, graph, setGraph, options);
+  return originalVertex
+    ? replaceVertexProperties(
+        txnId,
+        vertexId,
+        graph,
+        setGraph,
+        originalVertex.P,
+        options,
+      )
+    : addNewVertex(txnId, vertexData, graph, setGraph, options);
 }
 
 function handleDeletionsWithTransaction(
@@ -178,5 +205,5 @@ function handleDeletionsWithTransaction(
     }
   }
 
-  return {error, txnDetailIndex};
+  return { error, txnDetailIndex };
 }

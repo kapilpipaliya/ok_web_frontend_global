@@ -100,12 +100,15 @@ async function authenticateUser(
   }
 
   const user = convertNodeToJson(result.records[0].get("u"));
-  
+
   // Check if the user's account is pending deletion
   if (user.P.pendingDeletion === true) {
-    throw new APIError("This account is scheduled for deletion and cannot be accessed. Please contact support if this is a mistake.", 403);
+    throw new APIError(
+      "This account is scheduled for deletion and cannot be accessed. Please contact support if this is a mistake.",
+      403,
+    );
   }
-  
+
   if (!user.P.emailConfirmed) {
     throw new APIError(
       "Please confirm your email address before logging in.",

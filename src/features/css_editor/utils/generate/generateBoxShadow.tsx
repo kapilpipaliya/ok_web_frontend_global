@@ -6,6 +6,7 @@ export interface ShadowAttributes {
   "offset-y": string;
   spread: string;
 }
+
 export function generateBoxShadow(
   shadows: ShadowAttributes[],
   isView?: boolean,

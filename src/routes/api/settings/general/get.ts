@@ -36,11 +36,19 @@ export async function GET({ request }: APIEvent) {
     );
 
     const node = result.records[0]?.get("settings");
-    const companyRectangularLogoNode = result.records[0]?.get("companyRectangularLogo");
-    const companyCircularLogoNode = result.records[0]?.get("companyCircularLogo");
+    const companyRectangularLogoNode = result.records[0]?.get(
+      "companyRectangularLogo",
+    );
+    const companyCircularLogoNode = result.records[0]?.get(
+      "companyCircularLogo",
+    );
     const settings = node ? convertNodeToJson(node) : null;
-    const companyRectangularLogo = companyRectangularLogoNode ? convertNodeToJson(companyRectangularLogoNode) : null;
-    const companyCircularLogo = companyCircularLogoNode ? convertNodeToJson(companyCircularLogoNode) : null;
+    const companyRectangularLogo = companyRectangularLogoNode
+      ? convertNodeToJson(companyRectangularLogoNode)
+      : null;
+    const companyCircularLogo = companyCircularLogoNode
+      ? convertNodeToJson(companyCircularLogoNode)
+      : null;
 
     return { companyCircularLogo, companyRectangularLogo, settings };
   } catch (error) {

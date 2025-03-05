@@ -1,4 +1,4 @@
-import type {Session, Transaction} from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 export async function addAdminRoleToUser(
   sessionOrTx: Session | Transaction,
@@ -9,7 +9,7 @@ export async function addAdminRoleToUser(
     CREATE (u)-[:UserRole]->(r)
   `;
 
-  const params = {uuid};
+  const params = { uuid };
 
   try {
     await sessionOrTx.run(query, params);

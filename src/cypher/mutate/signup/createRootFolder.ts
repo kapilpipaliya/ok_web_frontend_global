@@ -1,6 +1,6 @@
-import type {Session, Transaction} from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
-import {getDefaultTheme} from "~/lib/theme/getDefaultTheme";
+import { getDefaultTheme } from "~/lib/theme/getDefaultTheme";
 
 export async function createRootFolder(
   tx: Session | Transaction,

@@ -1,5 +1,4 @@
 import { useGraph } from "~/lib/graph/graph";
-import { STYLES } from "~/pages/settings/constants";
 
 import type { PageLayoutObject } from "../context/LayoutContext";
 
@@ -18,9 +17,7 @@ export function SettingsWrapper() {
     //   "display:none": !layoutStore().isRightOpen,
     // }}
     >
-      <div
-        class={`px:2`}
-      >
+      <div class={"px:2"}>
         <SettingTabs />
       </div>
     </aside>

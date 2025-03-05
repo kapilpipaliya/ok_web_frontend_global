@@ -8,6 +8,7 @@ import { InitialPermissions } from "~/features/page_attr_render/InitialPermissio
 export type PreviewStoreObject = ReturnType<typeof getInitialPreviewStore>;
 
 type PreviewStore = ReturnType<typeof createStore<PreviewStoreObject>>;
+
 export function getInitialPreviewStore() {
   return {
     ...InitialPermissions,
@@ -19,6 +20,7 @@ export function getInitialPreviewStore() {
     previewMeta: undefined as undefined | Vertex,
   };
 }
+
 export const PreviewContext = createContext<PreviewStore>(
   createStore(getInitialPreviewStore()),
 );

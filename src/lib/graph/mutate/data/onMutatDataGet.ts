@@ -2,10 +2,10 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { batch } from "solid-js";
 
+import type { MutationResult } from "~/cypher/types/MutationArgs";
 import type { GraphInterface } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/Toast";
-import { MutationResult } from "~/cypher/types/MutationArgs";
 import { updateEdgeId } from "~/lib/graph/mutate/core/edge";
 import {
   mergeVertexProperties,

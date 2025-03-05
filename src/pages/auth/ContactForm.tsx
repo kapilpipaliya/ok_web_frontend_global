@@ -160,7 +160,7 @@ export function ContactForm() {
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
-      }
+      },
     }),
   };
 

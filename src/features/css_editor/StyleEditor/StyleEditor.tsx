@@ -27,7 +27,10 @@ export function StyleEditor() {
         placeholder="Search Style..."
         value={searchQuery()}
       />
-      <SectionList filteredSections={filteredSections} searchQuery={searchQuery()} />
+      <SectionList
+        filteredSections={filteredSections}
+        searchQuery={searchQuery()}
+      />
     </div>
   );
 }

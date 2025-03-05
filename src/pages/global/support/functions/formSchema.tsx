@@ -1,15 +1,15 @@
-import animateScrollTo from 'animated-scroll-to';
+import animateScrollTo from "animated-scroll-to";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { MutationResult } from "~/cypher/types/MutationArgs";
+import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { MutationResult } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { isAdminRole } from '~/lib/graph/get/sync/auth/isAdminRole';
-import { Vertex } from "~/lib/graph/graph";
+import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
@@ -23,31 +23,35 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
-          onClick: handleSave,
+          onClick: () => handleSave(options),
           text: options.dataContext.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
+        type: "button",
       },
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
           },
           text: "Cancel",
         }),
+        type: "button",
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS.replace("top", "bottom"),
     componentName: "Box",
     props: (options: FunctionArgumentType) => ({
-      hidden: !isAdminRole(options.graph)
+      hidden: !isAdminRole(options.graph),
     }),
   };
   const chatHistorySchema = {
@@ -109,32 +113,35 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     class: "font-size:12px color:base-50",
                                     componentName: "Text",
                                     props: (options: FunctionArgumentType) => ({
-                                      text: new Date(options.data.P.createdAt).toLocaleString(),
+                                      text: new Date(
+                                        options.data.P.createdAt,
+                                      ).toLocaleString(),
                                     }),
-                                  }
+                                  },
                                 ],
                                 componentName: "Box",
                                 props: () => {
                                   // const isUser = options.data.P.email !== "Support";
                                   // ${isUser ? 'bg:primary-10' : 'bg:base-10'}
                                   return {
-                                    class: `display:inline-block p:8 r:6 bg:base-10`,
+                                    class:
+                                      "display:inline-block p:8 r:6 bg:base-10",
                                   };
                                 },
-                              }
+                              },
                             ],
                             componentName: "Box",
                             props: () => {
                               // const isUser = options.data.P.email !== "Support";
                               // isUser ? 'text-align:right' : ''}`
                               return {
-                                class: `mb:12`,
+                                class: "mb:12",
                               };
                             },
-                          }
+                          },
                         ],
                         componentName: "Box",
-                      }
+                      },
                     ],
                     componentName: "Data",
                     props: (options: FunctionArgumentType) => ({
@@ -143,7 +150,11 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                           graph: options.graph,
                           setGraph: options.setGraph,
                           vertexes: [options.graph.vertexes[options.data.id]],
-                        }).sort((a: Vertex, b: Vertex) => new Date(a.P.createdAt).getTime() - new Date(b.P.createdAt).getTime()),
+                        }).sort(
+                          (a: Vertex, b: Vertex) =>
+                            new Date(a.P.createdAt).getTime() -
+                            new Date(b.P.createdAt).getTime(),
+                        ),
                     }),
                     // emptyState: {
                     //   as: "div",
@@ -153,7 +164,8 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     // },
                   },
                 ],
-                class: "max-h:300px min-h:100px overflow-y:auto border:1px|solid|base-20 r:6 p:12 bg:base-5 chat-history-container",
+                class:
+                  "max-h:300px min-h:100px overflow-y:auto border:1px|solid|base-20 r:6 p:12 bg:base-5 chat-history-container",
                 componentName: "Box",
               },
               {
@@ -169,45 +181,72 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         placeholder: "Type your reply here...",
                         props: (options: FunctionArgumentType) => ({
                           onInput: (e: { target: HTMLTextAreaElement }) => {
-                            options.dataContext.replyState[1]("replyText", e.target.value);
+                            options.dataContext.replyState[1](
+                              "replyText",
+                              e.target.value,
+                            );
                           },
-                          value: options.dataContext.replyState[0]?.replyText || "",
+                          value:
+                            options.dataContext.replyState[0]?.replyText || "",
                         }),
                       },
                       {
+                        as: "button",
                         class: "bg:primary color:white p:8|16 r:6",
-                        componentName: "Button",
+                        componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
-                          disabled: !options.dataContext.replyState[0]?.replyText?.trim(),
+                          disabled:
+                            !options.dataContext.replyState[0]?.replyText?.trim(),
                           onClick: async () => {
-                            const replyText = options.dataContext.replyState[0]?.replyText;
-                            if (!replyText?.trim()) return;
+                            const replyText =
+                              options.dataContext.replyState[0]?.replyText;
+                            if (!replyText?.trim()) {
+                              return;
+                            }
 
                             try {
-                              options.dataContext.modalState[1]("isLoading", true);
+                              options.dataContext.modalState[1](
+                                "isLoading",
+                                true,
+                              );
 
                               // Add reply to the ticket
-                              const response = await postAPI(API.support.replyUrl, {
-                                message: replyText,
-                                ticketId: options.data.id,
-                              });
+                              const response = await postAPI(
+                                API.support.replyUrl,
+                                {
+                                  message: replyText,
+                                  ticketId: options.data.id,
+                                },
+                              );
 
                               if (response.error) {
                                 throw new Error(response.error);
                               }
 
                               // Update the graph with the new data
-                              setGraphData(options.graph, options.setGraph, response.graph, { skipExisting: true });
+                              setGraphData(
+                                options.graph,
+                                options.setGraph,
+                                response.graph,
+                                { skipExisting: true },
+                              );
 
                               // Clear the input field
-                              options.dataContext.replyState[1]("replyText", "");
+                              options.dataContext.replyState[1](
+                                "replyText",
+                                "",
+                              );
 
                               // Show success message
-                              options.showSuccessToast("Reply sent successfully");
+                              options.showSuccessToast(
+                                "Reply sent successfully",
+                              );
 
                               // Scroll chat history to the bottom
                               setTimeout(() => {
-                                const chatHistory = document.querySelector('.chat-history-container');
+                                const chatHistory = document.querySelector(
+                                  ".chat-history-container",
+                                );
                                 if (chatHistory) {
                                   animateScrollTo(chatHistory.scrollHeight, {
                                     elementToScroll: chatHistory,
@@ -217,11 +256,15 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                             } catch (error) {
                               options.showErrorToast((error as Error).message);
                             } finally {
-                              options.dataContext.modalState[1]("isLoading", false);
+                              options.dataContext.modalState[1](
+                                "isLoading",
+                                false,
+                              );
                             }
                           },
                         }),
                         text: "Send",
+                        type: "button",
                       },
                     ],
                     class: "display:flex mt:8",
@@ -298,7 +341,6 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             componentName: "Box",
           },
           actionButtonsSchema,
-
         ],
         class: SETTINGS_CONSTANTS.FORM_CLASS,
         componentName: "Box",
@@ -323,7 +365,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             options.dataContext.modalState[1]("isLoading", false);
             // Scroll chat history to the bottom on mount
             setTimeout(() => {
-              const chatHistory = document.querySelector('.chat-history-container');
+              const chatHistory = document.querySelector(
+                ".chat-history-container",
+              );
               if (chatHistory) {
                 animateScrollTo(chatHistory.scrollHeight, {
                   elementToScroll: chatHistory,
@@ -334,7 +378,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         },
         onUnmount: () => {
           options.revertTransactionUpToIndex(options.txnId, -1);
-        }
+        },
       };
     },
   };
@@ -354,7 +398,11 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       if (response.error) {
         options.showErrorToast(response.error as string);
       } else {
-        onMutatDataGet(options.graph, options.setGraph, response as MutationResult);
+        onMutatDataGet(
+          options.graph,
+          options.setGraph,
+          response as MutationResult,
+        );
         options.showSuccessToast("Support ticket updated successfully");
         onSuccess();
       }
@@ -381,16 +429,19 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             icon: "ph:x",
           },
         ],
-        class: "border:none bg:transparent cursor:pointer color:base-50 hover:color:primary font-size:20px",
+        class:
+          "border:none bg:transparent cursor:pointer color:base-50 hover:color:primary font-size:20px",
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
           },
         }),
-      }
+      },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS + " flex ai:center justify-content:space-between",
+    class:
+      SETTINGS_CONSTANTS.MODAL.HEADER.CLASS +
+      " flex ai:center justify-content:space-between",
     componentName: "Box",
   };
 

@@ -27,8 +27,10 @@ export const FieldWithCustomBox = (
     parentRenderContext()?.context.meta as unknown as GenericField;
   // Check if any custom property has a configured value
   const hasConfiguredFields = () => {
-    if (!props.customProperty || props.customProperty.length === 0) return false;
-    
+    if (!props.customProperty || props.customProperty.length === 0) {
+      return false;
+    }
+
     const currentState = cssState[state()] || {};
     for (const property of props.customProperty) {
       if (currentState[property.key] !== undefined) {

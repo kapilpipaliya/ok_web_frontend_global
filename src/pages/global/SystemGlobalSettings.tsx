@@ -13,7 +13,7 @@ export default function SystemGlobalSettings() {
   createEffect(() => {
     const tab = searchParams.tab;
     if (tab && tab !== selectedMenu()) {
-      setSelectedMenu(typeof tab === 'string' ? tab : 'email');
+      setSelectedMenu(typeof tab === "string" ? tab : "email");
     }
   });
 

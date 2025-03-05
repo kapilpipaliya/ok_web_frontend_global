@@ -43,7 +43,7 @@ export function CompanyLogoSettings() {
     graph,
     setGraph,
   );
-  
+
   // Setup for rectangular logo
   const companyLogoVertexCopy = getCompanyRectangularLogoVertex(graph);
   if (companyLogoVertexCopy?.id) {
@@ -71,7 +71,8 @@ export function CompanyLogoSettings() {
   }
 
   const onRectangularFileSelected = () => {
-    const selectedFile = rectangularFileManagerStore.gridStore?.[0].selectedRows[0];
+    const selectedFile =
+      rectangularFileManagerStore.gridStore?.[0].selectedRows[0];
     if (!selectedFile) {
       showErrorToast("Please select a file");
       return;
@@ -100,7 +101,8 @@ export function CompanyLogoSettings() {
   };
 
   const onCircularFileSelected = () => {
-    const selectedFile = circularFileManagerStore.gridStore?.[0].selectedRows[0];
+    const selectedFile =
+      circularFileManagerStore.gridStore?.[0].selectedRows[0];
     if (!selectedFile) {
       showErrorToast("Please select a file");
       return;
@@ -128,11 +130,15 @@ export function CompanyLogoSettings() {
     setOpenCircularDialog(false);
   };
 
-  const setRectangularFileManagerStore = (fileManagerStore_: FileManagerObject) => {
+  const setRectangularFileManagerStore = (
+    fileManagerStore_: FileManagerObject,
+  ) => {
     rectangularFileManagerStore = fileManagerStore_;
   };
 
-  const setCircularFileManagerStore = (fileManagerStore_: FileManagerObject) => {
+  const setCircularFileManagerStore = (
+    fileManagerStore_: FileManagerObject,
+  ) => {
     circularFileManagerStore = fileManagerStore_;
   };
 
@@ -230,7 +236,7 @@ export function CompanyLogoSettings() {
                     const rectangularLogo = rectangularCompanyLogoVertex()[0];
                     const circularLogo = circularCompanyLogoVertex()[0];
 
-                    if (!rectangularLogo && !circularLogo) {
+                    if (!(rectangularLogo || circularLogo)) {
                       showErrorToast("Please select at least one company logo");
                       return;
                     }
@@ -272,12 +278,12 @@ export function CompanyLogoSettings() {
             }),
           },
         ],
-        componentName: "Html"
-      }
+        componentName: "Html",
+      },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Box",
-    props: (options: FunctionArgumentType) => ({
+    props: () => ({
       // TODO: if not saved, revert to previous state
       // onUnmount: () => {
       //   options.revertTransactionUpToIndex(options.txnId, -1);

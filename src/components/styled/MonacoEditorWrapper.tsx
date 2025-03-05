@@ -34,7 +34,10 @@ export interface MonacoEditorWrapperProps {
   height?: string;
   language?: string;
   onChange: (value: string) => void;
-  onMount?: (monaco: typeof Monaco, editor: typeof Monaco.editor.IStandaloneCodeEditor) => void;
+  onMount?: (
+    monaco: typeof Monaco,
+    editor: typeof Monaco.editor.IStandaloneCodeEditor,
+  ) => void;
   showMinimap?: boolean;
   value: string;
 }
@@ -69,4 +72,5 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
     />
   );
 }
+
 export default MonacoEditorWrapper;

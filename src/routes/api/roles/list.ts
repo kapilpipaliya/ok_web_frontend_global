@@ -2,7 +2,6 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { processResult } from "~/cypher/queries/evaluate/processResult";
@@ -44,7 +43,12 @@ export async function GET({ request }: APIEvent) {
       ORDER BY r.name ASC
     `);
 
-    const roles = processResult(result.records, { nodes, relationships }, "r", "");
+    const roles = processResult(
+      result.records,
+      { nodes, relationships },
+      "r",
+      "",
+    );
 
     return {
       graph: {

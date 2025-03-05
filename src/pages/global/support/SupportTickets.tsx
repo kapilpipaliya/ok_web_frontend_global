@@ -1,17 +1,16 @@
-import { CellContext } from "@tanstack/solid-table";
+import type { CellContext } from "@tanstack/solid-table";
+
 import { For } from "solid-js";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { DataGridStore } from "~/features/grid/DataGridContext";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
-import { SchemaRenderer } from "~/pages/SchemaRenderer";
+import { evalExpression } from "~/lib/expression_eval";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
 import { getSupportTicketFormSchema } from "./functions/formSchema";
-import { evalExpression } from "~/lib/expression_eval";
 
 export function SupportTickets() {
   const [graph, setGraph] = useGraph();
@@ -62,14 +61,24 @@ export function SupportTickets() {
               graph: graph,
               setGraph: setGraph,
               vertexes: [graph.vertexes[info.row.original.id]],
-            }).sort((a: Vertex, b: Vertex) => new Date(a.P.createdAt).getTime() - new Date(b.P.createdAt).getTime())
-          }
+            }).sort(
+              (a: Vertex, b: Vertex) =>
+                new Date(a.P.createdAt).getTime() -
+                new Date(b.P.createdAt).getTime(),
+            );
+          };
           return (
             <div>
               <For each={getReplies()}>
                 {(reply: Vertex) => (
                   <div class="white-space:nowrap overflow:hidden text-overflow:ellipsis">
-                    {new Date(reply.P.createdAt).toLocaleDateString()} {new Date(reply.P.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {reply.P.message.slice(0, 10)}... (by {reply.P.email.slice(0, 5)}...)
+                    {new Date(reply.P.createdAt).toLocaleDateString()}{" "}
+                    {new Date(reply.P.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    - {reply.P.message.slice(0, 10)}... (by{" "}
+                    {reply.P.email.slice(0, 5)}...)
                   </div>
                 )}
               </For>
@@ -93,7 +102,7 @@ export function SupportTickets() {
   return (
     <DataGrid
       // user should not create new support ticket himself, so we hide the add new button
-      CustomAddNewButton={() => <div></div>}
+      CustomAddNewButton={() => <div />}
       editSchema={editSchema}
       formSchema={SupportTicketSchema}
       getTableData={getTableData}

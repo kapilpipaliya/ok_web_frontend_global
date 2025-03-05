@@ -5,8 +5,10 @@ export function validateInput(
   value?: string,
   fieldKey?: string,
 ) {
-  const fieldName = fieldKey ? fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1) : "Input";
-  
+  const fieldName = fieldKey
+    ? fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)
+    : "Input";
+
   // Clear previous error
   // Check required rule
   if (validation.required && (!value || value.trim() === "")) {
@@ -30,16 +32,24 @@ export function validateInput(
 
   // Check regex rules
   if (validation.regex) {
-    const regexRules = Array.isArray(validation.regex) ? validation.regex : [validation.regex];
+    const regexRules = Array.isArray(validation.regex)
+      ? validation.regex
+      : [validation.regex];
     for (const element of regexRules) {
       const regexRule = element;
       if (regexRule.enabled) {
         if (!value) {
-          return regexRule.message || `${fieldName} does not match the required pattern`;
+          return (
+            regexRule.message ||
+            `${fieldName} does not match the required pattern`
+          );
         }
         const regex = new RegExp(regexRule.value);
         if (!regex.test(value)) {
-          return regexRule.message || `${fieldName} does not match the required pattern`;
+          return (
+            regexRule.message ||
+            `${fieldName} does not match the required pattern`
+          );
         }
       }
     }
@@ -47,8 +57,8 @@ export function validateInput(
 
   // Check custom validation functions
   if (validation.validate) {
-    const validateFunctions = Array.isArray(validation.validate) 
-      ? validation.validate 
+    const validateFunctions = Array.isArray(validation.validate)
+      ? validation.validate
       : [validation.validate];
 
     for (const validateFn of validateFunctions) {

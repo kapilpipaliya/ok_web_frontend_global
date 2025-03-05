@@ -75,9 +75,13 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
             fileManagerStore.parentVertexLabel === "Comp" ||
             fileManagerStore.parentVertexLabel === "Perm"
               ? () => (
-                <SchemaRenderer
-                form={getComponentFormSchema(()=>{}, ()=>{}, fileManagerStore.parentVertexLabel as "Comp" | "Perm")}
-              />
+                  <SchemaRenderer
+                    form={getComponentFormSchema(
+                      () => {},
+                      () => {},
+                      fileManagerStore.parentVertexLabel as "Comp" | "Perm",
+                    )}
+                  />
                 )
               : AddNewFileButton
           }
@@ -87,7 +91,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
               ? getComponentFormSchema(
                   () => {},
                   () => {},
-                  fileManagerStore.parentVertexLabel as "Comp" | "Perm"
+                  fileManagerStore.parentVertexLabel as "Comp" | "Perm",
                 )
               : undefined
           }

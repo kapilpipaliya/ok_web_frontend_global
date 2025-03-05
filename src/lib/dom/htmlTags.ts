@@ -5,7 +5,14 @@
 export const rootElements = ["html"];
 
 // Document metadata
-export const metadataElements = ["base", "head", "link", "meta", "style", "title"];
+export const metadataElements = [
+  "base",
+  "head",
+  "link",
+  "meta",
+  "style",
+  "title",
+];
 
 // Sectioning elements
 export const sectioningElements = [
@@ -81,10 +88,27 @@ export const inlineTextElements = [
 ];
 
 // Image and multimedia elements
-export const multimediaElements = ["area", "audio", "img", "map", "track", "video", "picture", "source"];
+export const multimediaElements = [
+  "area",
+  "audio",
+  "img",
+  "map",
+  "track",
+  "video",
+  "picture",
+  "source",
+];
 
 // Embedded content elements
-export const embeddedElements = ["embed", "iframe", "object", "param", "canvas", "math", "svg"];
+export const embeddedElements = [
+  "embed",
+  "iframe",
+  "object",
+  "param",
+  "canvas",
+  "math",
+  "svg",
+];
 
 // Form elements
 export const formElements = [
@@ -106,7 +130,18 @@ export const formElements = [
 ];
 
 // Table elements
-export const tableElements = ["caption", "col", "colgroup", "table", "tbody", "td", "tfoot", "th", "thead", "tr"];
+export const tableElements = [
+  "caption",
+  "col",
+  "colgroup",
+  "table",
+  "tbody",
+  "td",
+  "tfoot",
+  "th",
+  "thead",
+  "tr",
+];
 
 // Interactive elements
 export const interactiveElements = ["details", "dialog", "summary", "menuitem"];
@@ -129,17 +164,11 @@ export const svgBasicShapeElements = [
   "polygon",
   "polyline",
   "ellipse",
-  "switch"
+  "switch",
 ];
 
 // SVG Text Elements
-export const svgTextElements = [
-  "text",
-  "tspan",
-  "textPath",
-  "title",
-  "desc"
-];
+export const svgTextElements = ["text", "tspan", "textPath", "title", "desc"];
 
 // SVG Container Elements
 export const svgContainerElements = [
@@ -148,15 +177,11 @@ export const svgContainerElements = [
   "defs",
   "use",
   "symbol",
-  "metadata"
+  "metadata",
 ];
 
 // SVG Gradient Elements
-export const svgGradientElements = [
-  "linearGradient",
-  "radialGradient",
-  "stop"
-];
+export const svgGradientElements = ["linearGradient", "radialGradient", "stop"];
 
 // SVG Filter Elements
 export const svgFilterElements = [
@@ -185,7 +210,7 @@ export const svgFilterElements = [
   "feFuncR",
   "fePointLight",
   "feSpotLight",
-  "feTile"
+  "feTile",
 ];
 
 // SVG Animation Elements
@@ -194,7 +219,7 @@ export const svgAnimationElements = [
   "animateTransform",
   "animateMotion",
   "set",
-  "mpath"
+  "mpath",
 ];
 
 // SVG Other Elements
@@ -205,7 +230,7 @@ export const svgOtherElements = [
   "image",
   "foreignObject",
   "mask",
-  "clipPath"
+  "clipPath",
 ];
 
 // All SVG elements combined
@@ -217,7 +242,7 @@ export const svgElements = [
   ...svgGradientElements,
   ...svgFilterElements,
   ...svgAnimationElements,
-  ...svgOtherElements
+  ...svgOtherElements,
 ];
 
 // All HTML tags combined
@@ -252,44 +277,76 @@ export const htmlTagsTree = {
     //   label: "Metadata Elements"
     // },
     {
-      children: sectioningElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: sectioningElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "sectioning-elements",
-      label: "Sectioning Elements"
+      label: "Sectioning Elements",
     },
     {
-      children: textContentElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: textContentElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "text-content-elements",
-      label: "Text Content Elements"
+      label: "Text Content Elements",
     },
     {
-      children: inlineTextElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: inlineTextElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "inline-text-elements",
-      label: "Inline Text Elements"
+      label: "Inline Text Elements",
     },
     {
-      children: multimediaElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: multimediaElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "multimedia-elements",
-      label: "Multimedia Elements"
+      label: "Multimedia Elements",
     },
     {
-      children: embeddedElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: embeddedElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "embedded-elements",
-      label: "Embedded Elements"
+      label: "Embedded Elements",
     },
     {
-      children: formElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: formElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "form-elements",
-      label: "Form Elements"
+      label: "Form Elements",
     },
     {
-      children: tableElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: tableElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "table-elements",
-      label: "Table Elements"
+      label: "Table Elements",
     },
     {
-      children: interactiveElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: interactiveElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "interactive-elements",
-      label: "Interactive Elements"
+      label: "Interactive Elements",
     },
     // {
     //   children: webComponentElements.map(tag => ({ children: [], id: tag, label: tag })),
@@ -302,52 +359,84 @@ export const htmlTagsTree = {
     //   label: "Scripting Elements"
     // },
     {
-      children: editingElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: editingElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "editing-elements",
-      label: "Editing Elements"
+      label: "Editing Elements",
     },
     {
       children: [
         {
-          children: svgBasicShapeElements.map(tag => ({ children: [], id: tag, label: tag })),
+          children: svgBasicShapeElements.map((tag) => ({
+            children: [],
+            id: tag,
+            label: tag,
+          })),
           id: "svg-basic-shapes",
-          label: "Basic Shapes"
+          label: "Basic Shapes",
         },
         {
-          children: svgTextElements.map(tag => ({ children: [], id: tag, label: tag })),
+          children: svgTextElements.map((tag) => ({
+            children: [],
+            id: tag,
+            label: tag,
+          })),
           id: "svg-text",
-          label: "Text Elements"
+          label: "Text Elements",
         },
         {
-          children: svgContainerElements.map(tag => ({ children: [], id: tag, label: tag })),
+          children: svgContainerElements.map((tag) => ({
+            children: [],
+            id: tag,
+            label: tag,
+          })),
           id: "svg-containers",
-          label: "Containers"
+          label: "Containers",
         },
         {
-          children: svgGradientElements.map(tag => ({ children: [], id: tag, label: tag })),
+          children: svgGradientElements.map((tag) => ({
+            children: [],
+            id: tag,
+            label: tag,
+          })),
           id: "svg-gradients",
-          label: "Gradients"
+          label: "Gradients",
         },
         {
-          children: svgFilterElements.map(tag => ({ children: [], id: tag, label: tag })),
+          children: svgFilterElements.map((tag) => ({
+            children: [],
+            id: tag,
+            label: tag,
+          })),
           id: "svg-filters",
-          label: "Filters"
+          label: "Filters",
         },
         {
-          children: svgAnimationElements.map(tag => ({ children: [], id: tag, label: tag })),
+          children: svgAnimationElements.map((tag) => ({
+            children: [],
+            id: tag,
+            label: tag,
+          })),
           id: "svg-animation",
-          label: "Animation"
+          label: "Animation",
         },
         {
-          children: svgOtherElements.map(tag => ({ children: [], id: tag, label: tag })),
+          children: svgOtherElements.map((tag) => ({
+            children: [],
+            id: tag,
+            label: tag,
+          })),
           id: "svg-other",
-          label: "Other Elements"
-        }
+          label: "Other Elements",
+        },
       ],
       id: "svg-elements",
-      label: "SVG Elements"
-    }
+      label: "SVG Elements",
+    },
   ],
   id: "html-tags",
-  label: "HTML Tags"
+  label: "HTML Tags",
 };

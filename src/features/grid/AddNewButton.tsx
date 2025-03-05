@@ -7,9 +7,11 @@ import {
   type IconButtonProps,
 } from "../../components/styled/IconButton";
 
-export function AddNewButton(props: IconButtonProps & {
-  buttonText?: string;
-}) {
+export function AddNewButton(
+  props: IconButtonProps & {
+    buttonText?: string;
+  },
+) {
   const [local, rest] = splitProps(props, ["children", "buttonText"]);
 
   return (

@@ -57,8 +57,10 @@ export function getSublistRows(
   if (!vertex) {
     return [];
   }
-  
-  const type = meta.P.inward ? getInEdge(meta, vertex) : getToEdge(meta, vertex);
+
+  const type = meta.P.inward
+    ? getInEdge(meta, vertex)
+    : getToEdge(meta, vertex);
   return (
     evalExpression(meta.P.inward ? `<-${type}` : `->${type}`, {
       graph,
@@ -71,7 +73,7 @@ export function getSublistRowsForType(
   graph: Store<GraphInterface>,
   type: string,
   vertex: Vertex,
-  inward?: boolean,
+  _inward?: boolean,
 ) {
   return (
     evalExpression(`->${type}`, {

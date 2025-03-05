@@ -1,4 +1,4 @@
-import { createMemo, createSignal, type JSX } from "solid-js";
+import { createMemo, createSignal } from "solid-js";
 
 import type { TextFieldOptionsField } from "~/features/css_editor/constants/FieldSchemaType";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";

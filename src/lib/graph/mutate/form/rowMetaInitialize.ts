@@ -134,6 +134,7 @@ export function updateExistingMetaInstance(
     });
   });
 }
+
 function createAttributeRows(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,

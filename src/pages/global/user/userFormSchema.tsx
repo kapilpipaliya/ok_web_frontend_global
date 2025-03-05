@@ -11,10 +11,10 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validateUsername } from "~/lib/validation/validateUsername";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 export const userFormSchema = {
   as: "div",
@@ -36,9 +36,9 @@ export const userFormSchema = {
               componentName: "TextInput",
               key: "email",
               placeholder: "Enter email",
-              validation: { 
+              validation: {
                 required: true,
-                validate: validateEmail
+                validate: validateEmail,
               },
             },
           ],
@@ -58,13 +58,16 @@ export const userFormSchema = {
               componentName: "TextInput",
               key: "name",
               placeholder: "Enter name",
-              validation: { 
-                regex: [{
-                  enabled: true,
-                  message: "Name must be between 2 and 100 characters and contain only letters, spaces, and hyphens",
-                  value: "^[a-zA-Z\\s-]{2,100}$"
-                }],
-                required: true 
+              validation: {
+                regex: [
+                  {
+                    enabled: true,
+                    message:
+                      "Name must be between 2 and 100 characters and contain only letters, spaces, and hyphens",
+                    value: "^[a-zA-Z\\s-]{2,100}$",
+                  },
+                ],
+                required: true,
               },
             },
           ],
@@ -84,9 +87,9 @@ export const userFormSchema = {
               componentName: "TextInput",
               key: "username",
               placeholder: "Enter username",
-              validation: { 
+              validation: {
                 required: true,
-                validate: validateUsername
+                validate: validateUsername,
               },
             },
           ],
@@ -215,25 +218,29 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
-          onClick: handleSave,
+          onClick: () => handleSave(options),
           text: options.dataContext.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
+        type: "button",
       },
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
           },
           text: "Cancel",
         }),
+        type: "button",
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
@@ -294,7 +301,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     componentName: "Data",
     name: "modalState",
     noRepeat: true,
-    props: (options: FunctionArgumentType) => ({
+    props: () => ({
       data: createStore({
         isLoading: false,
         showModal: false,

@@ -1,13 +1,13 @@
 import { MetaProvider } from "@solidjs/meta";
-import { Router, useLocation } from "@solidjs/router";
+import { Router } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { FileRoutes } from "@solidjs/start/router";
 import { ToastProvider } from "solid-hot-toast";
 
 import "~/base.css";
 
-import { ErrorBoundary, onMount, Show, Suspense } from "solid-js";
-import {isServer} from "solid-js/web";
+import { ErrorBoundary, onMount, Suspense } from "solid-js";
+import { isServer } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
 
@@ -21,7 +21,10 @@ import { GraphContext } from "./lib/graph/graph";
 import { toastValue } from "./toastValue";
 
 // Create a generic error fallback component
-const ErrorFallback = (props: { error: Error; resetErrorBoundary: () => void }) => {
+const ErrorFallback = (props: {
+  error: Error;
+  resetErrorBoundary: () => void;
+}) => {
   return (
     <div class="error-boundary-fallback">
       <h2>Something went wrong</h2>
@@ -35,7 +38,7 @@ const ErrorFallback = (props: { error: Error; resetErrorBoundary: () => void }) 
 export default function App() {
   const graph = createAppState();
   const Toaster = clientOnly(() => import("./Toaster"));
-  
+
   // Set up global error handlers on client-side only
   onMount(() => {
     if (!isServer) {
@@ -55,11 +58,16 @@ export default function App() {
                 config={themeConfig(getGlobalThemeVertex(graph[0]))}
               >
                 <MetaProvider>
-                  <ErrorBoundary 
+                  <ErrorBoundary
                     fallback={(error, reset) => {
                       // Log the UI error
                       logError(error, { location: location.pathname });
-                      return <ErrorFallback error={error} resetErrorBoundary={reset} />;
+                      return (
+                        <ErrorFallback
+                          error={error}
+                          resetErrorBoundary={reset}
+                        />
+                      );
                     }}
                   >
                     <Suspense fallback={<LoaderNew />}>
@@ -67,7 +75,7 @@ export default function App() {
                     </Suspense>
                   </ErrorBoundary>
                   {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
-                    <Toaster />
+                  <Toaster />
                   {/* </Show> */}
                 </MetaProvider>
               </CSSRuntimeProvider>

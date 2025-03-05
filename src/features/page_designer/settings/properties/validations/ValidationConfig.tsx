@@ -9,6 +9,7 @@ interface ValidationProps {
   componentName: string;
   data: Vertex;
   meta: Vertex;
+
   onChange(meta: Vertex, data: any): void;
 }
 
@@ -190,6 +191,7 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
     </div>
   );
 }
+
 export const ValidationConfigTest = (validations: ValidationConfigType) => {
   const [values, setValues] = createSignal("");
   const [error, setError] = createSignal("");

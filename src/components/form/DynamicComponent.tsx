@@ -1,5 +1,4 @@
 import { createLazyMemo } from "@solid-primitives/memo";
-import { createPropsPredicate, filterProps } from "@solid-primitives/props";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
 import {
@@ -18,28 +17,42 @@ import {
   Switch,
   untrack,
 } from "solid-js";
-import { createStore, unwrap, type SetStoreFunction } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
 import { Label } from "~/features/css_editor/components/fields/Label";
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
-import { PageRenderContextProvider, usePageRenderContext, } from "~/features/page_attr_render/context/PageRenderContext";
+import {
+  PageRenderContextProvider,
+  usePageRenderContext,
+} from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
-import { getConfiguredPermissions, hasPermissions, } from "~/features/page_attr_render/permissions";
-import { PreviewContext, usePreviewContext, } from "~/features/page_designer/context/PreviewContext";
+import {
+  getConfiguredPermissions,
+  hasPermissions,
+} from "~/features/page_attr_render/permissions";
+import {
+  PreviewContext,
+  usePreviewContext,
+} from "~/features/page_designer/context/PreviewContext";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { type GraphInterface, IdAttr, useGraph, type Vertex, } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  IdAttr,
+  useGraph,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
-import type { FunctionArgumentType, } from "./FieldSchemaType";
+import type { FunctionArgumentType } from "./FieldSchemaType";
 
 import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
@@ -231,8 +244,10 @@ export function DynamicComponent(
         return isReadOnly();
       },
       ref,
-      revertTransaction: (txnId: number) => revertTransaction(txnId, graph, setGraph),
-      revertTransactionUpToIndex: (txnId: number, txnIndex: number) => revertTransactionUpToIndex(txnId, txnIndex, graph, setGraph),
+      revertTransaction: (txnId: number) =>
+        revertTransaction(txnId, graph, setGraph),
+      revertTransactionUpToIndex: (txnId: number, txnIndex: number) =>
+        revertTransactionUpToIndex(txnId, txnIndex, graph, setGraph),
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
       searchParams,
@@ -461,8 +476,10 @@ export function DynamicComponent(
     }
   });
 
-  const component = createMemo(
-    () => typeof componentName() === "function" ? componentName() : getDynamicComponent(componentName()) || NotFoundComponent,
+  const component = createMemo(() =>
+    typeof componentName() === "function"
+      ? componentName()
+      : getDynamicComponent(componentName()) || NotFoundComponent,
   );
 
   const isHidden = () => {
@@ -563,35 +580,41 @@ export function DynamicComponent(
   const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
 
   // break the cyclic dependency by creating an intermediate state for the classes.
-  const [mergedClasses, setMergedClasses] = createSignal({} as Record<string, string>);
+  const [mergedClasses, setMergedClasses] = createSignal(
+    {} as Record<string, string>,
+  );
 
-  createEffect(on([() => Object.keys(props.meta.P), dynamicProps], ([metaPropsKeys, dynamicPropsValues]) => {
-    const classes = [
-      ...metaPropsKeys.filter((key) =>
-        key.toLowerCase().endsWith("class"),
-      ),
-      ...Object.keys(dynamicPropsValues).filter((key) =>
-        key.toLowerCase().endsWith("class"),
-      ),
-    ].reduce(
-      (acc, key) => {
-        if (acc[key]) {
-          return acc;
-        }
-        const cssValue = props.meta.P[key]
-        acc[key] =
-          `${cssStateToString(
-            cssValue,
-            { P: { key: key } } as unknown as Vertex,
-            props.meta,
-            graph,
-          ) || ""} ${dynamicPropsValues[key] || ""}`.trim();
-        return acc;
+  createEffect(
+    on(
+      [() => Object.keys(props.meta.P), dynamicProps],
+      ([metaPropsKeys, dynamicPropsValues]) => {
+        const classes = [
+          ...metaPropsKeys.filter((key) => key.toLowerCase().endsWith("class")),
+          ...Object.keys(dynamicPropsValues).filter((key) =>
+            key.toLowerCase().endsWith("class"),
+          ),
+        ].reduce(
+          (acc, key) => {
+            if (acc[key]) {
+              return acc;
+            }
+            const cssValue = props.meta.P[key];
+            acc[key] = `${
+              cssStateToString(
+                cssValue,
+                { P: { key: key } } as unknown as Vertex,
+                props.meta,
+                graph,
+              ) || ""
+            } ${dynamicPropsValues[key] || ""}`.trim();
+            return acc;
+          },
+          {} as Record<string, string>,
+        );
+        setMergedClasses(classes);
       },
-      {} as Record<string, string>,
-    );
-    setMergedClasses(classes);
-  }));
+    ),
+  );
 
   const Content = () => (
     <>
@@ -626,7 +649,6 @@ export function DynamicComponent(
           ref={setRef}
           txnId={props.txnId}
           value={value()}
-  
         >
           <Show
             fallback={
@@ -704,26 +726,19 @@ export function DynamicComponent(
               )}
               label={
                 // @ts-ignore
-                props.label ||
-                props.meta.P.label ||
-                toTitle(props.meta.P.key)
+                props.label || props.meta.P.label || toTitle(props.meta.P.key)
               }
               layoutClass={props.meta.P.labelLayoutClass}
               position={props.meta.P.labelPosition}
-              required={
-                props.meta.P.validation?.required
-              }
-            //tooltip={(props.meta).P.tooltip}
+              required={props.meta.P.validation?.required}
+              //tooltip={(props.meta).P.tooltip}
             >
               <ContentWrapper />
             </Label>
           </Match>
           <Match
             keyed
-            when={
-              component() &&
-              (isNoPermissionCheck() || !hasNoPermission())
-            }
+            when={component() && (isNoPermissionCheck() || !hasNoPermission())}
           >
             <Switch>
               {/* <Match

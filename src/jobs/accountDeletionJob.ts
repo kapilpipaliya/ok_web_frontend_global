@@ -27,44 +27,56 @@ export async function processAccountDeletions() {
       }
 
       for (const record of result.records) {
-        const jobId = record.get('job').identity;
-        const userId = record.get('userId');
-        const userEmail = record.get('userEmail');
+        const jobId = record.get("job").identity;
+        const userId = record.get("userId");
+        const userEmail = record.get("userEmail");
 
         // Check if user still exists and is marked for deletion
-        const userCheck = await dbSession.run(`
+        const userCheck = await dbSession.run(
+          `
           MATCH (u:User)
           WHERE elementId(u) = $userId AND u.pendingDeletion = true
           RETURN u
-        `, { userId });
+        `,
+          { userId },
+        );
 
         if (userCheck.records.length === 0) {
           // User no longer exists or deletion was cancelled
-          await dbSession.run(`
+          await dbSession.run(
+            `
             MATCH (job:ScheduledJob)
             WHERE id(job) = $jobId
             SET job.status = 'cancelled',
                 job.completedAt = datetime(),
                 job.notes = 'User not found or deletion cancelled'
-          `, { jobId });
+          `,
+            { jobId },
+          );
           continue;
         }
 
         // Proceed with permanent deletion of the user and all their data
-        await dbSession.run(`
+        await dbSession.run(
+          `
           MATCH (u:User)
           WHERE elementId(u) = $userId
           OPTIONAL MATCH (u)-[r]-()
           DELETE u, r
-        `, { userId });
+        `,
+          { userId },
+        );
 
         // Mark the job as completed
-        await dbSession.run(`
+        await dbSession.run(
+          `
           MATCH (job:ScheduledJob)
           WHERE id(job) = $jobId
           SET job.status = 'completed',
               job.completedAt = datetime()
-        `, { jobId });
+        `,
+          { jobId },
+        );
 
         // Log the account deletion
         await createActivityLog(
@@ -77,9 +89,12 @@ export async function processAccountDeletions() {
         );
       }
     } catch (error) {
-      console.error(`Error processing account deletions for subdomain ${subdomainId}:`, error);
+      console.error(
+        `Error processing account deletions for subdomain ${subdomainId}:`,
+        error,
+      );
     } finally {
       await dbSession.close();
     }
   }
-} 
+}

@@ -38,19 +38,24 @@ export const CollapsibleSection = (
 
   // Check if section has any configured fields
   const hasConfiguredFields = createMemo(() => {
-    if (!showConfiguredOnly()) return true;
-    
+    if (!showConfiguredOnly()) {
+      return true;
+    }
+
     const currentState = cssState[state()] || {};
-    
+
     // Check all properties in this section
     for (const [, field] of Object.entries(props.propertyFieldMap)) {
       // Check main field
-      if (currentState[field.key || ''] !== undefined) {
+      if (currentState[field.key || ""] !== undefined) {
         return true;
       }
-      
+
       // Check custom properties for fieldWithCustomProperty components
-      if (field.componentName === 'fieldWithCustomProperty' && field.customProperty) {
+      if (
+        field.componentName === "fieldWithCustomProperty" &&
+        field.customProperty
+      ) {
         for (const customProp of field.customProperty) {
           if (currentState[customProp.key] !== undefined) {
             return true;
@@ -58,7 +63,7 @@ export const CollapsibleSection = (
         }
       }
     }
-    
+
     return false;
   });
 

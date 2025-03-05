@@ -56,6 +56,7 @@ export function ComponentList(props: {
       return { error: error instanceof Error ? error.message : String(error) };
     }
   }
+
   // Create effect to handle data changes
   onMount(async () => {
     if (!(props.isFetchData ?? true)) {

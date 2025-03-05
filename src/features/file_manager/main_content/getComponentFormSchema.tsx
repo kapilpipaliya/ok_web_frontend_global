@@ -2,7 +2,10 @@ import { createStore as createSolidJsStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { Vertex } from "~/lib/graph/graph";
-import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
 import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrains";
@@ -18,11 +21,15 @@ import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSc
 
 import { useFileManagerStore } from "../FileManagerContext";
 
-export const getComponentFormSchema = (onSuccess: () => void, onClose: () => void, saveAsLabel?: "Comp" | "Perm") => {
+export const getComponentFormSchema = (
+  onSuccess: () => void,
+  onClose: () => void,
+  saveAsLabel?: "Comp" | "Perm",
+) => {
   const { showErrorToast, showSuccessToast } = useToast();
   const [fileManagerStore] = useFileManagerStore();
   const [graph, setGraph] = useGraph();
-  const label = () => saveAsLabel === "Perm" ? "Permission" : "Component";
+  const label = () => (saveAsLabel === "Perm" ? "Permission" : "Component");
 
   const validateForm = (formData: Vertex) => {
     if (!formData.P.key?.trim()) {
@@ -49,7 +56,7 @@ export const getComponentFormSchema = (onSuccess: () => void, onClose: () => voi
 
     try {
       options.dataContext.modalState[1]("isLoading", true);
-      
+
       const newFormTxnId = generateNewTxnId(graph, setGraph);
       const formVertex = formData;
 
@@ -95,13 +102,13 @@ export const getComponentFormSchema = (onSuccess: () => void, onClose: () => voi
         setGraph,
         newFormTxnId,
       );
-      
-      if (!result.error) {
+
+      if (result.error) {
+        showErrorToast(result.error);
+      } else {
         showSuccessToast(`${label()} created successfully`);
         fileManagerStore.gridStore?.[0].fetchTableData();
         onSuccess();
-      } else {
-        showErrorToast(result.error);
       }
     } catch (error) {
       showErrorToast((error as Error).message);
@@ -180,19 +187,22 @@ export const getComponentFormSchema = (onSuccess: () => void, onClose: () => voi
     as: "div",
     attributes: [
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
-          onClick: handleSave,
+          onClick: () => handleSave(options),
           text: options.dataContext.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
+        type: "button",
       },
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: () => {
@@ -201,6 +211,7 @@ export const getComponentFormSchema = (onSuccess: () => void, onClose: () => voi
           },
           text: "Cancel",
         }),
+        type: "button",
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
@@ -264,7 +275,7 @@ export const getComponentFormSchema = (onSuccess: () => void, onClose: () => voi
     componentName: "Data",
     name: "modalState",
     noRepeat: true,
-    props: (options: FunctionArgumentType) => ({
+    props: () => ({
       data: createSolidJsStore({
         isLoading: false,
         showModal: false,

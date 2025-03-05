@@ -1,2 +1,3 @@
-import {  Toaster } from "solid-hot-toast";
+import { Toaster } from "solid-hot-toast";
+
 export default Toaster;

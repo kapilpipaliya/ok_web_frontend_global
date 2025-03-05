@@ -121,6 +121,7 @@ export interface StringField extends FormField {
   label: string;
   options: string[];
 }
+
 // text field with unit options
 export interface TextFieldOptionsField extends FormField {
   componentName: "string";
@@ -136,6 +137,7 @@ export interface TextFieldOptionsField extends FormField {
   unitOptions?: string[];
   // value?: string; // depricated
 }
+
 export interface ToggleField extends FormField {
   componentName: "toggleButton";
   isLabelOnTop?: boolean;

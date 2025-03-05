@@ -136,25 +136,29 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     as: "div",
     attributes: [
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
-          onClick: handleSave,
+          onClick: () => handleSave(options),
           text: options.dataContext.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
+        type: "button",
       },
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
           },
           text: "Cancel",
         }),
+        type: "button",
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
@@ -213,7 +217,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     componentName: "Data",
     name: "modalState",
     noRepeat: true,
-    props: (options: FunctionArgumentType) => ({
+    props: () => ({
       data: createStore({
         isLoading: false,
         showModal: false,

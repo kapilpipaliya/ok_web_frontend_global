@@ -29,7 +29,7 @@ export function validatePassword(password: any) {
 }
 
 export function validatePasswordConditions(password: string) {
-  return PASSWORD_CONDITIONS.map(condition => ({
+  return PASSWORD_CONDITIONS.map((condition) => ({
     isValid: condition.regex.test(password),
     message: condition.message,
   }));

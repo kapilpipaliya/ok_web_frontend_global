@@ -25,6 +25,7 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
       ""
     );
   }
+
   const [local, _others] = splitProps(props, [
     "componentName",
     "onChange",

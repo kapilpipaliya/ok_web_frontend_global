@@ -17,7 +17,10 @@ export async function GET({ request }: APIEvent) {
 
   try {
     if (subDomain !== SYSTEM_DB_NAME) {
-      throw new APIError("Unauthorized. System subdomain access required.", 403);
+      throw new APIError(
+        "Unauthorized. System subdomain access required.",
+        403,
+      );
     }
 
     const user = await getUserFromSession(request);

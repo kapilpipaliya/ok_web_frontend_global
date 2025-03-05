@@ -239,7 +239,10 @@ export function DynamicCSSComponent(
     const currentState = cssState[state()] || {};
 
     // Check custom properties for fieldWithCustomProperty components
-    if (props.meta.componentName === 'fieldWithCustomProperty' && props.meta.customProperty) {
+    if (
+      props.meta.componentName === "fieldWithCustomProperty" &&
+      props.meta.customProperty
+    ) {
       for (const customProp of props.meta.customProperty) {
         if (currentState[customProp.key] !== undefined) {
           return true;
@@ -257,7 +260,13 @@ export function DynamicCSSComponent(
           <Content />
         </Match>
         <Match when={props.meta.isLabelOnTop}>
-          <Show when={!showConfiguredOnly() || isValueConfigured() || hasConfiguredFields()}>
+          <Show
+            when={
+              !showConfiguredOnly() ||
+              isValueConfigured() ||
+              hasConfiguredFields()
+            }
+          >
             <div class={"w:full"}>
               <LabelWrapper
                 meta={props.meta}
@@ -269,7 +278,13 @@ export function DynamicCSSComponent(
           </Show>
         </Match>
         <Match when={props.meta.label}>
-          <Show when={!showConfiguredOnly() || isValueConfigured() || hasConfiguredFields()}>
+          <Show
+            when={
+              !showConfiguredOnly() ||
+              isValueConfigured() ||
+              hasConfiguredFields()
+            }
+          >
             <div class={"flex ai:center jc:space-between w:full"}>
               <LabelWrapper
                 meta={props.meta}

@@ -17,15 +17,13 @@ export function AccountDeletionForm() {
     options.dataContext.deleteState[1]("showConfirmDialog", false);
 
     try {
-      const response = await postAPI(
-        API.user.selfDeleteUrl,
-        {}
-      );
+      const response = await postAPI(API.user.selfDeleteUrl, {});
 
       if (response.success) {
         options.dataContext.deleteState[1](
           "successMessage",
-          response.message || "Account scheduled for deletion. It will be permanently removed after 48 hours."
+          response.message ||
+            "Account scheduled for deletion. It will be permanently removed after 48 hours.",
         );
         // Redirect to logout after successful deletion request
         setTimeout(() => {
@@ -34,13 +32,14 @@ export function AccountDeletionForm() {
       } else {
         options.dataContext.deleteState[1](
           "errorMessage",
-          response.error || "Failed to schedule account for deletion. Please try again."
+          response.error ||
+            "Failed to schedule account for deletion. Please try again.",
         );
       }
     } catch (error) {
       options.dataContext.deleteState[1](
         "errorMessage",
-        "An unexpected error occurred. Please try again."
+        "An unexpected error occurred. Please try again.",
       );
       console.error("Error scheduling account deletion:", error);
     } finally {
@@ -64,27 +63,33 @@ export function AccountDeletionForm() {
     as: "div",
     attributes: [
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.deleteState[1]("showConfirmDialog", false);
           },
-          text: "Cancel"
+          text: "Cancel",
         }),
+        type: "button",
       },
       {
+        as: "button",
         class: "bg:red-60 fg:white p:8|16 r:4 cursor:pointer",
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.deleteState[0]?.isLoading,
           onClick: () => handleDeleteAccount(options),
-          text: options.dataContext.deleteState[0]?.isLoading ? "Deleting..." : "Yes, Delete My Account"
+          text: options.dataContext.deleteState[0]?.isLoading
+            ? "Deleting..."
+            : "Yes, Delete My Account",
         }),
-      }
+        type: "button",
+      },
     ],
     class: "d:flex jc:flex-end gap:12px",
-    componentName: "Box"
+    componentName: "Box",
   };
   const deleteAccountSchema: FieldAttribute = {
     as: "div",
@@ -96,22 +101,22 @@ export function AccountDeletionForm() {
             as: "h1",
             class: "text:20 font:bold mb:4 color:error",
             componentName: "Html",
-            text: "Delete Your Account"
+            text: "Delete Your Account",
           },
           {
             as: "p",
             class: "mb:4 fg:error-50",
             componentName: "Html",
-            text: "Once you delete your account, all your data will be permanently removed after 48 hours. This action cannot be undone."
+            text: "Once you delete your account, all your data will be permanently removed after 48 hours. This action cannot be undone.",
           },
           {
             as: "p",
             class: "mb:6 fg:error-50",
             componentName: "Html",
-            text: "During the 48-hour period, you will not be able to log in to your account. If you change your mind, please contact our support team immediately."
-          }
+            text: "During the 48-hour period, you will not be able to log in to your account. If you change your mind, please contact our support team immediately.",
+          },
         ],
-        componentName: "Box"
+        componentName: "Box",
       },
       {
         as: "div",
@@ -121,13 +126,13 @@ export function AccountDeletionForm() {
             props: (options: FunctionArgumentType) => ({
               text: options.dataContext.deleteState[0]?.errorMessage,
             }),
-          }
+          },
         ],
         class: "mb:4 p:12px bg:red-5 border:1px|solid|red-10 fg:red-70 r:8px",
         componentName: "Box",
         props: (options: FunctionArgumentType) => ({
           hidden: !options.dataContext.deleteState[0]?.errorMessage,
-        })
+        }),
       },
       {
         as: "div",
@@ -137,31 +142,34 @@ export function AccountDeletionForm() {
             props: (options: FunctionArgumentType) => ({
               text: options.dataContext.deleteState[0]?.successMessage,
             }),
-          }
+          },
         ],
-        class: "mb:4 p:12px bg:green-5 border:1px|solid|green-10 fg:green-70 r:8px",
+        class:
+          "mb:4 p:12px bg:green-5 border:1px|solid|green-10 fg:green-70 r:8px",
         componentName: "Box",
         props: (options: FunctionArgumentType) => ({
           hidden: !options.dataContext.deleteState[0]?.successMessage,
-        })
+        }),
       },
       {
         as: "div",
         attributes: [
           {
+            as: "button",
             class: "bg:red-60 fg:white p:8|16 r:4 cursor:pointer",
-            componentName: "Button",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               disabled: options.dataContext.deleteState[0]?.isLoading,
               onClick: () => {
                 options.dataContext.deleteState[1]("showConfirmDialog", true);
               },
-              text: "Delete Account"
+              text: "Delete Account",
             }),
-          }
+            type: "button",
+          },
         ],
         class: "d:flex jc:flex-end",
-        componentName: "Box"
+        componentName: "Box",
       },
       // Confirmation Dialog
       {
@@ -183,22 +191,21 @@ export function AccountDeletionForm() {
                       {
                         as: "div",
                         attributes: [
-
                           {
                             class: "mb:4",
                             componentName: "Text",
-                            text: "Are you sure you want to delete your account? This action cannot be undone."
+                            text: "Are you sure you want to delete your account? This action cannot be undone.",
                           },
                           {
                             class: "mb:6",
                             componentName: "Text",
-                            text: "Your account will be scheduled for deletion and permanently removed after 48 hours."
+                            text: "Your account will be scheduled for deletion and permanently removed after 48 hours.",
                           },
                           modalFooterSchema,
                         ],
                         class: "p:24px",
-                        componentName: "Box"
-                      }
+                        componentName: "Box",
+                      },
                     ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",
@@ -207,23 +214,23 @@ export function AccountDeletionForm() {
                       style: {
                         "z-index": options.zIndex + 1,
                       },
-                    })
-                  }
+                    }),
+                  },
                 ],
-                componentName: "Portal"
-              }
+                componentName: "Portal",
+              },
             ],
-            componentName: "ZIndex"
-          }
+            componentName: "ZIndex",
+          },
         ],
         componentName: "Box",
         props: (options: FunctionArgumentType) => ({
           hidden: !options.dataContext.deleteState[0]?.showConfirmDialog,
-        })
-      }
+        }),
+      },
     ],
     class: "p:24px r:8px bg:white border:1px|solid|base-10 sh:md",
-    componentName: "Box"
+    componentName: "Box",
   };
 
   // Main form schema with state management
@@ -241,8 +248,8 @@ export function AccountDeletionForm() {
       }),
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
-      }
-    })
+      },
+    }),
   };
 
   return (
@@ -250,4 +257,4 @@ export function AccountDeletionForm() {
       form={{ attributes: [formSchema], key: "AccountDeletion" }}
     />
   );
-} 
+}

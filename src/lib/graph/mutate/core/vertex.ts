@@ -40,11 +40,7 @@ export function addNewVertex(
       return { error: "vertex ID already exist while adding new vertex" };
     }
     const actualVertex = updateVertexIdsToNew(klona(vertex), graph, true);
-    setGraph(
-      "vertexes",
-      actualVertexId,
-      {...actualVertex, IN: {}, OUT: {}},
-    );
+    setGraph("vertexes", actualVertexId, { ...actualVertex, IN: {}, OUT: {} });
     for (const label of vertex.L) {
       setGraph("vertexLabelIdMap", label, (vertexIds: Id[]) =>
         Array.isArray(vertexIds)

@@ -8,7 +8,6 @@ import { getThemeFormSchema } from "./theme_config/themeFormSchema";
 
 export function AddNewThemeDialog() {
   const [showDialog, setShowDialog] = createSignal(false);
-  const [buttonRef, setButtonRef] = createSignal<HTMLElement>();
 
   const handleSuccess = () => {
     setShowDialog(false);
@@ -20,7 +19,6 @@ export function AddNewThemeDialog() {
         buttonText="Add New Theme"
         class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
         onClick={() => setShowDialog(true)}
-        ref={setButtonRef}
       />
       <Show when={showDialog()}>
         <SchemaRenderer

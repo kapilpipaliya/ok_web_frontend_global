@@ -67,7 +67,7 @@ export function LoginForm() {
     if (validateFormData(formData)) {
       await showLoadingToast({
         loadMessage: "Logging In...",
-        onError: () => { },
+        onError: () => {},
         onSuccess: (value) => {
           handleLoginRedirect(value?.result, graph, navigate);
         },
@@ -282,7 +282,7 @@ export function LoginForm() {
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
-      }
+      },
     }),
   };
 

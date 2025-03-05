@@ -1,6 +1,7 @@
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { MutationResult } from "~/cypher/types/MutationArgs";
 import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,
@@ -9,7 +10,6 @@ import type {
 
 import { useToast } from "~/components/styled/Toast";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
-import { MutationResult } from "~/cypher/types/MutationArgs";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import { evalExpression } from "~/lib/expression_eval";
@@ -107,58 +107,70 @@ export const roleFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "button",
               class: "cursor:pointer p:8|16 ",
-              componentName: "Button",
+              componentName: "Html",
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RolePerm", {
                   graph: options.graph,
                   setGraph: options.setGraph,
                   vertexes: [options.data],
                 });
-                return ({
-                  class: options.dataContext.tabState[0]?.activeTab === "Perm"
-                    ? "bb:2px|solid|primary"
-                    : "bb:2px|solid|transparent",
-                  onClick: () => options.dataContext.tabState[1]("activeTab", "Perm"),
+                return {
+                  class:
+                    options.dataContext.tabState[0]?.activeTab === "Perm"
+                      ? "bb:2px|solid|primary"
+                      : "bb:2px|solid|transparent",
+                  onClick: () =>
+                    options.dataContext.tabState[1]("activeTab", "Perm"),
                   text: `Permissions ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
-                });
+                };
               },
+              type: "button",
             },
             {
+              as: "button",
               class: "cursor:pointer p:8|16 ",
-              componentName: "Button",
+              componentName: "Html",
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RolePage", {
                   graph: options.graph,
                   setGraph: options.setGraph,
                   vertexes: [options.data],
                 });
-                return ({
-                  class: options.dataContext.tabState[0]?.activeTab === "Page"
-                    ? "bb:2px|solid|primary"
-                    : "bb:2px|solid|transparent",
-                  onClick: () => options.dataContext.tabState[1]("activeTab", "Page"),
+                return {
+                  class:
+                    options.dataContext.tabState[0]?.activeTab === "Page"
+                      ? "bb:2px|solid|primary"
+                      : "bb:2px|solid|transparent",
+                  onClick: () =>
+                    options.dataContext.tabState[1]("activeTab", "Page"),
                   text: `Pages ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
-                });
+                };
               },
+              type: "button",
             },
             {
+              as: "button",
               class: "cursor:pointer p:8|16 ",
-              componentName: "Button",
+              componentName: "Html",
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RoleForm", {
                   graph: options.graph,
                   setGraph: options.setGraph,
                   vertexes: [options.data],
                 });
-                return ({
-                  class: options.dataContext.tabState[0]?.activeTab === "Form"
-                    ? "bb:2px|solid|primary"
-                    : "bb:2px|solid|transparent",
-                  onClick: () => options.dataContext.tabState[1]("activeTab", "Form"),
+                return {
+                  class:
+                    options.dataContext.tabState[0]?.activeTab === "Form"
+                      ? "bb:2px|solid|primary"
+                      : "bb:2px|solid|transparent",
+                  onClick: () =>
+                    options.dataContext.tabState[1]("activeTab", "Form"),
                   text: `Forms ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
-                });
+                };
               },
+              type: "button",
             },
           ],
           class: "display:flex bb:1px|solid|base-20",
@@ -239,7 +251,7 @@ export const roleFormSchema = {
       },
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
-      }
+      },
     };
   },
 };
@@ -275,7 +287,11 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
       if (response.error) {
         showErrorToast(response.error);
       } else {
-        onMutatDataGet(options.graph, options.setGraph, response as MutationResult);
+        onMutatDataGet(
+          options.graph,
+          options.setGraph,
+          response as MutationResult,
+        );
         showSuccessToast("Role created successfully");
         onSuccess();
       }
@@ -304,25 +320,29 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
-          onClick: handleSave,
+          onClick: () => handleSave(options),
           text: options.dataContext.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
+        type: "button",
       },
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
           },
           text: "Cancel",
         }),
+        type: "button",
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
@@ -380,7 +400,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
     componentName: "Data",
     name: "modalState",
     noRepeat: true,
-    props: (options: FunctionArgumentType) => ({
+    props: () => ({
       data: createStore({
         isLoading: false,
         showModal: false,

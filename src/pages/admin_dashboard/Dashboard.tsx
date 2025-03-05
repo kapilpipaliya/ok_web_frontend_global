@@ -14,13 +14,12 @@ export default function AdminDashboard() {
 
   // Only run this effect if the route hasn't changed
   createEffect(() => {
-      const tab = searchParams.tab as string;
-      if (!tab) {
-        setSelectedKey("Page");
-      } else if (tab !== selectedKey()) {
-        setSelectedKey(tab);
-      }
-    
+    const tab = searchParams.tab as string;
+    if (!tab) {
+      setSelectedKey("Page");
+    } else if (tab !== selectedKey()) {
+      setSelectedKey(tab);
+    }
   });
 
   const handleTabClick = (key: string) => {

@@ -10,7 +10,6 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 
 import type { FormStoreObject } from "./context/FormContext";
-import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 
 export type ComponentNameType = (options: FunctionArgumentType) => string;
 

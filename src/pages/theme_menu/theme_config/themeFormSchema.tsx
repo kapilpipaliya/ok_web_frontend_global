@@ -2,7 +2,6 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -59,28 +58,37 @@ export const themeFormSchema = {
             {
               key: "data",
               props: (options: FunctionArgumentType) => ({
-                componentName: (props: any) => <MonacoEditorWrapper
-                  height="400px"
-                  language="javascript"
-                  {...props}
-                  onChange={(value) => (options.dataContext.modalState[1]("editorData", value))}
-                  onMount={(monaco, editor) => (options.dataContext.editorState[1](editor))}
-                  value={options.dataContext.modalState[0]?.editorData}
-                />,
+                componentName: (props: any) => (
+                  <MonacoEditorWrapper
+                    height="400px"
+                    language="javascript"
+                    {...props}
+                    onChange={(value) =>
+                      options.dataContext.modalState[1]("editorData", value)
+                    }
+                    onMount={(_monaco, editor) =>
+                      options.dataContext.editorState[1](editor)
+                    }
+                    value={options.dataContext.modalState[0]?.editorData}
+                  />
+                ),
               }),
             },
             {
               as: "div",
               attributes: [
                 {
+                  as: "button",
                   class: "px:5 py:5 bg:gray-60 fg:base-5 r:5",
-                  componentName: "Button",
+                  componentName: "Html",
                   props: (options: FunctionArgumentType) => ({
                     onClick: async () => {
                       const editor = options.dataContext?.editorState[0]();
                       if (editor) {
                         try {
-                          const formatted = await formatJavaScriptCode(editor.getValue());
+                          const formatted = await formatJavaScriptCode(
+                            editor.getValue(),
+                          );
                           editor.setValue(formatted);
                         } catch (err) {
                           console.error("Formatting failed:", err);
@@ -90,6 +98,7 @@ export const themeFormSchema = {
                     },
                   }),
                   text: "Format",
+                  type: "button",
                 },
               ],
               class: "flex ai:center gap:0.50rem",
@@ -107,7 +116,10 @@ export const themeFormSchema = {
   componentName: "Box",
 } as FieldAttribute;
 
-export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) => {
+export const getThemeFormSchema = (
+  onSuccess: () => void,
+  onClose: () => void,
+) => {
   const { showErrorToast, showSuccessToast, showWarningToast } = useToast();
   const [graph, setGraph] = useGraph();
 
@@ -140,16 +152,10 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
 
       if (formData.id.startsWith("-")) {
         // Create new theme
-        result = createFormVertex(
-          graph,
-          setGraph,
-          newFormTxnId,
-          "Theme",
-          {
-            data: options.dataContext.modalState[0]?.editorData,
-            key: formData.P.key,
-          },
-        );
+        result = createFormVertex(graph, setGraph, newFormTxnId, "Theme", {
+          data: options.dataContext.modalState[0]?.editorData,
+          key: formData.P.key,
+        });
       } else {
         // Update existing theme
         result = mergeVertexProperties(
@@ -157,7 +163,7 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
           formData.id,
           graph,
           setGraph,
-          { data: options.dataContext.modalState[0]?.editorData }
+          { data: options.dataContext.modalState[0]?.editorData },
         );
       }
 
@@ -196,9 +202,10 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
         componentName: "Text",
         props: (options: FunctionArgumentType) => {
           return {
-            text: options.data?.id && !options.data.id.startsWith("-")
-              ? `Configure Theme [${options.data.P.key}]`
-              : "Add New Theme"
+            text:
+              options.data?.id && !options.data.id.startsWith("-")
+                ? `Configure Theme [${options.data.P.key}]`
+                : "Add New Theme",
           };
         },
       },
@@ -211,15 +218,17 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
     as: "div",
     attributes: [
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
-          onClick: handleSave,
+          onClick: () => handleSave(options),
           text: options.dataContext.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
+        type: "button",
       },
       {
         as: "button",
@@ -306,17 +315,22 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
     }),
   };
 
-  return { attributes: [{
-    attributes: [schema],
-    componentName: "Data",
-    name: "editorState",
-    noRepeat: true,
-    props: (options: FunctionArgumentType) => ({
-      data: createSignal(),
-      // TODO: if not saved, revert to previous state
-      // onUnmount: () => {
-      //   options.revertTransactionUpToIndex(options.txnId, -1);
-      // }
-    }),
-  }], key: "Theme" } as IFormMetaData;
-}; 
+  return {
+    attributes: [
+      {
+        attributes: [schema],
+        componentName: "Data",
+        name: "editorState",
+        noRepeat: true,
+        props: () => ({
+          data: createSignal(),
+          // TODO: if not saved, revert to previous state
+          // onUnmount: () => {
+          //   options.revertTransactionUpToIndex(options.txnId, -1);
+          // }
+        }),
+      },
+    ],
+    key: "Theme",
+  } as IFormMetaData;
+};

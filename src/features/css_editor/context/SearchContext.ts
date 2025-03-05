@@ -1,13 +1,10 @@
 import { createContext, createSignal, useContext } from "solid-js";
 
-export type SearchContextType = [
-  () => string,
-  (value: string) => void
-];
+export type SearchContextType = [() => string, (value: string) => void];
 
 export const SearchContext = createContext<SearchContextType>([
   () => "",
-  () => {}
+  () => {},
 ]);
 
 export function createSearchContext() {
@@ -17,4 +14,4 @@ export function createSearchContext() {
 
 export function useSearchContext() {
   return useContext(SearchContext);
-} 
+}

@@ -3,11 +3,11 @@ import type { JSX } from "solid-js";
 import { Link } from "@solidjs/meta";
 
 import { GetInitialData } from "~/GetInitialData";
+import { getCompanyCircularLogoUrl } from "~/lib/graph/get/sync/company/getCompanyCircularLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import {getCompanyCircularLogoUrl} from "~/lib/graph/get/sync/company/getCompanyCircularLogoUrl";
 
 export default function Admin() {
   return (

@@ -31,19 +31,19 @@ export function AuthenticatedMenu(
       // { href: API.urls.admin.contact, icon: "ph:question", label: "Help" },
     ] as { href: string; icon: string; label: string; target?: string }[];
 
-    if (!isSystemSubDomain() && !isAdminRole(graph)) {
+    if (!(isSystemSubDomain() || isAdminRole(graph))) {
       commonItems.push({
         href: API.urls.admin.support,
         icon: "ph:question",
         label: "Support",
-        target: "_blank"
+        target: "_blank",
       });
     } else if (isSystemSubDomain()) {
       commonItems.push({
         href: `${window.location.origin.replace(`${getMemberVertex(graph).P.subDomain}.`, "")}/support/contact`,
         icon: "ph:question",
         label: "Support",
-        target: "_blank"
+        target: "_blank",
       });
     }
 

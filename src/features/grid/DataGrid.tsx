@@ -278,10 +278,16 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       props.hideEditJsonAction,
     );
 
-    setGridState("tableStore", { data: nodes.map(node => graph.vertexes[node.id]), tableColumns });
+    setGridState("tableStore", {
+      data: nodes.map((node) => graph.vertexes[node.id]),
+      tableColumns,
+    });
     setGridState("search", "");
     // Track data from the graph store
-    setGridState("filteredData", nodes.map(node => graph.vertexes[node.id]));
+    setGridState(
+      "filteredData",
+      nodes.map((node) => graph.vertexes[node.id]),
+    );
   }
 
   const onDelete = useDeleteRowConfirm(gridState, setGridState);

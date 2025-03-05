@@ -35,8 +35,14 @@ export function SimpleCard(props: SimpleCardProps) {
         <CardHeader imgSrc={props.imgSrc} title={props.title} />
         <CardOptions
           options={[
-            { action: () => {}, label: "View" },
-            { action: () => {}, label: "Edit" },
+            {
+              action: () => {},
+              label: "View",
+            },
+            {
+              action: () => {},
+              label: "Edit",
+            },
           ]}
           title={props.title}
         />

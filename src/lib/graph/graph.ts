@@ -34,6 +34,7 @@ export interface GlobalProperties {
   // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,
   // language: "en" as string,
 }
+
 export interface GraphInterface {
   broadcastChannels: string[];
   edges: EdgeMap;

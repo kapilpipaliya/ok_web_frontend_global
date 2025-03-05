@@ -34,10 +34,10 @@ const content = [
         "border-radius": "4",
         color: "base-5",
         cursor: "pointer",
+        display: "inline-block",
         "margin-bottom": "16",
         padding: "8 16",
         "text-decoration": "none",
-        display: "inline-block",
       },
       ":hover": {
         opacity: "0.9",

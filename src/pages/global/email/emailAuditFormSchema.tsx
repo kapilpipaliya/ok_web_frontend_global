@@ -51,13 +51,13 @@ export const emailAuditFormSchema = {
               componentName: "TextInput",
               key: "subject",
               placeholder: "Enter email subject",
-              validation: { 
+              validation: {
                 regex: {
                   enabled: true,
                   message: "Subject must be between 1 and 200 characters",
-                  value: "^.{1,200}$"
+                  value: "^.{1,200}$",
                 },
-                required: true
+                required: true,
               },
             },
           ],
@@ -78,13 +78,13 @@ export const emailAuditFormSchema = {
               componentName: "TextInput",
               key: "recipients",
               placeholder: "Enter recipients",
-              validation: { 
+              validation: {
                 regex: {
                   enabled: true,
                   message: "Please enter valid email addresses",
-                  value: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+                  value: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
                 },
-                required: true
+                required: true,
               },
             },
           ],
@@ -116,13 +116,13 @@ export const emailAuditFormSchema = {
                 // srcdoc: xss(options.data.P.content, xssOptions),
                 srcdoc: options.data.P.content,
               }),
-              validation: { 
+              validation: {
                 regex: {
                   enabled: true,
                   message: "Content cannot be empty",
-                  value: "^.{1,}$"
+                  value: "^.{1,}$",
                 },
-                required: true
+                required: true,
               },
             },
           ],
@@ -225,25 +225,29 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
-          onClick: handleSave,
+          onClick: () => handleSave(options),
           text: options.dataContext.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
+        type: "button",
       },
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
           },
           text: "Cancel",
         }),
+        type: "button",
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,

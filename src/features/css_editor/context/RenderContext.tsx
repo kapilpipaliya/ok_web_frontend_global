@@ -7,6 +7,7 @@ import type { FunctionArgumentType } from "../../../components/form/FieldSchemaT
 export type RenderObject = ReturnType<typeof getInitialPageRenderStore>;
 
 export type RenderStore = ReturnType<typeof createStore<RenderObject>>;
+
 export function getInitialPageRenderStore() {
   return {
     context: {} as FunctionArgumentType,
@@ -19,6 +20,7 @@ export function getInitialPageRenderStore() {
     readOnly: undefined as boolean | undefined,
   };
 }
+
 export const RenderContext = createContext<RenderStore[]>();
 
 export function useRenderContext() {

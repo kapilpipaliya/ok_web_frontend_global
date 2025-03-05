@@ -11,6 +11,7 @@ export interface EmailSettings {
   smtpHost?: string;
   smtpPassword?: string;
   smtpPort?: number;
+
   smtpUsername?: string;
   // Add other provider settings as needed
 }

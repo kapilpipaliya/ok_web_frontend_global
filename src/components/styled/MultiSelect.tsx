@@ -29,6 +29,7 @@ export type Option =
       id: string;
       label: string;
     };
+
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(
   props: Readonly<{
@@ -324,7 +325,9 @@ export function MultiSelectField(
       {/* Main grid container */}
       <div class="d:grid grid-template-columns:1fr|auto ai:center">
         {/* Tags and input area */}
-        <div class={`${props.selectionLimit !== 1 ? "flex:wrap" : ""} ai:center d:flex gap:5px p:4px|6px w:100%`}>
+        <div
+          class={`${props.selectionLimit !== 1 ? "flex:wrap" : ""} ai:center d:flex gap:5px p:4px|6px w:100%`}
+        >
           <For each={selectedValue()}>
             {(tag) => (
               <div class="ai:center bg:primary-20 cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
@@ -360,7 +363,7 @@ export function MultiSelectField(
             />
           </div>
         </div>
-        
+
         {/* Dropdown icon area */}
         <div class="d:flex ai:center jc:center h:100% p:0|8px">
           <Icon
@@ -378,11 +381,11 @@ export function MultiSelectField(
           />
         </div>
       </div>
-      
+
       <Show when={props.error}>
         <div class="fg:error f:12 p:2px">{props.error}</div>
       </Show>
-      
+
       <Show when={dropdownVisible()}>
         <ZIndex>
           <DropdownMenu

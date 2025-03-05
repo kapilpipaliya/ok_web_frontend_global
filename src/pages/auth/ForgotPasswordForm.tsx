@@ -6,9 +6,9 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
+import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validatePassword } from "~/lib/validation/validatePassword";
-import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
@@ -564,7 +564,7 @@ export function ForgotPasswordForm() {
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
-      }
+      },
     }),
   };
 

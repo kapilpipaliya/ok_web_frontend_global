@@ -35,6 +35,7 @@ export function broadcastToAllChannels(
     }
   }
 }
+
 export function getChannel(name: string): BroadcastChannel {
   if (!channels.has(name)) {
     channels.set(name, new BroadcastChannel(name));

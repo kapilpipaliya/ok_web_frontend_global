@@ -9,7 +9,7 @@ This module handles Neo4j database interactions for the application.
 - `session/`: Session management
 - `queries/`: Query building and execution
 - `operations/`: Database operations (get, mutate)
-  - `get/`: Read operations
-  - `mutate/`: Write operations
+    - `get/`: Read operations
+    - `mutate/`: Write operations
 - `client/`: Server API calls accessible from client
 - `types/`: TypeScript type definitions 

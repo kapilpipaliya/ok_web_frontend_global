@@ -24,7 +24,8 @@ export const API = {
   file: {
     deleteFileUrl: "/api/file/delete",
     downloadCompanyCircularLogoUrl: "/api/file/downloadCompanyCircularLogo",
-    downloadCompanyRectangularLogoUrl: "/api/file/downloadCompanyRectangularLogo",
+    downloadCompanyRectangularLogoUrl:
+      "/api/file/downloadCompanyRectangularLogo",
     downloadFileUrl: "/api/file/download",
     replaceFileUrl: "/api/file/replace",
     uploadFileUrl: "/api/file/upload",

@@ -33,6 +33,7 @@ interface PageAttrDnDWrapperProps {
   children: JSX.Element;
   item: Vertex;
 }
+
 export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();

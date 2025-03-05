@@ -10,12 +10,9 @@ import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAccount";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
-import {
-  validateUniqueFields,
-
-} from "~/routes/api/auth/(profile)/functions/validateField";
+import { validateUniqueFields } from "~/routes/api/auth/(profile)/functions/validateField";
+import { validateNonSystemUser } from "~/routes/api/auth/(profile)/functions/validateNonSystemUser";
 import { updateSession } from "~/server/auth/session/updateSession";
-import {validateNonSystemUser} from "~/routes/api/auth/(profile)/functions/validateNonSystemUser";
 
 type ProfilePayload = {
   email?: string;
@@ -32,7 +29,10 @@ export async function updateProfile(
 ): Promise<ServerResult | { error: string; status: number }> {
   const { email, username } = payload;
 
-  const userValidation = await validateNonSystemUser(dbSession, currentUser.P.uuid);
+  const userValidation = await validateNonSystemUser(
+    dbSession,
+    currentUser.P.uuid,
+  );
   if ("error" in userValidation) {
     return userValidation;
   }

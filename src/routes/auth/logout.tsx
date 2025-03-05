@@ -14,10 +14,10 @@ export default function Logout() {
     try {
       // Call the logout API endpoint
       await postAPI(API.auth.logOutUrl, {});
-      
+
       // Delete member vertex from the graph
       deleteVertex(0, "member", graph, setGraph);
-      
+
       // Navigate to login page with replaced history
       navigate(API.urls.admin.login, { replace: true });
     } catch (error) {
@@ -29,4 +29,4 @@ export default function Logout() {
 
   // Return empty component since we're just handling the redirect
   return <div>Logging out...</div>;
-} 
+}

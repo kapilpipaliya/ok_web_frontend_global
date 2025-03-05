@@ -4,6 +4,7 @@ export interface MutationArgs {
   txnId: number;
   vertexIdMap: [number, number][];
 }
+
 export interface MutationResult {
   clientToServerEdgeIdMap?: Map<number, number>;
   clientToServerVertexIdMap?: Map<number, number>;

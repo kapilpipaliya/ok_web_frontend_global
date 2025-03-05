@@ -55,6 +55,7 @@ export function UniqueNameField(
     }
     props.onChange(metaVertex, data);
   }
+
   return (
     <div
       class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}

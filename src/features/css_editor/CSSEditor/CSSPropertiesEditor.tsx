@@ -12,7 +12,6 @@ import { deleteEdge } from "~/lib/graph/mutate/core/edge";
 
 import type { CSSStore } from "../context/CssEditorContext";
 
-import { ZIndex } from "../../../components/fields/ZIndex";
 import {
   type FormStoreObject,
   useFormContext,
@@ -26,6 +25,7 @@ import { cssStateToString } from "../utils/cssStateToString";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { AddNewCssState } from "./AddNewCssState";
 import { ResetButton } from "./ResetButton";
+
 const defaultStateLabel = "Default";
 
 export function CSSPropertiesEditor() {
@@ -148,16 +148,19 @@ export function CSSPropertiesEditor() {
           title="State Selectors"
         />
         <Show when={showDropdown()}>
-          <DropdownMenu parentRef={addNewStateButtonRef!} placement="bottom-end">
-              <div
-                class={`${
-                  Object.keys(cssState[state()] || {}).length > 0
-                    ? "bb:1px|solid|secondary m:1 pb:5"
-                    : ""
-                } flex ai:center jc:space-between mb:6px`}
-              >
-                <AddNewCssState onClose={() => setShowDropdown(false)} />
-              </div>
+          <DropdownMenu
+            parentRef={addNewStateButtonRef!}
+            placement="bottom-end"
+          >
+            <div
+              class={`${
+                Object.keys(cssState[state()] || {}).length > 0
+                  ? "bb:1px|solid|secondary m:1 pb:5"
+                  : ""
+              } flex ai:center jc:space-between mb:6px`}
+            >
+              <AddNewCssState onClose={() => setShowDropdown(false)} />
+            </div>
           </DropdownMenu>
         </Show>
       </div>

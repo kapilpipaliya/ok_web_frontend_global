@@ -14,11 +14,11 @@ export function ThemeConfigButton(props: {
 }) {
   let buttonRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
-  
+
   const handleSuccess = () => {
     setShowModal(false);
   };
-  
+
   return (
     <>
       <IconButton

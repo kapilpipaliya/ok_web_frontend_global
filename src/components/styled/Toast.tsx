@@ -3,7 +3,7 @@ import {
   type Component,
   createEffect,
   createSignal,
-  JSX,
+  type JSX,
   onCleanup,
   Show,
 } from "solid-js";
@@ -76,29 +76,39 @@ export function useToast() {
     successJSXFn,
     successMessage,
   }: LoadingToastParams<T>) {
-    await toastValue.toast.promise(promise, {
-      error: errorJSXFn ?? ((e: unknown) => {
-        onError?.(e);
-        return (
-          <span>
-            {errorMessage ?? getErrorMessage(e) ?? "Oops! Something went wrong"}
-          </span>
-        );
-      }),
-      loading: loadMessage,
-      success:
-        successJSXFn ??
-        ((val: T) => {
-          onSuccess?.(val);
-          return (
-            <span>
-              {successMessage ?? (val.message as string) ?? "Successfully completed"}
-            </span>
-          );
-        }),
-    }, {
-      duration: 3000,
-    });
+    await toastValue.toast.promise(
+      promise,
+      {
+        error:
+          errorJSXFn ??
+          ((e: unknown) => {
+            onError?.(e);
+            return (
+              <span>
+                {errorMessage ??
+                  getErrorMessage(e) ??
+                  "Oops! Something went wrong"}
+              </span>
+            );
+          }),
+        loading: loadMessage,
+        success:
+          successJSXFn ??
+          ((val: T) => {
+            onSuccess?.(val);
+            return (
+              <span>
+                {successMessage ??
+                  (val.message as string) ??
+                  "Successfully completed"}
+              </span>
+            );
+          }),
+      },
+      {
+        duration: 3000,
+      },
+    );
   }
 
   function showErrorToast(message: string) {
@@ -151,9 +161,12 @@ export function useToast() {
                 <button
                   class="background-color:#0e7490 border-radius:6px color:base-5 font-size:13px font-weight:500 height:80% letter-spacing:0.025em padding:14px"
                   onClick={() => toastValue.toast.dismiss(t.id)}
-                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#0e7490")}
+                  onMouseOut={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#0e7490")
+                  }
                   onMouseOver={(e) =>
-                    (e.currentTarget.style.backgroundColor = "rgba(14,116,144,0.7)")
+                    (e.currentTarget.style.backgroundColor =
+                      "rgba(14,116,144,0.7)")
                   }
                 >
                   CANCEL
@@ -164,10 +177,12 @@ export function useToast() {
                   class="align-items:center background-color:rgba(14,116,144,0.4) border-radius:6px color:base-5 display:flex font-size:24px height:80% letter-spacing:0.025em padding:10px position:relative"
                   onClick={() => toastValue.toast.dismiss(t.id)}
                   onMouseOut={(e) =>
-                    (e.currentTarget.style.backgroundColor = "rgba(14,116,144,0.4)")
+                    (e.currentTarget.style.backgroundColor =
+                      "rgba(14,116,144,0.4)")
                   }
                   onMouseOver={(e) =>
-                    (e.currentTarget.style.backgroundColor = "rgba(14,116,144,0.2)")
+                    (e.currentTarget.style.backgroundColor =
+                      "rgba(14,116,144,0.2)")
                   }
                 >
                   x

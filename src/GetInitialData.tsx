@@ -19,6 +19,7 @@ interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;
   dontRedirectToLogin?: boolean;
 }
+
 const fetchData = async (authenticate?: boolean) => {
   "use server";
   const [initialData, userData] = await Promise.all([

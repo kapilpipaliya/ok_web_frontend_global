@@ -1,82 +1,93 @@
-import {
-  computePosition,
-  flip,
-  offset,
-  shift,
-} from '@floating-ui/dom';
-import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { computePosition, flip, offset, shift } from "@floating-ui/dom";
+import { createEffect, onCleanup } from "solid-js";
+import { createStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from '~/components/form/FieldSchemaType';
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 
-import { FieldAttribute } from '../meta/FormMetadataType';
+import type { FieldAttribute } from "../meta/FormMetadataType";
 
 /**
  * Creates a wrapper that displays a popover when the user hovers over an action element
- * 
+ *
  * @param action - The element that triggers the popover
  * @param popoverSchema - The schema for the popover content
  * @returns A schema that wraps the action with popover functionality
  */
-export const popoverWrapperSchema = (action: FieldAttribute, popoverSchema: FieldAttribute) => {
-
+export const popoverWrapperSchema = (
+  action: FieldAttribute,
+  popoverSchema: FieldAttribute,
+) => {
   return {
     attributes: [
       {
         attributes: [
           {
-            as: 'div',
+            as: "div",
             attributes: [action],
-            componentName: 'Box',
+            componentName: "Box",
             props: (options: FunctionArgumentType) => {
               return {
                 onMount: () => {
-                  const popoverState = options.dataContext.popoverState as ReturnType<typeof createStore<{
-                    action: HTMLElement | null;
-                    isVisible: boolean;
-                    x: number;
-                    y: number;
-                  }>>;
+                  const popoverState = options.dataContext
+                    .popoverState as ReturnType<
+                    typeof createStore<{
+                      action: HTMLElement | null;
+                      isVisible: boolean;
+                      x: number;
+                      y: number;
+                    }>
+                  >;
                   const actionEl = options.ref() as HTMLElement;
                   popoverState[1]("action", actionEl);
                   const handleMouseEnter = () => {
-                    popoverState[1]('isVisible', true);
+                    popoverState[1]("isVisible", true);
                   };
-    
+
                   const handleMouseLeave = () => {
-                    popoverState[1]('isVisible', false);
+                    popoverState[1]("isVisible", false);
                   };
-    
-                  actionEl.addEventListener('mouseenter', handleMouseEnter);
-                  actionEl.addEventListener('mouseleave', handleMouseLeave);
-    
+
+                  actionEl.addEventListener("mouseenter", handleMouseEnter);
+                  actionEl.addEventListener("mouseleave", handleMouseLeave);
+
                   onCleanup(() => {
-                    actionEl.removeEventListener('mouseenter', handleMouseEnter);
-                    actionEl.removeEventListener('mouseleave', handleMouseLeave);
+                    actionEl.removeEventListener(
+                      "mouseenter",
+                      handleMouseEnter,
+                    );
+                    actionEl.removeEventListener(
+                      "mouseleave",
+                      handleMouseLeave,
+                    );
                   });
-                }
-              }
+                },
+              };
             },
           },
           {
-            as: 'div',
+            as: "div",
             attributes: [popoverSchema],
-            componentName: 'Box',
+            componentName: "Box",
             props: (options: FunctionArgumentType) => {
-              const popoverState = options.dataContext.popoverState as ReturnType<typeof createStore<{
-                action: HTMLElement | null;
-                isVisible: boolean;
-                x: number;
-                y: number;
-              }>>;
+              const popoverState = options.dataContext
+                .popoverState as ReturnType<
+                typeof createStore<{
+                  action: HTMLElement | null;
+                  isVisible: boolean;
+                  x: number;
+                  y: number;
+                }>
+              >;
 
               return {
-                class: popoverState[0]?.isVisible ? 'position:fixed z:9999' : 'd:none',
+                class: popoverState[0]?.isVisible
+                  ? "position:fixed z:9999"
+                  : "d:none",
                 onMount: () => {
                   const actionEl = popoverState[0]?.action;
 
                   if (!actionEl) {
-                    console.error('Action element not found');
+                    console.error("Action element not found");
                     return;
                   }
                   const el = options.ref() as HTMLElement;
@@ -84,10 +95,10 @@ export const popoverWrapperSchema = (action: FieldAttribute, popoverSchema: Fiel
                   const updatePosition = () => {
                     computePosition(actionEl, el, {
                       middleware: [offset(6), flip(), shift({ padding: 5 })],
-                      placement: 'top',
+                      placement: "top",
                     }).then(({ x, y }) => {
-                      popoverState[1]('x', x);
-                      popoverState[1]('y', y);
+                      popoverState[1]("x", x);
+                      popoverState[1]("y", y);
                     });
                   };
 
@@ -104,10 +115,10 @@ export const popoverWrapperSchema = (action: FieldAttribute, popoverSchema: Fiel
                       updatePosition();
                     }
                   };
-                  window.addEventListener('resize', handleResize);
+                  window.addEventListener("resize", handleResize);
 
                   onCleanup(() => {
-                    window.removeEventListener('resize', handleResize);
+                    window.removeEventListener("resize", handleResize);
                   });
                 },
                 style: {
@@ -118,12 +129,12 @@ export const popoverWrapperSchema = (action: FieldAttribute, popoverSchema: Fiel
             },
           },
         ],
-        class: 'position:relative',
-        componentName: 'Box',
-      }
+        class: "position:relative",
+        componentName: "Box",
+      },
     ],
-    componentName: 'Data',
-    name: 'popoverState',
+    componentName: "Data",
+    name: "popoverState",
     noRepeat: true,
     props: () => ({
       data: createStore({
@@ -133,4 +144,4 @@ export const popoverWrapperSchema = (action: FieldAttribute, popoverSchema: Fiel
       }),
     }),
   };
-}; 
+};

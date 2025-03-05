@@ -9,14 +9,16 @@ export function addEditButtonSchema(label: string) {
       {
         attributes: [
           {
+            as: "button",
             class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-            componentName: "Button",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {
                 options.dataContext.modalState[1]("showModal", true);
               },
               text: `Add New ${label}`,
             }),
+            type: "button",
           },
         ],
         componentName: "Show",
@@ -27,6 +29,7 @@ export function addEditButtonSchema(label: string) {
       {
         attributes: [
           {
+            as: "button",
             attributes: [
               {
                 componentName: "Icon",
@@ -36,12 +39,13 @@ export function addEditButtonSchema(label: string) {
               },
             ],
             class: "flex ai:center",
-            componentName: "Button",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {
                 options.dataContext.modalState[1]("showModal", true);
               },
             }),
+            type: "button",
           },
         ],
         componentName: "Show",

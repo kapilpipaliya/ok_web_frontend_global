@@ -11,6 +11,7 @@ import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 
 export type DataGridState = ReturnType<typeof getInitialGridState>;
 export type DataGridStore = ReturnType<typeof createStore<DataGridState>>;
+
 export function getInitialGridState(graph: GraphInterface) {
   return {
     allConfiguredPermission: (() => []) as Accessor<Vertex[]>,
@@ -52,6 +53,7 @@ export function getInitialGridState(graph: GraphInterface) {
     },
   };
 }
+
 export const DataGridStoreContext = createContext<DataGridStore>();
 
 const DataGridContext = createContext<DataGridStore>();

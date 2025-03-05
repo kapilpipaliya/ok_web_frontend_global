@@ -65,6 +65,7 @@ export function DisplayProperty(
   const [componentName, setComponentName] = createWritableMemo(() =>
     getComponent(props.column),
   );
+
   function getComponent(column: Vertex) {
     const componentNameValue = getComponentLabel(graph, column);
     if (componentNameValue?.includes("::")) {

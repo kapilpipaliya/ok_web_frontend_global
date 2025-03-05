@@ -1,10 +1,8 @@
 import { klona } from "klona";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { generateTableInputMeta } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/generateTableInputMeta";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
@@ -20,7 +18,8 @@ export function Permission() {
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const uniqueConstrainsMetaAttribute = klona(
-    FormMetaData[formStoreVertex()?.P.formId as keyof typeof FormMetaData].attributes,
+    FormMetaData[formStoreVertex()?.P.formId as keyof typeof FormMetaData]
+      .attributes,
   ).find((meta) => meta.key === "PermGlobal");
   if (!uniqueConstrainsMetaAttribute) {
     return <></>;
@@ -39,7 +38,7 @@ export function Permission() {
       />
 
       <div class="mt:.5rem px:0.25rem">
-      <TableInputField
+        <TableInputField
           data={graph.vertexes[formStoreVertex()?.P.formDataId!]}
           isNoPermissionCheck={true}
           isRealTime={false}

@@ -218,6 +218,7 @@ string`,
           },
         },
         {
+          as: "button",
           attributes: [
             {
               componentName: "Icon",
@@ -226,7 +227,7 @@ string`,
             },
           ],
           class: "flex ai:center gap:2 color:error",
-          componentName: "Button",
+          componentName: "Html",
           key: "button",
           props: (options: FunctionArgumentType) => {
             return {
@@ -249,6 +250,7 @@ string`,
               },
             };
           },
+          type: "button",
         },
       ],
       class: "flex ai:center gap:2",

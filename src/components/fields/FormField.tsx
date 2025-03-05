@@ -112,6 +112,7 @@ export function FormField(
       },
     );
   }
+
   async function loadData() {
     if (!id()) {
       return;

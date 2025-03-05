@@ -74,6 +74,7 @@ export function generateFormMetaAttributes(
   ignoreTable?: boolean,
 ): IFormMetaData {
   const result: FieldAttribute[] = [];
+
   function getAllInputFields(
     graph: Store<GraphInterface>,
     setGraph: SetStoreFunction<GraphInterface>,
@@ -122,6 +123,7 @@ export function generateFormMetaAttributes(
       };
     });
   }
+
   getAllInputFields(graph, setGraph, rootVertex, rootVertex, "");
 
   return {
@@ -131,6 +133,7 @@ export function generateFormMetaAttributes(
     title: rootVertex.P.title,
   };
 }
+
 export function getAllFieldsUsedInAllRules(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -176,6 +179,7 @@ export function getAllFieldsUsedInRootLevelSetting(
       collectUniqueConstraints(child);
     }
   }
+
   collectUniqueConstraints(layoutVertex);
 
   return fieldsUsedInUniqueConstraints;
@@ -218,7 +222,11 @@ export function isAnyFieldInvalid(
   function checkVertex(attrVertex: Vertex) {
     if (attrVertex.P.validation) {
       const value = data.P[attrVertex.P[uniqueNameKey]];
-      const error = validateInput(attrVertex.P.validation, value, attrVertex.P.key);
+      const error = validateInput(
+        attrVertex.P.validation,
+        value,
+        attrVertex.P.key,
+      );
       mergeVertexProperties(0, attrVertex.id, graph, setGraph, {
         error: error || "",
       });

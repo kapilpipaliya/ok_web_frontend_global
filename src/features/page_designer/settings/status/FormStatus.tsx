@@ -218,6 +218,7 @@ function createVertexIds() {
     warningMessage: `warningMessageVertex${createUniqueId()}`,
   };
 }
+
 function createVertices(
   vertexIds: ReturnType<typeof createVertexIds>,
   txnId: number,

@@ -1,6 +1,6 @@
-import type {Session} from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 
-import type {Vertex} from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 export async function validateUniqueFields(
   session: Session,

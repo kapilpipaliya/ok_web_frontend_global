@@ -121,6 +121,7 @@ async function getEmailSettingVertex(
     (await getParentAccountEmailSettings(subDomain))
   );
 }
+
 function getEnvEmailSettings(): null | Vertex {
   if (
     !(

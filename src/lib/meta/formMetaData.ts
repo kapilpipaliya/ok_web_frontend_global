@@ -43,14 +43,10 @@ for (const key in FormMetaData) {
   FormMetaData[key].addActionButtons = true;
 }
 
-
-
 FormMetaData.Form = {
   attributes: [
     ...FormMetaData.Page.attributes,
-    Coll("Form").attributes.find(
-      (x) => x.key === "PermGlobal",
-    )!,
+    Coll("Form").attributes.find((x) => x.key === "PermGlobal")!,
     // {
     //   collection: "g:'FormCategory'",
     //   componentName: "Select",
@@ -78,9 +74,7 @@ FormMetaData.Form = {
 };
 
 FormMetaData.Page.attributes.push({
-  ...Coll("Page").attributes.find(
-    (x) => x.key === "PermGlobal",
-  )!,
+  ...Coll("Page").attributes.find((x) => x.key === "PermGlobal")!,
 });
 
 export const ComponentLabel = "Component";

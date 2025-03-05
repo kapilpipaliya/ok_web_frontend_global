@@ -7,19 +7,20 @@ export function setupGlobalErrorHandlers(): void {
   // Handle synchronous errors
   window.addEventListener("error", (event) => {
     logError(event.error || new Error(event.message), {
-      type: "unhandled_error",
+      colno: event.colno,
       filename: event.filename,
       lineno: event.lineno,
-      colno: event.colno
+      type: "unhandled_error",
     });
   });
 
   // Handle unhandled promise rejections
   window.addEventListener("unhandledrejection", (event) => {
-    const error = event.reason instanceof Error 
-      ? event.reason 
-      : new Error(String(event.reason));
-    
+    const error =
+      event.reason instanceof Error
+        ? event.reason
+        : new Error(String(event.reason));
+
     logError(error, { type: "unhandled_promise_rejection" });
   });
-} 
+}

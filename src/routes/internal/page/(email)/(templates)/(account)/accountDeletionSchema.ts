@@ -56,10 +56,10 @@ const content = [
         "border-radius": "4",
         color: "base-5",
         cursor: "pointer",
-        padding: "8 16",
-        "margin-top": "16",
-        "text-decoration": "none",
         display: "inline-block",
+        "margin-top": "16",
+        padding: "8 16",
+        "text-decoration": "none",
       },
       ":hover": {
         opacity: "0.9",

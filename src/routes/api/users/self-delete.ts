@@ -48,7 +48,7 @@ export async function POST({ request }: APIEvent) {
         status: "scheduled"
       })
       `,
-      { email: user.P.email, id }
+      { email: user.P.email, id },
     );
 
     // Log the account deletion request
@@ -62,12 +62,13 @@ export async function POST({ request }: APIEvent) {
     );
 
     return {
-      message: "Account scheduled for deletion. It will be permanently removed after 48 hours.",
-      success: true
+      message:
+        "Account scheduled for deletion. It will be permanently removed after 48 hours.",
+      success: true,
     };
   } catch (error) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
   }
-} 
+}

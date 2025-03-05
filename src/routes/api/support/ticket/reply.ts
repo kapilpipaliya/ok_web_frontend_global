@@ -1,10 +1,10 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import type { Edge, Vertex } from "~/lib/graph/graph";
+
 import { processResult } from "~/cypher/queries/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
-import { Vertex } from "~/lib/graph/graph";
-import { Edge } from "~/lib/graph/graph";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -34,7 +34,11 @@ export async function POST({ request }: APIEvent) {
       })-[tr:ParentSupport]->(t)
       RETURN t, tr, r
     `;
-    const result = await dbSession.run(query, { email: user.P.email, message, ticketId });
+    const result = await dbSession.run(query, {
+      email: user.P.email,
+      message,
+      ticketId,
+    });
     processResult(result.records, { nodes, relationships }, ["t", "r"], "tr");
     return {
       graph: {

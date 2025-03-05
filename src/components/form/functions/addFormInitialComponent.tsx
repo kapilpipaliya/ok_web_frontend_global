@@ -25,6 +25,7 @@ export function addComponent(
 
   return componentIndex;
 }
+
 export function addFormInitialComponent(
   formVertex: Vertex,
   graph: GraphInterface,

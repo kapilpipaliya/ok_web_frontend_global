@@ -45,29 +45,30 @@ export function addNewEdge(
       return { error: "Edge End Vertex not exist while adding new edge" };
     }
     const startVertexOutEdges = graph.vertexes[actualStartVertexId].OUT[edge.T];
-    if (Array.isArray(startVertexOutEdges) && startVertexOutEdges.includes(actualEdgeId)) {
+    if (
+      Array.isArray(startVertexOutEdges) &&
+      startVertexOutEdges.includes(actualEdgeId)
+    ) {
       return {
         error: `Edge ID ${actualEdgeId} already exist in out_edges of the Start vertex ${actualStartVertexId}`,
       };
     }
-    
+
     const endVertexInEdges = graph.vertexes[actualEndVertexId].IN[edge.T];
-    if (Array.isArray(endVertexInEdges) && endVertexInEdges.includes(actualEdgeId)) {
+    if (
+      Array.isArray(endVertexInEdges) &&
+      endVertexInEdges.includes(actualEdgeId)
+    ) {
       return {
         error: `Edge ID ${actualEdgeId} already exist in in_edges of the End vertex ${actualEndVertexId}`,
       };
     }
     batch(() => {
       setGraph("edges", actualEdgeId, updateEdgeIdsToNew(edge, graph));
-      setGraph(
-        "vertexes",
-        actualStartVertexId,
-        "OUT",
-        edge.T,
-        (out_edges) =>
-          Array.isArray(out_edges)
-            ? [...out_edges, actualEdgeId]
-            : [actualEdgeId],
+      setGraph("vertexes", actualStartVertexId, "OUT", edge.T, (out_edges) =>
+        Array.isArray(out_edges)
+          ? [...out_edges, actualEdgeId]
+          : [actualEdgeId],
       );
       setGraph("vertexes", actualEndVertexId, "IN", edge.T, (in_edges) =>
         Array.isArray(in_edges) ? [...in_edges, actualEdgeId] : [actualEdgeId],
@@ -121,13 +122,17 @@ export function deleteEdge(
         const filteredIds = Array.isArray(ids)
           ? ids.filter((id_) => id_ !== actualEdgeId)
           : ids;
-        return filteredIds.length ? filteredIds : undefined as unknown as Id[];
+        return filteredIds.length
+          ? filteredIds
+          : (undefined as unknown as Id[]);
       });
       setGraph("vertexes", graph.edges[actualEdgeId].E, "IN", type, (ids) => {
         const filteredIds = Array.isArray(ids)
           ? ids.filter((id_) => id_ !== actualEdgeId)
           : ids;
-        return filteredIds.length ? filteredIds : undefined as unknown as Id[];
+        return filteredIds.length
+          ? filteredIds
+          : (undefined as unknown as Id[]);
       });
       // @ts-expect-error intentionally setting edge to undefined to remove it
       setGraph("edges", actualEdgeId, undefined);
@@ -209,7 +214,7 @@ export function replaceEdgeEnd(
         const filteredV = Array.isArray(v)
           ? v.filter((e) => e !== actualEdgeId)
           : v;
-        return filteredV.length ? filteredV : undefined as unknown as Id[];
+        return filteredV.length ? filteredV : (undefined as unknown as Id[]);
       });
       setGraph("vertexes", actualNewEndVertexId, "IN", edge.T, (v) =>
         Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
@@ -309,7 +314,7 @@ export function replaceEdgeStart(
         const filteredV = Array.isArray(v)
           ? v.filter((e) => e !== actualEdgeId)
           : v;
-        return filteredV.length ? filteredV : undefined as unknown as Id[];
+        return filteredV.length ? filteredV : (undefined as unknown as Id[]);
       });
       setGraph("vertexes", actualNewStartVertexId, "OUT", edge.T, (v) =>
         Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],

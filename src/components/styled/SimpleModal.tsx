@@ -12,7 +12,9 @@ interface SimpleWithDismissButtonProps {
   onConfirm?: () => void;
   title: string;
 }
+
 const ModalContext = createContext<SimpleWithDismissButtonProps>();
+
 export function SimpleWithDismissButton(
   props: Readonly<SimpleWithDismissButtonProps>,
 ) {

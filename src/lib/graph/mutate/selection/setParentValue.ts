@@ -70,6 +70,7 @@ export function setParentValue(
     }
   }
 }
+
 function vertexInEdgeContainVertex(
   vertex: Vertex,
   type: any,

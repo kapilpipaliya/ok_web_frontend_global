@@ -50,7 +50,7 @@ export function getEdgesFromRowsAttr(
         if (ignoreTables) {
           continue;
         }
-        
+
         const expression: NestedExpression = attribute.inward
           ? {
               expression: `<-${getInEdge(
@@ -70,7 +70,7 @@ export function getEdgesFromRowsAttr(
           expression.incoming = nested.incoming;
           expression.outgoing = nested.outgoing;
         }
-        
+
         if (attribute.inward) {
           incoming.push(expression);
         } else {

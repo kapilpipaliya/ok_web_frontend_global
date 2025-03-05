@@ -135,7 +135,7 @@ export function TabBar(props: { mainPanel: Id }) {
               e.dataTransfer?.setData("text/plain", openedFormId);
               mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
                 draggedTab: openedFormId,
-              })
+              });
             }}
             onDrop={() => moveTab(props.mainPanel)}
           >

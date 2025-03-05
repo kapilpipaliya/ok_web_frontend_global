@@ -5,10 +5,10 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { processResult } from "~/cypher/queries/evaluate/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
-import { processResult } from "~/cypher/queries/evaluate/processResult";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -43,7 +43,7 @@ export async function GET({ request }: APIEvent) {
     );
 
     processResult(result.records, { nodes, relationships }, "a", "");
-    
+
     const logs = result.records.map((record) =>
       convertNodeToJson(record.get("a")),
     );

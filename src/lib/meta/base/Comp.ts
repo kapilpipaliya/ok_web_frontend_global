@@ -160,7 +160,9 @@ export const Comp: IFormMetaData = {
         //   children: "Reset",
         //   class: "border-color:#FF0000 color:#FF0000",
 
-        //   componentName: "Button",
+        // componentName: "Html",
+        // as: "button",
+        // type: "button",
         //   key: "reset",
         //   variant: "outlined",
         //   // TODO:

@@ -104,7 +104,7 @@ export function PasswordChangeForm() {
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
-      }
+      },
     }),
   } as FieldAttribute;
 

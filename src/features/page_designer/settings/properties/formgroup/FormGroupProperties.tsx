@@ -18,7 +18,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";
 import { isObject } from "~/lib/data_structure/object/isObject";
-import {  htmlTagsTree } from "~/lib/dom/htmlTags";
+import { htmlTagsTree } from "~/lib/dom/htmlTags";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/expression/getPropsFromMetaExpression";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
@@ -46,6 +46,7 @@ interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
   onChange(meta: Vertex, data: unknown): void;
   selectedLayout: Vertex;
+
   txnId: number;
 }
 
