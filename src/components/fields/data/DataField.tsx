@@ -26,7 +26,7 @@ export const DataField = (props: {
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
   const [errorMessage, setErrorMessage] = createSignal("");
-  const dataContext = useRepeaterVertexContext();
+  const dataContext = useRepeaterVertexContext() || {};
 
   const setInitialState = async (expression: string) => {
     setIsFetching(true);

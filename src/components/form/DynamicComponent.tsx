@@ -187,7 +187,7 @@ export function DynamicComponent(
         return props.data;
       },
       get dataContext() {
-        return runWithOwner(owner, () => useRepeaterVertexContext());
+        return runWithOwner(owner, () => useRepeaterVertexContext() || {});
       },
       evalExpression,
       fns: functionProxy,

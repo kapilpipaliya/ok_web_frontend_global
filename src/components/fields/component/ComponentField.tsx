@@ -87,7 +87,7 @@ export function ComponentField(
   });
 
   const ComponentWrapper = () => {
-    const context = useRepeaterVertexContext();
+    const context = useRepeaterVertexContext() || {};
     const values = createMemo(() => {
       return {
         ...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph),

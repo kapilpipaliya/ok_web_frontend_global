@@ -83,7 +83,7 @@ export function PageView(
   });
 
   const ComponentWrapper = () => {
-    const context = useRepeaterVertexContext();
+    const context = useRepeaterVertexContext() || {};
     const formStoreId = useDesignerFormIdContext();
 
     const values = createMemo(() => {
