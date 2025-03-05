@@ -67,6 +67,8 @@ import {
 } from "~/lib/meta/base/Comp";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
+import { fetchFormData, fetchFormMetaData } from "./functions/fetchPageData";
+
 export function PageViewWrapper(
   props: Readonly<{
     closePopUp?: () => void;
@@ -201,96 +203,19 @@ export function PageViewWrapper(
     return "";
   });
 
-  // Pure data fetching functions that don't mutate state
-  async function fetchFormMetaData() {
-    let form: IFormMetaData | null = null;
-    if (!form && props.pageVertexName && FormMetaData[props.pageVertexName]) {
-      form = FormMetaData[props.pageVertexName];
-    }
-    if (!form || props.pageVertexLabel === "Form") {
-      form = FormMetaData.Form;
-      const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-
-      const data = await fetchDataFromMG({
-        expression:
-          props.expression ??
-          (props.formId
-            ? `id:'${props.formId}'`
-            : `g:'${props.pageVertexLabel ?? "Form"}[${props.pageVertexName}]'`),
-        [getGlobalStore(graph).P.url]: true,
-        incoming,
-        outgoing,
-      });
-
-      if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
-        return { error: `No ${props.pageVertexName} configured` };
-      }
-
-      return { data, form };
-    }
-
-    return { form };
-  }
-
-  async function fetchFormData() {
-    if (props.getFormData) {
-      try {
-        const data = await props.getFormData();
-        if (!data || data.error) {
-          return { error: data.error || "Error fetching form data" };
-        }
-        return { data };
-      } catch (error) {
-        return { error: (error as Error).message };
-      }
-    }
-
-    if (props.formDataId) {
-      return { formDataIdOverride: props.formDataId };
-    }
-
-    if (!id()) {
-      return { createNew: true };
-    }
-
-    if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) {
-      return { error: "Missing required permissions" };
-    }
-
-    try {
-      const { data, error } = await getFormData(
-        graph,
-        formStore().P.formMetaData!.attributes,
-        id()!,
-      );
-
-      if (error || !Array.isArray(data?.result) || data.result.length === 0) {
-        return { error: `No ${props.pageVertexName} found` };
-      }
-
-      // Find all Component vertices from the loaded data
-      const componentVertices = Object.values(data!.graph!.vertexes).filter(
-        (v) => v.L.includes("Component"),
-      );
-
-      // Fetch data for all components
-      if (componentVertices.length > 0) {
-        await fetchComponentData(componentVertices, graph, setGraph);
-      }
-
-      return {data};
-    } catch (e) {
-      return { error: `Error When Loading Form: ${(e as Error).message}` };
-    }
-  }
-
   // State mutation functions
   async function handleFormMetaData() {
     if (props.formMetaId) {
       setFormStore("formMetaId", props.formMetaId);
       return true;
     }
-    const result = await fetchFormMetaData();
+    const result = await fetchFormMetaData(
+      graph,
+      props.pageVertexName,
+      props.pageVertexLabel,
+      props.formId,
+      props.expression
+    );
 
     if (result.error) {
       setFormStore("error", result.error);
@@ -363,7 +288,16 @@ export function PageViewWrapper(
     );
   }
   async function handleFormData() {
-    const result = await fetchFormData();
+    const result = await fetchFormData(
+      graph,
+      props.getFormData,
+      props.formDataId,
+      id(),
+      isNoPermissionCheck(),
+      hasRequiredPermissions(),
+      props.pageVertexName,
+      formStore().P.formMetaData?.attributes
+    );
 
     if (result.error) {
       setFormStore("error", result.error);
@@ -371,6 +305,9 @@ export function PageViewWrapper(
     }
     if (result.data?.graph) {
       setGraphData(graph, setGraph, result.data.graph);
+    }
+    if (result.componentData?.graph) {
+      setGraphData(graph, setGraph, result.componentData.graph!);
     }
     const formDataId = result.data?.result?.[0]?.id;
     if (formDataId) {

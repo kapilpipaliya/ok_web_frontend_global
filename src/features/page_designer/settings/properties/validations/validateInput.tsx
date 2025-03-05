@@ -4,10 +4,11 @@ export function validateInput(
   validation: ValidationConfigType,
   value?: string,
   fieldKey?: string,
+  fieldLabel?: string,
 ) {
-  const fieldName = fieldKey
+  const fieldName = fieldLabel || (fieldKey
     ? fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)
-    : "Input";
+    : "Input");
 
   // Clear previous error
   // Check required rule

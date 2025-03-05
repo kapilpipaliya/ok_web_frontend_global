@@ -18,6 +18,7 @@ import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
+import { validateFunction } from "~/lib/validation/validateFunction";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export const themeFormSchema = {
@@ -131,10 +132,19 @@ export const getThemeFormSchema = (
       showErrorToast("Please enter theme name");
       return false;
     }
-    if (!options.dataContext.modalState[0]?.editorData?.trim()) {
+    
+    const editorData = options.dataContext.modalState[0]?.editorData?.trim();
+    if (!editorData) {
       showErrorToast("Please enter theme configuration");
       return false;
     }
+    
+    const validation = validateFunction(editorData);
+    if (!validation.isValid) {
+      showErrorToast(validation.error || "Invalid theme configuration");
+      return false;
+    }
+    
     return true;
   };
 

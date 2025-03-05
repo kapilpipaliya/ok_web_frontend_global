@@ -10,6 +10,7 @@ import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { validateFunction } from "../../../../lib/validation/validateFunction";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
@@ -41,46 +42,16 @@ export function FunctionEditor(props: {
   );
 
   const evaluateOtherProps = (value: string) => {
-    try {
-      if (!value) {
-        setIsFunctionValid(true);
-        props.setPropertyValue(
-          { P: { key: "props" } } as unknown as Vertex,
-          value,
-        );
-        return;
-      }
-
-      if (!value.includes("return {")) {
-        throw new Error("Function must return an object");
-      }
-
-      setIsFunctionValid(true);
+    const validation = validateFunction(value);
+    setIsFunctionValid(validation.isValid);
+    
+    if (validation.isValid) {
       props.setPropertyValue(
         { P: { key: "props" } } as unknown as Vertex,
         value,
       );
-
-      /* Original validation code:
-      const func = new Function("args", `${value}`);
-      if (typeof func === "function") {
-        const result = func({});
-        if (typeof result === "object") {
-          setIsFunctionValid(true);
-          props.setPropertyValue(
-            { P: { key: "props" } } as unknown as Vertex,
-            value,
-          );
-        } else {
-          throw new Error("Function did not return an object");
-        }
-      } else {
-        throw new Error("Input is not a function");
-      }
-      */
-    } catch (error) {
-      console.error("Error evaluating function:", error);
-      setIsFunctionValid(false);
+    } else {
+      console.error("Function validation error:", validation.error);
     }
   };
 
