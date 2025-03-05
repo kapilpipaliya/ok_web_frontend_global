@@ -1,6 +1,6 @@
 import type { JsonEditor, MenuButton, MenuItem, MenuSeparator, RenderMenuContext } from 'vanilla-jsoneditor';
 
-import { createSignal, onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup, onMount, createEffect } from 'solid-js';
 import { createJSONEditor } from 'vanilla-jsoneditor';
 // import 'vanilla-jsoneditor/themes/jse-theme-dark.css';
 
@@ -13,8 +13,17 @@ interface VanilaJsonEditorProps {
 // https://github.com/josdejong/svelte-jsoneditor
 export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
   let containerRef: HTMLDivElement | undefined;
-  let editor: JsonEditor | undefined;
+  const [editor, setEditor] = createSignal<JsonEditor | undefined>(undefined);
   const [currentContent, setCurrentContent] = createSignal<unknown>(props.json);
+
+  // Update editor when props.json changes
+  createEffect(() => {
+    if (editor()) {
+      const newJson = JSON.parse(JSON.stringify(props.json));
+      editor()!.update({ json: newJson });
+      setCurrentContent(newJson);
+    }
+  });
 
   onMount(() => {
     if (!containerRef) return;
@@ -30,6 +39,7 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
           
           const result: any = {};
           for (const key in obj) {
+            if (key === '') continue; // Skip empty string keys
             const newKey = key.includes(' ') ? key.replace(/ /g, '_') : key;
             result[newKey] = processContent(obj[key]);
           }
@@ -37,8 +47,8 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
         };
         
         const processedContent = processContent(currentContent());
-        if (editor) {
-          editor.update({ json: processedContent });
+        if (editor()) {
+          editor()!.update({ json: processedContent });
         }
         props.onChange(JSON.stringify(processedContent));
       }
@@ -92,7 +102,7 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
       });
     }
 
-    editor = createJSONEditor({
+    const newEditor = createJSONEditor({
       props: {
         content: {
           json: props.json
@@ -120,19 +130,21 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
           },
         onChangeMode: (mode: any) => {
           // Force tree mode if user tries to switch to text or table
-          if (mode !== 'tree' && editor) {
-            editor.updateProps({ mode: 'tree' as any });
+          if (mode !== 'tree' && newEditor) {
+            newEditor.updateProps({ mode: 'tree' as any });
           }
         },
         onRenderMenu: handleRenderMenu
       },
       target: containerRef
     });
+
+    setEditor(newEditor);
   });
 
   onCleanup(() => {
-    if (editor) {
-      editor.destroy();
+    if (editor()) {
+      editor()!.destroy();
     }
   });
 
