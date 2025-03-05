@@ -3,10 +3,14 @@ import { Dynamic } from "solid-js/web";
 
 import { replacePlaceholderWithUrl } from "~/features/css_editor/utils/cssStateToString";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
+import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPropertyValueGlobal";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph, Vertex } from "~/lib/graph/graph";
 
 import type { GenericComponentProps } from "./FieldType";
+
+import { FormStoreObject } from "../form/context/FormContext";
 
 // HtmlField
 export function HtmlField(
@@ -23,10 +27,14 @@ export function HtmlField(
       viewModeClass?: string;
     },
 ) {
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => parentRenderContext()?.context.meta!;
+  const layoutStoreId = useDesignerLayoutStore();
+  const formStoreId = useDesignerFormIdContext();
+  const formStoreVertex = () =>
+    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [local, others] = splitProps(props, [
     "componentName",
     "onChange",
@@ -41,15 +49,49 @@ export function HtmlField(
     "src",
   ]);
 
+  const handleTextChange = (e: Event) => {
+    if (!layoutStoreId) return;
+    
+    const target = e.target as HTMLSpanElement;
+    if (formStoreVertex()?.P.selectedId !== -1) {
+      setPropertyValueGlobal(
+        graph,
+        setGraph,
+        formStoreVertex()?.P.txnId,
+        {
+          P: {
+            key: "text",
+          },
+        } as unknown as Vertex,
+        meta(),
+        target.textContent,
+      );
+    }
+  };
+
   const Content = () => {
-    return (
-      <>
-        <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
-        {local.text}
-        {local.value}
-        <Show when={!local.childrenBefore}>{local.children}</Show>
-      </>
-    );
+    const isPageDesigner = !!layoutStoreId;
+
+    return <Switch>
+      <Match when={isPageDesigner && local.text}>
+          <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
+          <span 
+            contentEditable={true}
+            onBlur={handleTextChange}
+            style={{ display: "inline-block", "min-width": "1em" }}
+          >
+            {local.text}
+          </span>
+          {local.value}
+          <Show when={!local.childrenBefore}>{local.children}</Show>
+      </Match>
+      <Match when={true}>
+          <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
+          {local.text}
+          {local.value}
+          <Show when={!local.childrenBefore}>{local.children}</Show>
+      </Match>
+    </Switch>
   };
 
   return (
