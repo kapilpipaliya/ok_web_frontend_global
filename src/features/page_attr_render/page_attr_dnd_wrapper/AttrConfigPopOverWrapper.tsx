@@ -1,6 +1,6 @@
 import type { Strategy } from "@floating-ui/dom";
 
-import createFloating from "@corvu/utils/create/floating";
+// import createFloating from "@corvu/utils/create/floating";
 import { getFloatingStyle } from "@corvu/utils/floating";
 import { type Accessor, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
@@ -10,6 +10,7 @@ import {
   type PageLayoutObject,
   useDesignerFormIdContext,
 } from "~/features/page_designer/context/LayoutContext";
+import createFloating from "~/lib/dom/createFloating";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
