@@ -201,30 +201,8 @@ export function PageViewWrapper(
     return "";
   });
 
-  const metaDtaInitialize = (data: ServerResult) => {
-    if (props.formId && graph.vertexes[props.formId]) {
-      delete data.graph!.vertexes[props.formId];
-    }
-    setGraphData(graph, setGraph, data.graph!);
-
-    if (Array.isArray(data.result)) {
-      if (data.result.length > 0) {
-        setFormStore("formMetaId", data.result[0].id);
-      }
-    } else if (isObject(data.result)) {
-      setFormStore("formMetaId", data.result.id);
-    }
-  };
-
-  // load form meta data
-  async function loadFormDesignerMetaData(): Promise<boolean> {
-    if (!formStore()) {
-      return false;
-    }
-    if (props.formMetaId) {
-      setFormStore("formMetaId", props.formMetaId);
-      return true;
-    }
+  // Pure data fetching functions that don't mutate state
+  async function fetchFormMetaData() {
     let form: IFormMetaData | null = null;
     if (!form && props.pageVertexName && FormMetaData[props.pageVertexName]) {
       form = FormMetaData[props.pageVertexName];
@@ -243,11 +221,95 @@ export function PageViewWrapper(
         incoming,
         outgoing,
       });
+
       if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
-        setFormStore("error", `No ${props.pageVertexName} configured`);
-        return false;
+        return { error: `No ${props.pageVertexName} configured` };
       }
-      metaDtaInitialize(data);
+
+      return { data, form };
+    }
+
+    return { form };
+  }
+
+  async function fetchFormData() {
+    if (props.getFormData) {
+      try {
+        const data = await props.getFormData();
+        if (!data || data.error) {
+          return { error: data.error || "Error fetching form data" };
+        }
+        return { data };
+      } catch (error) {
+        return { error: (error as Error).message };
+      }
+    }
+
+    if (props.formDataId) {
+      return { formDataIdOverride: props.formDataId };
+    }
+
+    if (!id()) {
+      return { createNew: true };
+    }
+
+    if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) {
+      return { error: "Missing required permissions" };
+    }
+
+    try {
+      const { data, error } = await getFormData(
+        graph,
+        formStore().P.formMetaData!.attributes,
+        id()!,
+      );
+
+      if (error || !Array.isArray(data?.result) || data.result.length === 0) {
+        return { error: `No ${props.pageVertexName} found` };
+      }
+
+      // Find all Component vertices from the loaded data
+      const componentVertices = Object.values(data!.graph!.vertexes).filter(
+        (v) => v.L.includes("Component"),
+      );
+
+      // Fetch data for all components
+      if (componentVertices.length > 0) {
+        await fetchComponentData(componentVertices, graph, setGraph);
+      }
+
+      return {data};
+    } catch (e) {
+      return { error: `Error When Loading Form: ${(e as Error).message}` };
+    }
+  }
+
+  // State mutation functions
+  async function handleFormMetaData() {
+    if (props.formMetaId) {
+      setFormStore("formMetaId", props.formMetaId);
+      return true;
+    }
+    const result = await fetchFormMetaData();
+
+    if (result.error) {
+      setFormStore("error", result.error);
+      return false;
+    }
+
+    let form = result.form;
+    if (result.data) {
+      if (props.formId && graph.vertexes[props.formId]) {
+        delete result.data.graph!.vertexes[props.formId];
+      }
+      setGraphData(graph, setGraph, result.data.graph!);
+      if (Array.isArray(result.data.result)) {
+        if (result.data.result.length > 0) {
+          setFormStore("formMetaId", result.data.result[0].id);
+        }
+      } else if (isObject(result.data.result)) {
+        setFormStore("formMetaId", result.data.result.id);
+      }
       if (
         formStore()?.P.formMetaId &&
         graph.vertexes[formStore().P.formMetaId!]!
@@ -258,26 +320,30 @@ export function PageViewWrapper(
           graph.vertexes[formStore().P.formMetaId!]!,
         );
       }
+    } else if (result.formMetaId) {
+      setFormStore("formMetaId", result.formMetaId);
     }
-    setFormStore("formMetaData", form);
-    if (!formStore()?.P.formMetaData) {
+
+    if (!props.formMetaId && !form) {
       setFormStore("error", `${props.pageVertexName} is not configured`);
       return false;
     }
-    if (!formStore().P.formMetaId) {
-      const metaVertexResult = untrack(() => {
-        let formToUse = form;
-        if (PageDesignerLabels.includes(form.key) || form.key === "Component") {
-          formToUse = {
-            ...form,
-            attributes: form.attributes.map((attr) => ({
-              ...attr,
-              attributes: attr.attributes?.filter((a) => a.key !== "Attr"),
-            })),
-          };
-        }
-        return createMeta(formToUse, metaTxnId, graph, setGraph);
-      });
+    if (form) {
+      let formToUse = form;
+      // improve performance
+      if (PageDesignerLabels.includes(form.key!) || form.key === "Component") {
+        formToUse = {
+          ...form,
+          attributes: form.attributes.map((attr) => ({
+            ...attr,
+            attributes: attr.attributes?.filter((a) => a.key !== "Attr"),
+          })),
+        };
+      }
+
+      const metaVertexResult = untrack(() =>
+        createMeta(formToUse!, metaTxnId, graph, setGraph)
+      );
 
       if (metaVertexResult.error) {
         return false;
@@ -285,6 +351,7 @@ export function PageViewWrapper(
       setFormStore("formMetaId", metaVertexResult.vertex!.id);
     }
 
+    setFormStore("formMetaData", form);
     setFormStore("isPreview", props.pageId === "preview");
     return true;
   }
@@ -295,29 +362,22 @@ export function PageViewWrapper(
       (permissions.insert() || permissions.edit() || permissions.view())
     );
   }
+  async function handleFormData() {
+    const result = await fetchFormData();
 
-  async function loadData() {
-    if (props.getFormData) {
-      try {
-        const data = await props.getFormData();
-        if (data?.graph) {
-          setGraphData(graph, setGraph, data.graph);
-        }
-        const formDataId = data.result[0]?.id;
-        if (formDataId) {
-          setFormStore("formDataId", formDataId);
-          return;
-        }
-      } catch (error) {
-        setFormStore("error", (error as Error).message);
-        return;
-      }
-    }
-    if (props.formDataId) {
-      setFormStore("formDataId", props.formDataId);
+    if (result.error) {
+      setFormStore("error", result.error);
       return;
     }
-    if (!id()) {
+    if (result.data?.graph) {
+      setGraphData(graph, setGraph, result.data.graph);
+    }
+    const formDataId = result.data?.result?.[0]?.id;
+    if (formDataId) {
+      setFormStore("formDataId", formDataId);
+    } else if (props.formDataId) {
+      setFormStore("formDataId", props.formDataId);
+    } else if (!id()) {
       const createResult = createFormVertex(
         graph,
         setGraph,
@@ -325,6 +385,7 @@ export function PageViewWrapper(
         graph.vertexes[formStore().P.formMetaId!]!.P.key,
         {},
       );
+
       if (createResult.error) {
         setFormStore("error", createResult.error);
         return;
@@ -363,87 +424,58 @@ export function PageViewWrapper(
       }
 
       setFormStore("formDataId", createResult.vertex!.id);
-    }
 
-    if (!id() && graph.vertexes[formStore().P.formDataId!]?.L[0] === "Form") {
-      const layoutId = addFormInitialComponent(
-        graph.vertexes[formStore().P.formDataId!],
-        graph,
-        formStore().P.txnId,
-        setGraph,
-      );
-      if (layoutId === -1) {
-        setFormStore("error", "Adding component to layout failed");
-        return;
+      if (!id() && graph.vertexes[formStore().P.formDataId!]?.L[0] === "Form") {
+        const layoutId = addFormInitialComponent(
+          graph.vertexes[formStore().P.formDataId!],
+          graph,
+          formStore().P.txnId,
+          setGraph,
+        );
+        if (layoutId === -1) {
+          setFormStore("error", "Adding component to layout failed");
+          return;
+        }
       }
     }
 
-    saveUndoPoint(formStore().P.txnId, graph, setGraph);
     if (!(props.parentId || props.txnId)) {
       setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
     }
     saveStepIndex(formStore().P.txnId, "initial", graph, setGraph);
-
-    if (!(id() && (isNoPermissionCheck() || hasRequiredPermissions()))) {
-      return;
-    }
-    try {
-      const { data, error } = await getFormData(
-        graph,
-        formStore().P.formMetaData!.attributes,
-        id()!,
-      );
-
-      if (error || !Array.isArray(data?.result) || data.result.length === 0) {
-        setFormStore("error", `No ${props.pageVertexName} found`);
-        return;
-      }
-
-      // Find all Component vertices from the loaded data
-      const componentVertices = Object.values(data!.graph!.vertexes).filter(
-        (v) => v.L.includes("Component"),
-      );
-
-      // Fetch data for all components
-      if (componentVertices.length > 0) {
-        await fetchComponentData(componentVertices, graph, setGraph);
-      }
-
-      setGraphData(graph, setGraph, data!.graph!);
-      setFormStore("formDataId", data!.result[0].id);
-    } catch (e: any) {
-      setFormStore("error", `Error When Loading Form: ${e.message}`);
-    }
+    saveUndoPoint(formStore().P.txnId, graph, setGraph);
   }
 
-  onMount(async () => {
-    setFormStore("mounted", true);
-    if (!(await loadFormDesignerMetaData())) {
+  // Initialize data loading immediately
+  const loadInitialData = async () => {
+    if (!(await handleFormMetaData())) {
       return;
     }
-    if (
-      formStore().P.formMetaId &&
-      !isNoPermissionCheck() &&
-      !graph.vertexes[formStore().P.formMetaId!]!.P.public
-    ) {
-      setFormStore(
-        "error",
-        `${props.pageVertexName} ${props.pageVertexLabel} is not authorized`,
-      );
+
+    if (formStore().P.formMetaId && !isNoPermissionCheck() && !graph.vertexes[formStore().P.formMetaId!]!.P.public) {
+      setFormStore("error", `${props.pageVertexName} ${props.pageVertexLabel} is not authorized`);
       return;
     }
+
     if (!graph.vertexes[formStore().P.formMetaId!]) {
       setFormStore("error", "No form meta data found");
       return;
     }
+
     if (!graph.vertexes[formStore().P.formMetaId!]?.P.key) {
       setFormStore("error", `No key for the ${props.pageVertexName}`);
       return;
     }
 
     props.initializeFormStoreParent?.(pageFormVertexObject.id);
-    await loadData();
-  });
+    await handleFormData();
+  };
+
+  // Start loading data immediately
+  onMount(() => {
+    loadInitialData();
+    setFormStore("mounted", true);
+  })
 
   createEffect(
     on(
@@ -456,14 +488,15 @@ export function PageViewWrapper(
   createEffect(
     on(
       () => props.expression ?? "new",
-      () => {
+      async () => {
         setFormStore("formMetaId", undefined);
         setFormStore("formDataId", undefined);
-        loadFormDesignerMetaData();
+        await handleFormMetaData();
       },
       { defer: true },
     ),
   );
+
   onCleanup(() => {
     revertTransaction(metaTxnId, graph, setGraph);
   });

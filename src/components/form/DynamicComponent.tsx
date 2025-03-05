@@ -778,7 +778,7 @@ export function DynamicComponent(
   );
 }
 
-export function getText(
+ function getText(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   projection: string,
@@ -798,7 +798,7 @@ export function getText(
   }
 }
 
-export function getUrl(
+ function getUrl(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   projection: string,
@@ -816,24 +816,3 @@ export function getUrl(
     return undefined;
   }
 }
-
-const _inputTypes = {
-  color: "color",
-  date: "date",
-  "datetime-local": "datetime-local",
-  email: "email",
-  file: "file",
-  image: "image",
-  month: "month",
-  number: "number",
-  password: "password",
-  radio: "radio",
-  range: "range",
-  reset: "reset",
-  search: "search",
-  tel: "tel",
-  text: "text",
-  time: "time",
-  url: "url",
-  week: "week",
-};
