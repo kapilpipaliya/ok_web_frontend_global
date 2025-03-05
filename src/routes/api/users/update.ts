@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
@@ -45,101 +45,97 @@ export async function POST({ request }: APIEvent) {
 
     await validateUniqueFields(dbSession, uuid, oldUser, email, username);
 
-    // Store the pending email if changing
-    const setEmail =
-      email !== oldUser.P.email ? "u.pendingEmail = $email," : "";
-    const isEmailChanged = email !== oldUser.P.email;
-    const isUsernameChanged = username !== oldUser.P.username;
-    const isNameChanged = name !== oldUser.P.name;
+    // Start transaction after all validations are complete
+    const transaction = dbSession.beginTransaction();
 
-    // Update user and roles
-    const result = await dbSession.run(
-      `
-      MATCH (u:User {uuid: $uuid})
-      SET ${setEmail}
-          u.username = $username,
-          u.name = $name,
-          u.updatedAt = datetime()
-      WITH u
-      // Get existing roles
-      OPTIONAL MATCH (u)-[r:UserRole]->(existingRole:Role)
-      WITH u, collect(elementId(existingRole)) as existingRoleIds
-      // Delete relationships for removed roles
-      OPTIONAL MATCH (u)-[r:UserRole]->(roleToDelete:Role)
-      WHERE NOT elementId(roleToDelete) IN $roles
-      DELETE r
-      WITH u, existingRoleIds
-      // Create new role relationships only for new roles
-      UNWIND $roles as roleId
-      MATCH (r:Role)
-      WHERE elementId(r) = roleId AND NOT roleId IN existingRoleIds
-      CREATE (u)-[:UserRole]->(r)
-      RETURN u
-      `,
-      {
-        email,
+    try {
+      // Store the pending email if changing
+      const setEmail =
+        email !== oldUser.P.email ? "u.pendingEmail = $email," : "";
+      const isEmailChanged = email !== oldUser.P.email;
+      const isUsernameChanged = username !== oldUser.P.username;
+      const isNameChanged = name !== oldUser.P.name;
+
+      // Update user properties
+      const updatedUserNode = await updateUserProperties(
+        transaction,
+        isEmailChanged ? email : undefined,
         name,
-        roles,
+        setEmail,
         username,
         uuid,
-      },
-    );
-
-    const updatedUser = convertNodeToJson(result.records[0].get("u"));
-    const newRoles = await getUserRoles(dbSession, uuid);
-
-    // Build a detailed update message
-    let details = "User updated";
-    if (isNameChanged) {
-      details += ` - name: ${oldUser.P.name} → ${name}`;
-    }
-    if (isUsernameChanged) {
-      details += ` - username: ${oldUser.P.username} → ${username}`;
-    }
-    if (isEmailChanged) {
-      details += ` - pending email change: ${oldUser.P.email} → ${email}`;
-    }
-
-    // Add role changes if any
-    const addedRoles = newRoles.filter((r) => !oldRoles.includes(r));
-    const removedRoles = oldRoles.filter((r) => !newRoles.includes(r));
-
-    if (addedRoles.length > 0) {
-      details += ` - added roles: ${addedRoles.join(", ")}`;
-    }
-    if (removedRoles.length > 0) {
-      details += ` - removed roles: ${removedRoles.join(", ")}`;
-    }
-
-    // Log the user update activity
-    await createActivityLog(
-      dbSession,
-      "user_update",
-      "User",
-      uuid,
-      user.P.email,
-      details,
-    );
-
-    // If email was changed, send confirmation emails
-    if (email !== oldUser.P.email) {
-      await sendEmailConfirmation(
-        request,
-        oldUser,
-        email,
-        updatedUser,
-        subDomain,
-        dbSession,
       );
-    }
 
-    return {
-      graph: {
-        edges: {},
-        vertexes: { [updatedUser.id]: updatedUser },
-      },
-      result: updatedUser,
-    };
+      if (!updatedUserNode) {
+        throw new APIError("User not found", 404);
+      }
+
+      // Handle role updates
+      const existingRoleIds = await getExistingRoleIds(transaction, uuid);
+      await removeOldRoles(transaction, roles, uuid);
+      await addNewRoles(transaction, existingRoleIds, roles, uuid);
+
+      const updatedUser = convertNodeToJson(updatedUserNode);
+      const newRoles = await getUserRoles(transaction, uuid);
+
+      // Build a detailed update message
+      let details = "User updated";
+      if (isNameChanged) {
+        details += ` - name: ${oldUser.P.name} → ${name}`;
+      }
+      if (isUsernameChanged) {
+        details += ` - username: ${oldUser.P.username} → ${username}`;
+      }
+      if (isEmailChanged) {
+        details += ` - pending email change: ${oldUser.P.email} → ${email}`;
+      }
+
+      // Add role changes if any
+      const addedRoles = newRoles.filter((r) => !oldRoles.includes(r));
+      const removedRoles = oldRoles.filter((r) => !newRoles.includes(r));
+
+      if (addedRoles.length > 0) {
+        details += ` - added roles: ${addedRoles.join(", ")}`;
+      }
+      if (removedRoles.length > 0) {
+        details += ` - removed roles: ${removedRoles.join(", ")}`;
+      }
+
+      // Log the user update activity
+      await createActivityLog(
+        transaction,
+        "user_update",
+        "User",
+        uuid,
+        user.P.email,
+        details,
+      );
+
+      // If email was changed, send confirmation emails
+      if (email !== oldUser.P.email) {
+        await sendEmailConfirmation(
+          request,
+          oldUser,
+          email,
+          updatedUser,
+          subDomain,
+          transaction,
+        );
+      }
+
+      await transaction.commit();
+
+      return {
+        graph: {
+          edges: {},
+          vertexes: { [updatedUser.id]: updatedUser },
+        },
+        result: updatedUser,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   } catch (error) {
     return handleAPIError(error);
   } finally {
@@ -147,9 +143,39 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
+async function addNewRoles(
+  dbSession: Session | Transaction,
+  existingRoleIds: string[],
+  newRoleIds: string[],
+  uuid: string,
+) {
+  await dbSession.run(
+    `
+    MATCH (u:User {uuid: $uuid})
+    WITH u
+    UNWIND $newRoleIds as roleId
+    MATCH (r:Role)
+    WHERE elementId(r) = roleId AND NOT roleId IN $existingRoleIds
+    CREATE (u)-[:UserRole]->(r)
+    `,
+    { existingRoleIds, newRoleIds, uuid },
+  );
+}
+
+async function getExistingRoleIds(dbSession: Session | Transaction, uuid: string) {
+  const result = await dbSession.run(
+    `
+    MATCH (u:User {uuid: $uuid})-[:UserRole]->(role:Role)
+    RETURN collect(elementId(role)) as roleIds
+    `,
+    { uuid },
+  );
+  return result.records[0]?.get("roleIds") || [];
+}
+
 // Helper function to get user roles
 async function getUserRoles(
-  dbSession: Session,
+  dbSession: Session | Transaction,
   uuid: string,
 ): Promise<string[]> {
   const result = await dbSession.run(
@@ -159,6 +185,48 @@ async function getUserRoles(
   );
 
   return result.records.map((record) => record.get("r.key"));
+}
+
+async function removeOldRoles(
+  dbSession: Session | Transaction,
+  newRoleIds: string[],
+  uuid: string,
+) {
+  await dbSession.run(
+    `
+    MATCH (u:User {uuid: $uuid})-[r:UserRole]->(role:Role)
+    WHERE NOT elementId(role) IN $newRoleIds
+    DELETE r
+    `,
+    { newRoleIds, uuid },
+  );
+}
+
+async function updateUserProperties(
+  dbSession: Session | Transaction,
+  email: string | undefined,
+  name: string,
+  setEmail: string,
+  username: string,
+  uuid: string,
+) {
+  const result = await dbSession.run(
+    `
+    MATCH (u:User {uuid: $uuid})
+    SET ${setEmail}
+        u.username = $username,
+        u.name = $name,
+        u.updatedAt = datetime()
+    RETURN u
+    `,
+    {
+      email,
+      name,
+      username,
+      uuid,
+    },
+  );
+  return result.records[0]?.get("u");
 }
 
 // Remember to:

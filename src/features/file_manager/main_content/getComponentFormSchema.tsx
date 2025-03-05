@@ -10,16 +10,18 @@ import type {
 import { useToast } from "~/components/styled/Toast";
 import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrains";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { useGraph } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { getErrorMessage } from "~/lib/api/getErrorMessage";
 
 export const getComponentFormSchema = (
   onSuccess: () => void,
@@ -28,7 +30,6 @@ export const getComponentFormSchema = (
 ) => {
   const { showErrorToast, showSuccessToast } = useToast();
   const [fileManagerStore] = useFileManagerStore();
-  const [graph, setGraph] = useGraph();
   const label = () => (saveAsLabel === "Perm" ? "Permission" : "Component");
 
   const validateForm = (formData: Vertex) => {
@@ -57,39 +58,57 @@ export const getComponentFormSchema = (
     try {
       options.dataContext.modalState[1]("isLoading", true);
 
-      const newFormTxnId = generateNewTxnId(graph, setGraph);
+      const newFormTxnId = generateNewTxnId(options.graph, options.setGraph);
       const formVertex = formData;
 
-      const createResult = createFormVertex(
-        graph,
-        setGraph,
-        newFormTxnId,
-        saveAsLabel || "Comp",
-        {
-          description: formVertex.P.description,
-          key: formVertex.P.key,
-        },
-      );
-      const dataVertex = createResult.vertex!;
+      if (formData.id.startsWith("-")) {
+        const createResult = createFormVertex(
+          options.graph,
+          options.setGraph,
+          newFormTxnId,
+          saveAsLabel || "Comp",
+          {
+            description: formVertex.P.description,
+            key: formVertex.P.key,
+          },
+        );
+        const dataVertex = createResult.vertex!;
 
-      const parentFolderMetaVertex = {
-        id: "",
-        IN: {},
-        L: [],
-        OUT: {},
-        P: saveAsLabel === "Perm" ? parentPermAttribute : parentCompAttribute,
-      } as Vertex;
+        const parentFolderMetaVertex = {
+          id: "",
+          IN: {},
+          L: [],
+          OUT: {},
+          P: saveAsLabel === "Perm" ? parentPermAttribute : parentCompAttribute,
+        } as Vertex;
 
-      setSelectionValue(
-        newFormTxnId,
-        dataVertex,
-        graph,
-        setGraph,
-        parentFolderMetaVertex,
-        fileManagerStore.selectedItem!.id,
-      );
+        setSelectionValue(
+          newFormTxnId,
+          dataVertex,
+          options.graph,
+          options.setGraph,
+          parentFolderMetaVertex,
+          fileManagerStore.selectedItem!.id,
+        );
+      } else {
+        const updateResult = mergeVertexProperties(
+          newFormTxnId,
+          formData.id,
+          options.graph,
+          options.setGraph,
+          {
+            description: formVertex.P.description,
+            key: formVertex.P.key,
+          },
+        );
 
-      const commitData = commitTxn(newFormTxnId, graph);
+        if (updateResult.error) {
+          showErrorToast(updateResult.error);
+          return;
+        }
+      }
+
+      const commitData = commitTxn(newFormTxnId, options.graph);
 
       if (!commitData) {
         showErrorToast(`Failed to upload ${label()}`);
@@ -98,13 +117,13 @@ export const getComponentFormSchema = (
 
       const result = await submitDataCall(
         { ...commitData },
-        graph,
-        setGraph,
+        options.graph,
+        options.setGraph,
         newFormTxnId,
       );
 
-      if (result.error) {
-        showErrorToast(result.error);
+      if (getErrorMessage(result)) {
+        showErrorToast(getErrorMessage(result));
       } else {
         showSuccessToast(`${label()} created successfully`);
         fileManagerStore.gridStore?.[0].fetchTableData();
@@ -207,6 +226,7 @@ export const getComponentFormSchema = (
           disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            revertTransactionUpToIndex(options.txnId, -1, options.graph, options.setGraph);
             onClose();
           },
           text: "Cancel",

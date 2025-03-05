@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -14,7 +14,7 @@ export async function sendEmailConfirmation(
   newEmail: string,
   userNew: Vertex,
   subDomain: string,
-  dbSession: Session,
+  dbSession: Session | Transaction,
 ) {
   const userData = encodeUserData({
     email: oldUser.P.email,

@@ -126,7 +126,8 @@ export const userFormSchema = {
 export const getUserFormSchema = (onSuccess: () => void) => {
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const validateForm = (formData: Vertex) => {
+  const validateForm = (options: FunctionArgumentType) => {
+    const formData = options.data;
     if (!formData.P.email?.trim()) {
       showErrorToast("Please enter email");
       return false;
@@ -149,7 +150,11 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       showErrorToast(usernameError);
       return false;
     }
-    if (!formData.P.role?.length) {
+    if ((evalExpression("->$0Role", {
+      graph: options.graph,
+      setGraph: options.setGraph,
+      vertexes: [formData],
+    }) as Vertex[]).length === 0) {
       showErrorToast("Please select at least one role");
       return false;
     }
@@ -157,10 +162,10 @@ export const getUserFormSchema = (onSuccess: () => void) => {
   };
 
   const handleSave = async (options: FunctionArgumentType) => {
-    const formData = options.data;
-    if (!validateForm(formData)) {
+    if (!validateForm(options)) {
       return;
     }
+    const formData = options.data;
 
     try {
       options.dataContext.modalState[1]("isLoading", true);

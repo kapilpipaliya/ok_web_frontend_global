@@ -208,7 +208,7 @@ export function mergeVertexProperties<T extends { [key: string]: unknown }>(
   setGraph: SetStoreFunction<GraphInterface>,
   properties: Partial<T>,
   options?: { cloneProperties?: boolean; skipPostMessage?: string },
-): { error: boolean | string; txnDetailIndex?: number } {
+): { error: string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId =
       getVertexOldIdToNewIdMap(graph)[vertexId] || vertexId;
@@ -247,7 +247,7 @@ export function mergeVertexProperties<T extends { [key: string]: unknown }>(
       { mergeVertexProperties: { properties, txnId, vertexId } },
     );
     return {
-      error: false,
+      error: "",
       txnDetailIndex: getLastTxnIndex(txnId, graph),
     };
   });
