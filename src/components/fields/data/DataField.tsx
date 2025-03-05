@@ -1,6 +1,8 @@
+import { createAsync } from "@solidjs/router";
 import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
 import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsAPICall";
+import { ServerResult } from "~/cypher/types/ServerResult";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getCollection } from "~/features/page_attr_render/utils/getCollection";
@@ -28,16 +30,33 @@ export const DataField = (props: {
   const [errorMessage, setErrorMessage] = createSignal("");
   const dataContext = useRepeaterVertexContext() || {};
 
-  const setInitialState = async (expression: string) => {
-    setIsFetching(true);
+  const selectionOptionsData = createAsync<null | ServerResult>(async () => {
+    if (!props.expression) {
+      return null;
+    }
+    if (props.data) {
+      return null;
+    }
+    return getSelectionOptionsAPICall([data()], props.expression);
+  });
+
+
+  createEffect(() => {
+    if (!props.expression) {
+      return;
+    }
     setErrorMessage("");
+    if (!selectionOptionsData()) {
+      setOptions([]);
+      setErrorMessage("Failed to fetch data");
+      setIsFetching(false);
+      return;
+    }
 
-    const result = await getSelectionOptionsAPICall([data()], expression);
-
-    if (isValidResponse(result)) {
-      setGraphData(graph, setGraph, result.graph!, true);
+    if (isValidResponse(selectionOptionsData()!)) {
+      setGraphData(graph, setGraph, selectionOptionsData()!.graph!, true);
       setOptions(
-        evalExpression(expression, {
+        evalExpression(props.expression, {
           graph,
           setGraph,
           vertexes: dataContext || [],
@@ -45,11 +64,9 @@ export const DataField = (props: {
       );
     } else {
       setOptions([]);
-      setErrorMessage(getErrorMessage(result));
+      setErrorMessage(getErrorMessage(selectionOptionsData()!));
     }
-
-    setIsFetching(false);
-  };
+  });
 
   createEffect(() => {
     if (props.data) {
@@ -61,25 +78,25 @@ export const DataField = (props: {
       }
       return;
     }
-    if (props.expression && typeof props.expression === "string") {
-      setInitialState(props.expression);
-      return;
-    }
-    const data = evalExpression("->$0Data", {
-      graph,
-      setGraph,
-      vertexes: [meta()!],
-    });
-    if (data) {
-      setOptions(data);
-      return;
-    }
-    const collection = getCollection(graph, meta());
-    if (collection) {
-      setInitialState(`g:'${collection}'`);
-      return;
-    }
-    setOptions([]);
+
+    // we dont use ->0Data Expression now.
+    // const data = evalExpression("->$0Data", {
+    //   graph,
+    //   setGraph,
+    //   vertexes: [meta()!],
+    // });
+    // if (data) {
+    //   setOptions(data);
+    //   return;
+    // }
+    // we dont use collection now.
+    // const collection = getCollection(graph, meta());
+    // if (collection) {
+    //   setInitialState(`g:'${collection}'`);
+    //   return;
+    // }
+
+    // setOptions([]);
   });
 
   return (
