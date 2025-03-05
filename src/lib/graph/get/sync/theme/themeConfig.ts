@@ -9,7 +9,12 @@ export function themeConfig(themeVertex?: Vertex) {
   }
 
   if (themeConfig.trim().startsWith("{")) {
-    return JSON.parse(themeConfig);
+    try {
+      return JSON.parse(themeConfig);
+    } catch (error) {
+      console.error("Error parsing theme config JSON:", error);
+      return {};
+    }
   }
   if (themeConfig.trim()) {
     try {

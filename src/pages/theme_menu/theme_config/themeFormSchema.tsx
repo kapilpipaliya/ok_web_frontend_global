@@ -222,8 +222,9 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
         }),
       },
       {
+        as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
-        componentName: "Button",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: () => {
@@ -233,6 +234,7 @@ export const getThemeFormSchema = (onSuccess: () => void, onClose: () => void) =
           },
           text: "Cancel",
         }),
+        type: "button",
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,

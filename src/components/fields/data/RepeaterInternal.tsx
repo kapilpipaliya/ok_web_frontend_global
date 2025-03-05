@@ -14,7 +14,7 @@ export function RepeaterInternal(props: {
   name: string;
   repeaterValue: any;
 }) {
-  const context = useRepeaterVertexContext();
+  const context = useRepeaterVertexContext() || {};
   const repeaterStore = new Proxy(context, {
     get(target, key) {
       if (key === props.name) {

@@ -40,7 +40,7 @@ export const DataField = (props: {
         evalExpression(expression, {
           graph,
           setGraph,
-          vertexes: dataContext,
+          vertexes: dataContext || [],
         }) || [],
       );
     } else {
