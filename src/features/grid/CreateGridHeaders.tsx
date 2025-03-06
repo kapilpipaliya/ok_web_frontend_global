@@ -111,6 +111,7 @@ export function CreateGridHeaders(
                     }
                     <ImageWrapper
                       alt="Preview"
+                      // class="r:4px h:200px object-fit:cover"
                       src={getPreviewURL(attribute, info.row.original, graph)}
                     />
                   </div>
@@ -165,14 +166,15 @@ export function CreateGridHeaders(
                 arrowClass={STYLES.tooltip.arrow}
                 content={
                   <div class={STYLES.tooltip.content}>
-                    <Show when={info.getValue<string>()}>
+                    {/* <Show when={info.getValue<string>()}>
                       <div class={"f:14 font-weight:500"}>
                         {info.getValue<string>()}
                       </div>
-                    </Show>
-                    {getDownloadLink(info.row.original)}
+                    </Show> */}
+                    {/* {getDownloadLink(info.row.original)} */}
                     <ImageWrapper
                       alt="Preview"
+                      class="r:4px h:200px object-fit:cover"
                       src={getDownloadLink(info.row.original)}
                     />
                   </div>

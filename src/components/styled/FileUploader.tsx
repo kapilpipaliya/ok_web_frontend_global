@@ -1,100 +1,73 @@
-import { createWritableMemo } from "@solid-primitives/memo";
 import {
   createEffect,
   createSignal,
+  For,
   type JSX,
   Match,
+  onCleanup,
+  Show,
   splitProps,
   Switch,
 } from "solid-js";
 
-import { API } from "~/lib/api/endpoints";
-import { getSelectedVertexValue } from "~/lib/graph/get/sync/edge/getSelectedVertexValue";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { type Vertex } from "~/lib/graph/graph";
 
-import { setSelectValueHelper } from "../fields/utils/setSelectValueHelper";
 import { runEvent } from "../solid_blocks/tools";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-export type FileUploaderProps = JSX.HTMLAttributes<HTMLLabelElement> & {
+export type FileUploaderProps = JSX.HTMLAttributes<HTMLInputElement> & {
   data?: Vertex;
+  handleFileSelect?: (data: FileList | null) => void;
   label?: string;
   media?: string;
   meta?: Vertex;
-  onUploadSuccess?: (data: any) => void;
-  setValue?: (file: File) => void;
+  multiple?: boolean;
+  setValue?: (files: FileList) => void;
   txnId?: number;
 };
 
 export function FileUploader(props: FileUploaderProps) {
-  const [graph, setGraph] = useGraph();
   const [localProps, others] = splitProps(props, [
     "setValue",
     "meta",
     "data",
     "label",
     "media",
-    "onUploadSuccess",
+    "handleFileSelect",
+    "multiple",
   ]);
-  const [file, setFile] = createSignal<File | null>(null);
-  const [fullBoxMedia, setFullBoxMedia] = createSignal("");
+  const [files, setFiles] = createSignal<File[]>([]);
+  const [previewUrls, setPreviewUrls] = createSignal<string[]>([]);
   let inputRef: HTMLInputElement | undefined;
-
-  const [_selectedFiles, setSelectedFiles] = createWritableMemo(() =>
-    getSelectedVertexValue(graph, props.data, props.meta),
-  );
-
-  const handleFileUpload = async (file: File) => {
-    if (file) {
-      try {
-        return await uploadFile(file, API.file.uploadFileUrl);
-      } catch (error) {
-        // Handle the error case
-        console.error("Upload error:", error);
-      }
-    }
-  };
 
   // on file select
   // 4. on reload it should display preview.
-  const setValue = async (files?: FileList | null) => {
-    const txnId = props.txnId ?? 0;
-    const file = files?.[0];
-    if (file) {
-      setFile(file);
-      setFullBoxMedia(URL.createObjectURL(file));
-      // localProps.setValue?.(file);
-      const data = await handleFileUpload(file);
-      if (data?.graph) {
-        setGraphData(graph, setGraph, data.graph);
-        // Call the onUploadSuccess callback if provided
-        if (localProps.onUploadSuccess) {
-          localProps.onUploadSuccess(data);
-          return;
-        }
-        if (props.data) {
-          setSelectValueHelper(
-            txnId,
-            props.meta!,
-            props.data as Vertex,
-            "MultiSelect",
-            data.result,
-            false,
-            graph,
-            setGraph,
-          );
-        } else {
-          setSelectedFiles(data.result);
-        }
+  const setValue = async (fileList?: FileList | null) => {
+    if (fileList && fileList.length > 0) {
+      const filesArray = Array.from(fileList);
+      setFiles(filesArray);
+
+      // Create object URLs for each file
+      const urls = filesArray.map(file => URL.createObjectURL(file));
+      setPreviewUrls(urls);
+
+      // Call handleFileSelect if provided
+      if (localProps.handleFileSelect) {
+        localProps.handleFileSelect(fileList);
       }
     }
   };
 
   createEffect(() => {
     if (localProps.media) {
-      setFile(localProps.media);
-      setFullBoxMedia(localProps.media);
+      // If media is a string, create a single-item array
+      setPreviewUrls([localProps.media]);
     }
+  });
+
+  // Clean up object URLs when component unmounts
+  onCleanup(() => {
+    previewUrls().forEach(url => URL.revokeObjectURL(url));
   });
 
   const handleDrop = (event: DragEvent) => {
@@ -118,85 +91,81 @@ export function FileUploader(props: FileUploaderProps) {
   };
 
   return (
-    <div // NOSONAR
-      draggable={false}
-      onClick={handleFullBoxClick}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      style={{
-        "background-position": "center",
-        "background-size": "cover",
-        border: fullBoxMedia() === "" ? "2px dashed #ccc" : "",
-        "border-radius": "10px",
-        cursor: "pointer",
-        padding: "20px",
-        position: "relative",
-        "text-align": "center",
-      }}
-    >
+    <>
+      <Show when={files().length === 0 && previewUrls().length === 0}>
+        <button
+          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+          onClick={handleFullBoxClick}
+          type="button"
+        >
+          {localProps.label || `Select ${localProps.multiple ? 'Files' : 'File'}`}
+        </button>
+      </Show>
       <input
         accept="image/*, video/*"
+        multiple={localProps.multiple}
         onChange={(event) => {
           runEvent(event, handleInputChange);
         }}
-        ref={inputRef!}
+        ref={inputRef}
         style={{ display: "none" }}
         type="file"
         {...others}
       />
-      <Switch>
-        <Match when={file()}>
+      <Show when={files().length > 0 || previewUrls().length > 0}>
+        <div // NOSONAR
+          class={`
+        background-position:center
+        background-size:cover
+        ${previewUrls().length === 0 ? "border:2px|dashed|#ccc" : ""}
+        border-radius:10px
+        cursor:pointer
+        min-height:200px
+        position:relative
+        text-align:center
+      `}
+          draggable={false}
+          onClick={handleFullBoxClick}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
           <Switch>
-            <Match when={file()!.type.startsWith("image/")}>
-              <img
-                alt="Media"
-                src={fullBoxMedia()}
-                style={{
-                  "border-radius": "10px",
-                  "max-height": "100%",
-                  "max-width": "100%",
-                }}
-              />
-            </Match>
-            <Match when={file()!.type.startsWith("video/")}>
-              <video
-                controls
-                src={fullBoxMedia()}
-                style={{
-                  "border-radius": "10px",
-                  "max-height": "100%",
-                  "max-width": "100%",
-                }}
-              />
+            <Match when={files().length > 0 || previewUrls().length > 0}>
+              <div class="display:flex flex-wrap:wrap gap:10px justify-content:center p:10px">
+                <For each={files().length > 0 ? files() : [null]}>
+                  {(file, index) => (
+                    <div class="max-width:200px max-height:200px m:5px">
+                      <Switch>
+                        <Match when={file && file.type.startsWith("image/")}>
+                          <img
+                            alt="Media"
+                            class="border-radius:10px max-height:100% max-width:100%"
+                            src={previewUrls()[index()]}
+                          />
+                        </Match>
+                        <Match when={file && file.type.startsWith("video/")}>
+                          <video
+                            class="border-radius:10px max-height:100% max-width:100%"
+                            controls
+                            src={previewUrls()[index()]}
+                          />
+                        </Match>
+                        <Match when={!file && previewUrls().length > 0}>
+                          <img
+                            alt="Media"
+                            class="border-radius:10px max-height:100% max-width:100%"
+                            src={previewUrls()[index()]}
+                          />
+                        </Match>
+                      </Switch>
+                    </div>
+                  )}
+                </For>
+              </div>
             </Match>
           </Switch>
-        </Match>
-        <Match when={!file()}>
-          <span>{localProps.label || "Click to select a media file"}</span>
-        </Match>
-      </Switch>
-    </div>
+        </div>
+      </Show>
+    </>
   );
-}
-
-export async function uploadFile(file: File, apiUrl: string, method = "POST") {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    const response = await fetch(apiUrl, {
-      body: formData,
-      method,
-    });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok " + response.statusText);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("There was a problem with the file upload:", error);
-    throw error;
-  }
 }

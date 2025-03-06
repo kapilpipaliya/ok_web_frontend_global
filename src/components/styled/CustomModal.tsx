@@ -84,6 +84,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
 
   return (
     <Show when={open()}>
+      <div class={SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS}></div>
       <Portal>
         <div class={`${SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS}`}>
           <Content />

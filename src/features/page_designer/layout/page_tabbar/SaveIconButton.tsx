@@ -4,9 +4,9 @@ import { createMemo } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { formSubmit } from "~/components/form/functions/formSubmit";
-import { uploadFile } from "~/components/styled/FileUploader";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
+import { uploadFile } from "~/components/styled/uploadFile";
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { evalExpression } from "~/lib/expression_eval";
