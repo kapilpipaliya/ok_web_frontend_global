@@ -1,7 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { getQuery } from "vinxi/http";
-
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -11,12 +9,11 @@ import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { deleteFile } from "./functions/deleteFile";
 
 export async function DELETE({ request }: APIEvent) {
-  const query = getQuery();
-  const fileId = query.fileId;
+  const { id } = await request.json();
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    if (!fileId) {
+    if (!id) {
       throw new APIError("File ID is required", 400);
     }
 
@@ -37,7 +34,7 @@ export async function DELETE({ request }: APIEvent) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
-    return await deleteFile(fileId as string, dbSession, user);
+    return await deleteFile(id as string, dbSession, user);
   } catch (error) {
     return handleAPIError(error);
   } finally {

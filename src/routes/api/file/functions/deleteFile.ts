@@ -24,26 +24,30 @@ export async function deleteFile(
 
   try {
     const filePath = fileMetadata.P.filePath;
-    await fs.unlink(filePath); // Delete the file from the disk
 
-    const deletedFile = await deleteFileMetadata(neo4jSession, fileId);
+    const deletedFileResult = await deleteFileMetadata(neo4jSession, fileId);
 
-    if (deletedFile) {
+    if (deletedFileResult?.success) {
+      if (filePath) {
+        try {
+          await fs.access(filePath); // Check if file exists
+          await fs.unlink(filePath); // Delete the file from the disk only if it exists
+        } catch (fileError) {
+          // File doesn't exist or can't be accessed, continue with metadata deletion
+          console.log(`File not found on disk: ${filePath}`);
+        }
+      }
+
       await createActivityLog(
         neo4jSession,
         "file_delete",
         "File",
         fileId as string,
         user.P.email,
-        `File deleted: ${deletedFile?.P.fileName} (${deletedFile?.P.contentType})`,
+        `File deleted: ${fileMetadata.P.fileName} (${fileMetadata.P.contentType})`,
       );
     }
-    return {
-      graph: {
-        deleted_vertexes: [fileId],
-      },
-      success: true,
-    };
+    return deletedFileResult;
   } catch (error: any) {
     return {
       error: `Error deleting file ${error.message}`,
