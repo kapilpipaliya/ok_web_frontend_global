@@ -8,7 +8,7 @@ export function TabsWithUnderline(
     displayValueKey: string;
     onTabClick: (key: string) => void;
     selectedKey: string;
-    tabs: Array<{ key: string }>;
+    tabs: Array<{ id: string }>;
   }>,
 ) {
   const getOptionLabel = (option: any) => {
@@ -37,7 +37,7 @@ export function TabsWithUnderline(
         >
           <For each={props.tabs}>
             {(tab) => (
-              <option selected={tab.key === props.selectedKey} value={tab.key}>
+              <option selected={tab.id === props.selectedKey} value={tab.id}>
                 {getOptionLabel(tab)}
               </option>
             )}
@@ -52,10 +52,10 @@ export function TabsWithUnderline(
               {(tab) => (
                 <button
                   aria-current={
-                    tab.key === props.selectedKey ? "page" : undefined
+                    tab.id === props.selectedKey ? "page" : undefined
                   }
-                  class={`lh:1.25rem ${tab.key === props.selectedKey ? "border:primary-50 text:primary-60" : "border-color:transparent border:base-30:hover color:secondary-50 color:secondary-70:hover"} border-bottom-width:2px font-weight:500 px:0.25rem py:0.5rem white-space:nowrap`}
-                  onClick={() => props.onTabClick(tab.key)}
+                  class={`lh:1.25rem ${tab.id === props.selectedKey ? "border:primary-50 text:primary-60" : "border-color:transparent border:base-30:hover color:secondary-50 color:secondary-70:hover"} border-bottom-width:2px font-weight:500 px:0.25rem py:0.5rem white-space:nowrap`}
+                  onClick={() => props.onTabClick(tab.id)}
                   type="button"
                 >
                   {getOptionLabel(tab)}

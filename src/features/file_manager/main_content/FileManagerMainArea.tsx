@@ -8,6 +8,7 @@ import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { useFileManagerStore } from "../FileManagerContext";
 import { getFilesData } from "../sidebar/getFilesData";
 import { AddNewFileButton } from "./AddNewFileButton";
+import { getEditFileOrFolderSchema } from "./fileFormEditSchema";
 import { getComponentFormSchema } from "./getComponentFormSchema";
 
 export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
@@ -86,14 +87,15 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
               : AddNewFileButton
           }
           editSchema={
-            fileManagerStore.parentVertexLabel === "Comp" ||
-            fileManagerStore.parentVertexLabel === "Perm"
-              ? getComponentFormSchema(
-                  () => {},
+            fileManagerStore.editSchema ??
+            (fileManagerStore.parentVertexLabel === "Comp" ||
+              fileManagerStore.parentVertexLabel === "Perm"
+                ? getComponentFormSchema(
+                    () => {},
                   () => {},
                   fileManagerStore.parentVertexLabel as "Comp" | "Perm",
                 )
-              : undefined
+              : getEditFileOrFolderSchema(() => {}))
           }
           enableRowSelection={fileManagerStore.enableRowSelection}
           getTableData={() => fetchChildren(props.item)}

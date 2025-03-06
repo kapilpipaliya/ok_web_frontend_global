@@ -11,13 +11,14 @@ import {
 } from "solid-js";
 
 import { type Vertex } from "~/lib/graph/graph";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { runEvent } from "../solid_blocks/tools";
-import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 export type FileUploaderProps = JSX.HTMLAttributes<HTMLInputElement> & {
   data?: Vertex;
   handleFileSelect?: (data: FileList | null) => void;
+  hidePreview?: boolean;
   label?: string;
   media?: string;
   meta?: Vertex;
@@ -35,6 +36,7 @@ export function FileUploader(props: FileUploaderProps) {
     "media",
     "handleFileSelect",
     "multiple",
+    "hidePreview",
   ]);
   const [files, setFiles] = createSignal<File[]>([]);
   const [previewUrls, setPreviewUrls] = createSignal<string[]>([]);
@@ -92,7 +94,6 @@ export function FileUploader(props: FileUploaderProps) {
 
   return (
     <>
-      <Show when={files().length === 0 && previewUrls().length === 0}>
         <button
           class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
           onClick={handleFullBoxClick}
@@ -100,7 +101,7 @@ export function FileUploader(props: FileUploaderProps) {
         >
           {localProps.label || `Select ${localProps.multiple ? 'Files' : 'File'}`}
         </button>
-      </Show>
+
       <input
         accept="image/*, video/*"
         multiple={localProps.multiple}
@@ -112,7 +113,7 @@ export function FileUploader(props: FileUploaderProps) {
         type="file"
         {...others}
       />
-      <Show when={files().length > 0 || previewUrls().length > 0}>
+      <Show when={(files().length > 0 || previewUrls().length > 0) && !(localProps.hidePreview ?? true)}>
         <div // NOSONAR
           class={`
         background-position:center

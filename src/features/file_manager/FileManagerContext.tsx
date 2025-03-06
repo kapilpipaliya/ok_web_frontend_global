@@ -6,6 +6,7 @@ import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import type { MongoFilter } from "~/cypher/queries/evaluate/mongoToCypher";
 import type { DataGridStore } from "~/features/grid/DataGridContext";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
 
@@ -15,6 +16,7 @@ import { getRootData } from "./sidebar/getRootData";
 
 const getInitialFileManagerStore = () => {
   return {
+    editSchema: null as IFormMetaData | null,
     enableRowSelection:
       undefined as RowSelectionOptions<Vertex>["enableRowSelection"],
     expandedKeys: [] as string[],
@@ -69,6 +71,7 @@ export async function fetchChildrenDataBatch(
 export function FileManagerStoreProvider(
   props: Readonly<{
     children: JSX.Element;
+    editSchema?: IFormMetaData;
     enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
     fileId?: string;
     onFileSelected?: (file: Vertex) => void;
@@ -80,6 +83,9 @@ export function FileManagerStoreProvider(
 ) {
   const fileManagerStore = createStore({
     ...getInitialFileManagerStore(),
+    get editSchema() {
+      return props.editSchema || null;
+    },
     get enableRowSelection() {
       return props.enableRowSelection;
     },

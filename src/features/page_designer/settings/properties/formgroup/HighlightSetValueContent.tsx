@@ -63,7 +63,7 @@ export function HighlightSetValueContent(
           </Match>
           <Match
             when={
-              selectedAttr()?.P.componentName === "Image" &&
+              // selectedAttr()?.P.componentName === "Image" &&
               props.meta.P.key === "src"
             }
           >

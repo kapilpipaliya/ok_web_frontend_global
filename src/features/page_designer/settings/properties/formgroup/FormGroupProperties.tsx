@@ -74,6 +74,7 @@ export function createVertexIds() {
     perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
     src: `srcVertex${createUniqueId()}`,
+    text: `textVertex${createUniqueId()}`,
     thankYouPage: `thankYouPageVertex${createUniqueId()}`,
     width: `widthVertex${createUniqueId()}`,
   };
@@ -289,6 +290,15 @@ function createVertices(
         key: "attrLabel",
       },
     },
+    {
+      id: vertexIds.text,
+      P: {
+        class: PROPERTIES.Css.TextField,
+        componentName: "TextInput",
+        displayName: "Text",
+        key: "text",
+      },
+    },
   ];
   for (const vertex of vertices) {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
@@ -326,8 +336,8 @@ function moveClassToLast(
     vertices?.filter(
       (vertex) => !Object.keys(vertexIds).includes(vertex.P.key),
     ) ?? [];
-  const componentName =
-    graph.vertexes[formStoreVertex()?.P.selectedId].P.componentName;
+  const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
+  const componentName = selectedAttr()?.P.componentName;
   const isForm = formStoreVertex()?.L[0] === "Form";
   const isFormField = isForm && genericInputComponents.includes(componentName);
 
@@ -350,7 +360,7 @@ function moveClassToLast(
     graph.vertexes[vertexIds.required],
     graph.vertexes[vertexIds.hidden],
     graph.vertexes[vertexIds.disabled],
-    ...(componentName === "Image" ? [graph.vertexes[vertexIds.src]] : []),
+    ...(selectedAttr()?.P.as === "img" ? [graph.vertexes[vertexIds.src]] : []),
     ...(componentName === "Icon"
       ? [
           graph.vertexes[vertexIds.icon],
@@ -358,6 +368,7 @@ function moveClassToLast(
           graph.vertexes[vertexIds.height],
         ]
       : []),
+    ...(componentName === "Html" ? [graph.vertexes[vertexIds.text]] : []),
     ...nonCssVertices,
   ];
 }

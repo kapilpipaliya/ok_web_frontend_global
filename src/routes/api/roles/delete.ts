@@ -87,6 +87,7 @@ export async function DELETE({ request }: APIEvent) {
 
     return {
       graph: {
+        deleted_edges: [],
         deleted_vertexes: [roleCheck.records[0].get("r").identity],
       },
       success: true,

@@ -2,6 +2,7 @@ import type { RowSelectionOptions } from "@tanstack/solid-table";
 
 import type { MongoFilter } from "~/cypher/queries/evaluate/mongoToCypher";
 import type { Vertex } from "~/lib/graph/graph";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import {
   type FileManagerObject,
@@ -12,6 +13,7 @@ import { Sidebar } from "./sidebar/FileManagerSideBar";
 
 export default function FileManager(
   props: Readonly<{
+    editSchema?: IFormMetaData;
     enableRowSelection?: RowSelectionOptions<Vertex>["enableRowSelection"];
     fileId?: string;
     parentVertexLabel: string;
@@ -22,6 +24,7 @@ export default function FileManager(
 ) {
   return (
     <FileManagerStoreProvider
+      editSchema={props.editSchema}
       enableRowSelection={props.enableRowSelection}
       fileId={props.fileId}
       parentVertexLabel={props.parentVertexLabel}

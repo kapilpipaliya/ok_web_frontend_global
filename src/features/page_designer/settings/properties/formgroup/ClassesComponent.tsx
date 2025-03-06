@@ -49,7 +49,7 @@ export function ClassesComponent(props: Readonly<ClassesComponentProps>) {
         displayValueKey="::'P.displayName'||::'P.key'||::'P.id'||::'label'"
         onTabClick={handleTabClick}
         selectedKey={selectedId()}
-        tabs={metaClasses() as unknown as { key: string }[]}
+        tabs={metaClasses() as unknown as { id: string }[]}
       />
       <Show keyed when={selectedId()}>
         <CSSPropertiesEditorWrapper
