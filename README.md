@@ -345,3 +345,9 @@ LOGO Design:
 ✅ Tech-Oriented Design → A square element representing draggable blocks.
 ✅ Drag Handles → Added three small dots to signify movement & modularity.
 ✅ Sharp & Clean Lines → Matches modern UI/UX aesthetics.
+
+
+Load env variables on production:
+https://dear-caravan-605.notion.site/Solid-FAQ-b5ae5a47f2ec47c8a78bc5671180845d#1a328989d46a8033a63cd6e94cdaea31
+1. npm install -g dotenv-cli
+2. npm run start

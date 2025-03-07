@@ -7,7 +7,7 @@
     "dev": "vinxi dev --host",
     "build": "vinxi build --no-minify",
     "startDev": "vinxi start --port 3002",
-    "start": "vinxi start --port 3000"
+    "start": "dotenv -e .env -- vinxi start --port 3000"
   },
   "dependencies": {
     "@ai-sdk/openai": "1.2.1",
