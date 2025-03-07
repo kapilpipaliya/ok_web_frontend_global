@@ -8,6 +8,7 @@ import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { API } from "~/lib/api/endpoints";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
@@ -69,16 +70,16 @@ function buildAutoLoginUrl(
   if (host.includes("localhost")) {
     // For localhost, use port if present
     const port = host.split(":")[1] ? `:${host.split(":")[1]}` : "";
-    return `${protocol}//localhost${port}/api/auth/auto-login?token=${secureToken}`;
+    return `${protocol}//localhost${port}${API.auth.autoLoginUrl}?token=${secureToken}`;
   }
 
   const parsedDomain = parse(host);
   const baseDomain = parsedDomain.domain;
 
   if (targetDomain) {
-    return `${protocol}//${targetDomain}/api/auth/auto-login?token=${secureToken}`;
+    return `${protocol}//${targetDomain}${API.auth.autoLoginUrl}?token=${secureToken}`;
   }
-  return `${protocol}//${targetSubdomain}.${baseDomain}/api/auth/auto-login?token=${secureToken}`;
+  return `${protocol}//${targetSubdomain}.${baseDomain}${API.auth.autoLoginUrl}?token=${secureToken}`;
 }
 
 function validateRequest(url: URL) {

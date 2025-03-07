@@ -8,9 +8,9 @@ export const API = {
     passwordReset: {
       completeUrl: "/api/auth/password-reset/complete",
       requestUrl: "/api/auth/password-reset/request",
-      verifyOtpUrl: "/api/auth/password-reset/verify-otp",
+      verifyOtpUrl: "/api/auth/password-reset/verifyOtp",
     },
-    prepareAutoLoginUrl: "/api/auth/prepare-auto-login",
+    prepareAutoLoginUrl: "/api/auth/prepareAutoLogin",
     profileUrl: "/api/auth/updateProfile",
     signUpUrl: "/api/auth/signup",
     updateProfileImageUrl: "/api/auth/updateProfileImage",
