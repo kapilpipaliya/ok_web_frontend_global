@@ -26,7 +26,7 @@ export default createMiddleware({
     // }),
     async (event) => {
       const url = new URL(event.request.url);
-      if (url.pathname === "/api/mutate/superUserSetup") {
+      if (url.pathname === "/api/setup/superUserSetup") {
         return;
       }
       const subdomain = await getSubDomain(event.request.headers.get("host")!);
