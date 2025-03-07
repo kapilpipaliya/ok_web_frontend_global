@@ -1,4 +1,5 @@
 import type { Session, Transaction } from "neo4j-driver";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 interface TokenData {
   createdAt: number;
@@ -37,8 +38,8 @@ export async function getAndConsumeToken(
     return null;
   }
 
-  const token = result.records[0].get("t").properties;
-  return token as TokenData;
+  const token = convertNodeToJson(result.records[0].get("t"));
+  return token.P as TokenData;
 }
 
 export async function saveToken(

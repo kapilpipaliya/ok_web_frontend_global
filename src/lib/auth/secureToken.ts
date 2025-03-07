@@ -26,14 +26,14 @@ export async function generateSecureToken(
   // Clean up old tokens periodically
   await cleanupOldTokens(dbSession);
 
-  return randomToken;
+  return hashedToken;
 }
 
 export async function validateAndConsumeToken(
-  token: string,
+  hashedToken: string,
   dbSession: Session,
 ): Promise<null | string> {
-  const hashedToken = createHash("sha256").update(token).digest("hex");
+  // const hashedToken = createHash("sha256").update(token).digest("hex");
 
   const tokenData = await getAndConsumeToken(dbSession, hashedToken);
 

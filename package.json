@@ -4,9 +4,9 @@
   "scripts": {
     "check-errors": "npx tsc --noEmit && npx eslint . --ext .ts,.tsx && npm run build",
     "pretty": "prettier --write \"./**/*.{js,jsx,css,ts,tsx,json}\"",
-    "dev": "vinxi dev --host",
+    "dev": "vinxi dev --host --port 3001",
     "build": "vinxi build --no-minify",
-    "startDev": "vinxi start --port 3002",
+    "startDev": "vinxi start --port 3001",
     "start": "dotenv -e .env -- vinxi start --port 3001"
   },
   "dependencies": {

@@ -8,6 +8,11 @@ export default defineConfig({
   //   preset: "deno",
   // },
   vite: {
+    server: {
+      //  If set to true, the server is allowed to respond to requests for any hosts.
+      allowedHosts: true,
+      
+    },
     build: {
       rollupOptions: {
         external: ['node:async_hooks'] // Mark node:async_hooks as external to prevent browser compatibility issues

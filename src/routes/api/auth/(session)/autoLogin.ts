@@ -1,4 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
+import { getDriver } from "~/cypher/core/driver";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -7,9 +9,13 @@ import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
+import { API } from "~/lib/api/endpoints";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  const superDbSession = (await getDriver()).session({
+    database: SYSTEM_DB_NAME,
+  });
 
   try {
     const url = new URL(request.url);
@@ -29,11 +35,11 @@ export async function GET({ request }: APIEvent) {
     }
 
     // Validate and consume the token
-    const userData = await validateAndConsumeToken(token, dbSession);
+    const userData = await validateAndConsumeToken(token, superDbSession);
     if (!userData) {
       // "Invalid or expired token"
       return new Response(null, {
-        headers: { Location: "/auth/login" },
+        headers: { Location: API.urls.admin.login},
         status: 302,
       });
     }
@@ -43,7 +49,7 @@ export async function GET({ request }: APIEvent) {
 
     if (!existingUser) {
       return new Response(null, {
-        headers: { Location: "/auth/login" },
+        headers: { Location: API.urls.admin.login },
         status: 302,
       });
     }
@@ -59,5 +65,6 @@ export async function GET({ request }: APIEvent) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
+    await superDbSession.close();
   }
 }

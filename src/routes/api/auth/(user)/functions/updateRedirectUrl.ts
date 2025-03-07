@@ -30,5 +30,5 @@ export function updateRedirectUrl(
   user.P.redirectUrl =
     subDomain === SYSTEM_DB_NAME
       ? API.urls.system.projects
-      : API.urls.admin.userSettings;
+      : API.urls.admin.root;
 }
