@@ -23,13 +23,13 @@ export async function checkSuperUserAuthorization(
     };
   }
 
-  const isSuperUser = await checkRole(
+  const isSystemUser = await checkRole(
     request,
     SYSTEM_ROLES.SUPER_USER,
     dbSession,
     user,
   );
-  if (!isSuperUser) {
+  if (!isSystemUser) {
     return {
       error: `Access Denied: Super User privileges required to ${isMutate ? "make changes" : "view information"} in this area.`,
     };

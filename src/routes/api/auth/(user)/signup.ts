@@ -72,7 +72,7 @@ async function handleSignup(
       subDomain,
     );
 
-    // by default, emailVerified is false
+    // by default, emailConfirmed is false
     // Send email verification
     sendSignupEmailVerification(request, tx, user, subDomain);
 

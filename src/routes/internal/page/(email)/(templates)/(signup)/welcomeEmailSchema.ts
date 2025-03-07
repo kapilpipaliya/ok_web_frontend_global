@@ -69,7 +69,7 @@ const content = [
     componentName: "Html",
     pos: 4,
     props: `return {
-      href: window.location.origin + "/admin",
+      href: window.location.origin + "/admin/",
     }`,
     target: "_blank",
     text: "Get Started",

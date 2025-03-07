@@ -40,6 +40,7 @@ export async function subdomainRegister(
       email: data.email,
       username: data.username,
       uuid: user.P.uuid,
+      emailConfirmed: true,
     },
     true,
   );

@@ -85,7 +85,7 @@ export const API = {
       globalSettings: "/admin/GlobalSettings",
       login: "/auth/login",
       // it's name is admin, but its for subdomains
-      root: "/admin",
+      root: "/admin/",
       support: "/admin/support",
       userSettings: "/admin/UserSettings",
     },

@@ -61,7 +61,7 @@ export async function createUserInUserDB(
                 password: $hashedPassword,
                 salt: $salt,
                 isSystemUser: $isSystemUser,
-                emailConfirmed: false
+                emailConfirmed: $emailConfirmed
             }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserResult = await sessionOrTx.run(createUserQuery2, {
@@ -69,6 +69,7 @@ export async function createUserInUserDB(
     hashedPassword,
     isSystemUser: isSystemUser ?? null,
     salt,
+    emailConfirmed: params.emailConfirmed ?? false,
   });
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }

@@ -55,7 +55,7 @@ export async function GET({ request }: APIEvent) {
         // Update in system DB
         const systemResult = await dbSession.run(
           `MATCH (u:User {uuid: $uuid, email: $email})
-           SET u.emailVerified = true,
+           SET u.emailConfirmed = true,
                u.updatedAt = datetime()
            RETURN u`,
           { email, uuid },
@@ -72,7 +72,7 @@ export async function GET({ request }: APIEvent) {
         const updatePromises = updateSessions.map((session) =>
           session.run(
             `MATCH (u:User {uuid: $uuid})
-             SET u.emailVerified = true,
+             SET u.emailConfirmed = true,
                  u.updatedAt = datetime()
              RETURN u`,
             { uuid },
@@ -104,7 +104,7 @@ export async function GET({ request }: APIEvent) {
       // Handle regular subdomain case
       const result = await dbSession.run(
         `MATCH (u:User {uuid: $uuid, email: $email})
-         SET u.emailVerified = true,
+         SET u.emailConfirmed = true,
              u.updatedAt = datetime()
          RETURN u`,
         { email, uuid },

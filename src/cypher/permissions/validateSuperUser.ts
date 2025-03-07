@@ -9,7 +9,7 @@ export async function validateSuperUser(request: Request): Promise<boolean> {
     const result = await dbSession.run(
       `
       MATCH (u:User)
-      WHERE u.id = $userId AND u.isSuperUser = true
+      WHERE u.id = $userId AND u.isSystemUser = true
       RETURN u
     `,
       {
