@@ -1,5 +1,5 @@
 import { defineConfig } from "@solidjs/start/config";
-import devtools from 'solid-devtools/vite';
+// import devtools from 'solid-devtools/vite';
 
 
 export default defineConfig({
@@ -8,6 +8,14 @@ export default defineConfig({
   //   preset: "deno",
   // },
   vite: {
+    build: {
+      rollupOptions: {
+        external: ['node:async_hooks'] // Mark node:async_hooks as external to prevent browser compatibility issues
+      }
+    },
+    optimizeDeps: {
+      exclude: ['node:async_hooks'] // Exclude node:async_hooks from optimization to fix build error
+    },
     // dev: {
     //   force: false,
     //   https: false,
