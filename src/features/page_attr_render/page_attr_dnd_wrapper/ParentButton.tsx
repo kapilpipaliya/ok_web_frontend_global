@@ -10,7 +10,14 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-export function ParentButton(props: { item: Vertex; size: number }) {
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
+
+interface ParentButtonProps {
+  item: Vertex;
+  size: number;
+}
+
+export function ParentButton(props: Readonly<ParentButtonProps>) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
   const layoutStoreId = useDesignerLayoutStore();
@@ -21,9 +28,8 @@ export function ParentButton(props: { item: Vertex; size: number }) {
 
   return (
     <IconButton
-      class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+      class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
       icon="ph:arrow-up"
-      iconClass="transition:0.5s|ease-in-out"
       onClick={(e) => {
         e.stopPropagation();
         const parentResult = evalExpression("<-Attr", {
@@ -42,7 +48,7 @@ export function ParentButton(props: { item: Vertex; size: number }) {
         );
       }}
       size={props.size}
-      title="Parent"
+      title="Select Parent"
     />
   );
 }

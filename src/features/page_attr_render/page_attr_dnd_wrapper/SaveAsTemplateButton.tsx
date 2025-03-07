@@ -6,12 +6,14 @@ import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
-export function SaveAsTemplateButton(props: {
-  class?: string;
+interface SaveAsTemplateButtonProps {
   item: Vertex;
   size: number;
-}) {
+}
+
+export function SaveAsTemplateButton(props: Readonly<SaveAsTemplateButtonProps>) {
   let saveAsTemplateRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
   const [showTemplateMenu, setShowTemplateMenu] = createSignal(false);
@@ -28,9 +30,8 @@ export function SaveAsTemplateButton(props: {
   return (
     <>
       <IconButton
-        class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+        class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
         icon="ph:floppy-disk"
-        iconClass="transition:0.5s|ease-in-out"
         onClick={(e) => {
           e.stopPropagation();
           setShowModal(true);

@@ -16,6 +16,7 @@ import { InsertButtons } from "./InsertButtons";
 import { ParentButton } from "./ParentButton";
 import { PreviewCSSButton } from "./PreviewCSSButton";
 import { SaveAsTemplateButton } from "./SaveAsTemplateButton";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 interface SelectedAttrConfigPopOverProps {
   item: Vertex;
@@ -37,12 +38,12 @@ export function SelectedAttrConfigPopOver(
   return (
     <span class="position:relative">
       <div
-        class={`flex ai:center bg:primary bottom:100% color:base-5 gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:${zIndex}`}
+        class={`flex ai:center bg:primary-40 bottom:100% color:base-5 gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:${zIndex}`}
       >
         <IconButton
-          class="cursor:grab"
+          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
           draggable={true}
-          icon="ph:dots-six-vertical-light"
+          icon="ph:dots-six-vertical-bold"
           onClick={() => {}}
           onDragStart={(e) =>
             handleDragStart(e, graph, setGraph, layoutStoreVertex(), props.item)
@@ -58,7 +59,7 @@ export function SelectedAttrConfigPopOver(
         <PreviewCSSButton item={props.item} size={iconSize} />
         <ImportHtmlButton item={props.item} size={iconSize} />
         <DeleteButton
-          class="color:error"
+          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.delete}`}
           componentName={getComponentName()!}
           item={props.item}
           size={iconSize}

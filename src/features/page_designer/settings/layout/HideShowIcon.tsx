@@ -12,6 +12,7 @@ import {
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 export function HideShowIcon(props: { iconSize: number; metaVertex: Vertex }) {
   const [graph, setGraph] = useGraph();
@@ -26,9 +27,9 @@ export function HideShowIcon(props: { iconSize: number; metaVertex: Vertex }) {
 
   return (
     <IconButton
-      class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+      class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
       icon={icon()}
-      iconClass="transition:0.5s|ease-in-out"
+      iconClass="transition:transform|0.2s"
       onClick={(e) => {
         e.stopPropagation();
         toggleHidden(props.metaVertex.id, formStoreId!, graph, setGraph);

@@ -13,8 +13,9 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
-import { useFileManagerStore } from "../FileManagerContext"; // Import QuickEditModal
+import { useFileManagerStore } from "../FileManagerContext";
 import { getDownloadLink, openInNewTab } from "./getDownloadLink";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 export function FileManagerConfigIcons(
   props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,
@@ -113,26 +114,26 @@ export function FileManagerConfigIcons(
       >
         <Show when={props.metaVertex.L[0] === "File"}>
           <IconButton
-            class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+            class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
             icon="ic:round-download"
-            iconClass="transition:0.5s|ease-in-out"
+            iconClass="transition:transform|0.2s"
             onClick={() => openInNewTab(getDownloadLink(props.metaVertex))}
             size={18}
             title="Download"
           />
         </Show>
         <IconButton
-          class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
           icon="ph:gear"
-          iconClass="transition:0.5s|ease-in-out"
+          iconClass="transition:transform|0.2s"
           onClick={() => setIsEditModalOpen(true)}
           size={18}
           title="Settings"
         />
         <IconButton
-          class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
           icon="ph:folder-plus"
-          iconClass="transition:0.5s|ease-in-out"
+          iconClass="transition:transform|0.2s"
           onClick={(e) =>
             openDialog(
               "Add New Directory",
@@ -146,9 +147,9 @@ export function FileManagerConfigIcons(
           title="Create New Directory"
         />
         <IconButton
-          class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
           icon="ph:file-plus"
-          iconClass="transition:0.5s|ease-in-out"
+          iconClass="transition:transform|0.2s"
           onClick={(e) =>
             openDialog(
               "Add New File",
@@ -169,9 +170,9 @@ export function FileManagerConfigIcons(
           }
         >
           <IconButton
-            class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+            class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
             icon="ph:textbox"
-            iconClass="transition:0.5s|ease-in-out"
+            iconClass="transition:transform|0.2s"
             onClick={(e) =>
               openDialog(
                 `Rename ${props.metaVertex.L[0]}`,
@@ -185,9 +186,9 @@ export function FileManagerConfigIcons(
             title="Rename"
           />
           <IconButton
-            class="color:error cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+            class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.delete} ${ICON_BUTTON_STYLES.spacing}`}
             icon="ph:trash"
-            iconClass="transition:0.5s|ease-in-out"
+            iconClass="transition:transform|0.2s"
             onClick={() => {}}
             size={18}
             title="Delete"

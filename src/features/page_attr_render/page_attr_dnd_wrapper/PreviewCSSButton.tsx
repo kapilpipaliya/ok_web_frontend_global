@@ -5,14 +5,14 @@ import type { Vertex } from "~/lib/graph/graph";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { PreviewCSSMenu } from "./PreviewCSSMenu";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
-export function PreviewCSSButton(
-  props: Readonly<{
-    class?: string;
-    item: Vertex;
-    size: number;
-  }>,
-) {
+interface PreviewCSSButtonProps {
+  item: Vertex;
+  size: number;
+}
+
+export function PreviewCSSButton(props: Readonly<PreviewCSSButtonProps>) {
   let previewCSSRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
@@ -41,9 +41,8 @@ export function PreviewCSSButton(
   return (
     <>
       <IconButton
-        class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+        class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
         icon="ph:file-css"
-        iconClass="transition:0.5s|ease-in-out"
         onClick={() => setShowModal(true)}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}

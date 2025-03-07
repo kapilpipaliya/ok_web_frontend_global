@@ -338,3 +338,10 @@ const canManageUsers = await checkPermission(
 // Check for roles
 const isAdmin = await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession);
 
+
+
+LOGO Design:
+✅ Modern Typography → Uses Inter font for better UI/UX branding.
+✅ Tech-Oriented Design → A square element representing draggable blocks.
+✅ Drag Handles → Added three small dots to signify movement & modularity.
+✅ Sharp & Clean Lines → Matches modern UI/UX aesthetics.

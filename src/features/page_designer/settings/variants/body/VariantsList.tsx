@@ -12,6 +12,7 @@ import { deleteRow } from "~/lib/graph/mutate/vertex/deleteRow";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 export function VariantsList() {
   const [graph, setGraph] = useGraph();
@@ -140,7 +141,7 @@ export function VariantsList() {
             </span>
             <div class="flex gap:2">
               <IconButton
-                class="cursor:pointer opacity:.5 opacity:1:hover"
+                class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
                 icon="ph:gear"
                 onClick={() => openVariantSettings(variant)}
                 size={22}
@@ -148,7 +149,7 @@ export function VariantsList() {
                 type="button"
               />
               <IconButton
-                class="cursor:pointer opacity:.5 opacity:1:hover"
+                class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.delete}`}
                 icon="mage:trash"
                 onClick={() => setSelectedVariantToDelete(variant)}
                 size={22}

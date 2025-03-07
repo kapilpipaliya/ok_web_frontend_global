@@ -6,6 +6,7 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import { ComponentName } from "./ComponentName";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();
@@ -14,10 +15,10 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   return (
     <span class="position:relative ">
       <div
-        class={`flex ai:center bg:primary bottom:100% color:base-5 p:0.25rem position:absolute r:5px|5px|0px|0px right:0 z:${zIndex}`}
+        class={`flex ai:center bg:primary-40 bottom:100% color:base-5 p:0.25rem position:absolute r:5px|5px|0px|0px right:0 z:${zIndex}`}
       >
         <Icon
-          class="flex"
+          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
           icon={iconMap[getComponentName() as keyof typeof iconMap]}
           noobserver
         />

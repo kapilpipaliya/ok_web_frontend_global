@@ -10,6 +10,8 @@ import { ComponentList } from "~/features/page_designer/form_elements/components
 import { handleDropAtPosition } from "~/features/page_designer/functions/handleDropAtPosition";
 import { useGraph } from "~/lib/graph/graph";
 
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
+
 export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const [graph, setGraph] = useGraph();
   let insertBeforeButtonsRef: HTMLElement;
@@ -26,9 +28,9 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   return (
     <>
       <IconButton
-        class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+        class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
         icon="ph:arrow-line-up"
-        iconClass="transition:0.5s|ease-in-out"
+        iconClass="transition:transform|0.2s"
         onClick={(e) => {
           e.stopPropagation();
           setShowBeforeMenu(true);
@@ -58,9 +60,9 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
       </Show>
 
       <IconButton
-        class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+        class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
         icon="ph:arrow-line-down"
-        iconClass="transition:0.5s|ease-in-out"
+        iconClass="transition:transform|0.2s"
         onClick={(e) => {
           e.stopPropagation();
           setShowAfterMenu(true);
@@ -90,9 +92,9 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
       </Show>
 
       <IconButton
-        class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+        class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
         icon="ph:plus-circle"
-        iconClass="transition:0.5s|ease-in-out"
+        iconClass="transition:transform|0.2s"
         onClick={(e) => {
           e.stopPropagation();
           setShowInsideMenu(true);

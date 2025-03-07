@@ -106,3 +106,10 @@ export const STYLES = {
 } as const;
 export const APP_VERSION = "1.0.0";
 export const APP_NAME = "DecodeUI";
+
+export const ICON_BUTTON_STYLES = {
+  base: "cursor:pointer transition:color|0.2s",
+  default: "color:base-5 color:primary-20:hover",
+  delete: "color:error-50 color:error-40:hover",
+  spacing: "mr:2",
+} as const;

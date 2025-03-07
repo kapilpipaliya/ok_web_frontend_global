@@ -1,10 +1,10 @@
-import tld from "tldts";
+import { parse } from "tldts";
 
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 
 export async function getSubDomain(host: string) {
-  const { domain, subdomain } = tld.parse(host);
+  const { domain, subdomain } = parse(host);
 
   // If domain is null, set it to "super"
   const effectiveDomain = domain || "localhost";

@@ -6,12 +6,16 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { deleteLayoutAttr } from "~/features/page_designer/event_handler/deleteLayoutAttr";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-export function DeleteButton(props: {
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
+
+interface DeleteButtonProps {
   class?: string;
   componentName: string;
   item: Vertex;
   size: number;
-}) {
+}
+
+export function DeleteButton(props: Readonly<DeleteButtonProps>) {
   const [graph, setGraph] = useGraph();
   const { showSuccessToast } = useToast();
 
@@ -21,9 +25,8 @@ export function DeleteButton(props: {
 
   return (
     <IconButton
-      class={`${props.class} cursor:pointer mr:5px opacity:.5 opacity:1:hover`}
+      class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.delete} ${props.class ?? ""}`}
       icon="ph:trash"
-      iconClass="transition:0.5s|ease-in-out"
       onClick={(e) => {
         e.stopPropagation();
         deleteLayoutAttr(
@@ -37,7 +40,7 @@ export function DeleteButton(props: {
         );
       }}
       size={props.size}
-      title="Delete"
+      title={`Delete ${props.componentName}`}
     />
   );
 }
