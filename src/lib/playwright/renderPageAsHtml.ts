@@ -112,7 +112,7 @@ async function setupBrowserAndPage(
   const subDomainPart =
     subDomain && subDomain !== "super" ? `${subDomain}.` : "";
 
-  const baseUrl = `${protocol}://${subDomainPart}${process.env.DOMAIN}${domainPort}`;
+  const baseUrl = `${protocol}://${subDomainPart}${process.env.DOMAIN}${isDev ? domainPort : ""}`;
   const queryString = searchParams.toString();
 
   const url = token

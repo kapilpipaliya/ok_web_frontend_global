@@ -7,14 +7,13 @@ export default function EmailTemplate() {
   const [_searchParams] = useSearchParams();
   const params = useParams();
   return (
-    <GetInitialData authenticate dontRedirectToLogin>
+    <GetInitialData authenticate={false} dontRedirectToLogin>
       <PageViewWrapper
         dontConfirmExit={true}
         hideSaveCancelButton={true}
         isNoPermissionCheck={true}
-        pageId={""}
-        pageVertexLabel={"EmailTemplate"}
-        pageVertexName={params.template as string}
+        pageKeyName={params.template as string}
+        pageVertexName={"EmailTemplate"}
       />
     </GetInitialData>
   );

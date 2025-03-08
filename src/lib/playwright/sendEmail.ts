@@ -51,10 +51,12 @@ export async function sendEmail(options: EmailOptions) {
         secure:
           (dbSettings?.P.secure ?? process.env.SMTP_SECURE)
             ? process.env.SMTP_SECURE === "true"
-            : true,
+            : false,
         tls: {
           rejectUnauthorized: false,
         },
+        // debug: true,
+        // logger: true,
       });
 
       const emailOptions: nodemailer.SendMailOptions = {
@@ -213,7 +215,7 @@ async function saveEmailToDatabase(
     attachmentPath?: string;
     content: string;
     dbSettings: null | Vertex;
-    emailInfo: Record<string, unknown>;
+    emailInfo: void | nodemailer.SentMessageInfo;
     subject: string;
     to: string;
   },
@@ -237,7 +239,7 @@ async function saveEmailToDatabase(
         attachmentPath: attachmentPath || null,
         content,
         from: dbSettings?.P.from || process.env.SMTP_FROM || null,
-        messageId: emailInfo?.messageId || null,
+        messageId: emailInfo && 'messageId' in emailInfo ? emailInfo.messageId : null,
         status: emailInfo ? "sent" : "failed",
         subject,
         to,

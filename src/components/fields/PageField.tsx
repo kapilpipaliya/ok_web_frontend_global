@@ -24,7 +24,7 @@ export function PageField(props: Readonly<GenericComponentProps>) {
   return (
     <PageViewWrapper
       expression={meta()?.P.data}
-      pageVertexLabel={local.componentName}
+      pageVertexName={local.componentName}
     />
   );
 }

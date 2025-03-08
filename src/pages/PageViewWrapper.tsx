@@ -75,7 +75,6 @@ export function PageViewWrapper(
     context?: Record<string, unknown>;
     dataId?: Id;
     dontConfirmExit?: boolean;
-    enableSEO?: boolean;
     expression?: string;
     formDataId?: Id;
     formId?: string;
@@ -86,12 +85,13 @@ export function PageViewWrapper(
     isNoPermissionCheck?: boolean;
     metaTxnId?: number;
     pageId?: string;
-    pageVertexLabel?: string;
+    pageKeyName?: string;
     pageVertexName?: string;
     parentId?: Id;
     txnId?: string;
     uuid?: string;
     // openedFormId?: Id;
+    isDesignMode?: boolean;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -212,9 +212,10 @@ export function PageViewWrapper(
     const result = await fetchFormMetaData(
       graph,
       props.pageVertexName,
-      props.pageVertexLabel,
       props.formId,
-      props.expression
+      props.expression,
+      props.isDesignMode,
+      props.pageKeyName
     );
 
     if (result.error) {
@@ -222,7 +223,7 @@ export function PageViewWrapper(
       return false;
     }
 
-    let form = result.form;
+
     if (result.data) {
       if (props.formId && graph.vertexes[props.formId]) {
         delete result.data.graph!.vertexes[props.formId];
@@ -235,21 +236,21 @@ export function PageViewWrapper(
       } else if (isObject(result.data.result)) {
         setFormStore("formMetaId", result.data.result.id);
       }
-      if (
-        formStore()?.P.formMetaId &&
-        graph.vertexes[formStore().P.formMetaId!]!
-      ) {
-        form = generateFormMetaAttributes(
-          graph,
-          setGraph,
-          graph.vertexes[formStore().P.formMetaId!]!,
-        );
-      }
+      // if (
+      //   formStore()?.P.formMetaId &&
+      //   graph.vertexes[formStore().P.formMetaId!]!
+      // ) {
+      //   form = generateFormMetaAttributes(
+      //     graph,
+      //     setGraph,
+      //     graph.vertexes[formStore().P.formMetaId!]!,
+      //   );
+      // }
     } else if (result.formMetaId) {
       setFormStore("formMetaId", result.formMetaId);
     }
-
-    if (!props.formMetaId && !form) {
+    let form = result.form;
+    if (!(props.formMetaId || formStore().P.formMetaId || form)) {
       setFormStore("error", `${props.pageVertexName} is not configured`);
       return false;
     }
@@ -390,7 +391,7 @@ export function PageViewWrapper(
     }
 
     if (formStore().P.formMetaId && !isNoPermissionCheck() && !graph.vertexes[formStore().P.formMetaId!]!.P.public) {
-      setFormStore("error", `${props.pageVertexName} ${props.pageVertexLabel} is not authorized`);
+      setFormStore("error", `${props.pageVertexName} is not authorized`);
       return;
     }
 
@@ -556,13 +557,12 @@ export function PageViewWrapper(
                   </PreviewPage>
                 </Match>
               </Switch>
-
-              <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
+              {/* <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
                 <SaveCancelButton
                   closePopUp={props.closePopUp}
                   disabled={isDisabledTxn(formStore().P.txnId, graph)}
                 />
-              </Show>
+              </Show> */}
             </Match>
           </Switch>
         </FormContext.Provider>

@@ -107,7 +107,11 @@ export function PageView(
     });
     return (
       <RepeaterVertexContext.Provider value={repeaterStore}>
-        <PageAttrRender data={props.data} metaVertex={props.metaVertex!} />
+        <PageAttrRender
+          data={props.data}
+          isNoPermissionCheck={props.isNoPermissionCheck!}
+          metaVertex={props.metaVertex!}
+        />
       </RepeaterVertexContext.Provider>
     );
   };
@@ -124,6 +128,7 @@ export function PageView(
               <Match when={true}>
                 <PageAttrRender
                   data={props.data}
+                  isNoPermissionCheck={props.isNoPermissionCheck!}
                   metaVertex={props.metaVertex!}
                 />
               </Match>

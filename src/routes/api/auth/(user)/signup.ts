@@ -28,6 +28,12 @@ export async function POST({ request }: APIEvent) {
   try {
     const data: SignupRequestData = await request.json();
     const user = await handleSignup(request, data, tx, subDomain);
+    if (user.error) {
+      return {
+        error: user.error,
+        success: false,
+      };
+    }
     await tx.commit();
     return user;
   } catch (error) {
@@ -85,6 +91,8 @@ async function handleSignup(
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "An unknown error occurred";
-    return new Response(errorMessage, { status: 500 });
+    return {
+      error: errorMessage,
+    };
   }
 }

@@ -86,15 +86,15 @@ export async function fetchFormData(
 export async function fetchFormMetaData(
   graph: GraphInterface,
   pageVertexName?: string,
-  pageVertexLabel?: string,
   formId?: string,
   expression?: string,
+  isDesignMode?: boolean,
+  pageKeyName?: string,
 ): Promise<FetchFormMetaDataResult> {
   let form: IFormMetaData | null = null;
-  if (!form && pageVertexName && FormMetaData[pageVertexName]) {
-    form = FormMetaData[pageVertexName];
-  }
-  if (!form || pageVertexLabel === "Form") {
+  if (isDesignMode) {
+    return { form: FormMetaData[pageVertexName!] };
+  } else {
     form = FormMetaData.Form;
     const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
@@ -103,7 +103,7 @@ export async function fetchFormMetaData(
         expression ??
         (formId
           ? `id:'${formId}'`
-          : `g:'${pageVertexLabel ?? "Form"}[${pageVertexName}]'`),
+          : `g:'${pageVertexName ?? "Form"}[${pageKeyName}]'`),
       [getGlobalStore(graph).P.url]: true,
       incoming,
       outgoing,
@@ -113,8 +113,6 @@ export async function fetchFormMetaData(
       return { error: `No ${pageVertexName} configured` };
     }
 
-    return { data, form };
+    return { data };
   }
-
-  return { form };
 } 

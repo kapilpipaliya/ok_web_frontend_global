@@ -5,8 +5,7 @@ export default function Notfound() {
   return (
     <GetInitialData authenticate={true} dontRedirectToLogin={true}>
       <PageViewWrapper
-        pageId={""}
-        pageVertexLabel={"Page"}
+        pageKeyName={"home"}
         pageVertexName={"home"}
       />
     </GetInitialData>

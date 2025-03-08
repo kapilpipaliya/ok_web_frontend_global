@@ -46,7 +46,6 @@ export function TemplateRenderer(props: { context?: any; name: string }) {
         hideSaveCancelButton={true}
         isNoPermissionCheck={true}
         pageId={"new"}
-        pageVertexLabel={"Page"}
         pageVertexName={props.name}
       />
     </GraphContext.Provider>

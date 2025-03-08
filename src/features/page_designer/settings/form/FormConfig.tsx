@@ -25,6 +25,7 @@ export function FormConfig() {
           }}
         >
           <PageViewWrapper
+            isDesignMode={true}
             dataId={graph.vertexes[openedFormId].P.dataId}
             formDataId={graph.vertexes[openedFormId].P.formDataId}
             hideSaveCancelButton={true}
