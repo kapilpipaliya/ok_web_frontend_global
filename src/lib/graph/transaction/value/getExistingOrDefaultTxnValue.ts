@@ -2,8 +2,9 @@ import type { Store } from "solid-js/store";
 
 import { klona } from "klona";
 
-import type { GraphInterface, TransactionDetail } from "../../graph";
+import type { GraphInterface } from "../../graph";
 
+import {TransactionDetail} from "../types/TransactionDetail";
 import { getDefaultTxnValue } from "./getDefaultTxnValue";
 
 export function getExistingOrDefaultTxnValue(

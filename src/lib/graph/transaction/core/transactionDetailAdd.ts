@@ -2,10 +2,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { untrack } from "solid-js";
 
-import type { GraphInterface, TransactionDetail } from "../../graph";
+import type { GraphInterface } from "../../graph";
 import type { TransactionValue } from "../types/TransactionType";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
+import {TransactionDetail} from "../types/TransactionDetail";
 
 export function transactionDetailAdd(
   txnId: number,

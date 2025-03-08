@@ -4,10 +4,10 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import {
-  type TransactionDetail,
   useGraph,
   type Vertex,
 } from "~/lib/graph/graph";
+import {TransactionDetail} from "~/lib/graph/transaction/types/TransactionDetail";
 
 export function DebugInfo(props: { formStoreId: string }) {
   const [graph] = useGraph();

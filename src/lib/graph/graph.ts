@@ -1,8 +1,6 @@
-import type { createStore } from "solid-js/store";
+import type {createStore} from "solid-js/store";
 
-import { createContext, useContext } from "solid-js";
-
-import type { TransactionValue } from "~/lib/graph/transaction/types/TransactionType";
+import {createContext, useContext} from "solid-js";
 
 export type Id = string;
 
@@ -49,16 +47,6 @@ export interface GraphInterface {
 
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
-
-export interface TransactionDetail {
-  activeUndoIndex: number;
-  namedUndoStepIndexes: { [key: string]: number };
-  preventUndoBeforeIndex: number;
-  revertSteps: TransactionValue[];
-  steps: TransactionValue[];
-  submittedIndex: number;
-  undoStepIndexes: number[];
-}
 
 export interface Vertex<P extends object = { [key: string]: any }> {
   id: Id;
