@@ -4,7 +4,8 @@ import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 
 export async function getSubDomain(host: string) {
-  const { domain, subdomain } = parse(host);
+  const result = parse(host);
+  const { domain, subdomain } = result;
 
   // If domain is null, set it to "super"
   const effectiveDomain = domain || "localhost";
@@ -12,9 +13,9 @@ export async function getSubDomain(host: string) {
   // If it matches the current domain from env, use system subdomain
   if (effectiveDomain === process.env.DOMAIN) {
     if (!subdomain || subdomain === "www" || subdomain === "system") {
-      return SYSTEM_DB_NAME;
+      return { domain, subdomain: SYSTEM_DB_NAME };
     }
-    return subdomain;
+    return { domain, subdomain};
   }
 
   // Otherwise look up the domain in SubDomain vertex
@@ -29,7 +30,7 @@ export async function getSubDomain(host: string) {
       const result = await dbSession.run(query, { domain: effectiveDomain });
 
       if (result.records.length > 0) {
-        return result.records[0].get("subdomain");
+        return { domain, subdomain: result.records[0].get("subdomain") };
       }
     } catch (error) {
       console.error("Error looking up domain:", error);

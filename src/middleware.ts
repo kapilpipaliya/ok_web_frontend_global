@@ -29,7 +29,7 @@ export default createMiddleware({
       if (url.pathname === "/api/setup/superUserSetup") {
         return;
       }
-      const subdomain = await getSubDomain(event.request.headers.get("host")!);
+      const { subdomain } = await getSubDomain(event.request.headers.get("host")!);
       const isSuperSubDomain = subdomain === SYSTEM_DB_NAME;
       const sessionUser = await getUserFromSession(event.request);
 

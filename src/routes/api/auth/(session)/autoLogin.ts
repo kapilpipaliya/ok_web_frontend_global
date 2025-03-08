@@ -55,7 +55,14 @@ export async function GET({ request }: APIEvent) {
     }
 
     updateRedirectUrl(existingUser, subDomain, redirectUrl, queryParams);
-    await updateSession(existingUser);
+    if (existingUser.P.isSystemUser) {
+      const superUser = await findUserByEmailSimple(superDbSession, existingUser.P.email);
+      if (superUser) {
+        await updateSession(superUser);
+      }
+    } else {
+      await updateSession(existingUser);
+    }
 
     return new Response(null, {
       headers: { Location: existingUser.P.redirectUrl },

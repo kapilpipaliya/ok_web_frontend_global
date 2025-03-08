@@ -74,6 +74,11 @@ export function GetInitialData(props: GetInitialDataProps) {
       <Match when={!data()}>
         <LoaderNew />
       </Match>
+      <Match when={props.authenticate && !(data()?.userData as UserData)?.user}>
+        <div class="bg:error-20 p:1rem">
+          Not Authorized
+        </div>
+      </Match>
       <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
         <div class="bg:error p:1">
           {getGlobalStore(graph[0]).P.initialDataFetchError}

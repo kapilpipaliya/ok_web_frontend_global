@@ -22,7 +22,7 @@ export async function POST({ request }: APIEvent) {
     };
   }
 
-  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain, domain } = await getDBSessionForSubdomain(request);
   const tx = dbSession.beginTransaction();
 
   try {
@@ -58,11 +58,6 @@ async function handleSignup(
       throw new Error("User creation failed");
     }
 
-    await tx.commit();
-    await updateSession(user);
-    delete user.P.password;
-    updateRedirectUrl(user, subDomain);
-
     // Welcome email
     sendNotificationEmail(
       EMAIL_TEMPLATES.WelcomeEmail,
@@ -74,8 +69,12 @@ async function handleSignup(
 
     // by default, emailConfirmed is false
     // Send email verification
-    sendSignupEmailVerification(request, tx, user, subDomain);
+    await sendSignupEmailVerification(request, tx, user, subDomain);
 
+    await updateSession(user);
+    delete user.P.password;
+    updateRedirectUrl(user, subDomain);
+    
     return {
       graph: {
         edges: {},
@@ -84,7 +83,6 @@ async function handleSignup(
       result: user,
     };
   } catch (error) {
-    await tx.rollback();
     const errorMessage =
       error instanceof Error ? error.message : "An unknown error occurred";
     return new Response(errorMessage, { status: 500 });

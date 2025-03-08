@@ -70,7 +70,7 @@ export async function setupSuperUser(): Promise<{
           password: $hashedPassword,
           salt: $salt,
           username: $username,
-          uuid: randomUUID(),
+          uuid: $uuid,
           emailConfirmed: true
         })
         RETURN u
@@ -81,6 +81,7 @@ export async function setupSuperUser(): Promise<{
         hashedPassword,
         salt,
         username: superUserData.username,
+        uuid: uuidv7(),
       });
 
       if (createUserResult.records.length === 0) {

@@ -105,6 +105,11 @@ export function LoginForm() {
                         options.updateValue(e.target.value);
                       }
 
+                      // Don't proceed if already loading
+                      if (options.dataContext.submitState[0]?.isLoading) {
+                        return;
+                      }
+
                       // Check if password is empty
                       if (!options.data.P.password && formRefs.passwordRef) {
                         // Focus password field if empty
@@ -151,6 +156,12 @@ export function LoginForm() {
                             if (e.target instanceof HTMLInputElement) {
                               options.updateValue(e.target.value);
                             }
+                            
+                            // Don't proceed if already loading
+                            if (options.dataContext.submitState[0]?.isLoading) {
+                              return;
+                            }
+                            
                             try {
                               options.dataContext.submitState[1](
                                 "isLoading",

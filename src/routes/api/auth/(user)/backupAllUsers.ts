@@ -11,7 +11,7 @@ import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
 // deprecated
 export async function GET({ request }: APIEvent) {
   // const { formName, formId } = await request.json();
-  const _subdomain = await getSubDomain(request.headers.get("host")!);
+  const { subdomain } = await getSubDomain(request.headers.get("host")!);
 
   try {
     return saveGraphToCypherQL();

@@ -9,13 +9,13 @@ import { getSubDomain } from "~/cypher/session/getSubDomain";
 export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
   const url = getURL(request);
   const subDomain = await determineSubDomain(url);
-  const dbSession = (await getDriver()).session({ database: subDomain });
-  return { dbSession, subDomain };
+  const dbSession = (await getDriver()).session({ database: subDomain.subdomain });
+  return { dbSession, subDomain: subDomain.subdomain, domain: subDomain.domain };
 }
 
-async function determineSubDomain(url: URL): Promise<string> {
+async function determineSubDomain(url: URL): Promise<{ domain: string | null; subdomain: string }> {
   const adminui = url.searchParams.get("adminui");
-  return adminui === "true" ? "adminui" : await getSubDomain(url.hostname);
+  return adminui === "true" ? { domain: null, subdomain: "adminui" } : await getSubDomain(url.hostname);
 }
 
 function getURL(request?: APIEvent["request"]): URL {
