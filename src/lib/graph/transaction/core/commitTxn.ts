@@ -6,7 +6,7 @@ import type { MutationArgs } from "~/cypher/types/MutationArgs";
 
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
-import type { GraphInterface } from "../../graph";
+import type { GraphInterface, Edge, Vertex } from "../../graph";
 import type { TransactionValue } from "../types/TransactionType";
 
 import {
@@ -16,112 +16,112 @@ import {
 import { updateEdgeIdsToNew } from "../../mutate/core/edge";
 import { updateVertexIdsToNew } from "../../mutate/core/vertex";
 
+function validateTransaction(txnId: number, graph: Store<GraphInterface>): string {
+  if (!txnId) {
+    return 'Transaction ID is required'
+  }
+
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  if (!txnVertex) {
+    return `Transaction ${txnId} not found`
+  }
+
+  return "";
+}
+
 export function commitTxn(
   txnId: number,
   graph: Store<GraphInterface>,
 ): MutationArgs | undefined {
-  if (!txnId) {
-    return;
-  }
-  const txnVertex = graph.vertexes[`txn${txnId}`];
-  if (!txnVertex) {
+  const validationError = validateTransaction(txnId, graph);
+  if (validationError) {
+    console.error('Transaction validation failed:', validationError);
     return;
   }
 
+  const txnVertex = graph.vertexes[`txn${txnId}`];
   const submittedIndex = txnVertex.P.submittedIndex ?? -1;
-  const activeUndoIndex =
-    txnVertex.P.activeUndoIndex ?? txnVertex.P.steps.length - 1;
+  const activeUndoIndex = txnVertex.P.activeUndoIndex ?? txnVertex.P.steps.length - 1;
 
   if (submittedIndex === activeUndoIndex) {
     return;
   }
 
-  let revertSteps: TransactionValue[] = [];
-  let steps: TransactionValue[];
-  if (activeUndoIndex < submittedIndex) {
-    const removedSteps = txnVertex.P.steps.slice(
-      activeUndoIndex + 1,
-      submittedIndex + 1,
-    );
-    revertSteps = [...removedSteps, ...txnVertex.P.revertSteps];
-    steps = [];
-  } else {
-    const startFromNextStep = submittedIndex === 0 ? 0 : submittedIndex + 1;
-    steps = txnVertex.P.steps.slice(startFromNextStep, activeUndoIndex + 1);
-    revertSteps = txnVertex.P.revertSteps || [];
-  }
+  try {
+    let revertSteps: TransactionValue[] = [];
+    let steps: TransactionValue[];
 
-  const reverseStepsToCommit = revertSteps.reverse().map((txnDetail) => {
-    return removeUndefinedProperties({
-      deleteEdge: txnDetail.insertEdge
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      deleteVertex: txnDetail.insert
-        ? updateVertexIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      insertEdge: txnDetail.deleteEdge
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      insertVertex: txnDetail.deleteVertex
-        ? updateVertexIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      merge: txnDetail.merge
-        ? updateVertexIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      replace: txnDetail.replace
-        ? updateVertexIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      replaceEdge: txnDetail.replaceEdge
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      replaceEdgeEnd: txnDetail.replaceEdgeEnd
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      replaceEdgeStart: txnDetail.replaceEdgeStart
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-    });
-  });
+    if (activeUndoIndex < submittedIndex) {
+      const removedSteps = txnVertex.P.steps.slice(
+        activeUndoIndex + 1,
+        submittedIndex + 1,
+      );
+      revertSteps = [...removedSteps, ...txnVertex.P.revertSteps];
+      steps = [];
+    } else {
+      const startFromNextStep = submittedIndex === 0 ? 0 : submittedIndex + 1;
+      steps = txnVertex.P.steps.slice(startFromNextStep, activeUndoIndex + 1);
+      revertSteps = txnVertex.P.revertSteps || [];
+    }
 
-  const stepsToCommit = steps.map((txnDetail) => {
-    return removeUndefinedProperties({
-      deleteEdge: txnDetail.deleteEdge
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      deleteVertex: txnDetail.deleteVertex
-        ? updateVertexIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      insert: txnDetail.insert
-        ? updateVertexIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      insertEdge: txnDetail.insertEdge
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      merge: txnDetail.merge
-        ? updateVertexIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      replace: txnDetail.replace
-        ? updateVertexIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      replaceEdge: txnDetail.replaceEdge
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      replaceEdgeEnd: txnDetail.replaceEdgeEnd
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-      replaceEdgeStart: txnDetail.replaceEdgeStart
-        ? updateEdgeIdsToNew(klona(txnDetail.data), graph)
-        : undefined,
-    });
-  });
+    // Update transaction status
+    // txnVertex.P.status = 'committed';
+    // txnVertex.P.timestamp = Date.now();
 
-  if (stepsToCommit.length || txnVertex.P.revertSteps.length) {
-    const data = {
-      edgeIdMap: [...Object.entries(getEdgeOldIdToNewIdMap(graph))],
-      transactions: [...reverseStepsToCommit, ...stepsToCommit],
-      txnId: txnId,
-      vertexIdMap: [...Object.entries(getVertexOldIdToNewIdMap(graph))],
+    // Get ID maps
+    const vertexIdMap = getVertexOldIdToNewIdMap(graph);
+    const edgeIdMap = getEdgeOldIdToNewIdMap(graph);
+
+    // Create mutation args with proper typing
+    const mutationArgs: MutationArgs = {
+      edgeIdMap: Object.entries(edgeIdMap)),
+      transactions: [],
+      txnId,
+      vertexIdMap: Object.entries(vertexIdMap))
     };
-    return data;
+
+    // Process revert steps
+    const reverseStepsToCommit = revertSteps.reverse().map((txnDetail) => {
+      return removeUndefinedProperties({
+        deleteEdge: txnDetail.insertEdge ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+        deleteVertex: txnDetail.insert ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true) : undefined,
+        insertEdge: txnDetail.deleteEdge ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+        insertVertex: txnDetail.deleteVertex ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true) : undefined,
+        merge: txnDetail.merge ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true) : undefined,
+        replace: txnDetail.replace ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true) : undefined,
+        replaceEdge: txnDetail.replaceEdge ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+        replaceEdgeEnd: txnDetail.replaceEdgeEnd ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+        replaceEdgeStart: txnDetail.replaceEdgeStart ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+      });
+    });
+
+    // Process forward steps
+    const stepsToCommit = steps.map((txnDetail) => {
+      return removeUndefinedProperties({
+        deleteEdge: txnDetail.deleteEdge ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+        deleteVertex: txnDetail.deleteVertex ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true) : undefined,
+        insert: txnDetail.insert ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true) : undefined,
+        insertEdge: txnDetail.insertEdge ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+        merge: txnDetail.merge ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true) : undefined,
+        replace: txnDetail.replace ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true) : undefined,
+        replaceEdge: txnDetail.replaceEdge ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+        replaceEdgeEnd: txnDetail.replaceEdgeEnd ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+        replaceEdgeStart: txnDetail.replaceEdgeStart ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph) : undefined,
+      });
+    });
+
+    if (stepsToCommit.length || reverseStepsToCommit.length) {
+      mutationArgs.transactions = [...reverseStepsToCommit, ...stepsToCommit]; 
+      return mutationArgs;
+    }
+  } catch (error) {
+    console.error('Error during transaction commit:', error);
+    // txnVertex.P.status = 'rolled_back';
+    // txnVertex.P.error = {
+    //   code: 'COMMIT_ERROR',
+    //   message: error instanceof Error ? error.message : 'Unknown error during commit',
+    //   details: error
+    // };
+    return;
   }
 }

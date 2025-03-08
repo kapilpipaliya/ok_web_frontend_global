@@ -6,6 +6,33 @@ import type { TransactionValue } from "../types/TransactionType";
 import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 
+const MAX_HISTORY_SIZE = 100; // Maximum number of steps to keep in history
+const CLEANUP_THRESHOLD = 80; // When to trigger cleanup (80% of max)
+
+function cleanupTransactionHistory(
+  txnValue: { steps: TransactionValue[]; undoStepIndexes: number[] },
+  activeUndoIndex: number
+) {
+  if (txnValue.steps.length <= MAX_HISTORY_SIZE) {
+    return;
+  }
+
+  // Keep recent history and important undo points
+  const keepCount = Math.floor(MAX_HISTORY_SIZE * 0.7); // Keep 70% of max size
+  const removeCount = txnValue.steps.length - keepCount;
+  
+  // Don't remove steps that are part of the current undo/redo chain
+  const minKeepIndex = Math.max(0, activeUndoIndex - Math.floor(keepCount / 2));
+  
+  if (minKeepIndex > 0) {
+    txnValue.steps = txnValue.steps.slice(minKeepIndex);
+    // Adjust undo indexes
+    txnValue.undoStepIndexes = txnValue.undoStepIndexes
+      .map(index => index - minKeepIndex)
+      .filter(index => index >= 0);
+  }
+}
+
 export function redo(
   txnId: number,
   graph: Store<GraphInterface>,
@@ -32,7 +59,7 @@ export function redo(
       });
   }
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue);
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, { P: txnValue }, { cloneProperties: false });
 }
 
 export function redoAllowed(
@@ -74,7 +101,13 @@ export function saveUndoPoint(
       txnValue.undoStepIndexes.splice(insertIndex, 0, activeUndoIndex);
     }
   }
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, false);
+
+  // Check if cleanup is needed
+  if (txnValue.steps.length > CLEANUP_THRESHOLD) {
+    cleanupTransactionHistory(txnValue, activeUndoIndex);
+  }
+
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, { P: txnValue }, { cloneProperties: false });
 }
 
 export function transactionDetailAdd(
@@ -88,41 +121,32 @@ export function transactionDetailAdd(
   }
 
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
+  const activeUndoIndex = existingTxnValue.activeUndoIndex ?? existingTxnValue.steps.length - 1;
 
-  const activeUndoIndex =
-    existingTxnValue.activeUndoIndex ?? existingTxnValue.steps.length - 1;
-
+  // Clear future steps if we're not at the end
   if (activeUndoIndex < existingTxnValue.steps.length - 1) {
     const activeUndoPointIndex = existingTxnValue.undoStepIndexes.findIndex(
       (index) => index > activeUndoIndex,
     );
     existingTxnValue.undoStepIndexes = existingTxnValue.undoStepIndexes.slice(
       0,
-      activeUndoPointIndex,
+      activeUndoPointIndex === -1 ? undefined : activeUndoPointIndex,
     );
-
-    if (existingTxnValue.submittedIndex >= activeUndoIndex) {
-      const removedSteps = existingTxnValue.steps.slice(
-        activeUndoIndex + 1,
-        existingTxnValue.submittedIndex + 1,
-      );
-      existingTxnValue.revertSteps = [
-        ...removedSteps,
-        ...existingTxnValue.revertSteps,
-      ];
-    }
-    existingTxnValue.steps = existingTxnValue.steps.slice(
-      0,
-      activeUndoIndex + 1,
-    );
+    existingTxnValue.steps = existingTxnValue.steps.slice(0, activeUndoIndex + 1);
   }
 
-  existingTxnValue.steps.push(txnValue);
-  existingTxnValue.activeUndoIndex = existingTxnValue.steps.length - 1;
-
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, {
-    cloneProperties: false,
+  // Add new step
+  existingTxnValue.steps.push({
+    ...txnValue,
+    timestamp: Date.now()
   });
+
+  // Check if cleanup is needed
+  if (existingTxnValue.steps.length > CLEANUP_THRESHOLD) {
+    cleanupTransactionHistory(existingTxnValue, activeUndoIndex);
+  }
+
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, { P: existingTxnValue }, { cloneProperties: false });
 }
 
 export function undo(

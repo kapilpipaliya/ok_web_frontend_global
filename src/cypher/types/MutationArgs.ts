@@ -1,13 +1,15 @@
+import { Id } from "~/lib/graph/graph";
+
 export interface MutationArgs {
-  edgeIdMap: [number, number][];
+  edgeIdMap: [Id, Id][];
   transactions: any[];
   txnId: number;
-  vertexIdMap: [number, number][];
+  vertexIdMap: [Id, Id][];
 }
 
 export interface MutationResult {
-  clientToServerEdgeIdMap?: Map<number, number>;
-  clientToServerVertexIdMap?: Map<number, number>;
+  clientToServerEdgeIdMap?: Map<Id, Id>;
+  clientToServerVertexIdMap?: Map<Id, Id>;
   data: {
     [key in
       | "deleteEdge"

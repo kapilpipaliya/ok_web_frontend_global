@@ -1,4 +1,4 @@
-import type { Id } from "../../graph";
+import type { Edge, Id, Vertex } from "../../graph";
 
 export type InsertFn = {
   [key in
@@ -15,7 +15,7 @@ export type InsertFn = {
 };
 
 export type TransactionValue = InsertFn & {
-  data: any;
+  data: Vertex | Edge;
   id: Id;
-  originalData: any;
+  originalData: Vertex | Edge;
 };

@@ -13,6 +13,8 @@ import { postAPI } from "~/lib/api/postApi";
 
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { addEditButtonSchema } from "./addEditButtonSchema";
+import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
+import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -54,6 +56,8 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
             ? "Subdomain created successfully"
             : "Subdomain updated successfully",
         );
+        resetTransaction(options.txnId, options.graph, options.setGraph);
+        options.dataContext.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
@@ -155,6 +159,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            resetTransaction(options.txnId, options.graph, options.setGraph);
           },
           text: "Cancel",
         }),

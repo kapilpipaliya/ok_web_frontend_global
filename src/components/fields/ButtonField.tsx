@@ -19,7 +19,7 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
-import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
+import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 import { getNamedIndex } from "~/lib/graph/transaction/value/getNamedIndex";
 import { createLongPress } from "~/lib/hooks/createLongPress";
 
@@ -95,6 +95,9 @@ export function ButtonField(props: Readonly<ButtonProps>) {
       return;
     }
     const data = commitTxn(formVertex()!.P.txnId, graph);
+    if (!data) {
+      return;
+    }
     await showLoadingToast({
       loadMessage: "Submitting Data...",
       onSuccess: (_data) => {
@@ -111,16 +114,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
   };
 
   const onReset = () => {
-    const initialIndex = getNamedIndex(formVertex()!.P.txnId, "initial", graph);
-    if (initialIndex === undefined) {
-      return;
-    }
-    revertTransactionUpToIndex(
-      formVertex()!.P.txnId,
-      initialIndex - 1,
-      graph,
-      setGraph,
-    );
+    resetTransaction(formVertex()!.P.txnId, graph, setGraph);
   };
   const onClick = () => {
     runWithOwner(owner, () => {
