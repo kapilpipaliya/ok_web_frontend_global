@@ -7,6 +7,7 @@ import type { CSSStore } from "../context/CssEditorContext";
 import { cssStateToString } from "./cssStateToString";
 import { parseAndApplyCssRules } from "./parseAndApplyCssRules";
 
+// deprecated
 export function mergeCSS(
   input1: CSSStore | string,
   input2: CSSStore | string,

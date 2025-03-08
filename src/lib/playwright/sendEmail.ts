@@ -1,6 +1,7 @@
 import type { Session } from "neo4j-driver";
 
 import nodemailer from "nodemailer";
+import juice from "juice";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -22,6 +23,10 @@ interface EmailOptions {
 export async function sendEmail(options: EmailOptions) {
   const { attachmentName, attachmentPath, content, subDomain, subject, to } =
     options;
+  
+  // Process HTML content with juice to inline CSS
+  const processedContent = juice(content);
+  
   const dbSettings = await getEmailSettings(subDomain);
   let emailInfo;
   try {
@@ -35,7 +40,7 @@ export async function sendEmail(options: EmailOptions) {
         //   path: attachmentPath,
         // }] : undefined,
         from: dbSettings.P.from,
-        html: content,
+        html: processedContent,
         subject,
         to,
       });
@@ -70,7 +75,7 @@ export async function sendEmail(options: EmailOptions) {
               ]
             : undefined,
         from: dbSettings?.P.from || process.env.SMTP_FROM,
-        html: content,
+        html: processedContent,
         subject,
         to,
       };
@@ -85,7 +90,7 @@ export async function sendEmail(options: EmailOptions) {
   await saveEmailToDatabase(subDomain, {
     attachmentName,
     attachmentPath,
-    content,
+    content: processedContent, // Save the processed content
     dbSettings,
     emailInfo,
     subject,
