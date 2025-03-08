@@ -99,6 +99,9 @@ export function SignupForm() {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
                       }
+                      if (options.dataContext.submitState[0]?.isLoading) {
+                        return;
+                      }
                       // Focus email field when Enter is pressed in username field
                       if (formRefs.emailRef) {
                         formRefs.emailRef.focus();
@@ -122,6 +125,9 @@ export function SignupForm() {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
+                      }
+                      if (options.dataContext.submitState[0]?.isLoading) {
+                        return;
                       }
                       // Focus password field when Enter is pressed in email field
                       if (formRefs.passwordRef) {
@@ -161,6 +167,9 @@ export function SignupForm() {
                         if (e.key === "Enter") {
                           if (e.target instanceof HTMLInputElement) {
                             options.updateValue(e.target.value);
+                          }
+                          if (options.dataContext.submitState[0]?.isLoading) {
+                            return;
                           }
                           // Submit form when Enter is pressed in password field
                           try {

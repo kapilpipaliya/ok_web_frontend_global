@@ -199,6 +199,9 @@ export function ForgotPasswordForm() {
                   if (e.target instanceof HTMLInputElement) {
                     options.updateValue(e.target.value);
                   }
+                  if (options.dataContext.submitState[0]?.isLoading) {
+                    return;
+                  }
                   try {
                     options.dataContext.submitState[1]("isLoading", true);
                     await handleIdentifierSubmit(options);
@@ -265,6 +268,9 @@ export function ForgotPasswordForm() {
                 if (e.key === "Enter") {
                   if (e.target instanceof HTMLInputElement) {
                     options.updateValue(e.target.value);
+                  }
+                  if (options.dataContext.submitState[0]?.isLoading) {
+                    return;
                   }
                   try {
                     options.dataContext.submitState[1]("isLoading", true);
@@ -336,6 +342,9 @@ export function ForgotPasswordForm() {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
                       }
+                      if (options.dataContext.submitState[0]?.isLoading) {
+                        return;
+                      }
                       try {
                         options.dataContext.submitState[1]("isLoading", true);
                         await handlePasswordResetSubmit(options);
@@ -398,6 +407,9 @@ export function ForgotPasswordForm() {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
+                      }
+                      if (options.dataContext.submitState[0]?.isLoading) {
+                        return;
                       }
                       try {
                         options.dataContext.submitState[1]("isLoading", true);
