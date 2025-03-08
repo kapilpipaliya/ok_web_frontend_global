@@ -15,12 +15,17 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { addEditButtonSchema } from "./addEditButtonSchema";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
-
+import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();
   const validateForm = (formData: Vertex) => {
     if (!formData.P.key?.trim()) {
       showErrorToast("Please enter subdomain name");
+      return false;
+    }
+    const databaseNameError = validateDatabaseName(formData.P.key);
+    if (databaseNameError) {
+      showErrorToast(databaseNameError);
       return false;
     }
     return true;

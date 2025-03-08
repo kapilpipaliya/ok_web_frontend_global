@@ -104,8 +104,26 @@ export function updateVertex(
 
   setGraph("vertexes", vertexId, (prev) => {
     if (prev) {
-      const IN = { ...prev.IN, ...vertexData.IN };
-      const OUT = { ...prev.OUT, ...vertexData.OUT };
+      // Create deep merged IN object
+      const IN: { [key: string]: Id[] } = { ...prev.IN };
+      if (vertexData.IN) {
+        for (const key in vertexData.IN) {
+          const prevIds = prev.IN[key] || [];
+          const newIds = vertexData.IN[key] || [];
+          IN[key] = [...new Set([...prevIds, ...newIds])];
+        }
+      }
+      
+      // Create deep merged OUT object
+      const OUT: { [key: string]: Id[] } = { ...prev.OUT };
+      if (vertexData.OUT) {
+        for (const key in vertexData.OUT) {
+          const prevIds = prev.OUT[key] || [];
+          const newIds = vertexData.OUT[key] || [];
+          OUT[key] = [...new Set([...prevIds, ...newIds])];
+        }
+      }
+      
       return { ...vertexData, IN, OUT };
     }
     return vertexData;

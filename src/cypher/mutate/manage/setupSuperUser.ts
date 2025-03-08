@@ -14,6 +14,7 @@ import { hashPassword } from "~/lib/auth/password";
 
 import { createRootFolder } from "../signup/createRootFolder";
 import { insertComponents } from "../signup/insertComponents";
+import { getAllDatabases } from "./getAllDatabases";
 
 export const superUserData = {
   email: "superuser@easyformforge.com",
@@ -30,11 +31,10 @@ export async function setupSuperUser(): Promise<{
   const driver = await getDriver();
   const systemDbSession = driver.session();
   try {
-    const result = await systemDbSession.run("SHOW DATABASES");
-    const superDatabase = result.records.find(
-      (record) => record.get("name") === SYSTEM_DB_NAME,
-    );
-    if (superDatabase) {
+    const databases = await getAllDatabases();
+    const superDatabaseExists = databases.includes(SYSTEM_DB_NAME);
+    
+    if (superDatabaseExists) {
       return { error: "Super user already exists", status: 400, user: null };
     }
     await createDatabase(SYSTEM_DB_NAME);

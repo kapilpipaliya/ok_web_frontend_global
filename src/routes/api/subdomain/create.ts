@@ -4,11 +4,13 @@ import type { Session } from "neo4j-driver";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import { getAllDatabases } from "~/cypher/mutate/manage/getAllDatabases";
 import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -55,7 +57,16 @@ export async function POST({ request }: APIEvent) {
 
     const account = convertNodeToJson(accountResult.records[0].get("a"));
 
+    const databaseNameError = validateDatabaseName(key);
+    if (databaseNameError) {
+      throw new APIError(databaseNameError, 400);
+    }
+
     await validateKeyAndDomain(dbSession, key, domain);
+    const databases = await getAllDatabases();
+    if (databases.includes(key)) {
+      throw new APIError("Subdomain with this key already exists", 400);
+    }
     const newSubdomain = await createSubdomain(dbSession, key, domain);
 
     // Create AccountSubdomain relationship
@@ -126,7 +137,7 @@ async function createSubdomain(
       createdAt: datetime(),
       lastModified: datetime()
     }) RETURN s`,
-    { domain, key },
+    { domain: domain ?? "", key },
   );
   return convertNodeToJson(result.records[0]?.get("s"));
 }
@@ -144,11 +155,13 @@ async function validateKeyAndDomain(
     throw new APIError("Subdomain with this key already exists", 400);
   }
 
-  const existingDomain = await dbSession.run(
-    "MATCH (s:SubDomain {domain: $domain}) RETURN s",
-    { domain },
-  );
-  if (existingDomain.records.length > 0) {
-    throw new APIError("Domain name is already taken", 400);
+  if (domain) {
+    const existingDomain = await dbSession.run(
+      "MATCH (s:SubDomain {domain: $domain}) RETURN s",
+      { domain },
+    );
+    if (existingDomain.records.length > 0) {
+      throw new APIError("Domain name is already taken", 400);
+    }
   }
 }

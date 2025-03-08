@@ -74,10 +74,10 @@ export function commitTxn(
 
     // Create mutation args with proper typing
     const mutationArgs: MutationArgs = {
-      edgeIdMap: Object.entries(edgeIdMap)),
+      edgeIdMap: Object.entries(edgeIdMap),
       transactions: [],
       txnId,
-      vertexIdMap: Object.entries(vertexIdMap))
+      vertexIdMap: Object.entries(vertexIdMap)
     };
 
     // Process revert steps
