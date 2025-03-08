@@ -15,19 +15,18 @@ export async function POST({ request }: APIEvent) {
     if (!user) {
       throw new APIError("User not found", 404);
     }
-
-    const id = user.id;
+    const uuid = user.P.uuid;
 
     // Mark the user account for deletion (set pendingDeletion flag and timestamp)
     const userUpdate = await dbSession.run(
       `
       MATCH (u:User)
-      WHERE elementId(u) = $id
+      WHERE u.uuid = $uuid
       SET u.pendingDeletion = true,
           u.deletionScheduledAt = datetime()
       RETURN u
     `,
-      { id },
+      { uuid },
     );
 
     if (userUpdate.records.length === 0) {

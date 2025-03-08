@@ -19,11 +19,11 @@ export async function checkPermission(
   // Check if user has any of the required permissions and get allowed access levels
   const result = await dbSession.run(
     `MATCH (u:User)-[:UserRole]->(r:Role)-[:Role${permKey}]->(rp:Role${permKey})-[:Role${permKey}${permKey}]->(p:${permKey})
-     WHERE elementId(u) = $userId AND p.key IN $permissions
+     WHERE u.uuid = $uuid AND p.key IN $permissions
      RETURN count(p) > 0 as hasPermission, collect(DISTINCT rp.access) as allowedAccessLevels`,
     {
       permissions,
-      userId: user.id,
+      uuid: user.P.uuid,
     },
   );
 
@@ -48,11 +48,11 @@ export async function checkRole(
 
   const result = await dbSession.run(
     `MATCH (u:User)-[:UserRole]->(r:Role)
-     WHERE elementId(u) = $userId AND r.key IN $roles
+     WHERE u.uuid = $uuid AND r.key IN $roles
      RETURN count(r) > 0 as hasRole`,
     {
       roles,
-      userId: user.id,
+      uuid: user.P.uuid,
     },
   );
 

@@ -28,17 +28,17 @@ export async function processAccountDeletions() {
 
       for (const record of result.records) {
         const jobId = record.get("job").identity;
-        const userId = record.get("userId");
+        const uuid = record.get("uuid");
         const userEmail = record.get("userEmail");
 
         // Check if user still exists and is marked for deletion
         const userCheck = await dbSession.run(
           `
           MATCH (u:User)
-          WHERE elementId(u) = $userId AND u.pendingDeletion = true
+          WHERE u.uuid = $uuid AND u.pendingDeletion = true
           RETURN u
         `,
-          { userId },
+          { uuid },
         );
 
         if (userCheck.records.length === 0) {
@@ -60,11 +60,11 @@ export async function processAccountDeletions() {
         await dbSession.run(
           `
           MATCH (u:User)
-          WHERE elementId(u) = $userId
+          WHERE u.uuid = $uuid
           OPTIONAL MATCH (u)-[r]-()
           DELETE u, r
         `,
-          { userId },
+          { uuid },
         );
 
         // Mark the job as completed

@@ -52,7 +52,7 @@ export async function findUserByEmail(
     : null;
 
   if (user && !userSetting) {
-    userSetting = (await createUserSetting(dbSession, user.id)) as Vertex;
+    userSetting = (await createUserSetting(dbSession, user.P.uuid)) as Vertex;
   }
   user.P.subDomain = subDomain;
 

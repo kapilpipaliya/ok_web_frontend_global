@@ -37,6 +37,7 @@ export async function DELETE({ request }: APIEvent) {
     }
 
     // Check if user exists
+    // dont use id use uuid
     const userCheck = await dbSession.run(
       `
       MATCH (u:User)

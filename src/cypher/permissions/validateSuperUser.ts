@@ -9,11 +9,11 @@ export async function validateSuperUser(request: Request): Promise<boolean> {
     const result = await dbSession.run(
       `
       MATCH (u:User)
-      WHERE u.id = $userId AND u.isSystemUser = true
+      WHERE u.uuid = $uuid AND u.isSystemUser = true
       RETURN u
     `,
       {
-        userId: request.headers.get("user-id"), // Assuming user-id is passed in headers
+        uuid: request.headers.get("user-uuid"), // Assuming user-id is passed in headers
       },
     );
 

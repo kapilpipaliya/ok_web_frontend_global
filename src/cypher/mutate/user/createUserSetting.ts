@@ -6,16 +6,16 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 export async function createUserSetting(
   dbSession: Session,
-  userId: string,
+  uuid: string,
 ): Promise<null | Vertex> {
   const createUserSettingQuery = `
       MATCH (u:User)
-      WHERE ID(u) = $userId
+      WHERE u.uuid = $uuid
       CREATE (u)-[:UserSetting]->(s:UserSetting { createdAt: localDateTime() })
       RETURN s
     `;
   const createResult = await dbSession.run(createUserSettingQuery, {
-    userId: userId,
+    uuid: uuid,
   });
   return createResult.records.length > 0
     ? convertNodeToJson(createResult.records[0].get("s") as Node)
