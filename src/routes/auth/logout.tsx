@@ -30,3 +30,19 @@ export default function Logout() {
   // Return empty component since we're just handling the redirect
   return <div>Logging out...</div>;
 }
+/*
+    props.onClose();
+
+    await showLoadingToast({
+      loadMessage: "Logging Out...",
+      onSuccess: (value) => {
+        if (value?.message != null) {
+          navigate(API.urls.admin.login);
+        }
+      },
+      promise: postAPI(API.auth.logOutUrl, {}),
+      successMessage: "Log Out Successfully",
+    });
+
+    deleteVertex(0, "member", graph, setGraph);
+*/

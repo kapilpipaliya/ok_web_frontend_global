@@ -81,23 +81,6 @@ export function AuthenticatedMenu(
         ];
   };
 
-  const handleLogout = async () => {
-    props.onClose();
-
-    await showLoadingToast({
-      loadMessage: "Logging Out...",
-      onSuccess: (value) => {
-        if (value?.message != null) {
-          navigate(API.urls.admin.login);
-        }
-      },
-      promise: postAPI(API.auth.logOutUrl, {}),
-      successMessage: "Log Out Successfully",
-    });
-
-    deleteVertex(0, "member", graph, setGraph);
-  };
-
   return (
     <div class="p:10px">
       <For each={getMenuItems()}>
@@ -128,7 +111,7 @@ export function AuthenticatedMenu(
       </For>
       <hr class="my:8px color:base-20" />
       <li>
-        <button
+        <a
           class="
             flex ai:center w:100%
             bg:error-10:hover
@@ -139,11 +122,11 @@ export function AuthenticatedMenu(
             border:none
             cursor:pointer
           "
-          onclick={handleLogout}
+          href={API.urls.user.logout}
         >
           <Icon class="mr:10px" icon="ph:sign-out" width="20" />
           Sign Out
-        </button>
+        </a>
       </li>
     </div>
   );
