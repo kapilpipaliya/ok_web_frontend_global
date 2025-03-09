@@ -68,4 +68,6 @@ export const signupConfirmationForm = {
   attributes: [createEmailTemplate(content)],
   key: "SignupConfirmation",
   title: "Confirm Your Email Address",
+  description: "Initial email sent after user signup to confirm their email address",
+
 };

@@ -68,4 +68,6 @@ export const emailChangeSuccessfulForm = {
   attributes: [createEmailTemplate(content)],
   key: "EmailChangeSuccessful",
   title: "Email Change Successful",
+  description: "Confirmation email sent after an email address change has been successfully completed",
+
 };

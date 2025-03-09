@@ -71,4 +71,6 @@ export const verificationCodeForm = {
   attributes: [createEmailTemplate(content)],
   key: "VerificationCode",
   title: "Verification Code",
+  description: "Generic verification code email used for various authentication purposes, valid for 10 minutes",
+
 };

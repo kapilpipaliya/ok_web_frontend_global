@@ -80,4 +80,6 @@ export const emailChangedForm = {
   attributes: [createEmailTemplate(content)],
   key: "EmailChanged",
   title: "Email Change Notification",
+  description: "Sent to notify users that a request has been made to change their email address, with instructions if they didn't initiate the change",
+
 };

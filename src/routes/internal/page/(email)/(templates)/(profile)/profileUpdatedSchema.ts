@@ -57,4 +57,6 @@ export const profileUpdatedForm = {
   attributes: [createEmailTemplate(content)],
   key: "ProfileUpdated",
   title: "Profile Updated Successfully",
+  description: "Confirmation email sent after a user has made changes to their profile information",
+
 };

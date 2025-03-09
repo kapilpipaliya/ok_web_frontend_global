@@ -69,4 +69,6 @@ export const invitationEmailForm = {
   attributes: [createEmailTemplate(content)],
   key: "InvitationEmail",
   title: "User Invitation",
+  description: "Sent to invite new users to join the platform, containing a registration link valid for 7 days",
+
 };

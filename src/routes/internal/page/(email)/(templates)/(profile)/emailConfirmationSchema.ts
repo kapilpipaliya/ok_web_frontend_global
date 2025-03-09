@@ -69,4 +69,6 @@ export const emailConfirmationForm = {
   attributes: [createEmailTemplate(content)],
   key: "EmailConfirmation",
   title: "Confirm Your New Email Address",
+  description: "Sent when users request to change their email address, containing a verification link to confirm the new email",
+
 };

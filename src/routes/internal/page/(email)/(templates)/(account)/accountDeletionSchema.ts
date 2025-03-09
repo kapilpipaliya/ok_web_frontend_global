@@ -79,4 +79,6 @@ export const accountDeletionRequestForm = {
   attributes: [createEmailTemplate(content)],
   key: "AccountDeletionRequest",
   title: "Account Deletion Request",
+  description: "Sent when a user requests to delete their account, explaining the 48-hour deletion process and providing support contact information",
+
 };

@@ -73,4 +73,6 @@ export const passwordResetForm = {
   attributes: [createEmailTemplate(content)],
   key: "PasswordReset",
   title: "Reset Your Password",
+  description: "Sent when users request a password reset, containing a verification code valid for 10 minutes",
+
 };

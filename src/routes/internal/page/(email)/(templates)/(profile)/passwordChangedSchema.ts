@@ -56,4 +56,6 @@ export const passwordChangedForm = {
   attributes: [createEmailTemplate(content)],
   key: "PasswordChanged",
   title: "Password Changed Successfully",
+  description: "Notification sent after a user's password has been successfully changed",
+
 };

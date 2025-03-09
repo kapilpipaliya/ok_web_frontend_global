@@ -80,4 +80,6 @@ export const welcomeEmailForm = {
   attributes: [createEmailTemplate(content)],
   key: "WelcomeEmail",
   title: "Welcome Email",
+  description: "Sent to welcome new users after they have successfully completed the signup process",
+
 };
