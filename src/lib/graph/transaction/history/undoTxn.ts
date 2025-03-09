@@ -1,6 +1,6 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "../../graph";
+import type { Edge, GraphInterface, Vertex } from "../../graph";
 import type { TransactionValue } from "../types/TransactionType";
 
 import {
@@ -22,74 +22,90 @@ import {
   updateVertexIdsToNew,
 } from "../../mutate/core/vertex";
 
+/**
+ * Reverts a transaction step by applying its inverse operation to the graph.
+ * 
+ * This function handles the inverse of various graph mutation actions:
+ * - Vertex operations: 
+ *   - insert → delete
+ *   - delete → insert
+ *   - merge/replace → restore original properties
+ * - Edge operations:
+ *   - insert → delete
+ *   - delete → insert
+ *   - replace properties/start/end → restore original values
+ * 
+ * @param txnDetail - Transaction step details containing the action and data
+ * @param graph - Current graph state
+ * @param setGraph - Function to update graph state
+ */
 export function undoTxn(
   txnDetail: TransactionValue,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   const { data, id, originalData, ...actions } = txnDetail;
+
+  // Process each action in the transaction
   for (const action in actions) {
-    if (actions.hasOwnProperty(action)) {
-      switch (action) {
-        case "deleteEdge": {
-          addNewEdge(0, updateEdgeIdsToNew(data, graph), graph, setGraph);
-          break;
-        }
-        case "deleteVertex": {
-          addNewVertex(0, updateVertexIdsToNew(data, graph), graph, setGraph);
-          break;
-        }
-        case "insert": {
-          const actualVertexId2 = getVertexOldIdToNewIdMap(graph)[id] || id;
-          deleteVertex(0, actualVertexId2, graph, setGraph);
-          break;
-        }
-        case "insertEdge": {
-          const actualEdgeId2 = getEdgeOldIdToNewIdMap(graph)[id] || id;
-          deleteEdge(0, actualEdgeId2, graph, setGraph);
-          break;
-        }
-        case "merge": {
-          const actualVertexId3 = getVertexOldIdToNewIdMap(graph)[id] || id;
-          mergeVertexProperties(
-            0,
-            actualVertexId3,
-            graph,
-            setGraph,
-            originalData,
-          );
-          break;
-        }
-        case "replace": {
-          const actualVertexId2 = getVertexOldIdToNewIdMap(graph)[id] || id;
-          replaceVertexProperties(
-            0,
-            actualVertexId2,
-            graph,
-            setGraph,
-            originalData,
-          );
-          break;
-        }
-        case "replaceEdge": {
-          const actualEdgeId3 = getEdgeOldIdToNewIdMap(graph)[id] || id;
-          replaceEdgeStart(0, actualEdgeId3, graph, setGraph, originalData);
-          break;
-        }
-        case "replaceEdgeEnd": {
-          const actualEdgeId5 = getEdgeOldIdToNewIdMap(graph)[id] || id;
-          replaceEdgeEnd(0, actualEdgeId5, graph, setGraph, originalData.E);
-          break;
-        }
-        case "replaceEdgeStart": {
-          const actualEdgeId4 = getEdgeOldIdToNewIdMap(graph)[id] || id;
-          replaceEdgeStart(0, actualEdgeId4, graph, setGraph, originalData.S);
-          break;
-        }
-        default: {
-          console.error(`Unknown action: ${action}`);
-        }
-      }
+    if (!actions.hasOwnProperty(action)) continue;
+
+    // Map old IDs to new IDs where needed
+    const actualVertexId = getVertexOldIdToNewIdMap(graph)[id] || id;
+    const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[id] || id;
+
+    switch (action) {
+      // Vertex Operations
+      case "insert":
+        // Undo vertex insertion by deleting
+        deleteVertex(0, actualVertexId, graph, setGraph);
+        break;
+
+      case "deleteVertex":
+        // Restore deleted vertex
+        addNewVertex(0, updateVertexIdsToNew(data as Vertex, graph, false), graph, setGraph);
+        break;
+
+      case "merge":
+      case "replace":
+        // Restore original vertex properties
+        replaceVertexProperties(
+          0,
+          actualVertexId,
+          graph,
+          setGraph,
+          originalData,
+        );
+        break;
+
+      // Edge Operations
+      case "insertEdge":
+        // Undo edge insertion by deleting
+        deleteEdge(0, actualEdgeId, graph, setGraph);
+        break;
+
+      case "deleteEdge":
+        // Restore deleted edge
+        addNewEdge(0, updateEdgeIdsToNew(data as Edge, graph), graph, setGraph);
+        break;
+
+      case "replaceEdge":
+        // Restore original edge properties
+        replaceEdgeStart(0, actualEdgeId, graph, setGraph, originalData);
+        break;
+
+      case "replaceEdgeEnd":
+        // Restore original edge end
+        replaceEdgeEnd(0, actualEdgeId, graph, setGraph, (originalData as Edge).E);
+        break;
+
+      case "replaceEdgeStart":
+        // Restore original edge start
+        replaceEdgeStart(0, actualEdgeId, graph, setGraph, (originalData as Edge).S);
+        break;
+
+      default:
+        console.error(`Unknown action: ${action}`);
     }
   }
 }

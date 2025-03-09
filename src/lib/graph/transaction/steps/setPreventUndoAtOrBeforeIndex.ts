@@ -4,6 +4,7 @@ import type { GraphInterface } from "../../graph";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
+import { getLastTxnIndex } from "../value/getLastTxnIndex";
 
 export function setPreventUndoAtOrBeforeIndex(
   txnId: number,
@@ -13,8 +14,9 @@ export function setPreventUndoAtOrBeforeIndex(
   if (!txnId) {
     return;
   }
+  const lastTxnIndex = getLastTxnIndex(txnId, graph);
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  txnValue.preventUndoBeforeIndex = txnValue.steps.length - 1;
+  txnValue.preventUndoBeforeIndex = lastTxnIndex;
   replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {
     cloneProperties: false,
   });

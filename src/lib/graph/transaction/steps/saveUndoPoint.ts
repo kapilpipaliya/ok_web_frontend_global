@@ -4,7 +4,7 @@ import type { GraphInterface } from "~/lib/graph/graph";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
-
+import { getLastTxnIndex } from "../value/getLastTxnIndex";
 export function saveUndoPoint(
   txnId: number,
   graph: Store<GraphInterface>,
@@ -14,8 +14,8 @@ export function saveUndoPoint(
     return;
   }
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-
-  let activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
+  const lastTxnIndex = getLastTxnIndex(txnId, graph);
+  let activeUndoIndex = txnValue.activeUndoIndex ?? lastTxnIndex;
   if (activeUndoIndex === -1) {
     activeUndoIndex = 0;
   }
