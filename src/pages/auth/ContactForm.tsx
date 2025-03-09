@@ -32,6 +32,13 @@ export function ContactForm() {
             key: "name",
             placeholder: "Your name",
             validation: { required: true },
+            props: (options: FunctionArgumentType) => ({
+              onMount: () => {
+                if (options.ref && options.ref() instanceof HTMLInputElement) {
+                  options.ref()?.focus();
+                }
+              },
+            }),
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,

@@ -94,6 +94,11 @@ export function SignupForm() {
                 componentName: "TextInput",
                 key: "username",
                 props: (options: FunctionArgumentType) => ({
+                  onMount: () => {
+                    if (options.ref && options.ref() instanceof HTMLInputElement) {
+                      options.ref()?.focus();
+                    }
+                  },
                   onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
