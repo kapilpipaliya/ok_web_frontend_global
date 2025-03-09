@@ -13,7 +13,7 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
     <GetInitialData authenticate>
       {/* <Link href={getCompanyLogoUrl(graph) || ""} rel="icon" /> */}
       <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
-        <HomeIcon url={API.urls.admin.root} />
+        <HomeIcon />
         <div class="ml:auto flex gap:4">
           <UserDropdownMenuDisplay />
         </div>

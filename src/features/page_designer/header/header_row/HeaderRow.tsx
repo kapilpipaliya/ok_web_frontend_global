@@ -40,7 +40,7 @@ export function Header(props: HeaderProps) {
 export function HeaderRow(props: HeaderProps) {
   return (
     <Header class={props.class} style={props.style}>
-      <HomeIcon url={API.urls.admin.root} />
+      <HomeIcon />
       <RightSection />
     </Header>
   );

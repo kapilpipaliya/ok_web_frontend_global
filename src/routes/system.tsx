@@ -16,7 +16,7 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
     <GetInitialData authenticate>
       <Link href={getCompanyCircularLogoUrl(graph) || ""} rel="icon" />
       <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
-        <HomeIcon url={API.urls.system.root} />
+        <HomeIcon />
         <div class="ml:auto flex gap:4">
           <UserDropdownMenuDisplay />
         </div>
