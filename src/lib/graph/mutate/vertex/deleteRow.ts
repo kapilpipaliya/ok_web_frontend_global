@@ -36,7 +36,7 @@ export function deleteRow(
     for (const type in outEdge) {
       for (const edgeId of outEdge[type]) {
         const deleteEdgeResult = deleteEdge(
-          type === "AttrInst" ? 0 : txnId,
+          txnId,
           edgeId,
           graph,
           setGraph,

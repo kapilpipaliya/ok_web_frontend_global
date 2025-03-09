@@ -98,7 +98,7 @@ export function deleteVertex(
     const vertex = graph.vertexes[actualVertexId];
 
     if (
-      Object.keys(vertex.OUT).filter((label) => label !== "AttrInst").length > 0
+      Object.keys(vertex.OUT).length > 0
     ) {
       alert(
         `there are multiple children exist when deleting ${vertex.L[0]} (${actualVertexId})`,
@@ -125,29 +125,6 @@ export function deleteVertex(
       );
       return { error: "Vertex Children Exist When deleting vertex" };
     }
-
-    // this should be handled by TableInput Wrapper component
-    /*for (const attrInstEdgeId of vertex.OUT.AttrInst || []) {
-      const attrInstEdge = graph.edges[attrInstEdgeId];
-      if (attrInstEdge) {
-        const endVertex = graph.vertexes[attrInstEdge.E];
-        deleteEdge(0, attrInstEdgeId, graph, setGraph);
-        if (endVertex) {
-          for (const metaAttrEdgeId of endVertex.OUT.Attr || []) {
-            const metaAttrEdge = graph.edges[metaAttrEdgeId];
-            if (metaAttrEdge) {
-              const endVertex = graph.vertexes[metaAttrEdge.E];
-              deleteEdge(0, metaAttrEdgeId, graph, setGraph);
-              if (endVertex) {
-                deleteVertex(0, metaAttrEdge.E, graph, setGraph);
-              }
-            }
-          }
-
-          deleteVertex(0, attrInstEdge.E, graph, setGraph);
-        }
-      }
-    }*/
 
     const data = klona(vertex);
     batch(() => {
