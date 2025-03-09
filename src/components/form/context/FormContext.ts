@@ -22,7 +22,7 @@ export function getInitialFormStore(
     discardPopup: false,
     error: undefined as string | undefined,
     formDataId: undefined as unknown as string,
-    formMetaData: null as IFormMetaData | null,
+    // formMetaData: null as IFormMetaData | null,
     formMetaId: undefined as unknown as string,
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,

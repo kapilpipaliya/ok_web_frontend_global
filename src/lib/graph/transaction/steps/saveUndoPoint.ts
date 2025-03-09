@@ -27,6 +27,7 @@ export function saveUndoPoint(
     if (insertIndex === -1) {
       txnValue.undoStepIndexes.push(activeUndoIndex);
     } else {
+      // insert the new undo point at the correct position, and move all the points after it one position to the right
       txnValue.undoStepIndexes.splice(insertIndex, 0, activeUndoIndex);
     }
   }

@@ -263,9 +263,17 @@ export const getComponentFormSchema = (
                   {
                     as: "dialog",
                     attributes: [
-                      modalHeaderSchema,
-                      componentFormSchema,
-                      modalFooterSchema,
+                      {
+                        attributes: [
+                          modalHeaderSchema,
+                          componentFormSchema,
+                          modalFooterSchema,
+                        ],
+                        componentName: "Form",
+                        props: (options: FunctionArgumentType) => ({
+                          formDataId: options.data.id,
+                        }),
+                      },
                     ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",

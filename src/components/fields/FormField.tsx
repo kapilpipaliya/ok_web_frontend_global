@@ -34,6 +34,8 @@ export function FormField(
       // For Root Level Forms we use Parent vertex label as form key
       label?: string;
       submitButton?: any;
+      isNoPermissionCheck?: boolean;
+      formDataId?: string;
     }
   >,
 ) {
@@ -76,48 +78,57 @@ export function FormField(
     );
   };
 
-  const form = generateFormMetaAttributes(graph, () => {}, meta());
-  setFormStore("formMetaData", form);
+  // const form = generateFormMetaAttributes(graph, () => {}, meta());
+  // setFormStore("formMetaData", form);
 
-  if (id()) {
-    loadData();
-  } else {
-    const defaultValues = form.attributes.reduce(
-      (acc, attr) => {
-        acc[attr.key] = attr.defaultValue;
-        return acc;
-      },
-      {} as { [key: string]: any },
-    );
-    const createResult = createFormVertex(
-      graph,
-      setGraph,
-      formStore().P.txnId,
-      label(),
-      defaultValues,
-    );
-    if (createResult.error) {
-      setFormStore("error", createResult.error);
+  async function initForm() {
+    if (props.formDataId) {
+      setFormStore("formDataId", props.formDataId);
       return;
+    } else if (id()) {
+      loadData();
+    } else {
+      // const defaultValues = form.attributes.reduce(
+      //   (acc, attr) => {
+      //     acc[attr.key] = attr.defaultValue;
+      //     return acc;
+      //   },
+      //   {} as { [key: string]: any },
+      // );
+      const defaultValues = {};
+      const createResult = createFormVertex(
+        graph,
+        setGraph,
+        formStore().P.txnId,
+        label(),
+        defaultValues,
+      );
+      if (createResult.error) {
+        setFormStore("error", createResult.error);
+        return;
+      }
+      mergeVertexProperties<FormStoreObject>(
+        0,
+        pageFormVertexObject.id,
+        graph,
+        setGraph,
+        {
+          formDataId: createResult.vertex!.id,
+          formMetaId: meta().id,
+          txnId,
+        },
+      );
     }
-    mergeVertexProperties<FormStoreObject>(
-      0,
-      pageFormVertexObject.id,
-      graph,
-      setGraph,
-      {
-        formDataId: createResult.vertex!.id,
-        formMetaId: meta().id,
-        txnId,
-      },
-    );
   }
+  initForm();
 
   async function loadData() {
     if (!id()) {
       return;
     }
     try {
+      return;
+      // TODO: make this work
       const { data, error } = await getFormData(
         graph,
         formStore().P.formMetaData!.attributes,
@@ -141,6 +152,7 @@ export function FormField(
       <div class="">
         <PageAttrRender
           data={graph.vertexes[formStore().P.formDataId!]}
+          isNoPermissionCheck={props.isNoPermissionCheck!}
           metaVertex={meta()!}
         />
       </div>

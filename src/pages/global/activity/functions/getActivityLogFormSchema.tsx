@@ -248,7 +248,19 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             attributes: [
               {
                 as: "dialog",
-                attributes: [modalHeaderSchema, formSchema, modalFooterSchema],
+                attributes: [
+                  {
+                    attributes: [
+                      modalHeaderSchema,
+                      formSchema,
+                      modalFooterSchema,
+                    ],
+                    componentName: "Form",
+                    props: (options: FunctionArgumentType) => ({
+                      formDataId: options.data.id,
+                    }),
+                  },
+                ],
                 class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                 componentName: "Html",
                 open: true,

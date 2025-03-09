@@ -377,7 +377,7 @@ export function PageViewWrapper(
       }
     }
 
-    if (!(props.parentId || props.txnId)) {
+    if (!(props.parentId || props.txnId) && props.isDesignMode) {
       setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
     }
     saveStepIndex(formStore().P.txnId, "initial", graph, setGraph);

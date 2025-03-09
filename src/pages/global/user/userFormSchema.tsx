@@ -277,9 +277,17 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                   {
                     as: "dialog",
                     attributes: [
-                      modalHeaderSchema,
-                      userFormSchema,
-                      modalFooterSchema,
+                      {
+                        attributes: [
+                          modalHeaderSchema,
+                          userFormSchema,
+                          modalFooterSchema,
+                        ],
+                        componentName: "Form",
+                        props: (options: FunctionArgumentType) => ({
+                          formDataId: options.data.id,
+                        }),
+                      },
                     ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",
