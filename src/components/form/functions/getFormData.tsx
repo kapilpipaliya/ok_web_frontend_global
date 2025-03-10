@@ -7,16 +7,15 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getErrorMessage } from "~/lib/api/getErrorMessage";
 import { isValidResponse } from "~/lib/api/isValidResponse";
-import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { getEdgesFromGraph } from "~/lib/graph/get/sync/edge/getEdgesFromGraph";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 
 export const getFormData = async (
   graph: Store<GraphInterface>,
-  metaAttrs: FieldAttribute[],
   id: Id,
 ): Promise<{ data?: ServerResult; error: string }> => {
   try {
-    const { incoming, outgoing } = getEdgesFromRowsAttr(metaAttrs);
+    const { incoming, outgoing } = getEdgesFromGraph(graph, id);
     const result = await fetchDataFromMG({
       expression: `id:'${id}'`,
       [getGlobalStore(graph).P.url]: true,

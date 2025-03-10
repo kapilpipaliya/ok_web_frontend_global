@@ -8,7 +8,6 @@ export function getConfiguredPermissions(
   currentUserRoleId: Id[],
   vertex: null | undefined | Vertex,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!vertex?.L) {
     return [];
@@ -18,12 +17,12 @@ export function getConfiguredPermissions(
   const allRolePermissions: Vertex[] =
     evalExpression(`->$0${vertex.L?.[0] !== "Attr" ? "" : ""}Perm`, {
       graph,
-      setGraph,
+      setGraph: ()=>{},
       vertexes: [vertex],
     }) || [];
   for (const rp of allRolePermissions) {
     const roles: Vertex[] =
-      evalExpression("->$0Role", { graph, setGraph, vertexes: [rp] }) || [];
+      evalExpression("->$0Role", { graph, setGraph: ()=>{}, vertexes: [rp] }) || [];
     if (roles.some((r) => currentUserRoleId.includes(r.id))) {
       configuredPermissions.push(rp);
     }
@@ -36,11 +35,10 @@ export function hasPermissions(
   configuredPermissions: Vertex[],
   permission: string,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   for (const r of configuredPermissions) {
     const allRolePermissions: Vertex[] =
-      evalExpression("->$0Perm", { graph, setGraph, vertexes: [r] }) || [];
+      evalExpression("->$0Perm", { graph, setGraph: ()=>{}, vertexes: [r] }) || [];
     if (allRolePermissions.some((p) => p.P.key === permission)) {
       return true;
     }

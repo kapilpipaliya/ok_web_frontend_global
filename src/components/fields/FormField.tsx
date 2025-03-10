@@ -131,7 +131,6 @@ export function FormField(
       // TODO: make this work
       const { data, error } = await getFormData(
         graph,
-        formStore().P.formMetaData!.attributes,
         id()!,
       );
 

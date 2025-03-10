@@ -178,7 +178,7 @@ export function isVertex(vertex: unknown): vertex is Vertex {
 }
 
 // mergeVertexProperties(0, vertexId, {props: { title }}) } }} will replace props.
-export function mergeVertexProperties<T extends { [key: string]: unknown }>(
+export function mergeVertexProperties<T extends { [key: string]: any }>(
   txnId: number,
   vertexId: Id,
   graph: Store<GraphInterface>,

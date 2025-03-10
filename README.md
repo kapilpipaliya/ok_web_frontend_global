@@ -351,3 +351,6 @@ Load env variables on production:
 https://dear-caravan-605.notion.site/Solid-FAQ-b5ae5a47f2ec47c8a78bc5671180845d#1a328989d46a8033a63cd6e94cdaea31
 1. npm install -g dotenv-cli
 2. npm run start
+
+Setup a wildcard domain including free SSL | Let's Encrypt
+https://www.youtube.com/watch?v=oJ_sP9y9KWo

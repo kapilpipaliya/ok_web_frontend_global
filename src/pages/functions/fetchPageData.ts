@@ -27,26 +27,14 @@ export interface FetchFormMetaDataResult {
 
 export async function fetchFormData(
   graph: GraphInterface,
-  getFormDataFn?: () => Promise<ServerResult>,
+  // getFormDataFn?: () => Promise<ServerResult>,
   formDataId?: Id,
   id?: Id,
   isNoPermissionCheck?: boolean,
   hasRequiredPermissions?: boolean,
   pageVertexName?: string,
-  formMetaDataAttributes?: any[],
 ): Promise<FetchFormDataResult> {
-  if (getFormDataFn) {
-    try {
-      // TODO: This is the issue refactoring this is hard.
-      const data = await getFormDataFn();
-      if (!data || data.error) {
-        return { error: data.error || "Error fetching form data" };
-      }
-      return { data };
-    } catch (error) {
-      return { error: (error as Error).message };
-    }
-  }
+
 
   if (formDataId) {
     return { formDataIdOverride: formDataId };
@@ -61,7 +49,7 @@ export async function fetchFormData(
   }
 
   try {
-    const formDataResult = await getFormData(graph, formMetaDataAttributes!, id);
+    const formDataResult = await getFormData(graph, id);
 
     if (formDataResult.error || !Array.isArray(formDataResult.data?.result) || formDataResult.data.result.length === 0) {
       return { error: `No ${pageVertexName} found` };
@@ -75,7 +63,7 @@ export async function fetchFormData(
     // Fetch data for all components if needed
     let componentData: ServerResult | null = null;
     if (componentVertices.length > 0) {
-      componentData = await fetchComponentDataPure(componentVertices, graph);
+      componentData = await fetchComponentDataPure(componentVertices);
     }
 
     return { componentData, data: formDataResult.data };
@@ -85,13 +73,14 @@ export async function fetchFormData(
 }
 
 export async function fetchFormMetaData(
-  graph: GraphInterface,
+  // graph: GraphInterface,
   pageVertexName?: string,
   formId?: string,
   expression?: string,
   isDesignMode?: boolean,
   pageKeyName?: string,
 ): Promise<FetchFormMetaDataResult> {
+  "use server";
   let form: IFormMetaData | null = null;
   if (isDesignMode) {
     return { form: FormMetaData[pageVertexName!] };
@@ -105,7 +94,7 @@ export async function fetchFormMetaData(
         (formId
           ? `id:'${formId}'`
           : `g:'${pageVertexName ?? "Form"}[${pageKeyName}]'`),
-      [getGlobalStore(graph).P.url]: true,
+      // [getGlobalStore(graph).P.url]: true,
       incoming,
       outgoing,
     });

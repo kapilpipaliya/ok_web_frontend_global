@@ -13,7 +13,7 @@ export async function fetchComponentData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  const componentData = await fetchComponentDataPure(vertexes, graph);
+  const componentData = await fetchComponentDataPure(vertexes);
   if (componentData?.graph) {
     // skip existing because we not want to modify existing component data
     setGraphData(graph, setGraph, componentData.graph, { skipExisting: true });
@@ -22,14 +22,14 @@ export async function fetchComponentData(
 
 export async function fetchComponentDataPure(
   vertexes: Vertex[],
-  graph: GraphInterface,
+  // graph: GraphInterface,
 ) {
   const { incoming, outgoing } = getEdgesFromRowsAttr(
     FormMetaData.Component.attributes,
   );
   return await fetchDataFromMG({
     expression: `id:'${vertexes.map((v) => v.id).join("|")}'`,
-    [getGlobalStore(graph).P.url]: true,
+    // [getGlobalStore(graph).P.url]: true,
     incoming,
     outgoing,
   });

@@ -25,6 +25,7 @@ const ErrorFallback = (props: {
   error: Error;
   resetErrorBoundary: () => void;
 }) => {
+  console.error(props.error)
   return (
     <div class="error-boundary-fallback">
       <h2>Something went wrong</h2>

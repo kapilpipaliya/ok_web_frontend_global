@@ -1,5 +1,5 @@
 import { createAsync, useNavigate } from "@solidjs/router";
-import { createEffect, Match, type ParentProps, Switch } from "solid-js";
+import { createEffect, createSignal, Match, type ParentProps, Show, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
@@ -61,32 +61,32 @@ export function GetInitialData(props: GetInitialDataProps) {
       );
     }
   };
-  const data = createAsync(() => fetchData(props.authenticate));
-
-  createEffect(() => {
-    if (data()) {
-      setData(data()!.initialData, data()!.userData as UserData);
-    }
-  });
+  const data = createAsync(async () => {
+    const result = await fetchData(props.authenticate);
+    setData(result.initialData, result.userData as UserData);
+    return result;
+  }, {deferStream: true});
 
   return (
-    <Switch>
-      <Match when={!data()}>
-        <LoaderNew />
-      </Match>
-      <Match when={props.authenticate && !(data()?.userData as UserData)?.user}>
-        <div class="bg:error-20 p:1rem">
-          Not Authorized
-        </div>
-      </Match>
-      <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-        <div class="bg:error p:1">
-          {getGlobalStore(graph[0]).P.initialDataFetchError}
-        </div>
-      </Match>
-      <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
-        {props.children}
-      </Match>
-    </Switch>
+    <Show when={data()}>
+      <Switch>
+        {/* <Match when={!data()}>
+          <LoaderNew />
+        </Match> */}
+        <Match when={props.authenticate && !(data()?.userData as UserData)?.user}>
+          <div class="bg:error-20 p:1rem">
+            Not Authorized
+          </div>
+        </Match>
+        <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
+          <div class="bg:error p:1">
+            {getGlobalStore(graph[0]).P.initialDataFetchError}
+          </div>
+        </Match>
+        <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
+          {props.children}
+        </Match>
+      </Switch>
+    </Show>
   );
 }
