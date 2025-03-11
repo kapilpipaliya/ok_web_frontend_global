@@ -1,5 +1,6 @@
-import { createAsync, useNavigate } from "@solidjs/router";
-import { createEffect, createSignal, Match, type ParentProps, Show, Switch } from "solid-js";
+import { createAsync } from "@solidjs/router";
+import { useNavigate } from "@tanstack/solid-router";
+import { createEffect, Match, type ParentProps, Show, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
@@ -66,6 +67,12 @@ export function GetInitialData(props: GetInitialDataProps) {
     setData(result.initialData, result.userData as UserData);
     return result;
   }, {deferStream: true});
+  createEffect(() => {
+    const result = data();
+    if (result) {
+      setData(result.initialData, result.userData as UserData);
+    }
+  });
 
   return (
     <Show when={data()}>

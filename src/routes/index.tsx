@@ -1,7 +1,13 @@
+import { createFileRoute } from "@tanstack/solid-router";
+
 import { GetInitialData } from "~/GetInitialData";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-export default function Notfound() {
+export const Route = createFileRoute('/')({
+  component: Notfound,
+})
+
+function Notfound() {
   return (
     <GetInitialData authenticate={true} dontRedirectToLogin={true}>
       <PageViewWrapper

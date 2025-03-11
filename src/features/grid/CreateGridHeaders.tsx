@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
+import { UseNavigateResult } from "@tanstack/solid-router";
 import { Match, Show, Switch } from "solid-js";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
@@ -65,7 +66,7 @@ export function CreateGridHeaders(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   setDeleteRowId: (id: Id) => void,
-  navigate: (path: string) => void,
+  navigate: UseNavigateResult<string>,
   tableId: string,
   hideDeleteAction?: boolean,
   hideEditJsonAction?: boolean,
@@ -240,9 +241,9 @@ export function CreateGridHeaders(
                   icon="ph:pen"
                   iconClass="color:#3477CC"
                   onClick={() => {
-                    return navigate(
-                      `/admin/${tableId}/${info.row.original.id}`,
-                    );
+                    return navigate({
+                      to: `/admin/${tableId}/${info.row.original.id}`,
+                    });
                   }}
                   size={21}
                 />

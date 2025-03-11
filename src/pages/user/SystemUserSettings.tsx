@@ -1,4 +1,4 @@
-import { useSearchParams } from "@solidjs/router";
+import { useNavigate, useSearch } from "@tanstack/solid-router";
 import { createEffect, createSignal, Show } from "solid-js";
 
 import { SettingsLayout } from "~/components/settings/SettingsLayout";
@@ -7,13 +7,14 @@ import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
 import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
 export default function SystemUserSettings() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const searchParams = useSearch({strict: false});
   const [selectedMenu, setSelectedMenu] = createSignal(
-    searchParams.tab || "profile",
+    searchParams().tab || "profile",
   );
 
   createEffect(() => {
-    const tab = searchParams.tab;
+    const tab = searchParams().tab;
     if (tab && tab !== selectedMenu()) {
       setSelectedMenu(tab);
     }
@@ -38,7 +39,7 @@ export default function SystemUserSettings() {
   ];
 
   const handleMenuSelect = (id: string) => {
-    setSearchParams({ tab: id });
+    navigate({ search: (prev) => ({ tab: id }) });
   };
 
   return (

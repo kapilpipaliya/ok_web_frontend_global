@@ -1,3 +1,6 @@
 import { clientOnly } from "@solidjs/start";
+import { createFileRoute } from "@tanstack/solid-router";
 
-export default clientOnly(() => import("../../pages/PageDesignPreview"));
+export const Route = createFileRoute('/internal/PageDesignPreview')({
+  component: clientOnly(() => import("../../pages/PageDesignPreview")),
+})

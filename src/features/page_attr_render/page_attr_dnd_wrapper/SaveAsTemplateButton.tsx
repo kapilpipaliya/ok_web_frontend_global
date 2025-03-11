@@ -4,9 +4,9 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 interface SaveAsTemplateButtonProps {
   item: Vertex;

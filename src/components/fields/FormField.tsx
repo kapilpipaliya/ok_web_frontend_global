@@ -30,12 +30,12 @@ import { getFormData } from "../form/functions/getFormData";
 export function FormField(
   props: Readonly<
     GenericComponentProps & {
+      formDataId?: string;
       id?: string;
+      isNoPermissionCheck?: boolean;
       // For Root Level Forms we use Parent vertex label as form key
       label?: string;
       submitButton?: any;
-      isNoPermissionCheck?: boolean;
-      formDataId?: string;
     }
   >,
 ) {

@@ -1,6 +1,13 @@
-import { SchemaRenderer } from "~/pages/SchemaRenderer";
-import { profileUpdatedForm } from "~/routes/internal/page/(email)/(templates)/(profile)/profileUpdatedSchema";
+import { createFileRoute } from "@tanstack/solid-router";
 
-export default function ProfileUpdated() {
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
+
+import { profileUpdatedForm } from "./profileUpdatedSchema";
+
+export const Route = createFileRoute('/internal/page/(email)/(templates)/(profile)/ProfileUpdated')({
+  component: ProfileUpdated,
+})
+
+function ProfileUpdated() {
   return <SchemaRenderer form={profileUpdatedForm} />;
 }

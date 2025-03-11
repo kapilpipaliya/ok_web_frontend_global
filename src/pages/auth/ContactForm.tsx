@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate } from "@tanstack/solid-router";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
@@ -31,7 +31,6 @@ export function ContactForm() {
             componentName: "TextInput",
             key: "name",
             placeholder: "Your name",
-            validation: { required: true },
             props: (options: FunctionArgumentType) => ({
               onMount: () => {
                 if (options.ref && options.ref() instanceof HTMLInputElement) {
@@ -39,6 +38,7 @@ export function ContactForm() {
                 }
               },
             }),
+            validation: { required: true },
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -134,7 +134,7 @@ export function ContactForm() {
                         showErrorToast(response.error);
                       } else {
                         showSuccessToast("Support ticket created successfully");
-                        navigate("/");
+                        navigate({ to: "/" });
                       }
                     } catch (error) {
                       showErrorToast((error as Error).message);

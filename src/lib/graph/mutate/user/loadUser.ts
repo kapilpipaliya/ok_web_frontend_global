@@ -1,5 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
+import { UseNavigateResult } from "@tanstack/solid-router";
+
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { addNewVertex, replaceVertexProperties } from "../core/vertex";
@@ -15,11 +17,11 @@ export interface UserData {
 // Function to handle navigation after user data fetch
 export function handleUserNavigation(
   userData: null | UserData,
-  navigate?: (path: string) => void,
+  navigate?: UseNavigateResult<string>,
 ) {
   if (!userData?.user) {
     // TODO: add support for redirect to same page after login
-    navigate?.("/auth/login");
+    navigate?.({ to: "/auth/login" });
     return false;
   }
   return true;

@@ -1,6 +1,13 @@
-import { SchemaRenderer } from "~/pages/SchemaRenderer";
-import { twoFactorAuthForm } from "~/routes/internal/page/(email)/(templates)/(auth)/twoFactorAuthSchema";
+import { createFileRoute } from "@tanstack/solid-router";
 
-export default function TwoFactorAuth() {
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
+
+import { twoFactorAuthForm } from "./twoFactorAuthSchema";
+
+export const Route = createFileRoute('/internal/page/(email)/(templates)/(auth)/TwoFactorAuth')({
+  component: TwoFactorAuth,
+})
+
+function TwoFactorAuth() {
   return <SchemaRenderer form={twoFactorAuthForm} />;
 }

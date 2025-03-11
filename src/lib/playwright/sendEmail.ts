@@ -1,7 +1,7 @@
 import type { Session } from "neo4j-driver";
 
-import nodemailer from "nodemailer";
 import juice from "juice";
+import nodemailer from "nodemailer";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -220,7 +220,7 @@ async function saveEmailToDatabase(
     attachmentPath?: string;
     content: string;
     dbSettings: null | Vertex;
-    emailInfo: void | nodemailer.SentMessageInfo;
+    emailInfo: nodemailer.SentMessageInfo | void;
     subject: string;
     to: string;
   },

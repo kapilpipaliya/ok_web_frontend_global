@@ -1,7 +1,7 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { debounce } from "@solid-primitives/scheduled";
-import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
+import { useParams } from "@tanstack/solid-router";
 import { type IDBPDatabase, openDB } from "idb";
 import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
@@ -25,7 +25,7 @@ import {
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
 export function PageDesignerWrapper(): JSX.Element {
-  const params = useParams();
+  const params = useParams({strict: false});
   const initialStore = getInitialDesignerLayoutStore();
   const [graph, setGraph] = useGraph();
 
@@ -41,9 +41,9 @@ export function PageDesignerWrapper(): JSX.Element {
   const formId = uuidv7();
 
   const newOpenVertex = newVertex(uuidv7(), ["OpenForm"], {
-    dataId: params.id,
+    dataId: params().id,
     formId,
-    label: params.entity,
+    label: params().entity,
     mainPanel: initialStore.mainPanel[0],
   });
   addNewVertex(0, newOpenVertex, graph, setGraph);
@@ -175,7 +175,7 @@ export function PageDesignerWrapper(): JSX.Element {
   return (
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
-        <SiteTitle>{`${params.entity} Builder`}</SiteTitle>
+        <SiteTitle>{`${params().entity} Builder`}</SiteTitle>
         {/* <div
           classList={{
             "display:none": layoutStore().selectedSection === "setting",

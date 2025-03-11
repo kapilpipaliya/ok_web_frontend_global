@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate } from "@tanstack/solid-router";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
@@ -62,7 +62,7 @@ export function SignupForm() {
         loadMessage: "Registering User...",
         onError: () => {},
         onSuccess: (value) => {
-          handleLoginRedirect(value?.result, graph, navigate);
+          handleLoginRedirect(value?.result as Vertex, graph, navigate);
         },
         promise: postAPI(API.auth.signUpUrl, {
           email: formData.P.email.toLowerCase(),
@@ -94,11 +94,6 @@ export function SignupForm() {
                 componentName: "TextInput",
                 key: "username",
                 props: (options: FunctionArgumentType) => ({
-                  onMount: () => {
-                    if (options.ref && options.ref() instanceof HTMLInputElement) {
-                      options.ref()?.focus();
-                    }
-                  },
                   onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
@@ -111,6 +106,11 @@ export function SignupForm() {
                       if (formRefs.emailRef) {
                         formRefs.emailRef.focus();
                       }
+                    }
+                  },
+                  onMount: () => {
+                    if (options.ref && options.ref() instanceof HTMLInputElement) {
+                      options.ref()?.focus();
                     }
                   },
                 }),

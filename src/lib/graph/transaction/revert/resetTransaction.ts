@@ -2,8 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface } from "../../graph";
 
-import { revertTransactionUpToIndex } from "./revertTransactionUpToIndex";
 import { getNamedIndex } from "../value/getNamedIndex";
+import { revertTransactionUpToIndex } from "./revertTransactionUpToIndex";
 
 /**
  * Resets a transaction to its initial state by reverting all changes up to the initial index.

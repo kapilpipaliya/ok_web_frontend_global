@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate } from "@tanstack/solid-router";
 import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
@@ -73,7 +73,7 @@ export function PasswordChangeForm() {
                           showSuccessToast,
                         );
                         // Redirect to login page as session is expired
-                        navigate?.("/auth/login");
+                        navigate?.({ to: "/auth/login" });
                       } finally {
                         options.dataContext.saveState[1]("isLoading", false);
                       }
@@ -181,7 +181,7 @@ async function handlePasswordChange(
     });
 
     if (response.error) {
-      showErrorToast(response.error);
+      showErrorToast(response.error as string);
     } else {
       showSuccessToast("Password changed successfully");
     }

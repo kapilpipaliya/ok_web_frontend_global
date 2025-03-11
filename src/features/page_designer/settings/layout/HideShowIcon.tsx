@@ -10,9 +10,9 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 export function HideShowIcon(props: { iconSize: number; metaVertex: Vertex }) {
   const [graph, setGraph] = useGraph();

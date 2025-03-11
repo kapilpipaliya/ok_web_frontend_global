@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { useNavigate } from "@tanstack/solid-router";
 import { type JSX, Show } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
@@ -28,7 +28,7 @@ interface GridHeaderProps {
 export function GridHeader(props: Readonly<GridHeaderProps>) {
   const [gridState, setGridState] = useDataGridContext();
   const navigate = useNavigate();
-  const onAddNew = () => navigate(`/admin/${gridState.tableId}/new`);
+  const onAddNew = () => navigate({ to: `/admin/${gridState.tableId}/new` });
 
   const isTableLayout = () => gridState.layout === "table";
 

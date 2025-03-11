@@ -1,16 +1,14 @@
 import type { JSX } from "solid-js";
 
 import { Icon } from "@iconify-icon/solid";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate } from "@tanstack/solid-router";
 import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
-import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
@@ -20,8 +18,6 @@ export function AuthenticatedMenu(
   props: Readonly<AuthenticatedMenuProps>,
 ): JSX.Element {
   const [graph, setGraph] = useGraph();
-  const navigate = useNavigate();
-  const { showLoadingToast } = useToast();
 
   const isSystemSubDomain = () =>
     getMemberVertex(graph).P.subDomain === "super";

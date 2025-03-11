@@ -12,10 +12,10 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { getDownloadLink, openInNewTab } from "./getDownloadLink";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 export function FileManagerConfigIcons(
   props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,

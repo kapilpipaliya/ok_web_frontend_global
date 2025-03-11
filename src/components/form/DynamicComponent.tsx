@@ -1,5 +1,6 @@
 import { createLazyMemo } from "@solid-primitives/memo";
-import { useNavigate, useSearchParams } from "@solidjs/router";
+import { useNavigate } from "@tanstack/solid-router";
+import { useSearch } from "@tanstack/solid-router";
 import { toTitle } from "case-switcher-js";
 import {
   createEffect,
@@ -59,7 +60,7 @@ import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
-
+  
 export function DynamicComponent(
   props: Readonly<{
     componentName?: string;
@@ -83,7 +84,7 @@ export function DynamicComponent(
   const { showErrorToast, showSuccessToast, showWarningToast } = useToast();
   const [ref, setRef] = createSignal(null);
   const [mounted, setMounted] = createSignal(false);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearch({strict: false});
   const zIndex = useZIndex();
   const navigate = useNavigate();
 
@@ -261,7 +262,6 @@ export function DynamicComponent(
       ) => {
         setGraphDataWithTransaction(txnId, graph, setGraph, args, options);
       },
-      setSearchParams,
       showErrorToast,
       showSuccessToast,
       showWarningToast,

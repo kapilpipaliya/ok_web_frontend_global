@@ -1,6 +1,13 @@
-import { SchemaRenderer } from "~/pages/SchemaRenderer";
-import { signupConfirmationForm } from "~/routes/internal/page/(email)/(templates)/(signup)/signupConfirmationSchema";
+import { createFileRoute } from "@tanstack/solid-router";
 
-export default function SignupConfirmation() {
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
+
+import { signupConfirmationForm } from "./signupConfirmationSchema";
+
+export const Route = createFileRoute('/internal/page/(email)/(templates)/(signup)/SignupConfirmation')({
+  component: SignupConfirmation,
+})
+
+function SignupConfirmation() {
   return <SchemaRenderer form={signupConfirmationForm} />;
 }

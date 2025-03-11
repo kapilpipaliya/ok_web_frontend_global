@@ -5,7 +5,6 @@ import { useToast } from "~/components/styled/Toast";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { deleteLayoutAttr } from "~/features/page_designer/event_handler/deleteLayoutAttr";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-
 import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 interface DeleteButtonProps {

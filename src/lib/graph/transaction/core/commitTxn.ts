@@ -6,7 +6,7 @@ import type { MutationArgs } from "~/cypher/types/MutationArgs";
 
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
-import type { GraphInterface, Edge, Vertex } from "../../graph";
+import type { Edge, GraphInterface, Vertex } from "../../graph";
 import type { TransactionValue } from "../types/TransactionType";
 
 import {
@@ -16,19 +16,6 @@ import {
 import { updateEdgeIdsToNew } from "../../mutate/core/edge";
 import { updateVertexIdsToNew } from "../../mutate/core/vertex";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
-
-function validateTransaction(txnId: number, graph: Store<GraphInterface>): string {
-  if (!txnId) {
-    return 'Transaction ID is required'
-  }
-
-  const txnVertex = graph.vertexes[`txn${txnId}`];
-  if (!txnVertex) {
-    return `Transaction ${txnId} not found`
-  }
-
-  return "";
-}
 
 export function commitTxn(
   txnId: number,
@@ -126,4 +113,17 @@ export function commitTxn(
     // };
     return;
   }
+}
+
+function validateTransaction(txnId: number, graph: Store<GraphInterface>): string {
+  if (!txnId) {
+    return 'Transaction ID is required'
+  }
+
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+  if (!txnVertex) {
+    return `Transaction ${txnId} not found`
+  }
+
+  return "";
 }

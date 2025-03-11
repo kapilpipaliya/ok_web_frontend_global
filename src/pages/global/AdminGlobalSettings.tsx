@@ -1,4 +1,4 @@
-import { useSearchParams } from "@solidjs/router";
+import { useNavigate, useSearch } from "@tanstack/solid-router";
 import { createEffect, createSignal, Show } from "solid-js";
 
 import { SettingsLayout } from "~/components/settings/SettingsLayout";
@@ -14,13 +14,14 @@ import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
 
 export default function AdminGlobalSettings() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearch({strict: false});
+  const navigate = useNavigate();
   const [selectedMenu, setSelectedMenu] = createSignal(
-    searchParams.tab || "general",
+    searchParams().tab || "general",
   );
 
   createEffect(() => {
-    const tab = searchParams.tab;
+    const tab = searchParams().tab;
     if (tab && tab !== selectedMenu()) {
       setSelectedMenu(tab);
     }
@@ -90,7 +91,7 @@ export default function AdminGlobalSettings() {
   ];
 
   const handleMenuSelect = (id: string) => {
-    setSearchParams({ tab: id });
+    navigate({ search: (prev) => ({ tab: id }) });
   };
 
   return (

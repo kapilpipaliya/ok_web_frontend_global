@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "@solidjs/router";
+import { useNavigate, useSearch } from "@tanstack/solid-router";
 import { onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
@@ -19,9 +19,9 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
 
 export function LoginForm() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [graph] = useGraph();
+  const searchParams = useSearch({strict: false});
   const navigate = useNavigate();
+  const [graph] = useGraph();
   const { showErrorToast, showLoadingToast } = useToast();
   const [showPassword, setShowPassword] = createStore({
     password: false,
@@ -31,9 +31,9 @@ export function LoginForm() {
   });
 
   onMount(() => {
-    if (searchParams.error) {
-      showErrorToast(searchParams.error as string);
-      setSearchParams({ error: null }, { replace: true });
+    if (searchParams().error) {
+      showErrorToast(searchParams().error as string);
+      navigate({ search: (prev) => ({ error: null, replace: true }) });
     }
   });
 
@@ -69,7 +69,7 @@ export function LoginForm() {
         loadMessage: "Logging In...",
         onError: () => {},
         onSuccess: (value) => {
-          handleLoginRedirect(value?.result, graph, navigate);
+          handleLoginRedirect(value?.result as Vertex, graph, navigate);
         },
         promise: postAPI(API.auth.loginUrl, {
           email: formData.P.email.toLowerCase(),
@@ -99,11 +99,6 @@ export function LoginForm() {
                 componentName: "TextInput",
                 key: "email",
                 props: (options: FunctionArgumentType) => ({
-                  onMount: () => {
-                    if (options.ref && options.ref() instanceof HTMLInputElement) {
-                      options.ref()?.focus();
-                    }
-                  },
                   onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
                       if (e.target instanceof HTMLInputElement) {
@@ -132,6 +127,11 @@ export function LoginForm() {
                           );
                         }
                       }
+                    }
+                  },
+                  onMount: () => {
+                    if (options.ref && options.ref() instanceof HTMLInputElement) {
+                      options.ref()?.focus();
                     }
                   },
                 }),

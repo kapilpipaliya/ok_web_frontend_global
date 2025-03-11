@@ -1,15 +1,15 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { getDriver } from "~/cypher/core/driver";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { getDriver } from "~/cypher/core/driver";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { API } from "~/lib/api/endpoints";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
-import { API } from "~/lib/api/endpoints";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

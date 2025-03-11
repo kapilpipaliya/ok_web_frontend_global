@@ -110,7 +110,7 @@ export function updateVertex(
         for (const key in vertexData.IN) {
           const prevIds = prev.IN[key] || [];
           const newIds = vertexData.IN[key] || [];
-          IN[key] = [...new Set([...prevIds, ...newIds])];
+          IN[key] = [...new Set([...newIds, ...prevIds])];
         }
       }
       
@@ -120,7 +120,7 @@ export function updateVertex(
         for (const key in vertexData.OUT) {
           const prevIds = prev.OUT[key] || [];
           const newIds = vertexData.OUT[key] || [];
-          OUT[key] = [...new Set([...prevIds, ...newIds])];
+          OUT[key] = [...new Set([...newIds, ...prevIds])];
         }
       }
       

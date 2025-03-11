@@ -1,6 +1,13 @@
-import { SchemaRenderer } from "~/pages/SchemaRenderer";
-import { passwordChangedForm } from "~/routes/internal/page/(email)/(templates)/(profile)/passwordChangedSchema";
+import { createFileRoute } from "@tanstack/solid-router";
 
-export default function PasswordChanged() {
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
+
+import { passwordChangedForm } from "./passwordChangedSchema";
+
+export const Route = createFileRoute('/internal/page/(email)/(templates)/(profile)/PasswordChanged')({
+  component: PasswordChanged,
+})
+
+function PasswordChanged() {
   return <SchemaRenderer form={passwordChangedForm} />;
 }

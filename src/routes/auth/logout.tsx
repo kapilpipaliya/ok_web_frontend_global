@@ -1,4 +1,4 @@
-import { useNavigate } from "@solidjs/router";
+import { createFileRoute, useNavigate } from "@tanstack/solid-router";
 import { onMount } from "solid-js";
 
 import { API } from "~/lib/api/endpoints";
@@ -6,7 +6,11 @@ import { postAPI } from "~/lib/api/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 
-export default function Logout() {
+export const Route = createFileRoute('/auth/logout')({
+  component: Logout,
+})
+
+function Logout() {
   const navigate = useNavigate();
   const [graph, setGraph] = useGraph();
 
@@ -19,11 +23,11 @@ export default function Logout() {
       deleteVertex(0, "member", graph, setGraph);
 
       // Navigate to login page with replaced history
-      navigate(API.urls.admin.login, { replace: true });
+      navigate({ replace: true, to: API.urls.admin.login });
     } catch (error) {
       console.error("Logout failed:", error);
       // Even if there's an error, navigate to login
-      navigate(API.urls.admin.login, { replace: true });
+      navigate({ replace: true, to: API.urls.admin.login });
     }
   });
 
