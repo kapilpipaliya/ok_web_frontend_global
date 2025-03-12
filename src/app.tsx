@@ -1,10 +1,11 @@
 import { MetaProvider } from "@solidjs/meta";
+import { Router } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
-import { RouterProvider } from "@tanstack/solid-router";
+import { FileRoutes } from "@solidjs/start/router";
+import { ToastProvider } from "solid-hot-toast";
 
 import "~/base.css";
 
-import { ToastProvider } from "solid-hot-toast";
 import { ErrorBoundary, onMount, Suspense } from "solid-js";
 import { isServer } from "solid-js/web";
 
@@ -17,9 +18,7 @@ import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
 import { getGlobalThemeVertex } from "./lib/graph/get/sync/theme/getGlobalThemeVertex";
 import { themeConfig } from "./lib/graph/get/sync/theme/themeConfig";
 import { GraphContext } from "./lib/graph/graph";
-import { router } from "./router";
 import { toastValue } from "./toastValue";
-
 
 // Create a generic error fallback component
 const ErrorFallback = (props: {
@@ -47,11 +46,14 @@ export default function App() {
       setupGlobalErrorHandlers();
     }
   });
-  const CSSRuntimeProvider = clientOnly(() => import("./components/CSSRuntimeProvider"));
 
   return (
     <ToastProvider {...toastValue}>
-          
+      <Router
+        root={(props) => {
+          // <A> and 'use' router primitives can be only used inside a Route.
+          // const location = useLocation();
+          return (
             <GraphContext.Provider value={graph}>
               <CSSRuntimeProvider
                 config={themeConfig(getGlobalThemeVertex(graph[0]))}
@@ -69,19 +71,21 @@ export default function App() {
                       );
                     }}
                   >
-                    <RouterProvider router={router} />
+                    <Suspense fallback={<LoaderNew />}>
+                      {props.children}
+                    </Suspense>
                   </ErrorBoundary>
                   {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
                   <Toaster />
-                  {/* <CSSRuntimeProvider
-                config={themeConfig(getGlobalThemeVertex(graph[0]))}
-              />    */}
                   {/* </Show> */}
                 </MetaProvider>
               </CSSRuntimeProvider>
             </GraphContext.Provider>
-
-        
+          );
+        }}
+      >
+        <FileRoutes />
+      </Router>
     </ToastProvider>
   );
 }

@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/pages/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 const content = [
   {
@@ -66,8 +66,8 @@ const content = [
 
 export const signupConfirmationForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Initial email sent after user signup to confirm their email address",
   key: "SignupConfirmation",
   title: "Confirm Your Email Address",
+  description: "Initial email sent after user signup to confirm their email address",
 
 };

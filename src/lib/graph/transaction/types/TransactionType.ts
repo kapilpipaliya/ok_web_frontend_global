@@ -15,7 +15,7 @@ export type InsertFn = {
 };
 
 export type TransactionValue = InsertFn & {
-  data: Edge | Vertex;
+  data: Vertex | Edge;
   id: Id;
-  originalData: Edge | Vertex;
+  originalData: Vertex | Edge;
 };

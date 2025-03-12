@@ -10,10 +10,10 @@ export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
   const url = getURL(request);
   const subDomain = await determineSubDomain(url);
   const dbSession = (await getDriver()).session({ database: subDomain.subdomain });
-  return { dbSession, domain: subDomain.domain, subDomain: subDomain.subdomain };
+  return { dbSession, subDomain: subDomain.subdomain, domain: subDomain.domain };
 }
 
-async function determineSubDomain(url: URL): Promise<{ domain: null | string; subdomain: string }> {
+async function determineSubDomain(url: URL): Promise<{ domain: string | null; subdomain: string }> {
   const adminui = url.searchParams.get("adminui");
   return adminui === "true" ? { domain: null, subdomain: "adminui" } : await getSubDomain(url.hostname);
 }

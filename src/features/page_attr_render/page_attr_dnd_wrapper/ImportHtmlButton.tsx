@@ -3,9 +3,9 @@ import { createSignal, Show } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 import { ImportMenu } from "./ImportMenu";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 interface ImportHtmlButtonProps {
   item: Vertex;

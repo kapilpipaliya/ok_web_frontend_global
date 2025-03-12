@@ -1,5 +1,4 @@
 import type { Session, Transaction } from "neo4j-driver";
-
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 interface TokenData {

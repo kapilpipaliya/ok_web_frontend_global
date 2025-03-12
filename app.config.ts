@@ -1,6 +1,4 @@
 import { defineConfig } from "@solidjs/start/config";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-
 // import devtools from 'solid-devtools/vite';
 
 
@@ -10,6 +8,11 @@ export default defineConfig({
   //   preset: "deno",
   // },
   vite: {
+    server: {
+      //  If set to true, the server is allowed to respond to requests for any hosts.
+      allowedHosts: true,
+      
+    },
     build: {
       rollupOptions: {
         external: ['node:async_hooks'] // Mark node:async_hooks as external to prevent browser compatibility issues
@@ -40,17 +43,11 @@ export default defineConfig({
       // },
     // },
     plugins: [
-      TanStackRouterVite({ autoCodeSplitting: true, routeFileIgnorePattern: '\\.ts$', target: "solid" })
       // monaco-editor gives error in devtools
       // devtools({
       //   /* features options - all disabled by default */
       //   autoname: true,
       // }),
     ],
-    server: {
-      //  If set to true, the server is allowed to respond to requests for any hosts.
-      allowedHosts: true,
-      
-    },
   },
 });

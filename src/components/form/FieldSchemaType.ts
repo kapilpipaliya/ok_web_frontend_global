@@ -1,7 +1,6 @@
+import type { useNavigate, useSearchParams } from "@solidjs/router";
 import type { Accessor, Owner } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
-
-import { UseNavigateResult, useSearch } from "@tanstack/solid-router";
 
 import type {
   PageRenderObject,
@@ -30,7 +29,7 @@ export interface FunctionArgumentBaseType {
   // formValueStore: FormStoreObject;
   meta: Vertex;
   mounted: Accessor<boolean>;
-  navigate: UseNavigateResult<string>;
+  navigate: ReturnType<typeof useNavigate>;
   onChange: (value: any) => void;
   owner: Owner;
   parentItems: PageRenderStore[];
@@ -44,13 +43,14 @@ export interface FunctionArgumentBaseType {
   runWithParentOwner: <T>(fn: () => T) => T | undefined;
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
-  searchParams?: ReturnType<typeof useSearch>[0];
+  searchParams?: ReturnType<typeof useSearchParams>[0];
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
     txnId: number,
     args: Parameters<typeof setGraphDataWithTransaction>[3],
     options: Parameters<typeof setGraphDataWithTransaction>[4],
   ) => void;
+  setSearchParams?: ReturnType<typeof useSearchParams>[1];
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
   showWarningToast: (message: string) => void;

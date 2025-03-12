@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/pages/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 const content = [
   {
@@ -67,8 +67,8 @@ const content = [
 
 export const invitationEmailForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Sent to invite new users to join the platform, containing a registration link valid for 7 days",
   key: "InvitationEmail",
   title: "User Invitation",
+  description: "Sent to invite new users to join the platform, containing a registration link valid for 7 days",
 
 };

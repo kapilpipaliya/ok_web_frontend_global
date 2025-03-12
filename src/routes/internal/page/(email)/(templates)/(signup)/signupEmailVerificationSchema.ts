@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/pages/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 const content = [
   {
@@ -67,8 +67,8 @@ const content = [
 
 export const signupEmailVerificationForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Sent during the signup process to verify the user's email address, containing a verification link valid for 24 hours",
   key: "SignupEmailVerification",
   title: "Verify Your Email Address",
+  description: "Sent during the signup process to verify the user's email address, containing a verification link valid for 24 hours",
 
 };

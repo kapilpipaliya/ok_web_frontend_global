@@ -1,5 +1,4 @@
 import { Link, Title } from "@solidjs/meta";
-import { createFileRoute } from "@tanstack/solid-router";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { GetInitialData } from "~/GetInitialData";
@@ -9,11 +8,7 @@ import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
 
-export const Route = createFileRoute('/system/_nolayout/Projects')({
-  component: Projects,
-})
-
- function Projects() {
+export default function Projects() {
   return (
     <SystemLayoutRoute>
       <Title>Projects</Title>

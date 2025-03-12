@@ -1,7 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { UseNavigateResult } from "@tanstack/solid-router";
-
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
@@ -13,10 +11,10 @@ export function formCancel(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   closePopUp: () => void,
-  navigate: UseNavigateResult<string>,
+  navigate: (path: string) => void,
 ) {
   const navigateToParentRoute = () => {
-    navigate({ to: removeLastPathSegment() });
+    navigate(removeLastPathSegment());
   };
 
   return () => {

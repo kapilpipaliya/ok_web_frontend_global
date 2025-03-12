@@ -4,8 +4,8 @@ import type { GraphInterface } from "../../graph";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
-import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { redoTxn } from "./redoTxn";
+import { getLastTxnIndex } from "../value/getLastTxnIndex";
 
 /**
  * Performs a redo operation on a transaction, restoring previously undone changes.

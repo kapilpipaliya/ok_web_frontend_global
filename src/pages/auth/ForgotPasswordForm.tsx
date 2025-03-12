@@ -194,6 +194,11 @@ export function ForgotPasswordForm() {
             componentName: "TextInput",
             key: "identifier",
             props: (options: FunctionArgumentType) => ({
+              onMount: () => {
+                if (options.ref && options.ref() instanceof HTMLInputElement) {
+                  options.ref()?.focus();
+                }
+              },
               onKeyDown: async (e: KeyboardEvent) => {
                 if (e.key === "Enter") {
                   if (e.target instanceof HTMLInputElement) {
@@ -208,11 +213,6 @@ export function ForgotPasswordForm() {
                   } finally {
                     options.dataContext.submitState[1]("isLoading", false);
                   }
-                }
-              },
-              onMount: () => {
-                if (options.ref && options.ref() instanceof HTMLInputElement) {
-                  options.ref()?.focus();
                 }
               },
             }),

@@ -1,4 +1,5 @@
-import { createEffect, createResource, createSignal, For, Match, Switch } from "solid-js";
+import { createAsync } from "@solidjs/router";
+import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
 import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsAPICall";
 import { ServerResult } from "~/cypher/types/ServerResult";
@@ -29,7 +30,7 @@ export const DataField = (props: {
   const [errorMessage, setErrorMessage] = createSignal("");
   const dataContext = useRepeaterVertexContext() || {};
 
-  const selectionOptionsData = createResource<null | ServerResult>(async () => {
+  const selectionOptionsData = createAsync<null | ServerResult>(async () => {
     if (!props.expression) {
       return null;
     }

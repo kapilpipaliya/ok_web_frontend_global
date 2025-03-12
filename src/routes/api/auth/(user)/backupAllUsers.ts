@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Node, Relationship } from "neo4j-driver";
 
-// import { format } from "date-fns";
+import { format } from "date-fns";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 import { getDriver } from "~/cypher/core/driver";

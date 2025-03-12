@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { useNavigate } from "@tanstack/solid-router";
+import { useNavigate } from "@solidjs/router";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -80,7 +80,7 @@ export function useDeleteRowConfirm(
     }
     await showLoadingToast({
       loadMessage: "Deleting Row...",
-      onSuccess: () => setTimeout(() => navigate({ to: -1 }), 0),
+      onSuccess: () => setTimeout(() => navigate(-1), 0),
       promise: submitDataCall(data, graph, setGraph, txnId),
       successMessage: "Row deleted successfully",
     });

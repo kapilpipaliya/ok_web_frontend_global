@@ -1,6 +1,6 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
-import { useNavigate } from "@tanstack/solid-router";
+import { useNavigate } from "@solidjs/router";
 import {
   type Accessor,
   createEffect,

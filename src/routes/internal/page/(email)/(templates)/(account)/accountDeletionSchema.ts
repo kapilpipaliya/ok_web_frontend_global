@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/pages/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 const content = [
   {
@@ -77,8 +77,8 @@ const content = [
 
 export const accountDeletionRequestForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Sent when a user requests to delete their account, explaining the 48-hour deletion process and providing support contact information",
   key: "AccountDeletionRequest",
   title: "Account Deletion Request",
+  description: "Sent when a user requests to delete their account, explaining the 48-hour deletion process and providing support contact information",
 
 };

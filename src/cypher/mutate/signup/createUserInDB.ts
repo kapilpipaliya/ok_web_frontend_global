@@ -66,10 +66,10 @@ export async function createUserInUserDB(
 
   const createUserResult = await sessionOrTx.run(createUserQuery2, {
     ...params,
-    emailConfirmed: params.emailConfirmed ?? false,
     hashedPassword,
     isSystemUser: isSystemUser ?? null,
     salt,
+    emailConfirmed: params.emailConfirmed ?? false,
   });
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }

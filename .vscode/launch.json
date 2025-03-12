@@ -2,23 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch npm run dev Dev",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "/Users/kapil/.volta/bin/npm",
-      "runtimeArgs": [
-        "run",
-        "dev"
-      ],
-      "port": 9229,
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
-    },
-    {
-      "name": "Launch npm run dev Prod",
+      "name": "Launch npm run dev",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "/root/.volta/bin/npm",

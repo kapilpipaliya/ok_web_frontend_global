@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/pages/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 const content = [
   {
@@ -66,8 +66,8 @@ const content = [
 
 export const emailChangeSuccessfulForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Confirmation email sent after an email address change has been successfully completed",
   key: "EmailChangeSuccessful",
   title: "Email Change Successful",
+  description: "Confirmation email sent after an email address change has been successfully completed",
 
 };

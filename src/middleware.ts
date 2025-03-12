@@ -1,5 +1,5 @@
+import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
-import { redirect } from "@tanstack/solid-router";
 import { csrf } from "shieldwall/start";
 
 import { getSubDomain } from "~/cypher/session/getSubDomain";
@@ -24,27 +24,27 @@ export default createMiddleware({
     //     }
     //   }
     // }),
-    // async (event) => {
-    //   const url = new URL(event.request.url);
-    //   if (url.pathname === "/api/setup/superUserSetup") {
-    //     return;
-    //   }
-    //   const { subdomain } = await getSubDomain(event.request.headers.get("host")!);
-    //   const isSuperSubDomain = subdomain === SYSTEM_DB_NAME;
-    //   const sessionUser = await getUserFromSession(event.request);
+    async (event) => {
+      const url = new URL(event.request.url);
+      if (url.pathname === "/api/setup/superUserSetup") {
+        return;
+      }
+      const { subdomain } = await getSubDomain(event.request.headers.get("host")!);
+      const isSuperSubDomain = subdomain === SYSTEM_DB_NAME;
+      const sessionUser = await getUserFromSession(event.request);
 
-    //   // Check if the request URL path is in the list of public paths
-    //   if (url.pathname.includes("/system")) {
-    //     if (!(isSuperSubDomain && sessionUser)) {
-    //       // Redirect to the login page if not authorized
-    //       return redirect({ to: generate401RedirectUrl(url.pathname) });
-    //     }
-    //   } else if (url.pathname.includes("/admin")) {
-    //     if (!sessionUser) {
-    //       // Redirect to the login page if not authorized
-    //       return redirect({ to: generate401RedirectUrl(url.pathname) });
-    //     }
-    //   }
-    // },
+      // Check if the request URL path is in the list of public paths
+      if (url.pathname.includes("/system")) {
+        if (!(isSuperSubDomain && sessionUser)) {
+          // Redirect to the login page if not authorized
+          return redirect(generate401RedirectUrl(url.pathname));
+        }
+      } else if (url.pathname.includes("/admin")) {
+        if (!sessionUser) {
+          // Redirect to the login page if not authorized
+          return redirect(generate401RedirectUrl(url.pathname));
+        }
+      }
+    },
   ],
 });

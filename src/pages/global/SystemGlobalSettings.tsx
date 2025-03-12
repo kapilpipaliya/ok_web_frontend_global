@@ -1,18 +1,17 @@
-import { useNavigate, useSearch } from "@tanstack/solid-router";
+import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, Show } from "solid-js";
 
 import { SettingsLayout } from "~/components/settings/SettingsLayout";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
 
 export default function SystemGlobalSettings() {
-  const searchParams = useSearch({strict: false});
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMenu, setSelectedMenu] = createSignal<string>(
-    (searchParams().tab as string) || "email",
+    (searchParams.tab as string) || "email",
   );
 
   createEffect(() => {
-    const tab = searchParams().tab;
+    const tab = searchParams.tab;
     if (tab && tab !== selectedMenu()) {
       setSelectedMenu(typeof tab === "string" ? tab : "email");
     }
@@ -27,7 +26,7 @@ export default function SystemGlobalSettings() {
   ];
 
   const handleMenuSelect = (id: string) => {
-    navigate({ search: (prev) => ({ tab: id }) });
+    setSearchParams({ tab: id });
   };
 
   return (

@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/pages/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 const content = [
   {
@@ -78,8 +78,8 @@ const content = [
 
 export const emailChangedForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Sent to notify users that a request has been made to change their email address, with instructions if they didn't initiate the change",
   key: "EmailChanged",
   title: "Email Change Notification",
+  description: "Sent to notify users that a request has been made to change their email address, with instructions if they didn't initiate the change",
 
 };

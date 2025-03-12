@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/pages/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 const content = [
   {
@@ -54,8 +54,8 @@ const content = [
 
 export const passwordChangedForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Notification sent after a user's password has been successfully changed",
   key: "PasswordChanged",
   title: "Password Changed Successfully",
+  description: "Notification sent after a user's password has been successfully changed",
 
 };

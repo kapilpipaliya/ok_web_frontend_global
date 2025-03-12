@@ -1,7 +1,7 @@
 import type { JSX } from "solid-js";
 
 import { mergeRefs } from "@solid-primitives/refs";
-import { useNavigate } from "@tanstack/solid-router";
+import { useNavigate } from "@solidjs/router";
 import {
   createSignal,
   getOwner,
@@ -18,8 +18,8 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
-import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 import { getNamedIndex } from "~/lib/graph/transaction/value/getNamedIndex";
 import { createLongPress } from "~/lib/hooks/createLongPress";
 
@@ -110,7 +110,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
 
   const onCancel = () => {
     revertTransaction(formVertex()!.P.txnId, graph, setGraph);
-    setTimeout(() => navigate({ to: -1 }));
+    setTimeout(() => navigate(-1));
   };
 
   const onReset = () => {

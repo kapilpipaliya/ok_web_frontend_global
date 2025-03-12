@@ -1,18 +1,18 @@
-import type { UseNavigateResult } from "@tanstack/solid-router";
+import type { Navigator } from "@solidjs/router";
 
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 export function handleLoginRedirect(
   value: Vertex,
   _graph: GraphInterface,
-  navigate: UseNavigateResult<string>,
+  navigate: Navigator,
 ) {
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUrl = urlParams.get("redirectUrl");
 
   if (redirectUrl) {
-    navigate({ to: redirectUrl });
+    navigate(redirectUrl);
   } else if (value != null && value.id !== null) {
-    navigate({ to: `${value.P.redirectUrl ?? ""}` });
+    navigate(`${value.P.redirectUrl ?? ""}`);
   }
 }

@@ -101,4 +101,3 @@ export function CSSRuntimeProvider(props: {
     </RuntimeCSSContext.Provider>
   );
 }
-export default CSSRuntimeProvider;

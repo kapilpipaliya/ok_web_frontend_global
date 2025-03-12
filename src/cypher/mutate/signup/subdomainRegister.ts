@@ -38,9 +38,9 @@ export async function subdomainRegister(
     userDbSession,
     {
       email: data.email,
-      emailConfirmed: true,
       username: data.username,
       uuid: user.P.uuid,
+      emailConfirmed: true,
     },
     true,
   );

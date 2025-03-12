@@ -1,6 +1,6 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
-import { useParams } from "@tanstack/solid-router";
+import { useParams } from "@solidjs/router";
 import { batch, createContext, type JSX, onMount, useContext } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 
@@ -99,7 +99,7 @@ export function FileManagerStoreProvider(
   });
   props.setFileManagerStore?.(fileManagerStore[0]);
   const [graph, setGraph] = useGraph();
-  const params = useParams({strict: false});
+  const params = useParams();
 
   onMount(async () => {
     const { expandedKeys, root, selectedItem } = await fetchRootData(
@@ -108,7 +108,7 @@ export function FileManagerStoreProvider(
       props.toParentEdgeType,
       props.parentVertexLabel,
       fileManagerStore[0].rootKeys,
-      params().folderId,
+      params.folderId,
       props.fileId,
     );
 

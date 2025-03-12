@@ -1,10 +1,9 @@
-
 import { makeEventListener } from "@solid-primitives/event-listener";
+import { type BeforeLeaveEventArgs, createAsync, useBeforeLeave } from "@solidjs/router";
 import {
   batch,
   createEffect,
   createMemo,
-  createResource,
   Match,
   on,
   onCleanup,
@@ -82,8 +81,6 @@ export function PageViewWrapper(
     getFormData?: () => Promise<ServerResult>;
     hideSaveCancelButton?: boolean;
     initializeFormStoreParent?: (formStoreId: Id) => void;
-    // openedFormId?: Id;
-    isDesignMode?: boolean;
     isNoPermissionCheck?: boolean;
     metaTxnId?: number;
     pageId?: string;
@@ -92,6 +89,8 @@ export function PageViewWrapper(
     parentId?: Id;
     txnId?: string;
     uuid?: string;
+    // openedFormId?: Id;
+    isDesignMode?: boolean;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -204,19 +203,19 @@ export function PageViewWrapper(
 
 
   const constants = {
-    dataId: props.dataId,
-    expression: props.expression,
-    formDataId: props.formDataId,
-    formId: props.formId,
     formMetaId: props.formMetaId,
-    getFormData: props.getFormData ? true : false,
-    isDesignMode: props.isDesignMode,
-    isNoPermissionCheck: props.isNoPermissionCheck,
-    pageKeyName: props.pageKeyName,
     pageVertexName: props.pageVertexName,
+    formId: props.formId,
+    expression: props.expression,
+    isDesignMode: props.isDesignMode,
+    pageKeyName: props.pageKeyName,
+    isNoPermissionCheck: props.isNoPermissionCheck,
+    dataId: props.dataId,
+    getFormData: props.getFormData ? true : false,
+    formDataId: props.formDataId,
   };
 
-  const [metaData] = createResource(async () => {
+  const metaData = createAsync(async () => {
     console.log("Starting metaData computation");
     if (constants.formMetaId) {
       console.log("FormMetaId is provided, returning empty object");
@@ -304,11 +303,11 @@ export function PageViewWrapper(
         constants.pageVertexName,
       );
       console.log("DataResult fetched:", dataResult);
-      return {dataResult, formMetaId, metaResult};
+      return {metaResult, formMetaId, dataResult};
     }
 
     console.log("Returning metaResult and formMetaId");
-    return { formMetaId, metaResult };
+    return { metaResult, formMetaId };
   });
 
   async function handleFormMetaData(metaResult?: FetchFormMetaDataResult, formMetaId?: string) {
@@ -344,7 +343,7 @@ export function PageViewWrapper(
     if (formMetaId) {
       setFormStore("formMetaId", formMetaId);
     }
-    const form = metaResult.form;
+    let form = metaResult.form;
     if (!(props.formMetaId || formStore().P.formMetaId || form)) {
       setFormStore("error", `${props.pageVertexName} is not configured`);
       return false;
@@ -546,26 +545,26 @@ export function PageViewWrapper(
   });
 
   // Each open tab will be hidden and have its own useBeforeLeave callback
-  // useBeforeLeave((e: BeforeLeaveEventArgs) => {
-  //   if (props.dontConfirmExit) {
-  //     // allow navigation
-  //     return;
-  //   }
-  //   if (isDisabledTxn(formStore().P.txnId, graph)) {
-  //     // allow navigation
-  //     return;
-  //   }
+  useBeforeLeave((e: BeforeLeaveEventArgs) => {
+    if (props.dontConfirmExit) {
+      // allow navigation
+      return;
+    }
+    if (isDisabledTxn(formStore().P.txnId, graph)) {
+      // allow navigation
+      return;
+    }
 
-  //   // preventDefault to block immediately and prompt user async
-  //   e.preventDefault();
-  //   setTimeout(() => {
-  //     setFormStore("discardPopup", true);
-  //   }, 100);
-  //   onConfirmExit = () => {
-  //     // user wants to proceed anyway so retry with force=true
-  //     e.retry(true);
-  //   };
-  // });
+    // preventDefault to block immediately and prompt user async
+    e.preventDefault();
+    setTimeout(() => {
+      setFormStore("discardPopup", true);
+    }, 100);
+    onConfirmExit = () => {
+      // user wants to proceed anyway so retry with force=true
+      e.retry(true);
+    };
+  });
 
   const beforeunload = (event: BeforeUnloadEvent) => {
     if (!isDisabledTxn(formStore().P.txnId, graph)) {
@@ -650,7 +649,7 @@ export function PageViewWrapper(
                   ? dataVertex()
                   : true)
               }
-            >
+            >def1
               <Switch>
                 <Match when={!formStore().P.isPreview}>
                   <Content />

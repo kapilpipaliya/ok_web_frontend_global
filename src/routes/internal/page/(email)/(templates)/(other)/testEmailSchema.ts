@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/pages/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 const content = [
   {
@@ -40,8 +40,8 @@ const content = [
 
 export const testEmailForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Used to verify that the email configuration is working correctly",
   key: "TestEmail",
   title: "Test Email",
+  description: "Used to verify that the email configuration is working correctly",
 
 };

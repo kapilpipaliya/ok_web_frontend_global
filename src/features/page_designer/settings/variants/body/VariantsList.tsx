@@ -9,10 +9,10 @@ import { evalExpression } from "~/lib/expression_eval";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { deleteRow } from "~/lib/graph/mutate/vertex/deleteRow";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
+import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
 
 export function VariantsList() {
   const [graph, setGraph] = useGraph();

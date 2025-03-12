@@ -1,4 +1,4 @@
-import { useNavigate, useSearch } from "@tanstack/solid-router";
+import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal } from "solid-js";
 
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
@@ -8,14 +8,13 @@ import { useGraph } from "~/lib/graph/graph";
 
 export default function AdminDashboard() {
   const [graph] = useGraph();
-  const navigate = useNavigate();
-  const searchParams = useSearch({strict: false});
-  const initialId = (searchParams().tab as string) || "Page";
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialId = (searchParams.tab as string) || "Page";
   const [selectedId, setSelectedId] = createSignal(initialId);
 
   // Only run this effect if the route hasn't changed
   createEffect(() => {
-    const tab = searchParams().tab as string;
+    const tab = searchParams.tab as string;
     if (!tab) {
       setSelectedId("Page");
     } else if (tab !== selectedId()) {
@@ -24,9 +23,7 @@ export default function AdminDashboard() {
   });
 
   const handleTabClick = (id: string) => {
-    navigate({
-      search: (prev) => ({ tab: id }),
-    });
+    setSearchParams({ tab: id });
   };
 
   const tabs = () => {

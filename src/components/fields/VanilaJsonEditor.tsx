@@ -1,6 +1,6 @@
 import type { JsonEditor, MenuButton, MenuItem, MenuSeparator, RenderMenuContext } from 'vanilla-jsoneditor';
 
-import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup, onMount, createEffect } from 'solid-js';
 import { createJSONEditor } from 'vanilla-jsoneditor';
 // import 'vanilla-jsoneditor/themes/jse-theme-dark.css';
 

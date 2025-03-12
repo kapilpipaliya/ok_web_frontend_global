@@ -12,7 +12,7 @@ import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 export interface FetchFormDataResult {
-  componentData?: null | ServerResult;
+  componentData?: ServerResult | null;
   createNew?: boolean;
   data?: ServerResult;
   error?: string;
@@ -61,7 +61,7 @@ export async function fetchFormData(
     );
 
     // Fetch data for all components if needed
-    let componentData: null | ServerResult = null;
+    let componentData: ServerResult | null = null;
     if (componentVertices.length > 0) {
       componentData = await fetchComponentDataPure(componentVertices);
     }

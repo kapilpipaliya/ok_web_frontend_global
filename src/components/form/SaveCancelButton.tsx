@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/solid-router";
+import { useNavigate } from "@solidjs/router";
 import { type JSXElement, Show } from "solid-js";
 
 import { useGraph, type Vertex } from "~/lib/graph/graph";
