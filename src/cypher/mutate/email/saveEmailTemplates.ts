@@ -1,4 +1,4 @@
-import type { Session } from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 import { createAppState } from "~/createAppState";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
@@ -42,9 +42,7 @@ export function getEmailTemplateSchema(templateName: string) {
   return EMAIL_TEMPLATES[templateName as keyof typeof EMAIL_TEMPLATES];
 }
 
-export async function saveAllEmailTemplates(dbSession: Session) {
-  const tx = dbSession.beginTransaction();
-  try {
+export async function saveAllEmailTemplates(tx: Transaction) {
     for (const [templateName, schema] of Object.entries(EMAIL_TEMPLATES)) {
       const [graph, setGraph] = createAppState();
       const txnId = generateNewTxnId(graph, setGraph);
@@ -68,10 +66,5 @@ export async function saveAllEmailTemplates(dbSession: Session) {
       await mutateData(commitData, tx);
     }
 
-    await tx.commit();
     return { success: true };
-  } catch (error) {
-    await tx.rollback();
-    throw error;
-  }
 }

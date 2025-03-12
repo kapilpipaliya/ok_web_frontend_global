@@ -11,6 +11,7 @@ export async function createUserInSuperDB(
     email: string;
     password: string;
     username: string;
+    emailConfirmed?: boolean;
   },
 ) {
   const uuid = uuidv7();
@@ -24,7 +25,7 @@ export async function createUserInSuperDB(
             email: $email,
             password: $hashedPassword,
             salt: $salt,
-            emailConfirmed: false
+            emailConfirmed: $emailConfirmed
         }) SET u.createdAt = localDateTime() RETURN u;`;
 
   const createUserParams = {
@@ -32,6 +33,7 @@ export async function createUserInSuperDB(
     hashedPassword,
     salt,
     uuid,
+    emailConfirmed: userData.emailConfirmed ?? false,
   };
 
   const createUserResult = await superTx.run(createUserQuery, createUserParams);

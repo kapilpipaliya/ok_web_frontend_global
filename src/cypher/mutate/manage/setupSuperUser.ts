@@ -1,20 +1,15 @@
 import type { Session } from "neo4j-driver";
 
-import { v7 as uuidv7 } from "uuid";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
-import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
-import { addAdminRoleToUser } from "~/cypher/mutate/signup/addAdminRoleToUser";
 import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
-import { hashPassword } from "~/lib/auth/password";
 
-import { createRootFolder } from "../signup/createRootFolder";
-import { insertComponents } from "../signup/insertComponents";
 import { getAllDatabases } from "./getAllDatabases";
+import { signupAdmin } from "../signup/signupAdmin";
+import { createDatabaseConstraints } from "../signup/createRootFolder";
 
 export const superUserData = {
   email: "superuser@easyformforge.com",
@@ -41,13 +36,15 @@ export async function setupSuperUser(): Promise<{
 
     const driver = await getDriver();
     const dbSession = driver.session({ database: SYSTEM_DB_NAME });
+    await createDatabaseConstraints(dbSession);
+    const tx = dbSession.beginTransaction();
     try {
       // Check if a user with the same username already exists
       const checkUserQuery = `
         MATCH (u:User { username: $username })
         RETURN u
       `;
-      const checkUserResult = await dbSession.run(checkUserQuery, {
+      const checkUserResult = await tx.run(checkUserQuery, {
         username: superUserData.username,
       });
 
@@ -59,68 +56,12 @@ export async function setupSuperUser(): Promise<{
         };
       }
 
-      // Hash password before saving
-      const { hashedPassword, salt } = await hashPassword(
-        superUserData.password,
-      );
+      const result = await signupAdmin(tx, superUserData, true);
 
-      const createUserQuery = `
-        CREATE (u:User {
-          email: $email,
-          password: $hashedPassword,
-          salt: $salt,
-          username: $username,
-          uuid: $uuid,
-          emailConfirmed: true
-        })
-        RETURN u
-      `;
-
-      const createUserResult = await dbSession.run(createUserQuery, {
-        email: superUserData.email,
-        hashedPassword,
-        salt,
-        username: superUserData.username,
-        uuid: uuidv7(),
-      });
-
-      if (createUserResult.records.length === 0) {
-        return {
-          error: `Failed to create ${SYSTEM_DB_NAME} user.`,
-          status: 500,
-          user: null,
-        };
-      }
-
-      const user = convertNodeToJson(createUserResult.records[0].get("u"));
-
-      // Create Account and link with User
-      const accountId = await createSuperAccount(dbSession, user.P.uuid);
-
-      // Create SubDomain and link with Account
-      await createSystemSubdomain(dbSession, accountId);
-
-      await createRootFolder(dbSession);
-      await addAdminRoleToUser(dbSession, user.P.uuid);
-
-      const response = await insertComponents(dbSession);
-      if (!response.success) {
-        return {
-          error: "Failed to insert component tree",
-          status: 500,
-          user: null,
-        };
-      }
-
-      try {
-        await saveAllEmailTemplates(dbSession);
-      } catch (error) {
-        console.error("Failed to save email templates:", error);
-        // Continue even if email template creation fails
-      }
-
-      return { status: 200, user };
+      await tx.commit();
+      return { status: 200, user: result.user };
     } catch (error) {
+      await tx.rollback();
       console.error(`Error creating ${SYSTEM_DB_NAME} user:`, error);
       return {
         error: `Failed to create ${SYSTEM_DB_NAME} user`,
@@ -128,6 +69,7 @@ export async function setupSuperUser(): Promise<{
         user: null,
       };
     } finally {
+      await tx.close();
       await dbSession.close();
     }
   } catch (error) {
@@ -140,46 +82,4 @@ export async function setupSuperUser(): Promise<{
   } finally {
     await systemDbSession.close();
   }
-}
-
-async function createSuperAccount(dbSession: Session, userUuid: string) {
-  const accountId = uuidv7();
-  const query = `
-    CREATE (a:Account {
-      id: $accountId,
-      name: $username,
-      createdAt: datetime(),
-      lastModified: datetime()
-    })
-    WITH a
-    MATCH (u:User {uuid: $userUuid})
-    CREATE (a)-[:AccountUser]->(u)
-    RETURN a
-  `;
-
-  await dbSession.run(query, {
-    accountId,
-    username: superUserData.username,
-    userUuid,
-  });
-  return accountId;
-}
-
-async function createSystemSubdomain(dbSession: Session, accountId: string) {
-  const query = `
-    CREATE (s:SubDomain {
-      key: $systemDbName,
-      createdAt: datetime(),
-      lastModified: datetime()
-    })
-    WITH s
-    MATCH (a:Account {id: $accountId})
-    CREATE (a)-[:AccountSubdomain]->(s)
-    RETURN s
-  `;
-
-  return await dbSession.run(query, {
-    accountId,
-    systemDbName: SYSTEM_DB_NAME,
-  });
 }

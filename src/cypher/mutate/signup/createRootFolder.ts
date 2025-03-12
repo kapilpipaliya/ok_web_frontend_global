@@ -2,24 +2,55 @@ import type { Session, Transaction } from "neo4j-driver";
 
 import { getDefaultTheme } from "~/lib/theme/getDefaultTheme";
 
+export async function createDatabaseConstraints(session: Session) {
+  const constraints = [
+    // Role and Permission constraints
+    `CREATE CONSTRAINT unique_permission IF NOT EXISTS
+     FOR (p:Perm) REQUIRE p.key IS UNIQUE`,
+    `CREATE CONSTRAINT unique_role IF NOT EXISTS
+     FOR (r:Role) REQUIRE r.key IS UNIQUE`,
+
+     `CREATE CONSTRAINT unique_comp IF NOT EXISTS
+     FOR (c:Comp) REQUIRE c.key IS UNIQUE`,
+
+    `CREATE CONSTRAINT unique_support_status IF NOT EXISTS
+     FOR (s:SupportStatus) REQUIRE s.key IS UNIQUE`,
+
+     `CREATE CONSTRAINT unique_global_setting IF NOT EXISTS
+     FOR (g:GlobalSetting) REQUIRE g.key IS UNIQUE`,
+
+     `CREATE CONSTRAINT unique_theme IF NOT EXISTS
+     FOR (t:Theme) REQUIRE t.key IS UNIQUE`
+  ];
+
+  try {
+    for (const constraint of constraints) {
+      await session.run(constraint);
+    }
+  } catch (error) {
+    console.error("Error creating database constraints:", error);
+    throw error;
+  }
+}
+
 export async function createRootFolder(
   tx: Session | Transaction,
 ): Promise<void> {
-  const query = `
-    MERGE (:Folder {key: 'Root'})
-    MERGE (:Comp {key: 'Root'})
-    MERGE (:Perm {key: 'Root'})
-    MERGE (globalSetting:GlobalSetting {key: 'Default'})
-    MERGE (theme:Theme {key: 'Default'})
-    SET theme.data = $theme
-    MERGE (globalSetting)-[:GlobalSettingTheme]->(theme)
-  `;
-
-  const params = {
-    theme: getDefaultTheme(),
-  };
-
   try {
+    const query = `
+      MERGE (:Folder {key: 'Root'})
+      MERGE (:Comp {key: 'Root'})
+      MERGE (:Perm {key: 'Root'})
+      MERGE (globalSetting:GlobalSetting {key: 'Default'})
+      MERGE (theme:Theme {key: 'Default'})
+      SET theme.data = $theme
+      MERGE (globalSetting)-[:GlobalSettingTheme]->(theme)
+    `;
+
+    const params = {
+      theme: getDefaultTheme(),
+    };
+
     await tx.run(query, params);
     await createDefaultPermissions(tx);
     await createDefaultRoles(tx);
@@ -76,16 +107,6 @@ const createSupportStatus = async (tx: Session | Transaction) => {
 };
 
 async function createDefaultRoles(tx: Session | Transaction) {
-  const createConstraintPermissionQuery = `
-    CREATE CONSTRAINT unique_permission IF NOT EXISTS
-    FOR (p:Perm) REQUIRE p.key IS UNIQUE;
-  `;
-
-  const createConstraintRoleQuery = `
-    CREATE CONSTRAINT unique_role IF NOT EXISTS
-    FOR (r:Role) REQUIRE r.key IS UNIQUE;
-  `;
-
   const createRolesQuery = `
     MERGE (admin:Role {key: 'Admin'})
     MERGE (user:Role {key: 'User'})
@@ -93,8 +114,6 @@ async function createDefaultRoles(tx: Session | Transaction) {
   `;
 
   try {
-    await tx.run(createConstraintPermissionQuery);
-    await tx.run(createConstraintRoleQuery);
     await tx.run(createRolesQuery);
   } catch (error) {
     console.error("Error creating default roles:", error);

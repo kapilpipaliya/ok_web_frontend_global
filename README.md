@@ -1,24 +1,24 @@
 Section Links:
-http://localhost:3000/admin/UserSettings
-http://localhost:3000/admin/GlobalSettings
-http://localhost:3000/admin/
-http://localhost:3000/admin/Page
+http://decodeui.dev/admin/UserSettings
+http://decodeui.dev/admin/GlobalSettings
+http://decodeui.dev/admin/
+http://decodeui.dev/admin/Page
 
 email templates:
-http://localhost:3000/internal/page/AccountDeletionRequest
-http://localhost:3000/internal/page/TwoFactorAuth
-http://localhost:3000/internal/page/VerificationCode
-http://localhost:3000/internal/page/TestEmail
-http://localhost:3000/internal/page/PasswordChanged
-http://localhost:3000/internal/page/ProfileUpdated
-http://localhost:3000/internal/page/SignupConfirmation
-http://localhost:3000/internal/page/WelcomeEmail
-http://localhost:3000/internal/page/EmailChanged
-http://localhost:3000/internal/page/EmailChangeSuccessful
-http://localhost:3000/internal/page/EmailConfirmation
-http://localhost:3000/internal/page/InvitationEmail
+http://decodeui.dev/internal/page/AccountDeletionRequest
+http://decodeui.dev/internal/page/TwoFactorAuth
+http://decodeui.dev/internal/page/VerificationCode
+http://decodeui.dev/internal/page/TestEmail
+http://decodeui.dev/internal/page/PasswordChanged
+http://decodeui.dev/internal/page/ProfileUpdated
+http://decodeui.dev/internal/page/SignupConfirmation
+http://decodeui.dev/internal/page/WelcomeEmail
+http://decodeui.dev/internal/page/EmailChanged
+http://decodeui.dev/internal/page/EmailChangeSuccessful
+http://decodeui.dev/internal/page/EmailConfirmation
+http://decodeui.dev/internal/page/InvitationEmail
 
-http://localhost:3000/support/contact
+http://decodeui.dev/support/contact
 
 
 ##Development
@@ -26,7 +26,7 @@ http://localhost:3000/support/contact
 https://neo4j.com/docs/getting-started/whats-neo4j/
 
 # Neo4j Browser
-To access the Neo4j Browser, navigate to: [http://localhost:7474/browser/](http://localhost:7474/browser/)
+To access the Neo4j Browser, navigate to: [http://37.27.21.59:7474/browser/](http://37.27.21.59:7474/browser/)
 
 # Cypher Manual
 https://neo4j.com/docs/getting-started/cypher-intro/resources/
@@ -42,9 +42,9 @@ uncomment this in neo4j.conf
 server.default_listen_address=0.0.0.0
      auth.basic("neo4j", "12345678"),
 
-http://localhost:3000/api/setup/superUserSetup
+http://decodeui.dev/api/setup/superUserSetup
 # System Cleanup
-http://localhost:3000/api/setup/systemCleanup
+http://decodeui.dev/api/setup/systemCleanup
 
 
 ## Building

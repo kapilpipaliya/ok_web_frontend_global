@@ -55,7 +55,13 @@ async function handleSignup(
     let user;
 
     if (subDomain === SYSTEM_DB_NAME) {
-      user = await signupAdmin(tx, data);
+      const result = await signupAdmin(tx, data);
+      if (result.error) {
+        return {
+          error: result.error,
+        };
+      }
+      user = result.user;
     } else {
       user = await signupUser(tx, data);
     }

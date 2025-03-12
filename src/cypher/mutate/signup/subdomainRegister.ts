@@ -7,7 +7,7 @@ import { addAdminRoleToUser } from "~/cypher/mutate/signup/addAdminRoleToUser";
 import { syncNodesAPICall } from "~/cypher/mutate/sync";
 
 import { createDatabase } from "./createDatabase";
-import { createRootFolder } from "./createRootFolder";
+import { createDatabaseConstraints, createRootFolder } from "./createRootFolder";
 import { createUserInUserDB } from "./createUserInDB";
 import { insertComponents } from "./insertComponents";
 
@@ -34,37 +34,43 @@ export async function subdomainRegister(
   const userDbSession = (await getDriver()).session({
     database: data.subDomain,
   });
-  await createUserInUserDB(
-    userDbSession,
-    {
-      email: data.email,
-      username: data.username,
-      uuid: user.P.uuid,
-      emailConfirmed: true,
-    },
-    true,
-  );
-
-  await createRootFolder(userDbSession);
-  await addAdminRoleToUser(userDbSession, user.P.uuid);
-
-  // await insertDataTypes(userDbSession);
-
-  await insertComponents(userDbSession);
-
-  // After successful subdomain creation and registration
+  await createDatabaseConstraints(userDbSession); 
+  const tx = userDbSession.beginTransaction();
+  
   try {
-    await saveAllEmailTemplates(userDbSession);
+    await createUserInUserDB(
+      tx,
+      {
+        email: data.email,
+        username: data.username,
+        uuid: user.P.uuid,
+        emailConfirmed: true,
+      },
+      true,
+    );
+
+    await createRootFolder(tx);
+    await addAdminRoleToUser(tx, user.P.uuid);
+
+    // await insertDataTypes(tx);
+
+    await insertComponents(tx);
+
+    // After successful subdomain creation and registration
+    await saveAllEmailTemplates(tx);
+
+    await tx.commit();
   } catch (error) {
-    console.error("Failed to save email templates:", error);
-    // Continue even if email template creation fails
+    await tx.rollback();
+    throw error;
   }
 
-  syncNodesAPICall({
-    // This is not syncing Root to child relationship.
-    nodesToTransfer: ["Comp"], // "DataType", "Nav"
-    subDomain: data.subDomain,
-  });
-  userDbSession.close();
+  // syncNodesAPICall({
+  //   // This is not syncing Root to child relationship.
+  //   nodesToTransfer: ["Comp"], // "DataType", "Nav"
+  //   subDomain: data.subDomain,
+  // });
+  await tx.close();
+  await userDbSession.close();
   return user;
 }

@@ -199,9 +199,6 @@ export function PageViewWrapper(
     return "";
   });
 
-  console.log('running on ', id())
-
-
   const constants = {
     formMetaId: props.formMetaId,
     pageVertexName: props.pageVertexName,
@@ -216,12 +213,9 @@ export function PageViewWrapper(
   };
 
   const metaData = createAsync(async () => {
-    console.log("Starting metaData computation");
     if (constants.formMetaId) {
-      console.log("FormMetaId is provided, returning empty object");
       return {};
     }
-    console.log("Fetching form meta data");
     const metaResult = await fetchFormMetaData(
       constants.pageVertexName,
       constants.formId,
@@ -232,30 +226,22 @@ export function PageViewWrapper(
 
     let formMetaId = constants.formMetaId;
     if (metaResult.data) {
-      console.log("MetaResult data is available");
       if (Array.isArray(metaResult.data.result)) {
-        console.log("MetaResult data is an array");
         if (metaResult.data.result.length > 0) {
           formMetaId = metaResult.data.result[0].id;
-          console.log("FormMetaId set from array result:", formMetaId);
         }
       } else if (isObject(metaResult.data.result)) {
         formMetaId = metaResult.data.result.id;
-        console.log("FormMetaId set from object result:", formMetaId);
       }
     }
 
     const metaVertex = constants.formMetaId ? graph.vertexes[constants.formMetaId] : metaResult.data?.graph?.vertexes[formMetaId!];
-    console.log("MetaVertex determined:", metaVertex);
 
     const isNoPermissionCheck =
       constants.isNoPermissionCheck ||
       metaVertex?.P?.isNoPermissionCheck ||
       previewStore.isNoPermissionCheck;
-    console.log("IsNoPermissionCheck:", constants.isNoPermissionCheck, metaVertex?.P?.isNoPermissionCheck, previewStore.isNoPermissionCheck);
 
-
-    console.log("graph", graph);
     // const allConfiguredPermissionLocal = 
     //   getConfiguredPermissions(
     //     getGlobalStore(graph).P.userRoles,
@@ -263,10 +249,10 @@ export function PageViewWrapper(
     //     graph,
     //   );
     // console.log("AllConfiguredPermissionLocal:", allConfiguredPermissionLocal);
-    console.log('dataId', constants.dataId)
+
 
     const idLocal = constants.dataId === "new" ? undefined : constants.dataId;
-    console.log("IdLocal determined:", idLocal);
+
 
     // function checkPermission(action: string) {
     //   const hasPermission = (
@@ -293,7 +279,6 @@ export function PageViewWrapper(
     // console.log("HasRequiredPermissionsLocal:", hasRequiredPermissionsLocal);
 
     if (idLocal && !constants.getFormData) {
-      console.log("Fetching form data");
       const dataResult = await fetchFormData(
         graph,
         constants.formDataId,
@@ -302,11 +287,9 @@ export function PageViewWrapper(
         true, // shasRequiredPermissionsLocal,
         constants.pageVertexName,
       );
-      console.log("DataResult fetched:", dataResult);
       return { metaResult, formMetaId, dataResult };
     }
 
-    console.log("Returning metaResult and formMetaId");
     return { metaResult, formMetaId };
   });
 
@@ -328,17 +311,6 @@ export function PageViewWrapper(
         delete metaResult.data.graph!.vertexes[props.formId];
       }
       setGraphData(graph, setGraph, metaResult.data.graph!);
-
-      // if (
-      //   formStore()?.P.formMetaId &&
-      //   graph.vertexes[formStore().P.formMetaId!]!
-      // ) {
-      //   form = generateFormMetaAttributes(
-      //     graph,
-      //     setGraph,
-      //     graph.vertexes[formStore().P.formMetaId!]!,
-      //   );
-      // }
     }
     if (formMetaId) {
       setFormStore("formMetaId", formMetaId);

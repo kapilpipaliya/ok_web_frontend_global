@@ -6,10 +6,16 @@ import type { SignupRequestData } from "./SignupRequestData";
 
 import { createUserInSuperDB } from "./createUserInDB";
 import { newAdminValidations } from "./newAdminValidations";
+import { createRootFolder } from "./createRootFolder";
+import { insertComponents } from "./insertComponents";
+import { addAdminRoleToUser } from "./addAdminRoleToUser";
+import { saveAllEmailTemplates } from "../email/saveEmailTemplates";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 
 export async function signupAdmin(
-  tx: Session | Transaction,
+  tx: Transaction,
   data: SignupRequestData,
+  isSystemUser = false
 ) {
   // Check if the user already exists
   await newAdminValidations(tx, data.username, data.email);
@@ -18,14 +24,29 @@ export async function signupAdmin(
     email: data.email,
     password: data.password,
     username: data.username,
+    emailConfirmed: isSystemUser
   });
 
   // Create Account vertex and AccountUser relationship
   const accountId = uuidv7();
   await createAccount(tx, accountId, data.username);
   await createAccountUserRelation(tx, accountId, user.P.uuid);
+  await addAdminRoleToUser(tx, user.P.uuid);
 
-  return user;
+  // Create SubDomain and link with Account if it's system user
+  if (isSystemUser) {
+    await createSystemSubdomain(tx, accountId);
+    await createRootFolder(tx);
+    
+    const response = await insertComponents(tx);
+    if (!response.success) {
+      throw new Error("Failed to insert component tree");
+    }
+
+    await saveAllEmailTemplates(tx);
+  }
+
+  return {user, accountId, error: ""};
 }
 
 async function createAccount(
@@ -75,4 +96,26 @@ async function createAccountUserRelation(
       userUuid,
     },
   );
+}
+
+async function createSystemSubdomain(
+  tx: Session | Transaction,
+  accountId: string,
+) {
+  const query = `
+    CREATE (s:SubDomain {
+      key: $systemDbName,
+      createdAt: datetime(),
+      lastModified: datetime()
+    })
+    WITH s
+    MATCH (a:Account {id: $accountId})
+    CREATE (a)-[:AccountSubdomain]->(s)
+    RETURN s
+  `;
+
+  return await tx.run(query, {
+    accountId,
+    systemDbName: SYSTEM_DB_NAME,
+  });
 }
