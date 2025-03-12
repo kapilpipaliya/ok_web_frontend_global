@@ -7,14 +7,14 @@ import { ProfileSettings } from "~/pages/user/ProfileSettings";
 
 export default function AdminUserSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedMenu, setSelectedMenu] = createSignal(
-    searchParams.tab || "profile",
+  const [selectedMenu, setSelectedMenu] = createSignal<string>(
+    (searchParams.tab as string) || "profile",
   );
 
   createEffect(() => {
     const tab = searchParams.tab;
     if (tab && tab !== selectedMenu()) {
-      setSelectedMenu(tab);
+      setSelectedMenu(tab as string);
     }
   });
 

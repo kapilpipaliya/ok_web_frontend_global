@@ -66,6 +66,11 @@ export function GetInitialData(props: GetInitialDataProps) {
     setData(result.initialData, result.userData as UserData);
     return result;
   }, {deferStream: true});
+  createEffect(() => {
+    if (data()) {
+      setData(data()!.initialData, data()!.userData as UserData);
+    }
+  });
 
   return (
     <Show when={data()}>
