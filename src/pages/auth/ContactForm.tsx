@@ -146,6 +146,7 @@ export function ContactForm() {
                     ? "Sending..."
                     : "Send Message",
                 }),
+                type: "button",
               },
             ],
             componentName: "Data",

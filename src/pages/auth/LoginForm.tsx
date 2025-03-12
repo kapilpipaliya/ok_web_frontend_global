@@ -244,6 +244,7 @@ export function LoginForm() {
                 ? "Logging in..."
                 : "Log In",
             }),
+            type: "button",
           },
         ],
         componentName: "Data",

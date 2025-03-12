@@ -243,6 +243,7 @@ export function ForgotPasswordForm() {
                 ? "Sending..."
                 : "Confirm",
             }),
+            type: "button",
           },
         ],
         componentName: "Fragment",
@@ -313,6 +314,7 @@ export function ForgotPasswordForm() {
                 ? "Verifying..."
                 : "Submit",
             }),
+            type: "button",
           },
         ],
         componentName: "Fragment",
@@ -478,6 +480,7 @@ export function ForgotPasswordForm() {
                 ? "Resetting..."
                 : "Confirm",
             }),
+            type: "button",
           },
         ],
         componentName: "Fragment",

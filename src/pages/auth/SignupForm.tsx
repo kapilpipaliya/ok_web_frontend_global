@@ -255,6 +255,7 @@ export function SignupForm() {
                     ? "Signing up..."
                     : "Sign Up",
                 }),
+                type: "button",
               },
             ],
             componentName: "Fragment",

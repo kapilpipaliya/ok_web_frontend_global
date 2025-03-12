@@ -1,7 +1,9 @@
 import type { APIEvent } from "@solidjs/start/server";
 
+import { redirect } from "@solidjs/router";
+
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { handleAPIError } from "~/lib/api/apiErrorHandler";
 
 import { downloadFile } from "./functions/downloadFile";
 
@@ -16,7 +18,8 @@ export async function GET({ request }: APIEvent) {
     `);
 
     if (result.records.length === 0) {
-      throw new APIError("Company logo not found", 404);
+      // throw new APIError("Company logo not found", 404);
+      return redirect("/public/images/logo.svg");
     }
 
     const fileId = result.records[0].get("fileId");

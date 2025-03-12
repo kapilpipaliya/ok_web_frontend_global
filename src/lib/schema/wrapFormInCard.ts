@@ -11,7 +11,18 @@ export const wrapFormInCard = (formSchema: FormSchema) => {
     attributes: [
       {
         as: "div",
-        attributes: [formSchema],
+        attributes: [
+          {
+            as: "form",
+            attributes: [formSchema],
+            componentName: "Html",
+            props: () => ({
+              onSubmit: (e: Event) => {
+                e.preventDefault();
+              },
+            }),
+          }
+        ],
         class: "bg:base-5 p:16 p:32@xs r:8 shadow:1|2|3|primary", // max-width:700px width:90%
         componentName: "Box",
       },

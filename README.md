@@ -1,24 +1,24 @@
 Section Links:
-http://decodeui.dev/admin/UserSettings
-http://decodeui.dev/admin/GlobalSettings
-http://decodeui.dev/admin/
-http://decodeui.dev/admin/Page
+http://localhost:3001/admin/UserSettings
+http://localhost:3001/admin/GlobalSettings
+http://localhost:3001/admin/
+http://localhost:3001/admin/Page
 
 email templates:
-http://decodeui.dev/internal/page/AccountDeletionRequest
-http://decodeui.dev/internal/page/TwoFactorAuth
-http://decodeui.dev/internal/page/VerificationCode
-http://decodeui.dev/internal/page/TestEmail
-http://decodeui.dev/internal/page/PasswordChanged
-http://decodeui.dev/internal/page/ProfileUpdated
-http://decodeui.dev/internal/page/SignupConfirmation
-http://decodeui.dev/internal/page/WelcomeEmail
-http://decodeui.dev/internal/page/EmailChanged
-http://decodeui.dev/internal/page/EmailChangeSuccessful
-http://decodeui.dev/internal/page/EmailConfirmation
-http://decodeui.dev/internal/page/InvitationEmail
+http://localhost:3001/internal/page/AccountDeletionRequest
+http://localhost:3001/internal/page/TwoFactorAuth
+http://localhost:3001/internal/page/VerificationCode
+http://localhost:3001/internal/page/TestEmail
+http://localhost:3001/internal/page/PasswordChanged
+http://localhost:3001/internal/page/ProfileUpdated
+http://localhost:3001/internal/page/SignupConfirmation
+http://localhost:3001/internal/page/WelcomeEmail
+http://localhost:3001/internal/page/EmailChanged
+http://localhost:3001/internal/page/EmailChangeSuccessful
+http://localhost:3001/internal/page/EmailConfirmation
+http://localhost:3001/internal/page/InvitationEmail
 
-http://decodeui.dev/support/contact
+http://localhost:3001/support/contact
 
 
 ##Development
@@ -42,9 +42,9 @@ uncomment this in neo4j.conf
 server.default_listen_address=0.0.0.0
      auth.basic("neo4j", "12345678"),
 
-http://decodeui.dev/api/setup/superUserSetup
+http://localhost:3001/api/setup/superUserSetup
 # System Cleanup
-http://decodeui.dev/api/setup/systemCleanup
+http://localhost:3001/api/setup/systemCleanup
 
 
 ## Building

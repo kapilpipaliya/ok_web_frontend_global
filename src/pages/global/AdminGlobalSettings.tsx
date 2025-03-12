@@ -16,13 +16,13 @@ import { UserManagement } from "~/pages/global/user/UserManagement";
 export default function AdminGlobalSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedMenu, setSelectedMenu] = createSignal(
-    searchParams.tab || "general",
+    (searchParams.tab as string) || "general",
   );
 
   createEffect(() => {
     const tab = searchParams.tab;
     if (tab && tab !== selectedMenu()) {
-      setSelectedMenu(tab);
+      setSelectedMenu(tab as string);
     }
   });
 
