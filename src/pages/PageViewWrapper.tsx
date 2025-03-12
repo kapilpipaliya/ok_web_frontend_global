@@ -199,7 +199,7 @@ export function PageViewWrapper(
     return "";
   });
 
-    console.log('running on ', id())
+  console.log('running on ', id())
 
 
   const constants = {
@@ -247,13 +247,13 @@ export function PageViewWrapper(
 
     const metaVertex = constants.formMetaId ? graph.vertexes[constants.formMetaId] : metaResult.data?.graph?.vertexes[formMetaId!];
     console.log("MetaVertex determined:", metaVertex);
-    
-    const isNoPermissionCheck = 
-        constants.isNoPermissionCheck ||
-        metaVertex?.P?.isNoPermissionCheck ||
-        previewStore.isNoPermissionCheck;
+
+    const isNoPermissionCheck =
+      constants.isNoPermissionCheck ||
+      metaVertex?.P?.isNoPermissionCheck ||
+      previewStore.isNoPermissionCheck;
     console.log("IsNoPermissionCheck:", constants.isNoPermissionCheck, metaVertex?.P?.isNoPermissionCheck, previewStore.isNoPermissionCheck);
-    
+
 
     console.log("graph", graph);
     // const allConfiguredPermissionLocal = 
@@ -267,7 +267,7 @@ export function PageViewWrapper(
 
     const idLocal = constants.dataId === "new" ? undefined : constants.dataId;
     console.log("IdLocal determined:", idLocal);
-  
+
     // function checkPermission(action: string) {
     //   const hasPermission = (
     //     isNoPermissionCheck ||
@@ -287,11 +287,11 @@ export function PageViewWrapper(
     //   view: checkPermission("view"),
     // };
     // console.log("Permissions determined:", permissions);
-  
+
     // const hasRequiredPermissionsLocal = metaVertex &&
     //     (permissions.insert() || permissions.edit() || permissions.view());
     // console.log("HasRequiredPermissionsLocal:", hasRequiredPermissionsLocal);
-    
+
     if (idLocal && !constants.getFormData) {
       console.log("Fetching form data");
       const dataResult = await fetchFormData(
@@ -303,7 +303,7 @@ export function PageViewWrapper(
         constants.pageVertexName,
       );
       console.log("DataResult fetched:", dataResult);
-      return {metaResult, formMetaId, dataResult};
+      return { metaResult, formMetaId, dataResult };
     }
 
     console.log("Returning metaResult and formMetaId");
@@ -328,7 +328,7 @@ export function PageViewWrapper(
         delete metaResult.data.graph!.vertexes[props.formId];
       }
       setGraphData(graph, setGraph, metaResult.data.graph!);
-      
+
       // if (
       //   formStore()?.P.formMetaId &&
       //   graph.vertexes[formStore().P.formMetaId!]!
@@ -389,7 +389,7 @@ export function PageViewWrapper(
     }
   }
   props.initializeFormStoreParent?.(pageFormVertexObject.id);
-  
+
   createEffect(() => {
     const result = metaData();
     untrack(() => {
@@ -544,36 +544,38 @@ export function PageViewWrapper(
     // TODO: Remove all the meta
   });
 
-  // Each open tab will be hidden and have its own useBeforeLeave callback
-  useBeforeLeave((e: BeforeLeaveEventArgs) => {
-    if (props.dontConfirmExit) {
-      // allow navigation
-      return;
-    }
-    if (isDisabledTxn(formStore().P.txnId, graph)) {
-      // allow navigation
-      return;
-    }
+  if (props.isDesignMode) {
+    // Each open tab will be hidden and have its own useBeforeLeave callback
+    useBeforeLeave((e: BeforeLeaveEventArgs) => {
+      if (props.dontConfirmExit) {
+        // allow navigation
+        return;
+      }
+      if (isDisabledTxn(formStore().P.txnId, graph)) {
+        // allow navigation
+        return;
+      }
 
-    // preventDefault to block immediately and prompt user async
-    e.preventDefault();
-    setTimeout(() => {
-      setFormStore("discardPopup", true);
-    }, 100);
-    onConfirmExit = () => {
-      // user wants to proceed anyway so retry with force=true
-      e.retry(true);
+      // preventDefault to block immediately and prompt user async
+      e.preventDefault();
+      setTimeout(() => {
+        setFormStore("discardPopup", true);
+      }, 100);
+      onConfirmExit = () => {
+        // user wants to proceed anyway so retry with force=true
+        e.retry(true);
+      };
+    });
+
+    const beforeunload = (event: BeforeUnloadEvent) => {
+      if (!isDisabledTxn(formStore().P.txnId, graph)) {
+        event.preventDefault();
+        event.returnValue = ""; // Chrome requires returnValue to be set
+      }
     };
-  });
-
-  const beforeunload = (event: BeforeUnloadEvent) => {
-    if (!isDisabledTxn(formStore().P.txnId, graph)) {
-      event.preventDefault();
-      event.returnValue = ""; // Chrome requires returnValue to be set
+    if (!isServer) {
+      makeEventListener(window, "beforeunload", beforeunload);
     }
-  };
-  if (!isServer) {
-    makeEventListener(window, "beforeunload", beforeunload);
   }
 
   const Content = () => (
@@ -649,7 +651,7 @@ export function PageViewWrapper(
                   ? dataVertex()
                   : true)
               }
-            >def1
+            >
               <Switch>
                 <Match when={!formStore().P.isPreview}>
                   <Content />
