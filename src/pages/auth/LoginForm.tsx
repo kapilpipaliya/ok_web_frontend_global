@@ -18,6 +18,7 @@ import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
 import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 export function LoginForm() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -85,7 +86,12 @@ export function LoginForm() {
     as: "div",
     attributes: [
       getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
-      getTitleSchema("Login"),
+      {
+        as: "h1",
+        class: SETTINGS_CONSTANTS.TITLE_CLASS,
+        componentName: "Text",
+        text: "Login",
+      },
       {
         attributes: [
           {
@@ -145,6 +151,7 @@ export function LoginForm() {
                 ],
                 componentName: "Html",
               },
+              getErrorSchema("email"),
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
                 componentName: "Text",
@@ -228,6 +235,7 @@ export function LoginForm() {
                 class: "position:rel",
                 componentName: "Box",
               },
+              getErrorSchema("password"),
             ],
             class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
             componentName: "Box",

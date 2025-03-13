@@ -14,6 +14,7 @@ import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
 import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 export function ForgotPasswordForm() {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -184,6 +185,12 @@ export function ForgotPasswordForm() {
       getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
       getTitleSchema("Forgot Password"),
       {
+        as: "h1",
+        class: SETTINGS_CONSTANTS.TITLE_CLASS,
+        componentName: "Text",
+        text: "Reset Password",
+      },
+      {
         as: "div",
         attributes: [
           {
@@ -198,6 +205,7 @@ export function ForgotPasswordForm() {
                 class: PROPERTIES.Css.TextField,
                 componentName: "TextInput",
                 key: "identifier",
+                label: "Email or Username",
                 props: (options: FunctionArgumentType) => ({
                   onKeyDown: async (e: KeyboardEvent) => {
                     if (e.key === "Enter") {
@@ -226,6 +234,7 @@ export function ForgotPasswordForm() {
             ],
             componentName: "Html",
           },
+          getErrorSchema("identifier"),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
         componentName: "Box",
@@ -303,6 +312,7 @@ export function ForgotPasswordForm() {
             ],
             componentName: "Html",
           },
+          getErrorSchema("otp"),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
         componentName: "Box",
@@ -403,6 +413,7 @@ export function ForgotPasswordForm() {
             class: "position:rel",
             componentName: "Box",
           },
+          getErrorSchema("newPassword"),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
         componentName: "Box",
@@ -469,6 +480,7 @@ export function ForgotPasswordForm() {
             class: "position:rel",
             componentName: "Box",
           },
+          getErrorSchema("confirmPassword"),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
         componentName: "Box",

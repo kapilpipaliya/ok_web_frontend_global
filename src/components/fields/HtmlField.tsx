@@ -91,13 +91,11 @@ export function HtmlField(
           >
             {local.text}
           </span>
-          {local.value}
           <Show when={!local.childrenBefore}>{local.children}</Show>
       </Match>
       <Match when={true}>
           <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
           {local.text}
-          {local.value}
           <Show when={!local.childrenBefore}>{local.children}</Show>
       </Match>
     </Switch>

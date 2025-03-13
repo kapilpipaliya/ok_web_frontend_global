@@ -30,7 +30,7 @@ export function setValueGlobal(
   let error = "" as string | undefined;
   batch(() => {
     if (metaVertex.P.validation) {
-      error = validateInput(metaVertex.P.validation, data as number | string, metaVertex.P.key);
+      error = validateInput(metaVertex.P.validation, data as number | string, metaVertex.P.key, metaVertex.P.label);
       const errorVertexId = `${dataVertex.id}-error`;
       if (!graph.vertexes[errorVertexId]) {
         addNewVertex(

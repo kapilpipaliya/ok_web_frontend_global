@@ -35,6 +35,7 @@ export const SETTINGS_CONSTANTS = {
   SECONDARY_BUTTON_CLASS:
     "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
   SECTION_DIVIDER_CLASS: "my-8 border-t border-gray-200",
+  TITLE_CLASS: "font-size:24 font-weight:bold text-align:center color:base-50",
 } as const;
 
 export const headerIconButtonClass =

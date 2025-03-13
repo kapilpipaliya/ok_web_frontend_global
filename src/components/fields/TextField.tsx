@@ -22,7 +22,6 @@ export function TextField(
   return (
     <Dynamic component={local.as ?? "span"} {...others}>
       {local.text}
-      {local.value}
       {local.children}
     </Dynamic>
   );

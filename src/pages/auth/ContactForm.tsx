@@ -7,6 +7,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
@@ -75,6 +76,12 @@ export function ContactForm() {
   const form = {
     as: "div",
     attributes: [
+      {
+        as: "h1",
+        class: SETTINGS_CONSTANTS.TITLE_CLASS,
+        componentName: "Text",
+        text: "Contact Us",
+      },
       getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
       {
         as: "div",
@@ -114,6 +121,7 @@ export function ContactForm() {
             ],
             componentName: "Html",
           },
+          getErrorSchema("name", "fg:red grid-column:span|2"),
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
@@ -144,7 +152,8 @@ export function ContactForm() {
               }
             ],
             componentName: "Html",
-          }
+          },
+          getErrorSchema("email", "fg:red grid-column:span|2"),
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
@@ -174,7 +183,8 @@ export function ContactForm() {
               }
             ],
             componentName: "Html",
-          }
+          },
+          getErrorSchema("subject", "fg:red grid-column:span|2"),
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
@@ -205,6 +215,7 @@ export function ContactForm() {
             ],
             componentName: "Html",
           },
+          getErrorSchema("message", "fg:red grid-column:span|2"),
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
         componentName: "Box",
