@@ -1,16 +1,7 @@
-import { evalExpression } from "~/lib/expression_eval";
+import {evalExpression} from "~/lib/expression_eval";
 
-import type { GraphInterface, Vertex } from "../../../graph";
-
-export function getGlobalSettingVertex(
-  graph: GraphInterface,
-): undefined | Vertex {
-  const globalSettingId = graph.vertexLabelIdMap.GlobalSetting?.[0];
-  if (!globalSettingId) {
-    return;
-  }
-  return graph.vertexes[globalSettingId];
-}
+import type {GraphInterface, Vertex} from "../../../graph";
+import {getGlobalSettingVertex} from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
 
 export function getGlobalThemeVertex(
   graph: GraphInterface,

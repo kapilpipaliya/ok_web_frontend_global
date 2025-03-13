@@ -6,7 +6,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
-import { uploadFile } from "~/components/styled/uploadFile";
+import { uploadFile } from "~/lib/api/uploadFile";
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { evalExpression } from "~/lib/expression_eval";

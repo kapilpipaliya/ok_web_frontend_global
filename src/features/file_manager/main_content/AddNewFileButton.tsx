@@ -1,6 +1,6 @@
 import { FileUploader } from "~/components/styled/FileUploader";
 import { useToast } from "~/components/styled/Toast";
-import { uploadFile } from "~/components/styled/uploadFile";
+import { uploadFile } from "~/lib/api/uploadFile";
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { evalExpression } from "~/lib/expression_eval";

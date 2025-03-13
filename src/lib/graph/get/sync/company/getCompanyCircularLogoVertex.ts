@@ -2,7 +2,8 @@ import { evalExpression } from "~/lib/expression_eval";
 
 import type { GraphInterface, Vertex } from "../../../graph";
 
-import { getGlobalSettingVertex } from "../theme/getGlobalThemeVertex";
+
+import {getGlobalSettingVertex} from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
 
 export function getCompanyCircularLogoVertex(
   graph: GraphInterface,

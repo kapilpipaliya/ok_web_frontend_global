@@ -7,7 +7,6 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/postApi";
 import {
-  getGlobalSettingVertex,
   getGlobalThemeVertex,
 } from "~/lib/graph/get/sync/theme/getGlobalThemeVertex";
 import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
@@ -22,6 +21,7 @@ import { SETTINGS_CONSTANTS } from "../settings/constants";
 import { AddNewThemeDialog } from "./AddNewThemeDialog";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
+import {getGlobalSettingVertex} from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
 
 export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   const [graph, setGraph] = useGraph();

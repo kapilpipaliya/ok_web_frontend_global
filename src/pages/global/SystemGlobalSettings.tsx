@@ -1,7 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, Show } from "solid-js";
 
-import { SettingsLayout } from "~/components/settings/SettingsLayout";
+import { SettingsLayout } from "~/components/styled/SettingsLayout";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
 
 export default function SystemGlobalSettings() {

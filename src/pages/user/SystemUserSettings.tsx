@@ -1,7 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal, Show } from "solid-js";
 
-import { SettingsLayout } from "~/components/settings/SettingsLayout";
+import { SettingsLayout } from "~/components/styled/SettingsLayout";
 import { AccountDeletionForm } from "~/pages/user/AccountDeletionForm";
 import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
 import { ProfileSettings } from "~/pages/user/ProfileSettings";
