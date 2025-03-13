@@ -450,15 +450,29 @@ export function DynamicComponent(
       ? componentName()
       : getDynamicComponent(componentName()) || NotFoundComponent,
   );
-
   const isHidden = () => {
     try {
+      // Check for hidden property
       const hiddenProp = dynamicProps().hidden ?? props.meta.P.hidden;
-      const result =
-        typeof hiddenProp === "function"
-          ? hiddenProp(getFunctionArgumentWithValue())
-          : hiddenProp;
-      return result;
+      if (hiddenProp !== undefined) {
+        const result =
+          typeof hiddenProp === "function"
+            ? hiddenProp(getFunctionArgumentWithValue())
+            : hiddenProp;
+        if (result) return true;
+      }
+
+      // Check for show property (inverse of hidden)
+      const showProp = dynamicProps().show ?? props.meta.P.show;
+      if (showProp !== undefined) {
+        const result =
+          typeof showProp === "function"
+            ? showProp(getFunctionArgumentWithValue())
+            : showProp;
+        return !result;
+      }
+
+      return false;
     } catch (error) {
       console.error("Error in isHidden:", error);
       return false;
