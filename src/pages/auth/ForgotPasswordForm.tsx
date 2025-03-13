@@ -190,33 +190,39 @@ export function ForgotPasswordForm() {
             text: "Email or Username",
           },
           {
-            class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
-            key: "identifier",
-            props: (options: FunctionArgumentType) => ({
-              onMount: () => {
-                if (options.ref && options.ref() instanceof HTMLInputElement) {
-                  options.ref()?.focus();
-                }
-              },
-              onKeyDown: async (e: KeyboardEvent) => {
-                if (e.key === "Enter") {
-                  if (e.target instanceof HTMLInputElement) {
-                    options.updateValue(e.target.value);
-                  }
-                  if (options.dataContext.submitState[0]?.isLoading) {
-                    return;
-                  }
-                  try {
-                    options.dataContext.submitState[1]("isLoading", true);
-                    await handleIdentifierSubmit(options);
-                  } finally {
-                    options.dataContext.submitState[1]("isLoading", false);
-                  }
-                }
-              },
-            }),
-            validation: { required: true },
+            as: "div",
+            attributes: [
+              {
+                class: PROPERTIES.Css.TextField,
+                componentName: "TextInput",
+                key: "identifier",
+                props: (options: FunctionArgumentType) => ({
+                  onKeyDown: async (e: KeyboardEvent) => {
+                    if (e.key === "Enter") {
+                      if (e.target instanceof HTMLInputElement) {
+                        options.updateValue(e.target.value);
+                      }
+                      if (options.dataContext.submitState[0]?.isLoading) {
+                        return;
+                      }
+                      try {
+                        options.dataContext.submitState[1]("isLoading", true);
+                        await handleIdentifierSubmit(options);
+                      } finally {
+                        options.dataContext.submitState[1]("isLoading", false);
+                      }
+                    }
+                  },
+                  onMount: () => {
+                    if (options.ref && options.ref() instanceof HTMLInputElement) {
+                      options.ref()?.focus();
+                    }
+                  },
+                }),
+                validation: { required: true },
+              }
+            ],
+            componentName: "Html",
           },
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
@@ -265,29 +271,35 @@ export function ForgotPasswordForm() {
             text: "One Time Password (OTP)",
           },
           {
-            class: PROPERTIES.Css.TextField,
-            componentName: "TextInput",
-            key: "otp",
-            props: (options: FunctionArgumentType) => ({
-              maxLength: 6,
-              onKeyDown: async (e: KeyboardEvent) => {
-                if (e.key === "Enter") {
-                  if (e.target instanceof HTMLInputElement) {
-                    options.updateValue(e.target.value);
-                  }
-                  if (options.dataContext.submitState[0]?.isLoading) {
-                    return;
-                  }
-                  try {
-                    options.dataContext.submitState[1]("isLoading", true);
-                    await handleOtpSubmit(options);
-                  } finally {
-                    options.dataContext.submitState[1]("isLoading", false);
-                  }
-                }
-              },
-            }),
-            validation: { required: true },
+            as: "div",
+            attributes: [
+              {
+                class: PROPERTIES.Css.TextField,
+                componentName: "TextInput",
+                key: "otp",
+                props: (options: FunctionArgumentType) => ({
+                  maxLength: 6,
+                  onKeyDown: async (e: KeyboardEvent) => {
+                    if (e.key === "Enter") {
+                      if (e.target instanceof HTMLInputElement) {
+                        options.updateValue(e.target.value);
+                      }
+                      if (options.dataContext.submitState[0]?.isLoading) {
+                        return;
+                      }
+                      try {
+                        options.dataContext.submitState[1]("isLoading", true);
+                        await handleOtpSubmit(options);
+                      } finally {
+                        options.dataContext.submitState[1]("isLoading", false);
+                      }
+                    }
+                  },
+                }),
+                validation: { required: true },
+              }
+            ],
+            componentName: "Html",
           },
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,

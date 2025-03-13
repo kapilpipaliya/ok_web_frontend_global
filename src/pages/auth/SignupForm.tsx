@@ -30,7 +30,7 @@ export function SignupForm() {
     passwordRef: null as HTMLInputElement | null,
   });
 
-  const validateFormData = (formData: any) => {
+  const validateFormData = (formData: Vertex) => {
     const { email, password, username } = formData.P;
 
     const usernameError = validateUsername(username);
@@ -90,31 +90,42 @@ export function SignupForm() {
                 text: "Username",
               },
               {
-                class: PROPERTIES.Css.TextField,
-                componentName: "TextInput",
-                key: "username",
-                props: (options: FunctionArgumentType) => ({
-                  onMount: () => {
-                    if (options.ref && options.ref() instanceof HTMLInputElement) {
-                      options.ref()?.focus();
-                    }
+                as: "div",
+                attributes: [
+                  {
+                    class: PROPERTIES.Css.TextField,
+                    componentName: "TextInput",
+                    key: "username",
+                    // placeholder: "Choose a username",
+                    props: (options: FunctionArgumentType) => ({
+                      onKeyDown: async (e: KeyboardEvent) => {
+                        if (e.key === "Enter") {
+                          if (e.target instanceof HTMLInputElement) {
+                            options.updateValue(e.target.value);
+                          }
+                          if (options.dataContext.submitState[0]?.isLoading) {
+                            return;
+                          }
+                          // Focus email field when Enter is pressed in username field
+                          if (formRefs.emailRef) {
+                            formRefs.emailRef.focus();
+                          }
+                        }
+                      },
+                      onMount: () => {
+                        if (options.ref && options.ref() instanceof HTMLInputElement) {
+                          options.ref()?.focus();
+                        }
+                      },
+                    }),
+                    validation: { 
+                      minLength: 4,
+                      required: true,
+                      validate: validateUsername
+                    },
                   },
-                  onKeyDown: async (e: KeyboardEvent) => {
-                    if (e.key === "Enter") {
-                      if (e.target instanceof HTMLInputElement) {
-                        options.updateValue(e.target.value);
-                      }
-                      if (options.dataContext.submitState[0]?.isLoading) {
-                        return;
-                      }
-                      // Focus email field when Enter is pressed in username field
-                      if (formRefs.emailRef) {
-                        formRefs.emailRef.focus();
-                      }
-                    }
-                  },
-                }),
-                validation: { required: true },
+                ],
+                componentName: "Html",
               },
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
@@ -122,37 +133,48 @@ export function SignupForm() {
                 text: "Email",
               },
               {
-                class: PROPERTIES.Css.TextField,
-                componentName: "TextInput",
-                key: "email",
-                props: (options: FunctionArgumentType) => ({
-                  onKeyDown: async (e: KeyboardEvent) => {
-                    if (e.key === "Enter") {
-                      if (e.target instanceof HTMLInputElement) {
-                        options.updateValue(e.target.value);
-                      }
-                      if (options.dataContext.submitState[0]?.isLoading) {
-                        return;
-                      }
-                      // Focus password field when Enter is pressed in email field
-                      if (formRefs.passwordRef) {
-                        formRefs.passwordRef.focus();
-                      }
-                    }
-                  },
-                  onMount: () => {
-                    if (
-                      options.ref &&
-                      options.ref instanceof HTMLInputElement
-                    ) {
-                      setFormRefs("emailRef", options.ref);
-                    }
-                  },
-                  ref: (el: HTMLInputElement) => {
-                    setFormRefs("emailRef", el);
-                  },
-                }),
-                validation: { required: true },
+                as: "div",
+                attributes: [
+                  {
+                    class: PROPERTIES.Css.TextField,
+                    componentName: "TextInput",
+                    key: "email",
+                    // placeholder: "Enter your email",
+                    props: (options: FunctionArgumentType) => ({
+                      onKeyDown: async (e: KeyboardEvent) => {
+                        if (e.key === "Enter") {
+                          if (e.target instanceof HTMLInputElement) {
+                            options.updateValue(e.target.value);
+                          }
+                          if (options.dataContext.submitState[0]?.isLoading) {
+                            return;
+                          }
+                          // Focus password field when Enter is pressed in email field
+                          if (formRefs.passwordRef) {
+                            formRefs.passwordRef.focus();
+                          }
+                        }
+                      },
+                      onMount: () => {
+                        if (
+                          options.ref &&
+                          options.ref instanceof HTMLInputElement
+                        ) {
+                          setFormRefs("emailRef", options.ref);
+                        }
+                      },
+                      ref: (el: HTMLInputElement) => {
+                        setFormRefs("emailRef", el);
+                      },
+                    }),
+                    validation: {
+                      email: true,
+                      required: true,
+                      validate: validateEmail
+                    },
+                  }
+                ],
+                componentName: "Html"
               },
               wrapPasswordLabelWithHint("Password", "password"),
               {
@@ -162,6 +184,7 @@ export function SignupForm() {
                     class: PROPERTIES.Css.TextField,
                     componentName: "TextInput",
                     key: "password",
+                    // placeholder: "Choose a password",
                     props: (options: FunctionArgumentType) => ({
                       onInput: (e: Event) => {
                         if (e.target instanceof HTMLInputElement) {
@@ -205,7 +228,11 @@ export function SignupForm() {
                       },
                       type: showPassword.password ? "text" : "password",
                     }),
-                    validation: { required: true },
+                    validation: {
+                      minLength: 8,
+                      required: true,
+                      validate: validatePassword
+                    },
                   },
                   {
                     as: "div",

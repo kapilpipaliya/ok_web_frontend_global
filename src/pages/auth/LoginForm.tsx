@@ -95,47 +95,53 @@ export function LoginForm() {
                 text: "Username/Email",
               },
               {
-                class: PROPERTIES.Css.TextField,
-                componentName: "TextInput",
-                key: "email",
-                props: (options: FunctionArgumentType) => ({
-                  onMount: () => {
-                    if (options.ref && options.ref() instanceof HTMLInputElement) {
-                      options.ref()?.focus();
-                    }
-                  },
-                  onKeyDown: async (e: KeyboardEvent) => {
-                    if (e.key === "Enter") {
-                      if (e.target instanceof HTMLInputElement) {
-                        options.updateValue(e.target.value);
-                      }
-
-                      // Don't proceed if already loading
-                      if (options.dataContext.submitState[0]?.isLoading) {
-                        return;
-                      }
-
-                      // Check if password is empty
-                      if (!options.data.P.password && formRefs.passwordRef) {
-                        // Focus password field if empty
-                        formRefs.passwordRef.focus();
-                      } else {
-                        // Otherwise submit the form
-                        try {
-                          options.dataContext.submitState[1]("isLoading", true);
-                          const formData = options.data;
-                          await handleSubmit(formData);
-                        } finally {
-                          options.dataContext.submitState[1](
-                            "isLoading",
-                            false,
-                          );
+                as: "div",
+                attributes: [
+                  {
+                    class: PROPERTIES.Css.TextField,
+                    componentName: "TextInput",
+                    key: "email",
+                    props: (options: FunctionArgumentType) => ({
+                      onKeyDown: async (e: KeyboardEvent) => {
+                        if (e.key === "Enter") {
+                          if (e.target instanceof HTMLInputElement) {
+                            options.updateValue(e.target.value);
+                          }
+    
+                          // Don't proceed if already loading
+                          if (options.dataContext.submitState[0]?.isLoading) {
+                            return;
+                          }
+    
+                          // Check if password is empty
+                          if (!options.data.P.password && formRefs.passwordRef) {
+                            // Focus password field if empty
+                            formRefs.passwordRef.focus();
+                          } else {
+                            // Otherwise submit the form
+                            try {
+                              options.dataContext.submitState[1]("isLoading", true);
+                              const formData = options.data;
+                              await handleSubmit(formData);
+                            } finally {
+                              options.dataContext.submitState[1](
+                                "isLoading",
+                                false,
+                              );
+                            }
+                          }
                         }
-                      }
-                    }
-                  },
-                }),
-                validation: { required: true },
+                      },
+                      onMount: () => {
+                        if (options.ref && options.ref() instanceof HTMLInputElement) {
+                          options.ref()?.focus();
+                        }
+                      },
+                    }),
+                    validation: { required: true },
+                  }
+                ],
+                componentName: "Html",
               },
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
