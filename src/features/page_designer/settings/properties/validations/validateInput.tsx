@@ -2,7 +2,7 @@ import type { ValidationConfigType } from "./ValidationConfig";
 
 export function validateInput(
   validation: ValidationConfigType,
-  value?: string,
+  value?: number | string,
   fieldKey?: string,
   fieldLabel?: string,
 ) {
@@ -12,22 +12,25 @@ export function validateInput(
 
   // Clear previous error
   // Check required rule
-  if (validation.required && (!value || value.trim() === "")) {
+  if (validation.required && (value === undefined || value === null || (typeof value === 'string' && value.trim() === ""))) {
     return `${fieldName} is required`;
   }
 
+  // Convert number to string for string-based validations
+  const stringValue = value !== undefined && value !== null ? String(value) : '';
+
   // Check email rule
-  if (validation.email && value && !/\S+@\S+\.\S+/.test(value)) {
+  if (validation.email && stringValue && !/\S+@\S+\.\S+/.test(stringValue)) {
     return `Invalid ${fieldName.toLowerCase()} format`;
   }
 
   // Check minLength rule
-  if (validation.minLength && value && value.length < validation.minLength) {
+  if (validation.minLength && stringValue && stringValue.length < validation.minLength) {
     return `${fieldName} should be at least ${validation.minLength} characters`;
   }
 
   // Check maxLength rule
-  if (validation.maxLength && value && value.length > validation.maxLength) {
+  if (validation.maxLength && stringValue && stringValue.length > validation.maxLength) {
     return `${fieldName} should be no more than ${validation.maxLength} characters`;
   }
 
@@ -39,14 +42,14 @@ export function validateInput(
     for (const element of regexRules) {
       const regexRule = element;
       if (regexRule.enabled) {
-        if (!value) {
+        if (!stringValue) {
           return (
             regexRule.message ||
             `${fieldName} does not match the required pattern`
           );
         }
         const regex = new RegExp(regexRule.value);
-        if (!regex.test(value)) {
+        if (!regex.test(stringValue)) {
           return (
             regexRule.message ||
             `${fieldName} does not match the required pattern`
@@ -63,8 +66,8 @@ export function validateInput(
       : [validation.validate];
 
     for (const validateFn of validateFunctions) {
-      if (value) {
-        const error = validateFn(value);
+      if (value !== undefined && value !== null) {
+        const error = validateFn(stringValue);
         if (error) {
           return error;
         }

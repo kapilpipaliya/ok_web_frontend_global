@@ -17,9 +17,10 @@ import {
   Switch,
   untrack,
 } from "solid-js";
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
+import {getMetaProps} from "~/components/form/utils/getMetaProps";
 import { Label } from "~/features/css_editor/components/fields/Label";
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
@@ -42,12 +43,12 @@ import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import {
-  type GraphInterface,
   IdAttr,
   useGraph,
   type Vertex,
 } from "~/lib/graph/graph";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
+import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
@@ -59,8 +60,6 @@ import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
-
-import {getMetaProps} from "~/components/form/utils/getMetaProps";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -203,6 +202,10 @@ export function DynamicComponent(
       get dataContext() {
         return runWithOwner(owner, () => useRepeaterVertexContext() || {});
       },
+      error: (key?: string) => {
+        const errorVertexId = `${props.data?.id}-error`;
+        return graph.vertexes[errorVertexId]?.P[key ?? props.meta.P.key];
+      },
       evalExpression,
       fns: functionProxy,
       // formInitialValues,
@@ -252,6 +255,24 @@ export function DynamicComponent(
       runWithOwner: runWithOwnerFunction,
       runWithParentOwner: runWithParentOwnerFunction,
       searchParams,
+      setError: (error: string | undefined, key?: string) => {
+        const errorVertexId = `${props.data?.id}-error`;
+        if (!graph.vertexes[errorVertexId]) {
+          addNewVertex(0, {
+            id: errorVertexId,
+            IN: {},
+            L: ["Error"],
+            OUT: {},
+            P: {
+              [key ?? props.meta.P.key]: error || "",
+            },
+          }, graph, setGraph);
+        } else {
+          mergeVertexProperties(0, errorVertexId, graph, setGraph, {
+            [key ?? props.meta.P.key]: error || "",
+          });
+        }
+      },
       get setGraph() {
         return setGraph;
       },
@@ -346,14 +367,9 @@ export function DynamicComponent(
       get hasViewPermission() {
         return hasViewPermission();
       },
-    } as Record<string, any>;
+    } as Record<string, boolean | null | undefined>;
   });
 
-  const DisplayError = () => (
-    <Show when={props.meta.P.error}>
-      <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
-    </Show>
-  );
 
   const value = createMemo(() => {
     return ifNotNull(props.data?.P[props.meta.P[IdAttr]]);
@@ -621,7 +637,6 @@ export function DynamicComponent(
           </Show>
         </Dynamic>
       </ErrorBoundary>
-      <DisplayError />
     </>
   );
 

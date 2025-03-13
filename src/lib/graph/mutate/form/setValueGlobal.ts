@@ -4,7 +4,7 @@ import { batch } from "solid-js";
 
 import { validateInput } from "~/features/page_designer/settings/properties/validations/validateInput";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { commitTxn } from "../../transaction/core/commitTxn";
 import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
@@ -16,7 +16,7 @@ export function setValueGlobal(
   txnId: number,
   metaVertex: Vertex,
   dataVertex: Vertex,
-  data: any,
+  data: unknown,
   isRealTime: boolean,
 ) {
   if (!dataVertex) {
@@ -30,14 +30,26 @@ export function setValueGlobal(
   let error = "" as string | undefined;
   batch(() => {
     if (metaVertex.P.validation) {
-      error = validateInput(metaVertex.P.validation, data, metaVertex.P.key);
-      if (metaVertex.P.error !== error) {
-        // This was causing issue when we have onInput event on the field, It lose focus from the field, its fixed now.
-        mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-          error: error || "",
-        });
-        setGraph("vertexes", metaVertex.id, "P", {
-          error: error || "",
+      error = validateInput(metaVertex.P.validation, data as number | string, metaVertex.P.key);
+      const errorVertexId = `${dataVertex.id}-error`;
+      if (!graph.vertexes[errorVertexId]) {
+        addNewVertex(
+          0,
+          {
+            id: errorVertexId,
+            IN: {},
+            L: ["Error"],
+            OUT: {},
+            P: {
+              [metaVertex.P.key]: error || "",
+            },
+          },
+          graph,
+          setGraph
+        );
+      } else {
+        mergeVertexProperties(0, errorVertexId, graph, setGraph, {
+          [metaVertex.P.key]: error || "",
         });
       }
     }
@@ -47,7 +59,6 @@ export function setValueGlobal(
     });
 
     // we directly save the dataType on vertex:
-    // @ts-ignore
     // don't call setGraph directly.
     // setGraph("vertexes", dataVertex.id, "D", {
     //   [metaVertex.P[IdAttr]]: metaVertex.P.dataType,

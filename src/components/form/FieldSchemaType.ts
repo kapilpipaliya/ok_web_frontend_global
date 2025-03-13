@@ -15,9 +15,10 @@ export type ComponentNameType = (options: FunctionArgumentType) => string;
 
 export interface FunctionArgumentBaseType {
   data: Vertex;
-  dataContext: Record<string | symbol, any>;
-  evalExpression: (expression: string, options: object) => any;
-  fns?: (name: string) => Function | undefined;
+  dataContext: Record<string | symbol, unknown>;
+  error: (key?: string) => string | undefined;
+  evalExpression: (expression: string, options: object) => unknown;
+  fns?: (name: string) => ((...args: unknown[]) => unknown) | undefined;
   graph: GraphInterface;
   hasDeletePermission: boolean | null | undefined;
   hasEditPermission: boolean | null | undefined;
@@ -30,7 +31,7 @@ export interface FunctionArgumentBaseType {
   meta: Vertex;
   mounted: Accessor<boolean>;
   navigate: ReturnType<typeof useNavigate>;
-  onChange: (value: any) => void;
+  onChange: (value: unknown) => void;
   owner: Owner;
   parentItems: PageRenderStore[];
   parentMeta: Vertex;
@@ -44,6 +45,7 @@ export interface FunctionArgumentBaseType {
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   searchParams?: ReturnType<typeof useSearchParams>[0];
+  setError: (error: string | undefined, key?: string) => void;
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
     txnId: number,
@@ -62,7 +64,7 @@ export interface FunctionArgumentBaseType {
 export interface FunctionArgumentType extends FunctionArgumentBaseType {
   // parentValue: any;
   // projections: (number | string)[];
-  value: any;
+  value: unknown;
 }
 
 export type HiddenFnType =
