@@ -142,7 +142,7 @@ export const getComponentFormSchema = (
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: `Add New ${label()}`,
       },
     ],
@@ -161,7 +161,7 @@ export const getComponentFormSchema = (
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: `${label()} Name`,
                 validation: { required: true },
               },
@@ -181,7 +181,7 @@ export const getComponentFormSchema = (
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Description",
               },
               {

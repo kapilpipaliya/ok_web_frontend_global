@@ -52,7 +52,7 @@ export function AccountDeletionForm() {
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Confirm Account Deletion",
       },
     ],
@@ -122,7 +122,7 @@ export function AccountDeletionForm() {
         as: "div",
         attributes: [
           {
-            componentName: "Text",
+            as: "span", componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               text: options.dataContext.deleteState[0]?.errorMessage,
             }),
@@ -138,7 +138,7 @@ export function AccountDeletionForm() {
         as: "div",
         attributes: [
           {
-            componentName: "Text",
+            as: "span", componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               text: options.dataContext.deleteState[0]?.successMessage,
             }),
@@ -193,12 +193,12 @@ export function AccountDeletionForm() {
                         attributes: [
                           {
                             class: "mb:4",
-                            componentName: "Text",
+                            as: "span", componentName: "Html",
                             text: "Are you sure you want to delete your account? This action cannot be undone.",
                           },
                           {
                             class: "mb:6",
-                            componentName: "Text",
+                            as: "span", componentName: "Html",
                             text: "Your account will be scheduled for deletion and permanently removed after 48 hours.",
                           },
                           modalFooterSchema,

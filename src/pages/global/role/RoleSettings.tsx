@@ -20,12 +20,12 @@ export function RoleSettings() {
   const RoleSchema = {
     attributes: [
       {
-        componentName: "Text",
+        as: "span", componentName: "Html",
         displayName: "Name",
         key: "key",
       },
       {
-        componentName: "Text",
+        as: "span", componentName: "Html",
         displayName: "Description",
         key: "description",
       },

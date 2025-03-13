@@ -59,7 +59,7 @@ export const roleFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Name",
               validation: { required: true },
             },
@@ -84,7 +84,7 @@ export const roleFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Description",
             },
             {
@@ -308,7 +308,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Add New Role",
       },
     ],

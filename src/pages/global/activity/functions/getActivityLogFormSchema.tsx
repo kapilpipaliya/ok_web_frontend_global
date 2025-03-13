@@ -84,7 +84,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Action",
                 validation: { required: true },
               },
@@ -104,7 +104,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Entity Type",
                 validation: { required: true },
               },
@@ -124,7 +124,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Entity ID",
                 validation: { required: true },
               },
@@ -144,7 +144,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "User",
               },
               {
@@ -162,7 +162,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Description",
               },
               {
@@ -188,7 +188,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Add New Activity Log",
       },
     ],

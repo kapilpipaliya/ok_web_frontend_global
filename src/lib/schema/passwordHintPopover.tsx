@@ -26,7 +26,7 @@ export function createPasswordHintPopoverContent(
       {
         as: "h3",
         class: "font-size:16px color:primary m:0 mb:8",
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Password Requirements",
       },
       {
@@ -59,7 +59,7 @@ export function createPasswordHintPopoverContent(
               },
             },
             {
-              componentName: "Text",
+              as: "span", componentName: "Html",
               props: (options: FunctionArgumentType) => {
                 const validationState = options.dataContext.validationState;
                 const isValid =
@@ -123,7 +123,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: label,
           },
           {

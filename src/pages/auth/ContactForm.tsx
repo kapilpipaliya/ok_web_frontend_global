@@ -79,7 +79,7 @@ export function ContactForm() {
       {
         as: "h1",
         class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Contact Us",
       },
       getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
@@ -88,7 +88,7 @@ export function ContactForm() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Full Name",
             validation: { required: true },
           },
@@ -131,7 +131,7 @@ export function ContactForm() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Email Address",
             validation: { required: true },
           },
@@ -163,7 +163,7 @@ export function ContactForm() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Subject",
             validation: { required: true },
           },
@@ -194,7 +194,7 @@ export function ContactForm() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Message",
             validation: { required: true },
           },

@@ -83,7 +83,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Name",
                 validation: { required: true },
               },
@@ -106,7 +106,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Domain",
                 validation: { required: true },
               },
@@ -133,7 +133,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Add New SubDomain",
       },
     ],

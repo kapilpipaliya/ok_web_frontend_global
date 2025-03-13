@@ -45,7 +45,7 @@ export function GeneralSettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Application Name",
           },
           {
@@ -63,7 +63,7 @@ export function GeneralSettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Default Language",
           },
           {

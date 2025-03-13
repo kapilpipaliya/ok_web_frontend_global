@@ -31,7 +31,7 @@ const folderFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Folder Name",
               validation: { required: true },
             },
@@ -51,7 +51,7 @@ const folderFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Description",
             },
             {
@@ -178,7 +178,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Add New Folder",
       },
     ],

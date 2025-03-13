@@ -32,7 +32,7 @@ export const themeFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Theme Name",
               validation: { required: true },
             },
@@ -52,7 +52,7 @@ export const themeFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Theme Configuration",
               validation: { required: true },
             },
@@ -209,7 +209,7 @@ export const getThemeFormSchema = (
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         props: (options: FunctionArgumentType) => {
           return {
             text:

@@ -95,7 +95,7 @@ export function ProfileImageSettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Profile Image",
           },
           {

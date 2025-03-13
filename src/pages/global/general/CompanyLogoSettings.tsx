@@ -150,7 +150,7 @@ export function CompanyLogoSettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Rectangular Company Logo",
           },
           {
@@ -188,7 +188,7 @@ export function CompanyLogoSettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Circular Company Logo",
           },
           {

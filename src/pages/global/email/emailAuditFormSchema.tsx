@@ -42,7 +42,7 @@ export const emailAuditFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Subject",
               validation: { required: true },
             },
@@ -69,7 +69,7 @@ export const emailAuditFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Recipients",
               validation: { required: true },
             },
@@ -96,7 +96,7 @@ export const emailAuditFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Content",
               validation: { required: true },
             },
@@ -134,7 +134,7 @@ export const emailAuditFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Status",
             },
             {
@@ -213,7 +213,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Add New Email Audit",
       },
     ],

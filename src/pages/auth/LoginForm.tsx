@@ -89,7 +89,7 @@ export function LoginForm() {
       {
         as: "h1",
         class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Login",
       },
       {
@@ -99,7 +99,7 @@ export function LoginForm() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Username/Email",
               },
               {
@@ -154,7 +154,7 @@ export function LoginForm() {
               getErrorSchema("email"),
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Password",
               },
               {
@@ -293,7 +293,7 @@ export function LoginForm() {
         attributes: [
           {
             class: "color:grey",
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Don't have an account? ",
           },
           {

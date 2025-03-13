@@ -26,7 +26,7 @@ export function CompanySettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Company Name",
           },
           {
@@ -44,7 +44,7 @@ export function CompanySettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Address",
           },
           {
@@ -62,7 +62,7 @@ export function CompanySettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Contact Email",
           },
           {
@@ -81,7 +81,7 @@ export function CompanySettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Phone",
           },
           {

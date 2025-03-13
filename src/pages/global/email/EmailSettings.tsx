@@ -29,7 +29,7 @@ export function EmailSettings() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Email Provider",
               },
               {
@@ -54,7 +54,7 @@ export function EmailSettings() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "SMTP Host",
               },
               {
@@ -75,7 +75,7 @@ export function EmailSettings() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "SMTP Port",
               },
               {
@@ -97,7 +97,7 @@ export function EmailSettings() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "SMTP Username",
               },
               {
@@ -118,7 +118,7 @@ export function EmailSettings() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "SMTP Password",
               },
               {
@@ -140,7 +140,7 @@ export function EmailSettings() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "SendGrid API Key",
               },
               {
@@ -162,7 +162,7 @@ export function EmailSettings() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "From Email",
               },
               {
@@ -184,7 +184,7 @@ export function EmailSettings() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Use Secure Connection",
               },
               {

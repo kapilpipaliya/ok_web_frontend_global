@@ -22,13 +22,13 @@ export const popoverWrapperSchemaExample = () => {
       {
         as: "h3",
         class: "font-size:18px color:primary m:0 mb:8",
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Popover Title",
       },
       {
         as: "p",
         class: "font-size:14px color:base-80 m:0",
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "This is the popover content. You can hover over the button to see this content.",
       },
     ],
@@ -60,13 +60,13 @@ export const dynamicPopoverExample = () => {
       {
         as: "h3",
         class: "font-size:18px color:secondary m:0 mb:8",
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Dynamic Content",
       },
       {
         as: "p",
         class: "font-size:14px color:base-80 m:0",
-        componentName: "Text",
+        as: "span", componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           text: `This popover uses data from context: ${options.dataContext.popoverState[0]?.isVisible ? "Visible" : "Hidden"}`,
         }),

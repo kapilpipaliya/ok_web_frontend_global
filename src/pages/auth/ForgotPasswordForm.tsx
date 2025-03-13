@@ -187,7 +187,7 @@ export function ForgotPasswordForm() {
       {
         as: "h1",
         class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Reset Password",
       },
       {
@@ -195,7 +195,7 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Email or Username",
           },
           {
@@ -278,7 +278,7 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "One Time Password (OTP)",
           },
           {
@@ -568,7 +568,7 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             class: "color:grey",
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Already have an account? ",
           },
           {
@@ -589,7 +589,7 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             class: "color:grey",
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Don't have an account? ",
           },
           {

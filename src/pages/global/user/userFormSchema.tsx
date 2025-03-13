@@ -27,7 +27,7 @@ export const userFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Email",
               validation: { required: true },
             },
@@ -50,7 +50,7 @@ export const userFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Name",
             },
             {
@@ -79,7 +79,7 @@ export const userFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Username",
             },
             {
@@ -101,7 +101,7 @@ export const userFormSchema = {
           attributes: [
             {
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              componentName: "Text",
+              as: "span", componentName: "Html",
               text: "Role",
             },
             {
@@ -211,7 +211,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Add New User",
       },
     ],

@@ -125,8 +125,6 @@ export const componentsMap: Record<string, any> = {
   Select: SelectField,
   Show,
   Table: TableInputField,
-  // keep as its used in metadata
-  Text: TextField,
   TextArea: TextAreaField,
   TextInput: TextInputField,
   Title: MetaTitle,

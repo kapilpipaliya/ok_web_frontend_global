@@ -57,7 +57,7 @@ export const SubDomainGrid = () => {
             </a>
           );
         },
-        componentName: "Text",
+        as: "span", componentName: "Html",
         displayName: "Subdomain",
         key: "key",
       },
@@ -74,12 +74,12 @@ export const SubDomainGrid = () => {
             </a>
           );
         },
-        componentName: "Text",
+        as: "span", componentName: "Html",
         displayName: "Domain",
         key: "domain",
       },
       {
-        componentName: "Text",
+        as: "span", componentName: "Html",
         displayName: "Latest Activity",
         key: "activity",
       },

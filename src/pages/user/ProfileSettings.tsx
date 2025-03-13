@@ -56,12 +56,12 @@ export function ProfileSettings() {
                 attributes: [
                   {
                     class: "fg:base-80",
-                    componentName: "Text",
+                    as: "span", componentName: "Html",
                     text: "Important!",
                   },
                   {
                     class: "ml:4 mt:4px fg:base-60",
-                    componentName: "Text",
+                    as: "span", componentName: "Html",
                     text: "Changing your username or email will update them across all your projects.",
                   },
                 ],
@@ -83,7 +83,7 @@ export function ProfileSettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Username",
             validation: { required: true },
           },
@@ -103,7 +103,7 @@ export function ProfileSettings() {
         attributes: [
           {
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Text",
+            as: "span", componentName: "Html",
             key: "emailLabel",
             text: "Email Address",
           },

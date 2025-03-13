@@ -69,7 +69,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       },
       {
         class: SETTINGS_CONSTANTS.LABEL_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Replies",
       },
       {
@@ -96,14 +96,14 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                   {
                                     as: "div",
                                     class: "font-weight:bold",
-                                    componentName: "Text",
+                                    as: "span", componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: options.data.P.email || "Anonymous",
                                     }),
                                   },
                                   {
                                     as: "div",
-                                    componentName: "Text",
+                                    as: "span", componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: options.data.P.message,
                                     }),
@@ -111,7 +111,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                   {
                                     as: "div",
                                     class: "font-size:12px color:base-50",
-                                    componentName: "Text",
+                                    as: "span", componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: new Date(
                                         options.data.P.createdAt,
@@ -159,7 +159,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     // emptyState: {
                     //   as: "div",
                     //   class: "p:8 text-align:center color:base-50",
-                    //   componentName: "Text",
+                    //   as: "span", componentName: "Html",
                     //   text: "No messages yet",
                     // },
                   },
@@ -301,7 +301,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Status",
               },
               {
@@ -324,7 +324,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Message",
               },
               {
@@ -418,7 +418,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Edit Support Ticket",
       },
       {

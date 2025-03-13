@@ -84,7 +84,7 @@ export function SignupForm() {
       {
         as: "h1",
         class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        componentName: "Text",
+        as: "span", componentName: "Html",
         text: "Sign Up",
       },
       {
@@ -95,7 +95,7 @@ export function SignupForm() {
             attributes: [
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Username",
               },
               {
@@ -139,7 +139,7 @@ export function SignupForm() {
               getErrorSchema("username"),
               {
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Text",
+                as: "span", componentName: "Html",
                 text: "Email",
               },
               {
@@ -314,7 +314,7 @@ export function SignupForm() {
         attributes: [
           {
             class: "color:grey",
-            componentName: "Text",
+            as: "span", componentName: "Html",
             text: "Already have an account? ",
           },
           {
