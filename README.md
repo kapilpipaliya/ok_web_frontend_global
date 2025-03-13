@@ -4,6 +4,9 @@ http://localhost:3001/admin/GlobalSettings
 http://localhost:3001/admin/
 http://localhost:3001/admin/Page
 
+auth:
+http://localhost:3001/auth/login
+
 email templates:
 http://localhost:3001/internal/page/AccountDeletionRequest
 http://localhost:3001/internal/page/TwoFactorAuth

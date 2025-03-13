@@ -1,3 +1,5 @@
+// ADD a Feature:
+// When nested PageViewWrapper is used, children should get parent context too.
 import { makeEventListener } from "@solid-primitives/event-listener";
 import { type BeforeLeaveEventArgs, createAsync, useBeforeLeave } from "@solidjs/router";
 import {

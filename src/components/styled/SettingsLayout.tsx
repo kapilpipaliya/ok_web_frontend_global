@@ -1,9 +1,12 @@
-import { Title } from "@solidjs/meta";
-import { For, type JSX, Show } from "solid-js";
+import { type JSX } from "solid-js";
+
+import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/graph";
+import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { STYLES } from "~/pages/settings/constants";
 
 export interface MenuItem {
@@ -37,62 +40,119 @@ export function SettingsLayout(props: SettingsLayoutProps) {
     return groups;
   };
 
-  return (
-    <div class="">
-      <Title>
-        {props.title} -{" "}
-        {
-          props.menuItems.find((item) => item.id === props.selectedMenu())
-            ?.label
-        }
-      </Title>
+  type DataType = [string, MenuItem[]];
 
-      <HeaderWithDescription
-        class="flex:1"
-        description={props.description}
-        title={props.title}
-      />
+  // Create a schema for the SettingsLayout
+  const settingsLayoutSchema: IFormMetaData = {
+    attributes: [
+      {
+        as: "div",
+        attributes: [
+          {
+            componentName: "Title",
+            props: () => ({
+              text: `${props.title} - ${props.menuItems.find((item) => item.id === props.selectedMenu())?.label}`
+            })
+          },
+          {
+            class: "flex:1",
+            // @ts-expect-error - HeaderWithDescription is a function component
+            componentName: HeaderWithDescription,
+            props: () => ({
+              description: props.description,
+              title: props.title
+            })
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "div",
+                attributes: [
+                  {
+                    attributes: [
+                      {
+                        as: "div",
+                        attributes: [
+                          {
+                            attributes: [
+                              {
+                                as: "div",
+                                class: "text:14px fg:#6B7280 font-weight:500 mb:8px",
+                                componentName: "Html",
+                                props: (args: FunctionArgumentType) => ({
+                                  text: (args.dataContext.menuGroups as DataType)[0]
+                                })
+                              }
+                            ],
+                            componentName: "Fragment",
+                            props: (args: FunctionArgumentType) => ({
+                              hidden: (args.dataContext.menuGroups as DataType)[0] === "default"
+                            })
+                          },
+                          {
+                            attributes: [
+                              {
+                                as: "div",
+                                componentName: "Html",
+                                props: (args: FunctionArgumentType) => ({
+                                  class: `p:12px cursor:pointer r:4px mb:8px ${props.selectedMenu() === (args.dataContext.menuItems as MenuItem).id
+                                      ? "bg:primary fg:base-5"
+                                      : "bg:primary-10:hover fg:base-90"
+                                    }`,
+                                  hidden: (args.dataContext.menuItems as MenuItem).adminOnly && !isAdminRole(graph),
+                                  onClick: () => props.onMenuSelect((args.dataContext.menuItems as MenuItem).id),
+                                  text: (args.dataContext.menuItems as MenuItem).label
+                                })
+                              },
+                            ],
+                            componentName: "Data",
+                            loop: true,
+                            name: "menuItems",
+                            props: (args: FunctionArgumentType) => ({
+                              data: (args.dataContext.menuGroups as DataType)[1],
+                            })
+                          }
+                        ],
+                        class: "mb:16px",
+                        componentName: "Html",
+                        props: (args: FunctionArgumentType) => ({
+                          show: (args.dataContext.menuGroups as DataType)[1].some((item: MenuItem) => !item.adminOnly || isAdminRole(graph))
+                        })
+                      }
+                    ],
+                    componentName: "Data",
+                    name: "menuGroups",
+                    props: () => ({
+                      data: Object.entries(groupedMenuItems()),
+                      loop: true
+                    })
+                  }
+                ],
+                class: `${STYLES.overflow} h:calc(100vh-140px) border-right:1px|solid|#eee`,
+                componentName: "Html"
+              },
+              {
+                as: "div",
+                attributes: [
+                  {
+                    // @ts-expect-error - children is a function components
+                    componentName: () => <>{props.children}</>
+                  }
+                ],
+                class: "flex:1 p:6",
+                componentName: "Html"
+              }
+            ],
+            class: "display:grid grid-template-columns:250px|1fr p:6",
+            componentName: "Html"
+          }
+        ],
+        componentName: "Html"
+      }
+    ],
+    key: "settingsLayout"
+  };
 
-      <div class="display:grid grid-template-columns:250px|1fr  p:6">
-        <div
-          class={`${STYLES.overflow} h:calc(100vh-140px) border-right:1px|solid|#eee`}
-        >
-          <For each={Object.entries(groupedMenuItems())}>
-            {([group, items]) => (
-              <Show
-                when={items.some(
-                  (item) => !item.adminOnly || isAdminRole(graph),
-                )}
-              >
-                <div class="mb:16px">
-                  <Show when={group !== "default"}>
-                    <div class="text:14px fg:#6B7280 font-weight:500 mb:8px">
-                      {group}
-                    </div>
-                  </Show>
-                  <For each={items}>
-                    {(item) => (
-                      <Show when={!item.adminOnly || isAdminRole(graph)}>
-                        <div
-                          class={`p:12px cursor:pointer r:4px mb:8px ${
-                            props.selectedMenu() === item.id
-                              ? "bg:primary fg:base-5"
-                              : "bg:primary-10:hover fg:base-90"
-                          }`}
-                          onClick={() => props.onMenuSelect(item.id)}
-                        >
-                          {item.label}
-                        </div>
-                      </Show>
-                    )}
-                  </For>
-                </div>
-              </Show>
-            )}
-          </For>
-        </div>
-        <div class="flex:1 p:6">{props.children}</div>
-      </div>
-    </div>
-  );
+  return <SchemaRenderer form={settingsLayoutSchema} />;
 }
