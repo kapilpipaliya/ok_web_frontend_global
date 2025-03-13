@@ -13,6 +13,7 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
+import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 export function ForgotPasswordForm() {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -180,6 +181,7 @@ export function ForgotPasswordForm() {
   const stepUserNameSchema = {
     as: "div",
     attributes: [
+      getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
       getTitleSchema("Forgot Password"),
       {
         as: "div",

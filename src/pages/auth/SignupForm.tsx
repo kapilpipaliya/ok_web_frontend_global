@@ -17,6 +17,7 @@ import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect"
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { getTitleSchema } from "./functions/getTitleSchema";
+import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 export function SignupForm() {
   const [graph] = useGraph();
@@ -78,6 +79,7 @@ export function SignupForm() {
   const form = {
     as: "div",
     attributes: [
+      getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
       {
         attributes: [
           getTitleSchema("Sign Up"),

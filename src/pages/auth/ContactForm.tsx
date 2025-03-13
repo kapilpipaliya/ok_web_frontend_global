@@ -11,6 +11,7 @@ import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 export function ContactForm() {
   const navigate = useNavigate();
@@ -74,6 +75,7 @@ export function ContactForm() {
   const form = {
     as: "div",
     attributes: [
+      getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
       {
         as: "div",
         attributes: [
