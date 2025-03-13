@@ -1,15 +1,14 @@
 import type { Session } from "neo4j-driver";
 
-
 import type { Vertex } from "~/lib/graph/graph";
 
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createDatabase } from "~/cypher/mutate/signup/createDatabase";
 
-import { getAllDatabases } from "./getAllDatabases";
-import { signupAdmin } from "../signup/signupAdmin";
 import { createDatabaseConstraints } from "../signup/createRootFolder";
+import { signupAdmin } from "../signup/signupAdmin";
+import { getAllDatabases } from "./getAllDatabases";
 
 export const superUserData = {
   email: "superuser@easyformforge.com",

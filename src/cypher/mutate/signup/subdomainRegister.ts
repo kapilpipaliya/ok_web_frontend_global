@@ -42,9 +42,9 @@ export async function subdomainRegister(
       tx,
       {
         email: data.email,
+        emailConfirmed: true,
         username: data.username,
         uuid: user.P.uuid,
-        emailConfirmed: true,
       },
       true,
     );

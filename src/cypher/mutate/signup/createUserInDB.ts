@@ -9,9 +9,9 @@ export async function createUserInSuperDB(
   superTx: Session | Transaction,
   userData: {
     email: string;
+    emailConfirmed?: boolean;
     password: string;
     username: string;
-    emailConfirmed?: boolean;
   },
 ) {
   const uuid = uuidv7();
@@ -30,10 +30,10 @@ export async function createUserInSuperDB(
 
   const createUserParams = {
     ...userData,
+    emailConfirmed: userData.emailConfirmed ?? false,
     hashedPassword,
     salt,
     uuid,
-    emailConfirmed: userData.emailConfirmed ?? false,
   };
 
   const createUserResult = await superTx.run(createUserQuery, createUserParams);
@@ -68,10 +68,10 @@ export async function createUserInUserDB(
 
   const createUserResult = await sessionOrTx.run(createUserQuery2, {
     ...params,
+    emailConfirmed: params.emailConfirmed ?? false,
     hashedPassword,
     isSystemUser: isSystemUser ?? null,
     salt,
-    emailConfirmed: params.emailConfirmed ?? false,
   });
   return convertNodeToJson(createUserResult.records[0].get("u"));
 }

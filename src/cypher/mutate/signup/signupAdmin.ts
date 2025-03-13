@@ -2,15 +2,16 @@ import type { Session, Transaction } from "neo4j-driver";
 
 import { v7 as uuidv7 } from "uuid";
 
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+
 import type { SignupRequestData } from "./SignupRequestData";
 
-import { createUserInSuperDB } from "./createUserInDB";
-import { newAdminValidations } from "./newAdminValidations";
-import { createRootFolder } from "./createRootFolder";
-import { insertComponents } from "./insertComponents";
-import { addAdminRoleToUser } from "./addAdminRoleToUser";
 import { saveAllEmailTemplates } from "../email/saveEmailTemplates";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { addAdminRoleToUser } from "./addAdminRoleToUser";
+import { createRootFolder } from "./createRootFolder";
+import { createUserInSuperDB } from "./createUserInDB";
+import { insertComponents } from "./insertComponents";
+import { newAdminValidations } from "./newAdminValidations";
 
 export async function signupAdmin(
   tx: Transaction,
@@ -22,9 +23,9 @@ export async function signupAdmin(
 
   const user = await createUserInSuperDB(tx, {
     email: data.email,
+    emailConfirmed: isSystemUser,
     password: data.password,
-    username: data.username,
-    emailConfirmed: isSystemUser
+    username: data.username
   });
 
   // Create Account vertex and AccountUser relationship
@@ -46,7 +47,7 @@ export async function signupAdmin(
     await saveAllEmailTemplates(tx);
   }
 
-  return {user, accountId, error: ""};
+  return {accountId, error: "", user};
 }
 
 async function createAccount(
