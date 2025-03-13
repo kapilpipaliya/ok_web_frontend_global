@@ -238,7 +238,7 @@ export function AccountDeletionForm() {
     attributes: [deleteAccountSchema],
     componentName: "Data",
     name: "deleteState",
-    noRepeat: true,
+    
     props: (options: FunctionArgumentType) => ({
       data: createStore({
         errorMessage: "",

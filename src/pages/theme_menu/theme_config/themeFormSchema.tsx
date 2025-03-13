@@ -323,7 +323,7 @@ export const getThemeFormSchema = (
     ],
     componentName: "Data",
     name: "modalState",
-    noRepeat: true,
+    
     props: (options: FunctionArgumentType) => ({
       data: createStore({
         editorData: options.data.P.data ?? "",
@@ -339,7 +339,7 @@ export const getThemeFormSchema = (
         attributes: [schema],
         componentName: "Data",
         name: "editorState",
-        noRepeat: true,
+        
         props: () => ({
           data: createSignal(),
           // TODO: if not saved, revert to previous state

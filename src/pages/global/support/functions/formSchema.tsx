@@ -282,7 +282,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "replyState",
-    noRepeat: true,
+    
     props: () => ({
       data: createStore({
         replyText: "",
@@ -500,7 +500,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "modalState",
-    noRepeat: true,
+    
     props: () => ({
       data: createStore({
         isLoading: false,

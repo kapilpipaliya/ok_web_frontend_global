@@ -233,7 +233,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     ],
     componentName: "Data",
     name: "modalState",
-    noRepeat: true,
+    
     props: () => ({
       data: createStore({
         isLoading: false,

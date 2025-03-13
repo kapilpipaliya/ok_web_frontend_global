@@ -302,7 +302,7 @@ export const getComponentFormSchema = (
     ],
     componentName: "Data",
     name: "modalState",
-    noRepeat: true,
+    
     props: () => ({
       data: createSolidJsStore({
         isLoading: false,

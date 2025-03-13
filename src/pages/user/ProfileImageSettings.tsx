@@ -169,7 +169,7 @@ export function ProfileImageSettings() {
             ],
             componentName: "Data",
             name: "saveState",
-            noRepeat: true,
+            
             props: () => ({
               data: createStore({
                 isLoading: false,

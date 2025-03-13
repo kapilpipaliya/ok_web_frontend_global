@@ -292,7 +292,7 @@ export function SignupForm() {
         ],
         componentName: "Data",
         name: "submitState",
-        noRepeat: true,
+        
         props: () => ({
           data: createStore({
             isLoading: false,

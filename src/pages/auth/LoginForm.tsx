@@ -257,7 +257,7 @@ export function LoginForm() {
         ],
         componentName: "Data",
         name: "submitState",
-        noRepeat: true,
+        
         props: () => ({
           data: createStore({
             isLoading: false,

@@ -233,7 +233,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "modalState",
-    noRepeat: true,
+    
     props: () => ({
       data: createStore({
         isLoading: false,

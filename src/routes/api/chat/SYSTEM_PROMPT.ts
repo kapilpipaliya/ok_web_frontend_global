@@ -64,6 +64,9 @@ Attr Vertex:
   * 'Data' - For repeating Item patterns
     - required properties:
       - name: string - name of the data context, must not be empty
+    - optional properties:
+      - expression: string - expression to evaluate the data
+      - loop: boolean - whether to loop over the data
     - 'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'props' function body pass data key the array of values it should iterate over.
     - Requires 'name' property in Attr vertex, In the 'Data' Item children to read the value of the context, in 'props' function body use 'args.dataContext["name"]' property.
     - use 'Data' Item whenever possible.

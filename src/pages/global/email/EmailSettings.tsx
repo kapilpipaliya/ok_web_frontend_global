@@ -238,7 +238,7 @@ export function EmailSettings() {
                 ],
                 componentName: "Data",
                 name: "saveState",
-                noRepeat: true,
+                
                 props: () => ({
                   data: createStore({
                     isLoading: false,
@@ -282,7 +282,7 @@ export function EmailSettings() {
                 ],
                 componentName: "Data",
                 name: "testState",
-                noRepeat: true,
+                
                 props: () => ({
                   data: createStore({
                     isLoading: false,

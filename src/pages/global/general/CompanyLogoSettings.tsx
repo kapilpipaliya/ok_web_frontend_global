@@ -270,7 +270,7 @@ export function CompanyLogoSettings() {
             ],
             componentName: "Data",
             name: "saveState",
-            noRepeat: true,
+            
             props: () => ({
               data: createStore({
                 isLoading: false,

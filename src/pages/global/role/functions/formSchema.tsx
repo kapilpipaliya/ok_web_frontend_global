@@ -220,7 +220,7 @@ export const roleFormSchema = {
       ],
       componentName: "Data",
       name: "tabState",
-      noRepeat: true,
+      
       props: () => ({
         data: createStore({
           activeTab: "Perm",
@@ -407,7 +407,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "modalState",
-    noRepeat: true,
+    
     props: () => ({
       data: createStore({
         isLoading: false,

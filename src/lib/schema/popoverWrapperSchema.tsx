@@ -135,7 +135,7 @@ export const popoverWrapperSchema = (
     ],
     componentName: "Data",
     name: "popoverState",
-    noRepeat: true,
+    
     props: () => ({
       data: createStore({
         isVisible: false,

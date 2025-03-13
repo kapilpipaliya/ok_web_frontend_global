@@ -534,7 +534,7 @@ export function ForgotPasswordForm() {
             ],
             componentName: "Data",
             name: "stageData",
-            noRepeat: true,
+            
             props: () => ({
               data: createStore({
                 name: 0, // Initial stage
@@ -544,7 +544,7 @@ export function ForgotPasswordForm() {
         ],
         componentName: "Data",
         name: "submitState",
-        noRepeat: true,
+        
         props: () => ({
           data: createStore({
             isLoading: false,

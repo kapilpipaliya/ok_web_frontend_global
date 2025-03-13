@@ -18,6 +18,7 @@ import { RepeaterInternal } from "./RepeaterInternal";
 export const DataField = (props: {
   data: (() => any[]) | any[];
   expression: string;
+  loop: boolean;
 }) => {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
@@ -54,7 +55,7 @@ export const DataField = (props: {
     }
 
     if (isValidResponse(selectionOptionsData()!)) {
-      setGraphData(graph, setGraph, selectionOptionsData()!.graph!, true);
+      setGraphData(graph, setGraph, selectionOptionsData()!.graph!, {skipExisting: true});
       setOptions(
         evalExpression(props.expression, {
           graph,
@@ -107,7 +108,7 @@ export const DataField = (props: {
       <Match when={errorMessage()}>
         <div class="bg-red-500">{errorMessage()}</div>
       </Match>
-      <Match when={Array.isArray(options()) && !props.noRepeat}>
+      <Match when={Array.isArray(options()) && props.loop}>
         <For each={options()}>
           {(value, index) => {
             return (

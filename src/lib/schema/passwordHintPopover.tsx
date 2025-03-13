@@ -154,7 +154,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
     ],
     componentName: "Data",
     name: "helpIconState",
-    noRepeat: true,
+    
     props: () => ({
       data: createStore({
         hasContent: false,
@@ -184,7 +184,7 @@ export function wrapPasswordLabelWithHint(
         attributes: [popoverWrapperSchema(actionElement, popoverContent)],
         componentName: "Data",
         name: "validationState",
-        noRepeat: true,
+        
         props: () => ({
           data: createStore({
             conditions: PASSWORD_CONDITIONS.map((condition) => ({
