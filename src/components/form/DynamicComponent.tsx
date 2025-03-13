@@ -60,6 +60,8 @@ import { useToast } from "../styled/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 
+import {getMetaProps} from "~/components/form/utils/getMetaProps";
+
 export function DynamicComponent(
   props: Readonly<{
     componentName?: string;
@@ -125,31 +127,30 @@ export function DynamicComponent(
       getGlobalStore(graph).P.userRoles,
       props.meta,
       graph,
-      setGraph,
     ),
   );
   const hasInsertPermission = createLazyMemo(() => {
     return (
-      hasPermissions(allConfiguredPermission(), "insert", graph, setGraph) ??
+      hasPermissions(allConfiguredPermission(), "insert", graph) ??
       parentRenderContext()?.context.hasInsertPermission
     );
   });
 
   const hasEditPermission = createLazyMemo(() => {
     return (
-      hasPermissions(allConfiguredPermission(), "edit", graph, setGraph) ??
+      hasPermissions(allConfiguredPermission(), "edit", graph) ??
       parentRenderContext()?.context.hasEditPermission
     );
   });
   const hasViewPermission = createLazyMemo(() => {
     return (
-      hasPermissions(allConfiguredPermission(), "view", graph, setGraph) ??
+      hasPermissions(allConfiguredPermission(), "view", graph) ??
       parentRenderContext()?.context.hasViewPermission
     );
   });
   const hasDeletePermission = createLazyMemo(() => {
     return (
-      hasPermissions(allConfiguredPermission(), "delete", graph, setGraph) ??
+      hasPermissions(allConfiguredPermission(), "delete", graph) ??
       parentRenderContext()?.context.hasDeletePermission
     );
   });
@@ -373,67 +374,19 @@ export function DynamicComponent(
     });
   };
 
-  const getMetaProps = (
-    meta: Record<string, any>,
-    ignoreKeys: string[],
-  ): Record<string, any> => {
-    try {
-      const result = {} as Record<string, any>;
-
-      for (const key in meta) {
-        if (ignoreKeys.includes(key)) {
-          continue;
-        }
-
-        const value = meta[key];
-        if (typeof value === "function") {
-          result[key] = value;
-          /* we will not modify function signature, as we already have options in props context.
-          result[key] = (...args: unknown[]) => {
-            // Note: runWithOwner is breaking the reactivity of the function
-            // return runWithOwner(owner, () => {
-            try {
-              const functionArgs = getFunctionArgumentWithValue();
-              return (meta[key] as (...args: unknown[]) => unknown)(
-                Object.assign(functionArgs, { args }),
-              );
-            } catch (error) {
-              console.error(`Error executing function for key ${key}:`, error);
-              return undefined;
-            }
-            // });
-          };*/
-        } else if (key.toLowerCase().endsWith("class")) {
-          result[key] = cssStateToString(
-            value,
-            { P: { key: key } } as unknown as Vertex,
-            props.meta,
-            graph,
-          );
-        } else if (value !== null) {
-          result[key] = value;
-        }
-      }
-      return result;
-    } catch (error) {
-      console.error("Error in getMetaProps:", error);
-      return {};
-    }
-  };
-
   const dynamicProps = createMemo(() => {
     try {
       if (typeof props.meta.P.props === "function") {
         const dynamicPropsObj =
           props.meta.P.props!(getFunctionArgumentWithValue()) || {};
-        return getMetaProps(dynamicPropsObj, []);
+        return getMetaProps(dynamicPropsObj, [], graph);
       }
       if (typeof props.meta.P.props === "string") {
         try {
           const propsFunction = new Function("args", props.meta.P.props);
           const dynamicPropsObj =
             propsFunction(getFunctionArgumentWithValue()) || {};
-          return getMetaProps(dynamicPropsObj, []);
+          return getMetaProps(dynamicPropsObj, [], graph);
         } catch (error) {
           console.error("Error evaluating props function:", error);
           return {};
@@ -776,43 +729,4 @@ export function DynamicComponent(
       </PageRenderContextProvider>
     </>
   );
-}
-
- function getText(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  projection: string,
-  dataContext: Vertex[],
-) {
-  try {
-    return (
-      (evalExpression(projection, {
-        graph,
-        setGraph,
-        vertexes: dataContext,
-      }) as string) || projection
-    );
-  } catch (error) {
-    console.error("Error in getText:", error);
-    return "";
-  }
-}
-
- function getUrl(
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  projection: string,
-  dataContext: Vertex[],
-) {
-  try {
-    const url = evalExpression(projection, {
-      graph,
-      setGraph,
-      vertexes: dataContext,
-    }) as string | undefined;
-    return typeof url === "string" && url.startsWith("/") ? url : undefined;
-  } catch (error) {
-    console.error("Error in getUrl:", error);
-    return undefined;
-  }
 }
