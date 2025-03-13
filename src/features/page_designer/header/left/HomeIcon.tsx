@@ -1,11 +1,11 @@
 import { useNavigate } from "@solidjs/router";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass } from "~/pages/settings/constants";
-import { HomeUrlContext, getHomeUrl } from "~/lib/urls";
-import { useGraph } from "~/lib/graph/graph";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
+import { useGraph } from "~/lib/graph/graph";
+import { getHomeUrl, HomeUrlContext } from "~/lib/urls";
+import { headerIconButtonClass } from "~/pages/settings/constants";
 
 export const HomeIcon = () => {
   const [graph] = useGraph();

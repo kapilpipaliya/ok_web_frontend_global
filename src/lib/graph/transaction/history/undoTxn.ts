@@ -55,10 +55,9 @@ export function undoTxn(
     const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[id] || id;
 
     switch (action) {
-      // Vertex Operations
-      case "insert":
-        // Undo vertex insertion by deleting
-        deleteVertex(0, actualVertexId, graph, setGraph);
+      case "deleteEdge":
+        // Restore deleted edge
+        addNewEdge(0, updateEdgeIdsToNew(data as Edge, graph), graph, setGraph);
         break;
 
       case "deleteVertex":
@@ -66,7 +65,19 @@ export function undoTxn(
         addNewVertex(0, updateVertexIdsToNew(data as Vertex, graph, false), graph, setGraph);
         break;
 
+      // Vertex Operations
+      case "insert":
+        // Undo vertex insertion by deleting
+        deleteVertex(0, actualVertexId, graph, setGraph);
+        break;
+      // Edge Operations
+      case "insertEdge":
+        // Undo edge insertion by deleting
+        deleteEdge(0, actualEdgeId, graph, setGraph);
+        break;
+
       case "merge":
+
       case "replace":
         // Restore original vertex properties
         replaceVertexProperties(
@@ -76,17 +87,6 @@ export function undoTxn(
           setGraph,
           originalData,
         );
-        break;
-
-      // Edge Operations
-      case "insertEdge":
-        // Undo edge insertion by deleting
-        deleteEdge(0, actualEdgeId, graph, setGraph);
-        break;
-
-      case "deleteEdge":
-        // Restore deleted edge
-        addNewEdge(0, updateEdgeIdsToNew(data as Edge, graph), graph, setGraph);
         break;
 
       case "replaceEdge":

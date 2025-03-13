@@ -5,8 +5,8 @@ import type { GraphInterface } from "../../graph";
 import { replaceVertexProperties } from "../../mutate/core/vertex";
 import {TransactionDetail} from "../types/TransactionDetail";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
-import { undoTxn } from "./undoTxn";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
+import { undoTxn } from "./undoTxn";
 
 /**
  * Performs an undo operation on a transaction, reverting changes up to a specified point.

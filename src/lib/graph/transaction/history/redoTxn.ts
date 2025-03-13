@@ -54,6 +54,11 @@ export function redoTxn(
     const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[id] || id;
 
     switch (action) {
+      // Edge Operations
+      case "deleteEdge":
+        deleteEdge(0, actualVertexId, graph, setGraph);
+        break;
+
       // Vertex Operations
       case "deleteVertex":
         deleteVertex(0, actualVertexId, graph, setGraph);
@@ -63,21 +68,16 @@ export function redoTxn(
         addNewVertex(0, updateVertexIdsToNew(data as Vertex, graph, false), graph, setGraph);
         break;
 
+      case "insertEdge":
+        addNewEdge(0, updateEdgeIdsToNew(data as Edge, graph), graph, setGraph);
+        break;
+
       case "merge":
         mergeVertexProperties(0, actualVertexId, graph, setGraph, data.P);
         break;
 
       case "replace":
         replaceVertexProperties(0, actualVertexId, graph, setGraph, data.P);
-        break;
-
-      // Edge Operations
-      case "deleteEdge":
-        deleteEdge(0, actualVertexId, graph, setGraph);
-        break;
-
-      case "insertEdge":
-        addNewEdge(0, updateEdgeIdsToNew(data as Edge, graph), graph, setGraph);
         break;
 
       case "replaceEdge":

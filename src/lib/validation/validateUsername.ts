@@ -1,4 +1,7 @@
 export function validateUsername(username: string) {
+  if (!username) {
+    return "Please enter a username";
+  }
   if (username.length < 3) {
     return "Please enter a username with at least 3 characters";
   }

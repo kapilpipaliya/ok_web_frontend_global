@@ -57,7 +57,7 @@ const content = [
     pos: 4,
     props: `return {
       // href: window.location.origin + "/admin/UserSettings",
-      href: window.location.origin
+      href: "${typeof window !== 'undefined' ? window.location.origin : ""}/"
     }`,
     target: "_blank",
     text: "Go to Account Settings",
@@ -66,8 +66,8 @@ const content = [
 
 export const emailChangeSuccessfulForm = {
   attributes: [createEmailTemplate(content)],
+  description: "Confirmation email sent after an email address change has been successfully completed",
   key: "EmailChangeSuccessful",
   title: "Email Change Successful",
-  description: "Confirmation email sent after an email address change has been successfully completed",
 
 };

@@ -16,8 +16,8 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             pos: 1,
             props: `return {
             alt: "Logo",
-            src: \`\${window.location.origin}${API.file.downloadCompanyRectangularLogoUrl}\`
-          }`,
+            src: "${typeof window !== 'undefined' ? window.location.origin : ""}${API.file.downloadCompanyRectangularLogoUrl}"
+            }`,
           },
           {
             as: "hr",

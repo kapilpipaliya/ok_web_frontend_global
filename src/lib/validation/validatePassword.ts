@@ -18,7 +18,7 @@ export const PASSWORD_CONDITIONS = [
   },
 ];
 
-export function validatePassword(password: any) {
+export function validatePassword(password: string) {
   for (const condition of PASSWORD_CONDITIONS) {
     if (!condition.regex.test(password)) {
       return condition.message;

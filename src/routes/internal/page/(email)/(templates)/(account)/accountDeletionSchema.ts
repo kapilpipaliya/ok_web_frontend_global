@@ -68,7 +68,7 @@ const content = [
     componentName: "Html",
     pos: 5,
     props: `return {
-      href: window.location.origin + "/support/contact",
+      href: "${typeof window !== 'undefined' ? window.location.origin : ""}/support/contact"
     }`,
     target: "_blank",
     text: "Contact Support",
@@ -77,8 +77,8 @@ const content = [
 
 export const accountDeletionRequestForm = {
   attributes: [createEmailTemplate(content)],
+  description: "Sent when a user requests to delete their account, explaining the 48-hour deletion process and providing support contact information",
   key: "AccountDeletionRequest",
   title: "Account Deletion Request",
-  description: "Sent when a user requests to delete their account, explaining the 48-hour deletion process and providing support contact information",
 
 };

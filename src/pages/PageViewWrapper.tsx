@@ -81,6 +81,8 @@ export function PageViewWrapper(
     getFormData?: () => Promise<ServerResult>;
     hideSaveCancelButton?: boolean;
     initializeFormStoreParent?: (formStoreId: Id) => void;
+    // openedFormId?: Id;
+    isDesignMode?: boolean;
     isNoPermissionCheck?: boolean;
     metaTxnId?: number;
     pageId?: string;
@@ -89,8 +91,6 @@ export function PageViewWrapper(
     parentId?: Id;
     txnId?: string;
     uuid?: string;
-    // openedFormId?: Id;
-    isDesignMode?: boolean;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -200,16 +200,16 @@ export function PageViewWrapper(
   });
 
   const constants = {
-    formMetaId: props.formMetaId,
-    pageVertexName: props.pageVertexName,
-    formId: props.formId,
-    expression: props.expression,
-    isDesignMode: props.isDesignMode,
-    pageKeyName: props.pageKeyName,
-    isNoPermissionCheck: props.isNoPermissionCheck,
     dataId: props.dataId,
-    getFormData: props.getFormData ? true : false,
+    expression: props.expression,
     formDataId: props.formDataId,
+    formId: props.formId,
+    formMetaId: props.formMetaId,
+    getFormData: props.getFormData ? true : false,
+    isDesignMode: props.isDesignMode,
+    isNoPermissionCheck: props.isNoPermissionCheck,
+    pageKeyName: props.pageKeyName,
+    pageVertexName: props.pageVertexName,
   };
 
   const metaData = createAsync(async () => {
@@ -287,10 +287,10 @@ export function PageViewWrapper(
         true, // shasRequiredPermissionsLocal,
         constants.pageVertexName,
       );
-      return { metaResult, formMetaId, dataResult };
+      return { dataResult, formMetaId, metaResult };
     }
 
-    return { metaResult, formMetaId };
+    return { formMetaId, metaResult };
   });
 
   async function handleFormMetaData(metaResult?: FetchFormMetaDataResult, formMetaId?: string) {
@@ -315,7 +315,7 @@ export function PageViewWrapper(
     if (formMetaId) {
       setFormStore("formMetaId", formMetaId);
     }
-    let form = metaResult.form;
+    const form = metaResult.form;
     if (!(props.formMetaId || formStore().P.formMetaId || form)) {
       setFormStore("error", `${props.pageVertexName} is not configured`);
       return false;
@@ -364,11 +364,22 @@ export function PageViewWrapper(
 
   createEffect(() => {
     const result = metaData();
-    untrack(() => {
-      batch(() => {
-        handleFormMetaData(result?.metaResult, result?.formMetaId);
-        handleFormData(result?.dataResult);
+    if (!props.formMetaId && result) {
+      untrack(() => {
+        batch(() => {
+          handleFormMetaData(result?.metaResult, result?.formMetaId);
+          handleFormData(result?.dataResult);
+        });
       });
+    }
+  });
+  // Make SSR work when props.formMetaId is set
+  untrack(() => {
+    batch(() => {
+      if (props.formMetaId) {
+        handleFormMetaData();
+        handleFormData();
+      }
     });
   });
 

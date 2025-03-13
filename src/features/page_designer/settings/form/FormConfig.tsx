@@ -25,10 +25,10 @@ export function FormConfig() {
           }}
         >
           <PageViewWrapper
-            isDesignMode={true}
             dataId={graph.vertexes[openedFormId].P.dataId}
             formDataId={graph.vertexes[openedFormId].P.formDataId}
             hideSaveCancelButton={true}
+            isDesignMode={true}
             isNoPermissionCheck={true}
             pageVertexName={graph.vertexes[openedFormId].P.label}
             // @ts-expect-error ignore

@@ -3,10 +3,10 @@ import type { APIEvent } from "@solidjs/start/server";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { getHttpsSession } from "~/server/auth/session/getHttpsSession";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import { getHttpsSession } from "~/server/auth/session/getHttpsSession";
 
 export async function getUserFromSession(
   request?: APIEvent["request"],

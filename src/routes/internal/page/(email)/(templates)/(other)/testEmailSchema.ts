@@ -40,8 +40,8 @@ const content = [
 
 export const testEmailForm = {
   attributes: [createEmailTemplate(content)],
+  description: "Used to verify that the email configuration is working correctly",
   key: "TestEmail",
   title: "Test Email",
-  description: "Used to verify that the email configuration is working correctly",
 
 };

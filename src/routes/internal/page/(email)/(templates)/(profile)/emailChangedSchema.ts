@@ -69,7 +69,7 @@ const content = [
     componentName: "Html",
     pos: 5,
     props: `return {
-      href: window.location.origin + "/support/contact",
+      href: "${typeof window !== 'undefined' ? window.location.origin : ""}/support/contact"
     }`,
     target: "_blank",
     text: "Contact Support",
@@ -78,8 +78,8 @@ const content = [
 
 export const emailChangedForm = {
   attributes: [createEmailTemplate(content)],
+  description: "Sent to notify users that a request has been made to change their email address, with instructions if they didn't initiate the change",
   key: "EmailChanged",
   title: "Email Change Notification",
-  description: "Sent to notify users that a request has been made to change their email address, with instructions if they didn't initiate the change",
 
 };
