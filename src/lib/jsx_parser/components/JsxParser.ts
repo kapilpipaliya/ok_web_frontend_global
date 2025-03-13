@@ -174,7 +174,7 @@ export default class JsxParser {
         graph,
         "Comp",
         "key",
-        "Box",
+        "Html",
       )!;
       if (comp !== "div") {
         isText = true;

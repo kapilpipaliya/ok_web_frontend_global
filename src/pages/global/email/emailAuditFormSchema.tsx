@@ -62,7 +62,7 @@ export const emailAuditFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -89,7 +89,7 @@ export const emailAuditFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -127,7 +127,7 @@ export const emailAuditFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -149,14 +149,14 @@ export const emailAuditFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
       ],
       class: SETTINGS_CONSTANTS.FORM_CLASS,
-      componentName: "Box",
+      componentName: "Html",
     },
   ],
-  componentName: "Box",
+  componentName: "Html",
 } as FieldAttribute;
 
 export const getEmailAuditFormSchema = (onSuccess: () => void) => {
@@ -218,7 +218,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const modalFooterSchema = {
@@ -251,7 +251,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const schema = {
@@ -264,7 +264,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
             as: "div",
             attributes: [],
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: !options.dataContext.modalState[0]?.showModal,
             }),
@@ -299,7 +299,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
             componentName: "ZIndex",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",

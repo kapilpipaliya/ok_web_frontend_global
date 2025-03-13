@@ -44,7 +44,7 @@ const folderFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -62,14 +62,14 @@ const folderFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
       ],
       class: SETTINGS_CONSTANTS.FORM_CLASS,
-      componentName: "Box",
+      componentName: "Html",
     },
   ],
-  componentName: "Box",
+  componentName: "Html",
 } as FieldAttribute;
 
 export const getFolderFormSchema = (onSuccess: () => void) => {
@@ -183,7 +183,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const modalFooterSchema = {
@@ -216,7 +216,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const schema = {
@@ -233,7 +233,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
                     as: "div",
                     attributes: [],
                     class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
-                    componentName: "Box",
+                    componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       hidden: !options.dataContext.modalState[0]?.showModal,
                       style: {
@@ -275,7 +275,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
             componentName: "ZIndex",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",

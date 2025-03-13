@@ -43,7 +43,7 @@ export const userFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -72,7 +72,7 @@ export const userFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -94,7 +94,7 @@ export const userFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -113,14 +113,14 @@ export const userFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
       ],
       class: SETTINGS_CONSTANTS.FORM_CLASS,
-      componentName: "Box",
+      componentName: "Html",
     },
   ],
-  componentName: "Box",
+  componentName: "Html",
 } as FieldAttribute;
 
 export const getUserFormSchema = (onSuccess: () => void) => {
@@ -216,7 +216,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const modalFooterSchema = {
@@ -249,7 +249,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const schema = {
@@ -266,7 +266,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                     as: "div",
                     attributes: [],
                     class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
-                    componentName: "Box",
+                    componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       hidden: !options.dataContext.modalState[0]?.showModal,
                       style: {
@@ -308,7 +308,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
             componentName: "ZIndex",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",

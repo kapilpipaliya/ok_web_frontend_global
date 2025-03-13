@@ -58,7 +58,7 @@ export function PasswordChangeForm() {
                 as: "button",
                 class:
                   "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
-                componentName: "Box",
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
                   onClick: async () => {
@@ -96,11 +96,11 @@ export function PasswordChangeForm() {
           },
         ],
         class: "mt:24",
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
@@ -155,15 +155,15 @@ function createPasswordFieldWithHint(
             ],
             class:
               "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-            componentName: "Box",
+            componentName: "Html",
           },
         ],
         class: "position:rel",
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 }
 

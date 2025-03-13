@@ -24,7 +24,7 @@ export const popoverWrapperSchema = (
           {
             as: "div",
             attributes: [action],
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => {
               return {
                 onMount: () => {
@@ -67,7 +67,7 @@ export const popoverWrapperSchema = (
           {
             as: "div",
             attributes: [popoverSchema],
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => {
               const popoverState = options.dataContext
                 .popoverState as ReturnType<
@@ -130,7 +130,7 @@ export const popoverWrapperSchema = (
           },
         ],
         class: "position:relative",
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",

@@ -56,7 +56,7 @@ export function GeneralSettings() {
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -79,7 +79,7 @@ export function GeneralSettings() {
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -89,7 +89,7 @@ export function GeneralSettings() {
               {
                 as: "button",
                 class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-                componentName: "Box",
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
                   onClick: async () => {
@@ -128,11 +128,11 @@ export function GeneralSettings() {
           },
         ],
         class: "mt:24",
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
     props: () => ({
       // TODO: if not saved, revert to previous state
       // onUnmount: () => {

@@ -237,7 +237,7 @@ export function ForgotPasswordForm() {
           getErrorSchema("identifier"),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         attributes: [
@@ -245,7 +245,7 @@ export function ForgotPasswordForm() {
             as: "button",
             class:
               "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               disabled: options.dataContext.submitState[0]?.isLoading,
               onClick: async () => {
@@ -267,7 +267,7 @@ export function ForgotPasswordForm() {
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
   } as FieldAttribute;
 
   const stepOTPSchema = {
@@ -315,7 +315,7 @@ export function ForgotPasswordForm() {
           getErrorSchema("otp"),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         attributes: [
@@ -323,7 +323,7 @@ export function ForgotPasswordForm() {
             as: "button",
             class:
               "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               disabled: options.dataContext.submitState[0]?.isLoading,
               onClick: async () => {
@@ -345,7 +345,7 @@ export function ForgotPasswordForm() {
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
   } as FieldAttribute;
 
   const stepNewPasswordSchema = {
@@ -407,16 +407,16 @@ export function ForgotPasswordForm() {
                 ],
                 class:
                   "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                componentName: "Box",
+                componentName: "Html",
               },
             ],
             class: "position:rel",
-            componentName: "Box",
+            componentName: "Html",
           },
           getErrorSchema("newPassword"),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -474,16 +474,16 @@ export function ForgotPasswordForm() {
                 ],
                 class:
                   "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                componentName: "Box",
+                componentName: "Html",
               },
             ],
             class: "position:rel",
-            componentName: "Box",
+            componentName: "Html",
           },
           getErrorSchema("confirmPassword"),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         attributes: [
@@ -491,7 +491,7 @@ export function ForgotPasswordForm() {
             as: "button",
             class:
               "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               disabled: options.dataContext.submitState[0]?.isLoading,
               onClick: async () => {
@@ -513,7 +513,7 @@ export function ForgotPasswordForm() {
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
   } as FieldAttribute;
 
   const form = {
@@ -574,7 +574,7 @@ export function ForgotPasswordForm() {
           {
             as: "a",
             class: "color:primary text-decoration:none font-weight:bold",
-            componentName: "Box",
+            componentName: "Html",
             props: () => ({
               href: "/auth/login",
             }),
@@ -582,7 +582,7 @@ export function ForgotPasswordForm() {
           },
         ],
         class: "text-align:center mt:16",
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -595,7 +595,7 @@ export function ForgotPasswordForm() {
           {
             as: "a",
             class: "color:primary text-decoration:none font-weight:bold",
-            componentName: "Box",
+            componentName: "Html",
             props: () => ({
               href: "/auth/signup",
             }),
@@ -603,10 +603,10 @@ export function ForgotPasswordForm() {
           },
         ],
         class: "text-align:center mt:8",
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
-    componentName: "Box",
+    componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);

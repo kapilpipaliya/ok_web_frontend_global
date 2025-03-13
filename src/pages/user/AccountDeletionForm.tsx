@@ -57,7 +57,7 @@ export function AccountDeletionForm() {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
   const modalFooterSchema = {
     as: "div",
@@ -89,7 +89,7 @@ export function AccountDeletionForm() {
       },
     ],
     class: "d:flex jc:flex-end gap:12px",
-    componentName: "Box",
+    componentName: "Html",
   };
   const deleteAccountSchema: FieldAttribute = {
     as: "div",
@@ -116,7 +116,7 @@ export function AccountDeletionForm() {
             text: "During the 48-hour period, you will not be able to log in to your account. If you change your mind, please contact our support team immediately.",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -129,7 +129,7 @@ export function AccountDeletionForm() {
           },
         ],
         class: "mb:4 p:12px bg:red-5 border:1px|solid|red-10 fg:red-70 r:8px",
-        componentName: "Box",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           hidden: !options.dataContext.deleteState[0]?.errorMessage,
         }),
@@ -146,7 +146,7 @@ export function AccountDeletionForm() {
         ],
         class:
           "mb:4 p:12px bg:green-5 border:1px|solid|green-10 fg:green-70 r:8px",
-        componentName: "Box",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           hidden: !options.dataContext.deleteState[0]?.successMessage,
         }),
@@ -169,7 +169,7 @@ export function AccountDeletionForm() {
           },
         ],
         class: "d:flex jc:flex-end",
-        componentName: "Box",
+        componentName: "Html",
       },
       // Confirmation Dialog
       {
@@ -178,7 +178,7 @@ export function AccountDeletionForm() {
           {
             as: "div",
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
-            componentName: "Box",
+            componentName: "Html",
           },
           {
             attributes: [
@@ -204,7 +204,7 @@ export function AccountDeletionForm() {
                           modalFooterSchema,
                         ],
                         class: "p:24px",
-                        componentName: "Box",
+                        componentName: "Html",
                       },
                     ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
@@ -223,14 +223,14 @@ export function AccountDeletionForm() {
             componentName: "ZIndex",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           hidden: !options.dataContext.deleteState[0]?.showConfirmDialog,
         }),
       },
     ],
     class: "p:24px r:8px bg:white border:1px|solid|base-10 sh:md",
-    componentName: "Box",
+    componentName: "Html",
   };
 
   // Main form schema with state management

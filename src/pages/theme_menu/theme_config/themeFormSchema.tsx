@@ -45,7 +45,7 @@ export const themeFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -103,18 +103,18 @@ export const themeFormSchema = {
                 },
               ],
               class: "flex ai:center gap:0.50rem",
-              componentName: "Box",
+              componentName: "Html",
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
       ],
       class: SETTINGS_CONSTANTS.FORM_CLASS,
-      componentName: "Box",
+      componentName: "Html",
     },
   ],
-  componentName: "Box",
+  componentName: "Html",
 } as FieldAttribute;
 
 export const getThemeFormSchema = (
@@ -221,7 +221,7 @@ export const getThemeFormSchema = (
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const modalFooterSchema = {
@@ -257,7 +257,7 @@ export const getThemeFormSchema = (
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const schema = {
@@ -273,7 +273,7 @@ export const getThemeFormSchema = (
                     as: "div",
                     attributes: [],
                     class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
-                    componentName: "Box",
+                    componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       hidden: !options.dataContext.modalState[0]?.showModal,
                       style: {
@@ -318,7 +318,7 @@ export const getThemeFormSchema = (
             componentName: "ZIndex",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",

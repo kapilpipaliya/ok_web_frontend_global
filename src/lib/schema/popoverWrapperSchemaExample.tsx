@@ -33,7 +33,7 @@ export const popoverWrapperSchemaExample = () => {
       },
     ],
     class: "p:12 bg:white shadow:lg r:4 max-width:300px",
-    componentName: "Box",
+    componentName: "Html",
   };
 
   // Wrap the button with the popover
@@ -73,7 +73,7 @@ export const dynamicPopoverExample = () => {
       },
     ],
     class: "p:12 bg:white shadow:lg r:4 max-width:300px",
-    componentName: "Box",
+    componentName: "Html",
   };
 
   // Wrap the button with the popover

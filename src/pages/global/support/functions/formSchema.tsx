@@ -49,7 +49,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS.replace("top", "bottom"),
-    componentName: "Box",
+    componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       hidden: !isAdminRole(options.graph),
     }),
@@ -119,7 +119,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     }),
                                   },
                                 ],
-                                componentName: "Box",
+                                componentName: "Html",
                                 props: () => {
                                   // const isUser = options.data.P.email !== "Support";
                                   // ${isUser ? 'bg:primary-10' : 'bg:base-10'}
@@ -130,7 +130,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                 },
                               },
                             ],
-                            componentName: "Box",
+                            componentName: "Html",
                             props: () => {
                               // const isUser = options.data.P.email !== "Support";
                               // isUser ? 'text-align:right' : ''}`
@@ -140,7 +140,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                             },
                           },
                         ],
-                        componentName: "Box",
+                        componentName: "Html",
                       },
                     ],
                     componentName: "Data",
@@ -166,7 +166,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 ],
                 class:
                   "max-h:300px min-h:100px overflow-y:auto border:1px|solid|base-20 r:6 p:12 bg:base-5 chat-history-container",
-                componentName: "Box",
+                componentName: "Html",
               },
               {
                 as: "div",
@@ -268,16 +268,16 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                       },
                     ],
                     class: "display:flex mt:8",
-                    componentName: "Box",
+                    componentName: "Html",
                   },
                 ],
-                componentName: "Box",
+                componentName: "Html",
               },
             ],
-            componentName: "Box",
+            componentName: "Html",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",
@@ -317,7 +317,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
           },
           {
             as: "div",
@@ -338,15 +338,15 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
           },
           actionButtonsSchema,
         ],
         class: SETTINGS_CONSTANTS.FORM_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
-    componentName: "Box",
+    componentName: "Html",
     props: (options: FunctionArgumentType) => {
       return {
         onMount: async () => {
@@ -442,7 +442,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     class:
       SETTINGS_CONSTANTS.MODAL.HEADER.CLASS +
       " flex ai:center justify-content:space-between",
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const schema = {
@@ -455,7 +455,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             as: "div",
             attributes: [],
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: !options.dataContext.modalState[0]?.showModal,
             }),
@@ -473,7 +473,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         as: "div",
                         attributes: [chatHistorySchema],
                         class: "p:4",
-                        componentName: "Box",
+                        componentName: "Html",
                       },
                     ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
@@ -495,7 +495,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             componentName: "ZIndex",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",

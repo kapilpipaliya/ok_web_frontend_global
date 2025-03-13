@@ -124,7 +124,7 @@ export function ContactForm() {
           getErrorSchema("name", "fg:red grid-column:span|2"),
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -156,7 +156,7 @@ export function ContactForm() {
           getErrorSchema("email", "fg:red grid-column:span|2"),
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -187,7 +187,7 @@ export function ContactForm() {
           getErrorSchema("subject", "fg:red grid-column:span|2"),
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -218,7 +218,7 @@ export function ContactForm() {
           getErrorSchema("message", "fg:red grid-column:span|2"),
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -228,7 +228,7 @@ export function ContactForm() {
               {
                 as: "button",
                 class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-                componentName: "Box",
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
                   onClick: async () => {
@@ -278,11 +278,11 @@ export function ContactForm() {
           },
         ],
         class: "mt:24",
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);

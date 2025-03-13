@@ -261,16 +261,16 @@ export function SignupForm() {
                     ],
                     class:
                       "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                    componentName: "Box",
+                    componentName: "Html",
                   },
                 ],
                 class: "position:rel",
-                componentName: "Box",
+                componentName: "Html",
               },
               getErrorSchema("password"),
             ],
             class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-            componentName: "Box",
+            componentName: "Html",
           },
           {
             attributes: [
@@ -278,7 +278,7 @@ export function SignupForm() {
                 as: "button",
                 class:
                   "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-                componentName: "Box",
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.submitState[0]?.isLoading,
                   onClick: async () => {
@@ -320,7 +320,7 @@ export function SignupForm() {
           {
             as: "a",
             class: "color:primary text-decoration:none font-weight:bold",
-            componentName: "Box",
+            componentName: "Html",
             props: () => ({
               href: "/auth/login",
             }),
@@ -328,11 +328,11 @@ export function SignupForm() {
           },
         ],
         class: "text-align:center",
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);

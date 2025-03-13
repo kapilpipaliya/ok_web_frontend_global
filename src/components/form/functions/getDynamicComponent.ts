@@ -105,7 +105,6 @@ export const corvuComponents = {
 };
 
 export const componentsMap: Record<string, any> = {
-  Box: HtmlField,
   // Button: ButtonField,
   CheckBox: CheckboxField,
   Component: ComponentField,

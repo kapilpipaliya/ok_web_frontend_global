@@ -77,7 +77,7 @@ export const roleFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -95,11 +95,11 @@ export const roleFormSchema = {
             },
           ],
           class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-          componentName: "Box",
+          componentName: "Html",
         },
       ],
       class: SETTINGS_CONSTANTS.FORM_CLASS,
-      componentName: "Box",
+      componentName: "Html",
     },
     {
       attributes: [
@@ -174,7 +174,7 @@ export const roleFormSchema = {
             },
           ],
           class: "display:flex bb:1px|solid|base-20",
-          componentName: "Box",
+          componentName: "Html",
         },
         {
           as: "div",
@@ -182,7 +182,7 @@ export const roleFormSchema = {
             {
               as: "div",
               attributes: [permissionsTableSchema("Perm")],
-              componentName: "Box",
+              componentName: "Html",
               props: (options: FunctionArgumentType) => ({
                 class:
                   options.dataContext.tabState[0]?.activeTab === "Perm"
@@ -193,7 +193,7 @@ export const roleFormSchema = {
             {
               as: "div",
               attributes: [permissionsTableSchema("Page")],
-              componentName: "Box",
+              componentName: "Html",
               props: (options: FunctionArgumentType) => ({
                 class:
                   options.dataContext.tabState[0]?.activeTab === "Page"
@@ -205,7 +205,7 @@ export const roleFormSchema = {
             {
               as: "div",
               attributes: [permissionsTableSchema("Form")],
-              componentName: "Box",
+              componentName: "Html",
               props: (options: FunctionArgumentType) => ({
                 class:
                   options.dataContext.tabState[0]?.activeTab === "Form"
@@ -215,7 +215,7 @@ export const roleFormSchema = {
             },
           ],
           class: "mt:16 p:8",
-          componentName: "Box",
+          componentName: "Html",
         },
       ],
       componentName: "Data",
@@ -228,7 +228,7 @@ export const roleFormSchema = {
       }),
     },
   ],
-  componentName: "Box",
+  componentName: "Html",
   props: (options: FunctionArgumentType) => {
     return {
       onMount: async () => {
@@ -313,7 +313,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const modalFooterSchema = {
@@ -346,7 +346,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
       },
     ],
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
-    componentName: "Box",
+    componentName: "Html",
   };
 
   const schema = {
@@ -359,7 +359,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
             as: "div",
             attributes: [],
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: !options.dataContext.modalState[0]?.showModal,
             }),
@@ -402,7 +402,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
             componentName: "ZIndex",
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",

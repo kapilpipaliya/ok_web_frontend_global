@@ -101,7 +101,7 @@ export function ProfileImageSettings() {
           {
             as: "img",
             class: "cursor:pointer h:60px object-fit:cover",
-            componentName: "Box",
+            componentName: "Html",
             key: "profileImage",
             props: () => {
               const selectedFile = profileImageVertex()[0];
@@ -113,12 +113,12 @@ export function ProfileImageSettings() {
           },
           {
             as: "div",
-            componentName: "Box",
+            componentName: "Html",
           },
           {
             as: "button",
             class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS + " mr:auto",
-            componentName: "Box",
+            componentName: "Html",
             props: () => ({
               onClick: () => setOpenDialog(true),
             }),
@@ -129,7 +129,7 @@ export function ProfileImageSettings() {
               {
                 as: "button",
                 class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-                componentName: "Box",
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
                   onClick: async () => {
@@ -178,7 +178,7 @@ export function ProfileImageSettings() {
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
-        componentName: "Box",
+        componentName: "Html",
         props: () => ({
           // TODO: if not saved, revert to previous state
           // onUnmount: () => {
@@ -188,7 +188,7 @@ export function ProfileImageSettings() {
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
   } as FieldAttribute;
 
   const profileImageVertex = createMemo(() => {

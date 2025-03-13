@@ -47,7 +47,7 @@ export function EmailSettings() {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
           },
           {
             as: "div",
@@ -65,7 +65,7 @@ export function EmailSettings() {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: () => options.data.P.active !== "smtp",
             }),
@@ -87,7 +87,7 @@ export function EmailSettings() {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: () => options.data.P.active !== "smtp",
             }),
@@ -108,7 +108,7 @@ export function EmailSettings() {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: () => options.data.P.active !== "smtp",
             }),
@@ -130,7 +130,7 @@ export function EmailSettings() {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: () => options.data.P.active !== "smtp",
             }),
@@ -152,7 +152,7 @@ export function EmailSettings() {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: () => options.data.P.active !== "sendgrid",
             }),
@@ -174,7 +174,7 @@ export function EmailSettings() {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: () => !options.data.P.active,
             }),
@@ -193,7 +193,7 @@ export function EmailSettings() {
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
-            componentName: "Box",
+            componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hidden: () => options.data.P.active !== "smtp",
             }),
@@ -206,7 +206,7 @@ export function EmailSettings() {
                   {
                     as: "button",
                     class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-                    componentName: "Box",
+                    componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       disabled: options.dataContext.saveState[0]?.isLoading,
                       onClick: async () => {
@@ -250,7 +250,7 @@ export function EmailSettings() {
                   {
                     as: "button",
                     class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS,
-                    componentName: "Box",
+                    componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       disabled: options.dataContext.testState[0]?.isLoading,
                       onClick: async () => {
@@ -291,11 +291,11 @@ export function EmailSettings() {
               },
             ],
             class: "mt:24",
-            componentName: "Box",
+            componentName: "Html",
           },
         ],
         class: SETTINGS_CONSTANTS.FORM_CLASS,
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Fragment",

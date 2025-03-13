@@ -66,17 +66,17 @@ export function ProfileSettings() {
                   },
                 ],
                 class: "p:16px bg:primary-5 r:8px border:1px|solid|primary-10",
-                componentName: "Box",
+                componentName: "Html",
               },
             ],
             class: "mb:24px",
-            componentName: "Box",
+            componentName: "Html",
             props: () => ({
               hidden: !isSystemSubDomain(),
             }),
           },
         ],
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -96,7 +96,7 @@ export function ProfileSettings() {
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -117,7 +117,7 @@ export function ProfileSettings() {
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
-        componentName: "Box",
+        componentName: "Html",
       },
       // {
       //   as: "div",
@@ -125,7 +125,7 @@ export function ProfileSettings() {
       //     {
       //       as: "span",
       //       class: LABEL_CLASS,
-      //       componentName: "Box",
+      //       componentName: "Html",
       //       text: "Country"
       //     },
       //     {
@@ -140,7 +140,7 @@ export function ProfileSettings() {
       //     },
       //   ],
       //   class: GRID_ITEM_CLASS,
-      //   componentName: "Box",
+      //   componentName: "Html",
       // },
       {
         as: "div",
@@ -151,7 +151,7 @@ export function ProfileSettings() {
               {
                 as: "button",
                 class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-                componentName: "Box",
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
                   onClick: async () => {
@@ -202,12 +202,12 @@ export function ProfileSettings() {
               // {
               //   as: "button",
               //   class: "bg:#f3f4f6 fg:#374151 p:8|16 r:4 cursor:pointer border:1px|solid|#e5e7eb",
-              //   componentName: "Box",
+              //   componentName: "Html",
               //   text: "Cancel",
               // },
             ],
             class: "flex",
-            componentName: "Box",
+            componentName: "Html",
           },
         ],
         componentName: "Data",
@@ -221,7 +221,7 @@ export function ProfileSettings() {
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
     props: () => ({
       // TODO: if not saved, revert to previous state
       // onUnmount: () => {

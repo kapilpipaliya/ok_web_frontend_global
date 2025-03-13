@@ -156,7 +156,7 @@ export function CompanyLogoSettings() {
           {
             as: "img",
             class: "cursor:pointer h:60px object-fit:cover",
-            componentName: "Box",
+            componentName: "Html",
             key: "companyLogo",
             props: () => {
               const selectedFile = rectangularCompanyLogoVertex()[0];
@@ -168,12 +168,12 @@ export function CompanyLogoSettings() {
           },
           {
             as: "div",
-            componentName: "Box",
+            componentName: "Html",
           },
           {
             as: "button",
             class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS + " mr:auto",
-            componentName: "Box",
+            componentName: "Html",
             props: () => ({
               onClick: () => setOpenRectangularDialog(true),
             }),
@@ -181,7 +181,7 @@ export function CompanyLogoSettings() {
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -194,7 +194,7 @@ export function CompanyLogoSettings() {
           {
             as: "img",
             class: "cursor:pointer h:60px w:60px rounded-full object-fit:cover",
-            componentName: "Box",
+            componentName: "Html",
             key: "companyCircularLogo",
             props: () => {
               const selectedFile = circularCompanyLogoVertex()[0];
@@ -206,12 +206,12 @@ export function CompanyLogoSettings() {
           },
           {
             as: "div",
-            componentName: "Box",
+            componentName: "Html",
           },
           {
             as: "button",
             class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS + " mr:auto",
-            componentName: "Box",
+            componentName: "Html",
             props: () => ({
               onClick: () => setOpenCircularDialog(true),
             }),
@@ -219,7 +219,7 @@ export function CompanyLogoSettings() {
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
-        componentName: "Box",
+        componentName: "Html",
       },
       {
         as: "div",
@@ -229,7 +229,7 @@ export function CompanyLogoSettings() {
               {
                 as: "button",
                 class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
-                componentName: "Box",
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
                   onClick: async () => {
@@ -282,7 +282,7 @@ export function CompanyLogoSettings() {
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
-    componentName: "Box",
+    componentName: "Html",
     props: () => ({
       // TODO: if not saved, revert to previous state
       // onUnmount: () => {

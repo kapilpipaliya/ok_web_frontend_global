@@ -79,10 +79,10 @@ export function createPasswordHintPopoverContent(
             },
           ],
           class: "font-size:14px mb:4 d:flex align-items:center gap:8",
-          componentName: "Box",
+          componentName: "Html",
         })),
         class: "m:0 pl:16 list-style:none",
-        componentName: "Box",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => {
           createEffect(() => {
             const password = options.data?.P?.[passwordFieldKey] || "";
@@ -106,7 +106,7 @@ export function createPasswordHintPopoverContent(
       },
     ],
     class: "p:12 bg:white shadow:lg r:4 max-width:300px",
-    componentName: "Box",
+    componentName: "Html",
   };
 }
 
@@ -149,7 +149,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
           },
         ],
         class: "d:flex gap:4 align-items:center",
-        componentName: "Box",
+        componentName: "Html",
       },
     ],
     componentName: "Data",
@@ -196,6 +196,6 @@ export function wrapPasswordLabelWithHint(
         }),
       },
     ],
-    componentName: "Box",
+    componentName: "Html",
   };
 }

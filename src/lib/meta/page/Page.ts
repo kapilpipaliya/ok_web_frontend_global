@@ -41,7 +41,7 @@ export const wrapWithTitle = (
       children,
     ],
     class: "flex ai:center gap:2 justify-content:space-between mt:6",
-    componentName: "Box",
+    componentName: "Html",
     key: "box1",
   };
 };
@@ -172,8 +172,7 @@ export const Page: IFormMetaData = {
         },
       ],
       class: "d:flex flex:col gap:8",
-      componentName: "Box",
-      key: "box",
+      componentName: "Html",
     },
   ],
   key: "Page",
@@ -254,7 +253,7 @@ string`,
         },
       ],
       class: "flex ai:center gap:2",
-      componentName: "Box",
+      componentName: "Html",
       displayName: "Default Value",
     },
     // {
