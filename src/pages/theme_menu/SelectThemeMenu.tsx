@@ -115,8 +115,8 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
       }
       showSuccessToast("Theme deleted successfully");
       loadThemes(); // Reload themes after deletion
-    } catch (_error) {
-      showErrorToast("Failed to delete theme");
+    } catch (error) {
+      showErrorToast(error.message || "Failed to delete theme");
     }
   };
 

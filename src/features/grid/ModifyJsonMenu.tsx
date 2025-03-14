@@ -49,8 +49,8 @@ export function ModifyJsonMenu(props: {
       await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
       showSuccessToast("Template Saved Successfully");
       props.onClose();
-    } catch (_error) {
-      setError("An unexpected error occurred");
+    } catch (error) {
+      setError(error.message || "An unexpected error occurred");
     }
   };
 
@@ -59,8 +59,8 @@ export function ModifyJsonMenu(props: {
       const parsedData = JSON.parse(data);
       await updateVertexProperties(parsedData);
       props.onClose();
-    } catch (_e) {
-      setError("Invalid JSON format.");
+    } catch (error) {
+      setError(error.message || "Invalid JSON format.");
     }
   };
 

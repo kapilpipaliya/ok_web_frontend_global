@@ -35,7 +35,7 @@ export async function POST({ request }: APIEvent) {
     return {
       message: "Logout successful",
     };
-  } catch (_error) {
-    return handleAPIError(new APIError("Failed to logout", 500));
+  } catch (error) {
+    return handleAPIError(new APIError(error.message || "Failed to logout", 500));
   }
 }
