@@ -1,4 +1,5 @@
-import { type JSX } from "solid-js";
+import { useSearchParams } from "@solidjs/router";
+import { Component, createEffect, createSignal } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
@@ -11,23 +12,36 @@ import { STYLES } from "~/pages/settings/constants";
 
 export interface MenuItem {
   adminOnly?: boolean;
-  component: string;
+  component: Component;
   group?: string;
   id: string;
   label: string;
 }
 
 interface SettingsLayoutProps {
-  children: JSX.Element;
   description: string;
   menuItems: MenuItem[];
-  onMenuSelect: (id: string) => void;
-  selectedMenu: () => string;
   title: string;
 }
 
 export function SettingsLayout(props: SettingsLayoutProps) {
   const [graph] = useGraph();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedMenu, setSelectedMenu] = createSignal(
+    (searchParams.tab as string) || props.menuItems[0]?.id || "",
+  );
+
+  createEffect(() => {
+    const tab = searchParams.tab;
+    if (tab !== selectedMenu()) {
+      setSelectedMenu(typeof tab === "string" ? tab : props.menuItems[0]?.id || "");
+    }
+  });
+
+  const handleMenuSelect = (id: string) => {
+    setSearchParams({ tab: id });
+  };
+
   const groupedMenuItems = () => {
     const groups: Record<string, MenuItem[]> = {};
     props.menuItems.forEach((item) => {
@@ -51,7 +65,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
           {
             componentName: "Title",
             props: () => ({
-              text: `${props.title} - ${props.menuItems.find((item) => item.id === props.selectedMenu())?.label}`
+              text: `${props.title} - ${props.menuItems.find((item) => item.id === selectedMenu())?.label}`
             })
           },
           {
@@ -96,12 +110,12 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                 as: "div",
                                 componentName: "Html",
                                 props: (args: FunctionArgumentType) => ({
-                                  class: `p:12px cursor:pointer r:4px mb:8px ${props.selectedMenu() === (args.dataContext.menuItems as MenuItem).id
+                                  class: `p:12px cursor:pointer r:4px mb:8px ${selectedMenu() === (args.dataContext.menuItems as MenuItem).id
                                       ? "bg:primary fg:base-5"
                                       : "bg:primary-10:hover fg:base-90"
                                     }`,
                                   hidden: (args.dataContext.menuItems as MenuItem).adminOnly && !isAdminRole(graph),
-                                  onClick: () => props.onMenuSelect((args.dataContext.menuItems as MenuItem).id),
+                                  onClick: () => handleMenuSelect((args.dataContext.menuItems as MenuItem).id),
                                   text: (args.dataContext.menuItems as MenuItem).label
                                 })
                               },
@@ -136,8 +150,10 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                 as: "div",
                 attributes: [
                   {
-                    // @ts-expect-error - children is a function components
-                    componentName: () => <>{props.children}</>
+                    componentName: "Html",
+                    props: () => ({
+                      componentName: props.menuItems.find((item) => item.id === selectedMenu())?.component
+                    })
                   }
                 ],
                 class: "flex:1 p:6",
