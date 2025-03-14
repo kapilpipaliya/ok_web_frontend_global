@@ -11,6 +11,8 @@ import {
   Switch,
 } from "solid-js";
 
+import { FunctionArgumentType } from "../form/FieldSchemaType";
+
 export interface FormInputField extends Field {
   description?: GenericField | string;
   disabled?: boolean;

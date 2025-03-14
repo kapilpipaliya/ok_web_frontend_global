@@ -393,23 +393,25 @@ export function PageViewWrapper(
   }
 
   async function handleFormData(result?: FetchFormDataResult) {
-    if (props.getFormData) {
-      try {
-        const data = await props.getFormData();
-        if (!data || data.error) {
-          return { error: data.error || "Error fetching form data" };
-        }
-        setGraphData(graph, setGraph, data.graph!);
-        return { data };
-      } catch (error) {
-        return { error: (error as Error).message };
-      }
-    }
     if (props.formDataId) {
       setFormStore("formDataId", props.formDataId);
       return;
     }
-    if (!id()) {
+    if (props.getFormData) {
+      try {
+        // this breaks batch contract
+        const data = await props.getFormData();
+        if (!data || data.error) {
+          result = { error: data.error || "Error fetching form data" };
+        } else {
+          result = { data };
+        }
+      } catch (error) {
+        return { error: (error as Error).message };
+      }
+    }
+    const formDataId = result?.data?.result?.[0]?.id;
+    if (!id() && !formDataId) {
       const createResult = createFormVertex(
         graph,
         setGraph,
@@ -483,7 +485,6 @@ export function PageViewWrapper(
     if (result.componentData?.graph) {
       setGraphData(graph, setGraph, result.componentData.graph!);
     }
-    const formDataId = result.data?.result?.[0]?.id;
     if (formDataId) {
       setFormStore("formDataId", formDataId);
     }
@@ -623,7 +624,7 @@ export function PageViewWrapper(
       <Show
         fallback={<div>Data not found!</div>}
         // when={dataVertex()}
-        when={metaData()}
+        when={metaData() && (props.getFormData ? dataVertex() : true)}
       >
         <FormContext.Provider value={formStore().id}>
           <Switch>

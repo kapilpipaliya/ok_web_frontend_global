@@ -89,7 +89,7 @@ export function LoginForm() {
       {
         as: "h1",
         class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Login",
       },
       {

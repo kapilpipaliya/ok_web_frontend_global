@@ -84,7 +84,7 @@ export function SignupForm() {
       {
         as: "h1",
         class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Sign Up",
       },
       {

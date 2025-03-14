@@ -26,7 +26,7 @@ export function createPasswordHintPopoverContent(
       {
         as: "h3",
         class: "font-size:16px color:primary m:0 mb:8",
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Password Requirements",
       },
       {

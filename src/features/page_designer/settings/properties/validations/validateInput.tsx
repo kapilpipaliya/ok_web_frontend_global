@@ -66,11 +66,9 @@ export function validateInput(
       : [validation.validate];
 
     for (const validateFn of validateFunctions) {
-      if (value !== undefined && value !== null) {
-        const error = validateFn(stringValue);
-        if (error) {
-          return error;
-        }
+      const error = validateFn(stringValue);
+      if (error) {
+        return error;
       }
     }
   }
