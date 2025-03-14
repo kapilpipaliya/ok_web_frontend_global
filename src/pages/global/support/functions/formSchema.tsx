@@ -96,14 +96,14 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                   {
                                     as: "div",
                                     class: "font-weight:bold",
-                                    as: "span", componentName: "Html",
+                                    componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: options.data.P.email || "Anonymous",
                                     }),
                                   },
                                   {
                                     as: "div",
-                                    as: "span", componentName: "Html",
+                                    componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: options.data.P.message,
                                     }),
@@ -111,7 +111,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                   {
                                     as: "div",
                                     class: "font-size:12px color:base-50",
-                                    as: "span", componentName: "Html",
+                                    componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: new Date(
                                         options.data.P.createdAt,
@@ -159,7 +159,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     // emptyState: {
                     //   as: "div",
                     //   class: "p:8 text-align:center color:base-50",
-                    //   as: "span", componentName: "Html",
+                    //   componentName: "Html",
                     //   text: "No messages yet",
                     // },
                   },

@@ -5,10 +5,64 @@ import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/getApi";
-import { postAPI } from "~/lib/api/postApi";
+import { validateEmail } from "~/lib/validation/validateEmail";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
+import { handleApiRequest } from "./handleApiRequest";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
+
+// Validation functions
+const validateRequired = (value: string) => {
+  if (!value || value.trim() === '') {
+    return "This field is required";
+  }
+  return undefined;
+};
+
+const validatePort = (value: string) => {
+  if (!value) {
+    return "Port is required";
+  }
+  const port = parseInt(value, 10);
+  if (isNaN(port) || port < 1 || port > 65535) {
+    return "Port must be a number between 1 and 65535";
+  }
+  return undefined;
+};
+
+// Validation function based on provider
+const validateFormData = (data: any) => {
+  const errors: Record<string, string> = {};
+  const provider = data.active;
+  
+  if (provider === "smtp") {
+    // SMTP validation
+    const smtpHostError = validateRequired(data.smtpHost);
+    if (smtpHostError) errors.smtpHost = smtpHostError;
+    
+    const smtpPortError = validatePort(data.smtpPort);
+    if (smtpPortError) errors.smtpPort = smtpPortError;
+    
+    const smtpUsernameError = validateRequired(data.smtpUsername);
+    if (smtpUsernameError) errors.smtpUsername = smtpUsernameError;
+    
+    const smtpPasswordError = validateRequired(data.smtpPassword);
+    if (smtpPasswordError) errors.smtpPassword = smtpPasswordError;
+  } else if (provider === "sendgrid") {
+    // SendGrid validation
+    const sendGridApiKeyError = validateRequired(data.sendGridApiKey);
+    if (sendGridApiKeyError) errors.sendGridApiKey = sendGridApiKeyError;
+  }
+  
+  // From email is required for all providers if a provider is selected
+  if (provider) {
+    const fromEmailError = data.fromEmail ? validateEmail(data.fromEmail) : "From email is required";
+    if (fromEmailError) errors.fromEmail = fromEmailError;
+  }
+  
+  return Object.keys(errors).length > 0 ? errors : null;
+};
 
 export function EmailSettings() {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -49,6 +103,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
           },
+          getErrorSchema("active"),
           {
             as: "div",
             attributes: [
@@ -62,6 +117,8 @@ export function EmailSettings() {
                 componentName: "TextInput",
                 key: "smtpHost",
                 placeholder: "Enter SMTP host",
+                validate: (value: string, data: any) => 
+                  data.P.active === "smtp" ? validateRequired(value) : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -70,6 +127,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
+          getErrorSchema("smtpHost"),
           {
             as: "div",
             attributes: [
@@ -84,6 +142,8 @@ export function EmailSettings() {
                 key: "smtpPort",
                 placeholder: "Enter SMTP port",
                 type: "number",
+                validate: (value: string, data: any) => 
+                  data.P.active === "smtp" ? validatePort(value) : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -92,6 +152,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
+          getErrorSchema("smtpPort"),
           {
             as: "div",
             attributes: [
@@ -105,6 +166,8 @@ export function EmailSettings() {
                 componentName: "TextInput",
                 key: "smtpUsername",
                 placeholder: "Enter SMTP username",
+                validate: (value: string, data: any) => 
+                  data.P.active === "smtp" ? validateRequired(value) : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -113,6 +176,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
+          getErrorSchema("smtpUsername"),
           {
             as: "div",
             attributes: [
@@ -127,6 +191,8 @@ export function EmailSettings() {
                 key: "smtpPassword",
                 placeholder: "Enter SMTP password",
                 type: "password",
+                validate: (value: string, data: any) => 
+                  data.P.active === "smtp" ? validateRequired(value) : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -135,6 +201,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
+          getErrorSchema("smtpPassword"),
           {
             as: "div",
             attributes: [
@@ -149,6 +216,8 @@ export function EmailSettings() {
                 key: "sendGridApiKey",
                 placeholder: "Enter SendGrid API key",
                 type: "password",
+                validate: (value: string, data: any) => 
+                  data.P.active === "sendgrid" ? validateRequired(value) : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -157,6 +226,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "sendgrid",
             }),
           },
+          getErrorSchema("sendGridApiKey"),
           {
             as: "div",
             attributes: [
@@ -171,6 +241,11 @@ export function EmailSettings() {
                 key: "fromEmail",
                 placeholder: "Enter from email address",
                 type: "email",
+                validate: (value: string, data: any) => {
+                  if (!data.P.active) return undefined;
+                  if (!value) return "From email is required";
+                  return validateEmail(value);
+                },
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -179,6 +254,7 @@ export function EmailSettings() {
               hidden: () => !options.data.P.active,
             }),
           },
+          getErrorSchema("fromEmail"),
           {
             as: "div",
             attributes: [
@@ -198,6 +274,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
+          getErrorSchema("secure"),
           {
             as: "div",
             attributes: [
@@ -210,30 +287,33 @@ export function EmailSettings() {
                     props: (options: FunctionArgumentType) => ({
                       disabled: options.dataContext.saveState[0]?.isLoading,
                       onClick: async () => {
-                        try {
-                          options.dataContext.saveState[1]("isLoading", true);
-                          const settings = options.data;
-                          const response = await postAPI(
-                            API.settings.email.updateUrl,
-                            settings.P,
-                          );
-                          if (response.error) {
-                            showErrorToast(response.error);
-                          } else {
-                            showSuccessToast(
-                              "Email settings updated successfully",
-                            );
+                        // Validate form data
+                        const settings = options.data;
+                        const errors = validateFormData(settings.P);
+                        
+                        if (errors) {
+                          // Show validation errors
+                          for (const field in errors) {
+                            options.setError(field, errors[field]);
                           }
-                        } catch (error) {
-                          showErrorToast((error as Error).message);
-                        } finally {
-                          options.dataContext.saveState[1]("isLoading", false);
+                          showErrorToast("Please fix the validation errors");
+                          return;
                         }
+                        
+                        // Use the common handleApiRequest function
+                        await handleApiRequest(
+                          API.settings.email.updateUrl,
+                          settings.P,
+                          "Email settings updated successfully",
+                          (isLoading) => options.dataContext.saveState[1]("isLoading", isLoading),
+                          showSuccessToast,
+                          showErrorToast
+                        );
                       },
                       text: options.dataContext.saveState[0]?.isLoading
                         ? "Saving..."
                         : "Save Changes",
-                    }),
+                    }),  
                   },
                 ],
                 componentName: "Data",
@@ -254,18 +334,47 @@ export function EmailSettings() {
                     props: (options: FunctionArgumentType) => ({
                       disabled: options.dataContext.testState[0]?.isLoading,
                       onClick: async () => {
+                        // Validate form data first
+                        const settings = options.data;
+                        const errors = validateFormData(settings.P);
+                        
+                        if (errors) {
+                          // Show validation errors
+                          for (const field in errors) {
+                            options.setError(field, errors[field]);
+                          }
+                          showErrorToast("Please fix the validation errors before testing");
+                          return;
+                        }
+                        
+                        // Set loading state
+                        options.dataContext.testState[1]("isLoading", true);
+                        
                         try {
-                          options.dataContext.testState[1]("isLoading", true);
-                          const settings = options.data;
-                          const response = await postAPI(
+                          // First save the settings using handleApiRequest
+                          const saveResult = await handleApiRequest(
+                            API.settings.email.updateUrl,
+                            settings.P,
+                            "Settings saved before testing",
+                            () => {}, // We're managing loading state manually here
+                            () => {}, // Don't show success toast for save before test
+                            showErrorToast
+                          );
+                          
+                          if (!saveResult.success) {
+                            options.dataContext.testState[1]("isLoading", false);
+                            return;
+                          }
+                          
+                          // Then test the connection using handleApiRequest
+                          await handleApiRequest(
                             API.settings.email.testUrl,
                             settings.P,
+                            "Test email sent successfully",
+                            () => {}, // We're managing loading state manually here
+                            showSuccessToast,
+                            showErrorToast
                           );
-                          if (response.error) {
-                            showErrorToast(response.error);
-                          } else {
-                            showSuccessToast("Test email sent successfully");
-                          }
                         } catch (error) {
                           showErrorToast((error as Error).message);
                         } finally {
