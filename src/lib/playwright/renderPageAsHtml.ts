@@ -45,9 +45,12 @@ export async function renderPageAsHtml({
       state: "attached",
     });
 
+    // Convert all relative links to absolute links
+    await convertRelativeLinksToAbsolute(browserSetup.page);
+
     // Get the computed styles
     const masterStyles = await browserSetup.page.evaluate(() => {
-      const masterStyleEl = document.querySelector("style#master");
+      const masterStyleEl = document.querySelector("style#master") as HTMLStyleElement;
       if (!masterStyleEl?.sheet) {
         return "";
       }
@@ -85,6 +88,135 @@ export async function renderPageAsHtml({
   } finally {
     await browser?.close();
   }
+}
+
+/**
+ * Converts all relative URLs in the page to absolute URLs
+ */
+async function convertRelativeLinksToAbsolute(page: Page): Promise<void> {
+  // Extract base URL from current page URL (protocol + domain)
+  const baseUrl = page.url().split('/').slice(0, 3).join('/');
+  
+  await page.evaluate((baseUrl) => {
+    /**
+     * Converts a relative URL to an absolute URL
+     */
+    function toAbsoluteUrl(relativeUrl: string, baseUrl: string): string {
+      if (relativeUrl.startsWith('/')) {
+        // Absolute path relative to domain
+        return `${baseUrl}${relativeUrl}`;
+      } else {
+        // Relative path
+        return `${baseUrl}/${relativeUrl}`;
+      }
+    }
+
+    /**
+     * Processes elements with the specified attribute and converts relative URLs to absolute
+     */
+    function processElementUrls(selector: string, attribute: string): void {
+      const elements = document.querySelectorAll(`${selector}[${attribute}]`);
+      for (const element of elements) {
+        const url = element.getAttribute(attribute);
+        if (url && 
+            !url.startsWith('http') && 
+            !url.startsWith('mailto:') && 
+            !url.startsWith('#') &&
+            !url.startsWith('data:')) {
+          element.setAttribute(attribute, toAbsoluteUrl(url, baseUrl));
+        }
+      }
+    }
+
+    /**
+     * Extracts URL from CSS url() function
+     */
+    function extractUrlFromCssValue(cssValue: string): null | string {
+      const urlMatch = cssValue.match(/url\(['"]?([^'")]+)['"]?\)/i);
+      return urlMatch ? urlMatch[1] : null;
+    }
+
+    /**
+     * Processes inline style background images
+     */
+    function processInlineBackgroundImages(): void {
+      const elements = document.querySelectorAll('[style*="background"]');
+      for (const element of elements) {
+        const style = (element as HTMLElement).style;
+        const backgroundImage = style.backgroundImage;
+        
+        if (backgroundImage && backgroundImage.includes('url(')) {
+          const url = extractUrlFromCssValue(backgroundImage);
+          if (url && 
+              !url.startsWith('http') && 
+              !url.startsWith('data:')) {
+            style.backgroundImage = `url("${toAbsoluteUrl(url, baseUrl)}")`;
+          }
+        }
+      }
+    }
+
+    /**
+     * Processes all CSS rules in stylesheets to convert background image URLs
+     */
+    function processStylesheetBackgroundImages(): void {
+      // Process all stylesheets in the document
+      const stylesheets = Array.from(document.styleSheets);
+      for (const stylesheet of stylesheets) {
+        try {
+          // Skip if stylesheet is from a different origin (CORS restriction)
+          if (stylesheet.href && !stylesheet.href.startsWith(window.location.origin)) {
+            continue;
+          }
+          
+          // Process all CSS rules
+          const cssRules = Array.from(stylesheet.cssRules || []);
+          for (const rule of cssRules) {
+            if (rule instanceof CSSStyleRule) {
+              const style = rule.style;
+              
+              // Check for background-image property
+              if (style.backgroundImage && style.backgroundImage.includes('url(')) {
+                const url = extractUrlFromCssValue(style.backgroundImage);
+                if (url && 
+                    !url.startsWith('http') && 
+                    !url.startsWith('data:')) {
+                  style.backgroundImage = `url("${toAbsoluteUrl(url, baseUrl)}")`;
+                }
+              }
+              
+              // Also check for background shorthand property
+              if (style.background && style.background.includes('url(')) {
+                const url = extractUrlFromCssValue(style.background);
+                if (url && 
+                    !url.startsWith('http') && 
+                    !url.startsWith('data:')) {
+                  // Replace just the URL part in the background shorthand
+                  style.background = style.background.replace(
+                    /url\(['"]?([^'")]+)['"]?\)/i,
+                    `url("${toAbsoluteUrl(url, baseUrl)}")`
+                  );
+                }
+              }
+            }
+          }
+        } catch (e) {
+          // Silently handle CORS errors when accessing cross-origin stylesheets
+          console.warn('Could not process stylesheet:', e);
+        }
+      }
+    }
+
+    // Process different types of elements with URLs
+    processElementUrls('a', 'href');
+    processElementUrls('img', 'src');
+    processElementUrls('link', 'href');
+    processElementUrls('script', 'src');
+    
+    // Process CSS background images
+    processInlineBackgroundImages();
+    processStylesheetBackgroundImages();
+  }, baseUrl);
 }
 
 async function setupBrowserAndPage(
