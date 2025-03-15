@@ -7,7 +7,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { API } from "~/lib/api/endpoints";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";

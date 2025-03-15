@@ -5,8 +5,8 @@ import type { GraphInterface, Id } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { getErrorMessage } from "~/lib/api/getErrorMessage";
-import { isValidResponse } from "~/lib/api/isValidResponse";
+import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
+import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getEdgesFromGraph } from "~/lib/graph/get/sync/edge/getEdgesFromGraph";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 

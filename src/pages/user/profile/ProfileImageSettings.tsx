@@ -10,7 +10,7 @@ import { useToast } from "~/components/styled/Toast";
 import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import {
   getMemberVertex,
@@ -21,7 +21,7 @@ import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { profileImage, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-import { SchemaRenderer } from "../SchemaRenderer";
+import { SchemaRenderer } from "../../SchemaRenderer";
 
 export function ProfileImageSettings() {
   const [openDialog, setOpenDialog] = createSignal(false);

@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { redirect } from "@solidjs/router";
 
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { handleAPIError } from "~/lib/api/apiErrorHandler";
+import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
 import { downloadFile } from "./functions/downloadFile";
 

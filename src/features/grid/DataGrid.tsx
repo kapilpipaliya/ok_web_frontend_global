@@ -26,8 +26,8 @@ import {
   hasPermissions,
 } from "~/features/page_attr_render/permissions";
 import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
-import { getErrorMessage } from "~/lib/api/getErrorMessage";
-import { isValidResponse } from "~/lib/api/isValidResponse";
+import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
+import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";

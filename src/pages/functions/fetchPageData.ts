@@ -5,7 +5,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { getFormData } from "~/components/form/functions/getFormData";
 import { fetchComponentData, fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { isValidResponse } from "~/lib/api/isValidResponse";
+import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";

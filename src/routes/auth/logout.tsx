@@ -2,7 +2,7 @@ import { useNavigate } from "@solidjs/router";
 import { onMount } from "solid-js";
 
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 

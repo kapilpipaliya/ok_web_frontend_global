@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { setupSuperUser } from "~/cypher/mutate/manage/setupSuperUser";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
 export async function GET({ request }: APIEvent) {
   try {

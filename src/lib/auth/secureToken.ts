@@ -2,11 +2,9 @@ import type { Session, Transaction } from "neo4j-driver";
 
 import { createHash, randomBytes } from "node:crypto";
 
-import {
-  deleteExpiredTokens,
-  getAndConsumeToken,
-  saveToken,
-} from "~/cypher/mutate/token/tokenOperations";
+import {deleteExpiredTokens} from "~/cypher/mutate/token/deleteExpiredTokens";
+import {getAndConsumeToken} from "~/cypher/mutate/token/getAndConsumeToken";
+import {saveToken} from "~/cypher/mutate/token/saveToken";
 
 const TOKEN_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
 

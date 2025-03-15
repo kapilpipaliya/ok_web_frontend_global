@@ -6,7 +6,7 @@ import { createAppState } from "~/createAppState";
 import { getEmailTemplateSchema } from "~/cypher/mutate/email/saveEmailTemplates";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";

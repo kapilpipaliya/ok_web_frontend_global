@@ -3,7 +3,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
 import { sendEmail } from "~/lib/playwright/sendEmail";
 
-import { APIError } from "../api/apiErrorHandler";
+import { APIError } from "../api/server/apiErrorHandler";
 
 // New helper function for sending the email
 export async function sendNotificationEmail(

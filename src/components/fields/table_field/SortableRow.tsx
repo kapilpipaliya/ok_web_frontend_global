@@ -6,7 +6,7 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
-import { deleteRow } from "~/lib/graph/mutate/vertex/deleteRow";
+import { deleteRow } from "~/lib/graph/mutate/vertex/delete/deleteRow";
 
 import {
   type FormStoreObject,

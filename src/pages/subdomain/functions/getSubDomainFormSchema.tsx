@@ -9,7 +9,7 @@ import type {
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";

@@ -9,7 +9,7 @@ import type {
 
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useToast } from "~/components/styled/Toast";
-import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
 import { useGraph } from "~/lib/graph/graph";

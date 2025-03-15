@@ -6,7 +6,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 
 import { getDriver } from "~/cypher/core/driver";
 import { getSubDomain } from "~/cypher/session/getSubDomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
 // deprecated
 export async function GET({ request }: APIEvent) {

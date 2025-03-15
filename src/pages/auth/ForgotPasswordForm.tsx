@@ -5,7 +5,7 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
@@ -14,7 +14,7 @@ import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate"
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
-import { getTitleSchema } from "./functions/getTitleSchema";
+import { getTitleSchema } from "../../lib/schema/getTitleSchema";
 
 export function ForgotPasswordForm() {
   const { showErrorToast, showSuccessToast } = useToast();

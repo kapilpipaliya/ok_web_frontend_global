@@ -10,7 +10,7 @@ import { useToast } from "~/components/styled/Toast";
 import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import { getCompanyCircularLogoVertex } from "~/lib/graph/get/sync/company/getCompanyCircularLogoVertex";
 import { getCompanyRectangularLogoVertex } from "~/lib/graph/get/sync/company/getCompanyRectangularLogoVertex";

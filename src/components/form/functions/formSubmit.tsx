@@ -4,8 +4,8 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrains";
-import { getErrorMessage } from "~/lib/api/getErrorMessage";
-import { isValidResponse } from "~/lib/api/isValidResponse";
+import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
+import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";

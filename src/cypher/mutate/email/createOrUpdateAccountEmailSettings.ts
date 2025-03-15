@@ -1,20 +1,5 @@
-import type { Session } from "neo4j-driver";
-
-export interface EmailSettings {
-  [key: string]: unknown;
-  active?: string; // 'smtp', 'sendgrid', etc. Empty means not configured
-  fromEmail?: string;
-  secure?: boolean;
-  // SendGrid settings (can be extended)
-  sendGridApiKey?: string;
-  // SMTP settings
-  smtpHost?: string;
-  smtpPassword?: string;
-  smtpPort?: number;
-
-  smtpUsername?: string;
-  // Add other provider settings as needed
-}
+import type {Session} from "neo4j-driver";
+import {EmailSettings} from "~/cypher/mutate/email/EmailSettings";
 
 export async function createOrUpdateAccountEmailSettings(
   dbSession: Session,
@@ -25,7 +10,7 @@ export async function createOrUpdateAccountEmailSettings(
   const findResult = await dbSession.run(
     `MATCH (a:Account {id: $accountId})-[:AccountEmailSetting]->(s:EmailSetting)
      RETURN s.key as key`,
-    { accountId },
+    {accountId},
   );
 
   let settingsKey: string;
@@ -43,7 +28,7 @@ export async function createOrUpdateAccountEmailSettings(
        CREATE (a)-[:AccountEmailSetting]->(s)
        SET s += $settings
        RETURN s.key as key`,
-      { accountId, key: settingsKey, settings },
+      {accountId, key: settingsKey, settings},
     );
   } else {
     // Update existing EmailSetting
@@ -53,21 +38,9 @@ export async function createOrUpdateAccountEmailSettings(
        SET s += $settings,
            s.updatedAt = datetime()
        RETURN s.key as key`,
-      { accountId, settings },
+      {accountId, settings},
     );
   }
 
   return settingsKey;
-}
-
-export async function getAccountEmailSettings(
-  dbSession: Session,
-  accountId: string,
-) {
-  const result = await dbSession.run(
-    `MATCH (a:Account {id: $accountId})-[:AccountEmailSetting]->(s:EmailSetting)
-     RETURN s as settings`,
-    { accountId },
-  );
-  return result.records[0]?.get("settings") || null;
 }

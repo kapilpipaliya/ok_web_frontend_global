@@ -4,12 +4,12 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/getApi";
+import { getAPI } from "~/lib/api/general/getApi";
 import { validateEmail } from "~/lib/validation/validateEmail";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import { handleApiRequest } from "./handleApiRequest";
+import { handleApiRequest } from "../../../lib/api/general/handleApiRequest";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 

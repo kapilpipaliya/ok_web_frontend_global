@@ -7,7 +7,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
-import { deleteNestedLayout } from "../../../lib/graph/mutate/vertex/deleteNestedLayout";
+import { deleteNestedLayout } from "../../../lib/graph/mutate/vertex/delete/deleteNestedLayout";
 import {
   allFormAttrsInPageFromLevel,
   getAllFieldsUsedInAllRules,

@@ -1,6 +1,6 @@
 import { findUserByEmail } from "~/cypher/mutate/user/findUserByEmail";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function getUserRPC() {

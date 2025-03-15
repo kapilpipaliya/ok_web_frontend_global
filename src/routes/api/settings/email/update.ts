@@ -6,10 +6,11 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
-import { createOrUpdateAccountEmailSettings } from "./functions";
+
+import {createOrUpdateAccountEmailSettings} from "~/cypher/mutate/email/createOrUpdateAccountEmailSettings";
 
 export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);

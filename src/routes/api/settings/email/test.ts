@@ -4,7 +4,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";

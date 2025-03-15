@@ -1,7 +1,7 @@
 import { SettingsLayout } from "~/components/styled/SettingsLayout";
-import { AccountDeletionForm } from "~/pages/user/AccountDeletionForm";
-import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
-import { ProfileSettings } from "~/pages/user/ProfileSettings";
+import { AccountDeletionForm } from "~/pages/user/account_delete/AccountDeletionForm";
+import { PasswordChangeForm } from "~/pages/user/password_change/PasswordChangeForm";
+import { ProfileSettings } from "~/pages/user/profile/ProfileSettings";
 
 export default function SystemUserSettings() {
   const menuItems = [

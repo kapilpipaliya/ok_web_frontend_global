@@ -6,7 +6,7 @@ import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";

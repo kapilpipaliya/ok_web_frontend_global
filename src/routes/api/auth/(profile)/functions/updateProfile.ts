@@ -11,7 +11,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAccount";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import { validateUniqueFields } from "~/routes/api/auth/(profile)/functions/validateField";
-import { validateNonSystemUser } from "~/routes/api/auth/(profile)/functions/validateNonSystemUser";
+import { validateNonSystemUser } from "~/cypher/permissions/validateNonSystemUser";
 import { updateSession } from "~/server/auth/session/updateSession";
 
 type ProfilePayload = {

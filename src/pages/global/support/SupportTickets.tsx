@@ -6,7 +6,7 @@ import type { DataGridStore } from "~/features/grid/DataGridContext";
 
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 

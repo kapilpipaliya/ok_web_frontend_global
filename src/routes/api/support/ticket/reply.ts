@@ -2,9 +2,9 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import { processResult } from "~/cypher/queries/evaluate/processResult";
+import { processResult } from "~/cypher/conversion/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {

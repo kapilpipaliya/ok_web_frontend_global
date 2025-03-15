@@ -6,7 +6,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";
@@ -16,7 +16,7 @@ import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect"
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
-import { getTitleSchema } from "./functions/getTitleSchema";
+import { getTitleSchema } from "../../lib/schema/getTitleSchema";
 import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 

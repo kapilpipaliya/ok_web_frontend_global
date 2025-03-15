@@ -7,7 +7,7 @@ import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { signupUser } from "~/cypher/mutate/signup/signupUser";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { handleAPIError } from "~/lib/api/apiErrorHandler";
+import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { sendSignupEmailVerification } from "~/routes/api/auth/(profile)/functions/sendSignupEmailVerification";

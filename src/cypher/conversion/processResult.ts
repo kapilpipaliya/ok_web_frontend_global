@@ -7,7 +7,7 @@ import {
   convertRelationshipToJson,
 } from "~/cypher/conversion/convertNodeToJson";
 
-import type { ContextType } from "../../types/ContextType";
+import type { ContextType } from "../types/ContextType";
 
 export function processResult(
   records: Record[],

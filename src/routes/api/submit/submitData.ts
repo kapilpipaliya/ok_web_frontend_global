@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {

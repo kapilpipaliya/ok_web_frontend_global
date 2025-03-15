@@ -4,10 +4,10 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-import { SchemaRenderer } from "../SchemaRenderer";
+import { SchemaRenderer } from "../../SchemaRenderer";
 
 export function AccountDeletionForm() {
   const handleDeleteAccount = async (options: FunctionArgumentType) => {

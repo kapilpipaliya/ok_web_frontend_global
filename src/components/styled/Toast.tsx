@@ -8,7 +8,7 @@ import {
   Show,
 } from "solid-js";
 
-import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { toastValue } from "~/toastValue";
 
 type Renderable = JSX.Element;

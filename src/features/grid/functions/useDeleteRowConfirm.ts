@@ -4,7 +4,7 @@ import { useNavigate } from "@solidjs/router";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";

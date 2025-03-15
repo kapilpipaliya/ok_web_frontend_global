@@ -8,7 +8,7 @@ import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAccount";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";

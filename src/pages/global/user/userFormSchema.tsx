@@ -9,7 +9,7 @@ import type {
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validateUsername } from "~/lib/validation/validateUsername";

@@ -15,7 +15,7 @@ import {
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsAPICall";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
-import { isValidResponse } from "~/lib/api/isValidResponse";
+import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { evalExpression } from "~/lib/expression_eval";
 import { getStringComponent } from "~/lib/graph/get/sync/format/getStringComponent";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";

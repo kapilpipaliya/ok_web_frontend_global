@@ -1,4 +1,4 @@
-import { getErrorMessage } from "~/lib/api/getErrorMessage";
+import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 
 /**
  * Common function to make GET requests to a specified URL.

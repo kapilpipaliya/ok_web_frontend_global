@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { updateProfile } from "./functions/updateProfile";

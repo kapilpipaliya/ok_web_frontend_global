@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";

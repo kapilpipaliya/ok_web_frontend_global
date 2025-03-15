@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface } from "~/lib/graph/graph";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { isValidResponse } from "~/lib/api/isValidResponse";
+import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import {
   setGraphData,
   type UpdateOptions,

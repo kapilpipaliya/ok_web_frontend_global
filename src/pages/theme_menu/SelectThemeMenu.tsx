@@ -5,7 +5,7 @@ import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import {
   getGlobalThemeVertex,
 } from "~/lib/graph/get/sync/theme/getGlobalThemeVertex";

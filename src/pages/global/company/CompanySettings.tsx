@@ -5,8 +5,8 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/getApi";
-import { postAPI } from "~/lib/api/postApi";
+import { getAPI } from "~/lib/api/general/getApi";
+import { postAPI } from "~/lib/api/general/postApi";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";

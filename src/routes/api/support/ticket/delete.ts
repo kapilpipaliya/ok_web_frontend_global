@@ -3,7 +3,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function DELETE({ request }: APIEvent) {

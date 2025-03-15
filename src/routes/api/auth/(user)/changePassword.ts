@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { hashPassword, verifyPassword } from "~/lib/auth/password";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";

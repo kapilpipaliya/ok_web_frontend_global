@@ -1,4 +1,6 @@
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
+
+// for mutate use handleDataSubmission function.
 
 // Common function to handle API requests
 export async function handleApiRequest(url: string,

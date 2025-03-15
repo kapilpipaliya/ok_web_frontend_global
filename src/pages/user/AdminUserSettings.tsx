@@ -1,6 +1,6 @@
 import { SettingsLayout } from "~/components/styled/SettingsLayout";
-import { PasswordChangeForm } from "~/pages/user/PasswordChangeForm";
-import { ProfileSettings } from "~/pages/user/ProfileSettings";
+import { PasswordChangeForm } from "~/pages/user/password_change/PasswordChangeForm";
+import { ProfileSettings } from "~/pages/user/profile/ProfileSettings";
 
 export default function AdminUserSettings() {
   const menuItems = [

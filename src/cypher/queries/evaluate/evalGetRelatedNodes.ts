@@ -7,7 +7,7 @@ import type { ContextType } from "../../types/ContextType";
 import { getDBSessionForSubdomain } from "../../session/getSessionForSubdomain";
 import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
 import { mongoToCypher } from "./mongoToCypher";
-import { processResult } from "./processResult";
+import { processResult } from "../../conversion/processResult";
 
 export async function evalGetRelatedNodes(
   vertexes: Vertex[],

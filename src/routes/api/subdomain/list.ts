@@ -7,9 +7,9 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
-import { processResult } from "~/cypher/queries/evaluate/processResult";
+import { processResult } from "~/cypher/conversion/processResult";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/apiErrorHandler";
+import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function GET({ request }: APIEvent) {

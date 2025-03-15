@@ -2,7 +2,7 @@ import type { DataGridStore } from "~/features/grid/DataGridContext";
 
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/getApi";
+import { getAPI } from "~/lib/api/general/getApi";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { getActivityLogFormSchema } from "./functions/getActivityLogFormSchema";

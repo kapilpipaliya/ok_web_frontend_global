@@ -6,8 +6,8 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/getApi";
-import { postAPI } from "~/lib/api/postApi";
+import { getAPI } from "~/lib/api/general/getApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { useGraph } from "~/lib/graph/graph";
 import {
   addNewVertex,

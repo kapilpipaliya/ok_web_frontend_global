@@ -7,8 +7,8 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 
-import { commitTxn } from "../../transaction/core/commitTxn";
-import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
+import { commitTxn } from "../../../transaction/core/commitTxn";
+import { generateNewTxnId } from "../../../transaction/core/generateNewTxnId";
 
 export function deleteRow(
   vertex: Vertex,

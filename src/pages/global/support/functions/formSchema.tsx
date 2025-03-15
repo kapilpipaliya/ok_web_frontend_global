@@ -7,7 +7,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/postApi";
+import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";

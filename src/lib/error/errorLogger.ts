@@ -1,4 +1,4 @@
-import { postAPI } from "../api/postApi";
+import { postAPI } from "../api/general/postApi";
 
 interface ErrorLogData {
   additionalData?: Record<string, unknown>;
