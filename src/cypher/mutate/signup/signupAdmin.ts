@@ -4,14 +4,14 @@ import { v7 as uuidv7 } from "uuid";
 
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 
-import type { SignupRequestData } from "./SignupRequestData";
+import type { SignupRequestData } from "./type/SignupRequestData";
 
 import { saveAllEmailTemplates } from "../email/saveEmailTemplates";
-import { addAdminRoleToUser } from "./addAdminRoleToUser";
-import { createRootFolder } from "./createRootFolder";
-import { createUserInSuperDB } from "./createUserInDB";
-import { insertComponents } from "./insertComponents";
-import { newAdminValidations } from "./newAdminValidations";
+import { addAdminRoleToUser } from "./admin/addAdminRoleToUser";
+import { newAdminValidations } from "./admin/newAdminValidations";
+import { createRootFolder } from "./seed/createRootFolder";
+import { insertComponents } from "./seed/insertComponents";
+import { createUserInSuperDB } from "./user/createUserInDB";
 
 export async function signupAdmin(
   tx: Transaction,

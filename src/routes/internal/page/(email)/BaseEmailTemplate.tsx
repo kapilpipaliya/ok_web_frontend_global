@@ -11,14 +11,22 @@ export function getLogoSchema(
     as: "div",
     attributes: [
       {
-        as: "img",
-        class: imageClass,
+        as: "a",
+        attributes: [
+          {
+            as: "img",
+            class: imageClass,
+            componentName: "Html",
+            pos: 1,
+            props: `return {
+            alt: "Logo",
+            src: "${typeof window !== "undefined" ? window.location.origin : ""}${API.file.downloadCompanyRectangularLogoUrl}"
+            }`,
+          },
+        ],
         componentName: "Html",
+        href: "/",
         pos: 1,
-        props: `return {
-        alt: "Logo",
-        src: "${typeof window !== "undefined" ? window.location.origin : ""}${API.file.downloadCompanyRectangularLogoUrl}"
-        }`,
       },
       {
         as: "hr",

@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { insertComponents } from "~/cypher/mutate/signup/insertComponents";
+import { insertComponents } from "~/cypher/mutate/signup/seed/insertComponents";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 

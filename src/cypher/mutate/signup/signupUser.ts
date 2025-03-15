@@ -2,10 +2,10 @@ import type { Transaction } from "neo4j-driver";
 
 import { v7 as uuidv7 } from "uuid";
 
-import type { SignupRequestData } from "./SignupRequestData";
+import type { SignupRequestData } from "./type/SignupRequestData";
 
-import { createUserInUserDB } from "./createUserInDB";
-import { newAdminValidations } from "./newAdminValidations";
+import { newAdminValidations } from "./admin/newAdminValidations";
+import { createUserInUserDB } from "./user/createUserInDB";
 
 export async function signupUser(tx: Transaction, data: SignupRequestData) {
   // Check if the user already exists

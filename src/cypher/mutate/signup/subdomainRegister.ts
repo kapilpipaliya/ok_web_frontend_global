@@ -3,15 +3,15 @@ import type { Node, Session, Transaction } from "neo4j-driver";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { getDriver } from "~/cypher/core/driver";
 import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
-import { addAdminRoleToUser } from "~/cypher/mutate/signup/addAdminRoleToUser";
+import { addAdminRoleToUser } from "~/cypher/mutate/signup/admin/addAdminRoleToUser";
 
-import { createDatabase } from "./createDatabase";
+import { createDatabase } from "./database/createDatabase";
 import {
   createDatabaseConstraints,
   createRootFolder,
-} from "./createRootFolder";
-import { createUserInUserDB } from "./createUserInDB";
-import { insertComponents } from "./insertComponents";
+} from "./seed/createRootFolder";
+import { insertComponents } from "./seed/insertComponents";
+import { createUserInUserDB } from "./user/createUserInDB";
 
 export interface SubdomainRegisterRequestData {
   email: string;

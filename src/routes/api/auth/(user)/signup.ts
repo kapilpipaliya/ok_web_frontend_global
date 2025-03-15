@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Transaction } from "neo4j-driver";
 
-import type { SignupRequestData } from "~/cypher/mutate/signup/SignupRequestData";
+import type { SignupRequestData } from "~/cypher/mutate/signup/type/SignupRequestData";
 
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
