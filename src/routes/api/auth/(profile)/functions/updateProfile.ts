@@ -9,9 +9,9 @@ import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAccount";
+import { validateNonSystemUser } from "~/cypher/permissions/validateNonSystemUser";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import { validateUniqueFields } from "~/routes/api/auth/(profile)/functions/validateField";
-import { validateNonSystemUser } from "~/cypher/permissions/validateNonSystemUser";
 import { updateSession } from "~/server/auth/session/updateSession";
 
 type ProfilePayload = {

@@ -35,7 +35,14 @@ export function redo(
       });
   }
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, { P: txnValue }, { cloneProperties: false });
+  replaceVertexProperties(
+    0,
+    `txn${txnId}`,
+    graph,
+    setGraph,
+    { P: txnValue },
+    { cloneProperties: false },
+  );
 }
 
 export function redoAllowed(
@@ -83,7 +90,14 @@ export function saveUndoPoint(
     cleanupTransactionHistory(txnValue, activeUndoIndex);
   }
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, { P: txnValue }, { cloneProperties: false });
+  replaceVertexProperties(
+    0,
+    `txn${txnId}`,
+    graph,
+    setGraph,
+    { P: txnValue },
+    { cloneProperties: false },
+  );
 }
 
 export function transactionDetailAdd(
@@ -97,7 +111,8 @@ export function transactionDetailAdd(
   }
 
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  const activeUndoIndex = existingTxnValue.activeUndoIndex ?? existingTxnValue.steps.length - 1;
+  const activeUndoIndex =
+    existingTxnValue.activeUndoIndex ?? existingTxnValue.steps.length - 1;
 
   // Clear future steps if we're not at the end
   if (activeUndoIndex < existingTxnValue.steps.length - 1) {
@@ -108,13 +123,16 @@ export function transactionDetailAdd(
       0,
       activeUndoPointIndex === -1 ? undefined : activeUndoPointIndex,
     );
-    existingTxnValue.steps = existingTxnValue.steps.slice(0, activeUndoIndex + 1);
+    existingTxnValue.steps = existingTxnValue.steps.slice(
+      0,
+      activeUndoIndex + 1,
+    );
   }
 
   // Add new step
   existingTxnValue.steps.push({
     ...txnValue,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 
   // Check if cleanup is needed
@@ -122,7 +140,14 @@ export function transactionDetailAdd(
     cleanupTransactionHistory(existingTxnValue, activeUndoIndex);
   }
 
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, { P: existingTxnValue }, { cloneProperties: false });
+  replaceVertexProperties(
+    0,
+    `txn${txnId}`,
+    graph,
+    setGraph,
+    { P: existingTxnValue },
+    { cloneProperties: false },
+  );
 }
 
 export function undo(
@@ -170,7 +195,7 @@ export function undoAllowed(
 
 function cleanupTransactionHistory(
   txnValue: { steps: TransactionValue[]; undoStepIndexes: number[] },
-  activeUndoIndex: number
+  activeUndoIndex: number,
 ) {
   if (txnValue.steps.length <= MAX_HISTORY_SIZE) {
     return;
@@ -178,17 +203,17 @@ function cleanupTransactionHistory(
 
   // Keep recent history and important undo points
   const keepCount = Math.floor(MAX_HISTORY_SIZE * 0.7); // Keep 70% of max size
-  const removeCount = txnValue.steps.length - keepCount;
-  
+  const _removeCount = txnValue.steps.length - keepCount;
+
   // Don't remove steps that are part of the current undo/redo chain
   const minKeepIndex = Math.max(0, activeUndoIndex - Math.floor(keepCount / 2));
-  
+
   if (minKeepIndex > 0) {
     txnValue.steps = txnValue.steps.slice(minKeepIndex);
     // Adjust undo indexes
     txnValue.undoStepIndexes = txnValue.undoStepIndexes
-      .map(index => index - minKeepIndex)
-      .filter(index => index >= 0);
+      .map((index) => index - minKeepIndex)
+      .filter((index) => index >= 0);
   }
 }
 

@@ -25,8 +25,9 @@ export function CompanySettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Company Name",
           },
           {
@@ -43,8 +44,9 @@ export function CompanySettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Address",
           },
           {
@@ -61,8 +63,9 @@ export function CompanySettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Contact Email",
           },
           {
@@ -80,8 +83,9 @@ export function CompanySettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Phone",
           },
           {
@@ -134,7 +138,7 @@ export function CompanySettings() {
             ],
             componentName: "Data",
             name: "saveState",
-            
+
             props: () => ({
               data: createStore({
                 isLoading: false,

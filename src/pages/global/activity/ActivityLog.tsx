@@ -4,7 +4,6 @@ import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/general/getApi";
 
-import { SchemaRenderer } from "../../SchemaRenderer";
 import { getActivityLogFormSchema } from "./functions/getActivityLogFormSchema";
 
 export function ActivityLog() {
@@ -55,7 +54,7 @@ export function ActivityLog() {
     gridStore?.[0].fetchTableData();
   };
 
-  const addSchema = getActivityLogFormSchema(onSuccess);
+  const _addSchema = getActivityLogFormSchema(onSuccess);
   const editSchema = getActivityLogFormSchema(onSuccess);
 
   return (

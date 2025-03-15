@@ -4,10 +4,12 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { getDriver } from "~/cypher/core/driver";
 import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
 import { addAdminRoleToUser } from "~/cypher/mutate/signup/addAdminRoleToUser";
-import { syncNodesAPICall } from "~/cypher/mutate/sync";
 
 import { createDatabase } from "./createDatabase";
-import { createDatabaseConstraints, createRootFolder } from "./createRootFolder";
+import {
+  createDatabaseConstraints,
+  createRootFolder,
+} from "./createRootFolder";
 import { createUserInUserDB } from "./createUserInDB";
 import { insertComponents } from "./insertComponents";
 
@@ -34,9 +36,9 @@ export async function subdomainRegister(
   const userDbSession = (await getDriver()).session({
     database: data.subDomain,
   });
-  await createDatabaseConstraints(userDbSession); 
+  await createDatabaseConstraints(userDbSession);
   const tx = userDbSession.beginTransaction();
-  
+
   try {
     await createUserInUserDB(
       tx,

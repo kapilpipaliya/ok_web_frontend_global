@@ -69,7 +69,7 @@ const content = [
     componentName: "Html",
     pos: 4,
     props: `return {
-      href: "${typeof window !== 'undefined' ? window.location.origin : ""}/admin/"
+      href: "${typeof window !== "undefined" ? window.location.origin : ""}/admin/"
     }`,
     target: "_blank",
     text: "Get Started",
@@ -78,8 +78,8 @@ const content = [
 
 export const welcomeEmailForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Sent to welcome new users after they have successfully completed the signup process",
+  description:
+    "Sent to welcome new users after they have successfully completed the signup process",
   key: "WelcomeEmail",
   title: "Welcome Email",
-
 };

@@ -1,4 +1,4 @@
-import type {GraphInterface, Vertex} from "~/lib/graph/graph";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
 export function getGlobalSettingVertex(
   graph: GraphInterface,

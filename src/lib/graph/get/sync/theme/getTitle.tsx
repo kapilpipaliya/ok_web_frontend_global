@@ -1,7 +1,7 @@
 import type { GraphInterface } from "~/lib/graph/graph";
 
+import { getGlobalSettingVertex } from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
 import { APP_NAME, APP_VERSION } from "~/pages/settings/constants";
-import {getGlobalSettingVertex} from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
 
 export function getTitle(title: string, graph?: GraphInterface) {
   const appName = () =>

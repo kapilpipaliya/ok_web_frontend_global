@@ -10,7 +10,8 @@ import {
   Switch,
 } from "solid-js";
 
-import { type Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { runEvent } from "../solid_blocks/tools";
@@ -50,7 +51,7 @@ export function FileUploader(props: FileUploaderProps) {
       setFiles(filesArray);
 
       // Create object URLs for each file
-      const urls = filesArray.map(file => URL.createObjectURL(file));
+      const urls = filesArray.map((file) => URL.createObjectURL(file));
       setPreviewUrls(urls);
 
       // Call handleFileSelect if provided
@@ -69,7 +70,7 @@ export function FileUploader(props: FileUploaderProps) {
 
   // Clean up object URLs when component unmounts
   onCleanup(() => {
-    previewUrls().forEach(url => URL.revokeObjectURL(url));
+    previewUrls().forEach((url) => URL.revokeObjectURL(url));
   });
 
   const handleDrop = (event: DragEvent) => {
@@ -94,13 +95,13 @@ export function FileUploader(props: FileUploaderProps) {
 
   return (
     <>
-        <button
-          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
-          onClick={handleFullBoxClick}
-          type="button"
-        >
-          {localProps.label || `Select ${localProps.multiple ? 'Files' : 'File'}`}
-        </button>
+      <button
+        class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+        onClick={handleFullBoxClick}
+        type="button"
+      >
+        {localProps.label || `Select ${localProps.multiple ? "Files" : "File"}`}
+      </button>
 
       <input
         accept="image/*, video/*"
@@ -113,7 +114,12 @@ export function FileUploader(props: FileUploaderProps) {
         type="file"
         {...others}
       />
-      <Show when={(files().length > 0 || previewUrls().length > 0) && !(localProps.hidePreview ?? true)}>
+      <Show
+        when={
+          (files().length > 0 || previewUrls().length > 0) &&
+          !(localProps.hidePreview ?? true)
+        }
+      >
         <div // NOSONAR
           class={`
         background-position:center
@@ -137,14 +143,14 @@ export function FileUploader(props: FileUploaderProps) {
                   {(file, index) => (
                     <div class="max-width:200px max-height:200px m:5px">
                       <Switch>
-                        <Match when={file && file.type.startsWith("image/")}>
+                        <Match when={file?.type.startsWith("image/")}>
                           <img
                             alt="Media"
                             class="border-radius:10px max-height:100% max-width:100%"
                             src={previewUrls()[index()]}
                           />
                         </Match>
-                        <Match when={file && file.type.startsWith("video/")}>
+                        <Match when={file?.type.startsWith("video/")}>
                           <video
                             class="border-radius:10px max-height:100% max-width:100%"
                             controls

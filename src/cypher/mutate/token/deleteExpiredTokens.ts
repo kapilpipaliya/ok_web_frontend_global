@@ -1,4 +1,4 @@
-import type {Session, Transaction} from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 export async function deleteExpiredTokens(
   session: Session | Transaction,

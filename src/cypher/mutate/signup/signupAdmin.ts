@@ -16,7 +16,7 @@ import { newAdminValidations } from "./newAdminValidations";
 export async function signupAdmin(
   tx: Transaction,
   data: SignupRequestData,
-  isSystemUser = false
+  isSystemUser = false,
 ) {
   // Check if the user already exists
   await newAdminValidations(tx, data.username, data.email);
@@ -25,7 +25,7 @@ export async function signupAdmin(
     email: data.email,
     emailConfirmed: isSystemUser,
     password: data.password,
-    username: data.username
+    username: data.username,
   });
 
   // Create Account vertex and AccountUser relationship
@@ -38,7 +38,7 @@ export async function signupAdmin(
   if (isSystemUser) {
     await createSystemSubdomain(tx, accountId);
     await createRootFolder(tx);
-    
+
     const response = await insertComponents(tx);
     if (!response.success) {
       throw new Error("Failed to insert component tree");
@@ -47,7 +47,7 @@ export async function signupAdmin(
     await saveAllEmailTemplates(tx);
   }
 
-  return {accountId, error: "", user};
+  return { accountId, error: "", user };
 }
 
 async function createAccount(

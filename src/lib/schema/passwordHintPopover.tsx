@@ -59,7 +59,8 @@ export function createPasswordHintPopoverContent(
               },
             },
             {
-              as: "span", componentName: "Html",
+              as: "span",
+              componentName: "Html",
               props: (options: FunctionArgumentType) => {
                 const validationState = options.dataContext.validationState;
                 const isValid =
@@ -122,8 +123,9 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
       {
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: label,
           },
           {
@@ -154,7 +156,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
     ],
     componentName: "Data",
     name: "helpIconState",
-    
+
     props: () => ({
       data: createStore({
         hasContent: false,
@@ -184,7 +186,7 @@ export function wrapPasswordLabelWithHint(
         attributes: [popoverWrapperSchema(actionElement, popoverContent)],
         componentName: "Data",
         name: "validationState",
-        
+
         props: () => ({
           data: createStore({
             conditions: PASSWORD_CONDITIONS.map((condition) => ({

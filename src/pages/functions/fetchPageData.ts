@@ -1,14 +1,12 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Id } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormData } from "~/components/form/functions/getFormData";
-import { fetchComponentData, fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
+import { fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
-import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
-import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 export interface FetchFormDataResult {
@@ -34,8 +32,6 @@ export async function fetchFormData(
   hasRequiredPermissions?: boolean,
   pageVertexName?: string,
 ): Promise<FetchFormDataResult> {
-
-
   if (formDataId) {
     return { formDataIdOverride: formDataId };
   }
@@ -51,14 +47,18 @@ export async function fetchFormData(
   try {
     const formDataResult = await getFormData(graph, id);
 
-    if (formDataResult.error || !Array.isArray(formDataResult.data?.result) || formDataResult.data.result.length === 0) {
+    if (
+      formDataResult.error ||
+      !Array.isArray(formDataResult.data?.result) ||
+      formDataResult.data.result.length === 0
+    ) {
       return { error: `No ${pageVertexName} found` };
     }
 
     // Find all Component vertices from the loaded data
-    const componentVertices = Object.values(formDataResult.data!.graph!.vertexes).filter(
-      (v) => v.L.includes("Component"),
-    );
+    const componentVertices = Object.values(
+      formDataResult.data!.graph!.vertexes,
+    ).filter((v) => v.L.includes("Component"));
 
     // Fetch data for all components if needed
     let componentData: null | ServerResult = null;
@@ -84,25 +84,24 @@ export async function fetchFormMetaData(
   let form: IFormMetaData | null = null;
   if (isDesignMode) {
     return { form: FormMetaData[pageVertexName!] };
-  } else {
-    form = FormMetaData.Form;
-    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-
-    const data = await fetchDataFromMG({
-      expression:
-        expression ??
-        (formId
-          ? `id:'${formId}'`
-          : `g:'${pageVertexName ?? "Form"}[${pageKeyName}]'`),
-      // [getGlobalStore(graph).P.url]: true,
-      incoming,
-      outgoing,
-    });
-
-    if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
-      return { error: `No ${pageVertexName} configured` };
-    }
-
-    return { data };
   }
-} 
+  form = FormMetaData.Form;
+  const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+
+  const data = await fetchDataFromMG({
+    expression:
+      expression ??
+      (formId
+        ? `id:'${formId}'`
+        : `g:'${pageVertexName ?? "Form"}[${pageKeyName}]'`),
+    // [getGlobalStore(graph).P.url]: true,
+    incoming,
+    outgoing,
+  });
+
+  if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
+    return { error: `No ${pageVertexName} configured` };
+  }
+
+  return { data };
+}

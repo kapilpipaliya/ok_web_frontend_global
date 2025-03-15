@@ -10,17 +10,17 @@ export async function createDatabaseConstraints(session: Session) {
     `CREATE CONSTRAINT unique_role IF NOT EXISTS
      FOR (r:Role) REQUIRE r.key IS UNIQUE`,
 
-     `CREATE CONSTRAINT unique_comp IF NOT EXISTS
+    `CREATE CONSTRAINT unique_comp IF NOT EXISTS
      FOR (c:Comp) REQUIRE c.key IS UNIQUE`,
 
     `CREATE CONSTRAINT unique_support_status IF NOT EXISTS
      FOR (s:SupportStatus) REQUIRE s.key IS UNIQUE`,
 
-     `CREATE CONSTRAINT unique_global_setting IF NOT EXISTS
+    `CREATE CONSTRAINT unique_global_setting IF NOT EXISTS
      FOR (g:GlobalSetting) REQUIRE g.key IS UNIQUE`,
 
-     `CREATE CONSTRAINT unique_theme IF NOT EXISTS
-     FOR (t:Theme) REQUIRE t.key IS UNIQUE`
+    `CREATE CONSTRAINT unique_theme IF NOT EXISTS
+     FOR (t:Theme) REQUIRE t.key IS UNIQUE`,
   ];
 
   try {

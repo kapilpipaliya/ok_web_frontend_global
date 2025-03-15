@@ -13,7 +13,7 @@ export async function getUserFromSession(
 ): Promise<undefined | Vertex> {
   let dbSession = null;
   let superDbSession = null;
-  
+
   try {
     const httpSession = await getHttpsSession();
     const sessionUser = httpSession?.data?.user;
@@ -41,7 +41,7 @@ export async function getUserFromSession(
       const superDbResult = await superDbSession.run(query, {
         uuid: sessionUser.P.uuid,
       });
-  
+
       if (superDbResult.records.length === 0) {
         return;
       }

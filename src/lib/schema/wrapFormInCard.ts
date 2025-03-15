@@ -21,7 +21,7 @@ export const wrapFormInCard = (formSchema: FormSchema) => {
                 e.preventDefault();
               },
             }),
-          }
+          },
         ],
         class: "bg:base-5 p:16 p:32@xs r:8 shadow:1|2|3|primary", // max-width:700px width:90%
         componentName: "Html",

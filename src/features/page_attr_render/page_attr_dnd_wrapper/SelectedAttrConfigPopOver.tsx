@@ -7,7 +7,7 @@ import {
 import { handleDragStart } from "~/features/page_designer/event_handler/handleDragStart";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
+import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { ComponentName } from "./ComponentName";
 import { DeleteButton } from "./DeleteButton";

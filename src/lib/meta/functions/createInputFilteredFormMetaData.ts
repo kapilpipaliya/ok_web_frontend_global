@@ -7,10 +7,7 @@ export function createInputFilteredFormMetaData(
     return attributes.reduce<FieldAttribute[]>((acc, attribute) => {
       const componentName = attribute.componentName;
 
-      if (
-        attribute.key ||
-        componentName === "DynamicTable"
-      ) {
+      if (attribute.key || componentName === "DynamicTable") {
         const newAttribute = { ...attribute };
 
         // Recursively filter nested attributes if they exist

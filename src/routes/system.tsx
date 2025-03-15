@@ -4,7 +4,6 @@ import { Link } from "@solidjs/meta";
 
 import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
 import { GetInitialData } from "~/GetInitialData";
-import { API } from "~/lib/api/endpoints";
 import { getCompanyCircularLogoUrl } from "~/lib/graph/get/sync/company/getCompanyCircularLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";

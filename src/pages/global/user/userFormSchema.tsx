@@ -26,8 +26,9 @@ export const userFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Email",
               validation: { required: true },
             },
@@ -49,8 +50,9 @@ export const userFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Name",
             },
             {
@@ -78,8 +80,9 @@ export const userFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Username",
             },
             {
@@ -100,8 +103,9 @@ export const userFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Role",
             },
             {
@@ -150,11 +154,15 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       showErrorToast(usernameError);
       return false;
     }
-    if ((evalExpression("->$0Role", {
-      graph: options.graph,
-      setGraph: options.setGraph,
-      vertexes: [formData],
-    }) as Vertex[]).length === 0) {
+    if (
+      (
+        evalExpression("->$0Role", {
+          graph: options.graph,
+          setGraph: options.setGraph,
+          vertexes: [formData],
+        }) as Vertex[]
+      ).length === 0
+    ) {
       showErrorToast("Please select at least one role");
       return false;
     }
@@ -210,8 +218,9 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Add New User",
       },
     ],
@@ -313,7 +322,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: () => ({
       data: createStore({
         isLoading: false,

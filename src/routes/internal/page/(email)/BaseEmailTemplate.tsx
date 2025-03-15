@@ -2,7 +2,11 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { API } from "~/lib/api/endpoints";
 
-export function getLogoSchema(containerClass = "", imageClass = "h:80px mb:24", borderClass = "fg:base-20 my:24") {
+export function getLogoSchema(
+  containerClass = "",
+  imageClass = "h:80px mb:24",
+  borderClass = "fg:base-20 my:24",
+) {
   return {
     as: "div",
     attributes: [
@@ -13,7 +17,7 @@ export function getLogoSchema(containerClass = "", imageClass = "h:80px mb:24", 
         pos: 1,
         props: `return {
         alt: "Logo",
-        src: "${typeof window !== 'undefined' ? window.location.origin : ""}${API.file.downloadCompanyRectangularLogoUrl}"
+        src: "${typeof window !== "undefined" ? window.location.origin : ""}${API.file.downloadCompanyRectangularLogoUrl}"
         }`,
       },
       {

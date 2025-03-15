@@ -15,7 +15,7 @@ export async function getSubDomain(host: string) {
     if (!subdomain || subdomain === "www" || subdomain === "system") {
       return { domain, subdomain: SYSTEM_DB_NAME };
     }
-    return { domain, subdomain};
+    return { domain, subdomain };
   }
 
   // Otherwise look up the domain in SubDomain vertex

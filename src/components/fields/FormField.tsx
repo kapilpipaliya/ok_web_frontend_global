@@ -6,7 +6,6 @@ import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
-import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
@@ -85,7 +84,8 @@ export function FormField(
     if (props.formDataId) {
       setFormStore("formDataId", props.formDataId);
       return;
-    } else if (id()) {
+    }
+    if (id()) {
       loadData();
     } else {
       // const defaultValues = form.attributes.reduce(
@@ -129,10 +129,7 @@ export function FormField(
     try {
       return;
       // TODO: make this work
-      const { data, error } = await getFormData(
-        graph,
-        id()!,
-      );
+      const { data, error } = await getFormData(graph, id()!);
 
       if (error || !Array.isArray(data?.result) || data.result.length === 0) {
         setFormStore("error", `No ${label()} found`);

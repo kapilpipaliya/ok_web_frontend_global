@@ -7,6 +7,7 @@ import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
+import { MetaTitle } from "~/components/fields/MetaTitle";
 import { ZIndex } from "~/components/fields/ZIndex";
 import {
   DesignerLayoutStoreContext,
@@ -20,7 +21,6 @@ import {
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/core/vertex";
-import {MetaTitle} from "~/components/fields/MetaTitle";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 

@@ -15,10 +15,10 @@ import { validateUsername } from "~/lib/validation/validateUsername";
 import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect";
 import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
+import { getErrorSchema } from "../../lib/schema/getErrorSchema";
+import { getTitleSchema } from "../../lib/schema/getTitleSchema";
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
-import { getTitleSchema } from "../../lib/schema/getTitleSchema";
-import { getErrorSchema } from "../../lib/schema/getErrorSchema";
 
 export function SignupForm() {
   const [graph] = useGraph();
@@ -94,8 +94,9 @@ export function SignupForm() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Username",
               },
               {
@@ -122,15 +123,18 @@ export function SignupForm() {
                         }
                       },
                       onMount: () => {
-                        if (options.ref && options.ref() instanceof HTMLInputElement) {
+                        if (
+                          options.ref &&
+                          options.ref() instanceof HTMLInputElement
+                        ) {
                           options.ref()?.focus();
                         }
                       },
                     }),
-                    validation: { 
+                    validation: {
                       minLength: 4,
                       required: true,
-                      validate: validateUsername
+                      validate: validateUsername,
                     },
                   },
                 ],
@@ -138,8 +142,9 @@ export function SignupForm() {
               },
               getErrorSchema("username"),
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Email",
               },
               {
@@ -180,11 +185,11 @@ export function SignupForm() {
                     validation: {
                       email: true,
                       required: true,
-                      validate: validateEmail
+                      validate: validateEmail,
                     },
-                  }
+                  },
                 ],
-                componentName: "Html"
+                componentName: "Html",
               },
               getErrorSchema("email"),
               wrapPasswordLabelWithHint("Password", "password"),
@@ -242,7 +247,7 @@ export function SignupForm() {
                     validation: {
                       minLength: 8,
                       required: true,
-                      validate: validatePassword
+                      validate: validatePassword,
                     },
                   },
                   {
@@ -297,12 +302,13 @@ export function SignupForm() {
                 }),
                 type: "button",
               },
-            ], componentName: "Html",
+            ],
+            componentName: "Html",
           },
         ],
         componentName: "Data",
         name: "submitState",
-        
+
         props: () => ({
           data: createStore({
             isLoading: false,
@@ -313,8 +319,9 @@ export function SignupForm() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: "color:grey",
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Already have an account? ",
           },
           {

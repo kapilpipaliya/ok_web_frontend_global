@@ -69,8 +69,8 @@ const content = [
 
 export const twoFactorAuthForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Sent when two-factor authentication is required, containing a verification code",
+  description:
+    "Sent when two-factor authentication is required, containing a verification code",
   key: "TwoFactorAuth",
   title: "Two-Factor Authentication Code",
-
 };

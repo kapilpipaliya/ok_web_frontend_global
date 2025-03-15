@@ -9,12 +9,12 @@ import { redoTxn } from "./redoTxn";
 
 /**
  * Performs a redo operation on a transaction, restoring previously undone changes.
- * 
+ *
  * The redo operation:
  * 1. Moves forward to the next undo checkpoint if one exists
  * 2. Otherwise moves forward one step
  * 3. Applies all steps between current position and target position
- * 
+ *
  * @param txnId - Transaction ID to redo
  * @param graph - Current graph state
  * @param setGraph - Function to update graph state
@@ -35,7 +35,7 @@ export function redo(
 
   // Find next undo checkpoint or step
   let nextUndoIndex = txnValue.undoStepIndexes.find(
-    (index) => index > activeUndoIndex
+    (index) => index > activeUndoIndex,
   );
 
   // If no checkpoint found, move forward one step
@@ -51,7 +51,7 @@ export function redo(
   txnValue.activeUndoIndex = nextUndoIndex;
   for (const step of txnValue.steps.slice(
     activeUndoIndex + 1,
-    nextUndoIndex + 1
+    nextUndoIndex + 1,
   )) {
     redoTxn(step, graph, setGraph);
   }
@@ -64,11 +64,11 @@ export function redo(
 
 /**
  * Checks if a redo operation is allowed for the given transaction.
- * 
+ *
  * Validates:
  * 1. Transaction exists
  * 2. There are steps available to redo
- * 
+ *
  * @param txnId - Transaction ID to check
  * @param graph - Current graph state
  * @returns boolean indicating if redo is allowed
@@ -78,10 +78,14 @@ export function redoAllowed(
   graph: Store<GraphInterface>,
 ): boolean {
   // Basic validation
-  if (!txnId) return false;
-  
+  if (!txnId) {
+    return false;
+  }
+
   const txnVertex = graph.vertexes[`txn${txnId}`];
-  if (!txnVertex) return false;
+  if (!txnVertex) {
+    return false;
+  }
 
   const lastTxnIndex = getLastTxnIndex(txnId, graph);
   // Check if there are steps to redo

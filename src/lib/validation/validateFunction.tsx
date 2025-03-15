@@ -4,7 +4,10 @@
  * @returns An object with validation result and error message if any
  */
 
-export function validateFunction(value: string): { error?: string; isValid: boolean; } {
+export function validateFunction(value: string): {
+  error?: string;
+  isValid: boolean;
+} {
   try {
     if (!value) {
       return { isValid: true };

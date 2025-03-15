@@ -41,8 +41,9 @@ export const emailAuditFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Subject",
               validation: { required: true },
             },
@@ -68,8 +69,9 @@ export const emailAuditFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Recipients",
               validation: { required: true },
             },
@@ -95,8 +97,9 @@ export const emailAuditFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Content",
               validation: { required: true },
             },
@@ -133,8 +136,9 @@ export const emailAuditFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Status",
             },
             {
@@ -212,8 +216,9 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Add New Email Audit",
       },
     ],
@@ -304,7 +309,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: () => ({
       data: createStore({
         isLoading: false,

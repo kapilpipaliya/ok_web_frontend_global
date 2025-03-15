@@ -45,7 +45,7 @@ export function FunctionEditor(props: {
   const evaluateOtherProps = (value: string) => {
     const validation = validateFunction(value);
     setIsFunctionValid(validation.isValid);
-    
+
     if (validation.isValid) {
       props.setPropertyValue(
         { P: { key: "props" } } as unknown as Vertex,

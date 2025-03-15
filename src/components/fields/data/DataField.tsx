@@ -1,11 +1,11 @@
 import { createAsync } from "@solidjs/router";
 import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
+import type { ServerResult } from "~/cypher/types/ServerResult";
+
 import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsAPICall";
-import { ServerResult } from "~/cypher/types/ServerResult";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
-import { getCollection } from "~/features/page_attr_render/utils/getCollection";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
@@ -41,7 +41,6 @@ export const DataField = (props: {
     return getSelectionOptionsAPICall([data()], props.expression);
   });
 
-
   createEffect(() => {
     if (!props.expression) {
       return;
@@ -55,7 +54,9 @@ export const DataField = (props: {
     }
 
     if (isValidResponse(selectionOptionsData()!)) {
-      setGraphData(graph, setGraph, selectionOptionsData()!.graph!, {skipExisting: true});
+      setGraphData(graph, setGraph, selectionOptionsData()!.graph!, {
+        skipExisting: true,
+      });
       setOptions(
         evalExpression(props.expression, {
           graph,

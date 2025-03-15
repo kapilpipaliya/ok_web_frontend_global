@@ -26,8 +26,9 @@ const editFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Name",
               validation: { required: true },
             },
@@ -46,8 +47,9 @@ const editFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Description",
             },
             {
@@ -90,19 +92,25 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
     try {
       options.dataContext.modalState[1]("isLoading", true);
 
-    //   const currentItem = fileManagerStore.selectedItem;
-    //   if (!currentItem) {
-    //     showErrorToast("No item selected");
-    //     return;
-    //   }
+      //   const currentItem = fileManagerStore.selectedItem;
+      //   if (!currentItem) {
+      //     showErrorToast("No item selected");
+      //     return;
+      //   }
 
       const newFormTxnId = generateNewTxnId(options.graph, options.setGraph);
-      
+
       // Update the vertex properties
-      mergeVertexProperties(newFormTxnId, formData.id, options.graph, options.setGraph, {
-        description: formData.P.description,
-        fileName: formData.P.fileName,
-      });
+      mergeVertexProperties(
+        newFormTxnId,
+        formData.id,
+        options.graph,
+        options.setGraph,
+        {
+          description: formData.P.description,
+          fileName: formData.P.fileName,
+        },
+      );
 
       const commitData = commitTxn(newFormTxnId, options.graph);
 
@@ -138,8 +146,9 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Edit Item",
       },
     ],
@@ -233,7 +242,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: () => ({
       data: createStore({
         isLoading: false,
@@ -243,4 +252,4 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
   };
 
   return { attributes: [schema], key: "Edit" } as IFormMetaData;
-}; 
+};

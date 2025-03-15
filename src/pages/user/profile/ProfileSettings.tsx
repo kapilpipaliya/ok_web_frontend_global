@@ -55,13 +55,15 @@ export function ProfileSettings() {
                 as: "div",
                 attributes: [
                   {
+                    as: "span",
                     class: "fg:base-80",
-                    as: "span", componentName: "Html",
+                    componentName: "Html",
                     text: "Important!",
                   },
                   {
+                    as: "span",
                     class: "ml:4 mt:4px fg:base-60",
-                    as: "span", componentName: "Html",
+                    componentName: "Html",
                     text: "Changing your username or email will update them across all your projects.",
                   },
                 ],
@@ -82,8 +84,9 @@ export function ProfileSettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Username",
             validation: { required: true },
           },
@@ -102,8 +105,9 @@ export function ProfileSettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             key: "emailLabel",
             text: "Email Address",
           },
@@ -212,7 +216,7 @@ export function ProfileSettings() {
         ],
         componentName: "Data",
         name: "saveState",
-        
+
         props: () => ({
           data: createStore({
             isLoading: false,

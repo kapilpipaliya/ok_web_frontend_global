@@ -1,7 +1,8 @@
-import type {Session, Transaction} from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
-import {convertNodeToJson} from "~/cypher/conversion/convertNodeToJson";
-import {TokenData} from "~/cypher/mutate/token/TokenData";
+import type { TokenData } from "~/cypher/mutate/token/TokenData";
+
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 export async function getAndConsumeToken(
   session: Session | Transaction,
@@ -13,7 +14,7 @@ export async function getAndConsumeToken(
     RETURN t
   `;
 
-  const result = await session.run(query, {hashedToken});
+  const result = await session.run(query, { hashedToken });
   if (result.records.length === 0) {
     return null;
   }

@@ -17,16 +17,15 @@ import {
 import {
   addNewVertex,
   deleteVertex,
-  mergeVertexProperties,
   replaceVertexProperties,
   updateVertexIdsToNew,
 } from "../../mutate/core/vertex";
 
 /**
  * Reverts a transaction step by applying its inverse operation to the graph.
- * 
+ *
  * This function handles the inverse of various graph mutation actions:
- * - Vertex operations: 
+ * - Vertex operations:
  *   - insert → delete
  *   - delete → insert
  *   - merge/replace → restore original properties
@@ -34,7 +33,7 @@ import {
  *   - insert → delete
  *   - delete → insert
  *   - replace properties/start/end → restore original values
- * 
+ *
  * @param txnDetail - Transaction step details containing the action and data
  * @param graph - Current graph state
  * @param setGraph - Function to update graph state
@@ -48,7 +47,9 @@ export function undoTxn(
 
   // Process each action in the transaction
   for (const action in actions) {
-    if (!actions.hasOwnProperty(action)) continue;
+    if (!actions.hasOwnProperty(action)) {
+      continue;
+    }
 
     // Map old IDs to new IDs where needed
     const actualVertexId = getVertexOldIdToNewIdMap(graph)[id] || id;
@@ -62,7 +63,12 @@ export function undoTxn(
 
       case "deleteVertex":
         // Restore deleted vertex
-        addNewVertex(0, updateVertexIdsToNew(data as Vertex, graph, false), graph, setGraph);
+        addNewVertex(
+          0,
+          updateVertexIdsToNew(data as Vertex, graph, false),
+          graph,
+          setGraph,
+        );
         break;
 
       // Vertex Operations
@@ -97,12 +103,24 @@ export function undoTxn(
 
       case "replaceEdgeEnd":
         // Restore original edge end
-        replaceEdgeEnd(0, actualEdgeId, graph, setGraph, (originalData as Edge).E);
+        replaceEdgeEnd(
+          0,
+          actualEdgeId,
+          graph,
+          setGraph,
+          (originalData as Edge).E,
+        );
         break;
 
       case "replaceEdgeStart":
         // Restore original edge start
-        replaceEdgeStart(0, actualEdgeId, graph, setGraph, (originalData as Edge).S);
+        replaceEdgeStart(
+          0,
+          actualEdgeId,
+          graph,
+          setGraph,
+          (originalData as Edge).S,
+        );
         break;
 
       default:

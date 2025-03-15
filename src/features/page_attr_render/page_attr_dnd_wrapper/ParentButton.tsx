@@ -9,7 +9,7 @@ import {
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
+import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 interface ParentButtonProps {
   item: Vertex;

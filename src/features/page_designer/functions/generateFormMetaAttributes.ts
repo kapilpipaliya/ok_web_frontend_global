@@ -1,16 +1,15 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
-
-import { validateInput } from "~/features/page_designer/settings/properties/validations/validateInput";
-import { evalExpression } from "~/lib/expression_eval";
-
 import type {
   FieldAttribute,
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
+import { validateInput } from "~/features/page_designer/settings/properties/validations/validateInput";
+import { evalExpression } from "~/lib/expression_eval";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+
 import { uniqueNameKey } from "../constants/constant";
 import { getChildrenAttrs } from "./getChildrenAttrs";
 import { getComponentLabel } from "./getComponentLabel";
@@ -86,8 +85,7 @@ export function generateFormMetaAttributes(
 
     if (
       vertex !== rootVertex &&
-      (vertex.P.as === "input" ||
-        componentName === "DynamicTable")
+      (vertex.P.as === "input" || componentName === "DynamicTable")
     ) {
       result.push({
         id: vertex.id,

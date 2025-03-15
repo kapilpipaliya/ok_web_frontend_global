@@ -1,6 +1,6 @@
-import type {createStore} from "solid-js/store";
+import type { createStore } from "solid-js/store";
 
-import {createContext, useContext} from "solid-js";
+import { createContext, useContext } from "solid-js";
 
 export type Id = string;
 

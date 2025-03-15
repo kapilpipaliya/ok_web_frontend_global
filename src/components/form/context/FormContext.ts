@@ -4,7 +4,6 @@ import { createContext, useContext } from "solid-js";
 
 import type { IDToRuleMap } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import type { GraphInterface, Id } from "~/lib/graph/graph";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";

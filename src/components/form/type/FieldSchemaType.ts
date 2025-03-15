@@ -14,6 +14,7 @@ import type { FormStoreObject } from "../context/FormContext";
 export type ComponentNameType = (options: FunctionArgumentType) => string;
 
 export interface FunctionArgumentBaseType {
+  clearAllErrors: () => void;
   data: Vertex;
   dataContext: Record<string | symbol, unknown>;
   error: (key?: string) => string | undefined;
@@ -37,7 +38,6 @@ export interface FunctionArgumentBaseType {
   parentMeta: Vertex;
   parentRenderContext: PageRenderObject;
   readOnly: boolean | null | undefined;
-  clearAllErrors: () => void;
   ref: Accessor<HTMLDivElement | null>;
   revertTransaction: (txnId: number) => void;
   revertTransactionUpToIndex: (txnId: number, txnIndex: number) => void;

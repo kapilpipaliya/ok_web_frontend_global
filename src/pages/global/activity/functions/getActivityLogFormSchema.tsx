@@ -83,8 +83,9 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Action",
                 validation: { required: true },
               },
@@ -103,8 +104,9 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Entity Type",
                 validation: { required: true },
               },
@@ -123,8 +125,9 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Entity ID",
                 validation: { required: true },
               },
@@ -143,8 +146,9 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "User",
               },
               {
@@ -161,8 +165,9 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Description",
               },
               {
@@ -187,8 +192,9 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Add New Activity Log",
       },
     ],
@@ -283,7 +289,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: () => ({
       data: createStore({
         isLoading: false,

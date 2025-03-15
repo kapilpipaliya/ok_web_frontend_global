@@ -6,11 +6,9 @@ import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
-import { postAPI } from "~/lib/api/general/postApi";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
-import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;
@@ -19,8 +17,8 @@ export interface AuthenticatedMenuProps {
 export function AuthenticatedMenu(
   props: Readonly<AuthenticatedMenuProps>,
 ): JSX.Element {
-  const [graph, setGraph] = useGraph();
-  const navigate = useNavigate();
+  const [graph, _setGraph] = useGraph();
+  const _navigate = useNavigate();
   const { showLoadingToast } = useToast();
 
   const isSystemSubDomain = () =>

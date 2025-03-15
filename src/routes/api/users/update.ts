@@ -5,11 +5,11 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/checkPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { validateNonSystemUser } from "~/cypher/permissions/validateNonSystemUser";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import { validateUniqueFields } from "~/routes/api/auth/(profile)/functions/validateField";
-import { validateNonSystemUser } from "~/cypher/permissions/validateNonSystemUser";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {
@@ -162,7 +162,10 @@ async function addNewRoles(
   );
 }
 
-async function getExistingRoleIds(dbSession: Session | Transaction, uuid: string) {
+async function getExistingRoleIds(
+  dbSession: Session | Transaction,
+  uuid: string,
+) {
   const result = await dbSession.run(
     `
     MATCH (u:User {uuid: $uuid})-[:UserRole]->(role:Role)

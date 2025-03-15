@@ -30,8 +30,9 @@ const folderFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Folder Name",
               validation: { required: true },
             },
@@ -50,8 +51,9 @@ const folderFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Description",
             },
             {
@@ -177,8 +179,9 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Add New Folder",
       },
     ],
@@ -280,7 +283,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: () => ({
       data: createStore({
         isLoading: false,
@@ -290,4 +293,4 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
   };
 
   return { attributes: [schema], key: "Folder" } as IFormMetaData;
-}; 
+};

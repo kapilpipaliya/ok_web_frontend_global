@@ -23,10 +23,10 @@ interface EmailOptions {
 export async function sendEmail(options: EmailOptions) {
   const { attachmentName, attachmentPath, content, subDomain, subject, to } =
     options;
-  
+
   // Process HTML content with juice to inline CSS
   const processedContent = juice(content);
-  
+
   const dbSettings = await getEmailSettings(subDomain);
   let emailInfo;
   try {
@@ -220,7 +220,7 @@ async function saveEmailToDatabase(
     attachmentPath?: string;
     content: string;
     dbSettings: null | Vertex;
-    emailInfo: nodemailer.SentMessageInfo | void;
+    emailInfo: nodemailer.SentMessageInfo | undefined;
     subject: string;
     to: string;
   },
@@ -244,7 +244,8 @@ async function saveEmailToDatabase(
         attachmentPath: attachmentPath || null,
         content,
         from: dbSettings?.P.from || process.env.SMTP_FROM || null,
-        messageId: emailInfo && 'messageId' in emailInfo ? emailInfo.messageId : null,
+        messageId:
+          emailInfo && "messageId" in emailInfo ? emailInfo.messageId : null,
         status: emailInfo ? "sent" : "failed",
         subject,
         to,

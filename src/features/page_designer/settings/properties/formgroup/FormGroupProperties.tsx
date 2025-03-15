@@ -338,7 +338,10 @@ function moveClassToLast(
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
   const componentName = selectedAttr()?.P.componentName;
   const isForm = formStoreVertex()?.L[0] === "Form";
-  const isFormField = isForm && selectedAttr()?.P.as === "input" || selectedAttr()?.P.as === "textarea" || ["CheckBox", "Select", "MultiSelect", "TextInput"].includes(componentName);
+  const isFormField =
+    (isForm && selectedAttr()?.P.as === "input") ||
+    selectedAttr()?.P.as === "textarea" ||
+    ["CheckBox", "MultiSelect", "Select", "TextInput"].includes(componentName);
 
   const nonCssVertices = otherVertices.filter(
     (vertex) => !vertex.P.key.endsWith("Class"),

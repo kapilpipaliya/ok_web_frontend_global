@@ -4,7 +4,10 @@ import { batch } from "solid-js";
 
 import { validateInput } from "~/features/page_designer/settings/properties/validations/validateInput";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import {
+  addNewVertex,
+  mergeVertexProperties,
+} from "~/lib/graph/mutate/core/vertex";
 
 import { commitTxn } from "../../transaction/core/commitTxn";
 import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
@@ -30,9 +33,18 @@ export function setValueGlobal(
   let error = "" as string | undefined;
   batch(() => {
     if (metaVertex.P.validation) {
-      error = validateInput(metaVertex.P.validation, data as number | string, metaVertex.P.key, metaVertex.P.label);
+      error = validateInput(
+        metaVertex.P.validation,
+        data as number | string,
+        metaVertex.P.key,
+        metaVertex.P.label,
+      );
       const errorVertexId = `${dataVertex.id}-error`;
-      if (!graph.vertexes[errorVertexId]) {
+      if (graph.vertexes[errorVertexId]) {
+        mergeVertexProperties(0, errorVertexId, graph, setGraph, {
+          [metaVertex.P.key]: error || "",
+        });
+      } else {
         addNewVertex(
           0,
           {
@@ -45,12 +57,8 @@ export function setValueGlobal(
             },
           },
           graph,
-          setGraph
+          setGraph,
         );
-      } else {
-        mergeVertexProperties(0, errorVertexId, graph, setGraph, {
-          [metaVertex.P.key]: error || "",
-        });
       }
     }
 

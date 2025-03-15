@@ -89,9 +89,9 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
           editSchema={
             fileManagerStore.editSchema ??
             (fileManagerStore.parentVertexLabel === "Comp" ||
-              fileManagerStore.parentVertexLabel === "Perm"
-                ? getComponentFormSchema(
-                    () => {},
+            fileManagerStore.parentVertexLabel === "Perm"
+              ? getComponentFormSchema(
+                  () => {},
                   () => {},
                   fileManagerStore.parentVertexLabel as "Comp" | "Perm",
                 )

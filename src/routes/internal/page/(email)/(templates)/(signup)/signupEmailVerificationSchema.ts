@@ -67,8 +67,8 @@ const content = [
 
 export const signupEmailVerificationForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Sent during the signup process to verify the user's email address, containing a verification link valid for 24 hours",
+  description:
+    "Sent during the signup process to verify the user's email address, containing a verification link valid for 24 hours",
   key: "SignupEmailVerification",
   title: "Verify Your Email Address",
-
 };

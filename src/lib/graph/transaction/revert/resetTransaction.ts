@@ -18,10 +18,5 @@ export function resetTransaction(
   if (initialIndex === undefined) {
     return;
   }
-  revertTransactionUpToIndex(
-    txnId,
-    initialIndex - 1,
-    graph,
-    setGraph,
-  );
-} 
+  revertTransactionUpToIndex(txnId, initialIndex - 1, graph, setGraph);
+}

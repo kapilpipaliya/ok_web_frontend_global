@@ -1,5 +1,3 @@
-import type { Session } from "neo4j-driver";
-
 import type { Vertex } from "~/lib/graph/graph";
 
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
@@ -27,7 +25,7 @@ export async function setupSuperUser(): Promise<{
   try {
     const databases = await getAllDatabases();
     const superDatabaseExists = databases.includes(SYSTEM_DB_NAME);
-    
+
     if (superDatabaseExists) {
       return { error: "Super user already exists", status: 400, user: null };
     }

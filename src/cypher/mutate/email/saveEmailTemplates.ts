@@ -1,4 +1,4 @@
-import type { Session, Transaction } from "neo4j-driver";
+import type { Transaction } from "neo4j-driver";
 
 import { createAppState } from "~/createAppState";
 import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
@@ -43,28 +43,28 @@ export function getEmailTemplateSchema(templateName: string) {
 }
 
 export async function saveAllEmailTemplates(tx: Transaction) {
-    for (const [templateName, schema] of Object.entries(EMAIL_TEMPLATES)) {
-      const [graph, setGraph] = createAppState();
-      const txnId = generateNewTxnId(graph, setGraph);
+  for (const [templateName, schema] of Object.entries(EMAIL_TEMPLATES)) {
+    const [graph, setGraph] = createAppState();
+    const txnId = generateNewTxnId(graph, setGraph);
 
-      const { error } = createMeta(
-        schema,
-        txnId,
-        graph,
-        setGraph,
-        "EmailTemplate",
-      );
-      if (error) {
-        throw new APIError(`Failed to create meta for ${templateName}`, 500);
-      }
-
-      const commitData = commitTxn(txnId, graph);
-      if (!commitData) {
-        throw new APIError(`Failed to upload ${templateName} template`, 500);
-      }
-
-      await mutateData(commitData, tx);
+    const { error } = createMeta(
+      schema,
+      txnId,
+      graph,
+      setGraph,
+      "EmailTemplate",
+    );
+    if (error) {
+      throw new APIError(`Failed to create meta for ${templateName}`, 500);
     }
 
-    return { success: true };
+    const commitData = commitTxn(txnId, graph);
+    if (!commitData) {
+      throw new APIError(`Failed to upload ${templateName} template`, 500);
+    }
+
+    await mutateData(commitData, tx);
+  }
+
+  return { success: true };
 }

@@ -1,9 +1,9 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
-import { FormStoreObject } from "~/components/form/context/FormContext";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { createAppState } from "~/createAppState";
@@ -14,7 +14,10 @@ import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
 import { STYLES } from "~/pages/settings/constants";
 
-import {type PageLayoutObject, useDesignerLayoutStore} from "../../context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerLayoutStore,
+} from "../../context/LayoutContext";
 import { ComponentItem } from "./ComonentItem";
 import { getCompChildren } from "./getCompChildren";
 export function ComponentList(props: {
@@ -95,7 +98,7 @@ export function ComponentList(props: {
     setIsFetchingData(false);
   });
 
-    const showComponentChildren = () => {
+  const showComponentChildren = () => {
     return formStoreVertex()?.P.formId === "Component";
   };
 
@@ -107,12 +110,14 @@ export function ComponentList(props: {
         ? getCompChildren([rootCompVertex()!], props.edgeName, graph)
         : []);
     const query = searchQuery().toLowerCase();
-    
+
     // First filter by component type if showComponentChildren is true
-    const typeFiltered = !showComponentChildren()
-      ? children.filter((child) => (child.P.key as string) !== "ComponentChildren")
-      : children;
-    
+    const typeFiltered = showComponentChildren()
+      ? children
+      : children.filter(
+          (child) => (child.P.key as string) !== "ComponentChildren",
+        );
+
     // Then filter by search query
     return typeFiltered
       .filter((child) =>

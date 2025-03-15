@@ -1,10 +1,9 @@
 import { createAsync, useNavigate } from "@solidjs/router";
-import { createEffect, createSignal, Match, type ParentProps, Show, Switch } from "solid-js";
+import { createEffect, Match, type ParentProps, Show, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 
-import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
 import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 
@@ -61,11 +60,14 @@ export function GetInitialData(props: GetInitialDataProps) {
       );
     }
   };
-  const data = createAsync(async () => {
-    const result = await fetchData(props.authenticate);
-    setData(result.initialData, result.userData as UserData);
-    return result;
-  }, {deferStream: true});
+  const data = createAsync(
+    async () => {
+      const result = await fetchData(props.authenticate);
+      setData(result.initialData, result.userData as UserData);
+      return result;
+    },
+    { deferStream: true },
+  );
   createEffect(() => {
     if (data()) {
       setData(data()!.initialData, data()!.userData as UserData);
@@ -78,10 +80,10 @@ export function GetInitialData(props: GetInitialDataProps) {
         {/* <Match when={!data()}>
           <LoaderNew />
         </Match> */}
-        <Match when={props.authenticate && !(data()?.userData as UserData)?.user}>
-          <div class="bg:error-20 p:1rem">
-            Not Authorized
-          </div>
+        <Match
+          when={props.authenticate && !(data()?.userData as UserData)?.user}
+        >
+          <div class="bg:error-20 p:1rem">Not Authorized</div>
         </Match>
         <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
           <div class="bg:error p:1">

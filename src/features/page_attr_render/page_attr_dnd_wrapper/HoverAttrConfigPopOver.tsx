@@ -4,7 +4,7 @@ import { useZIndex } from "~/components/fields/ZIndex";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { iconMap } from "~/lib/ui/iconMap";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
+import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { ComponentName } from "./ComponentName";
 

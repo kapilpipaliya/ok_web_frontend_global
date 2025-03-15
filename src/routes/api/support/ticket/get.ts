@@ -39,19 +39,23 @@ export async function POST({ request }: APIEvent) {
 
     const { incoming, outgoing } = getEdgesFromRowsAttr([
       {
-        as: "span", componentName: "Html",
+        as: "span",
+        componentName: "Html",
         key: "name",
       },
       {
-        as: "span", componentName: "Html",
+        as: "span",
+        componentName: "Html",
         key: "email",
       },
       {
-        as: "span", componentName: "Html",
+        as: "span",
+        componentName: "Html",
         key: "subject",
       },
       {
-        as: "span", componentName: "Html",
+        as: "span",
+        componentName: "Html",
         key: "message",
       },
       {
@@ -60,7 +64,8 @@ export async function POST({ request }: APIEvent) {
         key: "SupportStatus",
       },
       {
-        as: "span", componentName: "Html",
+        as: "span",
+        componentName: "Html",
         key: "createdAt",
       },
       {

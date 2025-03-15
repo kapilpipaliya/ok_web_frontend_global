@@ -2,7 +2,6 @@ import type { RouteSectionProps } from "@solidjs/router";
 
 import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
 import { GetInitialData } from "~/GetInitialData";
-import { API } from "~/lib/api/endpoints";
 import { useGraph } from "~/lib/graph/graph";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";

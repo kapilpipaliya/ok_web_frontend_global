@@ -15,9 +15,9 @@ export function getComponentTree(): ComponentNode[] {
   - Meta
   - ComponentChildren
 `;
-// - Table
-// - Transition
-// - TransitionGroup
+  // - Table
+  // - Transition
+  // - TransitionGroup
   const parsedYaml: ParsedYamlNode[] = parse(yamlContent);
   return cleanFormat(convertToRequiredFormat(parsedYaml));
 }

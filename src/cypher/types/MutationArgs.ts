@@ -1,4 +1,4 @@
-import { Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
 
 export interface MutationArgs {
   edgeIdMap: [Id, Id][];

@@ -1,4 +1,4 @@
-import type {Session, Transaction} from "neo4j-driver";
+import type { Session, Transaction } from "neo4j-driver";
 
 export async function saveToken(
   session: Session | Transaction,

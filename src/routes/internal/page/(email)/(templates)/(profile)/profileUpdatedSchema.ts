@@ -46,7 +46,7 @@ const content = [
     pos: 3,
     props: `return {
       // href: window.location.origin + "/admin/UserSettings",
-      href: "${typeof window !== 'undefined' ? window.location.origin : ""}/"
+      href: "${typeof window !== "undefined" ? window.location.origin : ""}/"
     }`,
     target: "_blank",
     text: "View Profile",
@@ -55,8 +55,8 @@ const content = [
 
 export const profileUpdatedForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Confirmation email sent after a user has made changes to their profile information",
+  description:
+    "Confirmation email sent after a user has made changes to their profile information",
   key: "ProfileUpdated",
   title: "Profile Updated Successfully",
-
 };

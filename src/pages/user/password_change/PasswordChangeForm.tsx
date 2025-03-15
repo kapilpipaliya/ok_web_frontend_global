@@ -87,7 +87,7 @@ export function PasswordChangeForm() {
             ],
             componentName: "Data",
             name: "saveState",
-            
+
             props: () => ({
               data: createStore({
                 isLoading: false,

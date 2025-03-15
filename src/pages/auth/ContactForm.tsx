@@ -78,7 +78,8 @@ export function ContactForm() {
     attributes: [
       {
         as: "h1",
-        class: SETTINGS_CONSTANTS.TITLE_CLASS, componentName: "Html",
+        class: SETTINGS_CONSTANTS.TITLE_CLASS,
+        componentName: "Html",
         text: "Contact Us",
       },
       getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
@@ -87,7 +88,8 @@ export function ContactForm() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS, componentName: "Html",
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Html",
             text: "Full Name",
             validation: { required: true },
           },
@@ -101,7 +103,10 @@ export function ContactForm() {
                 placeholder: "Your name",
                 props: (options: FunctionArgumentType) => ({
                   onMount: () => {
-                    if (options.ref && options.ref() instanceof HTMLInputElement) {
+                    if (
+                      options.ref &&
+                      options.ref() instanceof HTMLInputElement
+                    ) {
                       options.ref()?.focus();
                     }
                   },
@@ -111,12 +116,13 @@ export function ContactForm() {
                   minLength: 2,
                   regex: {
                     enabled: true,
-                    message: "Name can only contain letters, spaces, and hyphens",
-                    value: "^[a-zA-Z\\s-]{2,100}$"
+                    message:
+                      "Name can only contain letters, spaces, and hyphens",
+                    value: "^[a-zA-Z\\s-]{2,100}$",
                   },
-                  required: true
+                  required: true,
                 },
-              }
+              },
             ],
             componentName: "Html",
           },
@@ -130,7 +136,8 @@ export function ContactForm() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS, componentName: "Html",
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Html",
             text: "Email Address",
             validation: { required: true },
           },
@@ -146,9 +153,9 @@ export function ContactForm() {
                 validation: {
                   email: true,
                   required: true,
-                  validate: validateEmail
+                  validate: validateEmail,
                 },
-              }
+              },
             ],
             componentName: "Html",
           },
@@ -162,7 +169,8 @@ export function ContactForm() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS, componentName: "Html",
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Html",
             text: "Subject",
             validation: { required: true },
           },
@@ -177,9 +185,9 @@ export function ContactForm() {
                 validation: {
                   maxLength: 200,
                   minLength: 3,
-                  required: true
+                  required: true,
                 },
-              }
+              },
             ],
             componentName: "Html",
           },
@@ -193,7 +201,8 @@ export function ContactForm() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS, componentName: "Html",
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Html",
             text: "Message",
             validation: { required: true },
           },
@@ -208,9 +217,9 @@ export function ContactForm() {
                 validation: {
                   maxLength: 5000,
                   minLength: 10,
-                  required: true
+                  required: true,
                 },
-              }
+              },
             ],
             componentName: "Html",
           },
@@ -268,7 +277,7 @@ export function ContactForm() {
             ],
             componentName: "Data",
             name: "saveState",
-            
+
             props: () => ({
               data: createStore({
                 isLoading: false,

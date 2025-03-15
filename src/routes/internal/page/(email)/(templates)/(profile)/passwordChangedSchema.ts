@@ -45,7 +45,7 @@ const content = [
     componentName: "Html",
     pos: 3,
     props: `return {
-      href: "${typeof window !== 'undefined' ? window.location.origin : ""}/support/contact"
+      href: "${typeof window !== "undefined" ? window.location.origin : ""}/support/contact"
     }`,
     target: "_blank",
     text: "Contact Support",
@@ -54,8 +54,8 @@ const content = [
 
 export const passwordChangedForm = {
   attributes: [createEmailTemplate(content)],
-  description: "Notification sent after a user's password has been successfully changed",
+  description:
+    "Notification sent after a user's password has been successfully changed",
   key: "PasswordChanged",
   title: "Password Changed Successfully",
-
 };

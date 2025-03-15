@@ -3,14 +3,16 @@ import { Dynamic } from "solid-js/web";
 
 import { replacePlaceholderWithUrl } from "~/features/css_editor/utils/cssStateToString";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
-import { useDesignerFormIdContext, useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
+import {
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "~/features/page_designer/context/LayoutContext";
 import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPropertyValueGlobal";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph, Vertex } from "~/lib/graph/graph";
+import { useGraph, type Vertex } from "~/lib/graph/graph";
 
+import type { FormStoreObject } from "../form/context/FormContext";
 import type { GenericComponentProps } from "./type/FieldType";
-
-import { FormStoreObject } from "../form/context/FormContext";
 
 // HtmlField
 export function HtmlField(
@@ -50,8 +52,10 @@ export function HtmlField(
   ]);
 
   const handleTextChange = (e: Event) => {
-    if (!layoutStoreId) return;
-    
+    if (!layoutStoreId) {
+      return;
+    }
+
     const target = e.target as HTMLSpanElement;
     if (formStoreVertex()?.P.selectedId !== -1) {
       setPropertyValueGlobal(
@@ -70,7 +74,7 @@ export function HtmlField(
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       (e.target as HTMLElement).blur();
       handleTextChange(e);
@@ -80,10 +84,11 @@ export function HtmlField(
   const Content = () => {
     const isPageDesigner = !!layoutStoreId;
 
-    return <Switch>
-      <Match when={isPageDesigner && local.text}>
+    return (
+      <Switch>
+        <Match when={isPageDesigner && local.text}>
           <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
-          <span 
+          <span
             contentEditable={true}
             onBlur={handleTextChange}
             onKeyDown={handleKeyDown}
@@ -92,13 +97,14 @@ export function HtmlField(
             {local.text}
           </span>
           <Show when={!local.childrenBefore}>{local.children}</Show>
-      </Match>
-      <Match when={true}>
+        </Match>
+        <Match when={true}>
           <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
           {local.text}
           <Show when={!local.childrenBefore}>{local.children}</Show>
-      </Match>
-    </Switch>
+        </Match>
+      </Switch>
+    );
   };
 
   return (

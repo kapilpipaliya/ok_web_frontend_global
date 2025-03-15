@@ -8,17 +8,16 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
 import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect";
+import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
-import { getTitleSchema } from "../../lib/schema/getTitleSchema";
-import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
-import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 export function LoginForm() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -98,8 +97,9 @@ export function LoginForm() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Username/Email",
               },
               {
@@ -115,20 +115,26 @@ export function LoginForm() {
                           if (e.target instanceof HTMLInputElement) {
                             options.updateValue(e.target.value);
                           }
-    
+
                           // Don't proceed if already loading
                           if (options.dataContext.submitState[0]?.isLoading) {
                             return;
                           }
-    
+
                           // Check if password is empty
-                          if (!options.data.P.password && formRefs.passwordRef) {
+                          if (
+                            !options.data.P.password &&
+                            formRefs.passwordRef
+                          ) {
                             // Focus password field if empty
                             formRefs.passwordRef.focus();
                           } else {
                             // Otherwise submit the form
                             try {
-                              options.dataContext.submitState[1]("isLoading", true);
+                              options.dataContext.submitState[1](
+                                "isLoading",
+                                true,
+                              );
                               const formData = options.data;
                               await handleSubmit(formData);
                             } finally {
@@ -141,20 +147,24 @@ export function LoginForm() {
                         }
                       },
                       onMount: () => {
-                        if (options.ref && options.ref() instanceof HTMLInputElement) {
+                        if (
+                          options.ref &&
+                          options.ref() instanceof HTMLInputElement
+                        ) {
                           options.ref()?.focus();
                         }
                       },
                     }),
                     validation: { required: true },
-                  }
+                  },
                 ],
                 componentName: "Html",
               },
               getErrorSchema("email"),
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Password",
               },
               {
@@ -176,12 +186,12 @@ export function LoginForm() {
                             if (e.target instanceof HTMLInputElement) {
                               options.updateValue(e.target.value);
                             }
-                            
+
                             // Don't proceed if already loading
                             if (options.dataContext.submitState[0]?.isLoading) {
                               return;
                             }
-                            
+
                             try {
                               options.dataContext.submitState[1](
                                 "isLoading",
@@ -265,7 +275,7 @@ export function LoginForm() {
         ],
         componentName: "Data",
         name: "submitState",
-        
+
         props: () => ({
           data: createStore({
             isLoading: false,
@@ -292,8 +302,9 @@ export function LoginForm() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: "color:grey",
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Don't have an account? ",
           },
           {

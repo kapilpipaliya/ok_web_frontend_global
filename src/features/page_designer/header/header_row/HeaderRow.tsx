@@ -1,6 +1,5 @@
 import type { JSX } from "solid-js";
 
-import { API } from "~/lib/api/endpoints";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";

@@ -1,10 +1,10 @@
 // JavaScript Expression Parser
 import jsep from "jsep";
 // https://github.com/donmccurdy/expression-eval
-import {path} from "rambda";
+import { path } from "rambda";
 
 //import { eval as eval1} from 'expression-eval';
-import type {Vertex} from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 import {
   evalGetChildren,
@@ -12,12 +12,12 @@ import {
   evalGlobalColl,
   evalVertexById,
 } from "~/cypher/queries/evaluate/evalFunctions";
-import {getLabelFilterSkipLimit} from "~/cypher/queries/evaluate/getLabelFilterSkipLimit";
-import {findVertexIdsByLabel} from "~/lib/graph/get/sync/entity/findVertex";
-import {jsonata} from "~/lib/jsonata/jsonata";
+import { getLabelFilterSkipLimit } from "~/cypher/queries/evaluate/getLabelFilterSkipLimit";
+import { findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
+import { jsonata } from "~/lib/jsonata/jsonata";
 
-import {isObject} from "./data_structure/object/isObject";
-import {getTextValue} from "./graph/get/sync/format/getTextValue";
+import { isObject } from "./data_structure/object/isObject";
+import { getTextValue } from "./graph/get/sync/format/getTextValue";
 
 /**
  * Evaluation code from JSEP project, under MIT License.
@@ -73,7 +73,7 @@ export const binopsInitial = {
   "||": (a, b) => a || b,
 } as { [key: string]: (v1: any, v2: any, context: object) => any };
 
-export const binops = {...binopsInitial};
+export const binops = { ...binopsInitial };
 
 export const unaryOperatorsInitial = {
   "!": (a) => !a,
@@ -82,7 +82,7 @@ export const unaryOperatorsInitial = {
   "~": (a) => ~a,
 } as { [key: string]: (v: any, context: any) => any };
 
-export const unops = {...unaryOperatorsInitial};
+export const unops = { ...unaryOperatorsInitial };
 
 declare type binaryCallback = (
   a: operand,
@@ -514,7 +514,7 @@ addUnaryOp("json:", (string) => {
 addUnaryOp(
   "g:",
   (edgeType, context) => {
-    const {filter, label, limit, skip} = getLabelFilterSkipLimit(
+    const { filter, label, limit, skip } = getLabelFilterSkipLimit(
       edgeType,
       context,
     );

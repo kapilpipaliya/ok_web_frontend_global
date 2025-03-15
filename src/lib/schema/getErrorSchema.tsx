@@ -8,7 +8,7 @@ export function getErrorSchema(key: string, customClass?: string) {
     key: key,
     props: (args: FunctionArgumentType) => ({
       hidden: !args.error(),
-      text: args.error()
+      text: args.error(),
     }),
   };
 }

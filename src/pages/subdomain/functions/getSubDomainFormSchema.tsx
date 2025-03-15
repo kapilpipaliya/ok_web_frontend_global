@@ -11,7 +11,6 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
-import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
@@ -82,8 +81,9 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Name",
                 validation: { required: true },
               },
@@ -105,8 +105,9 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Domain",
                 validation: { required: true },
               },
@@ -132,8 +133,9 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Add New SubDomain",
       },
     ],
@@ -196,17 +198,18 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 attributes: [
                   {
                     as: "dialog",
-                    attributes: [{
-                      attributes: [
-                        modalHeaderSchema,
-                        formSchema,
-                        modalFooterSchema,
-                      ],
-                      componentName: "Form",
-                      props: (options: FunctionArgumentType) => ({
-                        formDataId: options.data.id,
-                      }),
-                    }
+                    attributes: [
+                      {
+                        attributes: [
+                          modalHeaderSchema,
+                          formSchema,
+                          modalFooterSchema,
+                        ],
+                        componentName: "Form",
+                        props: (options: FunctionArgumentType) => ({
+                          formDataId: options.data.id,
+                        }),
+                      },
                     ],
                     class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",
@@ -233,7 +236,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: () => ({
       data: createStore({
         isLoading: false,

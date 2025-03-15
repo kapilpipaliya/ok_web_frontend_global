@@ -113,7 +113,7 @@ export function updateVertex(
           IN[key] = [...new Set([...newIds, ...prevIds])];
         }
       }
-      
+
       // Create deep merged OUT object
       const OUT: { [key: string]: Id[] } = { ...prev.OUT };
       if (vertexData.OUT) {
@@ -123,7 +123,7 @@ export function updateVertex(
           OUT[key] = [...new Set([...newIds, ...prevIds])];
         }
       }
-      
+
       return { ...vertexData, IN, OUT };
     }
     return vertexData;

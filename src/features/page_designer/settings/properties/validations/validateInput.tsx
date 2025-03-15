@@ -6,18 +6,24 @@ export function validateInput(
   fieldKey?: string,
   fieldLabel?: string,
 ) {
-  const fieldName = fieldLabel || (fieldKey
-    ? fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1)
-    : "Input");
+  const fieldName =
+    fieldLabel ||
+    (fieldKey ? fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1) : "Input");
 
   // Clear previous error
   // Check required rule
-  if (validation.required && (value === undefined || value === null || (typeof value === 'string' && value.trim() === ""))) {
+  if (
+    validation.required &&
+    (value === undefined ||
+      value === null ||
+      (typeof value === "string" && value.trim() === ""))
+  ) {
     return `${fieldName} is required`;
   }
 
   // Convert number to string for string-based validations
-  const stringValue = value !== undefined && value !== null ? String(value) : '';
+  const stringValue =
+    value !== undefined && value !== null ? String(value) : "";
 
   // Check email rule
   if (validation.email && stringValue && !/\S+@\S+\.\S+/.test(stringValue)) {
@@ -25,12 +31,20 @@ export function validateInput(
   }
 
   // Check minLength rule
-  if (validation.minLength && stringValue && stringValue.length < validation.minLength) {
+  if (
+    validation.minLength &&
+    stringValue &&
+    stringValue.length < validation.minLength
+  ) {
     return `${fieldName} should be at least ${validation.minLength} characters`;
   }
 
   // Check maxLength rule
-  if (validation.maxLength && stringValue && stringValue.length > validation.maxLength) {
+  if (
+    validation.maxLength &&
+    stringValue &&
+    stringValue.length > validation.maxLength
+  ) {
     return `${fieldName} should be no more than ${validation.maxLength} characters`;
   }
 

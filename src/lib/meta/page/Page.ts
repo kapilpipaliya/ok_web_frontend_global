@@ -23,18 +23,20 @@ export const wrapWithTitle = (
     as: "div",
     attributes: [
       {
+        as: "span",
         attributes: required
           ? [
               {
+                as: "span",
                 class: "color:error",
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 key: `required_${title}`,
                 text: " *",
               },
             ]
           : [],
         class: "flex:.5",
-        as: "span", componentName: "Html",
+        componentName: "Html",
         key: `title_${title}`,
         text: title,
       },

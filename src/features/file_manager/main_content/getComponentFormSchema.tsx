@@ -141,8 +141,9 @@ export const getComponentFormSchema = (
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: `Add New ${label()}`,
       },
     ],
@@ -160,8 +161,9 @@ export const getComponentFormSchema = (
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: `${label()} Name`,
                 validation: { required: true },
               },
@@ -180,8 +182,9 @@ export const getComponentFormSchema = (
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Description",
               },
               {
@@ -226,7 +229,12 @@ export const getComponentFormSchema = (
           disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
-            revertTransactionUpToIndex(options.txnId, -1, options.graph, options.setGraph);
+            revertTransactionUpToIndex(
+              options.txnId,
+              -1,
+              options.graph,
+              options.setGraph,
+            );
             onClose();
           },
           text: "Cancel",
@@ -302,7 +310,7 @@ export const getComponentFormSchema = (
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: () => ({
       data: createSolidJsStore({
         isLoading: false,

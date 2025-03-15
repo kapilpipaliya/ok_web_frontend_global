@@ -12,9 +12,9 @@ import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
+import { getTitleSchema } from "../../lib/schema/getTitleSchema";
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
-import { getTitleSchema } from "../../lib/schema/getTitleSchema";
 
 export function ForgotPasswordForm() {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -195,7 +195,8 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS, componentName: "Html",
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Html",
             text: "Email or Username",
           },
           {
@@ -224,13 +225,16 @@ export function ForgotPasswordForm() {
                     }
                   },
                   onMount: () => {
-                    if (options.ref && options.ref() instanceof HTMLInputElement) {
+                    if (
+                      options.ref &&
+                      options.ref() instanceof HTMLInputElement
+                    ) {
                       options.ref()?.focus();
                     }
                   },
                 }),
                 validation: { required: true },
-              }
+              },
             ],
             componentName: "Html",
           },
@@ -240,7 +244,8 @@ export function ForgotPasswordForm() {
         componentName: "Html",
       },
       {
-        as: "", attributes: [
+        as: "",
+        attributes: [
           {
             as: "button",
             class:
@@ -262,7 +267,8 @@ export function ForgotPasswordForm() {
             }),
             type: "button",
           },
-        ], componentName: "Html",
+        ],
+        componentName: "Html",
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
@@ -277,7 +283,8 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS, componentName: "Html",
+            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            componentName: "Html",
             text: "One Time Password (OTP)",
           },
           {
@@ -307,7 +314,7 @@ export function ForgotPasswordForm() {
                   },
                 }),
                 validation: { required: true },
-              }
+              },
             ],
             componentName: "Html",
           },
@@ -340,7 +347,8 @@ export function ForgotPasswordForm() {
             }),
             type: "button",
           },
-        ], componentName: "Html",
+        ],
+        componentName: "Html",
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
@@ -485,7 +493,8 @@ export function ForgotPasswordForm() {
         componentName: "Html",
       },
       {
-        as: "", attributes: [
+        as: "",
+        attributes: [
           {
             as: "button",
             class:
@@ -507,7 +516,8 @@ export function ForgotPasswordForm() {
             }),
             type: "button",
           },
-        ], componentName: "Html",
+        ],
+        componentName: "Html",
       },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
@@ -521,19 +531,25 @@ export function ForgotPasswordForm() {
           {
             attributes: [
               {
-                as: "", attributes: [stepUserNameSchema], componentName: "Html",
+                as: "",
+                attributes: [stepUserNameSchema],
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   hidden: options.dataContext.stageData?.[0]?.name !== 0,
                 }),
               },
               {
-                as: "", attributes: [stepOTPSchema], componentName: "Html",
+                as: "",
+                attributes: [stepOTPSchema],
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   hidden: options.dataContext.stageData?.[0]?.name !== 1,
                 }),
               },
               {
-                as: "", attributes: [stepNewPasswordSchema], componentName: "Html",
+                as: "",
+                attributes: [stepNewPasswordSchema],
+                componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   hidden: options.dataContext.stageData?.[0]?.name !== 2,
                 }),
@@ -541,7 +557,7 @@ export function ForgotPasswordForm() {
             ],
             componentName: "Data",
             name: "stageData",
-            
+
             props: () => ({
               data: createStore({
                 name: 0, // Initial stage
@@ -551,7 +567,7 @@ export function ForgotPasswordForm() {
         ],
         componentName: "Data",
         name: "submitState",
-        
+
         props: () => ({
           data: createStore({
             isLoading: false,
@@ -563,7 +579,8 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             as: "span",
-            class: "color:grey", componentName: "Html",
+            class: "color:grey",
+            componentName: "Html",
             text: "Already have an account? ",
           },
           {
@@ -584,7 +601,8 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             as: "span",
-            class: "color:grey", componentName: "Html",
+            class: "color:grey",
+            componentName: "Html",
             text: "Don't have an account? ",
           },
           {

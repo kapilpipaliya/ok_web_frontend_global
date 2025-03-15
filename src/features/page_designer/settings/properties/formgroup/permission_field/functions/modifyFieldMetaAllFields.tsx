@@ -6,20 +6,20 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 export function modifyFieldMetaAllFields(
   attribute: FieldAttribute,
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
-  formStoreVertex: Vertex<FormStoreObject>,
-  ignoreTable?: boolean,
+  _graph: GraphInterface,
+  _setGraph: SetStoreFunction<GraphInterface>,
+  _formStoreVertex: Vertex<FormStoreObject>,
+  _ignoreTable?: boolean,
 ) {
   attribute.labelKey = "::'key'||::'P.key'||::'P.id'";
   attribute.valueKey = "id";
   attribute.childrenKey = "attributes";
-  attribute.options = () => []
-    // generateFormMetaAttributes(
-    //   graph,
-    //   setGraph,
-    //   graph.vertexes[formStoreVertex?.P.formDataId!],
-    //   ignoreTable,
-    // ).attributes;
+  attribute.options = () => [];
+  // generateFormMetaAttributes(
+  //   graph,
+  //   setGraph,
+  //   graph.vertexes[formStoreVertex?.P.formDataId!],
+  //   ignoreTable,
+  // ).attributes;
   return attribute;
 }

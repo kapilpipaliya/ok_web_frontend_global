@@ -1,6 +1,8 @@
-import {type SetStoreFunction} from "solid-js/store";
-import {evalExpression} from "~/lib/expression_eval";
-import {type GraphInterface, type Vertex} from "~/lib/graph/graph";
+import type { SetStoreFunction } from "solid-js/store";
+
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+
+import { evalExpression } from "~/lib/expression_eval";
 
 // unused function
 export function getText(
@@ -41,4 +43,4 @@ export function getUrl(
     console.error("Error in getUrl:", error);
     return undefined;
   }
-} 
+}

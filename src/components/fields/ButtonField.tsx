@@ -20,7 +20,6 @@ import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
-import { getNamedIndex } from "~/lib/graph/transaction/value/getNamedIndex";
 import { createLongPress } from "~/lib/hooks/createLongPress";
 
 import type { FunctionArgumentType } from "../form/type/FieldSchemaType";

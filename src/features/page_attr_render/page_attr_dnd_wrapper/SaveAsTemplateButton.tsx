@@ -4,7 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
-import {ICON_BUTTON_STYLES} from "~/pages/settings/constants";
+import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
 
@@ -13,7 +13,9 @@ interface SaveAsTemplateButtonProps {
   size: number;
 }
 
-export function SaveAsTemplateButton(props: Readonly<SaveAsTemplateButtonProps>) {
+export function SaveAsTemplateButton(
+  props: Readonly<SaveAsTemplateButtonProps>,
+) {
   let saveAsTemplateRef: HTMLElement;
   const [showModal, setShowModal] = createSignal(false);
   const [showTemplateMenu, setShowTemplateMenu] = createSignal(false);

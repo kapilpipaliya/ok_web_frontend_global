@@ -45,6 +45,7 @@ export const SubDomainGrid = () => {
   const SubDomain: IFormMetaData = {
     attributes: [
       {
+        as: "span",
         cell: (info: CellContext<Vertex<SubDomain>, unknown>) => {
           return (
             <a
@@ -57,11 +58,12 @@ export const SubDomainGrid = () => {
             </a>
           );
         },
-        as: "span", componentName: "Html",
+        componentName: "Html",
         displayName: "Subdomain",
         key: "key",
       },
       {
+        as: "span",
         cell: (info: CellContext<Vertex<SubDomain>, unknown>) => {
           return (
             <a
@@ -74,12 +76,13 @@ export const SubDomainGrid = () => {
             </a>
           );
         },
-        as: "span", componentName: "Html",
+        componentName: "Html",
         displayName: "Domain",
         key: "domain",
       },
       {
-        as: "span", componentName: "Html",
+        as: "span",
+        componentName: "Html",
         displayName: "Latest Activity",
         key: "activity",
       },

@@ -5,17 +5,16 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/general/getApi";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import { validateEmail } from "~/lib/validation/validateEmail";
 
+import { handleApiRequest } from "../../../lib/api/general/handleApiRequest";
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import { handleApiRequest } from "../../../lib/api/general/handleApiRequest";
-import { getErrorSchema } from "~/lib/schema/getErrorSchema";
-import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 // Validation functions
 const validateRequired = (value: string) => {
-  if (!value || value.trim() === '') {
+  if (!value || value.trim() === "") {
     return "This field is required";
   }
   return undefined;
@@ -25,8 +24,8 @@ const validatePort = (value: string) => {
   if (!value) {
     return "Port is required";
   }
-  const port = parseInt(value, 10);
-  if (isNaN(port) || port < 1 || port > 65535) {
+  const port = Number.parseInt(value, 10);
+  if (Number.isNaN(port) || port < 1 || port > 65535) {
     return "Port must be a number between 1 and 65535";
   }
   return undefined;
@@ -36,32 +35,46 @@ const validatePort = (value: string) => {
 const validateFormData = (data: any) => {
   const errors: Record<string, string> = {};
   const provider = data.active;
-  
+
   if (provider === "smtp") {
     // SMTP validation
     const smtpHostError = validateRequired(data.smtpHost);
-    if (smtpHostError) errors.smtpHost = smtpHostError;
-    
+    if (smtpHostError) {
+      errors.smtpHost = smtpHostError;
+    }
+
     const smtpPortError = validatePort(data.smtpPort);
-    if (smtpPortError) errors.smtpPort = smtpPortError;
-    
+    if (smtpPortError) {
+      errors.smtpPort = smtpPortError;
+    }
+
     const smtpUsernameError = validateRequired(data.smtpUsername);
-    if (smtpUsernameError) errors.smtpUsername = smtpUsernameError;
-    
+    if (smtpUsernameError) {
+      errors.smtpUsername = smtpUsernameError;
+    }
+
     const smtpPasswordError = validateRequired(data.smtpPassword);
-    if (smtpPasswordError) errors.smtpPassword = smtpPasswordError;
+    if (smtpPasswordError) {
+      errors.smtpPassword = smtpPasswordError;
+    }
   } else if (provider === "sendgrid") {
     // SendGrid validation
     const sendGridApiKeyError = validateRequired(data.sendGridApiKey);
-    if (sendGridApiKeyError) errors.sendGridApiKey = sendGridApiKeyError;
+    if (sendGridApiKeyError) {
+      errors.sendGridApiKey = sendGridApiKeyError;
+    }
   }
-  
+
   // From email is required for all providers if a provider is selected
   if (provider) {
-    const fromEmailError = data.fromEmail ? validateEmail(data.fromEmail) : "From email is required";
-    if (fromEmailError) errors.fromEmail = fromEmailError;
+    const fromEmailError = data.fromEmail
+      ? validateEmail(data.fromEmail)
+      : "From email is required";
+    if (fromEmailError) {
+      errors.fromEmail = fromEmailError;
+    }
   }
-  
+
   return Object.keys(errors).length > 0 ? errors : null;
 };
 
@@ -84,7 +97,8 @@ export function EmailSettings() {
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS, componentName: "Html",
+                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                componentName: "Html",
                 text: "Email Provider",
               },
               {
@@ -109,8 +123,9 @@ export function EmailSettings() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "SMTP Host",
               },
               {
@@ -119,7 +134,9 @@ export function EmailSettings() {
                 key: "smtpHost",
                 placeholder: "Enter SMTP host",
                 validate: (value: string, data: any) =>
-                  data.P.active === "smtp" ? validateRequired(value) : undefined,
+                  data.P.active === "smtp"
+                    ? validateRequired(value)
+                    : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -133,8 +150,9 @@ export function EmailSettings() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "SMTP Port",
               },
               {
@@ -158,8 +176,9 @@ export function EmailSettings() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "SMTP Username",
               },
               {
@@ -168,7 +187,9 @@ export function EmailSettings() {
                 key: "smtpUsername",
                 placeholder: "Enter SMTP username",
                 validate: (value: string, data: any) =>
-                  data.P.active === "smtp" ? validateRequired(value) : undefined,
+                  data.P.active === "smtp"
+                    ? validateRequired(value)
+                    : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -182,8 +203,9 @@ export function EmailSettings() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "SMTP Password",
               },
               {
@@ -193,7 +215,9 @@ export function EmailSettings() {
                 placeholder: "Enter SMTP password",
                 type: "password",
                 validate: (value: string, data: any) =>
-                  data.P.active === "smtp" ? validateRequired(value) : undefined,
+                  data.P.active === "smtp"
+                    ? validateRequired(value)
+                    : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -207,8 +231,9 @@ export function EmailSettings() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "SendGrid API Key",
               },
               {
@@ -218,7 +243,9 @@ export function EmailSettings() {
                 placeholder: "Enter SendGrid API key",
                 type: "password",
                 validate: (value: string, data: any) =>
-                  data.P.active === "sendgrid" ? validateRequired(value) : undefined,
+                  data.P.active === "sendgrid"
+                    ? validateRequired(value)
+                    : undefined,
               },
             ],
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
@@ -232,8 +259,9 @@ export function EmailSettings() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "From Email",
               },
               {
@@ -243,8 +271,12 @@ export function EmailSettings() {
                 placeholder: "Enter from email address",
                 type: "email",
                 validate: (value: string, data: any) => {
-                  if (!data.P.active) return undefined;
-                  if (!value) return "From email is required";
+                  if (!data.P.active) {
+                    return undefined;
+                  }
+                  if (!value) {
+                    return "From email is required";
+                  }
                   return validateEmail(value);
                 },
               },
@@ -260,8 +292,9 @@ export function EmailSettings() {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Use Secure Connection",
               },
               {
@@ -308,9 +341,13 @@ export function EmailSettings() {
                           API.settings.email.updateUrl,
                           settings.P,
                           "Email settings updated successfully",
-                          (isLoading) => options.dataContext.saveState[1]("isLoading", isLoading),
+                          (isLoading) =>
+                            options.dataContext.saveState[1](
+                              "isLoading",
+                              isLoading,
+                            ),
                           showSuccessToast,
-                          showErrorToast
+                          showErrorToast,
                         );
                       },
                       text: options.dataContext.saveState[0]?.isLoading
@@ -346,7 +383,9 @@ export function EmailSettings() {
                           for (const fieldKey in errors) {
                             options.setError(errors[fieldKey], fieldKey);
                           }
-                          showErrorToast("Please fix the validation errors before testing");
+                          showErrorToast(
+                            "Please fix the validation errors before testing",
+                          );
                           return;
                         }
 
@@ -363,11 +402,14 @@ export function EmailSettings() {
                             "Settings saved before testing",
                             () => {}, // We're managing loading state manually here
                             () => {}, // Don't show success toast for save before test
-                            showErrorToast
+                            showErrorToast,
                           );
 
                           if (!saveResult.success) {
-                            options.dataContext.testState[1]("isLoading", false);
+                            options.dataContext.testState[1](
+                              "isLoading",
+                              false,
+                            );
                             return;
                           }
 
@@ -378,7 +420,7 @@ export function EmailSettings() {
                             "Test email sent successfully",
                             () => {}, // We're managing loading state manually here
                             showSuccessToast,
-                            showErrorToast
+                            showErrorToast,
                           );
                         } catch (error) {
                           showErrorToast((error as Error).message);

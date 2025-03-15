@@ -4,7 +4,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { useGraph } from "~/lib/graph/graph";
-import { getHomeUrl, HomeUrlContext } from "~/lib/urls";
+import { getHomeUrl } from "~/lib/urls";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 
 export const HomeIcon = () => {

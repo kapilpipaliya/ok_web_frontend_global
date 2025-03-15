@@ -1,4 +1,4 @@
-import type {Session} from "neo4j-driver";
+import type { Session } from "neo4j-driver";
 
 export async function getAccountEmailSettings(
   dbSession: Session,
@@ -7,7 +7,7 @@ export async function getAccountEmailSettings(
   const result = await dbSession.run(
     `MATCH (a:Account {id: $accountId})-[:AccountEmailSetting]->(s:EmailSetting)
      RETURN s as settings`,
-    {accountId},
+    { accountId },
   );
   return result.records[0]?.get("settings") || null;
 }

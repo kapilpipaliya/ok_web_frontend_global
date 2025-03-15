@@ -31,8 +31,10 @@ export async function deleteFileMetadata(dbSession: Session, fileId: string) {
       DELETE f
       RETURN f.identity as nodeId
     `;
-    const deleteResult = await dbSession.run(deleteNodeQuery, { fileId: fileId });
-    
+    const deleteResult = await dbSession.run(deleteNodeQuery, {
+      fileId: fileId,
+    });
+
     if (deleteResult.records.length === 0) {
       return null;
     }

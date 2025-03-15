@@ -1,5 +1,5 @@
 import { useSearchParams } from "@solidjs/router";
-import { Component, createEffect, createSignal } from "solid-js";
+import { type Component, createEffect, createSignal } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
@@ -34,7 +34,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
   createEffect(() => {
     const tab = searchParams.tab;
     if (tab !== selectedMenu()) {
-      setSelectedMenu(typeof tab === "string" ? tab : props.menuItems[0]?.id || "");
+      setSelectedMenu(
+        typeof tab === "string" ? tab : props.menuItems[0]?.id || "",
+      );
     }
   });
 
@@ -65,8 +67,8 @@ export function SettingsLayout(props: SettingsLayoutProps) {
           {
             componentName: "Title",
             props: () => ({
-              text: `${props.title} - ${props.menuItems.find((item) => item.id === selectedMenu())?.label}`
-            })
+              text: `${props.title} - ${props.menuItems.find((item) => item.id === selectedMenu())?.label}`,
+            }),
           },
           {
             class: "flex:1",
@@ -74,8 +76,8 @@ export function SettingsLayout(props: SettingsLayoutProps) {
             componentName: HeaderWithDescription,
             props: () => ({
               description: props.description,
-              title: props.title
-            })
+              title: props.title,
+            }),
           },
           {
             as: "div",
@@ -93,17 +95,22 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             attributes: [
                               {
                                 as: "div",
-                                class: "text:14px fg:#6B7280 font-weight:500 mb:8px",
+                                class:
+                                  "text:14px fg:#6B7280 font-weight:500 mb:8px",
                                 componentName: "Html",
                                 props: (args: FunctionArgumentType) => ({
-                                  text: (args.dataContext.menuGroups as DataType)[0]
-                                })
-                              }
+                                  text: (
+                                    args.dataContext.menuGroups as DataType
+                                  )[0],
+                                }),
+                              },
                             ],
                             componentName: "Html",
                             props: (args: FunctionArgumentType) => ({
-                              hidden: (args.dataContext.menuGroups as DataType)[0] === "default"
-                            })
+                              hidden:
+                                (args.dataContext.menuGroups as DataType)[0] ===
+                                "default",
+                            }),
                           },
                           {
                             attributes: [
@@ -111,41 +118,57 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                 as: "div",
                                 componentName: "Html",
                                 props: (args: FunctionArgumentType) => ({
-                                  class: `p:12px cursor:pointer r:4px mb:8px ${selectedMenu() === (args.dataContext.menuItems as MenuItem).id
+                                  class: `p:12px cursor:pointer r:4px mb:8px ${
+                                    selectedMenu() ===
+                                    (args.dataContext.menuItems as MenuItem).id
                                       ? "bg:primary fg:base-5"
                                       : "bg:primary-10:hover fg:base-90"
-                                    }`,
-                                  hidden: (args.dataContext.menuItems as MenuItem).adminOnly && !isAdminRole(graph),
-                                  onClick: () => handleMenuSelect((args.dataContext.menuItems as MenuItem).id),
-                                  text: (args.dataContext.menuItems as MenuItem).label
-                                })
+                                  }`,
+                                  hidden:
+                                    (args.dataContext.menuItems as MenuItem)
+                                      .adminOnly && !isAdminRole(graph),
+                                  onClick: () =>
+                                    handleMenuSelect(
+                                      (args.dataContext.menuItems as MenuItem)
+                                        .id,
+                                    ),
+                                  text: (args.dataContext.menuItems as MenuItem)
+                                    .label,
+                                }),
                               },
                             ],
                             componentName: "Data",
                             loop: true,
                             name: "menuItems",
                             props: (args: FunctionArgumentType) => ({
-                              data: (args.dataContext.menuGroups as DataType)[1],
-                            })
-                          }
+                              data: (
+                                args.dataContext.menuGroups as DataType
+                              )[1],
+                            }),
+                          },
                         ],
                         class: "mb:16px",
                         componentName: "Html",
                         props: (args: FunctionArgumentType) => ({
-                          show: (args.dataContext.menuGroups as DataType)[1].some((item: MenuItem) => !item.adminOnly || isAdminRole(graph))
-                        })
-                      }
+                          show: (
+                            args.dataContext.menuGroups as DataType
+                          )[1].some(
+                            (item: MenuItem) =>
+                              !item.adminOnly || isAdminRole(graph),
+                          ),
+                        }),
+                      },
                     ],
                     componentName: "Data",
                     name: "menuGroups",
                     props: () => ({
                       data: Object.entries(groupedMenuItems()),
-                      loop: true
-                    })
-                  }
+                      loop: true,
+                    }),
+                  },
                 ],
                 class: `${STYLES.overflow} h:calc(100vh-140px) border-right:1px|solid|#eee`,
-                componentName: "Html"
+                componentName: "Html",
               },
               {
                 as: "div",
@@ -153,22 +176,24 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                   {
                     componentName: "Html",
                     props: () => ({
-                      componentName: props.menuItems.find((item) => item.id === selectedMenu())?.component
-                    })
-                  }
+                      componentName: props.menuItems.find(
+                        (item) => item.id === selectedMenu(),
+                      )?.component,
+                    }),
+                  },
                 ],
                 class: "flex:1 p:6",
-                componentName: "Html"
-              }
+                componentName: "Html",
+              },
             ],
             class: "display:grid grid-template-columns:250px|1fr p:6",
-            componentName: "Html"
-          }
+            componentName: "Html",
+          },
         ],
-        componentName: "Html"
-      }
+        componentName: "Html",
+      },
     ],
-    key: "settingsLayout"
+    key: "settingsLayout",
   };
 
   return <SchemaRenderer form={settingsLayoutSchema} />;

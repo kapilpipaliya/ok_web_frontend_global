@@ -1,7 +1,7 @@
 export function validateDatabaseName(name: string) {
   // Convert to lowercase since names are case-insensitive
   const normalizedName = name.toLowerCase();
-  
+
   // Check length requirement (3-63 characters)
   if (normalizedName.length < 3 || normalizedName.length > 63) {
     return "Database name must be between 3 and 63 characters long";
@@ -18,4 +18,4 @@ export function validateDatabaseName(name: string) {
   }
 
   return undefined; // No error, database name is valid
-} 
+}

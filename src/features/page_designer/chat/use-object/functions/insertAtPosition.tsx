@@ -147,7 +147,7 @@ export function insertComponents(
     const fromVertex1 = {
       ...componentVertex,
       L: ["Page"],
-      P: { ...componentVertex.P, componentName: "Html", as: "" },
+      P: { ...componentVertex.P, as: "", componentName: "Html" },
     } as Vertex;
     handleDropAtPosition(
       graph,

@@ -20,7 +20,7 @@ import {
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
-import {getMetaProps} from "~/components/form/functions/getMetaProps";
+import { getMetaProps } from "~/components/form/functions/getMetaProps";
 import { Label } from "~/features/css_editor/components/fields/Label";
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
@@ -42,13 +42,13 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import {
-  IdAttr,
-  useGraph,
-  type Vertex,
-} from "~/lib/graph/graph";
+import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
-import { addNewVertex, mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import {
+  addNewVertex,
+  mergeVertexProperties,
+  replaceVertexProperties,
+} from "~/lib/graph/mutate/core/vertex";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
@@ -193,6 +193,10 @@ export function DynamicComponent(
 
   const getFunctionArgumentBase = () =>
     ({
+      clearAllErrors: () => {
+        const errorVertexId = `${props.data?.id}-error`;
+        replaceVertexProperties(0, errorVertexId, graph, setGraph, {});
+      },
       get context() {
         return previewStore.context;
       },
@@ -201,10 +205,6 @@ export function DynamicComponent(
       },
       get dataContext() {
         return runWithOwner(owner, () => useRepeaterVertexContext() || {});
-      },
-      clearAllErrors: () => {
-        const errorVertexId = `${props.data?.id}-error`;
-        replaceVertexProperties(0, errorVertexId, graph, setGraph, {});
       },
       error: (key?: string) => {
         const errorVertexId = `${props.data?.id}-error`;
@@ -261,20 +261,25 @@ export function DynamicComponent(
       searchParams,
       setError: (error: string | undefined, key?: string) => {
         const errorVertexId = `${props.data?.id}-error`;
-        if (!graph.vertexes[errorVertexId]) {
-          addNewVertex(0, {
-            id: errorVertexId,
-            IN: {},
-            L: ["Error"],
-            OUT: {},
-            P: {
-              [key ?? props.meta.P.key]: error || "",
-            },
-          }, graph, setGraph);
-        } else {
+        if (graph.vertexes[errorVertexId]) {
           mergeVertexProperties(0, errorVertexId, graph, setGraph, {
             [key ?? props.meta.P.key]: error || "",
           });
+        } else {
+          addNewVertex(
+            0,
+            {
+              id: errorVertexId,
+              IN: {},
+              L: ["Error"],
+              OUT: {},
+              P: {
+                [key ?? props.meta.P.key]: error || "",
+              },
+            },
+            graph,
+            setGraph,
+          );
         }
       },
       get setGraph() {
@@ -374,7 +379,6 @@ export function DynamicComponent(
     } as Record<string, boolean | null | undefined>;
   });
 
-
   const value = createMemo(() => {
     return ifNotNull(props.data?.P[props.meta.P[IdAttr]]);
   });
@@ -463,7 +467,9 @@ export function DynamicComponent(
           typeof hiddenProp === "function"
             ? hiddenProp(getFunctionArgumentWithValue())
             : hiddenProp;
-        if (result) return true;
+        if (result) {
+          return true;
+        }
       }
 
       // Check for show property (inverse of hidden)

@@ -44,8 +44,9 @@ export function GeneralSettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Application Name",
           },
           {
@@ -62,8 +63,9 @@ export function GeneralSettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Default Language",
           },
           {
@@ -119,7 +121,7 @@ export function GeneralSettings() {
             ],
             componentName: "Data",
             name: "saveState",
-            
+
             props: () => ({
               data: createStore({
                 isLoading: false,

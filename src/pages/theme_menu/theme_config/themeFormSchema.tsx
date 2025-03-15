@@ -31,8 +31,9 @@ export const themeFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Theme Name",
               validation: { required: true },
             },
@@ -51,8 +52,9 @@ export const themeFormSchema = {
           as: "div",
           attributes: [
             {
+              as: "span",
               class: SETTINGS_CONSTANTS.LABEL_CLASS,
-              as: "span", componentName: "Html",
+              componentName: "Html",
               text: "Theme Configuration",
               validation: { required: true },
             },
@@ -132,19 +134,19 @@ export const getThemeFormSchema = (
       showErrorToast("Please enter theme name");
       return false;
     }
-    
+
     const editorData = options.dataContext.modalState[0]?.editorData?.trim();
     if (!editorData) {
       showErrorToast("Please enter theme configuration");
       return false;
     }
-    
+
     const validation = validateFunction(editorData);
     if (!validation.isValid) {
       showErrorToast(validation.error || "Invalid theme configuration");
       return false;
     }
-    
+
     return true;
   };
 
@@ -208,8 +210,9 @@ export const getThemeFormSchema = (
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => {
           return {
             text:
@@ -323,7 +326,7 @@ export const getThemeFormSchema = (
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: (options: FunctionArgumentType) => ({
       data: createStore({
         editorData: options.data.P.data ?? "",
@@ -339,7 +342,7 @@ export const getThemeFormSchema = (
         attributes: [schema],
         componentName: "Data",
         name: "editorState",
-        
+
         props: () => ({
           data: createSignal(),
           // TODO: if not saved, revert to previous state

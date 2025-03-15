@@ -20,9 +20,9 @@ import { STYLES } from "~/pages/settings/constants";
 
 import type { DataGridState } from "./DataGridContext";
 
-import { selectedValue } from "../../lib/graph/get/sync/edge/selectedValue";
 import { IconButton } from "../../components/styled/IconButton";
 import { TooltipWrapper } from "../../components/styled/TooltipWrapper";
+import { selectedValue } from "../../lib/graph/get/sync/edge/selectedValue";
 import { ModifyJsonButton } from "./ModifyJsonButton";
 
 function ImageWrapper(props: { alt?: string; class?: string; src: string }) {
@@ -205,16 +205,21 @@ export function CreateGridHeaders(
   }
 
   // Check if any actions are available before adding the Actions column
-  const hasEditAction = !hideEditAction && (gridState.isNoPermissionCheck || 
-    (gridState.formMetaData() && (gridState.hasEditPermission() || gridState.hasViewPermission())));
-  
-  const hasDeleteAction = !hideDeleteAction && (gridState.isNoPermissionCheck || 
-    (gridState.formMetaData() && gridState.hasDeletePermission()));
-  
+  const hasEditAction =
+    !hideEditAction &&
+    (gridState.isNoPermissionCheck ||
+      (gridState.formMetaData() &&
+        (gridState.hasEditPermission() || gridState.hasViewPermission())));
+
+  const hasDeleteAction =
+    !hideDeleteAction &&
+    (gridState.isNoPermissionCheck ||
+      (gridState.formMetaData() && gridState.hasDeletePermission()));
+
   const hasFormAction = tableId === "Form";
-  
+
   const hasJsonAction = !(hideEditJsonAction || FormMetaData[tableId]);
-  
+
   // Only add Actions column if at least one action is available
   if (hasEditAction || hasDeleteAction || hasFormAction || hasJsonAction) {
     tableColumns.push({
@@ -270,7 +275,8 @@ export function CreateGridHeaders(
               when={
                 !hideDeleteAction &&
                 (gridState.isNoPermissionCheck ||
-                  (!!gridState.formMetaData() && gridState.hasDeletePermission()))
+                  (!!gridState.formMetaData() &&
+                    gridState.hasDeletePermission()))
               }
             >
               <IconButton

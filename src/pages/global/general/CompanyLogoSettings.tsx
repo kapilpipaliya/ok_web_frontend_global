@@ -149,8 +149,9 @@ export function CompanyLogoSettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Rectangular Company Logo",
           },
           {
@@ -187,8 +188,9 @@ export function CompanyLogoSettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Circular Company Logo",
           },
           {
@@ -270,7 +272,7 @@ export function CompanyLogoSettings() {
             ],
             componentName: "Data",
             name: "saveState",
-            
+
             props: () => ({
               data: createStore({
                 isLoading: false,

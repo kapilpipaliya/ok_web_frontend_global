@@ -59,11 +59,11 @@ interface DataGridProps {
   formSchema?: IFormMetaData;
   getTableData?: typeof defaultGetTableData;
   hideDeleteAction?: boolean;
+  hideEditAction?: boolean;
   hideEditJsonAction?: boolean;
   initializeGridStoreParent?: (formStore: DataGridStore) => void;
   isShowPagination?: boolean;
   tableId: string;
-  hideEditAction?: boolean;
 }
 
 export function DataGrid(props: Readonly<DataGridProps>) {

@@ -68,8 +68,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         type: "ParentSupport",
       },
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.LABEL_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Replies",
       },
       {
@@ -282,7 +283,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "replyState",
-    
+
     props: () => ({
       data: createStore({
         replyText: "",
@@ -300,8 +301,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Status",
               },
               {
@@ -323,8 +325,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             as: "div",
             attributes: [
               {
+                as: "span",
                 class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                componentName: "Html",
                 text: "Message",
               },
               {
@@ -417,8 +420,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     as: "div",
     attributes: [
       {
+        as: "span",
         class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
-        as: "span", componentName: "Html",
+        componentName: "Html",
         text: "Edit Support Ticket",
       },
       {
@@ -500,7 +504,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     ],
     componentName: "Data",
     name: "modalState",
-    
+
     props: () => ({
       data: createStore({
         isLoading: false,

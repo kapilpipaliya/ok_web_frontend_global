@@ -94,8 +94,9 @@ export function ProfileImageSettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            as: "span", componentName: "Html",
+            componentName: "Html",
             text: "Profile Image",
           },
           {
@@ -169,7 +170,7 @@ export function ProfileImageSettings() {
             ],
             componentName: "Data",
             name: "saveState",
-            
+
             props: () => ({
               data: createStore({
                 isLoading: false,

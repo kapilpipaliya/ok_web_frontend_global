@@ -41,7 +41,7 @@ export function getEdgesFromGraph(
           expression: `<-${getInEdge(
             { P: vertex.P } as unknown as Vertex,
             { L: ["$0"] } as unknown as Vertex,
-          )}`,  // `<-${capitalizedName}$0`
+          )}`, // `<-${capitalizedName}$0`
         });
       } else {
         outgoing.push({
@@ -73,7 +73,7 @@ export function getEdgesFromGraph(
             )}`,
           };
 
-      const children = getChildrenAttrs(graph, ()=>{}, vertex);
+      const children = getChildrenAttrs(graph, () => {}, vertex);
       if (children.length > 0) {
         const nested = getEdgesFromGraph(graph, children[0].id, ignoreTables);
         expression.incoming = nested.incoming;
@@ -97,4 +97,4 @@ export function getEdgesFromGraph(
   processVertex(vertex);
 
   return { incoming, outgoing };
-} 
+}

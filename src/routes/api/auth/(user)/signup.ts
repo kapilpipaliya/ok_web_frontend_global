@@ -22,7 +22,8 @@ export async function POST({ request }: APIEvent) {
     };
   }
 
-  const { dbSession, domain, subDomain } = await getDBSessionForSubdomain(request);
+  const { dbSession, domain, subDomain } =
+    await getDBSessionForSubdomain(request);
   const tx = dbSession.beginTransaction();
 
   try {
@@ -86,7 +87,7 @@ async function handleSignup(
     await updateSession(user);
     delete user.P.password;
     updateRedirectUrl(user, subDomain);
-    
+
     return {
       graph: {
         edges: {},

@@ -97,9 +97,7 @@ export function deleteVertex(
 
     const vertex = graph.vertexes[actualVertexId];
 
-    if (
-      Object.keys(vertex.OUT).length > 0
-    ) {
+    if (Object.keys(vertex.OUT).length > 0) {
       alert(
         `there are multiple children exist when deleting ${vertex.L[0]} (${actualVertexId})`,
       );

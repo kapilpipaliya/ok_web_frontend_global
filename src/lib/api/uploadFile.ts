@@ -1,4 +1,3 @@
-
 export async function uploadFile(file: File, apiUrl: string, method = "POST") {
   const formData = new FormData();
   formData.append("file", file);

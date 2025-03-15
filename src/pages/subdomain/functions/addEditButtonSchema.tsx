@@ -54,6 +54,7 @@ export function addEditButtonSchema(label: string) {
           when: !options.data?.id?.startsWith("-"),
         }),
       },
-    ], componentName: "Html",
+    ],
+    componentName: "Html",
   } as FieldAttribute;
 }

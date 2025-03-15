@@ -1,7 +1,7 @@
-import {evalExpression} from "~/lib/expression_eval";
+import { evalExpression } from "~/lib/expression_eval";
+import { getGlobalSettingVertex } from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
 
-import type {GraphInterface, Vertex} from "../../../graph";
-import {getGlobalSettingVertex} from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
+import type { GraphInterface, Vertex } from "../../../graph";
 
 export function getGlobalThemeVertex(
   graph: GraphInterface,
