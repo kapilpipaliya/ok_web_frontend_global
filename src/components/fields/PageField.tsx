@@ -4,7 +4,7 @@ import { usePageRenderContext } from "~/features/page_attr_render/context/PageRe
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import type { GenericComponentProps } from "./FieldType";
+import type { GenericComponentProps } from "./type/FieldType";
 
 export function PageField(props: Readonly<GenericComponentProps>) {
   const [local, _others] = splitProps(props, [

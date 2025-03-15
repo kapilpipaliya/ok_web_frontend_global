@@ -23,8 +23,8 @@ import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransact
 import { getNamedIndex } from "~/lib/graph/transaction/value/getNamedIndex";
 import { createLongPress } from "~/lib/hooks/createLongPress";
 
-import type { FunctionArgumentType } from "../form/FieldSchemaType";
-import type { GenericComponentProps } from "./FieldType";
+import type { FunctionArgumentType } from "../form/type/FieldSchemaType";
+import type { GenericComponentProps } from "./type/FieldType";
 
 import {
   type FormStoreObject,

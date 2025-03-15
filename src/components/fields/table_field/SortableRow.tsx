@@ -1,6 +1,6 @@
 import { type Accessor, createMemo, createSignal, For, Show } from "solid-js";
 
-import type { GenericComponentProps } from "~/components/fields/FieldType";
+import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";

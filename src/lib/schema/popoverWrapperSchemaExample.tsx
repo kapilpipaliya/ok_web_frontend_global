@@ -1,4 +1,4 @@
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 import { popoverWrapperSchema } from "./popoverWrapperSchema";
 

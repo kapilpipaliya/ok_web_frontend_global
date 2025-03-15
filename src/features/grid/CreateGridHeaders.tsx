@@ -20,7 +20,7 @@ import { STYLES } from "~/pages/settings/constants";
 
 import type { DataGridState } from "./DataGridContext";
 
-import { selectedValue } from "../../components/fields/utils/selectedValue";
+import { selectedValue } from "../../lib/graph/get/sync/edge/selectedValue";
 import { IconButton } from "../../components/styled/IconButton";
 import { TooltipWrapper } from "../../components/styled/TooltipWrapper";
 import { ModifyJsonButton } from "./ModifyJsonButton";

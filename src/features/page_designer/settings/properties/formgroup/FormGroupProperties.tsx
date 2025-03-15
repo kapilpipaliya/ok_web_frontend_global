@@ -15,7 +15,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { htmlTagsTree } from "~/lib/dom/htmlTags";
@@ -339,7 +338,7 @@ function moveClassToLast(
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
   const componentName = selectedAttr()?.P.componentName;
   const isForm = formStoreVertex()?.L[0] === "Form";
-  const isFormField = isForm && genericInputComponents.includes(componentName);
+  const isFormField = isForm && selectedAttr()?.P.as === "input" || selectedAttr()?.P.as === "textarea" || ["CheckBox", "Select", "MultiSelect", "TextInput"].includes(componentName);
 
   const nonCssVertices = otherVertices.filter(
     (vertex) => !vertex.P.key.endsWith("Class"),

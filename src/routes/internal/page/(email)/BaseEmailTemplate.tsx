@@ -37,8 +37,9 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
         attributes: [
           getLogoSchema(),
           {
+            as: "",
             attributes: content,
-            componentName: "Fragment",
+            componentName: "Html",
             pos: 1,
           },
           {

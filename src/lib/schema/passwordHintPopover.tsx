@@ -1,7 +1,7 @@
 import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";

@@ -2,7 +2,7 @@ import { onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";

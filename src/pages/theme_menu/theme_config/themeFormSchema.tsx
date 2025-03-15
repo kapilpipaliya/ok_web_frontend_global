@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
   FieldAttribute,
   IFormMetaData,

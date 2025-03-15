@@ -1,10 +1,11 @@
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
 
 export function addEditButtonSchema(label: string) {
   return {
+    as: "",
     attributes: [
       {
         attributes: [
@@ -53,7 +54,6 @@ export function addEditButtonSchema(label: string) {
           when: !options.data?.id?.startsWith("-"),
         }),
       },
-    ],
-    componentName: "Fragment",
+    ], componentName: "Html",
   } as FieldAttribute;
 }

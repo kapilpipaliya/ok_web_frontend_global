@@ -8,7 +8,6 @@ import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
 import { ZIndex } from "~/components/fields/ZIndex";
-import { SiteTitle } from "~/components/SiteTitle";
 import {
   DesignerLayoutStoreContext,
   getInitialDesignerLayoutStore,
@@ -21,6 +20,7 @@ import {
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/core/vertex";
+import {MetaTitle} from "~/components/fields/MetaTitle";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
@@ -175,7 +175,7 @@ export function PageDesignerWrapper(): JSX.Element {
   return (
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
-        <SiteTitle>{`${params.entity} Builder`}</SiteTitle>
+        <MetaTitle text={`${params.entity} Builder`} />
         {/* <div
           classList={{
             "display:none": layoutStore().selectedSection === "setting",

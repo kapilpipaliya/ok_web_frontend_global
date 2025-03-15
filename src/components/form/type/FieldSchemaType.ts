@@ -9,7 +9,7 @@ import type {
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 
-import type { FormStoreObject } from "./context/FormContext";
+import type { FormStoreObject } from "../context/FormContext";
 
 export type ComponentNameType = (options: FunctionArgumentType) => string;
 

@@ -36,10 +36,8 @@ export const getComponentClass = (componentName: string) => {
       return "min-w:200px";
     case "TextArea":
       return "min-w:200px";
-    case "TextField":
-      return "min-w:150px";
     default:
-      return "";
+      return "min-w:150px";
   }
 };
 

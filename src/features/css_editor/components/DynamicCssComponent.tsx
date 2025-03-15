@@ -12,7 +12,7 @@ import {
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import {

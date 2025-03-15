@@ -7,7 +7,7 @@ import {
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { isVertex } from "~/lib/graph/mutate/core/vertex";
 
-export function RepeaterInternal(props: {
+export function DataInternal(props: {
   data: any;
   index: number;
   meta: Vertex;

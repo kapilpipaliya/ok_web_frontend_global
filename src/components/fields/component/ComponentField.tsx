@@ -17,7 +17,7 @@ import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 
-import type { GenericComponentProps } from "../FieldType";
+import type { GenericComponentProps } from "../type/FieldType";
 
 import { ComponentChildrenContext } from "../contexts/ComponentChildrenContext";
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";

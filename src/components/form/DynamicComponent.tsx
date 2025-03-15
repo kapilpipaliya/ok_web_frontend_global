@@ -20,7 +20,7 @@ import {
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
-import {getMetaProps} from "~/components/form/utils/getMetaProps";
+import {getMetaProps} from "~/components/form/functions/getMetaProps";
 import { Label } from "~/features/css_editor/components/fields/Label";
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
@@ -53,7 +53,7 @@ import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
-import type { FunctionArgumentType } from "./FieldSchemaType";
+import type { FunctionArgumentType } from "./type/FieldSchemaType";
 
 import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
@@ -726,34 +726,7 @@ export function DynamicComponent(
             keyed
             when={component() && (isNoPermissionCheck() || !hasNoPermission())}
           >
-            <Switch>
-              {/* <Match
-                when={
-                  (props.isLabelWrap ?? true) &&
-                  componentName() !== "Label" &&
-                  (props.meta.P.label)
-                }
-              >
-                <Label
-                  class={mergeCSS(
-                    "",
-                    props.meta.P.labelClass,
-                    { P: { key: "labelClass" } } as unknown as Vertex,
-                    props.meta,
-                    graph,
-                  )}
-                  label={props.meta.P.label}
-                  required={
-                    props.meta.P.validation?.required
-                  }
-                >
-                  <Content />
-                </Label>
-              </Match> */}
-              <Match when={true}>
-                <ContentWrapper />
-              </Match>
-            </Switch>
+            <ContentWrapper />
           </Match>
           <Match when={getGlobalStore(graph).P.isDevelopment}>
             Hidden component

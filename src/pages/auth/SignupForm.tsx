@@ -1,7 +1,7 @@
 import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -273,6 +273,7 @@ export function SignupForm() {
             componentName: "Html",
           },
           {
+            as: "",
             attributes: [
               {
                 as: "button",
@@ -296,8 +297,7 @@ export function SignupForm() {
                 }),
                 type: "button",
               },
-            ],
-            componentName: "Fragment",
+            ], componentName: "Html",
           },
         ],
         componentName: "Data",

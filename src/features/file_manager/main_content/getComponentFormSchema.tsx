@@ -1,6 +1,6 @@
 import { createStore as createSolidJsStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,

@@ -1,7 +1,7 @@
 import { createMemo, onCleanup } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
-import type { GenericComponentProps } from "~/components/fields/FieldType";
+import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";

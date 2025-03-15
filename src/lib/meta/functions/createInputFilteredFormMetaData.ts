@@ -1,5 +1,3 @@
-import { genericInputComponents } from "~/components/form/functions/genericInputComponents";
-
 import type { FieldAttribute, IFormMetaData } from "../FormMetadataType";
 
 export function createInputFilteredFormMetaData(
@@ -10,7 +8,7 @@ export function createInputFilteredFormMetaData(
       const componentName = attribute.componentName;
 
       if (
-        genericInputComponents.includes(componentName) ||
+        attribute.key ||
         componentName === "DynamicTable"
       ) {
         const newAttribute = { ...attribute };

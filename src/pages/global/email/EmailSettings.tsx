@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -74,7 +74,7 @@ export function EmailSettings() {
   loadSettingsData();
 
   const form = {
-    as: "div",
+    as: "",
     attributes: [
       {
         as: "div",
@@ -83,8 +83,8 @@ export function EmailSettings() {
             as: "div",
             attributes: [
               {
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                as: "span", componentName: "Html",
+                as: "span",
+                class: SETTINGS_CONSTANTS.LABEL_CLASS, componentName: "Html",
                 text: "Email Provider",
               },
               {
@@ -118,7 +118,7 @@ export function EmailSettings() {
                 componentName: "TextInput",
                 key: "smtpHost",
                 placeholder: "Enter SMTP host",
-                validate: (value: string, data: any) => 
+                validate: (value: string, data: any) =>
                   data.P.active === "smtp" ? validateRequired(value) : undefined,
               },
             ],
@@ -143,7 +143,7 @@ export function EmailSettings() {
                 key: "smtpPort",
                 placeholder: "Enter SMTP port",
                 type: "number",
-                validate: (value: string, data: any) => 
+                validate: (value: string, data: any) =>
                   data.P.active === "smtp" ? validatePort(value) : undefined,
               },
             ],
@@ -167,7 +167,7 @@ export function EmailSettings() {
                 componentName: "TextInput",
                 key: "smtpUsername",
                 placeholder: "Enter SMTP username",
-                validate: (value: string, data: any) => 
+                validate: (value: string, data: any) =>
                   data.P.active === "smtp" ? validateRequired(value) : undefined,
               },
             ],
@@ -192,7 +192,7 @@ export function EmailSettings() {
                 key: "smtpPassword",
                 placeholder: "Enter SMTP password",
                 type: "password",
-                validate: (value: string, data: any) => 
+                validate: (value: string, data: any) =>
                   data.P.active === "smtp" ? validateRequired(value) : undefined,
               },
             ],
@@ -217,7 +217,7 @@ export function EmailSettings() {
                 key: "sendGridApiKey",
                 placeholder: "Enter SendGrid API key",
                 type: "password",
-                validate: (value: string, data: any) => 
+                validate: (value: string, data: any) =>
                   data.P.active === "sendgrid" ? validateRequired(value) : undefined,
               },
             ],
@@ -291,7 +291,7 @@ export function EmailSettings() {
                         // Validate form data
                         const settings = options.data;
                         const errors = validateFormData(settings.P);
-                        
+
                         if (errors) {
                           // Show validation errors
                           for (const fieldKey in errors) {
@@ -300,9 +300,9 @@ export function EmailSettings() {
                           showErrorToast("Please fix the validation errors");
                           return;
                         }
-                        
+
                         options.clearAllErrors();
-                        
+
                         // Use the common handleApiRequest function
                         await handleApiRequest(
                           API.settings.email.updateUrl,
@@ -316,12 +316,12 @@ export function EmailSettings() {
                       text: options.dataContext.saveState[0]?.isLoading
                         ? "Saving..."
                         : "Save Changes",
-                    }),  
+                    }),
                   },
                 ],
                 componentName: "Data",
                 name: "saveState",
-                
+
                 props: () => ({
                   data: createStore({
                     isLoading: false,
@@ -340,7 +340,7 @@ export function EmailSettings() {
                         // Validate form data first
                         const settings = options.data;
                         const errors = validateFormData(settings.P);
-                        
+
                         if (errors) {
                           // Show validation errors
                           for (const fieldKey in errors) {
@@ -349,12 +349,12 @@ export function EmailSettings() {
                           showErrorToast("Please fix the validation errors before testing");
                           return;
                         }
-                        
+
                         options.clearAllErrors();
-                        
+
                         // Set loading state
                         options.dataContext.testState[1]("isLoading", true);
-                        
+
                         try {
                           // First save the settings using handleApiRequest
                           const saveResult = await handleApiRequest(
@@ -365,12 +365,12 @@ export function EmailSettings() {
                             () => {}, // Don't show success toast for save before test
                             showErrorToast
                           );
-                          
+
                           if (!saveResult.success) {
                             options.dataContext.testState[1]("isLoading", false);
                             return;
                           }
-                          
+
                           // Then test the connection using handleApiRequest
                           await handleApiRequest(
                             API.settings.email.testUrl,
@@ -396,7 +396,7 @@ export function EmailSettings() {
                 ],
                 componentName: "Data",
                 name: "testState",
-                
+
                 props: () => ({
                   data: createStore({
                     isLoading: false,
@@ -412,7 +412,7 @@ export function EmailSettings() {
         componentName: "Html",
       },
     ],
-    componentName: "Fragment",
+    componentName: "Html",
     props: () => ({
       // TODO: if not saved, revert to previous state
       // onUnmount: () => {

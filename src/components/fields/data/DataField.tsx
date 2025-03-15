@@ -13,7 +13,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import { useGraph, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
-import { RepeaterInternal } from "./RepeaterInternal";
+import { DataInternal } from "./DataInternal";
 
 export const DataField = (props: {
   data: (() => any[]) | any[];
@@ -112,7 +112,7 @@ export const DataField = (props: {
         <For each={options()}>
           {(value, index) => {
             return (
-              <RepeaterInternal
+              <DataInternal
                 data={data()}
                 index={index()}
                 meta={meta()}
@@ -124,7 +124,7 @@ export const DataField = (props: {
         </For>
       </Match>
       <Match when={options()}>
-        <RepeaterInternal
+        <DataInternal
           data={data()}
           index={0}
           meta={meta()}

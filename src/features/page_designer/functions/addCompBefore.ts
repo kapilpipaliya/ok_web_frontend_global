@@ -5,9 +5,9 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { addComponentAttrInPage } from "~/features/page_designer/functions/drop/addComponentAttrInForm";
 import { sortChildren } from "~/features/page_designer/functions/sortChildren";
 
-import type { FormStoreObject } from "../context/FormContext";
+import type { FormStoreObject } from "../../../components/form/context/FormContext";
 
-export function addStepAfter(
+export function addCompBefore(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formStoreVertex: Vertex<FormStoreObject>,
@@ -39,6 +39,8 @@ export function addStepAfter(
     fromVertex,
     graph.vertexes[formDataId!],
     toVertex,
-    "after",
+    "before",
   );
+
+  // setLayoutStore('activeStepId', layoutRowId);
 }

@@ -10,11 +10,10 @@ import { Transition, TransitionGroup } from "solid-transition-group";
 import { ComponentChildrenField } from "~/components/fields/component/ComponentChildrenField";
 import { ComponentField } from "~/components/fields/component/ComponentField";
 import { DataField } from "~/components/fields/data/DataField";
-import { FragmentField } from "~/components/fields/FragmentField";
 import { IconField } from "~/components/fields/IconField";
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 // import { RadioGroupField } from "~/components/fields/RadioGroupField";
-import { SelectField } from "~/components/fields/SelectField";
+import { SelectField } from "~/components/fields/select/SelectField";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { TextInputField } from "~/components/fields/TextInputField";
 import { ZIndex } from "~/components/fields/ZIndex";
@@ -26,7 +25,6 @@ import { TextAreaField } from "~/features/css_editor/components/fields/TextArea"
 import { FormField } from "../../fields/FormField";
 import { HtmlField } from "../../fields/HtmlField";
 import { MetaLink, MetaMeta, MetaTitle } from "../../fields/MetaTitle";
-import { TextField } from "../../fields/TextField";
 import { FileUploader } from "../../styled/FileUploader";
 // const OtpField = clientOnly(() => import("~/components/ssr/otpfield/OtpField"));
 // OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
@@ -114,7 +112,6 @@ export const componentsMap: Record<string, any> = {
   DynamicTable: TableInputField,
   FileUploader: FileUploader,
   Form: FormField,
-  Fragment: FragmentField,
   Html: HtmlField,
   Icon: IconField,
   Link: MetaLink,

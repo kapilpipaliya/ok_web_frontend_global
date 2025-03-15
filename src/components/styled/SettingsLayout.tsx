@@ -1,7 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { Component, createEffect, createSignal } from "solid-js";
 
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
@@ -89,6 +89,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                         as: "div",
                         attributes: [
                           {
+                            as: "",
                             attributes: [
                               {
                                 as: "div",
@@ -99,7 +100,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                 })
                               }
                             ],
-                            componentName: "Fragment",
+                            componentName: "Html",
                             props: (args: FunctionArgumentType) => ({
                               hidden: (args.dataContext.menuGroups as DataType)[0] === "default"
                             })

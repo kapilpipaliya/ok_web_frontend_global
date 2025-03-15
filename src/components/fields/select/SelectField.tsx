@@ -9,7 +9,7 @@ import {
   Show,
 } from "solid-js";
 
-import type { GenericComponentProps } from "~/components/fields/FieldType";
+import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
@@ -21,16 +21,16 @@ import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
+import { selectedValue } from "~/lib/graph/get/sync/edge/selectedValue";
 import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import { setSelectValueHelper } from "~/lib/graph/mutate/selection/setSelectValueHelper";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
-import { useFormContext } from "../form/context/FormContext";
-import { isStaticOptions } from "./utils/isStaticOptions";
-import { selectedValue } from "./utils/selectedValue";
-import { setSelectValueHelper } from "./utils/setSelectValueHelper";
+import { useFormContext } from "../../form/context/FormContext";
+import { isStaticOptions } from "./functions/isStaticOptions";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(

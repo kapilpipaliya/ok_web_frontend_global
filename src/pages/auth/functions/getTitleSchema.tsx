@@ -1,4 +1,4 @@
-import type { FunctionArgumentType } from "~/components/form/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { getTitle } from "~/lib/graph/get/sync/theme/getTitle";

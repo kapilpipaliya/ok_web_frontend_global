@@ -8,7 +8,7 @@ import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPr
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph, Vertex } from "~/lib/graph/graph";
 
-import type { GenericComponentProps } from "./FieldType";
+import type { GenericComponentProps } from "./type/FieldType";
 
 import { FormStoreObject } from "../form/context/FormContext";
 

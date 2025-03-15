@@ -12,7 +12,7 @@ import {
   Switch,
 } from "solid-js";
 
-import type { GenericComponentProps } from "~/components/fields/FieldType";
+import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 
 import { AddNewButton } from "~/features/grid/AddNewButton";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";

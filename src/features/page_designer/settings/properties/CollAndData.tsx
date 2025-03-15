@@ -5,7 +5,7 @@ import { type Accessor, onCleanup } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { SelectField } from "~/components/fields/SelectField";
+import { SelectField } from "~/components/fields/select/SelectField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { evalExpression } from "~/lib/expression_eval";
