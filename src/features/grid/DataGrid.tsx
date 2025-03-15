@@ -63,6 +63,7 @@ interface DataGridProps {
   initializeGridStoreParent?: (formStore: DataGridStore) => void;
   isShowPagination?: boolean;
   tableId: string;
+  hideEditAction?: boolean;
 }
 
 export function DataGrid(props: Readonly<DataGridProps>) {
@@ -276,6 +277,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       props.tableId,
       props.hideDeleteAction,
       props.hideEditJsonAction,
+      props.hideEditAction,
     );
 
     setGridState("tableStore", {

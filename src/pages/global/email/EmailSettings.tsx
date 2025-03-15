@@ -11,6 +11,7 @@ import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { handleApiRequest } from "./handleApiRequest";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 // Validation functions
 const validateRequired = (value: string) => {
@@ -103,7 +104,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
           },
-          getErrorSchema("active"),
+          getErrorSchema("active", "fg:red mt:-20"),
           {
             as: "div",
             attributes: [
@@ -127,7 +128,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpHost"),
+          getErrorSchema("smtpHost", "fg:red mt:-20"),
           {
             as: "div",
             attributes: [
@@ -152,7 +153,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpPort"),
+          getErrorSchema("smtpPort", "fg:red mt:-20"),
           {
             as: "div",
             attributes: [
@@ -176,7 +177,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpUsername"),
+          getErrorSchema("smtpUsername", "fg:red mt:-20"),
           {
             as: "div",
             attributes: [
@@ -201,7 +202,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpPassword"),
+          getErrorSchema("smtpPassword", "fg:red mt:-20"),
           {
             as: "div",
             attributes: [
@@ -226,7 +227,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "sendgrid",
             }),
           },
-          getErrorSchema("sendGridApiKey"),
+          getErrorSchema("sendGridApiKey", "fg:red mt:-20"),
           {
             as: "div",
             attributes: [
@@ -254,7 +255,7 @@ export function EmailSettings() {
               hidden: () => !options.data.P.active,
             }),
           },
-          getErrorSchema("fromEmail"),
+          getErrorSchema("fromEmail", "fg:red mt:-20"),
           {
             as: "div",
             attributes: [
@@ -274,7 +275,7 @@ export function EmailSettings() {
               hidden: () => options.data.P.active !== "smtp",
             }),
           },
-          getErrorSchema("secure"),
+          getErrorSchema("secure", "fg:red mt:-20"),
           {
             as: "div",
             attributes: [
@@ -293,12 +294,14 @@ export function EmailSettings() {
                         
                         if (errors) {
                           // Show validation errors
-                          for (const field in errors) {
-                            options.setError(field, errors[field]);
+                          for (const fieldKey in errors) {
+                            options.setError(errors[fieldKey], fieldKey);
                           }
                           showErrorToast("Please fix the validation errors");
                           return;
                         }
+                        
+                        options.clearAllErrors();
                         
                         // Use the common handleApiRequest function
                         await handleApiRequest(
@@ -340,12 +343,14 @@ export function EmailSettings() {
                         
                         if (errors) {
                           // Show validation errors
-                          for (const field in errors) {
-                            options.setError(field, errors[field]);
+                          for (const fieldKey in errors) {
+                            options.setError(errors[fieldKey], fieldKey);
                           }
                           showErrorToast("Please fix the validation errors before testing");
                           return;
                         }
+                        
+                        options.clearAllErrors();
                         
                         // Set loading state
                         options.dataContext.testState[1]("isLoading", true);

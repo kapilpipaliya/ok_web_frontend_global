@@ -60,11 +60,12 @@ export function ActivityLog() {
 
   return (
     <DataGrid
-      CustomAddNewButton={() => <SchemaRenderer form={addSchema} />}
+      CustomAddNewButton={() => <></>}
       editSchema={editSchema}
       formSchema={ActivityLogSchema}
       getTableData={getTableData}
       hideDeleteAction={true}
+      hideEditAction={true}
       hideEditJsonAction={true}
       initializeGridStoreParent={(gridStore_) => {
         gridStore = gridStore_;

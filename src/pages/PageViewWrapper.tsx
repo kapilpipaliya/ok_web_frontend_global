@@ -130,6 +130,25 @@ export function PageViewWrapper(
     );
   };
 
+  // Track error vertex ID
+  let errorVertexId: string | undefined;
+
+  function createErrorVertex(dataId: string) {
+    // Delete previous error vertex if exists
+    if (errorVertexId) {
+      deleteVertex(0, errorVertexId, graph, setGraph);
+    }
+    
+    errorVertexId = `${dataId}-error`;
+    const errorVertex = newVertex(errorVertexId, ["Error"], {
+      dataId: dataId,
+      message: "",
+      timestamp: new Date().toISOString(),
+    });
+    addNewVertex(0, errorVertex, graph, setGraph);
+    return errorVertexId;
+  }
+
   onCleanup(() => {
     for (const viewId of formStore()?.P?.openedViews ?? []) {
       deleteVertex(0, viewId, graph, setGraph);
@@ -138,6 +157,13 @@ export function PageViewWrapper(
 
   onCleanup(() => {
     deleteVertex(0, componentVertexObject.id, graph, setGraph);
+  });
+
+  // Delete error vertex on cleanup
+  onCleanup(() => {
+    if (errorVertexId) {
+      deleteVertex(0, errorVertexId, graph, setGraph);
+    }
   });
 
   // Note: onCleanUp will be called on reverse order of the cleanup functions
@@ -472,6 +498,11 @@ export function PageViewWrapper(
         }
       }
     }
+    if (formDataId) {
+      setFormStore("formDataId", formDataId);
+      
+      createErrorVertex(formDataId);
+    }
     if (!result) {
       return;
     }
@@ -484,9 +515,6 @@ export function PageViewWrapper(
     }
     if (result.componentData?.graph) {
       setGraphData(graph, setGraph, result.componentData.graph!);
-    }
-    if (formDataId) {
-      setFormStore("formDataId", formDataId);
     }
 
     if (!(props.parentId || props.txnId) && props.isDesignMode) {

@@ -37,6 +37,7 @@ export interface FunctionArgumentBaseType {
   parentMeta: Vertex;
   parentRenderContext: PageRenderObject;
   readOnly: boolean | null | undefined;
+  clearAllErrors: () => void;
   ref: Accessor<HTMLDivElement | null>;
   revertTransaction: (txnId: number) => void;
   revertTransactionUpToIndex: (txnId: number, txnIndex: number) => void;

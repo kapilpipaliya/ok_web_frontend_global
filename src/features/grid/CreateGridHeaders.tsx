@@ -69,6 +69,7 @@ export function CreateGridHeaders(
   tableId: string,
   hideDeleteAction?: boolean,
   hideEditJsonAction?: boolean,
+  hideEditAction?: boolean,
 ) {
   const tableColumns = [] as ColumnDef<any>[];
 
@@ -202,97 +203,113 @@ export function CreateGridHeaders(
       );
     tableColumns.push(column);
   }
-  tableColumns.push({
-    accessorKey: "Actions",
-    cell: (info) => {
-      return (
-        <div
-          class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}
-        >
-          <Show
-            when={
-              gridState.isNoPermissionCheck ||
-              (gridState.formMetaData() &&
-                (gridState.hasEditPermission() ||
-                  gridState.hasViewPermission()))
-            }
-          >
-            <Switch>
-              <Match when={formNew.isInlineEditable && !gridState.editSchema}>
-                No Schema Found
-              </Match>
-              <Match when={formNew.isInlineEditable}>
-                <SchemaRenderer
-                  form={gridState.editSchema!}
-                  formDataId={info.row.original.id}
-                />
-              </Match>
-              <Match when={true}>
-                <IconButton
-                  disabled={
-                    !gridState.isNoPermissionCheck &&
-                    !!gridState.formMetaData() &&
-                    !(
-                      gridState.hasEditPermission() ||
-                      gridState.hasViewPermission()
-                    )
-                  }
-                  icon="ph:pen"
-                  iconClass="color:#3477CC"
-                  onClick={() => {
-                    return navigate(
-                      `/admin/${tableId}/${info.row.original.id}`,
-                    );
-                  }}
-                  size={21}
-                />
-              </Match>
-            </Switch>
-          </Show>
 
-          <Show
-            when={
-              !hideDeleteAction &&
-              (gridState.isNoPermissionCheck ||
-                (!!gridState.formMetaData() && gridState.hasDeletePermission()))
-            }
+  // Check if any actions are available before adding the Actions column
+  const hasEditAction = !hideEditAction && (gridState.isNoPermissionCheck || 
+    (gridState.formMetaData() && (gridState.hasEditPermission() || gridState.hasViewPermission())));
+  
+  const hasDeleteAction = !hideDeleteAction && (gridState.isNoPermissionCheck || 
+    (gridState.formMetaData() && gridState.hasDeletePermission()));
+  
+  const hasFormAction = tableId === "Form";
+  
+  const hasJsonAction = !(hideEditJsonAction || FormMetaData[tableId]);
+  
+  // Only add Actions column if at least one action is available
+  if (hasEditAction || hasDeleteAction || hasFormAction || hasJsonAction) {
+    tableColumns.push({
+      accessorKey: "Actions",
+      cell: (info) => {
+        return (
+          <div
+            class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}
           >
-            <IconButton
-              disabled={
-                !gridState.isNoPermissionCheck &&
-                !!gridState.formMetaData() &&
-                !gridState.hasDeletePermission()
+            <Show
+              when={
+                !hideEditAction &&
+                (gridState.isNoPermissionCheck ||
+                  (gridState.formMetaData() &&
+                    (gridState.hasEditPermission() ||
+                      gridState.hasViewPermission())))
               }
-              icon="ph:trash"
-              iconClass="color:rgb(255,0,0)"
-              onClick={() => setDeleteRowId(info.row.original.id)}
-              size={22}
-            />
-          </Show>
+            >
+              <Switch>
+                <Match when={formNew.isInlineEditable && !gridState.editSchema}>
+                  No Schema Found
+                </Match>
+                <Match when={formNew.isInlineEditable}>
+                  <SchemaRenderer
+                    form={gridState.editSchema!}
+                    formDataId={info.row.original.id}
+                  />
+                </Match>
+                <Match when={true}>
+                  <IconButton
+                    disabled={
+                      !gridState.isNoPermissionCheck &&
+                      !!gridState.formMetaData() &&
+                      !(
+                        gridState.hasEditPermission() ||
+                        gridState.hasViewPermission()
+                      )
+                    }
+                    icon="ph:pen"
+                    iconClass="color:#3477CC"
+                    onClick={() => {
+                      return navigate(
+                        `/admin/${tableId}/${info.row.original.id}`,
+                      );
+                    }}
+                    size={21}
+                  />
+                </Match>
+              </Switch>
+            </Show>
 
-          <Show when={tableId === "Form"}>
-            <IconButton
-              icon="ph:database"
-              iconClass="color:#3477CC"
-              onClick={() => {
-                const newUrl = `/admin/${info.row.original.P.key}`;
-                window.open(newUrl, "_blank");
-              }}
-              size={21}
-            />
-          </Show>
-          <Show when={!(hideEditJsonAction || FormMetaData[tableId])}>
-            <ModifyJsonButton
-              class="color:#FFA500"
-              item={info.row.original}
-              size={21}
-            />
-          </Show>
-        </div>
-      );
-    },
-    footer: "",
-    header: "Actions",
-  });
+            <Show
+              when={
+                !hideDeleteAction &&
+                (gridState.isNoPermissionCheck ||
+                  (!!gridState.formMetaData() && gridState.hasDeletePermission()))
+              }
+            >
+              <IconButton
+                disabled={
+                  !gridState.isNoPermissionCheck &&
+                  !!gridState.formMetaData() &&
+                  !gridState.hasDeletePermission()
+                }
+                icon="ph:trash"
+                iconClass="color:rgb(255,0,0)"
+                onClick={() => setDeleteRowId(info.row.original.id)}
+                size={22}
+              />
+            </Show>
+
+            <Show when={tableId === "Form"}>
+              <IconButton
+                icon="ph:database"
+                iconClass="color:#3477CC"
+                onClick={() => {
+                  const newUrl = `/admin/${info.row.original.P.key}`;
+                  window.open(newUrl, "_blank");
+                }}
+                size={21}
+              />
+            </Show>
+            <Show when={!(hideEditJsonAction || FormMetaData[tableId])}>
+              <ModifyJsonButton
+                class="color:#FFA500"
+                item={info.row.original}
+                size={21}
+              />
+            </Show>
+          </div>
+        );
+      },
+      footer: "",
+      header: "Actions",
+    });
+  }
   return tableColumns;
 }

@@ -48,7 +48,7 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
-import { addNewVertex, mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { addNewVertex, mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
@@ -201,6 +201,10 @@ export function DynamicComponent(
       },
       get dataContext() {
         return runWithOwner(owner, () => useRepeaterVertexContext() || {});
+      },
+      clearAllErrors: () => {
+        const errorVertexId = `${props.data?.id}-error`;
+        replaceVertexProperties(0, errorVertexId, graph, setGraph, {});
       },
       error: (key?: string) => {
         const errorVertexId = `${props.data?.id}-error`;
