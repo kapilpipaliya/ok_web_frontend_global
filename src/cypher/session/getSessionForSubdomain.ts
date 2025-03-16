@@ -19,6 +19,14 @@ export async function getDBSessionForSubdomain(request?: APIEvent["request"]) {
   };
 }
 
+export function getURL(request?: APIEvent["request"]): URL {
+  const url = request ? new URL(request.url) : getRequestURL();
+  if (!url) {
+    throw new Error("URL is missing");
+  }
+  return url;
+}
+
 async function determineSubDomain(
   url: URL,
 ): Promise<{ domain: null | string; subdomain: string }> {
@@ -26,12 +34,4 @@ async function determineSubDomain(
   return adminui === "true"
     ? { domain: null, subdomain: "adminui" }
     : await getSubDomain(url.hostname);
-}
-
-function getURL(request?: APIEvent["request"]): URL {
-  const url = request ? new URL(request.url) : getRequestURL();
-  if (!url) {
-    throw new Error("URL is missing");
-  }
-  return url;
 }

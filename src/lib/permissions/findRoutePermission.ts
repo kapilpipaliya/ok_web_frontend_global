@@ -1,5 +1,6 @@
-import { routePermissions } from "~/lib/permissions/routePermissions";
 import type { RoutePermission } from "~/lib/permissions/type/types";
+
+import { routePermissions } from "~/lib/permissions/routePermissions";
 
 // Helper function to find matching route permission for a given path
 export function findRoutePermission(path: string): RoutePermission | undefined {

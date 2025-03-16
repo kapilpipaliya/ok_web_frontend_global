@@ -6,8 +6,16 @@ export const routePermissions: RoutePermission[] = [
   { path: "/", requiredPermission: PermissionLevel.PUBLIC },
   { path: "/auth/*", requiredPermission: PermissionLevel.PUBLIC },
   { path: "/api/auth/*", requiredPermission: PermissionLevel.PUBLIC },
-  { path: "/api/file/downloadCompanyRectangularLogo", requiredPermission: PermissionLevel.PUBLIC },
-  { path: "/api/file/downloadCompanySquareLogo", requiredPermission: PermissionLevel.PUBLIC },
+  {
+    path: "/api/file/downloadCompanyRectangularLogo",
+    requiredPermission: PermissionLevel.PUBLIC,
+  },
+  {
+    path: "/api/file/downloadCompanySquareLogo",
+    requiredPermission: PermissionLevel.PUBLIC,
+  },
+  { path: "/api/error/logError", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/internal/*", requiredPermission: PermissionLevel.PUBLIC },
 
   // Authenticated routes - require login
   { path: "/dashboard", requiredPermission: PermissionLevel.AUTHENTICATED },

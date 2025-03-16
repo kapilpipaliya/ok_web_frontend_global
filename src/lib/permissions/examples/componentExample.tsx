@@ -1,4 +1,4 @@
-import {PermissionGuard} from "~/lib/permissions/examples/PermissionGuard";
+import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 
 /**
  * Example usage of the PermissionGuard component
@@ -14,4 +14,3 @@ export function AdminDashboard() {
     </PermissionGuard>
   );
 }
-

@@ -1,13 +1,13 @@
 import type { APIEvent } from "@solidjs/start/server";
-
 import type { Node } from "neo4j-driver";
 
-import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import type {
   SystemRoleType,
   UserWithPermissions,
 } from "~/lib/permissions/type/types";
+
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 
 /**
  * Asynchronously gets user permissions by querying the database for role relationships

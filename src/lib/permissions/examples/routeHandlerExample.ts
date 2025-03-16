@@ -1,7 +1,8 @@
-import { redirect } from "@solidjs/router";
 import type { APIEvent } from "@solidjs/start/server";
 
-import { checkRoutePermission } from "../checkRoutePermission";
+import { redirect } from "@solidjs/router";
+
+import { checkRoutePermission } from "../checkRoutePermissionRPC";
 
 /**
  * Example of using the common permission check function in a route handler

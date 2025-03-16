@@ -1,8 +1,9 @@
-import {useLocation, useNavigate} from "@solidjs/router";
-import {createResource, JSX, Show} from "solid-js";
+import { createAsync, useLocation, useNavigate } from "@solidjs/router";
+import { type JSX, Show } from "solid-js";
 
-import {API} from "~/lib/api/endpoints";
-import {checkRoutePermission} from "~/lib/permissions/checkRoutePermission";
+import { API } from "~/lib/api/endpoints";
+
+import { checkRoutePermission } from "../checkRoutePermissionRPC";
 
 /**
  * Example of using the common permission check function in a component
@@ -21,9 +22,9 @@ export function PermissionGuard(props: {
   const pathToCheck = () => props.path || location.pathname;
 
   // Create a resource to check permissions
-  const [permissionResult] = createResource(pathToCheck, async (path) => {
+  const permissionResult = createAsync(async () => {
     // Check if the user has permission to access this path
-    return await checkRoutePermission(undefined, path);
+    return await checkRoutePermission(undefined, pathToCheck());
   });
 
   // Handle unauthorized access
