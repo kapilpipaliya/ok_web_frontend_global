@@ -4,11 +4,10 @@ import { PermissionLevel, type RoutePermission } from "./type/types";
 export const routePermissions: RoutePermission[] = [
   // Public routes - accessible to anyone
   { path: "/", requiredPermission: PermissionLevel.PUBLIC },
-  { path: "/login", requiredPermission: PermissionLevel.PUBLIC },
-  { path: "/register", requiredPermission: PermissionLevel.PUBLIC },
-  { path: "/forgot-password", requiredPermission: PermissionLevel.PUBLIC },
-  { path: "/reset-password", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/auth/*", requiredPermission: PermissionLevel.PUBLIC },
   { path: "/api/auth/*", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/api/file/downloadCompanyRectangularLogo", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/api/file/downloadCompanySquareLogo", requiredPermission: PermissionLevel.PUBLIC },
 
   // Authenticated routes - require login
   { path: "/dashboard", requiredPermission: PermissionLevel.AUTHENTICATED },

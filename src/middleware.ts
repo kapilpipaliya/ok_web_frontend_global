@@ -2,7 +2,7 @@ import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
 import { csrf } from "shieldwall/start";
 
-import { checkRoutePermission } from "./lib/permissions/checkRoutePermission";
+import { checkRoutePermissionBase } from "./lib/permissions/checkRoutePermission";
 
 // https://docs.solidjs.com/solid-start/guides/security
 // https://github.com/atilafassina/shieldwall
@@ -21,7 +21,7 @@ export default createMiddleware({
     //   }
     // }),
     async (event) => {
-      const permissionResult = await checkRoutePermission(event.request);
+      const permissionResult = await checkRoutePermissionBase(event.request);
 
       // If the user doesn't have permission, redirect to the appropriate page
       if (!permissionResult.hasPermission && permissionResult.redirectUrl) {

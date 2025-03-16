@@ -62,7 +62,9 @@ export default function App() {
                   <ErrorBoundary
                     fallback={(error, reset) => {
                       // Log the UI error
-                      logError(error, { location: location.pathname });
+                      if (!isServer) {
+                        logError(error, { location: location.pathname });
+                      }
                       return (
                         <ErrorFallback
                           error={error}

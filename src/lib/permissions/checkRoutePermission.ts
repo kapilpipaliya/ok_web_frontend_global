@@ -21,6 +21,14 @@ export async function checkRoutePermission(
   host?: string,
 ): Promise<PermissionCheckResult> {
   "use server";
+  return checkRoutePermissionBase(request, path, host);
+}
+
+export async function checkRoutePermissionBase(
+  request?: Request,
+  path?: string,
+  host?: string,
+): Promise<PermissionCheckResult> {
   try {
     // If no path provided and request exists, extract path from request URL
     if (!path && request) {
