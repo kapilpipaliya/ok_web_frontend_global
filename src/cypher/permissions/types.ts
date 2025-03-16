@@ -13,7 +13,7 @@ export type Role = {
 export const SYSTEM_ROLES = {
   ADMIN: "Admin",
   GUEST: "Guest",
-  SUPER_USER: "SuperUser",
+  SYSTEM_ADMIN: "SystemAdmin",
   USER: "User",
 } as const;
 

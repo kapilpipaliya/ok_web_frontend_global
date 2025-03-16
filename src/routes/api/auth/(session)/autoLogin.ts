@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
-import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmail";
+import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmailOrUuid";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { API } from "~/lib/api/endpoints";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";

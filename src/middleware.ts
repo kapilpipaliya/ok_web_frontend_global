@@ -2,11 +2,7 @@ import { redirect } from "@solidjs/router";
 import { createMiddleware } from "@solidjs/start/middleware";
 import { csrf } from "shieldwall/start";
 
-import { getSubDomain } from "~/cypher/session/getSubDomain";
-import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
-
-import { SYSTEM_DB_NAME } from "./cypher/core/boltConstant";
-import { generate401RedirectUrl } from "./lib/api/endpoints";
+import { checkRoutePermission } from "./lib/permissions/checkRoutePermission";
 
 // https://docs.solidjs.com/solid-start/guides/security
 // https://github.com/atilafassina/shieldwall
@@ -25,27 +21,11 @@ export default createMiddleware({
     //   }
     // }),
     async (event) => {
-      const url = new URL(event.request.url);
-      if (url.pathname === "/api/setup/superUserSetup") {
-        return;
-      }
-      const { subdomain } = await getSubDomain(
-        event.request.headers.get("host")!,
-      );
-      const isSuperSubDomain = subdomain === SYSTEM_DB_NAME;
-      const sessionUser = await getUserFromSession(event.request);
+      const permissionResult = await checkRoutePermission(event.request);
 
-      // Check if the request URL path is in the list of public paths
-      if (url.pathname.includes("/system")) {
-        if (!(isSuperSubDomain && sessionUser)) {
-          // Redirect to the login page if not authorized
-          return redirect(generate401RedirectUrl(url.pathname));
-        }
-      } else if (url.pathname.includes("/admin")) {
-        if (!sessionUser) {
-          // Redirect to the login page if not authorized
-          return redirect(generate401RedirectUrl(url.pathname));
-        }
+      // If the user doesn't have permission, redirect to the appropriate page
+      if (!permissionResult.hasPermission && permissionResult.redirectUrl) {
+        return redirect(permissionResult.redirectUrl);
       }
     },
   ],

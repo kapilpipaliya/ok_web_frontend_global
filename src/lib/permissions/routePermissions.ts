@@ -1,0 +1,44 @@
+import { PermissionLevel, type RoutePermission } from "./type/types";
+
+// Define route permissions configuration
+export const routePermissions: RoutePermission[] = [
+  // Public routes - accessible to anyone
+  { path: "/", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/login", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/register", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/forgot-password", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/reset-password", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/api/auth/*", requiredPermission: PermissionLevel.PUBLIC },
+
+  // Authenticated routes - require login
+  { path: "/dashboard", requiredPermission: PermissionLevel.AUTHENTICATED },
+  { path: "/profile", requiredPermission: PermissionLevel.AUTHENTICATED },
+  { path: "/settings", requiredPermission: PermissionLevel.AUTHENTICATED },
+  { path: "/api/user/*", requiredPermission: PermissionLevel.AUTHENTICATED },
+
+  // Admin routes - require admin privileges
+  { path: "/admin/*", requiredPermission: PermissionLevel.ADMIN },
+  { path: "/api/admin/*", requiredPermission: PermissionLevel.ADMIN },
+
+  // System routes - require system admin privileges
+  { path: "/system/*", requiredPermission: PermissionLevel.SYSTEM },
+  { path: "/api/system/*", requiredPermission: PermissionLevel.SYSTEM },
+  {
+    path: "/api/setup/superUserSetup",
+    requiredPermission: PermissionLevel.PUBLIC,
+  }, // Special case
+
+  // Example of custom permission check
+  {
+    customPermissionCheck: (user, path) => {
+      // Example: Check if user has specific project access
+      // In a real implementation, you might extract project ID from path
+      // and check against user permissions
+      // const projectId = path.split('/')[2];
+      // return user.pathPermissions?.includes(`project:${projectId}`) || false;
+      return false;
+    },
+    path: "/projects/*",
+    requiredPermission: PermissionLevel.CUSTOM,
+  },
+];

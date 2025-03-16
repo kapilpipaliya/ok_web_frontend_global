@@ -1,4 +1,4 @@
-import { findUserByEmail } from "~/cypher/mutate/user/findUserByEmail";
+import { findUserByEmailOrUuid } from "~/cypher/mutate/user/findUserByEmailOrUuid";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
@@ -12,11 +12,16 @@ export async function getUserRPC() {
     //   throw new APIError("Not Authorized", 401);
     // }
 
-    const data = await findUserByEmail(dbSession, user?.P?.email, subDomain);
+    const data = await findUserByEmailOrUuid(
+      dbSession,
+      user?.P?.email,
+      user?.P?.uuid,
+    );
 
     if (!data.user) {
       throw new APIError("User not authorized", 401);
     }
+    data.user.P.subDomain = subDomain;
 
     delete data.user.P.password;
     return data;

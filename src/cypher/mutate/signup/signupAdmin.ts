@@ -8,6 +8,7 @@ import type { SignupRequestData } from "./type/SignupRequestData";
 
 import { saveAllEmailTemplates } from "../email/saveEmailTemplates";
 import { addAdminRoleToUser } from "./admin/addAdminRoleToUser";
+import { addSystemAdminRoleToUser } from "./admin/addSystemAdminRoleToUser";
 import { newAdminValidations } from "./admin/newAdminValidations";
 import { createRootFolder } from "./seed/createRootFolder";
 import { insertComponents } from "./seed/insertComponents";
@@ -33,6 +34,10 @@ export async function signupAdmin(
   await createAccount(tx, accountId, data.username);
   await createAccountUserRelation(tx, accountId, user.P.uuid);
   await addAdminRoleToUser(tx, user.P.uuid);
+
+  if (isSystemUser) {
+    await addSystemAdminRoleToUser(tx, user.P.uuid);
+  }
 
   // Create SubDomain and link with Account if it's system user
   if (isSystemUser) {
