@@ -12,7 +12,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/Toast";
 import { createAppState } from "~/createAppState";
-import { getTreeDataAPICall } from "~/cypher/client/getTreeDataAPICall";
+import { getTreeDataAPICall } from "~/cypher/get/getTreeDataAPICall";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { GetInitialData } from "~/GetInitialData";
 import {

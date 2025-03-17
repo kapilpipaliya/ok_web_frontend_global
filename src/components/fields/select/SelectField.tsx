@@ -13,7 +13,7 @@ import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
-import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsAPICall";
+import { getSelectionOptionsBase } from "~/cypher/get/getSelectionOptionsBase";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
@@ -141,15 +141,7 @@ export function SelectField(
         setLoading(true);
       });
 
-      const mutationData = props.txnId
-        ? commitTxn(props.txnId, graph)
-        : undefined;
-      const res = await getSelectionOptionsAPICall(
-        [data()],
-        collection,
-        mutationData,
-        10,
-      );
+      const res = await getSelectionOptionsBase([data()], collection);
       if (isValidResponse(res)) {
         parsedOptions = res.result || [];
       } else {

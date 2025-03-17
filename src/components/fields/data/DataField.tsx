@@ -3,7 +3,7 @@ import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
-import { getSelectionOptionsAPICall } from "~/cypher/client/getSelectionOptionsAPICall";
+import { getSelectionOptionsBase } from "~/cypher/get/getSelectionOptionsBase";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
@@ -38,7 +38,7 @@ export const DataField = (props: {
     if (props.data) {
       return null;
     }
-    return getSelectionOptionsAPICall([data()], props.expression);
+    return getSelectionOptionsBase([data()], props.expression);
   });
 
   createEffect(() => {
