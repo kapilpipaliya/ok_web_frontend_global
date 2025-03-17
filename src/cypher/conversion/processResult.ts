@@ -9,6 +9,8 @@ import {
 
 import type { ContextType } from "../types/ContextType";
 
+import { updateNodeRelations } from "./updateRelations";
+
 export function processResult(
   records: Record[],
   context: ContextType,
@@ -50,33 +52,11 @@ export function processResult(
     for (const relationship of relationships) {
       const convertedRel = convertRelationshipToJson(relationship);
       if (relationshipMap) {
-        updateNodeRelations(context, convertedRel);
+        updateNodeRelations(context.nodes!, convertedRel);
         relationshipMap[convertedRel.id] = convertedRel;
       }
     }
   }
 
   return vertices;
-}
-
-function updateNodeRelations(context: ContextType, relationship: Edge) {
-  if (!context.nodes) {
-    return;
-  }
-
-  const sourceNode = context.nodes[relationship.S];
-  if (sourceNode) {
-    if (!sourceNode.OUT[relationship.T]) {
-      sourceNode.OUT[relationship.T] = [];
-    }
-    sourceNode.OUT[relationship.T].push(relationship.id);
-  }
-
-  const targetNode = context.nodes[relationship.E];
-  if (targetNode) {
-    if (!targetNode.IN[relationship.T]) {
-      targetNode.IN[relationship.T] = [];
-    }
-    targetNode.IN[relationship.T].push(relationship.id);
-  }
 }

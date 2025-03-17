@@ -9,6 +9,8 @@ import {
   convertRelationshipToJson,
 } from "~/cypher/conversion/convertNodeToJson";
 
+import { updateNodeRelations } from "./updateRelations";
+
 export async function fetchFromMGAndSaveToArray(
   dbSession: Session,
   query: string,
@@ -25,14 +27,18 @@ export async function fetchFromMGAndSaveToArray(
           nodeObj[id] = convertNodeToJson(value);
         } else if (value instanceof types.Relationship) {
           const id = value.elementId;
-          relationshipObj[id] = convertRelationshipToJson(value);
+          const convertedRel = convertRelationshipToJson(value);
+          relationshipObj[id] = convertedRel;
+          updateNodeRelations(nodeObj, convertedRel);
         } else if (Array.isArray(value)) {
           for (const item of value) {
             const id = item.elementId;
             if (item instanceof types.Node) {
               nodeObj[id] = convertNodeToJson(item);
             } else if (item instanceof types.Relationship) {
-              relationshipObj[id] = convertRelationshipToJson(item);
+              const convertedRel = convertRelationshipToJson(item);
+              relationshipObj[id] = convertedRel;
+              updateNodeRelations(nodeObj, convertedRel);
             }
           }
         }
