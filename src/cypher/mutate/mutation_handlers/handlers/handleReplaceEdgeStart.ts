@@ -1,9 +1,16 @@
+import type { Transaction } from "neo4j-driver";
+
+import type { Edge, EdgeMap, Id } from "~/lib/graph/graph";
+
+import { convertRelationshipToJson } from "~/cypher/conversion/convertNodeToJson";
+
 export async function handleReplaceEdgeStart(
-  replaceEdgeStart: any,
-  tx: any,
-  clientToServerVertexIdMap: Map<number, number>,
-  clientToServerEdgeIdMap: Map<number, number>,
+  replaceEdgeStart: Edge,
+  tx: Transaction,
+  clientToServerVertexIdMap: Map<Id, Id>,
+  clientToServerEdgeIdMap: Map<Id, Id>,
   txnResult: any[],
+  edges: EdgeMap = {},
 ) {
   const id =
     clientToServerEdgeIdMap.get(replaceEdgeStart.id) || replaceEdgeStart.id;
@@ -29,8 +36,14 @@ export async function handleReplaceEdgeStart(
     });
     if (result.records.length > 0) {
       const oldId = replaceEdgeStart.id;
-      const edgeId = result.records[0].get("r").elementId;
+      const relationship = result.records[0].get("t");
+      const edgeId = relationship.elementId;
       clientToServerEdgeIdMap.set(oldId, edgeId);
+
+      // Store the updated edge in the edges map
+      const edge = convertRelationshipToJson(relationship);
+      edges[edgeId] = edge;
+
       txnResult.push({ replaceEdgeStart: { error: false } });
     }
   } catch (error) {

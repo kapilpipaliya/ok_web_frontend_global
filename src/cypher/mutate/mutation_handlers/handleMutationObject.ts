@@ -1,3 +1,5 @@
+import type { EdgeMap, Id, VertexMap } from "~/lib/graph/graph";
+
 import { isObject } from "~/lib/data_structure/object/isObject";
 
 import { handleDeleteEdge } from "./handlers/handleDeleteEdge";
@@ -13,9 +15,13 @@ import { handleReplaceEdgeStart } from "./handlers/handleReplaceEdgeStart";
 export async function handleMutationObject(
   mutationObject: any,
   tx: any,
-  clientToServerVertexIdMap: Map<number, number>,
-  clientToServerEdgeIdMap: Map<number, number>,
+  clientToServerVertexIdMap: Map<Id, Id>,
+  clientToServerEdgeIdMap: Map<Id, Id>,
   txnResult: any[],
+  vertexes: VertexMap = {},
+  edges: EdgeMap = {},
+  deletedVertexes: Id[] = [],
+  deletedEdges: Id[] = [],
 ) {
   if (mutationObject.insert && isObject(mutationObject.insert)) {
     await handleInsert(
@@ -23,6 +29,7 @@ export async function handleMutationObject(
       tx,
       clientToServerVertexIdMap,
       txnResult,
+      vertexes,
     );
   }
   if (mutationObject.replace && isObject(mutationObject.replace)) {
@@ -31,6 +38,7 @@ export async function handleMutationObject(
       tx,
       clientToServerVertexIdMap,
       txnResult,
+      vertexes,
     );
   }
   if (mutationObject.merge && isObject(mutationObject.merge)) {
@@ -39,6 +47,7 @@ export async function handleMutationObject(
       tx,
       clientToServerVertexIdMap,
       txnResult,
+      vertexes,
     );
   }
   if (mutationObject.deleteVertex) {
@@ -47,6 +56,7 @@ export async function handleMutationObject(
       tx,
       clientToServerVertexIdMap,
       txnResult,
+      deletedVertexes,
     );
   }
   if (mutationObject.insertEdge) {
@@ -56,6 +66,7 @@ export async function handleMutationObject(
       clientToServerVertexIdMap,
       clientToServerEdgeIdMap,
       txnResult,
+      edges,
     );
   }
   if (mutationObject.replaceEdge) {
@@ -65,6 +76,7 @@ export async function handleMutationObject(
       clientToServerVertexIdMap,
       clientToServerEdgeIdMap,
       txnResult,
+      edges,
     );
   }
   if (mutationObject.replaceEdgeStart) {
@@ -74,6 +86,7 @@ export async function handleMutationObject(
       clientToServerVertexIdMap,
       clientToServerEdgeIdMap,
       txnResult,
+      edges,
     );
   }
   if (mutationObject.replaceEdgeEnd) {
@@ -83,6 +96,7 @@ export async function handleMutationObject(
       clientToServerVertexIdMap,
       clientToServerEdgeIdMap,
       txnResult,
+      edges,
     );
   }
   if (mutationObject.deleteEdge) {
@@ -92,6 +106,7 @@ export async function handleMutationObject(
       clientToServerVertexIdMap,
       clientToServerEdgeIdMap,
       txnResult,
+      deletedEdges,
     );
   }
 }

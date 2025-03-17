@@ -1,9 +1,13 @@
+import type { Transaction } from "neo4j-driver";
+
+import type { Edge, Id } from "~/lib/graph/graph";
 export async function handleDeleteEdge(
-  deleteEdge: any,
-  tx: any,
-  clientToServerVertexIdMap: Map<number, number>,
-  clientToServerEdgeIdMap: Map<number, number>,
+  deleteEdge: Edge,
+  tx: Transaction,
+  clientToServerVertexIdMap: Map<Id, Id>,
+  clientToServerEdgeIdMap: Map<Id, Id>,
   txnResult: any[],
+  deletedEdges: Id[] = [],
 ) {
   const id = clientToServerEdgeIdMap.get(deleteEdge.id) || deleteEdge.id;
   const startId = clientToServerVertexIdMap.get(deleteEdge.S) || deleteEdge.S;
@@ -23,6 +27,7 @@ export async function handleDeleteEdge(
       const oldId = deleteEdge.id;
       const edgeId = result.records[0].get("r").elementId;
       clientToServerEdgeIdMap.set(oldId, edgeId);
+      deletedEdges.push(id);
       txnResult.push({ deleteEdge: { error: false } });
     }
   } catch (error: any) {

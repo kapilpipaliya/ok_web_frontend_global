@@ -1,12 +1,15 @@
 import type { Transaction } from "neo4j-driver";
 
-import type { Vertex } from "~/lib/graph/graph";
+import type { Vertex, VertexMap } from "~/lib/graph/graph";
+
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 export async function handleInsert(
   insert: Vertex | Vertex[],
   tx: Transaction,
   clientToServerVertexIdMap: Map<string, string>,
   txnResult: { insert: [string, string] }[],
+  vertexes: VertexMap = {},
 ) {
   const labels = (Array.isArray(insert) ? insert[0].L : insert.L)
     .map((label: string) => `:${label}`)
@@ -21,9 +24,15 @@ export async function handleInsert(
     });
     if (result.records.length > 0) {
       for (const [index, record] of result.records.entries()) {
-        const id = record.get("n").elementId;
+        const node = record.get("n");
+        const id = node.elementId;
         const oldId = Array.isArray(insert) ? insert[index].id : insert.id;
         clientToServerVertexIdMap.set(oldId, id);
+
+        // Store the vertex in the vertexes map
+        const vertex = convertNodeToJson(node);
+        vertexes[id] = vertex;
+
         // can also send new vertex array to clients
         txnResult.push({ insert: [oldId, id] });
       }

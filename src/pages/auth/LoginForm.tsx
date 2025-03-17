@@ -11,16 +11,16 @@ import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { STYLES } from "../settings/constants";
-// Import all utilities from the index file
 import {
   createFormHeader,
   createPasswordField,
   createTextField,
-  useFormRefs,
-  useFormSubmit,
-  usePasswordVisibility,
-  validateFormData,
-} from "./functions";
+} from "./functions/formComponents";
+import { useFormRefs } from "./functions/useFormRefs";
+import { useFormSubmit } from "./functions/useFormSubmit";
+import { usePasswordVisibility } from "./functions/usePasswordVisibility";
+import { validateFormData } from "./functions/validateFormData";
+// Import all utilities from the index file
 
 export function LoginForm() {
   const [searchParams, setSearchParams] = useSearchParams();

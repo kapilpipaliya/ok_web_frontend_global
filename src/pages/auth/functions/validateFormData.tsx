@@ -30,7 +30,7 @@ export function validateFormData(
   },
 ): boolean {
   const { email, password, username } = formData.P;
-  
+
   // Validate username if required
   if (options.requireUsername) {
     const usernameError = validateUsername(username);

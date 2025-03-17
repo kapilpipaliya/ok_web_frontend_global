@@ -1,11 +1,16 @@
 import type { Transaction } from "neo4j-driver";
 
+import type { Edge, EdgeMap, Id } from "~/lib/graph/graph";
+
+import { convertRelationshipToJson } from "~/cypher/conversion/convertRelationshipToJson";
+
 export async function handleInsertEdge(
-  insertEdge: any,
+  insertEdge: Edge,
   tx: Transaction,
-  clientToServerVertexIdMap: Map<number, number>,
-  clientToServerEdgeIdMap: Map<number, number>,
+  clientToServerVertexIdMap: Map<Id, Id>,
+  clientToServerEdgeIdMap: Map<Id, Id>,
   txnResult: any[],
+  edges: EdgeMap = {},
 ) {
   // if user has no permission to insert row vertex, do not allow and return error.
   // if user has no permission to insert select, dont allow it.
@@ -28,8 +33,14 @@ export async function handleInsertEdge(
     });
     if (result.records.length > 0) {
       const oldId = insertEdge.id;
-      const edgeId = result.records[0].get("r").elementId;
+      const relationship = result.records[0].get("r");
+      const edgeId = relationship.elementId;
       clientToServerEdgeIdMap.set(oldId, edgeId);
+
+      // Store the edge in the edges map
+      const edge = convertRelationshipToJson(relationship);
+      edges[edgeId] = edge;
+
       txnResult.push({ insertEdge: [oldId, edgeId] });
     }
   } catch (error: any) {

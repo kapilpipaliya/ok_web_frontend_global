@@ -488,8 +488,6 @@ export function ForgotPasswordForm() {
           }),
         }),
       },
-
-
     ],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({

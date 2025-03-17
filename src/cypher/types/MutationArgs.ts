@@ -1,4 +1,4 @@
-import type { Id } from "~/lib/graph/graph";
+import type { EdgeMap, Id, VertexMap } from "~/lib/graph/graph";
 
 export interface MutationArgs {
   edgeIdMap: [Id, Id][];
@@ -21,5 +21,12 @@ export interface MutationResult {
       | "replaceEdgeEnd"
       | "replaceEdgeStart"]?: any;
   }[];
+  error?: string;
+  graph?: {
+    deleted_edges?: Id[];
+    deleted_vertexes?: Id[];
+    edges: EdgeMap;
+    vertexes: VertexMap;
+  };
   txnId: number;
 }

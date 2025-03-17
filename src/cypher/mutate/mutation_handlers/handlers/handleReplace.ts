@@ -1,8 +1,15 @@
+import type { Transaction } from "neo4j-driver";
+
+import type { Id, Vertex, VertexMap } from "~/lib/graph/graph";
+
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+
 export async function handleReplace(
-  replace: any,
-  tx: any,
-  clientToServerVertexIdMap: Map<number, number>,
+  replace: Vertex,
+  tx: Transaction,
+  clientToServerVertexIdMap: Map<Id, Id>,
   txnResult: any[],
+  vertexes: VertexMap = {},
 ) {
   let id = replace.id;
   if (clientToServerVertexIdMap.has(id)) {
@@ -14,6 +21,11 @@ export async function handleReplace(
   try {
     const result = await tx.run(query, { id: id, properties: replace.P });
     if (result.records.length > 0) {
+      // Store the updated vertex in the vertexes map
+      const node = result.records[0].get("n");
+      const vertex = convertNodeToJson(node);
+      vertexes[id] = vertex;
+
       txnResult.push({ replace: { error: false, id } });
     }
   } catch (error: any) {
