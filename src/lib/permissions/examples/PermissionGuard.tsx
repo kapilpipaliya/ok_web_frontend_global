@@ -35,24 +35,26 @@ export function PermissionGuard(props: {
   };
 
   return (
-    <Show
-      fallback={
-        <div>
-          {props.fallback || (
-            <div class="unauthorized-message">
-              <h3>Access Denied</h3>
-              <p>
-                {permissionResult()?.message ||
-                  "You don't have permission to access this content"}
-              </p>
-              <button onClick={handleUnauthorized}>Go to login</button>
-            </div>
-          )}
-        </div>
-      }
-      when={permissionResult()?.hasPermission}
-    >
-      {props.children}
+    <Show when={permissionResult()}>
+      <Show
+        fallback={
+          <div>
+            {props.fallback || (
+              <div class="unauthorized-message">
+                <h3>Access Denied</h3>
+                <p>
+                  {permissionResult()?.message ||
+                    "You don't have permission to access this content"}
+                </p>
+                <button onClick={handleUnauthorized}>Go to login</button>
+              </div>
+            )}
+          </div>
+        }
+        when={permissionResult()?.hasPermission}
+      >
+        {props.children}
+      </Show>
     </Show>
   );
 }

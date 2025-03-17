@@ -13,8 +13,8 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
   return (
-    <PermissionGuard>
-      <GetInitialData authenticate>
+    <GetInitialData authenticate>
+      <PermissionGuard>
         <Link href={getCompanyCircularLogoUrl(graph) || ""} rel="icon" />
         <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
           <HomeIcon />
@@ -23,7 +23,7 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
           </div>
         </header>
         {props.children}
-      </GetInitialData>
-    </PermissionGuard>
+      </PermissionGuard>
+    </GetInitialData>
   );
 }

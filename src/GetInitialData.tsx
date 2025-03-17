@@ -1,4 +1,4 @@
-import { createAsync, useNavigate } from "@solidjs/router";
+import { createAsync, query, useNavigate } from "@solidjs/router";
 import { createEffect, Match, type ParentProps, Show, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
@@ -19,7 +19,7 @@ interface GetInitialDataProps extends ParentProps {
   dontRedirectToLogin?: boolean;
 }
 
-const fetchData = async (authenticate?: boolean) => {
+const fetchData = query(async (authenticate?: boolean) => {
   "use server";
   const [initialData, userData] = await Promise.all([
     getInitialData(),
@@ -30,7 +30,7 @@ const fetchData = async (authenticate?: boolean) => {
       : Promise.resolve(null),
   ]);
   return { initialData, userData };
-};
+}, "initialData");
 
 export function GetInitialData(props: GetInitialDataProps) {
   const graph = useGraph();

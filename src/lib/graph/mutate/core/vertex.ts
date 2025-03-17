@@ -251,7 +251,7 @@ export function replaceVertexProperties(
     const actualVertexId =
       getVertexOldIdToNewIdMap(graph)[vertexId] || vertexId;
     if (!graph.vertexes[actualVertexId]) {
-      const error = "Vertex ID not exist";
+      const error = `Vertex ID not exist ${actualVertexId}`;
       console.error(error);
       return { error };
     }

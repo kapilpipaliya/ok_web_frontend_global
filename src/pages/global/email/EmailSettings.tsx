@@ -84,8 +84,6 @@ export function EmailSettings() {
     return await getAPI(API.settings.email.getUrl);
   };
 
-  loadSettingsData();
-
   const form = {
     as: "",
     attributes: [

@@ -1,8 +1,10 @@
-import { Show } from "solid-js";
+import { createAsync } from "@solidjs/router";
+import { createEffect, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
@@ -235,18 +237,25 @@ export function ProfileSettings() {
   } as FieldAttribute;
 
   // Get user data and update vertex properties
-  const loadUserData = async () => {
+  const loadUserData = createAsync(async () => {
     try {
-      const data = await getUserRPC();
-      const user = data.user;
-
-      replaceVertexProperties(0, formDataId, graph, setGraph, user.P);
+      return await getUserRPC();
     } catch (err) {
       showErrorToast((err as Error).message);
     }
+  });
+  const setUserData = (user: UserData) => {
+    if (user.user) {
+      replaceVertexProperties(0, formDataId, graph, setGraph, user.user.P);
+    }
   };
+  createEffect(() => {
+    const userData = loadUserData();
+    if (userData) {
+      setUserData(userData as UserData);
+    }
+  });
 
-  loadUserData();
   return (
     <div>
       <SchemaRenderer
