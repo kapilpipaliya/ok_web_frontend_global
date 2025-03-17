@@ -56,8 +56,7 @@ export const Page: IFormMetaData = {
         {
           collection: "g:'File'",
           componentName: "Select",
-          hidden: true,
-          // hidden: true,
+          hide: true,
           key: "Preview",
           label: "File",
           labelKey: "::'P.fileName'",
@@ -138,7 +137,7 @@ export const Page: IFormMetaData = {
         {
           attributes: pageAttr,
           componentName: "DynamicTable",
-          hidden: true,
+          hide: true,
           key: "Attr",
           label: "Attr",
           tab: "Attribute",
@@ -146,27 +145,27 @@ export const Page: IFormMetaData = {
         },
         {
           ...parentComponentAttribute,
-          hidden: true,
+          hide: true,
           hideInGrid: true,
           inward: true,
         },
         {
           ...parentTemplateAttribute,
-          hidden: true,
+          hide: true,
           hideInGrid: true,
           inward: true,
         },
         {
           collection: "->$0Perm",
           componentName: "MultiSelect",
-          hidden: true,
+          hide: true,
           hideInGrid: true,
           key: "globalPerm",
         },
         {
           collection: "->ChatHistory",
           componentName: "MultiSelect",
-          hidden: true,
+          hide: true,
           hideInGrid: true,
           key: "ChatHistory",
           label: "ChatHistory",
@@ -232,7 +231,7 @@ string`,
           key: "button",
           props: (options: FunctionArgumentType) => {
             return {
-              hidden: (options: FunctionArgumentType) => {
+              hide: (options: FunctionArgumentType) => {
                 return (
                   options.data.P.defValue === undefined ||
                   options.data.P.defValue === null

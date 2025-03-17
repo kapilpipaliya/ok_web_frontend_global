@@ -107,7 +107,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             ],
                             componentName: "Html",
                             props: (args: FunctionArgumentType) => ({
-                              hidden:
+                              hide:
                                 (args.dataContext.menuGroups as DataType)[0] ===
                                 "default",
                             }),
@@ -124,7 +124,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                       ? "bg:primary fg:base-5"
                                       : "bg:primary-10:hover fg:base-90"
                                   }`,
-                                  hidden:
+                                  hide:
                                     (args.dataContext.menuItems as MenuItem)
                                       .adminOnly && !isAdminRole(graph),
                                   onClick: () =>

@@ -247,7 +247,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.showModal,
+              hide: !options.dataContext.modalState[0]?.showModal,
             }),
           },
           {
@@ -271,7 +271,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
                 componentName: "Html",
                 open: true,
                 props: (options: FunctionArgumentType) => ({
-                  hidden: !options.dataContext.modalState[0]?.showModal,
+                  hide: !options.dataContext.modalState[0]?.showModal,
                   style: {
                     "z-index": options.zIndex + 1,
                   },
@@ -280,7 +280,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             ],
             componentName: "Portal",
             props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.showModal,
+              hide: !options.dataContext.modalState[0]?.showModal,
             }),
           },
         ],

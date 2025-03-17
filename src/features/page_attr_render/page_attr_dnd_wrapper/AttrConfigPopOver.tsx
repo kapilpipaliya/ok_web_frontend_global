@@ -29,7 +29,7 @@ export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   return (
     <div ref={popoverRef}>
       <div
-      // classList={{ hidden: !visible() }}
+      // classList={{ hide: !visible() }}
       >
         <Switch>
           <Match when={isSelectedLayoutId(props.item.id)}>

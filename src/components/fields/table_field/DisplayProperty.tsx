@@ -145,7 +145,7 @@ export function DisplayProperty(
 
   return (
     <Switch>
-      <Match when={metaVertex().P.hidden}>
+      <Match when={metaVertex().P.hide}>
         <td class="align-content:center">
           <div
             class={`${getComponentClass(componentName())} flex ai:center jc:center`}

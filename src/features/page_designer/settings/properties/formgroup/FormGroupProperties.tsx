@@ -67,7 +67,7 @@ export function createVertexIds() {
     disabled: `disabledVertex${createUniqueId()}`,
     errorClass: `errorClassVertex${createUniqueId()}`,
     height: `heightVertex${createUniqueId()}`,
-    hidden: `hiddenVertex${createUniqueId()}`,
+    hide: `hiddenVertex${createUniqueId()}`,
     icon: `iconVertex${createUniqueId()}`,
     key: `nameVertex${createUniqueId()}`,
     perm: `permissionVertex${createUniqueId()}`,
@@ -230,8 +230,8 @@ function createVertices(
       P: { displayName: "Required Expr", key: "required" },
     },
     {
-      id: vertexIds.hidden,
-      P: { displayName: "Hidden Expr", key: "hidden" },
+      id: vertexIds.hide,
+      P: { displayName: "Hidden Expr", key: "hide" },
     },
     {
       id: vertexIds.disabled,
@@ -360,7 +360,7 @@ function moveClassToLast(
     graph.vertexes[vertexIds.calculatedValue],
     graph.vertexes[vertexIds.as],
     graph.vertexes[vertexIds.required],
-    graph.vertexes[vertexIds.hidden],
+    graph.vertexes[vertexIds.hide],
     graph.vertexes[vertexIds.disabled],
     ...(selectedAttr()?.P.as === "img" ? [graph.vertexes[vertexIds.src]] : []),
     ...(componentName === "Icon"
@@ -414,7 +414,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
         <Match
           when={
             props.meta.P.key === "required" ||
-            props.meta.P.key === "hidden" ||
+            props.meta.P.key === "hide" ||
             props.meta.P.key === "disabled" ||
             props.meta.P.key === "calculatedValue"
           }

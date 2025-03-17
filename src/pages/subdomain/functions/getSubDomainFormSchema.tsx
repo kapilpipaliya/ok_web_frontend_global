@@ -189,7 +189,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.showModal,
+              hide: !options.dataContext.modalState[0]?.showModal,
             }),
           },
           {
@@ -215,7 +215,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                     componentName: "Html",
                     open: true,
                     props: (options: FunctionArgumentType) => ({
-                      hidden: !options.dataContext.modalState[0]?.showModal,
+                      hide: !options.dataContext.modalState[0]?.showModal,
                       style: {
                         "z-index": options.zIndex + 1,
                       },
@@ -224,7 +224,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 ],
                 componentName: "Portal",
                 props: (options: FunctionArgumentType) => ({
-                  hidden: !options.dataContext.modalState[0]?.showModal,
+                  hide: !options.dataContext.modalState[0]?.showModal,
                 }),
               },
             ],

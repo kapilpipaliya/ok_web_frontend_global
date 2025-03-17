@@ -460,8 +460,8 @@ export function DynamicComponent(
   );
   const isHidden = () => {
     try {
-      // Check for hidden property
-      const hiddenProp = dynamicProps().hidden ?? props.meta.P.hidden;
+      // Check for hide property
+      const hiddenProp = dynamicProps().hide ?? props.meta.P.hide;
       if (hiddenProp !== undefined) {
         const result =
           typeof hiddenProp === "function"
@@ -472,7 +472,7 @@ export function DynamicComponent(
         }
       }
 
-      // Check for show property (inverse of hidden)
+      // Check for show property (inverse of hide)
       const showProp = dynamicProps().show ?? props.meta.P.show;
       if (showProp !== undefined) {
         const result =
@@ -559,7 +559,7 @@ export function DynamicComponent(
   });
 
   const ignoreMetaKeys = [
-    "hidden",
+    "hide",
     "children",
     "onChange",
     "projections",
@@ -620,7 +620,7 @@ export function DynamicComponent(
         <Dynamic
           {...otherProps}
           {...dynamicProps()}
-          hidden={null}
+          hide={null}
           {...mergedClasses()}
           {...permissions()}
           component={component()}

@@ -566,7 +566,7 @@ export function PageViewWrapper(
   });
 
   if (props.isDesignMode) {
-    // Each open tab will be hidden and have its own useBeforeLeave callback
+    // Each open tab will be hide and have its own useBeforeLeave callback
     useBeforeLeave((e: BeforeLeaveEventArgs) => {
       if (props.dontConfirmExit) {
         // allow navigation

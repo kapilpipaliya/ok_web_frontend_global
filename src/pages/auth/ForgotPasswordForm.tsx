@@ -535,7 +535,7 @@ export function ForgotPasswordForm() {
                 attributes: [stepUserNameSchema],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  hidden: options.dataContext.stageData?.[0]?.name !== 0,
+                  hide: options.dataContext.stageData?.[0]?.name !== 0,
                 }),
               },
               {
@@ -543,7 +543,7 @@ export function ForgotPasswordForm() {
                 attributes: [stepOTPSchema],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  hidden: options.dataContext.stageData?.[0]?.name !== 1,
+                  hide: options.dataContext.stageData?.[0]?.name !== 1,
                 }),
               },
               {
@@ -551,7 +551,7 @@ export function ForgotPasswordForm() {
                 attributes: [stepNewPasswordSchema],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  hidden: options.dataContext.stageData?.[0]?.name !== 2,
+                  hide: options.dataContext.stageData?.[0]?.name !== 2,
                 }),
               },
             ],

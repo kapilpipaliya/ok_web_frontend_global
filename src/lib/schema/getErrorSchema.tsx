@@ -7,7 +7,7 @@ export function getErrorSchema(key: string, customClass?: string) {
     componentName: "Html",
     key: key,
     props: (args: FunctionArgumentType) => ({
-      hidden: !args.error(),
+      hide: !args.error(),
       text: args.error(),
     }),
   };

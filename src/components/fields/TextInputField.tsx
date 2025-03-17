@@ -54,7 +54,7 @@ export interface TextInputFieldMeta extends FormInputField {
 interface TextInputFieldProps
   extends Omit<
       JSX.InputHTMLAttributes<HTMLInputElement>,
-      "children" | "hidden" | "name" | "onChange" | "required" | "value"
+      "children" | "hide" | "name" | "onChange" | "required" | "value"
     >,
     TextInputFieldMeta {
   onChange?: (value: string) => void;
@@ -76,7 +76,7 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
     "viewModeClass",
     "showValue",
     "suffixToValue",
-    "hidden",
+    "hide",
     "required",
   ]);
 

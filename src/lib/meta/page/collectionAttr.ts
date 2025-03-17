@@ -48,7 +48,7 @@ export const collectionAttr = [
   },
   {
     componentName: "MultiSelect",
-    key: "hidden",
+    key: "hide",
   },
   {
     componentName: "MultiSelect",

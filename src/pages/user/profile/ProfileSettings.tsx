@@ -76,7 +76,7 @@ export function ProfileSettings() {
             class: "mb:24px",
             componentName: "Html",
             props: () => ({
-              hidden: !isSystemSubDomain(),
+              hide: !isSystemSubDomain(),
             }),
           },
         ],

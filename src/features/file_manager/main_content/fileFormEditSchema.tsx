@@ -205,7 +205,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
                     class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
-                      hidden: !options.dataContext.modalState[0]?.showModal,
+                      hide: !options.dataContext.modalState[0]?.showModal,
                       style: {
                         "z-index": options.zIndex,
                       },
@@ -230,7 +230,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Portal",
                 props: (options: FunctionArgumentType) => ({
-                  hidden: !options.dataContext.modalState[0]?.showModal,
+                  hide: !options.dataContext.modalState[0]?.showModal,
                 }),
               },
             ],

@@ -128,7 +128,7 @@ export const SupportTicketSection = (
         }
         when={messages().length > 0}
       >
-        <div class="display:flex flex-direction:column justify-content:space-between left:50% max-height:500px overflow:hidden top:50% z-index:2">
+        <div class="display:flex flex-direction:column justify-content:space-between left:50% max-height:500px overflow:hide top:50% z-index:2">
           <div
             class="flex-col grid overflow-y:auto padding:10px"
             ref={(el) => {

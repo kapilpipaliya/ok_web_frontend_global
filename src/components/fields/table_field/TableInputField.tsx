@@ -167,7 +167,7 @@ export function TableInputField(
                           <span />
                         </Match>
                         <Match
-                          when={!attribute.P.hidden || attribute.P.defaultValue}
+                          when={!attribute.P.hide || attribute.P.defaultValue}
                         >
                           <th class="font-weight:medium jc:center p:0px|10px">
                             {toTitle(

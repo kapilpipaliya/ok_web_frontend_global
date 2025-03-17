@@ -133,7 +133,7 @@ export function AccountDeletionForm() {
         class: "mb:4 p:12px bg:red-5 border:1px|solid|red-10 fg:red-70 r:8px",
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          hidden: !options.dataContext.deleteState[0]?.errorMessage,
+          hide: !options.dataContext.deleteState[0]?.errorMessage,
         }),
       },
       {
@@ -151,7 +151,7 @@ export function AccountDeletionForm() {
           "mb:4 p:12px bg:green-5 border:1px|solid|green-10 fg:green-70 r:8px",
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          hidden: !options.dataContext.deleteState[0]?.successMessage,
+          hide: !options.dataContext.deleteState[0]?.successMessage,
         }),
       },
       {
@@ -230,7 +230,7 @@ export function AccountDeletionForm() {
         ],
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          hidden: !options.dataContext.deleteState[0]?.showConfirmDialog,
+          hide: !options.dataContext.deleteState[0]?.showConfirmDialog,
         }),
       },
     ],

@@ -357,3 +357,8 @@ https://dear-caravan-605.notion.site/Solid-FAQ-b5ae5a47f2ec47c8a78bc5671180845d#
 
 Setup a wildcard domain including free SSL | Let's Encrypt
 https://www.youtube.com/watch?v=oJ_sP9y9KWo
+
+
+Note:
+RPC function call should be handled carefully in createAsync().
+if one RPC call is not handled properly, if will effect other component async function calls and it will be critical to debug.

@@ -51,7 +51,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS.replace("top", "bottom"),
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      hidden: !isAdminRole(options.graph),
+      hide: !isAdminRole(options.graph),
     }),
   };
   const chatHistorySchema = {
@@ -63,7 +63,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         inward: true,
         key: "ParentSupport",
         props: () => ({
-          hidden: true,
+          hide: true,
         }),
         type: "ParentSupport",
       },
@@ -461,7 +461,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hidden: !options.dataContext.modalState[0]?.showModal,
+              hide: !options.dataContext.modalState[0]?.showModal,
             }),
           },
           {
@@ -492,7 +492,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Portal",
                 props: (options: FunctionArgumentType) => ({
-                  hidden: !options.dataContext.modalState[0]?.showModal,
+                  hide: !options.dataContext.modalState[0]?.showModal,
                 }),
               },
             ],
