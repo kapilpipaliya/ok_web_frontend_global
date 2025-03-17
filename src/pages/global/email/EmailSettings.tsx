@@ -140,7 +140,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: () => options.data.P.active !== "smtp",
+              hide: () => options.data?.P.active !== "smtp",
             }),
           },
           getErrorSchema("smtpHost", "fg:red mt:-20"),
@@ -166,7 +166,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: () => options.data.P.active !== "smtp",
+              hide: () => options.data?.P.active !== "smtp",
             }),
           },
           getErrorSchema("smtpPort", "fg:red mt:-20"),
@@ -193,7 +193,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: () => options.data.P.active !== "smtp",
+              hide: () => options.data?.P.active !== "smtp",
             }),
           },
           getErrorSchema("smtpUsername", "fg:red mt:-20"),
@@ -221,7 +221,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: () => options.data.P.active !== "smtp",
+              hide: () => options.data?.P.active !== "smtp",
             }),
           },
           getErrorSchema("smtpPassword", "fg:red mt:-20"),
@@ -249,7 +249,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: () => options.data.P.active !== "sendgrid",
+              hide: () => options.data?.P.active !== "sendgrid",
             }),
           },
           getErrorSchema("sendGridApiKey", "fg:red mt:-20"),
@@ -282,7 +282,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: () => !options.data.P.active,
+              hide: () => !options.data?.P.active,
             }),
           },
           getErrorSchema("fromEmail", "fg:red mt:-20"),
@@ -303,7 +303,7 @@ export function EmailSettings() {
             class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: () => options.data.P.active !== "smtp",
+              hide: () => options.data?.P.active !== "smtp",
             }),
           },
           getErrorSchema("secure", "fg:red mt:-20"),

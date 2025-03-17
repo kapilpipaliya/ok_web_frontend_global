@@ -26,6 +26,7 @@ export function getInitialFormStore(
     hiddenNodes: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     id: undefined as string | undefined,
+    isFetching: false,
     isPreview: false,
     mounted: false,
     multiHighlight: [] as Array<Id | number>,
