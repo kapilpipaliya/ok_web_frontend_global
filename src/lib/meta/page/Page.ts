@@ -30,21 +30,19 @@ export const wrapWithTitle = (
                 as: "span",
                 class: "color:error",
                 componentName: "Html",
-                key: `required_${title}`,
                 text: " *",
               },
             ]
           : [],
         class: "flex:.5",
         componentName: "Html",
-        key: `title_${title}`,
+        // key: `${title}`,
         text: title,
       },
       children,
     ],
     class: "flex ai:center gap:2 justify-content:space-between mt:6",
     componentName: "Html",
-    key: "box1",
   };
 };
 

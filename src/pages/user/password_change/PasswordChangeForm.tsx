@@ -10,7 +10,7 @@ import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { postAPI } from "~/lib/api/general/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
 import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
-import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
+import { getPasswordLabelWithHintSchema } from "~/lib/schema/passwordHintPopover";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
@@ -123,7 +123,7 @@ function createPasswordFieldWithHint(
   return {
     as: "div",
     attributes: [
-      wrapPasswordLabelWithHint(label, key),
+      getPasswordLabelWithHintSchema(label, key),
       {
         as: "div",
         attributes: [

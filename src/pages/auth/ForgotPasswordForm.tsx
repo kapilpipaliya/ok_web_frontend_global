@@ -1,3 +1,4 @@
+import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -7,21 +8,29 @@ import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
-import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
+import { getPasswordLabelWithHintSchema } from "~/lib/schema/passwordHintPopover";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validatePassword } from "~/lib/validation/validatePassword";
-import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
-import { getTitleSchema } from "../../lib/schema/getTitleSchema";
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
+// Import our utilities
+import {
+  createFormHeader,
+  createFormSubmitButton,
+  createLinkButton,
+  createTextField,
+  usePasswordVisibility,
+} from "./functions";
 
 export function ForgotPasswordForm() {
+  const navigate = useNavigate();
   const { showErrorToast, showSuccessToast } = useToast();
-  const [showPassword, setShowPassword] = createStore({
-    confirmPassword: false,
-    newPassword: false,
-  });
+
+  const [showPassword, toggleVisibility] = usePasswordVisibility([
+    "newPassword",
+    "confirmPassword",
+  ]);
 
   // Store user data and session data for the entire flow
   const [userState, setUserState] = createStore({
@@ -126,13 +135,13 @@ export function ForgotPasswordForm() {
 
     if (newPassword !== confirmPassword) {
       showErrorToast("Passwords do not match");
-      return;
+      return false;
     }
 
     const passwordError = validatePassword(newPassword);
     if (passwordError) {
       showErrorToast(passwordError);
-      return;
+      return false;
     }
 
     // Get user UUID and session token from state or session storage as fallback
@@ -146,7 +155,7 @@ export function ForgotPasswordForm() {
       showErrorToast(
         "Session expired. Please restart the password reset process.",
       );
-      return;
+      return false;
     }
 
     try {
@@ -159,7 +168,7 @@ export function ForgotPasswordForm() {
 
       if (!result.success) {
         showErrorToast(result.message || "Failed to reset password");
-        return;
+        return false;
       }
 
       // Clear session storage
@@ -170,198 +179,123 @@ export function ForgotPasswordForm() {
 
       // Redirect to login page after successful reset
       setTimeout(() => {
-        window.location.href = "/auth/login";
+        navigate("/auth/login");
       }, 3000);
+
+      return true;
     } catch (error) {
       showErrorToast(
         error instanceof Error ? error.message : "An unexpected error occurred",
       );
+      return false;
     }
   };
 
-  const stepUserNameSchema = {
+  // Step 1: Enter email/username
+  const stepUserNameSchema: FieldAttribute = {
     as: "div",
     attributes: [
-      getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
-      getTitleSchema("Forgot Password"),
+      ...createFormHeader("Reset Password"),
       {
-        as: "h1",
-        class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        componentName: "Html",
-        text: "Reset Password",
-      },
-      {
-        as: "div",
         attributes: [
-          {
-            as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Html",
-            text: "Email or Username",
-          },
-          {
-            as: "div",
-            attributes: [
-              {
-                class: PROPERTIES.Css.TextField,
-                componentName: "TextInput",
-                key: "identifier",
-                label: "Email or Username",
-                props: (options: FunctionArgumentType) => ({
-                  onKeyDown: async (e: KeyboardEvent) => {
-                    if (e.key === "Enter") {
-                      if (e.target instanceof HTMLInputElement) {
-                        options.updateValue(e.target.value);
-                      }
-                      if (options.dataContext.submitState[0]?.isLoading) {
-                        return;
-                      }
-                      try {
-                        options.dataContext.submitState[1]("isLoading", true);
-                        await handleIdentifierSubmit(options);
-                      } finally {
-                        options.dataContext.submitState[1]("isLoading", false);
-                      }
-                    }
-                  },
-                  onMount: () => {
-                    if (
-                      options.ref &&
-                      options.ref() instanceof HTMLInputElement
-                    ) {
-                      options.ref()?.focus();
-                    }
-                  },
-                }),
-                validation: { required: true },
-              },
-            ],
-            componentName: "Html",
-          },
-          getErrorSchema("identifier"),
-        ],
-        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-        componentName: "Html",
-      },
-      {
-        as: "",
-        attributes: [
-          {
-            as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-            componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              disabled: options.dataContext.submitState[0]?.isLoading,
-              onClick: async () => {
-                try {
-                  options.dataContext.submitState[1]("isLoading", true);
-                  await handleIdentifierSubmit(options);
-                } finally {
-                  options.dataContext.submitState[1]("isLoading", false);
-                }
-              },
-              text: options.dataContext.submitState[0]?.isLoading
+          ...createTextField(
+            "identifier",
+            "Email or Username",
+            async (options: FunctionArgumentType) => {
+              try {
+                options.dataContext.submitState[1]("isLoading", true);
+                await handleIdentifierSubmit(options);
+              } finally {
+                options.dataContext.submitState[1]("isLoading", false);
+              }
+            },
+          ),
+          createFormSubmitButton(
+            (options) =>
+              options.dataContext.submitState[0]?.isLoading
                 ? "Sending..."
                 : "Confirm",
-            }),
-            type: "button",
-          },
+            async (options) => {
+              await handleIdentifierSubmit(options);
+            },
+          ),
+          createLinkButton(
+            () => "Back to Login",
+            () => {
+              navigate("/auth/login");
+            },
+          ),
         ],
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Html",
-  } as FieldAttribute;
+  };
 
-  const stepOTPSchema = {
+  // Step 2: Enter OTP
+  const stepOTPSchema: FieldAttribute = {
     as: "div",
     attributes: [
+      ...createFormHeader("Verify OTP"),
       {
-        as: "div",
         attributes: [
           {
-            as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
-            componentName: "Html",
-            text: "One Time Password (OTP)",
-          },
-          {
             as: "div",
-            attributes: [
-              {
-                class: PROPERTIES.Css.TextField,
-                componentName: "TextInput",
-                key: "otp",
-                props: (options: FunctionArgumentType) => ({
-                  maxLength: 6,
-                  onKeyDown: async (e: KeyboardEvent) => {
-                    if (e.key === "Enter") {
-                      if (e.target instanceof HTMLInputElement) {
-                        options.updateValue(e.target.value);
-                      }
-                      if (options.dataContext.submitState[0]?.isLoading) {
-                        return;
-                      }
-                      try {
-                        options.dataContext.submitState[1]("isLoading", true);
-                        await handleOtpSubmit(options);
-                      } finally {
-                        options.dataContext.submitState[1]("isLoading", false);
-                      }
-                    }
-                  },
-                }),
-                validation: { required: true },
-              },
-            ],
+            class: "text:center mb:16px",
             componentName: "Html",
+            text: `We've sent a verification code to ${userState.email || "your email"}. Please enter it below.`,
           },
-          getErrorSchema("otp"),
+          ...createTextField(
+            "otp",
+            "One Time Password (OTP)",
+            async (options: FunctionArgumentType) => {
+              try {
+                options.dataContext.submitState[1]("isLoading", true);
+                await handleOtpSubmit(options);
+              } finally {
+                options.dataContext.submitState[1]("isLoading", false);
+              }
+            },
+            undefined,
+            {
+              maxLength: 6,
+              minLength: 6,
+              required: true,
+            },
+          ),
+          createFormSubmitButton(
+            (options) =>
+              options.dataContext.submitState[0]?.isLoading
+                ? "Verifying..."
+                : "Submit",
+            async (options) => {
+              await handleOtpSubmit(options);
+            },
+          ),
+          createLinkButton(
+            () => "Back to Previous Step",
+            () => {
+              options.dataContext.stageData[1]("name", 0);
+            },
+          ),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
         componentName: "Html",
       },
-      {
-        as: "",
-        attributes: [
-          {
-            as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-            componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              disabled: options.dataContext.submitState[0]?.isLoading,
-              onClick: async () => {
-                try {
-                  options.dataContext.submitState[1]("isLoading", true);
-                  await handleOtpSubmit(options);
-                } finally {
-                  options.dataContext.submitState[1]("isLoading", false);
-                }
-              },
-              text: options.dataContext.submitState[0]?.isLoading
-                ? "Verifying..."
-                : "Submit",
-            }),
-            type: "button",
-          },
-        ],
-        componentName: "Html",
-      },
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Html",
-  } as FieldAttribute;
+  };
 
-  const stepNewPasswordSchema = {
+  // Step 3: Enter new password
+  const stepNewPasswordSchema: FieldAttribute = {
     as: "div",
     attributes: [
+      ...createFormHeader("Set New Password"),
       {
-        as: "div",
         attributes: [
-          wrapPasswordLabelWithHint("New Password", "newPassword"),
+          // New password field
+          getPasswordLabelWithHintSchema("New Password", "newPassword"),
           {
             as: "div",
             attributes: [
@@ -393,7 +327,9 @@ export function ForgotPasswordForm() {
                   },
                   type: showPassword.newPassword ? "text" : "password",
                 }),
-                validation: { required: true },
+                validation: {
+                  required: true,
+                },
               },
               {
                 as: "div",
@@ -404,11 +340,7 @@ export function ForgotPasswordForm() {
                       icon: showPassword.newPassword
                         ? "ph:eye"
                         : "ph:eye-slash",
-                      onClick: () =>
-                        setShowPassword(
-                          "newPassword",
-                          !showPassword.newPassword,
-                        ),
+                      onClick: () => toggleVisibility("newPassword"),
                     }),
                   },
                 ],
@@ -421,14 +353,9 @@ export function ForgotPasswordForm() {
             componentName: "Html",
           },
           getErrorSchema("newPassword"),
-        ],
-        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-        componentName: "Html",
-      },
-      {
-        as: "div",
-        attributes: [
-          wrapPasswordLabelWithHint("Confirm Password", "confirmPassword"),
+
+          // Confirm password field
+          getPasswordLabelWithHintSchema("Confirm Password", "confirmPassword"),
           {
             as: "div",
             attributes: [
@@ -460,7 +387,9 @@ export function ForgotPasswordForm() {
                   },
                   type: showPassword.confirmPassword ? "text" : "password",
                 }),
-                validation: { required: true },
+                validation: {
+                  required: true,
+                },
               },
               {
                 as: "div",
@@ -471,11 +400,7 @@ export function ForgotPasswordForm() {
                       icon: showPassword.confirmPassword
                         ? "ph:eye"
                         : "ph:eye-slash",
-                      onClick: () =>
-                        setShowPassword(
-                          "confirmPassword",
-                          !showPassword.confirmPassword,
-                        ),
+                      onClick: () => toggleVisibility("confirmPassword"),
                     }),
                   },
                 ],
@@ -488,35 +413,24 @@ export function ForgotPasswordForm() {
             componentName: "Html",
           },
           getErrorSchema("confirmPassword"),
+
+          createFormSubmitButton(
+            (options) =>
+              options.dataContext.submitState[0]?.isLoading
+                ? "Resetting..."
+                : "Reset Password",
+            async (options) => {
+              await handlePasswordResetSubmit(options);
+            },
+          ),
+          createLinkButton(
+            () => "Back to Previous Step",
+            (options) => {
+              options.dataContext.stageData[1]("name", 1);
+            },
+          ),
         ],
         class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-        componentName: "Html",
-      },
-      {
-        as: "",
-        attributes: [
-          {
-            as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-            componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              disabled: options.dataContext.submitState[0]?.isLoading,
-              onClick: async () => {
-                try {
-                  options.dataContext.submitState[1]("isLoading", true);
-                  await handlePasswordResetSubmit(options);
-                } finally {
-                  options.dataContext.submitState[1]("isLoading", false);
-                }
-              },
-              text: options.dataContext.submitState[0]?.isLoading
-                ? "Resetting..."
-                : "Confirm",
-            }),
-            type: "button",
-          },
-        ],
         componentName: "Html",
       },
     ],
@@ -574,50 +488,8 @@ export function ForgotPasswordForm() {
           }),
         }),
       },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "span",
-            class: "color:grey",
-            componentName: "Html",
-            text: "Already have an account? ",
-          },
-          {
-            as: "a",
-            class: "color:primary text-decoration:none font-weight:bold",
-            componentName: "Html",
-            props: () => ({
-              href: "/auth/login",
-            }),
-            text: "Sign In",
-          },
-        ],
-        class: "text-align:center mt:16",
-        componentName: "Html",
-      },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "span",
-            class: "color:grey",
-            componentName: "Html",
-            text: "Don't have an account? ",
-          },
-          {
-            as: "a",
-            class: "color:primary text-decoration:none font-weight:bold",
-            componentName: "Html",
-            props: () => ({
-              href: "/auth/signup",
-            }),
-            text: "Sign Up",
-          },
-        ],
-        class: "text-align:center mt:8",
-        componentName: "Html",
-      },
+
+
     ],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({

@@ -6,6 +6,8 @@ export const routePermissions: RoutePermission[] = [
   { path: "/", requiredPermission: PermissionLevel.PUBLIC },
   { path: "/auth/*", requiredPermission: PermissionLevel.PUBLIC },
   { path: "/api/auth/*", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/support/contact", requiredPermission: PermissionLevel.PUBLIC },
+  { path: "/api/support/ticket/create", requiredPermission: PermissionLevel.PUBLIC },
   {
     path: "/api/file/downloadCompanyRectangularLogo",
     requiredPermission: PermissionLevel.PUBLIC,

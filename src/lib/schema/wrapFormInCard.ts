@@ -1,11 +1,6 @@
-type FormSchema = {
-  as?: string;
-  attributes: any[];
-  class?: string;
-  componentName: string;
-};
+import type { FieldAttribute } from "../meta/FormMetadataType";
 
-export const wrapFormInCard = (formSchema: FormSchema) => {
+export const wrapFormInCard = (formSchema: FieldAttribute) => {
   return {
     as: "div",
     attributes: [

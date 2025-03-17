@@ -96,6 +96,7 @@ export const API = {
       userSettings: "/system/UserSettings",
     },
     user: {
+      forgotPassword: "/auth/forgotPassword",
       logout: "/auth/logout",
     },
   },

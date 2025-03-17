@@ -3,33 +3,33 @@ import { onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
-import { validateEmail } from "~/lib/validation/validateEmail";
-import { validatePassword } from "~/lib/validation/validatePassword";
-import { validateUsername } from "~/lib/validation/validateUsername";
-import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect";
-import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
+import { STYLES } from "../settings/constants";
+// Import all utilities from the index file
+import {
+  createFormHeader,
+  createPasswordField,
+  createTextField,
+  useFormRefs,
+  useFormSubmit,
+  usePasswordVisibility,
+  validateFormData,
+} from "./functions";
 
 export function LoginForm() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [graph] = useGraph();
   const navigate = useNavigate();
-  const { showErrorToast, showLoadingToast } = useToast();
-  const [showPassword, setShowPassword] = createStore({
-    password: false,
-  });
-  const [formRefs, setFormRefs] = createStore({
-    passwordRef: null as HTMLInputElement | null,
-  });
+
+  // Use our utility hooks
+  const [showPassword, toggleVisibility] = usePasswordVisibility(["password"]);
+  const [formRefs, setRef] = useFormRefs(["emailRef", "passwordRef"]);
+  const { showErrorToast, submitForm } = useFormSubmit();
 
   onMount(() => {
     if (searchParams.error) {
@@ -38,290 +38,153 @@ export function LoginForm() {
     }
   });
 
-  const validateFormData = (formData: Vertex) => {
-    const { email, password } = formData.P;
-
-    if (email.includes("@")) {
-      const emailError = validateEmail(email);
-      if (emailError) {
-        showErrorToast("Enter valid email or username");
-        return false;
-      }
-    } else {
-      const usernameError = validateUsername(email);
-      if (usernameError) {
-        showErrorToast("Enter valid email or username");
-        return false;
-      }
-    }
-
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      showErrorToast(passwordError);
-      return false;
-    }
-
-    return true;
+  // Validation function using our utility
+  const validateLoginData = (formData: Vertex) => {
+    return validateFormData(formData, showErrorToast, {
+      allowEmailOrUsername: true,
+      requireEmail: true,
+      requirePassword: true,
+    });
   };
 
+  // Submit handler using our utility
   const handleSubmit = async (formData: Vertex) => {
-    if (validateFormData(formData)) {
-      await showLoadingToast({
-        loadMessage: "Logging In...",
-        onError: () => {},
-        onSuccess: (value) => {
-          handleLoginRedirect(value?.result, graph, navigate);
-        },
-        promise: postAPI(API.auth.loginUrl, {
-          email: formData.P.email.toLowerCase(),
-          password: formData.P.password,
+    await submitForm(formData, {
+      apiCall: (data) =>
+        postAPI(API.auth.loginUrl, {
+          email: data.P.email.toLowerCase(),
+          password: data.P.password,
         }),
-        successMessage: "Logged In Successfully",
-      });
+      loadMessage: "Logging In...",
+      navigate,
+      shouldRedirect: true,
+      successMessage: "Logged In Successfully",
+      validateFn: validateLoginData,
+    });
+  };
+
+  // Password field enter key handler
+  const handlePasswordEnter = async (options: FunctionArgumentType) => {
+    try {
+      options.dataContext.submitState[1]("isLoading", true);
+      const formData = options.data;
+      await handleSubmit(formData);
+    } finally {
+      options.dataContext.submitState[1]("isLoading", false);
+    }
+  };
+
+  // Email field enter key handler
+  const handleEmailEnter = (options: FunctionArgumentType) => {
+    // Focus password field if empty
+    if (!options.data.P.password && formRefs.passwordRef) {
+      formRefs.passwordRef.focus();
+    } else {
+      handlePasswordEnter(options);
     }
   };
 
   const form = {
     as: "div",
     attributes: [
-      getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
-      {
-        as: "h1",
-        class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        componentName: "Html",
-        text: "Login",
-      },
+      // Use our utility for form header
+      ...createFormHeader("Login"),
       {
         attributes: [
+          {
+            attributes: [
+              // Use our utility for text field
+              ...createTextField(
+                "email",
+                "Username/Email",
+                handleEmailEnter,
+                (ref) => setRef("emailRef", ref),
+              ),
+              // Use our utility for password field
+              ...createPasswordField(
+                "password",
+                "Password",
+                showPassword,
+                toggleVisibility,
+                handlePasswordEnter,
+                (ref) => setRef("passwordRef", ref),
+              ),
+              {
+                as: "div",
+                attributes: [
+                  {
+                    as: "a",
+                    class: "fg:primary-50 text:sm cursor:pointer",
+                    componentName: "Html",
+                    props: () => ({
+                      onClick: () => {
+                        navigate(API.urls.user.forgotPassword);
+                      },
+                    }),
+                    text: "Forgot Password?",
+                  },
+                ],
+                class: "text:right mb:16px",
+                componentName: "Html",
+              },
+              {
+                as: "button",
+                class: `${STYLES.button2} w:100%`,
+                componentName: "Html",
+                props: (options: FunctionArgumentType) => ({
+                  disabled: options.dataContext.submitState[0]?.isLoading,
+                  onClick: async () => {
+                    try {
+                      options.dataContext.submitState[1]("isLoading", true);
+                      await handleSubmit(options.data);
+                    } finally {
+                      options.dataContext.submitState[1]("isLoading", false);
+                    }
+                  },
+                  text: options.dataContext.submitState[0]?.isLoading
+                    ? "Logging in..."
+                    : "Log In",
+                }),
+                type: "button",
+              },
+            ],
+            componentName: "Data",
+            name: "submitState",
+
+            props: () => ({
+              data: createStore({
+                isLoading: false,
+              }),
+            }),
+          },
           {
             as: "div",
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                class: "fg:base",
                 componentName: "Html",
-                text: "Username/Email",
+                text: "Don't have an account? ",
               },
               {
-                as: "div",
-                attributes: [
-                  {
-                    class: PROPERTIES.Css.TextField,
-                    componentName: "TextInput",
-                    key: "email",
-                    props: (options: FunctionArgumentType) => ({
-                      onKeyDown: async (e: KeyboardEvent) => {
-                        if (e.key === "Enter") {
-                          if (e.target instanceof HTMLInputElement) {
-                            options.updateValue(e.target.value);
-                          }
-
-                          // Don't proceed if already loading
-                          if (options.dataContext.submitState[0]?.isLoading) {
-                            return;
-                          }
-
-                          // Check if password is empty
-                          if (
-                            !options.data.P.password &&
-                            formRefs.passwordRef
-                          ) {
-                            // Focus password field if empty
-                            formRefs.passwordRef.focus();
-                          } else {
-                            // Otherwise submit the form
-                            try {
-                              options.dataContext.submitState[1](
-                                "isLoading",
-                                true,
-                              );
-                              const formData = options.data;
-                              await handleSubmit(formData);
-                            } finally {
-                              options.dataContext.submitState[1](
-                                "isLoading",
-                                false,
-                              );
-                            }
-                          }
-                        }
-                      },
-                      onMount: () => {
-                        if (
-                          options.ref &&
-                          options.ref() instanceof HTMLInputElement
-                        ) {
-                          options.ref()?.focus();
-                        }
-                      },
-                    }),
-                    validation: { required: true },
-                  },
-                ],
+                as: "a",
+                class: "fg:primary-50 cursor:pointer",
                 componentName: "Html",
-              },
-              getErrorSchema("email"),
-              {
-                as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Html",
-                text: "Password",
-              },
-              {
-                as: "div",
-                attributes: [
-                  {
-                    class: PROPERTIES.Css.TextField,
-                    componentName: "TextInput",
-                    key: "password",
-                    props: (options: FunctionArgumentType) => {
-                      return {
-                        onInput: (e: Event) => {
-                          if (e.target instanceof HTMLInputElement) {
-                            options.updateValue(e.target.value);
-                          }
-                        },
-                        onKeyDown: async (e: KeyboardEvent) => {
-                          if (e.key === "Enter") {
-                            if (e.target instanceof HTMLInputElement) {
-                              options.updateValue(e.target.value);
-                            }
-
-                            // Don't proceed if already loading
-                            if (options.dataContext.submitState[0]?.isLoading) {
-                              return;
-                            }
-
-                            try {
-                              options.dataContext.submitState[1](
-                                "isLoading",
-                                true,
-                              );
-                              const formData = options.data;
-                              await handleSubmit(formData);
-                            } finally {
-                              options.dataContext.submitState[1](
-                                "isLoading",
-                                false,
-                              );
-                            }
-                          }
-                        },
-                        onMount: () => {
-                          if (
-                            options.ref &&
-                            options.ref instanceof HTMLInputElement
-                          ) {
-                            setFormRefs("passwordRef", options.ref);
-                          }
-                        },
-                        ref: (el: HTMLInputElement) => {
-                          setFormRefs("passwordRef", el);
-                        },
-                        type: showPassword.password ? "text" : "password",
-                      };
-                    },
-                    validation: { required: true },
+                props: () => ({
+                  onClick: () => {
+                    navigate("/auth/signup");
                   },
-                  {
-                    as: "div",
-                    attributes: [
-                      {
-                        componentName: "Icon",
-                        props: () => ({
-                          icon: showPassword.password
-                            ? "ph:eye"
-                            : "ph:eye-slash",
-                          onClick: () =>
-                            setShowPassword("password", !showPassword.password),
-                        }),
-                      },
-                    ],
-                    class:
-                      "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
-                    componentName: "Html",
-                  },
-                ],
-                class: "position:rel",
-                componentName: "Html",
+                }),
+                text: "Sign Up",
               },
-              getErrorSchema("password"),
             ],
-            class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
+            class: "text:center mt:16px",
             componentName: "Html",
-          },
-          {
-            as: "button",
-            class:
-              "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
-            componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              disabled: options.dataContext.submitState[0]?.isLoading,
-              onClick: async () => {
-                try {
-                  options.dataContext.submitState[1]("isLoading", true);
-                  const formData = options.data;
-                  await handleSubmit(formData);
-                } finally {
-                  options.dataContext.submitState[1]("isLoading", false);
-                }
-              },
-              text: options.dataContext.submitState[0]?.isLoading
-                ? "Logging in..."
-                : "Log In",
-            }),
-            type: "button",
           },
         ],
-        componentName: "Data",
-        name: "submitState",
-
-        props: () => ({
-          data: createStore({
-            isLoading: false,
-          }),
-        }),
-      },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "a",
-            class: "color:primary text-decoration:none",
-            componentName: "Html",
-            props: () => ({
-              href: "/auth/forgotPassword",
-            }),
-            text: "Forgot Password?",
-          },
-        ],
-        class: "text-align:center",
-        componentName: "Html",
-      },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "span",
-            class: "color:grey",
-            componentName: "Html",
-            text: "Don't have an account? ",
-          },
-          {
-            as: "a",
-            class: "color:primary text-decoration:none font-weight:bold",
-            componentName: "Html",
-            props: () => ({
-              href: "/auth/signup",
-            }),
-            text: "Sign Up",
-          },
-        ],
-        class: "text-align:center",
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {

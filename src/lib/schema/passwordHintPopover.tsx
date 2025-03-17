@@ -172,7 +172,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
  * @param passwordFieldKey The key of the password field to validate
  * @returns A field attribute with the label wrapped in a popover
  */
-export function wrapPasswordLabelWithHint(
+export function getPasswordLabelWithHintSchema(
   label: string,
   passwordFieldKey: string,
 ): FieldAttribute {

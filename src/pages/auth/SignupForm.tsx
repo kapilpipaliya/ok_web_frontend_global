@@ -2,197 +2,121 @@ import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
-import { wrapPasswordLabelWithHint } from "~/lib/schema/passwordHintPopover";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
+import { getPasswordLabelWithHintSchema } from "~/lib/schema/passwordHintPopover";
 import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
-import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
-import { validateUsername } from "~/lib/validation/validateUsername";
-import { handleLoginRedirect } from "~/pages/auth/functions/handleLoginRedirect";
-import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
 
-import { getErrorSchema } from "../../lib/schema/getErrorSchema";
-import { getTitleSchema } from "../../lib/schema/getTitleSchema";
 import { SchemaRenderer } from "../SchemaRenderer";
-import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
+import { PROPERTIES, SETTINGS_CONSTANTS, STYLES } from "../settings/constants";
+// Import all utilities from the index file
+import {
+  createFormHeader,
+  createTextField,
+  useFormRefs,
+  useFormSubmit,
+  usePasswordVisibility,
+  validateFormData,
+} from "./functions";
 
 export function SignupForm() {
-  const [graph] = useGraph();
   const navigate = useNavigate();
-  const { showErrorToast, showLoadingToast } = useToast();
-  const [showPassword, setShowPassword] = createStore({
-    password: false,
-  });
-  const [formRefs, setFormRefs] = createStore({
-    emailRef: null as HTMLInputElement | null,
-    passwordRef: null as HTMLInputElement | null,
-  });
 
-  const validateFormData = (formData: Vertex) => {
-    const { email, password, username } = formData.P;
+  // Use our utility hooks
+  const [showPassword, toggleVisibility] = usePasswordVisibility(["password"]);
+  const [formRefs, setRef] = useFormRefs(["emailRef", "passwordRef"]);
+  const { showErrorToast, submitForm } = useFormSubmit();
 
-    const usernameError = validateUsername(username);
-    if (usernameError) {
-      showErrorToast(usernameError);
-      return false;
-    }
-
-    const emailError = validateEmail(email);
-    if (emailError) {
-      showErrorToast(emailError);
-      return false;
-    }
-
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      showErrorToast(passwordError);
-      return false;
-    }
-
-    return true;
+  // Validation function using our utility
+  const validateSignupData = (formData: Vertex) => {
+    return validateFormData(formData, showErrorToast, {
+      requireEmail: true,
+      requirePassword: true,
+      requireUsername: true,
+    });
   };
 
+  // Submit handler using our utility
   const handleSubmit = async (formData: Vertex) => {
-    if (validateFormData(formData)) {
-      const _globalStoreId = "globalStoreId";
-
-      await showLoadingToast({
-        loadMessage: "Registering User...",
-        onError: () => {},
-        onSuccess: (value) => {
-          handleLoginRedirect(value?.result, graph, navigate);
-        },
-        promise: postAPI(API.auth.signUpUrl, {
-          email: formData.P.email.toLowerCase(),
-          password: formData.P.password,
-          subDomain: formData.P.subDomain,
-          username: formData.P.username.toLowerCase(),
+    await submitForm(formData, {
+      apiCall: (data) =>
+        postAPI(API.auth.signUpUrl, {
+          email: data.P.email.toLowerCase(),
+          password: data.P.password,
+          subDomain: data.P.subDomain,
+          username: data.P.username.toLowerCase(),
         }),
-        successMessage: "Registered Successfully",
-      });
+      loadMessage: "Registering User...",
+      navigate,
+      shouldRedirect: true,
+      successMessage: "Registered Successfully",
+      validateFn: validateSignupData,
+    });
+  };
+
+  // Password field enter key handler
+  const handlePasswordEnter = async (options: FunctionArgumentType) => {
+    try {
+      options.dataContext.submitState[1]("isLoading", true);
+      const formData = options.data;
+      await handleSubmit(formData);
+    } finally {
+      options.dataContext.submitState[1]("isLoading", false);
+    }
+  };
+
+  // Email field enter key handler
+  const handleEmailEnter = () => {
+    // Focus password field when Enter is pressed in email field
+    if (formRefs.passwordRef) {
+      formRefs.passwordRef.focus();
+    }
+  };
+
+  // Username field enter key handler
+  const handleUsernameEnter = () => {
+    // Focus email field when Enter is pressed in username field
+    if (formRefs.emailRef) {
+      formRefs.emailRef.focus();
     }
   };
 
   const form = {
     as: "div",
     attributes: [
-      getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
-      {
-        as: "h1",
-        class: SETTINGS_CONSTANTS.TITLE_CLASS,
-        componentName: "Html",
-        text: "Sign Up",
-      },
+      // Use our utility for form header
+      ...createFormHeader("Sign Up"),
       {
         attributes: [
-          getTitleSchema("Sign Up"),
           {
-            as: "div",
             attributes: [
-              {
-                as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Html",
-                text: "Username",
-              },
-              {
-                as: "div",
-                attributes: [
-                  {
-                    class: PROPERTIES.Css.TextField,
-                    componentName: "TextInput",
-                    key: "username",
-                    // placeholder: "Choose a username",
-                    props: (options: FunctionArgumentType) => ({
-                      onKeyDown: async (e: KeyboardEvent) => {
-                        if (e.key === "Enter") {
-                          if (e.target instanceof HTMLInputElement) {
-                            options.updateValue(e.target.value);
-                          }
-                          if (options.dataContext.submitState[0]?.isLoading) {
-                            return;
-                          }
-                          // Focus email field when Enter is pressed in username field
-                          if (formRefs.emailRef) {
-                            formRefs.emailRef.focus();
-                          }
-                        }
-                      },
-                      onMount: () => {
-                        if (
-                          options.ref &&
-                          options.ref() instanceof HTMLInputElement
-                        ) {
-                          options.ref()?.focus();
-                        }
-                      },
-                    }),
-                    validation: {
-                      minLength: 4,
-                      required: true,
-                      validate: validateUsername,
-                    },
-                  },
-                ],
-                componentName: "Html",
-              },
-              getErrorSchema("username"),
-              {
-                as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
-                componentName: "Html",
-                text: "Email",
-              },
-              {
-                as: "div",
-                attributes: [
-                  {
-                    class: PROPERTIES.Css.TextField,
-                    componentName: "TextInput",
-                    key: "email",
-                    // placeholder: "Enter your email",
-                    props: (options: FunctionArgumentType) => ({
-                      onKeyDown: async (e: KeyboardEvent) => {
-                        if (e.key === "Enter") {
-                          if (e.target instanceof HTMLInputElement) {
-                            options.updateValue(e.target.value);
-                          }
-                          if (options.dataContext.submitState[0]?.isLoading) {
-                            return;
-                          }
-                          // Focus password field when Enter is pressed in email field
-                          if (formRefs.passwordRef) {
-                            formRefs.passwordRef.focus();
-                          }
-                        }
-                      },
-                      onMount: () => {
-                        if (
-                          options.ref &&
-                          options.ref instanceof HTMLInputElement
-                        ) {
-                          setFormRefs("emailRef", options.ref);
-                        }
-                      },
-                      ref: (el: HTMLInputElement) => {
-                        setFormRefs("emailRef", el);
-                      },
-                    }),
-                    validation: {
-                      email: true,
-                      required: true,
-                      validate: validateEmail,
-                    },
-                  },
-                ],
-                componentName: "Html",
-              },
-              getErrorSchema("email"),
-              wrapPasswordLabelWithHint("Password", "password"),
+              // Use our utility for text fields
+              ...createTextField(
+                "username",
+                "Username",
+                handleUsernameEnter,
+                undefined,
+                {
+                  minLength: 4,
+                  required: true,
+                },
+              ),
+              ...createTextField(
+                "email",
+                "Email",
+                handleEmailEnter,
+                (ref) => setRef("emailRef", ref),
+                {
+                  email: true,
+                  required: true,
+                },
+              ),
+              // Use our utility for password field with hint
+              getPasswordLabelWithHintSchema("Password", "password"),
               {
                 as: "div",
                 attributes: [
@@ -200,7 +124,6 @@ export function SignupForm() {
                     class: PROPERTIES.Css.TextField,
                     componentName: "TextInput",
                     key: "password",
-                    // placeholder: "Choose a password",
                     props: (options: FunctionArgumentType) => ({
                       onInput: (e: Event) => {
                         if (e.target instanceof HTMLInputElement) {
@@ -215,38 +138,26 @@ export function SignupForm() {
                           if (options.dataContext.submitState[0]?.isLoading) {
                             return;
                           }
-                          // Submit form when Enter is pressed in password field
-                          try {
-                            options.dataContext.submitState[1](
-                              "isLoading",
-                              true,
-                            );
-                            const formData = options.data;
-                            await handleSubmit(formData);
-                          } finally {
-                            options.dataContext.submitState[1](
-                              "isLoading",
-                              false,
-                            );
-                          }
+                          handlePasswordEnter(options);
                         }
                       },
                       onMount: () => {
                         if (
                           options.ref &&
-                          options.ref instanceof HTMLInputElement
+                          options.ref() instanceof HTMLInputElement
                         ) {
-                          setFormRefs("passwordRef", options.ref);
+                          setRef("passwordRef", options.ref());
                         }
                       },
                       ref: (el: HTMLInputElement) => {
-                        setFormRefs("passwordRef", el);
+                        setRef("passwordRef", el);
                       },
                       type: showPassword.password ? "text" : "password",
                     }),
                     validation: {
                       minLength: 8,
                       required: true,
+                      // Note: if hint is displayed, this is not needed
                       validate: validatePassword,
                     },
                   },
@@ -259,8 +170,7 @@ export function SignupForm() {
                           icon: showPassword.password
                             ? "ph:eye"
                             : "ph:eye-slash",
-                          onClick: () =>
-                            setShowPassword("password", !showPassword.password),
+                          onClick: () => toggleVisibility("password"),
                         }),
                       },
                     ],
@@ -273,25 +183,16 @@ export function SignupForm() {
                 componentName: "Html",
               },
               getErrorSchema("password"),
-            ],
-            class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
-            componentName: "Html",
-          },
-          {
-            as: "",
-            attributes: [
               {
                 as: "button",
-                class:
-                  "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8 w:100%",
+                class: `${STYLES.button2} w:100% mt:16`,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.submitState[0]?.isLoading,
                   onClick: async () => {
                     try {
                       options.dataContext.submitState[1]("isLoading", true);
-                      const formData = options.data;
-                      await handleSubmit(formData);
+                      await handleSubmit(options.data);
                     } finally {
                       options.dataContext.submitState[1]("isLoading", false);
                     }
@@ -303,48 +204,46 @@ export function SignupForm() {
                 type: "button",
               },
             ],
-            componentName: "Html",
-          },
-        ],
-        componentName: "Data",
-        name: "submitState",
+            componentName: "Data",
+            name: "submitState",
 
-        props: () => ({
-          data: createStore({
-            isLoading: false,
-          }),
-        }),
-      },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "span",
-            class: "color:grey",
-            componentName: "Html",
-            text: "Already have an account? ",
-          },
-          {
-            as: "a",
-            class: "color:primary text-decoration:none font-weight:bold",
-            componentName: "Html",
             props: () => ({
-              href: "/auth/login",
+              data: createStore({
+                isLoading: false,
+              }),
             }),
-            text: "Sign In",
+          },
+
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                class: "fg:base",
+                componentName: "Html",
+                text: "Already have an account? ",
+              },
+              {
+                as: "a",
+                class: "fg:primary-50 cursor:pointer",
+                componentName: "Html",
+                props: () => ({
+                  onClick: () => {
+                    navigate("/auth/login");
+                  },
+                }),
+                text: "Login",
+              },
+            ],
+            class: "text:center mt:16px",
+            componentName: "Html",
           },
         ],
-        class: "text-align:center",
+        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Html",
-    props: (options: FunctionArgumentType) => ({
-      onUnmount: () => {
-        options.revertTransactionUpToIndex(options.txnId, -1);
-      },
-    }),
   };
 
   return (

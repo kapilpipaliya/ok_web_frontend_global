@@ -77,6 +77,7 @@ export const PROPERTIES = {
 export const STYLES = {
   // Common button styles
   button: "cursor:pointer transition:transform|0.2s|linear",
+  button2: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
   // Container styles
   container: {
     base: "flex w:full",
