@@ -14,14 +14,13 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
-// Import our utilities
 import {
   createFormHeader,
   createFormSubmitButton,
   createLinkButton,
   createTextField,
-  usePasswordVisibility,
-} from "./functions";
+} from "./functions/formComponents";
+import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();

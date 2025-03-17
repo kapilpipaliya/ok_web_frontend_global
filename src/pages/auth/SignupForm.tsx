@@ -14,14 +14,11 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS, STYLES } from "../settings/constants";
 // Import all utilities from the index file
-import {
-  createFormHeader,
-  createTextField,
-  useFormRefs,
-  useFormSubmit,
-  usePasswordVisibility,
-  validateFormData,
-} from "./functions";
+import { createFormHeader, createTextField } from "./functions/formComponents";
+import { useFormRefs } from "./functions/useFormRefs";
+import { useFormSubmit } from "./functions/useFormSubmit";
+import { usePasswordVisibility } from "./functions/usePasswordVisibility";
+import { validateFormData } from "./functions/validateFormData";
 
 export function SignupForm() {
   const navigate = useNavigate();

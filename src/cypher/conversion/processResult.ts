@@ -1,6 +1,6 @@
 import type { Record } from "neo4j-driver";
 
-import type { Edge, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 import {
   convertNodeToJson,

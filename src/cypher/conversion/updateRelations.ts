@@ -1,7 +1,5 @@
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import type { ContextType } from "../types/ContextType";
-
 /**
  * Updates the IN and OUT properties of nodes when a relationship is processed
  * Can work with either a ContextType object or a direct nodeObj map
@@ -29,4 +27,4 @@ export function updateNodeRelations(
     }
     targetNode.IN[relationship.T].push(relationship.id);
   }
-} 
+}

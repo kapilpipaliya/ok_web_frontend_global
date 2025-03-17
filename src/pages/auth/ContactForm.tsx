@@ -11,15 +11,14 @@ import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 import { validateEmail } from "~/lib/validation/validateEmail";
 
 import { SchemaRenderer } from "../SchemaRenderer";
-// Import our utilities
 import {
   createFormHeader,
   createFormSubmitButton,
   createLinkButton,
   createTextAreaField,
   createTextField,
-  useFormSubmit,
-} from "./functions";
+} from "./functions/formComponents";
+import { useFormSubmit } from "./functions/useFormSubmit";
 export function ContactForm() {
   const navigate = useNavigate();
   const { showErrorToast } = useToast();
