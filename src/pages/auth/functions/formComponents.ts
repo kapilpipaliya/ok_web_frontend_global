@@ -6,7 +6,7 @@ import {
   SETTINGS_CONSTANTS,
   STYLES,
 } from "~/pages/settings/constants";
-import { getLogoSchema } from "~/routes/internal/page/(email)/BaseEmailTemplate";
+import { getLogoSchema } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 /**
  * Creates a form header with logo and title

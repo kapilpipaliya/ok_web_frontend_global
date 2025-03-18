@@ -1,7 +1,5 @@
-import { splitProps } from "solid-js";
-
 import { HtmlField } from "~/components/fields/HtmlField";
-import { PROPERTIES } from "~/pages/settings/constants";
+import {NumberField} from "~/features/css_editor/components/fields/NumberField";
 
 import { ArrayComponent } from "./fields/ArrayComponent";
 import { ButtonGroups } from "./fields/ButtonGroups";
@@ -14,18 +12,6 @@ import { TextAreaField } from "./fields/TextArea";
 import { TextFieldWithSelect } from "./fields/textfield_with_unit/TextFieldWithSelect";
 import { ToggleButton } from "./fields/ToggleButton";
 
-const NumberF = (props: any) => {
-  const [local, others] = splitProps(props, ["onChange"]);
-
-  return (
-    <input
-      class={PROPERTIES.Css.TextField}
-      onChange={local.onChange}
-      type="number"
-      {...others}
-    />
-  );
-};
 export const componentMap: Record<string, any> = {
   array: ArrayComponent,
   boolean: CheckboxField,
@@ -34,7 +20,7 @@ export const componentMap: Record<string, any> = {
   colorPicker: ColorPickerInput,
   dataEditor: DataEditWithCustomDialog,
   fieldWithCustomProperty: FieldWithCustomBox,
-  number: NumberF,
+  number: NumberField,
   select: Select,
   // This trigger onInput event, so dont use it.
   string: TextFieldWithSelect,

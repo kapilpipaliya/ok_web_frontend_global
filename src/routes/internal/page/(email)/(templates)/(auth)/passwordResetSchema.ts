@@ -1,4 +1,4 @@
-import { createEmailTemplate } from "~/routes/internal/page/(email)/BaseEmailTemplate";
+import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 const content = [
   {
