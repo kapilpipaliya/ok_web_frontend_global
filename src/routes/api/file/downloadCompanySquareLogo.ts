@@ -11,7 +11,7 @@ export async function GET({ request }: APIEvent) {
   try {
     // Query to get the company logo file ID
     const result = await dbSession.run(`
-      MATCH (g:GlobalSetting)-[:CompanyCircularLogo]->(f:File)
+      MATCH (g:GlobalSetting)-[:CompanySquareLogo]->(f:File)
       RETURN elementId(f) as fileId
     `);
 

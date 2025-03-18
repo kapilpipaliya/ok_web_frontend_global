@@ -29,8 +29,8 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
-    const { circularLogo, rectangularLogo } = await request.json();
-    if (!(rectangularLogo || circularLogo)) {
+    const { squareLogo, rectangularLogo } = await request.json();
+    if (!(rectangularLogo || squareLogo)) {
       throw new APIError("At least one company logo is required", 400);
     }
 
@@ -67,20 +67,20 @@ export async function POST({ request }: APIEvent) {
       );
     }
 
-    // Delete all existing CompanyCircularLogo relationships
+    // Delete all existing CompanySquareLogo relationships
     await dbSession.run(
-      `MATCH (g:GlobalSetting)-[r:CompanyCircularLogo]->(f:File)
+      `MATCH (g:GlobalSetting)-[r:CompanySquareLogo]->(f:File)
        DELETE r`,
     );
 
-    // Handle circular logo
-    if (circularLogo) {
+    // Handle Square logo
+    if (squareLogo) {
       // Create new relationship
       await dbSession.run(
         `MATCH (g:GlobalSetting)
-         MATCH (f:File) WHERE elementId(f) = $circularLogo
-         MERGE (g)-[:CompanyCircularLogo]->(f)`,
-        { circularLogo },
+         MATCH (f:File) WHERE elementId(f) = $squareLogo
+         MERGE (g)-[:CompanySquareLogo]->(f)`,
+        { squareLogo },
       );
     }
 
@@ -88,8 +88,8 @@ export async function POST({ request }: APIEvent) {
     const result = await dbSession.run(
       `MATCH (g:GlobalSetting)
        OPTIONAL MATCH (g)-[:CompanyRectangularLogo]->(rectLogo:File)
-       OPTIONAL MATCH (g)-[:CompanyCircularLogo]->(circLogo:File)
-       RETURN g, rectLogo, circLogo`,
+       OPTIONAL MATCH (g)-[:CompanySquareLogo]->(squareLogo:File)
+       RETURN g, rectLogo, squareLogo`,
     );
 
     if (!result.records[0]?.get("g")) {
@@ -100,8 +100,8 @@ export async function POST({ request }: APIEvent) {
     const rectangularLogoFile = result.records[0].get("rectLogo")
       ? convertNodeToJson(result.records[0].get("rectLogo"))
       : null;
-    const circularLogoFile = result.records[0].get("circLogo")
-      ? convertNodeToJson(result.records[0].get("circLogo"))
+    const squareLogoFile = result.records[0].get("squareLogo")
+      ? convertNodeToJson(result.records[0].get("squareLogo"))
       : null;
 
     // Log company logo updates
@@ -111,9 +111,9 @@ export async function POST({ request }: APIEvent) {
         `rectangular logo: ${rectangularLogoFile?.P.fileName} (${rectangularLogoFile?.P.contentType})`,
       );
     }
-    if (circularLogo) {
+    if (squareLogo) {
       logDetails.push(
-        `circular logo: ${circularLogoFile?.P.fileName} (${circularLogoFile?.P.contentType})`,
+        `Square logo: ${squareLogoFile?.P.fileName} (${squareLogoFile?.P.contentType})`,
       );
     }
 
@@ -134,8 +134,8 @@ export async function POST({ request }: APIEvent) {
       vertexes[rectangularLogoFile.id] = rectangularLogoFile;
     }
 
-    if (circularLogoFile) {
-      vertexes[circularLogoFile.id] = circularLogoFile;
+    if (squareLogoFile) {
+      vertexes[squareLogoFile.id] = squareLogoFile;
     }
 
     return {
@@ -144,7 +144,7 @@ export async function POST({ request }: APIEvent) {
         vertexes: vertexes,
       },
       result: {
-        circularLogoFile,
+        squareLogoFile,
         globalSetting: updatedGlobalSetting,
         rectangularLogoFile,
       },

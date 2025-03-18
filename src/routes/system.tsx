@@ -4,7 +4,7 @@ import { Link } from "@solidjs/meta";
 
 import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
 import { GetInitialData } from "~/GetInitialData";
-import { getCompanyCircularLogoUrl } from "~/lib/graph/get/sync/company/getCompanyCircularLogoUrl";
+import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
@@ -15,7 +15,7 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
   return (
     <GetInitialData authenticate>
       <PermissionGuard>
-        <Link href={getCompanyCircularLogoUrl(graph) || ""} rel="icon" />
+        <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
           <HomeIcon />
           <div class="ml:auto flex gap:4">

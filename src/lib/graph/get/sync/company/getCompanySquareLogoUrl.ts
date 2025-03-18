@@ -3,9 +3,9 @@ import { profileImage } from "~/pages/settings/constants";
 
 import type { GraphInterface } from "../../../graph";
 
-import { getCompanyCircularLogoVertex } from "./getCompanyCircularLogoVertex";
+import { getCompanySquareLogoVertex } from "./getCompanySquareLogoVertex";
 
-export function getCompanyCircularLogoUrl(graph: GraphInterface): string {
-  const companyLogoVertex = getCompanyCircularLogoVertex(graph);
+export function getCompanySquareLogoUrl(graph: GraphInterface): string {
+  const companyLogoVertex = getCompanySquareLogoVertex(graph);
   return getDownloadLink(companyLogoVertex) || profileImage;
 }

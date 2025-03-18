@@ -3,7 +3,7 @@ import type { JSX } from "solid-js";
 import { Link } from "@solidjs/meta";
 
 import { GetInitialData } from "~/GetInitialData";
-import { getCompanyCircularLogoUrl } from "~/lib/graph/get/sync/company/getCompanyCircularLogoUrl";
+import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
 import { useGraph } from "~/lib/graph/graph";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
@@ -23,7 +23,7 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
   return (
     <PermissionGuard>
       <GetInitialData authenticate>
-        <Link href={getCompanyCircularLogoUrl(graph) || ""} rel="icon" />
+        <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
           <div class="flex:1" />
           <div class="ml:auto flex gap:4">

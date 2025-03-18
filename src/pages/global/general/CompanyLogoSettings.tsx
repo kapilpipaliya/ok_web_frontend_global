@@ -12,7 +12,7 @@ import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { getCompanyCircularLogoVertex } from "~/lib/graph/get/sync/company/getCompanyCircularLogoVertex";
+import { getCompanySquareLogoVertex } from "~/lib/graph/get/sync/company/getCompanySquareLogoVertex";
 import { getCompanyRectangularLogoVertex } from "~/lib/graph/get/sync/company/getCompanyRectangularLogoVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
@@ -23,11 +23,11 @@ import { SchemaRenderer } from "../../SchemaRenderer";
 
 export function CompanyLogoSettings() {
   const [openRectangularDialog, setOpenRectangularDialog] = createSignal(false);
-  const [openCircularDialog, setOpenCircularDialog] = createSignal(false);
+  const [openSquareDialog, setOpenSquareDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
   let rectangularFileManagerStore: FileManagerObject;
-  let circularFileManagerStore: FileManagerObject;
+  let squareFileManagerStore: FileManagerObject;
 
   // because we are loading custom settings, we need to create a new vertex
   const formDataId = uuidv7();
@@ -57,16 +57,16 @@ export function CompanyLogoSettings() {
     );
   }
 
-  // Setup for circular logo
-  const companyCircularLogoVertexCopy = getCompanyCircularLogoVertex(graph);
-  if (companyCircularLogoVertexCopy?.id) {
+  // Setup for Square logo
+  const companySquareLogoVertexCopy = getCompanySquareLogoVertex(graph);
+  if (companySquareLogoVertexCopy?.id) {
     setSelectionValue(
       0,
       graph.vertexes[formDataId],
       graph,
       setGraph,
-      { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanyCircularLogo" } },
-      companyCircularLogoVertexCopy.id,
+      { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanySquareLogo" } },
+      companySquareLogoVertexCopy.id,
     );
   }
 
@@ -100,9 +100,9 @@ export function CompanyLogoSettings() {
     setOpenRectangularDialog(false);
   };
 
-  const onCircularFileSelected = () => {
+  const onSquareFileSelected = () => {
     const selectedFile =
-      circularFileManagerStore.gridStore?.[0].selectedRows[0];
+      squareFileManagerStore.gridStore?.[0].selectedRows[0];
     if (!selectedFile) {
       showErrorToast("Please select a file");
       return;
@@ -114,7 +114,7 @@ export function CompanyLogoSettings() {
       L: [],
       OUT: {},
       P: {
-        type: "CompanyCircularLogo",
+        type: "CompanySquareLogo",
       },
     };
 
@@ -127,7 +127,7 @@ export function CompanyLogoSettings() {
       selectedFile.id,
     );
 
-    setOpenCircularDialog(false);
+    setOpenSquareDialog(false);
   };
 
   const setRectangularFileManagerStore = (
@@ -136,10 +136,10 @@ export function CompanyLogoSettings() {
     rectangularFileManagerStore = fileManagerStore_;
   };
 
-  const setCircularFileManagerStore = (
+  const setSquareFileManagerStore = (
     fileManagerStore_: FileManagerObject,
   ) => {
-    circularFileManagerStore = fileManagerStore_;
+    squareFileManagerStore = fileManagerStore_;
   };
 
   const form = {
@@ -191,17 +191,17 @@ export function CompanyLogoSettings() {
             as: "span",
             class: SETTINGS_CONSTANTS.LABEL_CLASS,
             componentName: "Html",
-            text: "Circular Company Logo",
+            text: "Square Company Logo",
           },
           {
             as: "img",
             class: "cursor:pointer h:60px w:60px rounded-full object-fit:cover",
             componentName: "Html",
-            key: "companyCircularLogo",
+            key: "companySquareLogo",
             props: () => {
-              const selectedFile = circularCompanyLogoVertex()[0];
+              const selectedFile = squareCompanyLogoVertex()[0];
               return {
-                onClick: () => setOpenCircularDialog(true),
+                onClick: () => setOpenSquareDialog(true),
                 src: getDownloadLink(selectedFile) || profileImage,
               };
             },
@@ -215,9 +215,9 @@ export function CompanyLogoSettings() {
             class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS + " mr:auto",
             componentName: "Html",
             props: () => ({
-              onClick: () => setOpenCircularDialog(true),
+              onClick: () => setOpenSquareDialog(true),
             }),
-            text: "Change Circular Logo",
+            text: "Change Square Logo",
           },
         ],
         class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
@@ -236,9 +236,9 @@ export function CompanyLogoSettings() {
                   disabled: options.dataContext.saveState[0]?.isLoading,
                   onClick: async () => {
                     const rectangularLogo = rectangularCompanyLogoVertex()[0];
-                    const circularLogo = circularCompanyLogoVertex()[0];
+                    const squareLogo = squareCompanyLogoVertex()[0];
 
-                    if (!(rectangularLogo || circularLogo)) {
+                    if (!(rectangularLogo || squareLogo)) {
                       showErrorToast("Please select at least one company logo");
                       return;
                     }
@@ -248,7 +248,7 @@ export function CompanyLogoSettings() {
                       const response = await postAPI(
                         API.settings.company.updateLogoUrl,
                         {
-                          circularLogo: circularLogo?.id || null,
+                          squareLogo: squareLogo?.id || null,
                           rectangularLogo: rectangularLogo?.id || null,
                         },
                       );
@@ -303,9 +303,9 @@ export function CompanyLogoSettings() {
     );
   });
 
-  const circularCompanyLogoVertex = createMemo(() => {
+  const squareCompanyLogoVertex = createMemo(() => {
     return (
-      evalExpression("->CompanyCircularLogo", {
+      evalExpression("->CompanySquareLogo", {
         graph,
         setGraph,
         vertexes: [graph.vertexes[formDataId]],
@@ -327,11 +327,11 @@ export function CompanyLogoSettings() {
         setOpen={setOpenRectangularDialog}
       />
       <FilePickerModal
-        onFileSelected={onCircularFileSelected}
-        open={openCircularDialog}
-        selectedFileVertex={circularCompanyLogoVertex()}
-        setFileManagerStore={setCircularFileManagerStore}
-        setOpen={setOpenCircularDialog}
+        onFileSelected={onSquareFileSelected}
+        open={openSquareDialog}
+        selectedFileVertex={squareCompanyLogoVertex()}
+        setFileManagerStore={setSquareFileManagerStore}
+        setOpen={setOpenSquareDialog}
       />
     </div>
   );

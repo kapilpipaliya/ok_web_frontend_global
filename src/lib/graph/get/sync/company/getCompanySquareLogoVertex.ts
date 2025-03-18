@@ -3,10 +3,10 @@ import { getGlobalSettingVertex } from "~/lib/graph/get/sync/theme/getGlobalSett
 
 import type { GraphInterface, Vertex } from "../../../graph";
 
-export function getCompanyCircularLogoVertex(
+export function getCompanySquareLogoVertex(
   graph: GraphInterface,
 ): undefined | Vertex {
-  return evalExpression("->CompanyCircularLogo", {
+  return evalExpression("->CompanySquareLogo", {
     graph,
     vertexes: [getGlobalSettingVertex(graph)],
   })?.[0];
