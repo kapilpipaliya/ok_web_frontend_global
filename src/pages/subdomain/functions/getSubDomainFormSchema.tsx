@@ -93,7 +93,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 key: "key",
                 placeholder: "Enter subdomain name",
                 props: (options: FunctionArgumentType) => ({
-                  disabled: !options.data.id.startsWith("-"),
+                  disabled: !options.data?.id.startsWith("-"),
                 }),
                 validation: { required: true },
               },
@@ -207,7 +207,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                         ],
                         componentName: "Form",
                         props: (options: FunctionArgumentType) => ({
-                          formDataId: options.data.id,
+                          formDataId: options.data?.id,
                         }),
                       },
                     ],

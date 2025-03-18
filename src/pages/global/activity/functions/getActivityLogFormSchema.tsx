@@ -263,7 +263,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
                     ],
                     componentName: "Form",
                     props: (options: FunctionArgumentType) => ({
-                      formDataId: options.data.id,
+                      formDataId: options.data?.id,
                     }),
                   },
                 ],

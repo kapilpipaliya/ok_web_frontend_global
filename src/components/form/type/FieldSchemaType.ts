@@ -47,6 +47,8 @@ export interface FunctionArgumentBaseType {
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   searchParams?: ReturnType<typeof useSearchParams>[0];
   setError: (error: string | undefined, key?: string) => void;
+  removeTxnIdAndCreateNew: (txnId: number) => number;
+  deleteTxnIdAndCreateNew: (txnId: number) => number;
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
     txnId: number,

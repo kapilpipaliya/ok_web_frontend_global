@@ -44,10 +44,10 @@ export function undo(
     revertTransactionUpToIndex ?? getNewUndoIndex(txnValue, activeUndoIndex);
 
   // Revert steps in reverse order up to the target index
-  const stepsToRedo = txnValue.steps
+  const stepsToUndo = txnValue.steps
     .slice(newUndoIndex + 1, activeUndoIndex + 1)
     .reverse();
-  for (const txn of stepsToRedo) {
+  for (const txn of stepsToUndo) {
     undoTxn(txn, graph, setGraph);
   }
   txnValue.activeUndoIndex = newUndoIndex;

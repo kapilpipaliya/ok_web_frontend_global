@@ -205,7 +205,7 @@ string`,
           // componentName: "::'P.type'",
           props: (options: FunctionArgumentType) => {
             const type =
-              options.data.P.type === "boolean" ? "CheckBox" : "TextInput";
+              options.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
             return {
               class:
                 type === "CheckBox"
@@ -231,14 +231,14 @@ string`,
             return {
               hide: (options: FunctionArgumentType) => {
                 return (
-                  options.data.P.defValue === undefined ||
-                  options.data.P.defValue === null
+                  options.data?.P.defValue === undefined ||
+                  options.data?.P.defValue === null
                 );
               },
               onClick: () => {
                 mergeVertexProperties(
                   options.txnId,
-                  options.data.id,
+                  options.data?.id,
                   options.graph,
                   options.setGraph,
                   {
@@ -259,7 +259,7 @@ string`,
     //   // componentName: "::'P.type'",
     //   props: (options: FunctionArgumentType) => {
     //     return {
-    //       componentName: options.data.P.type === "boolean" ? "CheckBox" : "TextInput"
+    //       componentName: options.data?.P.type === "boolean" ? "CheckBox" : "TextInput"
     //     }
     //   },
     //   displayName: "Value",

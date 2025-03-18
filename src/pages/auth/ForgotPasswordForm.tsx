@@ -39,7 +39,7 @@ export function ForgotPasswordForm() {
   });
 
   const handleIdentifierSubmit = async (options: FunctionArgumentType) => {
-    const { identifier } = options.data.P;
+    const { identifier } = options.data?.P;
     if (!identifier?.trim()) {
       showErrorToast("Enter email or username");
       return;
@@ -87,7 +87,7 @@ export function ForgotPasswordForm() {
   };
 
   const handleOtpSubmit = async (options: FunctionArgumentType) => {
-    const { otp } = options.data.P;
+    const { otp } = options.data?.P;
     if (!otp?.trim()) {
       showErrorToast("Please enter OTP");
       return;
@@ -130,7 +130,7 @@ export function ForgotPasswordForm() {
   };
 
   const handlePasswordResetSubmit = async (options: FunctionArgumentType) => {
-    const { confirmPassword, newPassword } = options.data.P;
+    const { confirmPassword, newPassword } = options.data?.P;
 
     if (newPassword !== confirmPassword) {
       showErrorToast("Passwords do not match");

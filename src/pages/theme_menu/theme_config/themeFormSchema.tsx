@@ -216,8 +216,8 @@ export const getThemeFormSchema = (
         props: (options: FunctionArgumentType) => {
           return {
             text:
-              options.data?.id && !options.data.id.startsWith("-")
-                ? `Configure Theme [${options.data.P.key}]`
+              options.data?.id && !options.data?.id.startsWith("-")
+                ? `Configure Theme [${options.data?.P.key}]`
                 : "Add New Theme",
           };
         },
@@ -295,7 +295,7 @@ export const getThemeFormSchema = (
                         ],
                         componentName: "Form",
                         props: (options: FunctionArgumentType) => ({
-                          formDataId: options.data.id,
+                          formDataId: options.data?.id,
                         }),
                       },
                     ],
@@ -329,7 +329,7 @@ export const getThemeFormSchema = (
 
     props: (options: FunctionArgumentType) => ({
       data: createStore({
-        editorData: options.data.P.data ?? "",
+        editorData: options.data?.P.data ?? "",
         isLoading: false,
         showModal: true,
       }),

@@ -71,8 +71,8 @@ export const roleFormSchema = {
               placeholder: "Enter role name",
               props: (options: FunctionArgumentType) => ({
                 disabled:
-                  !options.data.id.startsWith("-") &&
-                  Object.values(SYSTEM_ROLES).includes(options.data.P.key),
+                  !options.data?.id.startsWith("-") &&
+                  Object.values(SYSTEM_ROLES).includes(options.data?.P.key),
               }),
               validation: { required: true },
             },
@@ -234,11 +234,11 @@ export const roleFormSchema = {
   props: (options: FunctionArgumentType) => {
     return {
       onMount: async () => {
-        if (!options.data.id.startsWith("-")) {
+        if (!options.data?.id.startsWith("-")) {
           try {
             options.dataContext.modalState[1]("isLoading", true);
             const response = await postAPI(API.role.getRoleUrl, {
-              id: options.data.id,
+              id: options.data?.id,
             });
             if (response.error) {
               throw new Error(response.error);
@@ -252,7 +252,8 @@ export const roleFormSchema = {
         }
       },
       onUnmount: () => {
-        options.revertTransactionUpToIndex(options.txnId, -1);
+        // not needed here, doing on cancel click.
+        // options.revertTransactionUpToIndex(options.txnId, -1);
       },
     };
   },
@@ -294,7 +295,9 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
           options.setGraph,
           response as MutationResult,
         );
+        options.removeTxnIdAndCreateNew(options.txnId);
         showSuccessToast("Role created successfully");
+        options.dataContext.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
@@ -342,6 +345,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
         }),
@@ -380,9 +384,9 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                           roleFormSchema,
                           modalFooterSchema,
                         ],
-                        componentName: "Form",
+                        componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
-                          formDataId: options.data.id,
+                          formDataId: options.data?.id,
                         }),
                       },
                     ],

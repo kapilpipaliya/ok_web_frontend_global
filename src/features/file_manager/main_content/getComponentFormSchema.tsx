@@ -279,7 +279,7 @@ export const getComponentFormSchema = (
                         ],
                         componentName: "Form",
                         props: (options: FunctionArgumentType) => ({
-                          formDataId: options.data.id,
+                          formDataId: options.data?.id,
                         }),
                       },
                     ],

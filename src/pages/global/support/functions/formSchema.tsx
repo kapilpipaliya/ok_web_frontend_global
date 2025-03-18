@@ -99,14 +99,14 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     class: "font-weight:bold",
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
-                                      text: options.data.P.email || "Anonymous",
+                                      text: options.data?.P.email || "Anonymous",
                                     }),
                                   },
                                   {
                                     as: "div",
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
-                                      text: options.data.P.message,
+                                      text: options.data?.P.message,
                                     }),
                                   },
                                   {
@@ -115,14 +115,14 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: new Date(
-                                        options.data.P.createdAt,
+                                        options.data?.P.createdAt,
                                       ).toLocaleString(),
                                     }),
                                   },
                                 ],
                                 componentName: "Html",
                                 props: () => {
-                                  // const isUser = options.data.P.email !== "Support";
+                                  // const isUser = options.data?.P.email !== "Support";
                                   // ${isUser ? 'bg:primary-10' : 'bg:base-10'}
                                   return {
                                     class:
@@ -133,7 +133,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                             ],
                             componentName: "Html",
                             props: () => {
-                              // const isUser = options.data.P.email !== "Support";
+                              // const isUser = options.data?.P.email !== "Support";
                               // isUser ? 'text-align:right' : ''}`
                               return {
                                 class: "mb:12",
@@ -150,7 +150,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         evalExpression("<-ParentSupport", {
                           graph: options.graph,
                           setGraph: options.setGraph,
-                          vertexes: [options.graph.vertexes[options.data.id]],
+                          vertexes: [options.graph.vertexes[options.data?.id]],
                         }).sort(
                           (a: Vertex, b: Vertex) =>
                             new Date(a.P.createdAt).getTime() -
@@ -216,7 +216,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                 API.support.replyUrl,
                                 {
                                   message: replyText,
-                                  ticketId: options.data.id,
+                                  ticketId: options.data?.id,
                                 },
                               );
 
@@ -336,7 +336,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 key: "message",
                 props: (options: FunctionArgumentType) => ({
                   disabled: true,
-                  value: options.data.P.message,
+                  value: options.data?.P.message,
                 }),
               },
             ],
@@ -356,7 +356,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
           try {
             options.dataContext.modalState[1]("isLoading", true);
             const response = await postAPI(API.support.getTicketUrl, {
-              id: options.data.id,
+              id: options.data?.id,
             });
             if (response.error) {
               throw new Error(response.error);

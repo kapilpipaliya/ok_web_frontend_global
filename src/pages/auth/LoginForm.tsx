@@ -77,7 +77,7 @@ export function LoginForm() {
   // Email field enter key handler
   const handleEmailEnter = (options: FunctionArgumentType) => {
     // Focus password field if empty
-    if (!options.data.P.password && formRefs.passwordRef) {
+    if (!options.data?.P.password && formRefs.passwordRef) {
       formRefs.passwordRef.focus();
     } else {
       handlePasswordEnter(options);
