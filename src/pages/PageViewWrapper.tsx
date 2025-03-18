@@ -114,9 +114,9 @@ export function PageViewWrapper(
     componentValue: componentVertexObject.id,
     formId: props.pageVertexName,
     id: id()!,
+    isFetching: false, // Add fetching state
     openedViews: [viewVertexObject.id],
     txnId: props.txnId ?? initialFormStore.txnId,
-    isFetching: false, // Add fetching state
   });
 
   addNewVertex(0, pageFormVertexObject, graph, setGraph);
@@ -436,12 +436,12 @@ export function PageViewWrapper(
       try {
         // Set fetching state to true before making the API call
         setFormStore("isFetching", true);
-        
+
         const data = await props.getFormData();
-        
+
         // Set fetching state to false after the API call completes
         setFormStore("isFetching", false);
-        
+
         if (!data || data.error) {
           result = { error: data.error || "Error fetching form data" };
         } else {
@@ -668,7 +668,10 @@ export function PageViewWrapper(
       <Show
         fallback={<div>Data not found!</div>}
         // when={dataVertex()}
-        when={metaData() && (props.getFormData ? (dataVertex() || formStore().P.isFetching) : true)}
+        when={
+          metaData() &&
+          (props.getFormData ? dataVertex() || formStore().P.isFetching : true)
+        }
       >
         <FormContext.Provider value={formStore().id}>
           <Switch>
@@ -677,7 +680,9 @@ export function PageViewWrapper(
                 !authError() &&
                 // formStore().P.mounted &&
                 metaVertex() &&
-                (props.dataId && props.dataId !== "new" ? dataVertex() || formStore().P.isFetching : true)
+                (props.dataId && props.dataId !== "new"
+                  ? dataVertex() || formStore().P.isFetching
+                  : true)
               }
             >
               <Switch>

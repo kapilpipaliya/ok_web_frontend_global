@@ -201,7 +201,9 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
       if (response.error) {
         showErrorToast(response.error);
       } else {
+        options.removeTxnIdAndCreateNew(options.txnId);
         showSuccessToast("Email audit record saved successfully");
+        options.dataContext.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
@@ -249,6 +251,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
         }),

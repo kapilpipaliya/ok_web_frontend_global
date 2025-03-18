@@ -29,7 +29,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
-    const { squareLogo, rectangularLogo } = await request.json();
+    const { rectangularLogo, squareLogo } = await request.json();
     if (!(rectangularLogo || squareLogo)) {
       throw new APIError("At least one company logo is required", 400);
     }
@@ -144,9 +144,9 @@ export async function POST({ request }: APIEvent) {
         vertexes: vertexes,
       },
       result: {
-        squareLogoFile,
         globalSetting: updatedGlobalSetting,
         rectangularLogoFile,
+        squareLogoFile,
       },
     };
   } catch (error) {

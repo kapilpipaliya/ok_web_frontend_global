@@ -10,7 +10,6 @@ import type {
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
-import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
@@ -55,12 +54,12 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
       if (response.error) {
         showErrorToast(response.error);
       } else {
+        options.removeTxnIdAndCreateNew(options.txnId);
         showSuccessToast(
           formData.id.startsWith("-")
             ? "Subdomain created successfully"
             : "Subdomain updated successfully",
         );
-        resetTransaction(options.txnId, options.graph, options.setGraph);
         options.dataContext.modalState[1]("showModal", false);
         onSuccess();
       }
@@ -166,7 +165,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
-            resetTransaction(options.txnId, options.graph, options.setGraph);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
         }),
@@ -205,7 +204,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                           formSchema,
                           modalFooterSchema,
                         ],
-                        componentName: "Form",
+                        componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
                           formDataId: options.data?.id,
                         }),
@@ -242,10 +241,6 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         isLoading: false,
         showModal: false,
       }),
-      // TODO: if not saved, revert to previous state
-      // onUnmount: () => {
-      //   options.revertTransactionUpToIndex(options.txnId, -1);
-      // }
     }),
   };
 

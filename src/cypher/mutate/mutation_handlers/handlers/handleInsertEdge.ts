@@ -1,8 +1,8 @@
 import type { Transaction } from "neo4j-driver";
-import { convertRelationshipToJson } from "~/cypher/conversion/convertNodeToJson";
 
 import type { Edge, EdgeMap, Id } from "~/lib/graph/graph";
 
+import { convertRelationshipToJson } from "~/cypher/conversion/convertNodeToJson";
 
 export async function handleInsertEdge(
   insertEdge: Edge,

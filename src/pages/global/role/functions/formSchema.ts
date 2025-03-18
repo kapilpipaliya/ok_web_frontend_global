@@ -18,7 +18,7 @@ import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
-import { loadingIconSchema } from "./loadingIconSchema";
+import { loadingIconSchema } from "../../../../lib/schema/loadingIconSchema";
 
 export const permissionsTableSchema = (label: string) =>
   ({
@@ -420,10 +420,6 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
         isLoading: false,
         showModal: false,
       }),
-      // TODO: if not saved, revert to previous state
-      // onUnmount: () => {
-      //   options.revertTransactionUpToIndex(options.txnId, -1);
-      // }
     }),
   };
 

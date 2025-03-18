@@ -199,11 +199,13 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       if (response.error) {
         showErrorToast(response.error);
       } else {
+        options.removeTxnIdAndCreateNew(options.txnId);
         showSuccessToast(
           formData.id.startsWith("-")
             ? "User invited successfully"
             : "User updated successfully",
         );
+        options.dataContext.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
@@ -251,6 +253,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
         }),
@@ -292,7 +295,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                           userFormSchema,
                           modalFooterSchema,
                         ],
-                        componentName: "Form",
+                        componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
                           formDataId: options.data?.id,
                         }),
@@ -328,10 +331,6 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         isLoading: false,
         showModal: false,
       }),
-      // TODO: if not saved, revert to previous state
-      // onUnmount: () => {
-      //   options.revertTransactionUpToIndex(options.txnId, -1);
-      // }
     }),
   };
 

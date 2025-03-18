@@ -59,11 +59,13 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
       if (response.error) {
         showErrorToast(response.error);
       } else {
+        options.removeTxnIdAndCreateNew(options.txnId);
         showSuccessToast(
           formData.id.startsWith("-")
             ? "Activity log created successfully"
             : "Activity log updated successfully",
         );
+        options.dataContext.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
@@ -225,6 +227,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
         }),
@@ -261,7 +264,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
                       formSchema,
                       modalFooterSchema,
                     ],
-                    componentName: "Form",
+                    componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       formDataId: options.data?.id,
                     }),

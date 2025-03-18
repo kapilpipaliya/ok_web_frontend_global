@@ -1,5 +1,5 @@
 import { HtmlField } from "~/components/fields/HtmlField";
-import {NumberField} from "~/features/css_editor/components/fields/NumberField";
+import { NumberField } from "~/features/css_editor/components/fields/NumberField";
 
 import { ArrayComponent } from "./fields/ArrayComponent";
 import { ButtonGroups } from "./fields/ButtonGroups";

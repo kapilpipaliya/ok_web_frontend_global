@@ -51,9 +51,9 @@ import {
   replaceVertexProperties,
 } from "~/lib/graph/mutate/core/vertex";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
-import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 import type { FunctionArgumentType } from "./type/FieldSchemaType";
 
@@ -199,32 +199,6 @@ export function DynamicComponent(
         const errorVertexId = `${props.data?.id}-error`;
         replaceVertexProperties(0, errorVertexId, graph, setGraph, {});
       },
-      deleteTxnIdAndCreateNew: (txnId: number) => {
-        // Delete existing transaction
-        revertTransaction(txnId, graph, setGraph);
-        // Generate and return a new transaction ID
-        const newTxnId = generateNewTxnId(graph, setGraph);
-        mergeVertexProperties<FormStoreObject>(
-          0,
-          formId!,
-          graph,
-          setGraph,
-          { txnId: newTxnId },
-        );
-        return newTxnId;
-      },
-      removeTxnIdAndCreateNew: (txnId: number) => {
-        deleteVertex(0, `txn${txnId}`, graph, setGraph);
-        const newTxnId = generateNewTxnId(graph, setGraph);
-        mergeVertexProperties<FormStoreObject>(
-          0,
-          formId!,
-          graph,
-          setGraph,
-          { txnId: newTxnId },
-        );
-        return newTxnId;
-      },
       get context() {
         return previewStore.context;
       },
@@ -233,6 +207,16 @@ export function DynamicComponent(
       },
       get dataContext() {
         return runWithOwner(owner, () => useRepeaterVertexContext() || {});
+      },
+      deleteTxnIdAndCreateNew: (txnId: number) => {
+        // Delete existing transaction
+        revertTransaction(txnId, graph, setGraph);
+        // Generate and return a new transaction ID
+        const newTxnId = generateNewTxnId(graph, setGraph);
+        mergeVertexProperties<FormStoreObject>(0, formId!, graph, setGraph, {
+          txnId: newTxnId,
+        });
+        return newTxnId;
       },
       error: (key?: string) => {
         const errorVertexId = `${props.data?.id}-error`;
@@ -280,6 +264,14 @@ export function DynamicComponent(
         return isReadOnly();
       },
       ref,
+      removeTxnIdAndCreateNew: (txnId: number) => {
+        deleteVertex(0, `txn${txnId}`, graph, setGraph);
+        const newTxnId = generateNewTxnId(graph, setGraph);
+        mergeVertexProperties<FormStoreObject>(0, formId!, graph, setGraph, {
+          txnId: newTxnId,
+        });
+        return newTxnId;
+      },
       revertTransaction: (txnId: number) =>
         revertTransaction(txnId, graph, setGraph),
       revertTransactionUpToIndex: (txnId: number, txnIndex: number) =>

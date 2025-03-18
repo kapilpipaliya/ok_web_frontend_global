@@ -3,11 +3,10 @@ import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
-  FieldAttribute,
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
+import type { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useToast } from "~/components/styled/Toast";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -80,7 +79,6 @@ export const themeFormSchema = {
             {
               as: "div",
               attributes: [
-                {
                   as: "button",
                   class: "px:5 py:5 bg:gray-60 fg:base-5 r:5",
                   componentName: "Html",
@@ -98,8 +96,7 @@ export const themeFormSchema = {
                           options.showWarningToast("Failed to format code");
                         }
                       }
-                    },
-                  }),
+                    },),
                   text: "Format",
                   type: "button",
                 },
@@ -192,7 +189,9 @@ export const getThemeFormSchema = (
 
       try {
         await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
+        options.removeTxnIdAndCreateNew(options.txnId);
         showSuccessToast("Theme Saved Successfully");
+        options.dataContext.modalState[1]("showModal", false);
         onSuccess();
       } catch (er) {
         showErrorToast(getErrorMessage(er));
@@ -201,7 +200,6 @@ export const getThemeFormSchema = (
       showErrorToast((error as Error).message);
     } finally {
       options.dataContext.modalState[1]("isLoading", false);
-      options.dataContext.modalState[1]("showModal", false);
     }
   };
 
@@ -293,7 +291,7 @@ export const getThemeFormSchema = (
                           themeFormSchema,
                           modalFooterSchema,
                         ],
-                        componentName: "Form",
+                        componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
                           formDataId: options.data?.id,
                         }),
@@ -345,10 +343,6 @@ export const getThemeFormSchema = (
 
         props: () => ({
           data: createSignal(),
-          // TODO: if not saved, revert to previous state
-          // onUnmount: () => {
-          //   options.revertTransactionUpToIndex(options.txnId, -1);
-          // }
         }),
       },
     ],

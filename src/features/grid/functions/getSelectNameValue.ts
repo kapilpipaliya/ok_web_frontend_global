@@ -4,9 +4,9 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { evalExpression } from "~/lib/expression_eval";
+import { selectedValue } from "~/lib/graph/get/sync/edge/selectedValue";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 
-import { selectedValue } from "~/lib/graph/get/sync/edge/selectedValue";
 import { formNameDisplayExprFromVertex } from "./formNameDisplayExprFromVertex";
 
 export function getSelectNameValue(

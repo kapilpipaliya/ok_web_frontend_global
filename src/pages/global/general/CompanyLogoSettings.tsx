@@ -12,8 +12,8 @@ import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { getCompanySquareLogoVertex } from "~/lib/graph/get/sync/company/getCompanySquareLogoVertex";
 import { getCompanyRectangularLogoVertex } from "~/lib/graph/get/sync/company/getCompanyRectangularLogoVertex";
+import { getCompanySquareLogoVertex } from "~/lib/graph/get/sync/company/getCompanySquareLogoVertex";
 import { useGraph } from "~/lib/graph/graph";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
@@ -101,8 +101,7 @@ export function CompanyLogoSettings() {
   };
 
   const onSquareFileSelected = () => {
-    const selectedFile =
-      squareFileManagerStore.gridStore?.[0].selectedRows[0];
+    const selectedFile = squareFileManagerStore.gridStore?.[0].selectedRows[0];
     if (!selectedFile) {
       showErrorToast("Please select a file");
       return;
@@ -136,9 +135,7 @@ export function CompanyLogoSettings() {
     rectangularFileManagerStore = fileManagerStore_;
   };
 
-  const setSquareFileManagerStore = (
-    fileManagerStore_: FileManagerObject,
-  ) => {
+  const setSquareFileManagerStore = (fileManagerStore_: FileManagerObject) => {
     squareFileManagerStore = fileManagerStore_;
   };
 
@@ -248,8 +245,8 @@ export function CompanyLogoSettings() {
                       const response = await postAPI(
                         API.settings.company.updateLogoUrl,
                         {
-                          squareLogo: squareLogo?.id || null,
                           rectangularLogo: rectangularLogo?.id || null,
+                          squareLogo: squareLogo?.id || null,
                         },
                       );
 
@@ -285,11 +282,10 @@ export function CompanyLogoSettings() {
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Html",
-    props: () => ({
-      // TODO: if not saved, revert to previous state
-      // onUnmount: () => {
-      //   options.revertTransactionUpToIndex(options.txnId, -1);
-      // }
+    props: (options: FunctionArgumentType) => ({
+      onUnmount: () => {
+        options.revertTransactionUpToIndex(options.txnId, -1);
+      },
     }),
   } as FieldAttribute;
 

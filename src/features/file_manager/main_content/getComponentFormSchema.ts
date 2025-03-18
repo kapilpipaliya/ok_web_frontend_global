@@ -16,7 +16,6 @@ import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { parentCompAttribute, parentPermAttribute } from "~/lib/meta/base/Comp";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
@@ -125,7 +124,9 @@ export const getComponentFormSchema = (
       if (getErrorMessage(result)) {
         showErrorToast(getErrorMessage(result));
       } else {
+        options.removeTxnIdAndCreateNew(options.txnId);
         showSuccessToast(`${label()} created successfully`);
+        options.dataContext.modalState[1]("showModal", false);
         fileManagerStore.gridStore?.[0].fetchTableData();
         onSuccess();
       }
@@ -133,7 +134,6 @@ export const getComponentFormSchema = (
       showErrorToast((error as Error).message);
     } finally {
       options.dataContext.modalState[1]("isLoading", false);
-      options.dataContext.modalState[1]("showModal", false);
     }
   };
 
@@ -229,12 +229,7 @@ export const getComponentFormSchema = (
           disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
-            revertTransactionUpToIndex(
-              options.txnId,
-              -1,
-              options.graph,
-              options.setGraph,
-            );
+            options.revertTransactionUpToIndex(options.txnId, -1);
             onClose();
           },
           text: "Cancel",
@@ -277,7 +272,7 @@ export const getComponentFormSchema = (
                           componentFormSchema,
                           modalFooterSchema,
                         ],
-                        componentName: "Form",
+                        componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
                           formDataId: options.data?.id,
                         }),

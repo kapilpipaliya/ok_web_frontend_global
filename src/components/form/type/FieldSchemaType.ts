@@ -17,6 +17,7 @@ export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
   data: Vertex;
   dataContext: Record<string | symbol, unknown>;
+  deleteTxnIdAndCreateNew: (txnId: number) => number;
   error: (key?: string) => string | undefined;
   evalExpression: (expression: string, options: object) => unknown;
   fns?: (name: string) => ((...args: unknown[]) => unknown) | undefined;
@@ -39,6 +40,7 @@ export interface FunctionArgumentBaseType {
   parentRenderContext: PageRenderObject;
   readOnly: boolean | null | undefined;
   ref: Accessor<HTMLDivElement | null>;
+  removeTxnIdAndCreateNew: (txnId: number) => number;
   revertTransaction: (txnId: number) => void;
   revertTransactionUpToIndex: (txnId: number, txnIndex: number) => void;
   runWithOwner: <T>(fn: () => T) => T | undefined;
@@ -47,8 +49,6 @@ export interface FunctionArgumentBaseType {
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
   searchParams?: ReturnType<typeof useSearchParams>[0];
   setError: (error: string | undefined, key?: string) => void;
-  removeTxnIdAndCreateNew: (txnId: number) => number;
-  deleteTxnIdAndCreateNew: (txnId: number) => number;
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
     txnId: number,

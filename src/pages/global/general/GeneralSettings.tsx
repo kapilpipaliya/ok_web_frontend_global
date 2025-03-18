@@ -135,11 +135,10 @@ export function GeneralSettings() {
     ],
     class: SETTINGS_CONSTANTS.FORM_CLASS,
     componentName: "Html",
-    props: () => ({
-      // TODO: if not saved, revert to previous state
-      // onUnmount: () => {
-      //   options.revertTransactionUpToIndex(options.txnId, -1);
-      // }
+    props: (options: FunctionArgumentType) => ({
+      onUnmount: () => {
+        options.revertTransactionUpToIndex(options.txnId, -1);
+      },
     }),
   };
 

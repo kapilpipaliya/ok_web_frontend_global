@@ -160,7 +160,9 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
       );
 
       if (isSuccess) {
+        options.removeTxnIdAndCreateNew(options.txnId);
         showSuccessToast("Folder created successfully");
+        options.dataContext.modalState[1]("showModal", false);
         fileManagerStore.gridStore?.[0].fetchTableData();
         onSuccess();
       } else {
@@ -171,7 +173,6 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
       showErrorToast("Failed to create folder");
     } finally {
       options.dataContext.modalState[1]("isLoading", false);
-      options.dataContext.modalState[1]("showModal", false);
     }
   };
 
@@ -212,6 +213,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
         }),
@@ -253,7 +255,7 @@ export const getFolderFormSchema = (onSuccess: () => void) => {
                           folderFormSchema,
                           modalFooterSchema,
                         ],
-                        componentName: "Form",
+                        componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
                           formDataId: options.data?.id,
                         }),

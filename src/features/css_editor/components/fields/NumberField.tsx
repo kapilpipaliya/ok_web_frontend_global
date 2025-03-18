@@ -1,6 +1,6 @@
-import {splitProps} from "solid-js";
+import { splitProps } from "solid-js";
 
-import {PROPERTIES} from "~/pages/settings/constants";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 export const NumberField = (props: any) => {
   const [local, others] = splitProps(props, ["onChange"]);
@@ -13,8 +13,8 @@ export const NumberField = (props: any) => {
     if (targetValue === "") {
       local.onChange?.("");
     } else {
-      const parsedValue = parseFloat(targetValue);
-      local.onChange?.(!isNaN(parsedValue) ? parsedValue as any : "");
+      const parsedValue = Number.parseFloat(targetValue);
+      local.onChange?.(isNaN(parsedValue) ? "" : (parsedValue as any));
     }
 
     // Force the input value to update the props.value,

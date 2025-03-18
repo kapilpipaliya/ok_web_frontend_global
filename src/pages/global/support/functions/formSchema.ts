@@ -16,7 +16,7 @@ import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
-import { loadingIconSchema } from "../../role/functions/loadingIconSchema";
+import { loadingIconSchema } from "../../../../lib/schema/loadingIconSchema";
 
 export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   const actionButtonsSchema = {
@@ -42,6 +42,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
         }),
@@ -99,7 +100,8 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     class: "font-weight:bold",
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
-                                      text: options.data?.P.email || "Anonymous",
+                                      text:
+                                        options.data?.P.email || "Anonymous",
                                     }),
                                   },
                                   {
@@ -401,12 +403,14 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       if (response.error) {
         options.showErrorToast(response.error as string);
       } else {
+        options.removeTxnIdAndCreateNew(options.txnId);
         onMutatDataGet(
           options.graph,
           options.setGraph,
           response as MutationResult,
         );
         options.showSuccessToast("Support ticket updated successfully");
+        options.dataContext.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
@@ -439,6 +443,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
         }),
       },
