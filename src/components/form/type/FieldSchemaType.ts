@@ -50,6 +50,7 @@ export interface FunctionArgumentBaseType {
   searchParams?: ReturnType<typeof useSearchParams>[0];
   setError: (error: string | undefined, key?: string) => void;
   setGraph: SetStoreFunction<GraphInterface>;
+  ensureData: () => string | null;
   setGraphData: (
     txnId: number,
     args: Parameters<typeof setGraphDataWithTransaction>[3],

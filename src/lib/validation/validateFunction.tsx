@@ -14,7 +14,7 @@ export function validateFunction(value: string): {
     }
 
     if (!value.includes("return {")) {
-      return { error: "Function must return an object", isValid: false };
+      return { error: "Function body must return an object", isValid: false };
     }
 
     return { isValid: true };

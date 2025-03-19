@@ -155,7 +155,6 @@ export const SortableRow = (
               // When we have a Table we pass original Table Meta Vertex
               meta={expandVertex()!}
               onChange={props.onChange}
-              txnId={props.txnId}
             />
           </td>
         </tr>

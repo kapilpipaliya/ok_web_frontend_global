@@ -34,6 +34,8 @@ import { STYLES } from "~/pages/settings/constants";
 
 import { insertNewRow } from "./insertNewRow";
 import { SortableRow } from "./SortableRow";
+import { useFormContext } from "~/components/form/context/FormContext";
+import { FormStoreObject } from "~/components/form/context/FormContext";
 
 export function TableInputField(
   props: Readonly<
@@ -44,11 +46,12 @@ export function TableInputField(
       isRealTime?: boolean;
       isTableInside?: boolean;
       meta?: Vertex;
-      txnId?: number;
     }
   >,
 ) {
   const [graph, setGraph] = useGraph();
+  const formId = useFormContext();
+  const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => props.meta ?? parentRenderContext()?.context.meta;
@@ -106,7 +109,7 @@ export function TableInputField(
       updatedRows.splice(dragToIndex()!, 0, draggedRow);
       setSortedVertexes(updatedRows);
       for (const [index, vertex] of updatedRows.entries()) {
-        mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, {
+        mergeVertexProperties(formVertex().P.txnId!, vertex.id, graph, setGraph, {
           pos: index + 1,
         });
       }
@@ -131,7 +134,7 @@ export function TableInputField(
           onClick={() =>
             runWithOwner(owner, () =>
               insertNewRow(
-                props.txnId || 0,
+                formVertex().P.txnId || 0,
                 meta()!,
                 data()!,
                 props.isRealTime ?? false,
@@ -208,7 +211,7 @@ export function TableInputField(
                     setDragFromIndex={setDragFromIndex}
                     setDragToIndex={setDragToIndex}
                     tableColumnsTemplate={tableColumnsTemplate}
-                    txnId={props.txnId ?? 0}
+                    txnId={formVertex().P.txnId ?? 0}
                   />
                 )}
               </For>

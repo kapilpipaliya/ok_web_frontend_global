@@ -49,7 +49,7 @@ export function SelectField(
 ) {
   const [graph, setGraph] = useGraph();
   const formId = useFormContext();
-  const formVertex = graph.vertexes[formId!] as Vertex<FormStoreObject>;
+  const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => props.meta ?? parentRenderContext()?.context.meta!;
@@ -182,7 +182,7 @@ export function SelectField(
         if (!value) {
           return;
         }
-        let txnId = props.txnId ?? 0;
+        let txnId = formVertex().P.txnId ?? 0;
         if (props.isRealTime) {
           txnId = generateNewTxnId(graph, setGraph);
         }
@@ -223,7 +223,7 @@ export function SelectField(
         }
         onChangeHandler(
           txnId,
-          graph.vertexes[formVertex.P.formDataId!],
+          graph.vertexes[formVertex().P.formDataId!],
           data(),
           meta(),
           graph,

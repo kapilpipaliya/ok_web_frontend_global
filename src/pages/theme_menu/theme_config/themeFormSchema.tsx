@@ -6,7 +6,7 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-import type { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
+import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useToast } from "~/components/styled/Toast";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -79,13 +79,14 @@ export const themeFormSchema = {
             {
               as: "div",
               attributes: [
+                {
                   as: "button",
                   class: "px:5 py:5 bg:gray-60 fg:base-5 r:5",
                   componentName: "Html",
                   props: (options: FunctionArgumentType) => ({
                     onClick: async () => {
                       const editor = options.dataContext?.editorState[0]();
-                      if (editor) {
+                      if (editor) { 
                         try {
                           const formatted = await formatJavaScriptCode(
                             editor.getValue(),
@@ -96,7 +97,8 @@ export const themeFormSchema = {
                           options.showWarningToast("Failed to format code");
                         }
                       }
-                    },),
+                    },
+                  }),
                   text: "Format",
                   type: "button",
                 },
@@ -189,7 +191,9 @@ export const getThemeFormSchema = (
 
       try {
         await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
-        options.removeTxnIdAndCreateNew(options.txnId);
+        // options.removeTxnIdAndCreateNew(options.txnId);
+        // as we are creating new transaction, we need to revert to previous state
+        options.revertTransactionUpToIndex(options.txnId, -1);
         showSuccessToast("Theme Saved Successfully");
         options.dataContext.modalState[1]("showModal", false);
         onSuccess();

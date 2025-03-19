@@ -50,6 +50,7 @@ import {
   mergeVertexProperties,
   replaceVertexProperties,
 } from "~/lib/graph/mutate/core/vertex";
+import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
@@ -263,6 +264,43 @@ export function DynamicComponent(
       get readOnly() {
         return isReadOnly();
       },
+      // on create save dataVertex is is changed, so its not available. so this will create new dataVertex again.
+      ensureData: () => {
+        // Delete the existing data vertex if it exists
+        if (props.data?.id) {
+          return props.data.id;
+        }
+        
+        // Create a new form vertex
+        const metaVertex = () => graph.vertexes[formVertex()?.P.formMetaId!];
+        const metaKey = metaVertex()!.P.key;
+        if (!metaKey) {
+          console.error("Cannot recreate data ID: No meta key found");
+          return null;
+        }
+        
+        const createResult = createFormVertex(
+          graph,
+          setGraph,
+          formVertex()?.P.txnId!,
+          metaKey,
+          {},  // Empty initial properties
+        );
+        
+        if (createResult.error) {
+          console.error("Error creating new data vertex:", createResult.error);
+          return null;
+        }
+
+        if (createResult.vertex) {
+          mergeVertexProperties(0, formId!, graph, setGraph, {
+            formDataId: createResult.vertex.id,
+          });
+        }
+        
+        // Return the new vertex ID
+        return createResult.vertex?.id;
+      },
       ref,
       removeTxnIdAndCreateNew: (txnId: number) => {
         deleteVertex(0, `txn${txnId}`, graph, setGraph);
@@ -317,7 +355,7 @@ export function DynamicComponent(
       showSuccessToast,
       showWarningToast,
       get txnId() {
-        return props.txnId!;
+        return formVertex()?.P.txnId!;
       },
       updateValue,
       zIndex,
@@ -366,7 +404,7 @@ export function DynamicComponent(
     setValueGlobal(
       graph,
       setGraph,
-      props.txnId!,
+      formVertex()?.P.txnId!,
       props.meta,
       props.data!,
       newValue,
@@ -660,7 +698,6 @@ export function DynamicComponent(
           props={null}
           readOnly={isReadOnly()}
           ref={setRef}
-          txnId={props.txnId}
           value={value()}
         >
           <Show
@@ -718,7 +755,7 @@ export function DynamicComponent(
       </Show> */}
       <PageRenderContextProvider store={repeterStore}>
         <Switch>
-          <Match when={!component()}>NO INPUT {componentName()}</Match>
+          <Match when={!component()}>NO INPUT {componentName() as string}</Match>
           {/* @ts-ignore */}
           <Match when={isHidden()} />
           <Match
