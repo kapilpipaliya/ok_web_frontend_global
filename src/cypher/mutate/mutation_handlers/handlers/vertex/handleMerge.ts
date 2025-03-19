@@ -13,7 +13,7 @@ export async function handleMerge(
 ) {
   let id = merge.id;
   if (clientToServerVertexIdMap.has(id)) {
-    id = clientToServerVertexIdMap.get(id);
+    id = clientToServerVertexIdMap.get(id)!;
   }
 
   const query =

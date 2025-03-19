@@ -192,11 +192,14 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
     if (!vertex) {
       return { error: `Vertex ID is not valid ${actualVertexId}` };
     }
+    // Store the original vertex before modification
+    const originalVertex = klona(vertex);
     const originalProperties = {} as { [key: string]: unknown };
     for (const property in properties) {
       // clonning json will remove undefined value, so used null as default.
       originalProperties[property] = vertex.P[property] ?? null;
     }
+    originalVertex.P = originalProperties;
     const clonedProperties = options?.cloneProperties
       ? klona(properties)
       : properties;
@@ -211,7 +214,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
         data,
         id: actualVertexId,
         merge: "mergeVertex",
-        originalData: klona(originalProperties),
+        originalData: originalVertex,
       },
       graph,
       setGraph,
@@ -264,7 +267,7 @@ export function replaceVertexProperties(
       reconcile(shouldClone ? klona(properties) : properties),
     );
     if (txnId) {
-      const originalProperties = klona(graph.vertexes[actualVertexId].P);
+      const originalVertex = klona(graph.vertexes[actualVertexId]);
       const data = updateVertexIdsToNew(
         klona(graph.vertexes[actualVertexId]),
         graph,
@@ -275,7 +278,7 @@ export function replaceVertexProperties(
         {
           data,
           id: actualVertexId,
-          originalData: klona(originalProperties),
+          originalData: originalVertex,
           replace: "replaceVertex",
         },
         graph,

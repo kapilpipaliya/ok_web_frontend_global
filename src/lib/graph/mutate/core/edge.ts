@@ -201,7 +201,7 @@ export function replaceEdgeProperties(
     if (!graph.edges[actualEdgeId]) {
       return { error: "Edge ID is not valid" };
     }
-    const originalProperties = klona(graph.edges[actualEdgeId].P);
+    const originalEdge = klona(graph.edges[actualEdgeId]);
     setGraph("edges", actualEdgeId, "P", reconcile(klona(properties)));
     const data = updateEdgeIdsToNew(graph.edges[actualEdgeId], graph);
     transactionDetailAdd(
@@ -209,7 +209,7 @@ export function replaceEdgeProperties(
       {
         data,
         id: actualEdgeId,
-        originalData: originalProperties,
+        originalData: originalEdge,
         replaceEdge: "replaceEdgeFn",
       },
       graph,

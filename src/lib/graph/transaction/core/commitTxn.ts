@@ -77,26 +77,25 @@ export function commitTxn(
     const reverseStepsToCommit = revertSteps.reverse().map((txnDetail) => {
       return removeUndefinedProperties({
         deleteEdge: txnDetail.insertEdge
-          ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
+          ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
           : undefined,
         deleteVertex: txnDetail.insert
-          ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true)
+          ? updateVertexIdsToNew(klona(txnDetail.originalData as Vertex), graph, true)
           : undefined,
         insertEdge: txnDetail.deleteEdge
-          ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
+          ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
           : undefined,
         insertVertex: txnDetail.deleteVertex
-          ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true)
+          ? updateVertexIdsToNew(klona(txnDetail.originalData as Vertex), graph, true)
           : undefined,
-        // TODO: Below Four are not correctly implemented yet
         merge: txnDetail.merge
-          ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true)
+          ? updateVertexIdsToNew(klona(txnDetail.originalData as Vertex), graph, true)
           : undefined,
         replace: txnDetail.replace
-          ? updateVertexIdsToNew(klona(txnDetail.data as Vertex), graph, true)
+          ? updateVertexIdsToNew(klona(txnDetail.originalData as Vertex), graph, true)
           : undefined,
         replaceEdge: txnDetail.replaceEdge
-          ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
+          ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
           : undefined,
       });
     });
