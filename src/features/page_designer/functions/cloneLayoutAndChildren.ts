@@ -1,6 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { componentDrop } from "~/features/page_designer/functions/drop/componentDrop";
 import { evalExpression } from "~/lib/expression_eval";

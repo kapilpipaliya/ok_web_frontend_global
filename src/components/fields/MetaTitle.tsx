@@ -1,7 +1,7 @@
 import { Link, Meta, Title } from "@solidjs/meta";
 
 import { getTitle } from "~/lib/graph/get/sync/theme/getTitle";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 export function MetaLink(props: { href: string }) {
   return <Link {...props} />;

@@ -1,6 +1,6 @@
 import { For } from "solid-js";
 
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";

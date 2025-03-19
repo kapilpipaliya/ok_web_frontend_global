@@ -2,7 +2,8 @@ import type { Store } from "solid-js/store";
 
 import { klona } from "klona/json";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { useToast } from "~/components/styled/Toast";
 import { FormMetaData } from "~/lib/meta/formMetaData";

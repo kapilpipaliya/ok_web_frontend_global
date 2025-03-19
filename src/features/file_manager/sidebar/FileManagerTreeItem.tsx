@@ -1,8 +1,10 @@
 import { createSelector, createSignal, For, onMount, Show } from "solid-js";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { TreeItemContainer } from "~/features/page_designer/settings/layout/TreeItemContainer";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { FileManagerConfigIcons } from "./FileManagerConfigIcons";

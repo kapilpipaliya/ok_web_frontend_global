@@ -1,13 +1,15 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { createSignal, onMount, Show } from "solid-js";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useToast } from "~/components/styled/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";

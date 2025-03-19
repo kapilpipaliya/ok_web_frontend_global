@@ -2,11 +2,12 @@ import { useChat } from "@ai-sdk/solid";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
-import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
-import { getGlobalThemeVertex } from "~/lib/graph/get/sync/theme/getGlobalThemeVertex";
+import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
+import { getGlobalThemeVertex } from "~/lib/graph/get/sync/store/getGlobalThemeVertex";
 import { themeConfig } from "~/lib/graph/get/sync/theme/themeConfig";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { deleteRow } from "~/lib/graph/mutate/vertex/delete/deleteRow";
 import { STYLES } from "~/pages/settings/constants";
 

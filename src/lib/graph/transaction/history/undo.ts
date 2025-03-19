@@ -1,6 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "../../graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
+
 import type { TransactionDetail } from "../types/TransactionDetail";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";

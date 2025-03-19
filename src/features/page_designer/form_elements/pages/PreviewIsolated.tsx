@@ -1,6 +1,8 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { GraphContext, type GraphInterface, type Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
+
+import { GraphContext, type GraphInterface } from "~/lib/graph/GraphContext";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 export function PreviewIsolated(props: {

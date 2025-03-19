@@ -2,16 +2,14 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type {
-  IFormMetaData,
-} from "~/lib/meta/FormMetadataType";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useToast } from "~/components/styled/Toast";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
@@ -86,7 +84,7 @@ export const themeFormSchema = {
                   props: (options: FunctionArgumentType) => ({
                     onClick: async () => {
                       const editor = options.dataContext?.editorState[0]();
-                      if (editor) { 
+                      if (editor) {
                         try {
                           const formatted = await formatJavaScriptCode(
                             editor.getValue(),

@@ -13,6 +13,7 @@ import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import {
@@ -20,7 +21,7 @@ import {
   useFormContext,
 } from "~/components/form/context/FormContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import type { FormField, GenericField } from "../constants/FieldSchemaType";

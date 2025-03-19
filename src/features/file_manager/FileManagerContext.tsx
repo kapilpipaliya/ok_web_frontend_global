@@ -6,9 +6,10 @@ import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import type { MongoFilter } from "~/cypher/queries/evaluate/mongoToCypher";
 import type { DataGridStore } from "~/features/grid/DataGridContext";
+import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 
 import { getFilesData } from "./sidebar/getFilesData";
 import { getParentData } from "./sidebar/getParentData";

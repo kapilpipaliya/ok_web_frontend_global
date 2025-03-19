@@ -4,7 +4,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import * as Acorn from "acorn";
 import AcornJSX from "acorn-jsx";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { componentDrop } from "~/features/page_designer/functions/drop/componentDrop";
 import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPropertyValueGlobal";

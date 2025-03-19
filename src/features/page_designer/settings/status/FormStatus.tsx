@@ -2,9 +2,10 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { createSignal, createUniqueId, For, onCleanup, Show } from "solid-js";
 
+import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";

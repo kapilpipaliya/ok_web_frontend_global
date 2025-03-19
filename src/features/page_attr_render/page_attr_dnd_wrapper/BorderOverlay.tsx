@@ -24,7 +24,7 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/getBoundingRectChildren";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/getDnDBoxShadowArgs";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,

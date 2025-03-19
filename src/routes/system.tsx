@@ -5,7 +5,7 @@ import { Link } from "@solidjs/meta";
 import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
 import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";

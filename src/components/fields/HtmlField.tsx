@@ -1,6 +1,8 @@
 import { type JSX, Match, Show, splitProps, Switch } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { replacePlaceholderWithUrl } from "~/features/css_editor/utils/cssStateToString";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import {
@@ -9,7 +11,7 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPropertyValueGlobal";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 import type { GenericComponentProps } from "./type/FieldType";

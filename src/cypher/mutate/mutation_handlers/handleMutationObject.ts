@@ -2,15 +2,15 @@ import type { EdgeMap, Id, VertexMap } from "~/lib/graph/graph";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
 
-import { handleDeleteEdge } from "./handlers/handleDeleteEdge";
-import { handleDeleteVertex } from "./handlers/handleDeleteVertex";
-import { handleInsert } from "./handlers/handleInsert";
-import { handleInsertEdge } from "./handlers/handleInsertEdge";
-import { handleMerge } from "./handlers/handleMerge";
-import { handleReplace } from "./handlers/handleReplace";
-import { handleReplaceEdge } from "./handlers/handleReplaceEdge";
-import { handleReplaceEdgeEnd } from "./handlers/handleReplaceEdgeEnd";
-import { handleReplaceEdgeStart } from "./handlers/handleReplaceEdgeStart";
+import { handleDeleteEdge } from "./handlers/edge/handleDeleteEdge";
+import { handleInsertEdge } from "./handlers/edge/handleInsertEdge";
+import { handleReplaceEdge } from "./handlers/edge/handleReplaceEdge";
+import { handleReplaceEdgeEnd } from "./handlers/edge/handleReplaceEdgeEnd";
+import { handleReplaceEdgeStart } from "./handlers/edge/handleReplaceEdgeStart";
+import { handleDeleteVertex } from "./handlers/vertex/handleDeleteVertex";
+import { handleInsert } from "./handlers/vertex/handleInsert";
+import { handleMerge } from "./handlers/vertex/handleMerge";
+import { handleReplace } from "./handlers/vertex/handleReplace";
 
 export async function handleMutationObject(
   mutationObject: any,

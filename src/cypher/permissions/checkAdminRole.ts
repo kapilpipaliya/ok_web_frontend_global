@@ -2,7 +2,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 import { checkRole } from "./checkPermission";
-import { SYSTEM_ROLES } from "./types";
+import { SYSTEM_ROLES } from "./type/types";
 
 export async function checkAdminRole(request: Request): Promise<boolean> {
   const { dbSession } = await getDBSessionForSubdomain(request);

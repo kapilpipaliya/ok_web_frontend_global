@@ -1,5 +1,6 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { GraphInterface, Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormData } from "~/components/form/functions/getFormData";

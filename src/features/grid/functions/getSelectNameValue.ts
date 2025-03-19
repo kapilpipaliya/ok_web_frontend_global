@@ -1,11 +1,12 @@
 import type { CellContext } from "@tanstack/solid-table";
 import type { SetStoreFunction } from "solid-js/store";
 
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { evalExpression } from "~/lib/expression_eval";
 import { selectedValue } from "~/lib/graph/get/sync/edge/selectedValue";
-import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
 
 import { formNameDisplayExprFromVertex } from "./formNameDisplayExprFromVertex";
 

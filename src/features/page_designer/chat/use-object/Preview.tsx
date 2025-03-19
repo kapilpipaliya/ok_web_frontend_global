@@ -3,16 +3,17 @@ import type { z } from "zod";
 import { createSignal, For, onCleanup, Show } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
+import type { Vertex } from "~/lib/graph/graph";
 import type { graphInterfaceSchema } from "~/routes/api/use-object/schema";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { addNewEdge } from "~/lib/graph/mutate/core/edge";
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import {

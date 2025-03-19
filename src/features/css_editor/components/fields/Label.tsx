@@ -8,7 +8,9 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import {
   type FormStoreObject,

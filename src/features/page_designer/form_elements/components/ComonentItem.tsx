@@ -4,17 +4,13 @@ import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { getDynamicComponent } from "~/components/form/functions/getDynamicComponent";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
-import {
-  type GraphInterface,
-  type Id,
-  useGraph,
-  type Vertex,
-} from "~/lib/graph/graph";
+import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";

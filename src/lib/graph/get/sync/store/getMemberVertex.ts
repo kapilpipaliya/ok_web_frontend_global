@@ -1,6 +1,8 @@
+import type { GraphInterface } from "~/lib/graph/GraphContext";
+
 import { evalExpression } from "~/lib/expression_eval";
 
-import type { GraphInterface, Vertex } from "../../../graph";
+import type { Vertex } from "../../../graph";
 
 export function getMemberVertex(graph: GraphInterface): Vertex {
   return graph.vertexes.member ?? ({ P: {} } as Vertex);

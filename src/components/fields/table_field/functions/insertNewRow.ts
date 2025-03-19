@@ -2,7 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { getOwner, runWithOwner } from "solid-js";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";

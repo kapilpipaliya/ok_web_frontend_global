@@ -1,10 +1,11 @@
 import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
 
+import type { Vertex } from "~/lib/graph/graph";
+
+import { ComponentChildrenContext } from "~/components/fields/component/contexts/ComponentChildrenContext";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
-import {
-  RepeaterVertexContext,
-  useRepeaterVertexContext,
-} from "~/features/page_attr_render/context/PageAttrContext";
+import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
+import { DataContext } from "~/features/page_attr_render/context/PageAttrContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
@@ -15,11 +16,10 @@ import { getChildrenAttrs } from "~/features/page_designer/functions/getChildren
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { GenericComponentProps } from "../type/FieldType";
 
-import { ComponentChildrenContext } from "../contexts/ComponentChildrenContext";
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
 
 export function ComponentField(
@@ -104,9 +104,9 @@ export function ComponentField(
       },
     });
     return (
-      <RepeaterVertexContext.Provider value={repeaterStore}>
+      <DataContext.Provider value={repeaterStore}>
         <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
-      </RepeaterVertexContext.Provider>
+      </DataContext.Provider>
     );
   };
 

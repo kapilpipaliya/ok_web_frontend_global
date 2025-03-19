@@ -1,6 +1,6 @@
 import { onCleanup, onMount } from "solid-js";
 
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import {
   getChannel,
   handleChannelMessage,

@@ -1,6 +1,6 @@
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { getGlobalSettingVertex } from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
+import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { APP_NAME, APP_VERSION } from "~/pages/settings/constants";
 
 export function getTitle(title: string, graph?: GraphInterface) {

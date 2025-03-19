@@ -2,9 +2,10 @@ import { For, Show } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import {
   deleteVertex,
   mergeVertexProperties,

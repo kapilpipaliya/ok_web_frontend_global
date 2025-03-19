@@ -1,7 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { MutationArgs } from "~/cypher/types/MutationArgs";
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";

@@ -2,11 +2,11 @@ import { onCleanup } from "solid-js";
 
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 
 export function generateTableInputMeta(metaAttribute: FieldAttribute) {

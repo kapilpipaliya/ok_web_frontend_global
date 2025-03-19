@@ -7,7 +7,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getAllDatabases } from "~/cypher/mutate/manage/getAllDatabases";
 import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
 import { checkRole } from "~/cypher/permissions/checkPermission";
-import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";

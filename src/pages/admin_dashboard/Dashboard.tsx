@@ -4,7 +4,7 @@ import { createEffect, createSignal } from "solid-js";
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 export default function AdminDashboard() {
   const [graph] = useGraph();

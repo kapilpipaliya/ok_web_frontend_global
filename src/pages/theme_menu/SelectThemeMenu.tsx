@@ -1,14 +1,16 @@
 import { createSignal, For, onMount, Show } from "solid-js";
 import { Portal } from "solid-js/web";
 
+import type { Id, Vertex } from "~/lib/graph/graph";
+
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
-import { getGlobalSettingVertex } from "~/lib/graph/get/sync/theme/getGlobalSettingVertex";
-import { getGlobalThemeVertex } from "~/lib/graph/get/sync/theme/getGlobalThemeVertex";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
+import { getGlobalThemeVertex } from "~/lib/graph/get/sync/store/getGlobalThemeVertex";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
 import { handleDataSubmission } from "~/lib/graph/mutate/data/handleDataSubmission";

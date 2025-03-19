@@ -5,7 +5,7 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 import { processResult } from "~/cypher/conversion/processResult";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { checkRole } from "~/cypher/permissions/checkPermission";
-import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";

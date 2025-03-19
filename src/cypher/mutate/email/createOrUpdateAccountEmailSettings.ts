@@ -1,6 +1,6 @@
 import type { Session } from "neo4j-driver";
 
-import type { EmailSettings } from "~/cypher/mutate/email/EmailSettings";
+import type { EmailSettings } from "~/cypher/mutate/email/type/EmailSettings";
 
 export async function createOrUpdateAccountEmailSettings(
   dbSession: Session,

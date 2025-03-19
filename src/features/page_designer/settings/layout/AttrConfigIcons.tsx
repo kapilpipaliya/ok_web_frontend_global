@@ -1,6 +1,7 @@
 import { createSelector, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { DeleteButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/DeleteButton";
@@ -9,7 +10,7 @@ import { ImportHtmlButton } from "~/features/page_attr_render/page_attr_dnd_wrap
 import { InsertButtons } from "~/features/page_attr_render/page_attr_dnd_wrapper/InsertButtons";
 import { ParentButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/ParentButton";
 import { SaveAsTemplateButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/SaveAsTemplateButton";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentLabel } from "../../functions/getComponentLabel";

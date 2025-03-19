@@ -4,12 +4,12 @@ import { createEffect, Match, type ParentProps, Show, Switch } from "solid-js";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 
+import { type GlobalProperties, useGraph } from "~/lib/graph/GraphContext";
 import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
 import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 
 import { getInitialData } from "./cypher/get/getInitialData";
 import { getGlobalStore } from "./lib/graph/get/sync/store/getGlobalStore";
-import { type GlobalProperties, useGraph } from "./lib/graph/graph";
 import { setGraphData } from "./lib/graph/mutate/core/setGraphData";
 import { mergeVertexProperties } from "./lib/graph/mutate/core/vertex";
 import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";

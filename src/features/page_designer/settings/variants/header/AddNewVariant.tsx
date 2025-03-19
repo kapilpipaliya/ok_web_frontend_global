@@ -1,13 +1,14 @@
 import { createSignal, onCleanup, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
-import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
+import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";

@@ -7,8 +7,8 @@ import { For } from "solid-js";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
-import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
-import { useGraph } from "~/lib/graph/graph";
+import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;

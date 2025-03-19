@@ -1,6 +1,9 @@
 import { createMemo, Match, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
+import type { Id, Vertex } from "~/lib/graph/graph";
+
+import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { getDataVertex } from "~/features/page_attr_render/utils/getDataVertex";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
@@ -9,15 +12,12 @@ import {
   type PreviewStoreObject,
 } from "~/features/page_designer/context/PreviewContext";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { FormStoreObject } from "../../components/form/context/FormContext";
 
 import { getComponentDefaultValues } from "../../components/fields/component/functions/getComponentDefaultValues";
-import {
-  RepeaterVertexContext,
-  useRepeaterVertexContext,
-} from "./context/PageAttrContext";
+import { DataContext } from "./context/PageAttrContext";
 
 export function PageView(
   props: Readonly<{
@@ -106,13 +106,13 @@ export function PageView(
       },
     });
     return (
-      <RepeaterVertexContext.Provider value={repeaterStore}>
+      <DataContext.Provider value={repeaterStore}>
         <PageAttrRender
           data={props.data}
           isNoPermissionCheck={props.isNoPermissionCheck!}
           metaVertex={props.metaVertex!}
         />
-      </RepeaterVertexContext.Provider>
+      </DataContext.Provider>
     );
   };
 

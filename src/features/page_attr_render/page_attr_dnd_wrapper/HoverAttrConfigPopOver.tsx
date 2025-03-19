@@ -1,8 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { useZIndex } from "~/components/fields/ZIndex";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 

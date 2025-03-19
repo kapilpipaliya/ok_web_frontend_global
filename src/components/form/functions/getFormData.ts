@@ -1,7 +1,8 @@
 import type { Store } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { GraphInterface, Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";

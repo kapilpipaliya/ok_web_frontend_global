@@ -23,7 +23,7 @@ import { Dynamic } from "solid-js/web";
 import { getMetaProps } from "~/components/form/functions/getMetaProps";
 import { Label } from "~/features/css_editor/components/fields/Label";
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
-import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
+import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
 import {
   PageRenderContextProvider,
   usePageRenderContext,
@@ -42,7 +42,8 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 import {
   addNewVertex,
@@ -219,6 +220,43 @@ export function DynamicComponent(
         });
         return newTxnId;
       },
+      // on create save dataVertex is is changed, so its not available. so this will create new dataVertex again.
+      ensureData: () => {
+        // Delete the existing data vertex if it exists
+        if (props.data?.id) {
+          return props.data.id;
+        }
+
+        // Create a new form vertex
+        const metaVertex = () => graph.vertexes[formVertex()?.P.formMetaId!];
+        const metaKey = metaVertex()!.P.key;
+        if (!metaKey) {
+          console.error("Cannot recreate data ID: No meta key found");
+          return null;
+        }
+
+        const createResult = createFormVertex(
+          graph,
+          setGraph,
+          formVertex()?.P.txnId!,
+          metaKey,
+          {}, // Empty initial properties
+        );
+
+        if (createResult.error) {
+          console.error("Error creating new data vertex:", createResult.error);
+          return null;
+        }
+
+        if (createResult.vertex) {
+          mergeVertexProperties(0, formId!, graph, setGraph, {
+            formDataId: createResult.vertex.id,
+          });
+        }
+
+        // Return the new vertex ID
+        return createResult.vertex?.id;
+      },
       error: (key?: string) => {
         const errorVertexId = `${props.data?.id}-error`;
         return graph.vertexes[errorVertexId]?.P[key ?? props.meta.P.key];
@@ -263,43 +301,6 @@ export function DynamicComponent(
       parentRenderContext: parentRenderContext(),
       get readOnly() {
         return isReadOnly();
-      },
-      // on create save dataVertex is is changed, so its not available. so this will create new dataVertex again.
-      ensureData: () => {
-        // Delete the existing data vertex if it exists
-        if (props.data?.id) {
-          return props.data.id;
-        }
-        
-        // Create a new form vertex
-        const metaVertex = () => graph.vertexes[formVertex()?.P.formMetaId!];
-        const metaKey = metaVertex()!.P.key;
-        if (!metaKey) {
-          console.error("Cannot recreate data ID: No meta key found");
-          return null;
-        }
-        
-        const createResult = createFormVertex(
-          graph,
-          setGraph,
-          formVertex()?.P.txnId!,
-          metaKey,
-          {},  // Empty initial properties
-        );
-        
-        if (createResult.error) {
-          console.error("Error creating new data vertex:", createResult.error);
-          return null;
-        }
-
-        if (createResult.vertex) {
-          mergeVertexProperties(0, formId!, graph, setGraph, {
-            formDataId: createResult.vertex.id,
-          });
-        }
-        
-        // Return the new vertex ID
-        return createResult.vertex?.id;
       },
       ref,
       removeTxnIdAndCreateNew: (txnId: number) => {
@@ -755,7 +756,9 @@ export function DynamicComponent(
       </Show> */}
       <PageRenderContextProvider store={repeterStore}>
         <Switch>
-          <Match when={!component()}>NO INPUT {componentName() as string}</Match>
+          <Match when={!component()}>
+            NO INPUT {componentName() as string}
+          </Match>
           {/* @ts-ignore */}
           <Match when={isHidden()} />
           <Match

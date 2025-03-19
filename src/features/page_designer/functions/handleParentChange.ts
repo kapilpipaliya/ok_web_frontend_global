@@ -1,6 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { sortChildren } from "~/features/page_designer/functions/sortChildren";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";

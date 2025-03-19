@@ -1,4 +1,5 @@
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 

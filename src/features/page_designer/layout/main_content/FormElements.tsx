@@ -2,7 +2,7 @@ import { type Setter, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { Drawer } from "~/components/styled/Drawer";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {

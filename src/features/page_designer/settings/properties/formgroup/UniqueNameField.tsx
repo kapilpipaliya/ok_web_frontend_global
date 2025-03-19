@@ -3,7 +3,8 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";
 import { isUniqueIdUsed } from "~/features/page_designer/functions/generateFormMetaAttributes";
-import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";

@@ -9,7 +9,8 @@ import { FilePickerButton } from "~/features/css_editor/components/fields/textfi
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { evalExpression } from "~/lib/expression_eval";
-import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import { DefaultValueContent } from "./DefaultValueContent";
 import { Label } from "./Label";

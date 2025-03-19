@@ -1,14 +1,10 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import {
-  type GraphInterface,
-  type Id,
-  useGraph,
-  type Vertex,
-} from "~/lib/graph/graph";
+import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 

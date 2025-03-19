@@ -1,7 +1,7 @@
 import { For } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";

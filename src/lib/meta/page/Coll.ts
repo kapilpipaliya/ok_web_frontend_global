@@ -1,10 +1,10 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/entity/findVertex";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";
-import { useGraph } from "../../graph/graph";
 import { FormMetaData } from "../formMetaData";
 import { collectionAttr } from "./collectionAttr";
 

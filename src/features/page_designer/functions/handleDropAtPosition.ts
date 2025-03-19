@@ -1,6 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { handlePageDrag } from "~/features/page_designer/functions/handlePageDrag";
 import { handleParentChange } from "~/features/page_designer/functions/handleParentChange";

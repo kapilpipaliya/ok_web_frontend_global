@@ -15,9 +15,9 @@ import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/styled/LoaderSimple";
 import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
-import { getGlobalThemeVertex } from "./lib/graph/get/sync/theme/getGlobalThemeVertex";
+import { getGlobalThemeVertex } from "./lib/graph/get/sync/store/getGlobalThemeVertex";
 import { themeConfig } from "./lib/graph/get/sync/theme/themeConfig";
-import { GraphContext } from "./lib/graph/graph";
+import { GraphContext } from "./lib/graph/GraphContext";
 import { toastValue } from "./toastValue";
 
 // Create a generic error fallback component

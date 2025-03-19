@@ -1,13 +1,14 @@
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { addNewVertex, deleteVertex } from "~/lib/graph/mutate/core/vertex";
-import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";

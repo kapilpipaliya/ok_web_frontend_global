@@ -1,7 +1,7 @@
 import { BroadcastChannel } from "broadcast-channel";
 import { reconcile, type SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import {
   addNewEdge,

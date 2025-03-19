@@ -2,7 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { klona } from "klona";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { getComponentFromLayoutRow } from "~/features/page_designer/functions/drop/getComponentFromLayoutRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";

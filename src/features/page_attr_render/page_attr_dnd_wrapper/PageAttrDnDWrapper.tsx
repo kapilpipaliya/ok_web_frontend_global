@@ -8,6 +8,7 @@ import {
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/Toast";
 import {
@@ -23,7 +24,7 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/getChildrenAttrs";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";

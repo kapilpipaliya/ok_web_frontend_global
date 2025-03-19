@@ -2,14 +2,15 @@ import { useNavigate } from "@solidjs/router";
 import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { postAPI } from "~/lib/api/general/postApi";
-import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
-import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
+import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
+import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { getPasswordLabelWithHintSchema } from "~/lib/schema/passwordHintPopover";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";

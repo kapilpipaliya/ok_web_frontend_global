@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import { batch } from "solid-js";
 
 import type { MutationResult } from "~/cypher/types/MutationArgs";
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { useToast } from "~/components/styled/Toast";
 import { updateEdgeId } from "~/lib/graph/mutate/core/edge";

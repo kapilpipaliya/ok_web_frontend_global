@@ -1,7 +1,8 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 export function modifyFieldMetaAllFields(

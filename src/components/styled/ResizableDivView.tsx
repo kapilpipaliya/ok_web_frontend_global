@@ -1,5 +1,7 @@
 import { createEffect, createSignal, type JSX, Show } from "solid-js";
 
+import type { Id, Vertex } from "~/lib/graph/graph";
+
 import {
   type PageLayoutObject,
   useDesignerFormIdContext,
@@ -7,7 +9,7 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { STYLES } from "~/pages/settings/constants";
 

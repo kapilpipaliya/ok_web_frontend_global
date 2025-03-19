@@ -1,7 +1,8 @@
 import type { Store } from "solid-js/store";
 
 import type { NestedExpression } from "~/cypher/types/NestedExpression";
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { getChildrenAttrs } from "~/features/page_designer/functions/getChildrenAttrs";
 

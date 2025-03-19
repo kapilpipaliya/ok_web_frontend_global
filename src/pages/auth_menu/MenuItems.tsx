@@ -1,7 +1,7 @@
 import { type JSX, Show } from "solid-js";
 
-import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
-import { useGraph } from "~/lib/graph/graph";
+import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import { AuthenticatedMenu } from "./AuthenticatedMenu";
 import { UnauthenticatedMenu } from "./UnauthenticatedMenu";

@@ -11,12 +11,14 @@ import {
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { isAnyFieldInvalid } from "~/features/page_designer/functions/generateFormMetaAttributes";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";

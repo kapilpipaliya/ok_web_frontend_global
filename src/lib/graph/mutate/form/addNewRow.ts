@@ -2,7 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { batch, untrack } from "solid-js";
 
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { evalExpression } from "~/lib/expression_eval";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
@@ -11,8 +12,8 @@ import { getInEdge } from "../../get/sync/edge/getInEdge";
 import { getToEdge } from "../../get/sync/edge/getToEdge";
 import { commitTxn } from "../../transaction/core/commitTxn";
 import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
-import { generateNewVertexId } from "../../transaction/core/generateNewVertexId";
 import { addNewEdge, newEdge } from "../core/edge";
+import { generateNewVertexId } from "../core/generateNewVertexId";
 
 export function addNewRow(
   txnId: number,

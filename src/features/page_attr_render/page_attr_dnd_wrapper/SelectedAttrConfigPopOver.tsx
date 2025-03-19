@@ -1,3 +1,5 @@
+import type { Vertex } from "~/lib/graph/graph";
+
 import { useZIndex } from "~/components/fields/ZIndex";
 import { IconButton } from "~/components/styled/IconButton";
 import {
@@ -6,7 +8,7 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { handleDragStart } from "~/features/page_designer/event_handler/handleDragStart";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { ComponentName } from "./ComponentName";

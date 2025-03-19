@@ -3,7 +3,7 @@ import { createSignal, type JSX, Show } from "solid-js";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { getProfileImageUrl } from "~/lib/graph/get/sync/user/getProfileImageUrl";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";

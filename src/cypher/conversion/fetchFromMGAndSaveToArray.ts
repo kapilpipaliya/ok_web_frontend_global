@@ -29,7 +29,6 @@ export async function fetchFromMGAndSaveToArray(
           const id = value.elementId;
           const convertedRel = convertRelationshipToJson(value);
           relationshipObj[id] = convertedRel;
-          updateNodeRelations(nodeObj, convertedRel);
         } else if (Array.isArray(value)) {
           for (const item of value) {
             const id = item.elementId;
@@ -38,11 +37,14 @@ export async function fetchFromMGAndSaveToArray(
             } else if (item instanceof types.Relationship) {
               const convertedRel = convertRelationshipToJson(item);
               relationshipObj[id] = convertedRel;
-              updateNodeRelations(nodeObj, convertedRel);
             }
           }
         }
       }
+    }
+
+    for (const relId in relationshipObj) {
+      updateNodeRelations(nodeObj, relationshipObj[relId]);
     }
   } catch (error) {
     console.error("Failed to execute query:", query, "Error:", error);

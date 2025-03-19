@@ -1,4 +1,5 @@
-import type { EdgeMap, Id, VertexMap } from "~/lib/graph/graph";
+import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { Id } from "~/lib/graph/graph";
 
 export interface MutationArgs {
   edgeIdMap: [Id, Id][];
@@ -22,11 +23,6 @@ export interface MutationResult {
       | "replaceEdgeStart"]?: any;
   }[];
   error?: string;
-  graph?: {
-    deleted_edges?: Id[];
-    deleted_vertexes?: Id[];
-    edges: EdgeMap;
-    vertexes: VertexMap;
-  };
+  graph?: ServerResult["graph"];
   txnId: number;
 }

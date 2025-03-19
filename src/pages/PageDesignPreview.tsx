@@ -1,6 +1,7 @@
 import { createSignal, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { PageView } from "~/features/page_attr_render/PageView";
 import {
@@ -11,7 +12,7 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import {
   getChannel,
   handleChannelMessage,

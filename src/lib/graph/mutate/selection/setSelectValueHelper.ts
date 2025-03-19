@@ -1,7 +1,8 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import type { Option } from "~/components/styled/MultiSelect";
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { setParentValue } from "~/lib/graph/mutate/selection/setParentValue";

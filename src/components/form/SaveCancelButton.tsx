@@ -1,7 +1,9 @@
 import { useNavigate } from "@solidjs/router";
 import { type JSXElement, Show } from "solid-js";
 
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+
+import { useGraph } from "~/lib/graph/GraphContext";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { useToast } from "../styled/Toast";

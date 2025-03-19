@@ -1,10 +1,11 @@
 import { klona } from "klona";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { pageAttr } from "~/lib/meta/page/pageAttr";
 
 import { generateTableInputMeta } from "./functions/generateTableInputMeta";

@@ -2,7 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { makeEventListener } from "@solid-primitives/event-listener";
 
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { getGlobalStore } from "../graph/get/sync/store/getGlobalStore";
 import { createActiveClickOutside } from "./createActiveClickOutside";

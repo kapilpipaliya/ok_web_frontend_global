@@ -1,6 +1,7 @@
 import type { Store } from "solid-js/store";
 
-import type { GraphInterface, Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 export function findVertexByLabelAndPks(
   label: string,

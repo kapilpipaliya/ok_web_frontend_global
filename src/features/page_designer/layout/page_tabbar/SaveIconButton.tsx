@@ -2,6 +2,7 @@ import { domToPng } from "modern-screenshot";
 import { createMemo } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/styled/IconButton";
@@ -11,12 +12,12 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { uploadFile } from "~/lib/api/uploadFile";
 import { evalExpression } from "~/lib/expression_eval";
 import { getToEdge } from "~/lib/graph/get/sync/edge/getToEdge";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { addNewEdge, newEdge } from "~/lib/graph/mutate/core/edge";
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 

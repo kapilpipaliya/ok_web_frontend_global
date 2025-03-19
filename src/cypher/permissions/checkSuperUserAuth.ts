@@ -4,7 +4,7 @@ import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 
 import { getUserFromSession } from "../../server/auth/session/getUserFromSession";
 import { checkRole } from "./checkPermission";
-import { SYSTEM_ROLES } from "./types";
+import { SYSTEM_ROLES } from "./type/types";
 
 export async function checkSuperUserAuthorization(
   request: Request,

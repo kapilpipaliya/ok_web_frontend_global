@@ -1,6 +1,6 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 

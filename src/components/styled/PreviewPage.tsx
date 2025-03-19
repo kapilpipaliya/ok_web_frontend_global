@@ -1,6 +1,6 @@
 import { createSignal, For, type JSX, onCleanup } from "solid-js";
 
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
 

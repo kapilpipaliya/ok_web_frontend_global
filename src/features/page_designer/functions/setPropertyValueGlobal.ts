@@ -2,7 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { untrack } from "solid-js";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 

@@ -63,6 +63,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
         />
         <IconButton
           class={headerIconButtonClass}
+          disabled={gridState.isLoading}
           icon={isTableLayout() ? "ph:identification-card" : "ph:table"}
           onClick={() =>
             setGridState("layout", isTableLayout() ? "card" : "table")

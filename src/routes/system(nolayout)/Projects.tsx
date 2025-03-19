@@ -3,7 +3,7 @@ import { Link, Title } from "@solidjs/meta";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";

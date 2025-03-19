@@ -2,12 +2,14 @@ import { Icon } from "@iconify-icon/solid";
 import { batch, createSignal, Show } from "solid-js";
 import { reconcile } from "solid-js/store";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
 import { TextEditor } from "~/features/css_editor/CSSEditor/TextEditor";
 import { StyleEditor } from "~/features/css_editor/StyleEditor/StyleEditor";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge";
 
 import type { CSSStore } from "../context/CssEditorContext";

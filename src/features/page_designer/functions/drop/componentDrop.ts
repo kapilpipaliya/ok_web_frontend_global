@@ -3,7 +3,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { klona } from "klona";
 import { batch } from "solid-js";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { useToast } from "~/components/styled/Toast";
 import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drop/createAttrCompMetaVertex";

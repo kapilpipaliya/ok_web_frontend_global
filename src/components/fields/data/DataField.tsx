@@ -2,15 +2,16 @@ import { createAsync } from "@solidjs/router";
 import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { getSelectionOptionsBase } from "~/cypher/get/getSelectionOptionsBase";
-import { useRepeaterVertexContext } from "~/features/page_attr_render/context/PageAttrContext";
+import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 import { DataInternal } from "./DataInternal";

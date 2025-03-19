@@ -3,12 +3,13 @@ import type { CellContext } from "@tanstack/solid-table";
 import { For } from "solid-js";
 
 import type { DataGridStore } from "~/features/grid/DataGridContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import { getSupportTicketFormSchema } from "./functions/formSchema";
 

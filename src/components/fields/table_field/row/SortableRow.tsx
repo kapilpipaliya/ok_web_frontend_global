@@ -1,18 +1,19 @@
 import { type Accessor, createMemo, createSignal, For, Show } from "solid-js";
 
 import type { GenericComponentProps } from "~/components/fields/type/FieldType";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { deleteRow } from "~/lib/graph/mutate/vertex/delete/deleteRow";
 
 import {
   type FormStoreObject,
   useFormContext,
-} from "../../form/context/FormContext";
-import { DisplayProperty } from "./DisplayProperty";
+} from "../../../form/context/FormContext";
+import { DisplayProperty } from "../cell/DisplayProperty";
 
 export const SortableRow = (
   props: Readonly<

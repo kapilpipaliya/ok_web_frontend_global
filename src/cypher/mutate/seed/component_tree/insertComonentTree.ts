@@ -1,6 +1,6 @@
 import type { Session, Transaction } from "neo4j-driver";
 
-import type { ComponentNode } from "./ComponentTreeType";
+import type { ComponentNode } from "./type/ComponentTreeType";
 
 export async function insertComponentTree(
   dbSession: Session | Transaction,

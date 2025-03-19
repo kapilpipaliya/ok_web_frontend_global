@@ -6,6 +6,7 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import type { GenericComponentProps } from "./type/FieldType";
 
+// this is currently not used, but may be used in future.
 export function PageField(props: Readonly<GenericComponentProps>) {
   const [local, _others] = splitProps(props, [
     "componentName",

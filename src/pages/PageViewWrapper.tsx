@@ -22,6 +22,7 @@ import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 import {
   FormContext,
@@ -41,7 +42,7 @@ import { usePreviewContext } from "~/features/page_designer/context/PreviewConte
 import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import {
   addNewVertex,

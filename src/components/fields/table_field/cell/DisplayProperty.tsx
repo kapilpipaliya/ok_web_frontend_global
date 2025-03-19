@@ -18,12 +18,13 @@ import { getComponentLabel } from "~/features/page_designer/functions/getCompone
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { evalExpression } from "~/lib/expression_eval";
 import { getStringComponent } from "~/lib/graph/get/sync/format/getStringComponent";
-import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import {
   type FormStoreObject,
   useFormContext,
-} from "../../form/context/FormContext";
+} from "../../../form/context/FormContext";
 import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
 

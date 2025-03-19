@@ -1,6 +1,6 @@
 import { parse } from "yaml";
 
-import type { ComponentNode } from "./ComponentTreeType";
+import type { ComponentNode } from "./type/ComponentTreeType";
 
 type ParsedYamlNode = string | { [key: string]: ParsedYamlNode[] };
 

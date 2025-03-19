@@ -3,13 +3,14 @@ import type * as Monaco from "monaco-editor";
 import { createEffect, createSignal, on } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import { validateFunction } from "../../../../lib/validation/validateFunction";
 

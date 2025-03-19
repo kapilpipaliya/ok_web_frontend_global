@@ -4,7 +4,7 @@ import createFloating from "@corvu/utils/create/floating";
 import { createSignal, type JSX, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { useZIndex } from "../fields/ZIndex";

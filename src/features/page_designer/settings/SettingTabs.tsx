@@ -1,11 +1,13 @@
 import { createMemo, For, type JSX, Show } from "solid-js";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import {
   FormContext,
   type FormStoreObject,
 } from "~/components/form/context/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {

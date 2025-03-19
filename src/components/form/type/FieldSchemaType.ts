@@ -6,7 +6,8 @@ import type {
   PageRenderObject,
   PageRenderStore,
 } from "~/features/page_attr_render/context/PageRenderContext";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 
 import type { FormStoreObject } from "../context/FormContext";
@@ -18,6 +19,7 @@ export interface FunctionArgumentBaseType {
   data: Vertex;
   dataContext: Record<string | symbol, unknown>;
   deleteTxnIdAndCreateNew: (txnId: number) => number;
+  ensureData: () => null | string;
   error: (key?: string) => string | undefined;
   evalExpression: (expression: string, options: object) => unknown;
   fns?: (name: string) => ((...args: unknown[]) => unknown) | undefined;
@@ -50,7 +52,6 @@ export interface FunctionArgumentBaseType {
   searchParams?: ReturnType<typeof useSearchParams>[0];
   setError: (error: string | undefined, key?: string) => void;
   setGraph: SetStoreFunction<GraphInterface>;
-  ensureData: () => string | null;
   setGraphData: (
     txnId: number,
     args: Parameters<typeof setGraphDataWithTransaction>[3],

@@ -1,7 +1,6 @@
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/entity/findVertex";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { PROPERTIES } from "~/pages/settings/constants";
-
-import { useGraph } from "../../graph/graph";
 
 export const Nav = {
   attributes: [

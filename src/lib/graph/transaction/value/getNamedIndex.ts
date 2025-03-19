@@ -1,6 +1,6 @@
 import type { Store } from "solid-js/store";
 
-import type { GraphInterface } from "../../graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 export function getNamedIndex(
   txnId: number,

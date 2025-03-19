@@ -8,7 +8,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
 import { handleDropAtPosition } from "~/features/page_designer/functions/handleDropAtPosition";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {

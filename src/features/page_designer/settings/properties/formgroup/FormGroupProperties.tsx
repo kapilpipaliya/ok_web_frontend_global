@@ -12,6 +12,7 @@ import {
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -20,7 +21,7 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 import { htmlTagsTree } from "~/lib/dom/htmlTags";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/expression/getPropsFromMetaExpression";
-import { type GraphInterface, useGraph, type Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import {
   addNewVertex,
   mergeVertexProperties,

@@ -1,10 +1,12 @@
 import { Show } from "solid-js";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import {
   FormContext,
   type FormStoreObject,
 } from "~/components/form/context/FormContext";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import {
   DesignerFormIdContext,

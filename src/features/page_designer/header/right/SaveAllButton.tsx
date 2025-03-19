@@ -1,9 +1,10 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/Toast";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 

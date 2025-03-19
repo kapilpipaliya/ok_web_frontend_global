@@ -1,10 +1,12 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
+import type { GraphInterface } from "~/lib/graph/GraphContext";
+
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getId } from "~/lib/data_structure/string/getId";
 import { getLabel } from "~/lib/data_structure/string/getLabel";
 import { evalExpression } from "~/lib/expression_eval";
-import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 

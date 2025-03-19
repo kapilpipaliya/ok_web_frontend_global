@@ -10,8 +10,8 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
-import { getMemberVertex } from "~/lib/graph/get/sync/user/getMemberVertex";
-import { useGraph } from "~/lib/graph/graph";
+import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
+import { useGraph } from "~/lib/graph/GraphContext";
 import {
   addNewVertex,
   replaceVertexProperties,

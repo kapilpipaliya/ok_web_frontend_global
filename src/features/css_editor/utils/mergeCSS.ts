@@ -1,6 +1,7 @@
 import { recursive } from "merge";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import type { CSSStore } from "../context/CssEditorContext";
 

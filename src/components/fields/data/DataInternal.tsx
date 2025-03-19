@@ -1,9 +1,9 @@
 import type { Vertex } from "~/lib/graph/graph";
 
 import {
-  RepeaterVertexContext,
+  DataContext,
   useRepeaterVertexContext,
-} from "~/features/page_attr_render/context/PageAttrContext";
+} from "~/features/page_attr_render/context/DataContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { isVertex } from "~/lib/graph/mutate/core/vertex";
 
@@ -27,11 +27,11 @@ export function DataInternal(props: {
     },
   });
   return (
-    <RepeaterVertexContext.Provider value={repeaterStore}>
+    <DataContext.Provider value={repeaterStore}>
       <PageAttrRender
         data={isVertex(props.repeaterValue) ? props.repeaterValue : props.data}
         metaVertex={props.meta}
       />
-    </RepeaterVertexContext.Provider>
+    </DataContext.Provider>
   );
 }

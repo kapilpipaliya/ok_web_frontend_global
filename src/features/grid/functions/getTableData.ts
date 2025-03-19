@@ -1,6 +1,6 @@
 import type { Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";

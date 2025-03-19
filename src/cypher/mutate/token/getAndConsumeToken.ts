@@ -1,6 +1,6 @@
 import type { Session, Transaction } from "neo4j-driver";
 
-import type { TokenData } from "~/cypher/mutate/token/TokenData";
+import type { TokenData } from "~/cypher/mutate/token/type/TokenData";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 

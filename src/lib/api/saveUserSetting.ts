@@ -1,6 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface } from "../graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { getGlobalStore } from "../graph/get/sync/store/getGlobalStore";
 import { mergeVertexProperties } from "../graph/mutate/core/vertex";

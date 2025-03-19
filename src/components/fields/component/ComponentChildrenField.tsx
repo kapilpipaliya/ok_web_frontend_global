@@ -1,6 +1,6 @@
 import { useContext } from "solid-js";
 
-import { ComponentChildrenContext } from "../contexts/ComponentChildrenContext";
+import { ComponentChildrenContext } from "~/components/fields/component/contexts/ComponentChildrenContext";
 
 export const ComponentChildrenField = () => {
   const children = useContext(ComponentChildrenContext);

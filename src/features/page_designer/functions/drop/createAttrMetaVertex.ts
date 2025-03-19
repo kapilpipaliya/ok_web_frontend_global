@@ -1,9 +1,9 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { newVertex } from "~/lib/graph/mutate/core/vertex";
-import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 
 export function createAttrMetaVertex(
   graph: Store<GraphInterface>,

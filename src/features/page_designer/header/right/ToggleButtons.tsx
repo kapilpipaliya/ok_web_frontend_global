@@ -1,5 +1,5 @@
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 

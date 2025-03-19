@@ -1,6 +1,8 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { Edge, GraphInterface, Vertex } from "../../graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
+
+import type { Edge, Vertex } from "../../graph";
 import type { TransactionValue } from "../types/TransactionType";
 
 import {

@@ -5,13 +5,15 @@ import { getFloatingStyle } from "@corvu/utils/floating";
 import { type Accessor, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { ZIndex } from "~/components/fields/ZIndex";
 import {
   type PageLayoutObject,
   useDesignerFormIdContext,
 } from "~/features/page_designer/context/LayoutContext";
 import createFloating from "~/lib/dom/createFloating";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 

@@ -7,6 +7,8 @@ import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
+import type { Vertex } from "~/lib/graph/graph";
+
 import { MetaTitle } from "~/components/fields/MetaTitle";
 import { ZIndex } from "~/components/fields/ZIndex";
 import {
@@ -14,7 +16,7 @@ import {
   getInitialDesignerLayoutStore,
   type PageLayoutObject,
 } from "~/features/page_designer/context/LayoutContext";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import {
   addNewVertex,
   deleteVertex,

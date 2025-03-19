@@ -1,6 +1,7 @@
 import type { Navigator } from "@solidjs/router";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 export function handleLoginRedirect(
   value: Vertex,

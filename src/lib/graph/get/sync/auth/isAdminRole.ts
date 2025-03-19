@@ -1,4 +1,4 @@
-import type { GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 

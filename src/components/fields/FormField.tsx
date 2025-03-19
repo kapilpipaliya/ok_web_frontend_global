@@ -7,7 +7,8 @@ import { usePageRenderContext } from "~/features/page_attr_render/context/PageRe
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import {
   addNewVertex,

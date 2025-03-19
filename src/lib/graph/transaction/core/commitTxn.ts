@@ -3,10 +3,11 @@ import type { Store } from "solid-js/store";
 import { klona } from "klona";
 
 import type { MutationArgs } from "~/cypher/types/MutationArgs";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
-import type { Edge, GraphInterface, Vertex } from "../../graph";
+import type { Edge, Vertex } from "../../graph";
 import type { TransactionValue } from "../types/TransactionType";
 
 import {
@@ -140,7 +141,7 @@ export function commitTxn(
       // Merge steps operating on the same entity before returning
       const allSteps = [...reverseStepsToCommit, ...stepsToCommit];
       const mergedSteps = mergeStepsForSameEntities(allSteps);
-      
+
       mutationArgs.transactions = mergedSteps;
       return mutationArgs;
     }
@@ -162,18 +163,18 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
   const seenEdgeIds = new Set<string>();
   const edgesToDelete = new Set<string>();
   const result: any[] = [];
-  
+
   // First pass: process all steps
   for (const step of steps) {
     // Handle merge operations
     if (step.merge) {
       const entityId = step.merge.id;
-      
+
       // Check if we've seen this entity before
       const existingIndex = result.findIndex(
-        s => s.merge && s.merge.id === entityId
+        (s) => s.merge && s.merge.id === entityId,
       );
-      
+
       if (existingIndex === -1) {
         // First occurrence - add to result
         result.push(step);
@@ -187,9 +188,9 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
             ...existingStep.merge,
             P: {
               ...(existingStep.merge.P || {}),
-              ...(step.merge.P || {})
-            }
-          }
+              ...(step.merge.P || {}),
+            },
+          },
         };
       }
     }
@@ -203,18 +204,19 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
     else if (step.deleteEdge) {
       const edgeId = step.deleteEdge.id;
       edgesToDelete.add(edgeId);
-      
+
       // Remove any previous operations for this edge ID
-      const filteredResult = result.filter(s => 
-        !(s.insertEdge && s.insertEdge.id === edgeId) &&
-        !(s.replaceEdge && s.replaceEdge.id === edgeId) &&
-        !(s.replaceEdgeStart && s.replaceEdgeStart.id === edgeId) &&
-        !(s.replaceEdgeEnd && s.replaceEdgeEnd.id === edgeId)
+      const filteredResult = result.filter(
+        (s) =>
+          !(s.insertEdge && s.insertEdge.id === edgeId) &&
+          !(s.replaceEdge && s.replaceEdge.id === edgeId) &&
+          !(s.replaceEdgeStart && s.replaceEdgeStart.id === edgeId) &&
+          !(s.replaceEdgeEnd && s.replaceEdgeEnd.id === edgeId),
       );
-      
+
       result.length = 0;
       result.push(...filteredResult);
-      
+
       // Only add the delete operation if the edge wasn't just inserted in this transaction
       const wasInserted = seenEdgeIds.has(edgeId);
       if (!wasInserted) {
@@ -225,23 +227,25 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
     }
     // Handle edge modifications (replaceEdge, replaceEdgeStart, replaceEdgeEnd)
     else if (step.replaceEdge || step.replaceEdgeStart || step.replaceEdgeEnd) {
-      const operation = step.replaceEdge || step.replaceEdgeStart || step.replaceEdgeEnd;
+      const operation =
+        step.replaceEdge || step.replaceEdgeStart || step.replaceEdgeEnd;
       const edgeId = operation.id;
-      
+
       // this will not happen, but lets keep it here for now.
       if (edgesToDelete.has(edgeId)) {
         // This edge is going to be deleted, so ignore modifications
         continue;
       }
-      
+
       // Check if we've seen this edge before
       const existingIndex = result.findIndex(
-        s => (s.insertEdge && s.insertEdge.id === edgeId) || 
-             (s.replaceEdge && s.replaceEdge.id === edgeId) ||
-             (s.replaceEdgeStart && s.replaceEdgeStart.id === edgeId) ||
-             (s.replaceEdgeEnd && s.replaceEdgeEnd.id === edgeId)
+        (s) =>
+          (s.insertEdge && s.insertEdge.id === edgeId) ||
+          (s.replaceEdge && s.replaceEdge.id === edgeId) ||
+          (s.replaceEdgeStart && s.replaceEdgeStart.id === edgeId) ||
+          (s.replaceEdgeEnd && s.replaceEdgeEnd.id === edgeId),
       );
-      
+
       if (existingIndex === -1) {
         // First occurrence - add to result
         result.push(step);
@@ -263,7 +267,7 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
       result.push(step);
     }
   }
-  
+
   return result;
 }
 
@@ -282,4 +286,3 @@ function validateTransaction(
 
   return "";
 }
-

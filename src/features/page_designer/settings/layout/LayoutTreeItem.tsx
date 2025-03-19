@@ -8,6 +8,7 @@ import {
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/Toast";
 import { generateBoxShadow } from "~/features/css_editor/utils/generate/generateBoxShadow";
@@ -16,7 +17,7 @@ import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/getDnDBoxShadowArgs";
-import { type Id, useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {

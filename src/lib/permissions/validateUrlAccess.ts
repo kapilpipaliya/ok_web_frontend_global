@@ -1,4 +1,4 @@
-import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { generate401RedirectUrl } from "~/lib/api/endpoints";
 import { findRoutePermission } from "~/lib/permissions/findRoutePermission";
 import {

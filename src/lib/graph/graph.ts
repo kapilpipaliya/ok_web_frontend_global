@@ -1,7 +1,3 @@
-import type { createStore } from "solid-js/store";
-
-import { createContext, useContext } from "solid-js";
-
 export type Id = string;
 
 export const IdAttr = "key";
@@ -15,30 +11,6 @@ export interface Edge {
 }
 
 export type EdgeMap = { [key: string]: Edge };
-
-export interface GlobalProperties {
-  activeClickOutside: string[];
-  initialDataFetchError: string;
-  isDevelopment: boolean;
-  isSideBarOpen?: boolean;
-  isSubSideBarOpen?: boolean;
-  newVertexId_: number;
-  txnId_: number;
-  url: string;
-  userRoles: Id[];
-  userSettingId: Id;
-  // isAuthenticated: false,
-  // theme: "light" as "light" | "dark",
-  // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,
-  // language: "en" as string,
-}
-
-export interface GraphInterface {
-  broadcastChannels: string[];
-  edges: EdgeMap;
-  vertexes: VertexMap;
-  vertexLabelIdMap: { [key: string]: Id[] };
-}
 
 // implement changes feed like: https://pouchdb.com/guides/changes.html
 // '_local/' prefix will not be synced, will not hae revision history, but need to provide the current _rev when you update local docs, just like with regular docs.
@@ -57,16 +29,3 @@ export interface Vertex<P extends object = { [key: string]: any }> {
 }
 
 export type VertexMap = { [Id: string]: Vertex };
-
-type AnyObject = { [key: string]: any };
-
-export const GraphContext =
-  createContext<ReturnType<typeof createStore<GraphInterface>>>();
-
-export function useGraph() {
-  const graphStore = useContext(GraphContext)!;
-  if (!graphStore) {
-    throw new Error("useGraph must be used within a GraphProvider");
-  }
-  return graphStore;
-}

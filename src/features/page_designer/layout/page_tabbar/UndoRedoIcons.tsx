@@ -1,9 +1,10 @@
 import { For } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { redo, redoAllowed } from "~/lib/graph/transaction/history/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/history/undo";
 import { headerIconButtonClass } from "~/pages/settings/constants";

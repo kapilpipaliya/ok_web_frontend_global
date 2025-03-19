@@ -2,7 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { deleteEdge } from "~/lib/graph/mutate/core/edge";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex";

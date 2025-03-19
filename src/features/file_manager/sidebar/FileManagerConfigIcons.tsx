@@ -1,7 +1,9 @@
 import { createSelector, createSignal, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
+import type { Vertex } from "~/lib/graph/graph";
+
+import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
@@ -9,7 +11,7 @@ import { useToast } from "~/components/styled/Toast";
 import { QuickEditModal } from "~/features/grid/QuickEditModal";
 import { CommonAddComponent } from "~/features/page_designer/settings/variants/header/CommonAddComponent";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";

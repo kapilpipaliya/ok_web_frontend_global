@@ -1,15 +1,3 @@
-export type Permission = {
-  description: string;
-  key: string;
-  name: string;
-};
-
-export type Role = {
-  key: string;
-  name: string;
-  permissions: string[];
-};
-
 export const SYSTEM_ROLES = {
   ADMIN: "Admin",
   GUEST: "Guest",

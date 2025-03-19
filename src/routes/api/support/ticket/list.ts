@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
 import { checkRole } from "~/cypher/permissions/checkPermission";
-import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";

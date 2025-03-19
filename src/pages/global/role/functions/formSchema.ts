@@ -9,7 +9,7 @@ import type {
 } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/Toast";
-import { SYSTEM_ROLES } from "~/cypher/permissions/types";
+import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";

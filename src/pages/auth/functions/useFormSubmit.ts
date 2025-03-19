@@ -3,7 +3,7 @@ import type { Navigator } from "@solidjs/router";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/Toast";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 
 import { handleLoginRedirect } from "./handleLoginRedirect";
 

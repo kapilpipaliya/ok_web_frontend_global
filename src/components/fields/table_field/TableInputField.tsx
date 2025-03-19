@@ -13,14 +13,18 @@ import {
 } from "solid-js";
 
 import type { GenericComponentProps } from "~/components/fields/type/FieldType";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 
+import { useFormContext } from "~/components/form/context/FormContext";
 import { AddNewButton } from "~/features/grid/AddNewButton";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getDataVertex } from "~/features/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/entity/sortVertexesByPosition";
-import { IdAttr, useGraph, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import {
   addNewVertex,
   mergeVertexProperties,
@@ -28,14 +32,11 @@ import {
 } from "~/lib/graph/mutate/core/vertex";
 import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { STYLES } from "~/pages/settings/constants";
 
-import { insertNewRow } from "./insertNewRow";
-import { SortableRow } from "./SortableRow";
-import { useFormContext } from "~/components/form/context/FormContext";
-import { FormStoreObject } from "~/components/form/context/FormContext";
+import { insertNewRow } from "./functions/insertNewRow";
+import { SortableRow } from "./row/SortableRow";
 
 export function TableInputField(
   props: Readonly<
@@ -109,9 +110,15 @@ export function TableInputField(
       updatedRows.splice(dragToIndex()!, 0, draggedRow);
       setSortedVertexes(updatedRows);
       for (const [index, vertex] of updatedRows.entries()) {
-        mergeVertexProperties(formVertex().P.txnId!, vertex.id, graph, setGraph, {
-          pos: index + 1,
-        });
+        mergeVertexProperties(
+          formVertex().P.txnId!,
+          vertex.id,
+          graph,
+          setGraph,
+          {
+            pos: index + 1,
+          },
+        );
       }
     }
     setDragFromIndex(null);

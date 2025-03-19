@@ -2,6 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { klona } from "klona/json";
 
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -9,9 +10,9 @@ import type {
 
 import { useToast } from "~/components/styled/Toast";
 
-import type { GraphInterface, Vertex } from "../../graph";
+import type { Vertex } from "../../graph";
 
-import { generateNewVertexId } from "../../transaction/core/generateNewVertexId";
+import { generateNewVertexId } from "../core/generateNewVertexId";
 import { addNewVertex, newVertex } from "../core/vertex";
 import { newRow } from "./addNewRow";
 

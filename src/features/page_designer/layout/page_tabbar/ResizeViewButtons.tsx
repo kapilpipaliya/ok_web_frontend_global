@@ -2,9 +2,10 @@ import { toTitle } from "case-switcher-js";
 import { createEffect } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/graph";
 
 import { DIMENSIONS } from "~/components/styled/ResizableDivView";
-import { useGraph, type Vertex } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 export const ResizeViewButtons = (props: {

@@ -2,7 +2,8 @@ import { klona } from "klona";
 import { batch, untrack } from "solid-js";
 import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel";

@@ -2,8 +2,10 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { batch } from "solid-js";
 
+import type { GraphInterface } from "~/lib/graph/GraphContext";
+
 import { validateInput } from "~/features/page_designer/settings/properties/validations/validateInput";
-import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   addNewVertex,
   mergeVertexProperties,

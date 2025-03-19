@@ -6,11 +6,13 @@ import {
   useKeyedContext,
 } from "@corvu/utils/create/keyedContext";
 
-import type { GraphInterface } from "~/lib/graph/graph";
-
 import { createAppState } from "~/createAppState";
 import { GetInitialData } from "~/GetInitialData";
-import { type GlobalProperties, GraphContext } from "~/lib/graph/graph";
+import {
+  type GlobalProperties,
+  GraphContext,
+  type GraphInterface,
+} from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 

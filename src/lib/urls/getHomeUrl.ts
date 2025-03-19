@@ -1,4 +1,4 @@
-import { API } from "./api/endpoints";
+import { API } from "../api/endpoints";
 
 export type HomeUrlContext = "admin" | "default" | "system";
 

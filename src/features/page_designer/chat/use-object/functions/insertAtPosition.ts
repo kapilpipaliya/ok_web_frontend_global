@@ -2,15 +2,16 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
-import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { insertNewRow } from "~/components/fields/table_field/insertNewRow";
+import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
 import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/openInNewInternalTab";
 import { handleDropAtPosition } from "~/features/page_designer/functions/handleDropAtPosition";
 import { evalExpression } from "~/lib/expression_eval";
+import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import { generateNewVertexId } from "~/lib/graph/transaction/core/generateNewVertexId";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/steps/setPreventUndoAtOrBeforeIndex";
 
 export function insertAtPosition(

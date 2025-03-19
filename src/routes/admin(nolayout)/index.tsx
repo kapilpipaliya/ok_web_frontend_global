@@ -4,7 +4,7 @@ import { Link } from "@solidjs/meta";
 
 import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
-import { useGraph } from "~/lib/graph/graph";
+import { useGraph } from "~/lib/graph/GraphContext";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
