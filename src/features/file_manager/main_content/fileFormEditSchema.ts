@@ -127,7 +127,12 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
       );
 
       if (isSuccess) {
+        // options.removeTxnIdAndCreateNew(options.txnId);
+        // as we are creating new transaction, we need to revert to previous state
+        options.revertTransactionUpToIndex(options.txnId, -1);
+        options.ensureData();
         showSuccessToast("Item updated successfully");
+        options.dataContext.modalState[1]("showModal", false);
         fileManagerStore.gridStore?.[0].fetchTableData();
         onSuccess();
       } else {
@@ -138,7 +143,6 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
       showErrorToast("Failed to update item");
     } finally {
       options.dataContext.modalState[1]("isLoading", false);
-      options.dataContext.modalState[1]("showModal", false);
     }
   };
 
@@ -179,6 +183,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
+            options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
         }),

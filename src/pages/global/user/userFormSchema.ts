@@ -199,7 +199,10 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       if (response.error) {
         showErrorToast(response.error);
       } else {
-        options.removeTxnIdAndCreateNew(options.txnId);
+        // options.removeTxnIdAndCreateNew(options.txnId);
+        // as we are creating new transaction, we need to revert to previous state
+        options.revertTransactionUpToIndex(options.txnId, -1);
+        options.ensureData();
         showSuccessToast(
           formData.id.startsWith("-")
             ? "User invited successfully"

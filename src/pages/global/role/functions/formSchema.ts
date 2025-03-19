@@ -72,6 +72,7 @@ export const roleFormSchema = {
               props: (options: FunctionArgumentType) => ({
                 disabled:
                   !options.data?.id.startsWith("-") &&
+                  // TODO: fix, after rename to Admin, the field is disabled.
                   Object.values(SYSTEM_ROLES).includes(options.data?.P.key),
               }),
               validation: { required: true },
@@ -251,10 +252,6 @@ export const roleFormSchema = {
           }
         }
       },
-      onUnmount: () => {
-        // not needed here, doing on cancel click.
-        // options.revertTransactionUpToIndex(options.txnId, -1);
-      },
     };
   },
 };
@@ -296,6 +293,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
           response as MutationResult,
         );
         options.removeTxnIdAndCreateNew(options.txnId);
+        options.ensureData();
         showSuccessToast("Role created successfully");
         options.dataContext.modalState[1]("showModal", false);
         onSuccess();
@@ -346,6 +344,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
           onClick: () => {
             options.dataContext.modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
+            options.ensureData();
           },
           text: "Cancel",
         }),

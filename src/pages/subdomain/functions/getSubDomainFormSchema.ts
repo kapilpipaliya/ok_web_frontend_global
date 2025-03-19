@@ -55,6 +55,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         showErrorToast(response.error);
       } else {
         options.removeTxnIdAndCreateNew(options.txnId);
+        options.ensureData();
         showSuccessToast(
           formData.id.startsWith("-")
             ? "Subdomain created successfully"

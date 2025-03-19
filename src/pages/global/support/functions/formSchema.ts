@@ -404,6 +404,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         options.showErrorToast(response.error as string);
       } else {
         options.removeTxnIdAndCreateNew(options.txnId);
+        options.ensureData();
         onMutatDataGet(
           options.graph,
           options.setGraph,

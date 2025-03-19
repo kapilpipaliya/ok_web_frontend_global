@@ -191,9 +191,9 @@ export const getThemeFormSchema = (
 
       try {
         await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
+        // we not need to ensure data here, because clicking on Add new Theme will create a new form..
         // options.removeTxnIdAndCreateNew(options.txnId);
-        // as we are creating new transaction, we need to revert to previous state
-        options.revertTransactionUpToIndex(options.txnId, -1);
+        // options.ensureData();
         showSuccessToast("Theme Saved Successfully");
         options.dataContext.modalState[1]("showModal", false);
         onSuccess();

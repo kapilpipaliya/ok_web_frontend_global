@@ -124,7 +124,10 @@ export const getComponentFormSchema = (
       if (getErrorMessage(result)) {
         showErrorToast(getErrorMessage(result));
       } else {
-        options.removeTxnIdAndCreateNew(options.txnId);
+        // options.removeTxnIdAndCreateNew(options.txnId);
+        // as we are creating new transaction, we need to revert to previous state
+        options.revertTransactionUpToIndex(options.txnId, -1);
+        options.ensureData();
         showSuccessToast(`${label()} created successfully`);
         options.dataContext.modalState[1]("showModal", false);
         fileManagerStore.gridStore?.[0].fetchTableData();
