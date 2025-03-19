@@ -8,7 +8,7 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
 import type { Edge, Vertex } from "../../graph";
-import type { TransactionValue } from "../types/TransactionType";
+import type { InsertFnKey, TransactionValue } from "../types/TransactionType";
 
 import {
   getEdgeOldIdToNewIdMap,
@@ -18,6 +18,9 @@ import { updateEdgeIdsToNew } from "../../mutate/core/edge";
 import { updateVertexIdsToNew } from "../../mutate/core/vertex";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 
+type ResultStep = {
+  [key in InsertFnKey]?: Edge | Vertex;
+};
 export function commitTxn(
   txnId: number,
   graph: Store<GraphInterface>,
@@ -95,12 +98,6 @@ export function commitTxn(
         replaceEdge: txnDetail.replaceEdge
           ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
           : undefined,
-        replaceEdgeEnd: txnDetail.replaceEdgeEnd
-          ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
-          : undefined,
-        replaceEdgeStart: txnDetail.replaceEdgeStart
-          ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
-          : undefined,
       });
     });
 
@@ -128,12 +125,6 @@ export function commitTxn(
         replaceEdge: txnDetail.replaceEdge
           ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
           : undefined,
-        replaceEdgeEnd: txnDetail.replaceEdgeEnd
-          ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
-          : undefined,
-        replaceEdgeStart: txnDetail.replaceEdgeStart
-          ? updateEdgeIdsToNew(klona(txnDetail.data as Edge), graph)
-          : undefined,
       });
     });
 
@@ -154,13 +145,12 @@ export function commitTxn(
     return;
   }
 }
-
 // Helper function to merge steps that operate on the same entity
-function mergeStepsForSameEntities(steps: any[]): any[] {
+function mergeStepsForSameEntities(steps: ResultStep[]): ResultStep[] {
   const seenEntityIds = new Set<string>();
   const seenEdgeIds = new Set<string>();
   const edgesToDelete = new Set<string>();
-  const result: any[] = [];
+  const result: ResultStep[] = [];
 
   // First pass: process all steps
   for (const step of steps) {
@@ -170,7 +160,9 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
 
       // Check if we've seen this entity before
       const existingIndex = result.findIndex(
-        (s) => s.merge && s.merge.id === entityId,
+        (s) => 
+          (s.merge && s.merge.id === entityId) ||
+          (s.insert && s.insert.id === entityId)
       );
 
       if (existingIndex === -1) {
@@ -180,16 +172,66 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
       } else {
         // Merge with existing step
         const existingStep = result[existingIndex];
-        result[existingIndex] = {
-          ...existingStep,
-          merge: {
-            ...existingStep.merge,
-            P: {
-              ...(existingStep.merge.P || {}),
-              ...(step.merge.P || {}),
+        if (existingStep.insert) {
+          // If the existing step is an insert, merge its properties with the merge step
+          result[existingIndex] = {
+            ...existingStep,
+            insert: {
+              ...(existingStep.insert as Vertex),
+              P: {
+                ...(existingStep.insert!.P || {}),
+                ...(step.merge!.P || {}),
+              },
             },
-          },
-        };
+          };
+        } else {
+          // Otherwise merge with existing merge step
+          result[existingIndex] = {
+            ...existingStep,
+            merge: {
+              ...(existingStep.merge as Vertex),
+              P: {
+                ...(existingStep.merge!.P || {}),
+                ...(step.merge!.P || {}),
+              },
+            },
+          };
+        }
+      }
+    }
+    // Handle replace operations
+    else if (step.replace) {
+      const entityId = step.replace.id;
+      
+      // Check if we've seen this entity before
+      const existingIndex = result.findIndex(
+        (s) => 
+          (s.replace && s.replace.id === entityId) ||
+          (s.insert && s.insert.id === entityId)
+      );
+
+      if (existingIndex === -1) {
+        // First occurrence - add to result
+        result.push(step);
+        seenEntityIds.add(entityId);
+      } else {
+        // Replace with existing step
+        const existingStep = result[existingIndex];
+        if (existingStep.insert) {
+          // If the existing step is an insert, replace its properties
+          result[existingIndex] = {
+            ...existingStep,
+            insert: {
+              ...(existingStep.insert as Vertex),
+              P: {
+                ...(step.replace!.P || {}),
+              },
+            },
+          };
+        } else {
+          // Otherwise add the replace step
+          result[existingIndex] = step;
+        }
       }
     }
     // Handle insertEdge operations
@@ -221,7 +263,7 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
       // Otherwise, if the edge was just inserted in this transaction,
       // we can omit both the insert and delete operations
     }
-    // Handle edge modifications (replaceEdge, replaceEdgeStart, replaceEdgeEnd)
+    // Handle edge modifications (replaceEdge)
     else if (step.replaceEdge) {
       const operation = step.replaceEdge;
       const edgeId = operation.id;
@@ -245,7 +287,11 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
       } else {
         // Update based on which operation this is
         if (step.replaceEdge) {
-          result[existingIndex].P = step.replaceEdge.P;
+          if (result[existingIndex].insertEdge) {
+            result[existingIndex].insertEdge.P = step.replaceEdge.P;
+          } else if (result[existingIndex].replaceEdge) {
+            result[existingIndex].replaceEdge.P = step.replaceEdge.P;
+          }
         }
       }
     }

@@ -4,6 +4,7 @@ import type { Edge, EdgeMap, Id } from "~/lib/graph/graph";
 
 import { convertRelationshipToJson } from "~/cypher/conversion/convertNodeToJson";
 
+// deprecated
 export async function handleReplaceEdgeStart(
   replaceEdgeStart: Edge,
   tx: Transaction,
