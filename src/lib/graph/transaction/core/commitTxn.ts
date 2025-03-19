@@ -137,7 +137,11 @@ export function commitTxn(
     });
 
     if (stepsToCommit.length || reverseStepsToCommit.length) {
-      mutationArgs.transactions = [...reverseStepsToCommit, ...stepsToCommit];
+      // Merge steps operating on the same entity before returning
+      const allSteps = [...reverseStepsToCommit, ...stepsToCommit];
+      const mergedSteps = mergeStepsForSameEntities(allSteps);
+      
+      mutationArgs.transactions = mergedSteps;
       return mutationArgs;
     }
   } catch (error) {
@@ -150,6 +154,117 @@ export function commitTxn(
     // };
     return;
   }
+}
+
+// Helper function to merge steps that operate on the same entity
+function mergeStepsForSameEntities(steps: any[]): any[] {
+  const seenEntityIds = new Set<string>();
+  const seenEdgeIds = new Set<string>();
+  const edgesToDelete = new Set<string>();
+  const result: any[] = [];
+  
+  // First pass: process all steps
+  for (const step of steps) {
+    // Handle merge operations
+    if (step.merge) {
+      const entityId = step.merge.id;
+      
+      // Check if we've seen this entity before
+      const existingIndex = result.findIndex(
+        s => s.merge && s.merge.id === entityId
+      );
+      
+      if (existingIndex === -1) {
+        // First occurrence - add to result
+        result.push(step);
+        seenEntityIds.add(entityId);
+      } else {
+        // Merge with existing step
+        const existingStep = result[existingIndex];
+        result[existingIndex] = {
+          ...existingStep,
+          merge: {
+            ...existingStep.merge,
+            P: {
+              ...(existingStep.merge.P || {}),
+              ...(step.merge.P || {})
+            }
+          }
+        };
+      }
+    }
+    // Handle insertEdge operations
+    else if (step.insertEdge) {
+      const edgeId = step.insertEdge.id;
+      result.push(step);
+      seenEdgeIds.add(edgeId);
+    }
+    // Handle deleteEdge operations
+    else if (step.deleteEdge) {
+      const edgeId = step.deleteEdge.id;
+      edgesToDelete.add(edgeId);
+      
+      // Remove any previous operations for this edge ID
+      const filteredResult = result.filter(s => 
+        !(s.insertEdge && s.insertEdge.id === edgeId) &&
+        !(s.replaceEdge && s.replaceEdge.id === edgeId) &&
+        !(s.replaceEdgeStart && s.replaceEdgeStart.id === edgeId) &&
+        !(s.replaceEdgeEnd && s.replaceEdgeEnd.id === edgeId)
+      );
+      
+      result.length = 0;
+      result.push(...filteredResult);
+      
+      // Only add the delete operation if the edge wasn't just inserted in this transaction
+      const wasInserted = seenEdgeIds.has(edgeId);
+      if (!wasInserted) {
+        result.push(step);
+      }
+      // Otherwise, if the edge was just inserted in this transaction,
+      // we can omit both the insert and delete operations
+    }
+    // Handle edge modifications (replaceEdge, replaceEdgeStart, replaceEdgeEnd)
+    else if (step.replaceEdge || step.replaceEdgeStart || step.replaceEdgeEnd) {
+      const operation = step.replaceEdge || step.replaceEdgeStart || step.replaceEdgeEnd;
+      const edgeId = operation.id;
+      
+      // this will not happen, but lets keep it here for now.
+      if (edgesToDelete.has(edgeId)) {
+        // This edge is going to be deleted, so ignore modifications
+        continue;
+      }
+      
+      // Check if we've seen this edge before
+      const existingIndex = result.findIndex(
+        s => (s.insertEdge && s.insertEdge.id === edgeId) || 
+             (s.replaceEdge && s.replaceEdge.id === edgeId) ||
+             (s.replaceEdgeStart && s.replaceEdgeStart.id === edgeId) ||
+             (s.replaceEdgeEnd && s.replaceEdgeEnd.id === edgeId)
+      );
+      
+      if (existingIndex === -1) {
+        // First occurrence - add to result
+        result.push(step);
+      } else {
+        // Update based on which operation this is
+        if (step.replaceEdge) {
+          result[existingIndex].P = step.replaceEdge.P;
+          // assuming that insert vertex is done before insert edge.
+        } else if (step.replaceEdgeStart) {
+          result[existingIndex].S = step.replaceEdgeStart.S;
+        } else if (step.replaceEdgeEnd) {
+          result[existingIndex].E = step.replaceEdgeEnd.E;
+        }
+      }
+    }
+    // All other operations (not merge or edge related)
+    else {
+      // Non-merge, non-edge step - add as is
+      result.push(step);
+    }
+  }
+  
+  return result;
 }
 
 function validateTransaction(
@@ -167,3 +282,4 @@ function validateTransaction(
 
   return "";
 }
+
