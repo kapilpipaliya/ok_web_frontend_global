@@ -12,9 +12,7 @@ import {
 import {
   addNewEdge,
   deleteEdge,
-  replaceEdgeEnd,
   replaceEdgeProperties,
-  replaceEdgeStart,
   updateEdgeIdsToNew,
 } from "../../mutate/core/edge";
 import {
@@ -91,14 +89,6 @@ export function redoTxn(
 
       case "replaceEdge":
         replaceEdgeProperties(0, actualEdgeId, graph, setGraph, data.P);
-        break;
-
-      case "replaceEdgeEnd":
-        replaceEdgeEnd(0, actualEdgeId, graph, setGraph, (data as Edge).E);
-        break;
-
-      case "replaceEdgeStart":
-        replaceEdgeStart(0, actualEdgeId, graph, setGraph, (data as Edge).S);
         break;
 
       default:

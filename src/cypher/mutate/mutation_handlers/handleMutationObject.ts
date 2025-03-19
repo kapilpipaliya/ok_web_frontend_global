@@ -5,8 +5,6 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 import { handleDeleteEdge } from "./handlers/edge/handleDeleteEdge";
 import { handleInsertEdge } from "./handlers/edge/handleInsertEdge";
 import { handleReplaceEdge } from "./handlers/edge/handleReplaceEdge";
-import { handleReplaceEdgeEnd } from "./handlers/edge/handleReplaceEdgeEnd";
-import { handleReplaceEdgeStart } from "./handlers/edge/handleReplaceEdgeStart";
 import { handleDeleteVertex } from "./handlers/vertex/handleDeleteVertex";
 import { handleInsert } from "./handlers/vertex/handleInsert";
 import { handleMerge } from "./handlers/vertex/handleMerge";
@@ -79,26 +77,26 @@ export async function handleMutationObject(
       edges,
     );
   }
-  if (mutationObject.replaceEdgeStart) {
-    await handleReplaceEdgeStart(
-      mutationObject.replaceEdgeStart,
-      tx,
-      clientToServerVertexIdMap,
-      clientToServerEdgeIdMap,
-      txnResult,
-      edges,
-    );
-  }
-  if (mutationObject.replaceEdgeEnd) {
-    await handleReplaceEdgeEnd(
-      mutationObject.replaceEdgeEnd,
-      tx,
-      clientToServerVertexIdMap,
-      clientToServerEdgeIdMap,
-      txnResult,
-      edges,
-    );
-  }
+  // if (mutationObject.replaceEdgeStart) {
+  //   await handleReplaceEdgeStart(
+  //     mutationObject.replaceEdgeStart,
+  //     tx,
+  //     clientToServerVertexIdMap,
+  //     clientToServerEdgeIdMap,
+  //     txnResult,
+  //     edges,
+  //   );
+  // }
+  // if (mutationObject.replaceEdgeEnd) {
+  //   await handleReplaceEdgeEnd(
+  //     mutationObject.replaceEdgeEnd,
+  //     tx,
+  //     clientToServerVertexIdMap,
+  //     clientToServerEdgeIdMap,
+  //     txnResult,
+  //     edges,
+  //   );
+  // }
   if (mutationObject.deleteEdge) {
     await handleDeleteEdge(
       mutationObject.deleteEdge,

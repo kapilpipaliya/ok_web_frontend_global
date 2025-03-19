@@ -18,9 +18,7 @@ export interface MutationResult {
       | "insert"
       | "insertEdge"
       | "replace"
-      | "replaceEdge"
-      | "replaceEdgeEnd"
-      | "replaceEdgeStart"]?: any;
+      | "replaceEdge"]?: any;
   }[];
   error?: string;
   graph?: ServerResult["graph"];

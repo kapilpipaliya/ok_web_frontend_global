@@ -46,7 +46,7 @@ export function onMutatDataGet(
           showErrorToast,
         );
       }
-      // TODO: handle other cases for replace, replaceEdge, deleteEdge, replaceEdgeStart, replaceEdgeEnd
+      // TODO: handle other cases for replace, replaceEdge, deleteEdge,
     }
 
     /*if (isAllTxnProcessed(graph)) {

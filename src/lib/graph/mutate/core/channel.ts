@@ -6,9 +6,7 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import {
   addNewEdge,
   deleteEdge,
-  replaceEdgeEnd,
   replaceEdgeProperties,
-  replaceEdgeStart,
   updateEdgeId,
 } from "~/lib/graph/mutate/core/edge";
 import { updateEdge, updateVertex } from "~/lib/graph/mutate/core/setGraphData";
@@ -125,26 +123,6 @@ export function handleChannelMessage(
       graph,
       setGraph,
       data.replaceEdgeProperties.properties,
-      { skipPostMessage: id },
-    );
-  }
-  if (data.replaceEdgeStart) {
-    replaceEdgeStart(
-      data.replaceEdgeStart.txnId,
-      data.replaceEdgeStart.edgeId,
-      graph,
-      setGraph,
-      data.replaceEdgeStart.newStartVertexId,
-      { skipPostMessage: id },
-    );
-  }
-  if (data.replaceEdgeEnd) {
-    replaceEdgeEnd(
-      data.replaceEdgeEnd.txnId,
-      data.replaceEdgeEnd.edgeId,
-      graph,
-      setGraph,
-      data.replaceEdgeEnd.newEndVertexId,
       { skipPostMessage: id },
     );
   }

@@ -187,65 +187,6 @@ export function newEdge(
   };
 }
 
-// private
-export function replaceEdgeEnd(
-  txnId: number,
-  edgeId: Id,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  newEndVertexId: Id,
-  options?: { skipPostMessage?: string },
-): { error: boolean | string; txnDetailIndex?: number } {
-  return untrack(() => {
-    const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
-    const actualNewEndVertexId =
-      getVertexOldIdToNewIdMap(graph)[newEndVertexId] || newEndVertexId;
-
-    if (!graph.edges[actualEdgeId]) {
-      return { error: "Edge ID is not valid" };
-    }
-    const edge = updateEdgeIdsToNew(graph.edges[actualEdgeId], graph);
-    const oldEndVertexId = edge.E;
-    if (oldEndVertexId === actualNewEndVertexId) {
-      return { error: "" };
-    }
-    batch(() => {
-      setGraph("edges", actualEdgeId, "E", actualNewEndVertexId);
-      setGraph("vertexes", oldEndVertexId, "IN", edge.T, (v) => {
-        const filteredV = Array.isArray(v)
-          ? v.filter((e) => e !== actualEdgeId)
-          : v;
-        return filteredV.length ? filteredV : (undefined as unknown as Id[]);
-      });
-      setGraph("vertexes", actualNewEndVertexId, "IN", edge.T, (v) =>
-        Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
-      );
-    });
-    const data = updateEdgeIdsToNew(graph.edges[actualEdgeId], graph);
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        id: actualEdgeId,
-        originalData: klona(edge),
-        replaceEdgeEnd: "replaceEdgeEndFn",
-      },
-      graph,
-      setGraph,
-      options,
-    );
-    broadcastToAllChannels(
-      graph.broadcastChannels,
-      options?.skipPostMessage ?? "",
-      { replaceEdgeEnd: { edgeId, newEndVertexId, txnId } },
-    );
-    return {
-      error: false,
-      txnDetailIndex: getLastTxnIndex(txnId, graph),
-    };
-  });
-}
-
 export function replaceEdgeProperties(
   txnId: number,
   edgeId: Id,
@@ -279,65 +220,6 @@ export function replaceEdgeProperties(
       graph.broadcastChannels,
       options?.skipPostMessage ?? "",
       { replaceEdgeProperties: { edgeId, properties, txnId } },
-    );
-    return {
-      error: false,
-      txnDetailIndex: getLastTxnIndex(txnId, graph),
-    };
-  });
-}
-
-// private
-export function replaceEdgeStart(
-  txnId: number,
-  edgeId: Id,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  newStartVertexId: Id,
-  options?: { skipPostMessage?: string },
-): { error: boolean | string; txnDetailIndex?: number } {
-  return untrack(() => {
-    const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
-    const actualNewStartVertexId =
-      getVertexOldIdToNewIdMap(graph)[newStartVertexId] || newStartVertexId;
-
-    if (!graph.edges[actualEdgeId]) {
-      return { error: "Edge ID is not valid" };
-    }
-    const edge = updateEdgeIdsToNew(graph.edges[actualEdgeId], graph);
-    const oldStartVertexId = edge.S;
-    if (oldStartVertexId === actualNewStartVertexId) {
-      return { error: "" };
-    }
-    batch(() => {
-      setGraph("edges", actualEdgeId, "S", actualNewStartVertexId);
-      setGraph("vertexes", oldStartVertexId, "OUT", edge.T, (v) => {
-        const filteredV = Array.isArray(v)
-          ? v.filter((e) => e !== actualEdgeId)
-          : v;
-        return filteredV.length ? filteredV : (undefined as unknown as Id[]);
-      });
-      setGraph("vertexes", actualNewStartVertexId, "OUT", edge.T, (v) =>
-        Array.isArray(v) ? [...v, actualEdgeId] : [actualEdgeId],
-      );
-    });
-    const data = updateEdgeIdsToNew(graph.edges[actualEdgeId], graph);
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        id: actualEdgeId,
-        originalData: klona(edge),
-        replaceEdgeStart: "replaceEdgeStartFn",
-      },
-      graph,
-      setGraph,
-      options,
-    );
-    broadcastToAllChannels(
-      graph.broadcastChannels,
-      options?.skipPostMessage ?? "",
-      { replaceEdgeStart: { edgeId, newStartVertexId, txnId } },
     );
     return {
       error: false,

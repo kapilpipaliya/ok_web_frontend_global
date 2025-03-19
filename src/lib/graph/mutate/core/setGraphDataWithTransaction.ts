@@ -9,9 +9,7 @@ import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 import {
   addNewEdge,
   deleteEdge,
-  replaceEdgeEnd,
   replaceEdgeProperties,
-  replaceEdgeStart,
 } from "~/lib/graph/mutate/core/edge";
 import {
   addNewVertex,
@@ -123,12 +121,6 @@ export function updateEdgeWithTransaction(
       if (result.error) {
         return result;
       }
-    }
-    if (edge.S !== originalEdge.S) {
-      replaceEdgeStart(txnId, edgeId, graph, setGraph, edge.S, options);
-    }
-    if (edge.E !== originalEdge.E) {
-      replaceEdgeEnd(txnId, edgeId, graph, setGraph, edge.E, options);
     }
   } else {
     return addNewEdge(txnId, edge, graph, setGraph, options);

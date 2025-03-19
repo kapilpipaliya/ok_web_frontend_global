@@ -12,8 +12,7 @@ import {
 import {
   addNewEdge,
   deleteEdge,
-  replaceEdgeEnd,
-  replaceEdgeStart,
+  replaceEdgeProperties,
   updateEdgeIdsToNew,
 } from "../../mutate/core/edge";
 import {
@@ -102,29 +101,7 @@ export function undoTxn(
       case "replaceEdge":
         // Restore original edge properties
         // TODO: Fix this is not working
-        replaceEdgeStart(0, actualEdgeId, graph, setGraph, originalData);
-        break;
-
-      case "replaceEdgeEnd":
-        // Restore original edge end
-        replaceEdgeEnd(
-          0,
-          actualEdgeId,
-          graph,
-          setGraph,
-          (originalData as Edge).E,
-        );
-        break;
-
-      case "replaceEdgeStart":
-        // Restore original edge start
-        replaceEdgeStart(
-          0,
-          actualEdgeId,
-          graph,
-          setGraph,
-          (originalData as Edge).S,
-        );
+        replaceEdgeProperties(0, actualEdgeId, graph, setGraph, originalData);
         break;
 
       default:

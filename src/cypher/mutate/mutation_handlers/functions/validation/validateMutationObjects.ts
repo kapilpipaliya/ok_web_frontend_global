@@ -5,13 +5,7 @@ import { isProperNodeFormat } from "./isProperNodeFormat";
 
 export function validateMutationObjects(mutationObjects: any[]) {
   const mutationTypes = ["insert", "replace", "merge", "deleteVertex"];
-  const edgeMutationTypes = [
-    "insertEdge",
-    "replaceEdge",
-    "replaceEdgeStart",
-    "replaceEdgeEnd",
-    "deleteEdge",
-  ];
+  const edgeMutationTypes = ["insertEdge", "replaceEdge", "deleteEdge"];
 
   for (const mutationObject of mutationObjects) {
     for (const key of mutationTypes) {

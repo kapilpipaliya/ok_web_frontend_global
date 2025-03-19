@@ -140,9 +140,7 @@ export function commitTxn(
     if (stepsToCommit.length || reverseStepsToCommit.length) {
       // Merge steps operating on the same entity before returning
       const allSteps = [...reverseStepsToCommit, ...stepsToCommit];
-      const mergedSteps = mergeStepsForSameEntities(allSteps);
-
-      mutationArgs.transactions = mergedSteps;
+      mutationArgs.transactions = mergeStepsForSameEntities(allSteps);
       return mutationArgs;
     }
   } catch (error) {
@@ -209,9 +207,7 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
       const filteredResult = result.filter(
         (s) =>
           !(s.insertEdge && s.insertEdge.id === edgeId) &&
-          !(s.replaceEdge && s.replaceEdge.id === edgeId) &&
-          !(s.replaceEdgeStart && s.replaceEdgeStart.id === edgeId) &&
-          !(s.replaceEdgeEnd && s.replaceEdgeEnd.id === edgeId),
+          !(s.replaceEdge && s.replaceEdge.id === edgeId),
       );
 
       result.length = 0;
@@ -226,9 +222,8 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
       // we can omit both the insert and delete operations
     }
     // Handle edge modifications (replaceEdge, replaceEdgeStart, replaceEdgeEnd)
-    else if (step.replaceEdge || step.replaceEdgeStart || step.replaceEdgeEnd) {
-      const operation =
-        step.replaceEdge || step.replaceEdgeStart || step.replaceEdgeEnd;
+    else if (step.replaceEdge) {
+      const operation = step.replaceEdge;
       const edgeId = operation.id;
 
       // this will not happen, but lets keep it here for now.
@@ -241,9 +236,7 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
       const existingIndex = result.findIndex(
         (s) =>
           (s.insertEdge && s.insertEdge.id === edgeId) ||
-          (s.replaceEdge && s.replaceEdge.id === edgeId) ||
-          (s.replaceEdgeStart && s.replaceEdgeStart.id === edgeId) ||
-          (s.replaceEdgeEnd && s.replaceEdgeEnd.id === edgeId),
+          (s.replaceEdge && s.replaceEdge.id === edgeId),
       );
 
       if (existingIndex === -1) {
@@ -253,11 +246,6 @@ function mergeStepsForSameEntities(steps: any[]): any[] {
         // Update based on which operation this is
         if (step.replaceEdge) {
           result[existingIndex].P = step.replaceEdge.P;
-          // assuming that insert vertex is done before insert edge.
-        } else if (step.replaceEdgeStart) {
-          result[existingIndex].S = step.replaceEdgeStart.S;
-        } else if (step.replaceEdgeEnd) {
-          result[existingIndex].E = step.replaceEdgeEnd.E;
         }
       }
     }
