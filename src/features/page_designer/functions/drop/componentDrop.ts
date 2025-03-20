@@ -6,7 +6,7 @@ import { batch } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drop/createAttrCompMetaVertex";
 import { createAttrMetaVertex } from "~/features/page_designer/functions/drop/createAttrMetaVertex";
 import { processChildrenAttrs } from "~/features/page_designer/functions/drop/processChildrenAttrs";

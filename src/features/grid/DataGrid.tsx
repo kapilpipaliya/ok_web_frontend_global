@@ -18,10 +18,10 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
-import { CommonTable } from "~/components/styled/Table";
-import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
+import { CommonTable } from "~/components/styled/table/Table";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import {
   getConfiguredPermissions,
   hasPermissions,
@@ -171,7 +171,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       props.tableId !== "Form" && form === FormMetaData.Form;
     if (isDynamicForm) {
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-      const data = await fetchDataFromMG({
+      const data = await fetchDataFromDB({
         expression: `g:'Form[${props.tableId}]'`,
         [getGlobalStore(graph).P.url]: true,
         incoming,

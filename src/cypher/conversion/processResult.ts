@@ -7,13 +7,13 @@ import {
   convertRelationshipToJson,
 } from "~/cypher/conversion/convertNodeToJson";
 
-import type { ContextType } from "../types/ContextType";
+import type { EvalExpressionContext } from "../types/EvalExpressionContext";
 
 import { updateNodeRelations } from "./updateRelations";
 
 export function processResult(
   records: Record[],
-  context: ContextType,
+  context: EvalExpressionContext,
   nodeLabel: string | string[],
   typeLabel?: string,
 ) {

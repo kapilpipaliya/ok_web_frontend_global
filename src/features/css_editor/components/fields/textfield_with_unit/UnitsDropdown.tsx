@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createSignal, For, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 
 interface DropDownProps {
   isDropdownOpen: () => boolean;

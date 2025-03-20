@@ -1,7 +1,8 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDriver } from "~/cypher/core/driver";
-import { validateSuperUser } from "~/cypher/permissions/validateSuperUser";
+import { checkSuperUserAuthorization } from "~/cypher/permissions/isSystemAdminRole";
+import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
 // Important security notes:
@@ -9,9 +10,14 @@ import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 // The endpoint should only be accessible in development/controlled environments
 // Consider adding additional security measures like API keys or specific environment checks
 export async function GET({ request }: APIEvent) {
+  const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
     // Validate that the request is from a super user
-    const isValid = await validateSuperUser(request);
+    const isValid = await checkSuperUserAuthorization(
+      request,
+      subDomain,
+      dbSession,
+    );
     if (!isValid) {
       throw new APIError("Unauthorized access", 403);
     }

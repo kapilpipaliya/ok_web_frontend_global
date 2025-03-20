@@ -3,7 +3,7 @@ import type { Session } from "neo4j-driver";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
-import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
@@ -74,7 +74,7 @@ async function fetchAndSaveFormMetaData(
 ) {
   const form = FormMetaData[formName];
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-  const result = await fetchDataFromMG(
+  const result = await fetchDataFromDB(
     {
       expression: `g:'${formName}'`,
       incoming,

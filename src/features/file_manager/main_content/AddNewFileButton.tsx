@@ -1,7 +1,7 @@
 import type { Vertex } from "~/lib/graph/graph";
 
 import { FileUploader } from "~/components/styled/FileUploader";
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { uploadFile } from "~/lib/api/uploadFile";

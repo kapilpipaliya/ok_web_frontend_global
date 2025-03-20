@@ -4,7 +4,7 @@ import type { Session } from "neo4j-driver";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { getChildrenOrParentVertex } from "~/cypher/get/getChildrenOrParentVertex";
+import { getChildrenOrParentVertex } from "~/cypher/get/relation/getChildrenOrParentVertex";
 import { findOrCreateNodeAndUpdateProperties } from "~/cypher/mutate/sync/findOrCreateNodeAndUpdateProperties";
 
 import { globalCollections } from "./constants/globalCollections";

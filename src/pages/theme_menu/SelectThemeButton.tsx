@@ -1,7 +1,7 @@
 import { createSignal, Show } from "solid-js";
 
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 
 import { SelectThemeMenu } from "./SelectThemeMenu";

@@ -4,7 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/general/getApi";
 import { postAPI } from "~/lib/api/general/postApi";

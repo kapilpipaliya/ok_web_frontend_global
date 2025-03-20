@@ -5,7 +5,7 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { IconButton } from "~/components/styled/IconButton";
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";

@@ -28,7 +28,7 @@ import {
   TableHeadCell,
 } from "~/components/styled/SimpleTable";
 
-import { CardGrid } from "./CardGrid";
+import { CardGrid } from "../CardGrid";
 import { TableActions } from "./TableActions";
 
 type TableProps = {

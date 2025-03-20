@@ -6,7 +6,7 @@
 import { createSignal, type JSX, splitProps } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 
 interface Properties
   extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {

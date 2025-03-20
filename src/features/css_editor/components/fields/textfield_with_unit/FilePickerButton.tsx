@@ -9,7 +9,7 @@ import {
   useFormContext,
 } from "~/components/form/context/FormContext";
 import { IconButton } from "~/components/styled/IconButton";
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { useCssEditorProps } from "~/features/css_editor/context/CSSEditorPropsContext";
 import { useCssState } from "~/features/css_editor/context/CssStateContext";
 import { useRenderContext } from "~/features/css_editor/context/RenderContext";

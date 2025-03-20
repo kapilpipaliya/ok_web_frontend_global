@@ -10,7 +10,7 @@ import {
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import {
   type PageLayoutObject,
   useDesignerFormIdContext,

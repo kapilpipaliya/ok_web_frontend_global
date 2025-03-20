@@ -4,7 +4,7 @@ import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
 import { For } from "solid-js";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";

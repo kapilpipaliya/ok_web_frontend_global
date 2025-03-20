@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import {
   setGraphData,
@@ -20,7 +20,7 @@ export async function fetchAndSetGraphData(
   },
   options?: UpdateOptions,
 ) {
-  const result = await fetchDataFromMG(
+  const result = await fetchDataFromDB(
     { expression, [getGlobalStore(graph).P.url]: true },
     context,
   );

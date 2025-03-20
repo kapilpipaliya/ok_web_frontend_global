@@ -3,7 +3,7 @@ import { makeEventListener } from "@solid-primitives/event-listener";
 import { createSignal, For, type Setter, Show, splitProps } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 
 import type { SelectField } from "../../constants/FieldSchemaType";
 

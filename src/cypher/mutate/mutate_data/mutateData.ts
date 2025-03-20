@@ -2,7 +2,7 @@ import type { Transaction } from "neo4j-driver";
 
 import type { EdgeMap, Id, VertexMap } from "~/lib/graph/graph";
 
-import { mutateArgsValidation } from "~/cypher/mutate/mutation_handlers/functions/validation/mutateArgsValidation";
+import { mutateArgsValidation } from "~/cypher/mutate/mutate_data/functions/validation/mutateArgsValidation";
 
 import type { MutationArgs, MutationResult } from "../../types/MutationArgs";
 

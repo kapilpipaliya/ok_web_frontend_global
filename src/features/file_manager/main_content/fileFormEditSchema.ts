@@ -6,7 +6,7 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";

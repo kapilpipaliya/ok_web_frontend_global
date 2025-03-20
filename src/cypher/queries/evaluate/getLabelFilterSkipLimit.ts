@@ -1,6 +1,9 @@
-import type { ContextType } from "~/cypher/types/ContextType";
+import type { EvalExpressionContext } from "~/cypher/types/EvalExpressionContext";
 
-export function getLabelFilterSkipLimit(label: string, context: ContextType) {
+export function getLabelFilterSkipLimit(
+  label: string,
+  context: EvalExpressionContext,
+) {
   const nameMatch = label.match(/\[(.*?)\]/);
   let key = "";
   let filter = {};
@@ -10,7 +13,7 @@ export function getLabelFilterSkipLimit(label: string, context: ContextType) {
     key = nameMatch[1];
     label = label.replace(`[${key}]`, "");
     if (key.startsWith("$")) {
-      const contextData = context[key as keyof ContextType] ?? {};
+      const contextData = context[key as keyof EvalExpressionContext] ?? {};
       filter = contextData.filter;
       limit = contextData.limit;
       skip = contextData.skip;

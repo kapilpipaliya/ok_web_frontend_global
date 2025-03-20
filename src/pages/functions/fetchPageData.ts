@@ -5,7 +5,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormData } from "~/components/form/functions/getFormData";
 import { fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
-import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
@@ -89,7 +89,7 @@ export async function fetchFormMetaData(
   form = FormMetaData.Form;
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
-  const data = await fetchDataFromMG({
+  const data = await fetchDataFromDB({
     expression:
       expression ??
       (formId

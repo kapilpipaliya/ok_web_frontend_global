@@ -3,9 +3,9 @@ import type { Session, Transaction } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { checkRole } from "~/cypher/permissions/checkPermission";
+import { checkRole } from "~/cypher/permissions/isPermission";
+import { isSystemUser } from "~/cypher/permissions/isSystemUser";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
-import { validateNonSystemUser } from "~/cypher/permissions/validateNonSystemUser";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
@@ -35,12 +35,15 @@ export async function POST({ request }: APIEvent) {
 
     const { email, name, roles, username, uuid } = await request.json();
 
-    const userValidation = await validateNonSystemUser(dbSession, uuid);
-    if ("error" in userValidation) {
-      return userValidation;
+    const userValidation = await isSystemUser(dbSession, uuid);
+    if (userValidation.isSystemUser) {
+      return {
+        error: "Super Admin cannot update profile in subdomain",
+        status: 404,
+      };
     }
 
-    const oldUser = userValidation.user;
+    const oldUser = userValidation.user!;
     const oldRoles = await getUserRoles(dbSession, uuid);
 
     await validateUniqueFields(dbSession, uuid, oldUser, email, username);

@@ -6,7 +6,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { API } from "~/lib/api/endpoints";

@@ -17,9 +17,9 @@ import { evalExpression } from "~/lib/expression_eval";
 import { STYLES } from "~/pages/settings/constants";
 
 import { useZIndex, ZIndex } from "../fields/ZIndex";
-import { DropdownMenu } from "./DropdownMenu";
 import { IconButton } from "./IconButton";
-import { useToast } from "./Toast";
+import { DropdownMenu } from "./modal/DropdownMenu";
+import { useToast } from "./modal/Toast";
 
 export type Option =
   | string

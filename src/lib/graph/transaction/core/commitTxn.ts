@@ -80,19 +80,35 @@ export function commitTxn(
           ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
           : undefined,
         deleteVertex: txnDetail.insert
-          ? updateVertexIdsToNew(klona(txnDetail.originalData as Vertex), graph, true)
+          ? updateVertexIdsToNew(
+              klona(txnDetail.originalData as Vertex),
+              graph,
+              true,
+            )
           : undefined,
         insertEdge: txnDetail.deleteEdge
           ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
           : undefined,
         insertVertex: txnDetail.deleteVertex
-          ? updateVertexIdsToNew(klona(txnDetail.originalData as Vertex), graph, true)
+          ? updateVertexIdsToNew(
+              klona(txnDetail.originalData as Vertex),
+              graph,
+              true,
+            )
           : undefined,
         merge: txnDetail.merge
-          ? updateVertexIdsToNew(klona(txnDetail.originalData as Vertex), graph, true)
+          ? updateVertexIdsToNew(
+              klona(txnDetail.originalData as Vertex),
+              graph,
+              true,
+            )
           : undefined,
         replace: txnDetail.replace
-          ? updateVertexIdsToNew(klona(txnDetail.originalData as Vertex), graph, true)
+          ? updateVertexIdsToNew(
+              klona(txnDetail.originalData as Vertex),
+              graph,
+              true,
+            )
           : undefined,
         replaceEdge: txnDetail.replaceEdge
           ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
@@ -159,9 +175,9 @@ function mergeStepsForSameEntities(steps: ResultStep[]): ResultStep[] {
 
       // Check if we've seen this entity before
       const existingIndex = result.findIndex(
-        (s) => 
+        (s) =>
           (s.merge && s.merge.id === entityId) ||
-          (s.insert && s.insert.id === entityId)
+          (s.insert && s.insert.id === entityId),
       );
 
       if (existingIndex === -1) {
@@ -201,12 +217,12 @@ function mergeStepsForSameEntities(steps: ResultStep[]): ResultStep[] {
     // Handle replace operations
     else if (step.replace) {
       const entityId = step.replace.id;
-      
+
       // Check if we've seen this entity before
       const existingIndex = result.findIndex(
-        (s) => 
+        (s) =>
           (s.replace && s.replace.id === entityId) ||
-          (s.insert && s.insert.id === entityId)
+          (s.insert && s.insert.id === entityId),
       );
 
       if (existingIndex === -1) {

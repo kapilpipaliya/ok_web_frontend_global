@@ -6,15 +6,15 @@ import { createSignal, For, type JSX, Show } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { ChipDropDown } from "~/components/styled/Chip";
-import { CustomModal } from "~/components/styled/CustomModal";
-import { DialogWithButtons } from "~/components/styled/DeleteDialog";
 import { IconButton } from "~/components/styled/IconButton";
+import { CustomModal } from "~/components/styled/modal/CustomModal";
+import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
+import { useToast } from "~/components/styled/modal/Toast";
 import {
   Table,
   TableBodyCell,
   TableHeadCell,
 } from "~/components/styled/SimpleTable";
-import { useToast } from "~/components/styled/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 

@@ -329,10 +329,10 @@ https://github.com/forwardemail/forwardemail.net
 
 
 // Check for specific permissions
-const canCreateUser = await checkPermission(request, PERMISSIONS.CREATE_USER, dbSession);
+const canCreateUser = await isPermission(request, PERMISSIONS.CREATE_USER, dbSession);
 
 // Check for multiple permissions (any of them)
-const canManageUsers = await checkPermission(
+const canManageUsers = await isPermission(
   request, 
   [PERMISSIONS.CREATE_USER, PERMISSIONS.DELETE_USER], 
   dbSession

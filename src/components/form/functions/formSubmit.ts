@@ -4,7 +4,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { checkUniqueConstrains } from "~/cypher/permissions/checkUniqueConstrains";
+import { checkUniqueConstrains } from "~/cypher/mutate/validations/checkUniqueConstrains";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";

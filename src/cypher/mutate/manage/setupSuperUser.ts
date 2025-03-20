@@ -3,8 +3,8 @@ import type { Vertex } from "~/lib/graph/graph";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
+import { createDatabaseConstraints } from "~/cypher/mutate/signup/seed/createDatabaseConstraints";
 
-import { createDatabaseConstraints } from "../signup/seed/createRootFolder";
 import { signupAdmin } from "../signup/signupAdmin";
 import { getAllDatabases } from "./getAllDatabases";
 

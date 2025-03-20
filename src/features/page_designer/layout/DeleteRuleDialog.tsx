@@ -3,7 +3,7 @@ import { For, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-import { SimpleWithDismissButton } from "~/components/styled/SimpleModal";
+import { SimpleWithDismissButton } from "~/components/styled/modal/SimpleModal";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 

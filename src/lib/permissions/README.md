@@ -126,7 +126,7 @@ if (permissionResult.hasPermission) {
 If you need to directly validate URL access without the full route checking process, you can use the `validateUrlAccess` function:
 
 ```typescript
-import { validateUrlAccess } from "~/lib/permissions/checkPermission";
+import { validateUrlAccess } from "~/lib/permissions/isPermission";
 
 // Validate if a user has access to a specific URL path
 const result = validateUrlAccess(userWithPermissions, '/admin/dashboard', isSuperSubDomain);

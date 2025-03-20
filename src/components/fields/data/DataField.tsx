@@ -4,7 +4,7 @@ import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { getSelectionOptionsBase } from "~/cypher/get/getSelectionOptionsBase";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
@@ -39,7 +39,14 @@ export const DataField = (props: {
     if (props.data) {
       return null;
     }
-    return getSelectionOptionsBase([data()], props.expression);
+    return fetchDataFromDB(
+      { expression: props.expression },
+      {
+        nodes: {},
+        relationships: {},
+        vertexes: [data()],
+      },
+    );
   });
 
   createEffect(() => {

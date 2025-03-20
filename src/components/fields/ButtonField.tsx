@@ -31,7 +31,7 @@ import {
   type FormStoreObject,
   useFormContext,
 } from "../form/context/FormContext";
-import { useToast } from "../styled/Toast";
+import { useToast } from "../styled/modal/Toast";
 
 interface ButtonProps
   extends GenericComponentProps,

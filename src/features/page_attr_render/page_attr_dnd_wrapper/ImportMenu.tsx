@@ -4,7 +4,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";

@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-import { useToast } from "../styled/Toast";
+import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { formCancel } from "./functions/formCancel";
 import { formSubmit } from "./functions/formSubmit";

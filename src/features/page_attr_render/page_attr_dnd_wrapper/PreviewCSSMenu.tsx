@@ -5,7 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 

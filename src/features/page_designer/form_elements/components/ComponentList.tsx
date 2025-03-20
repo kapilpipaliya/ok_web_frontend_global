@@ -6,7 +6,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { createAppState } from "~/createAppState";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";

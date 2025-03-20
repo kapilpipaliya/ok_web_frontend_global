@@ -1,7 +1,7 @@
 import { autofocus } from "@solid-primitives/autofocus";
 import { createSignal } from "solid-js";
 
-import { CustomModal } from "~/components/styled/CustomModal";
+import { CustomModal } from "~/components/styled/modal/CustomModal";
 
 import { FormStatus } from "./FormStatus";
 // prevents from being tree-shaken by TS

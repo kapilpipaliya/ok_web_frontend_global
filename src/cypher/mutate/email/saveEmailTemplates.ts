@@ -1,7 +1,7 @@
 import type { Transaction } from "neo4j-driver";
 
 import { createAppState } from "~/createAppState";
-import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
+import { mutateData } from "~/cypher/mutate/mutate_data/mutateData";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";

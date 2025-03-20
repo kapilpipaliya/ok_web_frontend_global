@@ -4,8 +4,8 @@ import { reconcile } from "solid-js/store";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
-import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
+import { IframeHelpDialog } from "~/components/styled/modal/IframeHelpDialog";
 import { TextEditor } from "~/features/css_editor/CSSEditor/TextEditor";
 import { StyleEditor } from "~/features/css_editor/StyleEditor/StyleEditor";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";

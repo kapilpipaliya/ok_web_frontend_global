@@ -5,7 +5,7 @@ import { batch } from "solid-js";
 import type { MutationResult } from "~/cypher/types/MutationArgs";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { updateEdgeId } from "~/lib/graph/mutate/core/edge";
 import {
   mergeVertexProperties,

@@ -11,7 +11,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { SETTINGS_CONSTANTS, STYLES } from "~/pages/settings/constants";
 
-import { useZIndex } from "../fields/ZIndex";
+import { useZIndex } from "../../fields/ZIndex";
 
 interface CustomModalProps {
   bodyClass?: string;

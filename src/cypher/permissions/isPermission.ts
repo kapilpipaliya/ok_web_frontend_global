@@ -2,7 +2,32 @@ import type { Session } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-export async function checkPermission(
+export async function checkRole(
+  _request: Request,
+  role: string | string[],
+  dbSession: Session,
+  user?: Vertex,
+): Promise<boolean> {
+  if (!user?.id) {
+    return false;
+  }
+
+  const roles = Array.isArray(role) ? role : [role];
+
+  const result = await dbSession.run(
+    `MATCH (u:User)-[:UserRole]->(r:Role)
+     WHERE u.uuid = $uuid AND r.key IN $roles
+     RETURN count(r) > 0 as hasRole`,
+    {
+      roles,
+      uuid: user.P.uuid,
+    },
+  );
+
+  return result.records[0]?.get("hasRole");
+}
+
+export async function isPermission(
   _request: Request,
   permission: string | string[],
   dbSession: Session,
@@ -32,29 +57,4 @@ export async function checkPermission(
     result.records[0]?.get("allowedAccessLevels") || [];
 
   return { allowedAccessLevels, hasPermission };
-}
-
-export async function checkRole(
-  _request: Request,
-  role: string | string[],
-  dbSession: Session,
-  user?: Vertex,
-): Promise<boolean> {
-  if (!user?.id) {
-    return false;
-  }
-
-  const roles = Array.isArray(role) ? role : [role];
-
-  const result = await dbSession.run(
-    `MATCH (u:User)-[:UserRole]->(r:Role)
-     WHERE u.uuid = $uuid AND r.key IN $roles
-     RETURN count(r) > 0 as hasRole`,
-    {
-      roles,
-      uuid: user.P.uuid,
-    },
-  );
-
-  return result.records[0]?.get("hasRole");
 }

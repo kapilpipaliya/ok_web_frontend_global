@@ -4,12 +4,10 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { getDriver } from "~/cypher/core/driver";
 import { saveAllEmailTemplates } from "~/cypher/mutate/email/saveEmailTemplates";
 import { addAdminRoleToUser } from "~/cypher/mutate/signup/admin/addAdminRoleToUser";
+import { createDatabaseConstraints } from "~/cypher/mutate/signup/seed/createDatabaseConstraints";
 
 import { createDatabase } from "./database/createDatabase";
-import {
-  createDatabaseConstraints,
-  createRootFolder,
-} from "./seed/createRootFolder";
+import { createRootFolder } from "./seed/createRootFolder";
 import { insertComponents } from "./seed/insertComponents";
 import { createUserInUserDB } from "./user/createUserInDB";
 
@@ -53,8 +51,6 @@ export async function subdomainRegister(
 
     await createRootFolder(tx);
     await addAdminRoleToUser(tx, user.P.uuid);
-
-    // await insertDataTypes(tx);
 
     await insertComponents(tx);
 

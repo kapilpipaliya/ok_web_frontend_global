@@ -4,7 +4,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
-import { IframeHelpDialog } from "~/components/styled/IframeHelpDialog";
+import { IframeHelpDialog } from "~/components/styled/modal/IframeHelpDialog";
 import { FilePickerButton } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerButtonImageSrc";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";

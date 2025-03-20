@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 
-import { CustomModal } from "~/components/styled/CustomModal";
 import { IconButton } from "~/components/styled/IconButton";
+import { CustomModal } from "~/components/styled/modal/CustomModal";
 import {
   headerIconButtonClass,
   SETTINGS_CONSTANTS,

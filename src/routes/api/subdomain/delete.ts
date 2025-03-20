@@ -3,7 +3,7 @@ import type { Session } from "neo4j-driver";
 
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { checkRole } from "~/cypher/permissions/checkPermission";
+import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";

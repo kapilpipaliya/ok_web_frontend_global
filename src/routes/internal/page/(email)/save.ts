@@ -4,7 +4,7 @@ import { getQuery } from "vinxi/http";
 
 import { createAppState } from "~/createAppState";
 import { getEmailTemplateSchema } from "~/cypher/mutate/email/saveEmailTemplates";
-import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
+import { mutateData } from "~/cypher/mutate/mutate_data/mutateData";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";

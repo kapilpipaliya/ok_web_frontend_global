@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
@@ -21,7 +21,7 @@ export async function loadPageData(
     return;
   }
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-  const result = await fetchDataFromMG({
+  const result = await fetchDataFromDB({
     expression: `id:'${fromVertex.id}'`,
     [getGlobalStore(graph).P.url]: true,
     incoming,

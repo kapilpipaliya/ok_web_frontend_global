@@ -1,7 +1,7 @@
 import { createSignal, type JSX, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { getProfileImageUrl } from "~/lib/graph/get/sync/user/getProfileImageUrl";
 import { useGraph } from "~/lib/graph/GraphContext";
 

@@ -2,8 +2,8 @@ import { createEffect, createSignal, For, onCleanup, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { useToast } from "~/components/styled/Toast";
-import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
+import { useToast } from "~/components/styled/modal/Toast";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { syncNodesAPICall } from "~/cypher/mutate/sync";
 import { profileImage } from "~/pages/settings/constants";
 
@@ -16,7 +16,7 @@ export function SyncData() {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [selectedUsers, setSelectedUsers] = createSignal([] as Vertex[]);
 
-  fetchDataFromMG({
+  fetchDataFromDB({
     expression: `g:'User'`,
   }).then((res: any) => {
     setUsers(res.result || []);

@@ -5,14 +5,14 @@ import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { evalExpressionAsync } from "~/lib/expression_eval";
 
-import type { ContextType } from "../types/ContextType";
+import type { EvalExpressionContext } from "../types/EvalExpressionContext";
 import type { NestedExpression } from "../types/NestedExpression";
 
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 
-export async function fetchDataFromMG(
+export async function fetchDataFromDB(
   expression: NestedExpression,
-  context: ContextType & { adminui?: boolean } = {
+  context: EvalExpressionContext & { adminui?: boolean } = {
     nodes: {} as { [key: string]: Vertex },
     relationships: {} as { [key: string]: Edge },
     vertexes: undefined as any,
@@ -21,7 +21,7 @@ export async function fetchDataFromMG(
 ): Promise<ServerResult> {
   "use server";
   let dbSession: Session;
-  let _subDomain = "";
+  let subDomain = "";
   // @ts-expect-error ignore
   if (expression.adminui) {
     context.adminui = true;
@@ -30,7 +30,7 @@ export async function fetchDataFromMG(
   if (context.dbSession) {
     dbSession = context.dbSession;
   } else {
-    ({ _subDomain, dbSession } = await getDBSessionForSubdomain(
+    ({ dbSession, subDomain } = await getDBSessionForSubdomain(
       context.adminui
         ? ({ url: "http://localhost/?adminui=true" } as Request)
         : undefined,
@@ -64,7 +64,7 @@ export async function fetchDataFromMG(
     };
   } catch (error: any) {
     console.error(
-      "Error in fetchDataFromMG:",
+      "Error in fetchDataFromDB:",
       expression.expression,
       error,
       error.cause,
@@ -76,18 +76,18 @@ export async function fetchDataFromMG(
 async function processIncomingOutgoingExpressions(
   expression: NestedExpression,
   mainResult: Vertex[],
-  context: ContextType,
+  context: EvalExpressionContext,
 ) {
   if (expression.incoming && mainResult && mainResult.length > 0) {
     for (const exp of expression.incoming) {
       context.vertexes = [...mainResult];
-      await fetchDataFromMG(exp, context);
+      await fetchDataFromDB(exp, context);
     }
   }
   if (expression.outgoing && mainResult && mainResult.length > 0) {
     for (const exp of expression.outgoing) {
       context.vertexes = [...mainResult];
-      await fetchDataFromMG(exp, context);
+      await fetchDataFromDB(exp, context);
     }
   }
 }

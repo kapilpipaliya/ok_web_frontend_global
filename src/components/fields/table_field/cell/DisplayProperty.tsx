@@ -13,7 +13,7 @@ import {
 } from "solid-js";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { getSelectionOptionsBase } from "~/cypher/get/getSelectionOptionsBase";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { evalExpression } from "~/lib/expression_eval";
@@ -84,9 +84,13 @@ export function DisplayProperty(
             });
             let componentNameNew = "";
             if (formVertex()?.P.txnId) {
-              const res = await getSelectionOptionsBase(
-                [props.joinVertex],
-                componentNameValue,
+              const res = await fetchDataFromDB(
+                { expression: componentNameValue },
+                {
+                  nodes: {},
+                  relationships: {},
+                  vertexes: [props.joinVertex],
+                },
               );
               if (isValidResponse(res) && typeof res.result === "string") {
                 componentNameNew = res.result;

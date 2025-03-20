@@ -2,7 +2,7 @@ import { type Accessor, For, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { IconButton } from "./IconButton";
+import { IconButton } from "../IconButton";
 
 export function TableActions(
   props: Readonly<{

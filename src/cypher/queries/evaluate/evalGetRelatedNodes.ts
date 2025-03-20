@@ -2,7 +2,7 @@ import type { Session, Transaction } from "neo4j-driver";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import type { ContextType } from "../../types/ContextType";
+import type { EvalExpressionContext } from "../../types/EvalExpressionContext";
 
 import { processResult } from "../../conversion/processResult";
 import { getDBSessionForSubdomain } from "../../session/getSessionForSubdomain";
@@ -12,7 +12,7 @@ import { mongoToCypher } from "./mongoToCypher";
 export async function evalGetRelatedNodes(
   vertexes: Vertex[],
   edgeType: string,
-  context: ContextType,
+  context: EvalExpressionContext,
   relationType: "child" | "g" | "id" | "parent",
 ) {
   if (
@@ -62,7 +62,7 @@ function buildQuery(
   edgeType: string,
   vertexes: Vertex[],
   relationType: "child" | "g" | "id" | "parent",
-  context: ContextType,
+  context: EvalExpressionContext,
 ) {
   const ids = vertexes.map((v) => v.id);
   let query = "";
@@ -161,7 +161,10 @@ RETURN n`;
   return { params, query };
 }
 
-async function closeSession(dbSession: null | Session, context: ContextType) {
+async function closeSession(
+  dbSession: null | Session,
+  context: EvalExpressionContext,
+) {
   if (!context.dbSession && dbSession) {
     await dbSession.close();
   }
@@ -171,7 +174,7 @@ function getEdgeType(edgeType: string, vertexes: Vertex[]) {
   return edgeType.replaceAll("$0", vertexes[0].L[0]);
 }
 
-async function getSession(context: ContextType) {
+async function getSession(context: EvalExpressionContext) {
   if (context.tx) {
     return null;
   }

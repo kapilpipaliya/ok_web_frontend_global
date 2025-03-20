@@ -5,7 +5,7 @@ import { klona } from "klona/json";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { getToEdge } from "../../get/sync/edge/getToEdge";

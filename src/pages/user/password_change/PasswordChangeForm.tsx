@@ -5,7 +5,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { postAPI } from "~/lib/api/general/postApi";

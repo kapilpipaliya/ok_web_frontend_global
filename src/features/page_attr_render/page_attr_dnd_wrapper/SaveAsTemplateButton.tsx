@@ -2,8 +2,8 @@ import { createSignal, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";

@@ -2,9 +2,9 @@ import type { Message } from "ai";
 
 import { createSignal, For, type JSX, Match, Show, Switch } from "solid-js";
 
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
-import { TooltipWrapper } from "~/components/styled/TooltipWrapper";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
+import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
 import { STYLES } from "~/pages/settings/constants";
 
 interface ChatInputProps {

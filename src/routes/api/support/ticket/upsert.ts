@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { mutateData } from "~/cypher/mutate/mutation_handlers/mutateData";
-import { checkRole } from "~/cypher/permissions/checkPermission";
+import { mutateData } from "~/cypher/mutate/mutate_data/mutateData";
+import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";

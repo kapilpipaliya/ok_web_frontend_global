@@ -3,7 +3,7 @@ import { createSelector, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { DeleteButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/DeleteButton";
 import { DuplicateButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/DuplicateButton";
 import { ImportHtmlButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/ImportHtmlButton";

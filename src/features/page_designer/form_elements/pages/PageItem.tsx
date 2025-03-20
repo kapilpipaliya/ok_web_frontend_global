@@ -7,8 +7,8 @@ import { createSignal, onCleanup, Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/openInNewInternalTab";
 import { onClickAddComponent } from "~/features/page_designer/functions/onClickAddComponent";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";

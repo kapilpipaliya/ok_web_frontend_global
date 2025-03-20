@@ -7,7 +7,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";

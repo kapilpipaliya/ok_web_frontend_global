@@ -8,7 +8,7 @@ import {
   useFormContext,
 } from "~/components/form/context/FormContext";
 import { IconButton } from "~/components/styled/IconButton";
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";

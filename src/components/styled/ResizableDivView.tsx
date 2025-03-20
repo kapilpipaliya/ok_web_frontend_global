@@ -15,8 +15,8 @@ import { STYLES } from "~/pages/settings/constants";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 
+import { useToast } from "./modal/Toast";
 import { ResizeOverlay } from "./ResizeOverlay";
-import { useToast } from "./Toast";
 
 export const DIMENSIONS = {
   desktop: {

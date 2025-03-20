@@ -3,7 +3,7 @@ import { type JSX, Show, splitProps } from "solid-js";
 
 import { STYLES } from "~/pages/settings/constants";
 
-import { TooltipWrapper } from "./TooltipWrapper";
+import { TooltipWrapper } from "./modal/TooltipWrapper";
 
 export interface IconButtonProps
   extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {

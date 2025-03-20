@@ -6,7 +6,7 @@ import type {
 } from "~/features/css_editor/constants/FieldSchemaType";
 
 import { ZIndex } from "~/components/fields/ZIndex";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 
 interface SuggestionsDropdownProps {
   isDropdownOpen: () => boolean;

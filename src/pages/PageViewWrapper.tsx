@@ -30,7 +30,7 @@ import {
   getInitialFormStore,
 } from "~/components/form/context/FormContext";
 import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
-import { DialogWithButtons } from "~/components/styled/DeleteDialog";
+import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
 import { PreviewPage } from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { PageView } from "~/features/page_attr_render/PageView";
@@ -285,7 +285,7 @@ export function PageViewWrapper(
 
     const idLocal = constants.dataId === "new" ? undefined : constants.dataId;
 
-    // function checkPermission(action: string) {
+    // function isPermission(action: string) {
     //   const hasPermission = (
     //     isNoPermissionCheck ||
     //     (action === "insert" &&
@@ -298,10 +298,10 @@ export function PageViewWrapper(
     //   return hasPermission;
     // }
     // const permissions = {
-    //   // delete: checkPermission("delete"),
-    //   edit: checkPermission("edit"),
-    //   insert: checkPermission("insert"),
-    //   view: checkPermission("view"),
+    //   // delete: isPermission("delete"),
+    //   edit: isPermission("edit"),
+    //   insert: isPermission("insert"),
+    //   view: isPermission("view"),
     // };
     // console.log("Permissions determined:", permissions);
 

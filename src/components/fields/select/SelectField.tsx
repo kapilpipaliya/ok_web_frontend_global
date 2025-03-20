@@ -13,7 +13,7 @@ import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
-import { getSelectionOptionsBase } from "~/cypher/get/getSelectionOptionsBase";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
@@ -142,7 +142,14 @@ export function SelectField(
         setLoading(true);
       });
 
-      const res = await getSelectionOptionsBase([data()], collection);
+      const res = await fetchDataFromDB(
+        { expression: collection },
+        {
+          nodes: {},
+          relationships: {},
+          vertexes: [data()],
+        },
+      );
       if (isValidResponse(res)) {
         parsedOptions = res.result || [];
       } else {

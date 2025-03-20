@@ -61,7 +61,7 @@ import type { FunctionArgumentType } from "./type/FieldSchemaType";
 
 import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
-import { useToast } from "../styled/Toast";
+import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 
@@ -691,10 +691,10 @@ export function DynamicComponent(
                 isDisabledByPermissions() ??
                 props.meta.P.disabled)
           }
-          isNoPermissionCheck={isNoPermissionCheck()}
-          isRealTime={props.isRealTime}
-          isTableInside={props.isTableInside}
-          isViewMode={isViewMode()}
+          // isNoPermissionCheck={isNoPermissionCheck()}
+          // isRealTime={props.isRealTime}
+          // isTableInside={props.isTableInside}
+          // isViewMode={isViewMode()}
           onChange={onChange}
           props={null}
           readOnly={isReadOnly()}

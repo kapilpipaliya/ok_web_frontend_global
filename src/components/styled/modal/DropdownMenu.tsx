@@ -7,7 +7,7 @@ import { Portal } from "solid-js/web";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
-import { useZIndex } from "../fields/ZIndex";
+import { useZIndex } from "../../fields/ZIndex";
 
 export function DropdownMenu(
   props: JSX.HTMLAttributes<HTMLDivElement> & {

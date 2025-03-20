@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { fetchDataFromMG } from "~/cypher/get/fetchDataFromMG";
-import { checkRole } from "~/cypher/permissions/checkPermission";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
+import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
@@ -38,7 +38,7 @@ export async function GET({ request }: APIEvent) {
       userFormSchema.attributes!,
     );
 
-    const data = await fetchDataFromMG({
+    const data = await fetchDataFromDB({
       expression: `g:'User'`,
       incoming,
       outgoing,

@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { useNavigate } from "@solidjs/router";
 
-import { useToast } from "~/components/styled/Toast";
+import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";

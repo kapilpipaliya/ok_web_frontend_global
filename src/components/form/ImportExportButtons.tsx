@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 
 import { IconButton } from "~/components/styled/IconButton";
 
+// deprecated, not used function
 export function ImportExportButtons(
   props: Readonly<{ setPopup: (value: boolean) => void }>,
 ) {

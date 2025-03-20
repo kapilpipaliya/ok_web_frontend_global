@@ -8,8 +8,8 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { getSubdomainsForAccount } from "~/cypher/permissions/getSubdomainsForAccount";
-import { validateNonSystemUser } from "~/cypher/permissions/validateNonSystemUser";
+import { isSystemUser } from "~/cypher/permissions/isSystemUser";
+import { getSubdomainsForAccount } from "~/cypher/session/getSubdomainsForAccount";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import { validateUniqueFields } from "~/routes/api/auth/(profile)/functions/validateField";
 import { updateSession } from "~/server/auth/session/updateSession";
@@ -29,15 +29,15 @@ export async function updateProfile(
 ): Promise<ServerResult | { error: string; status: number }> {
   const { email, username } = payload;
 
-  const userValidation = await validateNonSystemUser(
-    dbSession,
-    currentUser.P.uuid,
-  );
-  if ("error" in userValidation) {
-    return userValidation;
+  const isSystemUserResult = await isSystemUser(dbSession, currentUser.P.uuid);
+  if (isSystemUserResult.isSystemUser) {
+    return {
+      error: "Super Admin cannot update profile in subdomain",
+      status: 404,
+    };
   }
 
-  const oldUser = userValidation.user;
+  const oldUser = isSystemUserResult.user!;
   const isEmailChanged = !!email && email !== oldUser.P.email;
   const isUsernameChanged = !!username && username !== oldUser.P.username;
 

@@ -5,9 +5,9 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
-import { DropdownMenu } from "~/components/styled/DropdownMenu";
 import { IconButton } from "~/components/styled/IconButton";
-import { useToast } from "~/components/styled/Toast";
+import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
+import { useToast } from "~/components/styled/modal/Toast";
 import { QuickEditModal } from "~/features/grid/QuickEditModal";
 import { CommonAddComponent } from "~/features/page_designer/settings/variants/header/CommonAddComponent";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";

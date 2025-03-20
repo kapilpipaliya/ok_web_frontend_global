@@ -1,8 +1,8 @@
 import { createSignal, Show } from "solid-js";
 
-import { CustomModal } from "~/components/styled/CustomModal";
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { IconButton } from "~/components/styled/IconButton";
+import { CustomModal } from "~/components/styled/modal/CustomModal";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 interface IframeHelpDialogProps {
