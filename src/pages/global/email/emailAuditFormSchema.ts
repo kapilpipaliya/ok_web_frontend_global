@@ -234,19 +234,19 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
   const modalFooterSchema = {
     as: "div",
     attributes: [
-      {
-        as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
-        componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
-          disabled: options.dataContext.modalState[0]?.isLoading,
-          onClick: () => handleSave(options),
-          text: options.dataContext.modalState[0]?.isLoading
-            ? "Saving..."
-            : "Save",
-        }),
-        type: "button",
-      },
+      // {
+      //   as: "button",
+      //   class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+      //   componentName: "Html",
+      //   props: (options: FunctionArgumentType) => ({
+      //     disabled: options.dataContext.modalState[0]?.isLoading,
+      //     onClick: () => handleSave(options),
+      //     text: options.dataContext.modalState[0]?.isLoading
+      //       ? "Saving..."
+      //       : "Save",
+      //   }),
+      //   type: "button",
+      // },
       {
         as: "button",
         class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
