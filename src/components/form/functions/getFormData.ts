@@ -9,15 +9,28 @@ import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getEdgesFromGraph } from "~/lib/graph/get/sync/edge/getEdgesFromGraph";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
+import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
+import { NestedExpression } from "~/cypher/types/NestedExpression";
 
 export const getFormData = async (
   graph: Store<GraphInterface>,
-  id: Id,
+  metaResult: {
+    data?: ServerResult;
+    form?: IFormMetaData;
+  },
+  dataId: Id,
 ): Promise<{ data?: ServerResult; error: string }> => {
   try {
-    const { incoming, outgoing } = getEdgesFromGraph(graph, id);
+    let incoming: NestedExpression[] = [];
+    let outgoing: NestedExpression[] = [];
+    if (metaResult.form) {
+      ({ incoming, outgoing } = getEdgesFromRowsAttr(metaResult.form.attributes));
+    } else if (metaResult.data) {
+      ({ incoming, outgoing } = getEdgesFromGraph(metaResult.data.graph as GraphInterface, metaResult.data.result[0].id));
+    }
     const result = await fetchDataFromDB({
-      expression: `id:'${id}'`,
+      expression: `id:'${dataId}'`,
       [getGlobalStore(graph).P.url]: true,
       incoming,
       outgoing,

@@ -312,6 +312,7 @@ export function PageViewWrapper(
     if (idLocal && !constants.getFormData) {
       const dataResult = await fetchFormData(
         graph,
+        metaResult,
         constants.formDataId,
         idLocal,
         isNoPermissionCheck,

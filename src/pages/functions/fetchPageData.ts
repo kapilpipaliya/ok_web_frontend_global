@@ -1,7 +1,7 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Id } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormData } from "~/components/form/functions/getFormData";
 import { fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
@@ -26,6 +26,10 @@ export interface FetchFormMetaDataResult {
 
 export async function fetchFormData(
   graph: GraphInterface,
+  metaResult: {
+    data?: ServerResult;
+    form?: IFormMetaData;
+  },
   // getFormDataFn?: () => Promise<ServerResult>,
   formDataId?: Id,
   id?: Id,
@@ -46,7 +50,11 @@ export async function fetchFormData(
   }
 
   try {
-    const formDataResult = await getFormData(graph, id);
+    const formDataResult = await getFormData(
+      graph,
+      metaResult,
+      id,
+    );
 
     if (
       formDataResult.error ||
