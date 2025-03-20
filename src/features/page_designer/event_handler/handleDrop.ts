@@ -5,10 +5,10 @@ import type { PageLayoutObject } from "~/features/page_designer/context/LayoutCo
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { handleDropAtPosition } from "~/features/page_designer/functions/handleDropAtPosition";
-import { loadPageData } from "~/features/page_designer/functions/loadPageData";
+import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/handleDropAtPosition";
+import { loadPageData } from "~/features/page_designer/functions/utils/loadPageData";
 
-import { PageDesignerLabels } from "../functions/PageDesignerLabels";
+import { PageDesignerLabels } from "../functions/utils/PageDesignerLabels";
 import { onLayoutItemClick } from "./onLayoutItemClick";
 
 export async function handleDrop(

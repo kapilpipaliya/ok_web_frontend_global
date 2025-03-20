@@ -7,8 +7,8 @@ import AcornJSX from "acorn-jsx";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { componentDrop } from "~/features/page_designer/functions/drop/componentDrop";
-import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPropertyValueGlobal";
+import { componentDrop } from "~/features/page_designer/functions/drag_drop/componentDrop";
+import { setPropertyValueGlobal } from "~/features/page_designer/functions/utils/setPropertyValueGlobal";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
 import {

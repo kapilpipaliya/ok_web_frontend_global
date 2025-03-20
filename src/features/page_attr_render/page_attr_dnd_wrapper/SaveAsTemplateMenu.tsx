@@ -10,7 +10,7 @@ import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useToast } from "~/components/styled/modal/Toast";
 import { checkUniqueConstrains } from "~/cypher/mutate/validations/checkUniqueConstrains";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { cloneLayoutAndChildren } from "~/features/page_designer/functions/cloneLayoutAndChildren";
+import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layout/cloneLayoutAndChildren";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { useGraph } from "~/lib/graph/GraphContext";

@@ -14,7 +14,7 @@ import {
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
-import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
+import { getComponentLabel } from "~/features/page_designer/functions/component/getComponentLabel";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { evalExpression } from "~/lib/expression_eval";
 import { getStringComponent } from "~/lib/graph/get/sync/format/getStringComponent";

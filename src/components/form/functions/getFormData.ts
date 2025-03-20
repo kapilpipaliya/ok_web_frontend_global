@@ -1,17 +1,17 @@
 import type { Store } from "solid-js/store";
 
+import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Id } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getEdgesFromGraph } from "~/lib/graph/get/sync/edge/getEdgesFromGraph";
-import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
-import { NestedExpression } from "~/cypher/types/NestedExpression";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 
 export const getFormData = async (
   graph: Store<GraphInterface>,
@@ -25,9 +25,14 @@ export const getFormData = async (
     let incoming: NestedExpression[] = [];
     let outgoing: NestedExpression[] = [];
     if (metaResult.form) {
-      ({ incoming, outgoing } = getEdgesFromRowsAttr(metaResult.form.attributes));
+      ({ incoming, outgoing } = getEdgesFromRowsAttr(
+        metaResult.form.attributes,
+      ));
     } else if (metaResult.data) {
-      ({ incoming, outgoing } = getEdgesFromGraph(metaResult.data.graph as GraphInterface, metaResult.data.result[0].id));
+      ({ incoming, outgoing } = getEdgesFromGraph(
+        metaResult.data.graph as GraphInterface,
+        metaResult.data.result[0].id,
+      ));
     }
     const result = await fetchDataFromDB({
       expression: `id:'${dataId}'`,

@@ -3,15 +3,15 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { handlePageDrag } from "~/features/page_designer/functions/handlePageDrag";
-import { handleParentChange } from "~/features/page_designer/functions/handleParentChange";
-import { sortChildren } from "~/features/page_designer/functions/sortChildren";
-import { validateDragOver } from "~/features/page_designer/functions/validateDragOver";
+import { handlePageDrag } from "~/features/page_designer/functions/drag_drop/handlePageDrag";
+import { validateDragOver } from "~/features/page_designer/functions/drag_drop/validateDragOver";
+import { handleParentChange } from "~/features/page_designer/functions/layout/handleParentChange";
+import { sortChildren } from "~/features/page_designer/functions/layout/sortChildren";
 import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
-import { componentDrop } from "./drop/componentDrop";
-import { PageDesignerLabels } from "./PageDesignerLabels";
+import { PageDesignerLabels } from "../utils/PageDesignerLabels";
+import { componentDrop } from "./componentDrop";
 
 export async function handleDropAtPosition(
   graph: Store<GraphInterface>,

@@ -3,7 +3,7 @@ import { Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPropertyValueGlobal";
+import { setPropertyValueGlobal } from "~/features/page_designer/functions/utils/setPropertyValueGlobal";
 import { FunctionEditor } from "~/features/page_designer/settings/properties/FunctionEditor";
 import { JsonEditorFieldComponent } from "~/features/page_designer/settings/properties/JsonEditorField";
 import { evalExpression } from "~/lib/expression_eval";

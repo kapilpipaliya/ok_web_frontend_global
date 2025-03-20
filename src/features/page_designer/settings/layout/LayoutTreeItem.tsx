@@ -16,7 +16,7 @@ import { handleDragStart } from "~/features/page_designer/event_handler/handleDr
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
-import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/getDnDBoxShadowArgs";
+import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/getDnDBoxShadowArgs";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
@@ -26,7 +26,7 @@ import {
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { handleDragOver } from "../../event_handler/handleDragOver";
-import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
+import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { AttrConfigIcons } from "./AttrConfigIcons";
 import { HideShowIcon } from "./HideShowIcon";
 import { TreeItemContainer } from "./TreeItemContainer";

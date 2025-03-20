@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { createContext, useContext } from "solid-js";
 
-import type { IDToRuleMap } from "~/features/page_designer/functions/generateFormMetaAttributes";
+import type { IDToRuleMap } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
 import type { Id } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 

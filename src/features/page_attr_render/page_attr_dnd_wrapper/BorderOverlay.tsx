@@ -22,8 +22,8 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
-import { getBoundingRectChildren } from "~/features/page_designer/functions/getBoundingRectChildren";
-import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/getDnDBoxShadowArgs";
+import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/getBoundingRectChildren";
+import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/getDnDBoxShadowArgs";
 import { useGraph } from "~/lib/graph/GraphContext";
 
 export function BorderOverlay(

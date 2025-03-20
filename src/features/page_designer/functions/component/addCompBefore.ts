@@ -3,12 +3,12 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { addComponentAttrInPage } from "~/features/page_designer/functions/drop/addComponentAttrInForm";
-import { sortChildren } from "~/features/page_designer/functions/sortChildren";
+import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/addComponentAttrInForm";
+import { sortChildren } from "~/features/page_designer/functions/layout/sortChildren";
 
-import type { FormStoreObject } from "../../../components/form/context/FormContext";
+import type { FormStoreObject } from "../../../../components/form/context/FormContext";
 
-export function addCompAfter(
+export function addCompBefore(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formStoreVertex: Vertex<FormStoreObject>,
@@ -40,6 +40,8 @@ export function addCompAfter(
     fromVertex,
     graph.vertexes[formDataId!],
     toVertex,
-    "after",
+    "before",
   );
+
+  // setLayoutStore('activeStepId', layoutRowId);
 }

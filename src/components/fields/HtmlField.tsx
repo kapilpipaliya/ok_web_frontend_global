@@ -9,13 +9,13 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
-import { setPropertyValueGlobal } from "~/features/page_designer/functions/setPropertyValueGlobal";
+import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
+import { setPropertyValueGlobal } from "~/features/page_designer/functions/utils/setPropertyValueGlobal";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 import type { GenericComponentProps } from "./type/FieldType";
-import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 
 // HtmlField
 export function HtmlField(
@@ -89,7 +89,10 @@ export function HtmlField(
     const TextContent = () => {
       return (
         <Show when={props.text}>
-          <Show when={previewStore.isDesignMode} fallback={<span>{local.text}</span>}>
+          <Show
+            fallback={<span>{local.text}</span>}
+            when={previewStore.isDesignMode}
+          >
             <span
               contentEditable={true}
               onBlur={handleTextChange}

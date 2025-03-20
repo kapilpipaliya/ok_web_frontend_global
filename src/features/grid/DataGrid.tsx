@@ -26,7 +26,7 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "~/features/page_attr_render/permissions";
-import { generateFormMetaAttributes } from "~/features/page_designer/functions/generateFormMetaAttributes";
+import { generateFormMetaAttributes } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";

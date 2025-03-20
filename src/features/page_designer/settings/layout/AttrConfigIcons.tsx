@@ -13,7 +13,7 @@ import { SaveAsTemplateButton } from "~/features/page_attr_render/page_attr_dnd_
 import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { getComponentLabel } from "../../functions/getComponentLabel";
+import { getComponentLabel } from "../../functions/component/getComponentLabel";
 import { HideShowIcon } from "./HideShowIcon";
 
 export function AttrConfigIcons(

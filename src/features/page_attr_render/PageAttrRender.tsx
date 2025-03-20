@@ -9,7 +9,7 @@ import {
 } from "~/components/form/context/FormContext";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
-import { getChildrenAttrs } from "~/features/page_designer/functions/getChildrenAttrs";
+import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/GraphContext";
 

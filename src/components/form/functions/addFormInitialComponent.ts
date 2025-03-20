@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { Id, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { addComponentAttrInPage } from "~/features/page_designer/functions/drop/addComponentAttrInForm";
+import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/addComponentAttrInForm";
 
 export function addComponent(
   graph: GraphInterface,

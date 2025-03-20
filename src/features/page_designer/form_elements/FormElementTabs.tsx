@@ -25,7 +25,7 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "../context/LayoutContext";
-import { PageDesignerLabels } from "../functions/PageDesignerLabels";
+import { PageDesignerLabels } from "../functions/utils/PageDesignerLabels";
 import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
 import { openInNewInternalTab } from "./pages/openInNewInternalTab";

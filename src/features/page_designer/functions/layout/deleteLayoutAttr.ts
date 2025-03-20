@@ -7,14 +7,14 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
-
 import { deleteNestedLayout } from "~/lib/graph/mutate/vertex/delete/deleteNestedLayout";
+
 import {
   allFormAttrsInPageFromLevel,
   getAllFieldsUsedInAllRules,
   getAllFieldsUsedInRootLevelSetting,
   isAttrUsedInRules,
-} from "./generateFormMetaAttributes";
+} from "../form/generateFormMetaAttributes";
 
 export function deleteLayoutAttr(
   formStoreVertex: Vertex<FormStoreObject>,

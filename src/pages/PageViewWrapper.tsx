@@ -39,7 +39,7 @@ import {
   hasPermissions,
 } from "~/features/page_attr_render/permissions";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
-import { PageDesignerLabels } from "~/features/page_designer/functions/PageDesignerLabels";
+import { PageDesignerLabels } from "~/features/page_designer/functions/utils/PageDesignerLabels";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useGraph } from "~/lib/graph/GraphContext";
@@ -60,6 +60,7 @@ import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransact
 import { saveStepIndex } from "~/lib/graph/transaction/steps/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/steps/setPreventUndoAtOrBeforeIndex";
+import { getExistingOrDefaultTxnValue } from "~/lib/graph/transaction/value/getExistingOrDefaultTxnValue";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import {
   parentComponentAttribute,
@@ -121,6 +122,12 @@ export function PageViewWrapper(
   });
 
   addNewVertex(0, pageFormVertexObject, graph, setGraph);
+  createEffect(() => {
+    console.log(
+      "txnValue",
+      getExistingOrDefaultTxnValue(pageFormVertexObject.P.txnId, graph),
+    );
+  });
 
   const formStore = () =>
     graph.vertexes[pageFormVertexObject.id] as Vertex<FormStoreObject>;

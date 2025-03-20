@@ -7,15 +7,15 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { useToast } from "~/components/styled/modal/Toast";
-import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drop/createAttrCompMetaVertex";
-import { createAttrMetaVertex } from "~/features/page_designer/functions/drop/createAttrMetaVertex";
-import { processChildrenAttrs } from "~/features/page_designer/functions/drop/processChildrenAttrs";
+import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drag_drop/createAttrCompMetaVertex";
+import { createAttrMetaVertex } from "~/features/page_designer/functions/drag_drop/createAttrMetaVertex";
+import { processChildrenAttrs } from "~/features/page_designer/functions/drag_drop/processChildrenAttrs";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { addNewRow } from "../../../../lib/graph/mutate/form/addNewRow";
 import { uniqueNameKey } from "../../constants/constant";
-import { getUniqueName } from "../generateFormMetaAttributes";
-import { PageDesignerLabels } from "../PageDesignerLabels";
+import { getUniqueName } from "../form/generateFormMetaAttributes";
+import { PageDesignerLabels } from "../utils/PageDesignerLabels";
 import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";
 import { getCompPropsObj } from "./getCompPropsObj";
 

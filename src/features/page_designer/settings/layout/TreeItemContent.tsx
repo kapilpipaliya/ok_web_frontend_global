@@ -9,8 +9,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { getChildrenAttrs } from "../../functions/getChildrenAttrs";
-import { getComponentName } from "../../functions/getComponentLabel";
+import { getComponentName } from "../../functions/component/getComponentLabel";
+import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { nameExpr } from "../utils/nameExpr";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
 

@@ -37,7 +37,7 @@ import {
   PreviewContext,
   usePreviewContext,
 } from "~/features/page_designer/context/PreviewContext";
-import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
+import { getComponentLabel } from "~/features/page_designer/functions/component/getComponentLabel";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
@@ -630,7 +630,7 @@ export function DynamicComponent(
     "labelClass",
     "key",
     "pos",
-    "isnopermissioncheck"
+    "isnopermissioncheck",
   ];
   const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
 

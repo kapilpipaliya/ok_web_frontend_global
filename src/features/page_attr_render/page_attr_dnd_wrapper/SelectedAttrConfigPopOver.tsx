@@ -7,7 +7,7 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 import { handleDragStart } from "~/features/page_designer/event_handler/handleDragStart";
-import { getComponentLabel } from "~/features/page_designer/functions/getComponentLabel";
+import { getComponentLabel } from "~/features/page_designer/functions/component/getComponentLabel";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 

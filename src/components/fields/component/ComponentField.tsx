@@ -12,7 +12,7 @@ import {
   PreviewContext,
   usePreviewContext,
 } from "~/features/page_designer/context/PreviewContext";
-import { getChildrenAttrs } from "~/features/page_designer/functions/getChildrenAttrs";
+import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { evalExpression } from "~/lib/expression_eval";

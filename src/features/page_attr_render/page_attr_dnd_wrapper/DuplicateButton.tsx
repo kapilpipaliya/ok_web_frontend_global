@@ -3,7 +3,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { cloneLayoutAndChildren } from "~/features/page_designer/functions/cloneLayoutAndChildren";
+import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layout/cloneLayoutAndChildren";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 

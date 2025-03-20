@@ -15,7 +15,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
-import { isAnyFieldInvalid } from "~/features/page_designer/functions/generateFormMetaAttributes";
+import { isAnyFieldInvalid } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/GraphContext";

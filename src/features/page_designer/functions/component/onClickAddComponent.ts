@@ -6,8 +6,8 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
-import { componentDrop } from "./drop/componentDrop";
-import { sortChildren } from "./sortChildren";
+import { componentDrop } from "../drag_drop/componentDrop";
+import { sortChildren } from "../layout/sortChildren";
 
 export function onClickAddComponent(
   graph: Store<GraphInterface>,
