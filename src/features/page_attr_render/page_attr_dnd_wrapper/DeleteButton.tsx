@@ -4,7 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { deleteLayoutAttr } from "~/features/page_designer/event_handler/deleteLayoutAttr";
+import { deleteLayoutAttr } from "~/features/page_designer/functions/deleteLayoutAttr";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
