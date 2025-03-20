@@ -95,9 +95,10 @@ export function ChatInput(props: ChatInputProps) {
             class="cursor:pointer"
             disabled={props.isLoading()}
             icon="ph:paper-plane-right"
+            onClick={(e) => handleSubmit(e as any)}
             size={22}
             title="Submit"
-            type="submit"
+            type="button"
           />
         </div>
         <FileInput

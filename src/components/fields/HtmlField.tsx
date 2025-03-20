@@ -15,6 +15,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 import type { GenericComponentProps } from "./type/FieldType";
+import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 
 // HtmlField
 export function HtmlField(
@@ -37,6 +38,7 @@ export function HtmlField(
   const meta = () => parentRenderContext()?.context.meta!;
   const layoutStoreId = useDesignerLayoutStore();
   const formStoreId = useDesignerFormIdContext();
+  const [previewStore] = usePreviewContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [local, others] = splitProps(props, [
@@ -84,28 +86,29 @@ export function HtmlField(
   };
 
   const Content = () => {
-    const isPageDesigner = !!layoutStoreId;
+    const TextContent = () => {
+      return (
+        <Show when={props.text}>
+          <Show when={previewStore.isDesignMode} fallback={<span>{local.text}</span>}>
+            <span
+              contentEditable={true}
+              onBlur={handleTextChange}
+              onKeyDown={handleKeyDown}
+              style={{ display: "inline-block", "min-width": "1em" }}
+            >
+              {local.text}
+            </span>
+          </Show>
+        </Show>
+      );
+    };
 
     return (
-      <Switch>
-        <Match when={isPageDesigner && local.text}>
-          <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
-          <span
-            contentEditable={true}
-            onBlur={handleTextChange}
-            onKeyDown={handleKeyDown}
-            style={{ display: "inline-block", "min-width": "1em" }}
-          >
-            {local.text}
-          </span>
-          <Show when={!local.childrenBefore}>{local.children}</Show>
-        </Match>
-        <Match when={true}>
-          <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
-          {local.text}
-          <Show when={!local.childrenBefore}>{local.children}</Show>
-        </Match>
-      </Switch>
+      <>
+        <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
+        <TextContent />
+        <Show when={!local.childrenBefore}>{local.children}</Show>
+      </>
     );
   };
 

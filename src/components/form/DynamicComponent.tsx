@@ -628,6 +628,9 @@ export function DynamicComponent(
     "class",
     "validation",
     "labelClass",
+    "key",
+    "pos",
+    "isnopermissioncheck"
   ];
   const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
 

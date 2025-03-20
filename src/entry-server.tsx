@@ -6,7 +6,7 @@ export default createHandler(
     <StartServer
       document={({ assets, children, scripts }) => {
         return (
-          <html lang="en">
+          <html style="display: none" lang="en">
             <head>
               <meta charset="utf-8" />
               <meta

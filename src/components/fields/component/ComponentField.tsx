@@ -78,8 +78,8 @@ export function ComponentField(
 
   const previewStoreProxy = new Proxy(previewStore, {
     get(target, prop) {
-      // @ts-expect-error ignore temporary key name
       if (prop === "isDesignMode") {
+        // @ts-expect-error ignore temporary key name
         return target.isDesignModePrev;
       }
       return target[prop as keyof typeof target];
