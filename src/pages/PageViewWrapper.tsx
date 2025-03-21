@@ -529,6 +529,12 @@ export function PageViewWrapper(
 
       createErrorVertex(formDataId);
     }
+    if (!(props.parentId || props.txnId) && props.isDesignMode) {
+      setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
+    }
+    saveStepIndex(formStore().P.txnId, "initial", graph, setGraph);
+    saveUndoPoint(formStore().P.txnId, graph, setGraph);
+
     if (!result) {
       return;
     }
@@ -542,12 +548,6 @@ export function PageViewWrapper(
     if (result.componentData?.graph) {
       setGraphData(graph, setGraph, result.componentData.graph!);
     }
-
-    if (!(props.parentId || props.txnId) && props.isDesignMode) {
-      setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
-    }
-    saveStepIndex(formStore().P.txnId, "initial", graph, setGraph);
-    saveUndoPoint(formStore().P.txnId, graph, setGraph);
   }
 
   // Start loading data immediately

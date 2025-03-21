@@ -20,6 +20,7 @@ import { HeaderRow } from "../header/header_row/HeaderRow";
 import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteConfirmation } from "./main_content/DeleteConfirmation";
 import { FormElements } from "./main_content/FormElements";
+import { PageViewComponent } from "./main_content/PageViewComponent";
 import { PropertiesContent } from "./main_content/PropertiesContent";
 import { TabBar } from "./main_content/TabBar";
 
@@ -293,7 +294,7 @@ export function RenderMainContent() {
             }
           >
             <TabBar mainPanel={mainPanel} />
-            {/* <PageViewComponent mainPanel={mainPanel} /> */}
+            <PageViewComponent mainPanel={mainPanel} />
           </Panel>
         )}
       </For>

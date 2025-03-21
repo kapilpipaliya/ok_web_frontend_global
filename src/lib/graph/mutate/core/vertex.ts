@@ -233,7 +233,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
 }
 
 // return a new Vertex
-export function newVertex<T extends { [key: string]: unknown }>(
+export function newVertex<T extends { [key: string]: any }>(
   id: Id,
   labels: string[],
   properties?: T,
