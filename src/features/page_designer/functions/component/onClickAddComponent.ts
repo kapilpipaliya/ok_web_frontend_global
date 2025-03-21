@@ -42,6 +42,8 @@ export function onClickAddComponent(
     setGraph,
     undefined,
     undefined,
+    toVertex,
+    "center",
   );
   if (layoutRowId === -1) {
     return layoutRowId;

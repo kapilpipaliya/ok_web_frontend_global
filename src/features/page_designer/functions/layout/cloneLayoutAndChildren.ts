@@ -38,6 +38,10 @@ export function cloneLayoutAndChildren(
     toParentVertex || formData,
     graph,
     setGraph,
+    undefined,
+    undefined,
+    toVertex,
+    position,
   );
   if (layoutRowId === -1) {
     return;

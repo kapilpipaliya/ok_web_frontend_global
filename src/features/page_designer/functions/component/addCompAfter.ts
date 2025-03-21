@@ -24,6 +24,9 @@ export function addCompAfter(
     graph,
     setGraph,
     "Step",
+    undefined,
+    toVertex,
+    "after",
   );
 
   if (layoutRowId === -1) {

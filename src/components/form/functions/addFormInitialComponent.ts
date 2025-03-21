@@ -5,28 +5,7 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/addComponentAttrInForm";
 
-export function addComponent(
-  graph: GraphInterface,
-  formVertex: Vertex,
-  parentId: Id,
-  txnId: number,
-  setGraph: SetStoreFunction<GraphInterface>,
-  type: string,
-  attributes: any = {},
-) {
-  const componentIndex = addComponentAttrInPage(
-    formVertex,
-    graph.vertexes[parentId],
-    txnId,
-    graph,
-    setGraph,
-    type,
-    attributes,
-  );
-
-  return componentIndex;
-}
-
+// deprecated
 export function addFormInitialComponent(
   formVertex: Vertex,
   graph: GraphInterface,
@@ -160,4 +139,30 @@ export function addFormInitialComponent(
   if (cancelButtonCompIndex === -1) {
     return -1;
   }
+}
+
+function addComponent(
+  graph: GraphInterface,
+  formVertex: Vertex,
+  parentId: Id,
+  txnId: number,
+  setGraph: SetStoreFunction<GraphInterface>,
+  type: string,
+  attributes: any = {},
+  toVertex?: Vertex,
+  position: string = "center",
+) {
+  const componentIndex = addComponentAttrInPage(
+    formVertex,
+    graph.vertexes[parentId],
+    txnId,
+    graph,
+    setGraph,
+    type,
+    attributes,
+    toVertex,
+    position,
+  );
+
+  return componentIndex;
 }

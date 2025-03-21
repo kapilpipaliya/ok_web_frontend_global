@@ -24,6 +24,9 @@ export function addCompBefore(
     graph,
     setGraph,
     "Step",
+    undefined,
+    toVertex,
+    "before",
   );
 
   if (layoutRowId === -1) {

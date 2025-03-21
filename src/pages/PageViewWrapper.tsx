@@ -512,7 +512,7 @@ export function PageViewWrapper(
       setFormStore("formDataId", createResult.vertex!.id);
 
       if (!id() && dataVertex()?.L[0] === "Form") {
-        const layoutId = addFormInitialComponent(
+        /*const layoutId = addFormInitialComponent(
           dataVertex(),
           graph,
           formStore().P.txnId,
@@ -521,7 +521,7 @@ export function PageViewWrapper(
         if (layoutId === -1) {
           setFormStore("error", "Adding component to layout failed");
           return;
-        }
+        }*/
       }
     }
     if (formDataId) {
