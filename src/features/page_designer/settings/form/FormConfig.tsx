@@ -1,4 +1,4 @@
-import { For, createMemo } from "solid-js";
+import { createMemo, For } from "solid-js";
 
 import { Id } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";

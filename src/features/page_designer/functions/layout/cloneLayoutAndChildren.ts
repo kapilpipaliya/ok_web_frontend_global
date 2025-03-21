@@ -7,7 +7,7 @@ import { componentDrop } from "~/features/page_designer/functions/drag_drop/comp
 import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
-import { sortChildren } from "./sortChildren";
+import { sortChildren } from "../drag_drop/sortChildren";
 
 export function cloneLayoutAndChildren(
   layoutVertex: Vertex,

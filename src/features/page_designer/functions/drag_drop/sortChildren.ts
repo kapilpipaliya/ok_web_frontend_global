@@ -5,7 +5,7 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
-import { getChildrenAttrs } from "./getChildrenAttrs";
+import { getChildrenAttrs } from "../layout/getChildrenAttrs";
 
 export function sortChildren(
   graph: Store<GraphInterface>,

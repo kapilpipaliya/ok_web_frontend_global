@@ -4,7 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { componentDrop } from "~/features/page_designer/functions/drag_drop/componentDrop";
-import { sortChildren } from "~/features/page_designer/functions/layout/sortChildren";
+import { sortChildren } from "~/features/page_designer/functions/drag_drop/sortChildren";
 
 export async function handlePageDrag(
   graph: GraphInterface,

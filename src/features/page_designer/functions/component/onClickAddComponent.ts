@@ -7,7 +7,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import { componentDrop } from "../drag_drop/componentDrop";
-import { sortChildren } from "../layout/sortChildren";
+import { sortChildren } from "../drag_drop/sortChildren";
 
 export function onClickAddComponent(
   graph: Store<GraphInterface>,

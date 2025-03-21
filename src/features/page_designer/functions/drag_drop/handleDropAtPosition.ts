@@ -4,9 +4,9 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { handlePageDrag } from "~/features/page_designer/functions/drag_drop/handlePageDrag";
+import { handleParentChange } from "~/features/page_designer/functions/drag_drop/handleParentChange";
+import { sortChildren } from "~/features/page_designer/functions/drag_drop/sortChildren";
 import { validateDragOver } from "~/features/page_designer/functions/drag_drop/validateDragOver";
-import { handleParentChange } from "~/features/page_designer/functions/layout/handleParentChange";
-import { sortChildren } from "~/features/page_designer/functions/layout/sortChildren";
 import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
@@ -52,6 +52,8 @@ export async function handleDropAtPosition(
       setGraph,
       undefined,
       undefined,
+      toVertex,
+      position,
     );
     if (layoutRowId === -1) {
       return layoutRowId;

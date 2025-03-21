@@ -40,14 +40,15 @@ export async function handleDrop(
       return;
     }
 
-    if (PageDesignerLabels.includes(fromVertex.L[0])) {
-      await loadPageData(graph, setGraph, fromVertex, showErrorToast);
-    }
-
     if (!layoutStoreVertex?.P.position) {
       showErrorToast("Position not found when dropping");
       return;
     }
+
+    if (PageDesignerLabels.includes(fromVertex.L[0])) {
+      await loadPageData(graph, setGraph, fromVertex, showErrorToast);
+    }
+    
     // NOTE: Multiple selected dragged vertexes may not drop before or after as expected. test it.
     const layoutId = await handleDropAtPosition(
       graph,

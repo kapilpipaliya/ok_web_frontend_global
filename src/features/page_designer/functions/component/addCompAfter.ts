@@ -1,12 +1,11 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/addComponentAttrInForm";
-import { sortChildren } from "~/features/page_designer/functions/layout/sortChildren";
-
-import type { FormStoreObject } from "../../../../components/form/context/FormContext";
+import { sortChildren } from "~/features/page_designer/functions/drag_drop/sortChildren";
 
 export function addCompAfter(
   graph: Store<GraphInterface>,

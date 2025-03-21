@@ -12,7 +12,7 @@ import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValu
 import { uniqueNameKey } from "../../constants/constant";
 import { getUniqueName } from "../form/generateFormMetaAttributes";
 import { getChildrenAttrs } from "../layout/getChildrenAttrs";
-import { sortChildren } from "../layout/sortChildren";
+import { sortChildren } from "./sortChildren";
 
 export function getRowProps(
   fromVertex: Vertex,
