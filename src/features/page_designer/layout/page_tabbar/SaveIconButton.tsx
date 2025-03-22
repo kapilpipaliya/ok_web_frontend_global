@@ -1,4 +1,3 @@
-import { domToPng } from "modern-screenshot";
 import { createMemo } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -7,18 +6,9 @@ import type { Vertex } from "~/lib/graph/graph";
 import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
-import { API } from "~/lib/api/endpoints";
-import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { uploadFile } from "~/lib/api/uploadFile";
-import { evalExpression } from "~/lib/expression_eval";
-import { getToEdge } from "~/lib/graph/get/sync/edge/getToEdge";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { addNewEdge, newEdge } from "~/lib/graph/mutate/core/edge";
-import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
-import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
-import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
-import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
+import { capturePreview } from "~/lib/utils/capturePreview";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 
 export function SaveIconButton(props: { formStoreId: string }) {
@@ -32,43 +22,8 @@ export function SaveIconButton(props: { formStoreId: string }) {
     () => !!txnId() && isDisabledTxn(txnId()!, graph),
   );
 
-  const capturePreview = async (apiUrl: string, method = "POST") => {
-    // Get the first opened view's iframe
-    const iframe = document.querySelector(
-      `iframe[name="${props.formStoreId}"]`,
-    ) as HTMLIFrameElement;
-    if (!iframe) {
-      return;
-    }
-
-    try {
-      // Wait for iframe to load
-      // await new Promise(resolve => iframe.addEventListener('load', resolve, { once: true }));
-
-      // Capture the iframe content using modern-screenshot
-      const dataUrl = await domToPng(iframe.contentDocument!.body);
-
-      // Convert data URL to blob
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-
-      // Create file from blob
-      const file = new File([blob], "preview.png", { type: "image/png" });
-
-      const data = await uploadFile(file, apiUrl, method);
-      if (data?.graph) {
-        setGraphData(graph, setGraph, data.graph);
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Failed to capture preview:", error);
-      return null;
-    }
-  };
-
-  const handleSave = async () => {
-    // Call original form submit
+  const saveAndCaptureForm = async () => {
+    // Call form submit
     const formSubmitError = await formSubmit(
       formStoreVertex,
       graph,
@@ -79,70 +34,24 @@ export function SaveIconButton(props: { formStoreId: string }) {
       showWarningToast,
     )();
 
-    if (formSubmitError) {
-      return;
-    }
-
-    const imgSaveTxnId = generateNewTxnId(graph, setGraph);
-    const existingPreview =
-      evalExpression("->$0Preview", {
+    // If form saved successfully, capture preview
+    if (!formSubmitError) {
+      await capturePreview(
+        formStoreVertex,
         graph,
         setGraph,
-        vertexes: [graph.vertexes[formStoreVertex().P.formDataId!]!],
-      }) || [];
-
-    if (existingPreview.length > 0) {
-      const preview = existingPreview[existingPreview.length - 1];
-      const previewData = await capturePreview(
-        `${API.file.replaceFileUrl}?fileId=${preview.id}`,
-        "PUT",
+        showErrorToast
       );
-      if (!previewData?.result) {
-        showErrorToast("Failed to capture preview");
-        return;
-      }
-      // const data = commitTxn(imgSaveTxnId, graph);
-      // submitDataCall(data, graph, setGraph, imgSaveTxnId);
-    } else {
-      const previewData = await capturePreview(API.file.uploadFileUrl);
-      if (!previewData?.result) {
-        showErrorToast("Failed to capture preview");
-        return;
-      }
-      const previewVertexId =
-        previewData.result[previewData.result.length - 1].id;
-      const previewEdge = newEdge(
-        generateNewVertexId(graph, setGraph),
-        getToEdge(
-          { P: { key: "Preview" } } as unknown as Vertex,
-          graph.vertexes[formStoreVertex().P.formDataId!],
-        ),
-        {},
-        formStoreVertex().P.formDataId,
-        previewVertexId,
-      );
-      const addNewEdgeResult = addNewEdge(
-        imgSaveTxnId,
-        previewEdge,
-        graph,
-        setGraph,
-      );
-      if (addNewEdgeResult.error) {
-        showErrorToast(addNewEdgeResult.error as string);
-        return;
-      }
-      const data = commitTxn(imgSaveTxnId, graph);
-      if (data) {
-        submitDataCall(data, graph, setGraph, imgSaveTxnId);
-      }
     }
+
+    return !formSubmitError;
   };
 
   return (
     <IconButton
       class={`${isDisabled() ? "cursor:not-allowed" : ""} ${headerIconButtonClass}`}
       icon="ph:floppy-disk"
-      onClick={handleSave}
+      onClick={isDisabled() ? undefined : saveAndCaptureForm}
       size={22}
       title="Save"
       tooltipGroup="page-buttons"

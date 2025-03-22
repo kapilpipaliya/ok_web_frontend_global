@@ -101,21 +101,23 @@ export function CreateGridHeaders(
               <TooltipWrapper
                 arrowClass={STYLES.tooltip.arrow}
                 content={
-                  <div class={STYLES.tooltip.content}>
-                    <Show when={info.getValue<string>()}>
+                  <div class={"b:2px|solid|#ccc"}>
+                    {/* <Show when={info.getValue<string>()}>
                       <div class={"f:14 font-weight:500"}>
                         {info.getValue<string>()}
                       </div>
-                    </Show>
-                    {
+                    </Show> */}
+                    {/* {
                       getPreviewVertex(attribute, info.row.original, graph)?.P
                         .fileName
-                    }
-                    <ImageWrapper
-                      alt="Preview"
-                      // class="r:4px h:200px object-fit:cover"
-                      src={getPreviewURL(attribute, info.row.original, graph)}
-                    />
+                    } */}
+                    <div class="bg:white p:8">
+                      <ImageWrapper
+                        alt="Preview"
+                        // class="r:4px h:200px object-fit:cover"
+                        src={getPreviewURL(attribute, info.row.original, graph)}
+                      />
+                    </div>
                   </div>
                 }
                 triggerAs="span"

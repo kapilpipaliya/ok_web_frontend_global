@@ -6,6 +6,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
+import { capturePreview } from "~/lib/utils/capturePreview";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
@@ -28,24 +29,44 @@ export function SaveAllButton() {
     return !!txnId() && isDisabledTxn(txnId()!, graph);
   };
 
+  const saveAndCaptureForm = async (openFormData: Id) => {
+    const formStoreVertex = () =>
+      graph.vertexes[
+        graph.vertexes[openFormData].P.formId
+      ] as Vertex<FormStoreObject>;
+    
+    // Save the form
+    const formSubmitError = await formSubmit(
+      formStoreVertex,
+      graph,
+      setGraph,
+      () => {},
+      showErrorToast,
+      showLoadingToast,
+      showWarningToast,
+    )();
+    
+    // If form saved successfully, capture preview
+    if (!formSubmitError) {
+      return capturePreview(
+        formStoreVertex,
+        graph,
+        setGraph,
+        showErrorToast
+      );
+    }
+    
+    return false;
+  };
+
   const handleSaveAll = async () => {
     const idsToSave = formStoreIds().filter(
       (openFormData) => !isDisabled(graph.vertexes[openFormData].P.formId),
     );
+    
+    // Process forms sequentially to avoid UI conflicts
     for (const openFormData of idsToSave) {
-      const formStoreVertex = () =>
-        graph.vertexes[
-          graph.vertexes[openFormData].P.formId
-        ] as Vertex<FormStoreObject>;
-      await formSubmit(
-        formStoreVertex,
-        graph,
-        setGraph,
-        () => {},
-        showErrorToast,
-        showLoadingToast,
-        showWarningToast,
-      )();
+      await saveAndCaptureForm(openFormData);
     }
   };
 

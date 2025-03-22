@@ -30,3 +30,7 @@ export async function createDatabaseConstraints(session: Session) {
     throw error;
   }
 }
+/*
+Remember to add appropriate indexes to the Neo4j database for the Token nodes if you expect high volume:
+CREATE INDEX token_hashed_token FOR (t:Token) ON (t.hashedToken);
+*/
