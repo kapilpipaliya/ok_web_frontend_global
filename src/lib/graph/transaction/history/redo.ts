@@ -3,10 +3,10 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
+import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { redoTxn } from "./redoTxn";
-import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 
 /**
  * Performs a redo operation on a transaction, restoring previously undone changes.
@@ -33,6 +33,9 @@ export function redo(
   // Get current transaction state
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex = getActiveUndoIndex(txnId, graph);
+  
+  // Get the highest previous submitted index (may be higher than current submittedIndex after undo)
+  const originalSubmittedIndex = txnValue.originalSubmittedIndex;
 
   // Find next undo checkpoint or step
   let nextUndoIndex = txnValue.undoStepIndexes.find(
@@ -55,6 +58,14 @@ export function redo(
     nextUndoIndex + 1,
   )) {
     redoTxn(step, graph, setGraph);
+  }
+  
+  // When redoing steps, we need to restore the original submittedIndex if appropriate
+  // If we're redoing back into previously committed steps
+  if (nextUndoIndex <= originalSubmittedIndex) {
+    // If we redo to an index that was previously committed, restore the submittedIndex
+    // but only up to our current position
+    txnValue.submittedIndex = Math.min(nextUndoIndex, originalSubmittedIndex);
   }
 
   // Update transaction state in the graph

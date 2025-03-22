@@ -44,6 +44,8 @@ export function transactionDetailAdd(
     let steps = [...currentTxnState.steps];
     let undoStepIndexes = [...currentTxnState.undoStepIndexes];
     let revertSteps = [...currentTxnState.revertSteps];
+    let submittedIndex = currentTxnState.submittedIndex;
+    let originalSubmittedIndex = currentTxnState.originalSubmittedIndex ?? submittedIndex;
 
     const lastStepIndex = getLastTxnIndex(txnId, graph);
     // Get current position in undo history
@@ -63,13 +65,19 @@ export function transactionDetailAdd(
           : undoStepIndexes.slice(0, nextUndoPointIndex);
 
       // If we had submitted steps that are being discarded, save them for revert in the database
-      if (currentTxnState.submittedIndex > currentUndoPosition) {
+      if (originalSubmittedIndex > currentUndoPosition) {
         const discardedSteps = steps.slice(
           currentUndoPosition + 1,
-          currentTxnState.submittedIndex + 1,
+          originalSubmittedIndex + 1,
         );
         // discard steps should be first in the revertSteps array
         revertSteps = [...discardedSteps, ...revertSteps];
+        
+        // When branching, adjust submittedIndex to current position
+        submittedIndex = currentUndoPosition;
+        // Reset originalSubmittedIndex as we're creating a new branch
+        // Old values are meaningless in this new branch
+        originalSubmittedIndex = currentUndoPosition;
       }
 
       // Remove all steps after our current position
@@ -84,8 +92,10 @@ export function transactionDetailAdd(
     const updatedTxnState = {
       ...currentTxnState,
       activeUndoIndex: newUndoPosition,
+      originalSubmittedIndex,
       revertSteps,
       steps,
+      submittedIndex, 
       undoStepIndexes,
     };
 
@@ -95,7 +105,7 @@ export function transactionDetailAdd(
       `txn${txnId}`,
       graph,
       setGraph,
-      updatedTxnState,
+      updatedTxnState as unknown as { [key: string]: unknown },
       {
         cloneProperties: false,
         skipPostMessage: options?.skipPostMessage,

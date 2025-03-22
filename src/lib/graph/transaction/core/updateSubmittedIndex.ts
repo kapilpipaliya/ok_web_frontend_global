@@ -15,8 +15,9 @@ export function updateSubmittedIndex(
   }
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
   existingTxnValue.submittedIndex = existingTxnValue.activeUndoIndex;
+  existingTxnValue.originalSubmittedIndex = existingTxnValue.activeUndoIndex;
   existingTxnValue.revertSteps = [];
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue, {
+  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, existingTxnValue as unknown as { [key: string]: unknown }, {
     cloneProperties: false,
   });
 }

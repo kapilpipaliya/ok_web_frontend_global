@@ -19,9 +19,7 @@ export function isDisabledTxn(
   const activeUndoIndex = getActiveUndoIndex(txnId, graph);
   return (
     txnVertex.P.steps.length === 0 ||
-    activeUndoIndex === txnVertex.P.preventUndoBeforeIndex ||
-    (txnVertex.P.submittedIndex > -1
-      ? txnVertex.P.submittedIndex === activeUndoIndex
-      : false)
+    (activeUndoIndex !== -1 && txnVertex.P.preventUndoBeforeIndex !== -1 && activeUndoIndex === txnVertex.P.preventUndoBeforeIndex) ||
+    false
   );
 }

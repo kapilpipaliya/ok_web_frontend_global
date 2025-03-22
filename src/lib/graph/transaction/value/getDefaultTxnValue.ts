@@ -4,6 +4,7 @@ export function getDefaultTxnValue() {
   return {
     activeUndoIndex: -1,
     namedUndoStepIndexes: {},
+    originalSubmittedIndex: -1,
     preventUndoBeforeIndex: -1,
     revertSteps: [],
     steps: [],

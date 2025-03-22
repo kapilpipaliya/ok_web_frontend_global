@@ -13,6 +13,7 @@ import { usePreviewContext } from "~/features/page_designer/context/PreviewConte
 import { setPropertyValueGlobal } from "~/features/page_designer/functions/utils/setPropertyValueGlobal";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/GraphContext";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 import type { GenericComponentProps } from "./type/FieldType";
@@ -61,7 +62,7 @@ export function HtmlField(
     }
 
     const target = e.target as HTMLSpanElement;
-    if (formStoreVertex()?.P.selectedId !== -1) {
+    if (formStoreVertex()?.P.selectedId !== -1 && target.textContent !== local.text) {
       setPropertyValueGlobal(
         graph,
         setGraph,
@@ -74,6 +75,7 @@ export function HtmlField(
         meta(),
         target.textContent,
       );
+      saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
     }
   };
 

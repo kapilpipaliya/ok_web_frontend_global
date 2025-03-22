@@ -1,12 +1,21 @@
 import type { Transaction } from "neo4j-driver";
 
 import type { Edge, Id } from "~/lib/graph/graph";
+
+type EdgeResult = {
+  deleteEdge: {
+    error: boolean;
+    id: Id;
+    message?: string;
+  };
+};
+
 export async function handleDeleteEdge(
   deleteEdge: Edge,
   tx: Transaction,
   clientToServerVertexIdMap: Map<Id, Id>,
   clientToServerEdgeIdMap: Map<Id, Id>,
-  txnResult: any[],
+  txnResult: EdgeResult[],
   deletedEdges: Id[] = [],
 ) {
   const id = clientToServerEdgeIdMap.get(deleteEdge.id) || deleteEdge.id;
@@ -15,7 +24,8 @@ export async function handleDeleteEdge(
   const type = deleteEdge.T;
   const query = `match (n1)-[r:${type}]->(n2)
                 where elementId(n1) = $startId and elementId(n2) = $endId and elementId(r) = $id 
-                delete r;`;
+                delete r
+                return r;`;
 
   try {
     const result = await tx.run(query, {
@@ -28,11 +38,13 @@ export async function handleDeleteEdge(
       const edgeId = result.records[0].get("r").elementId;
       clientToServerEdgeIdMap.set(oldId, edgeId);
       deletedEdges.push(id);
-      txnResult.push({ deleteEdge: { error: false } });
+      txnResult.push({ deleteEdge: { error: false, id: edgeId } });
+    } else {
+      txnResult.push({ deleteEdge: { error: true, id, message: "Edge not found" } });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      `Can't delete edge due to an internal server error: ${error.message}`,
+      `Can't delete edge due to an internal server error: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }

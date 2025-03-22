@@ -7,6 +7,10 @@ export interface TransactionDetail {
   // Maps named checkpoints to their step indexes for quick reference
   namedUndoStepIndexes: { [key: string]: number };
 
+  // Original index of submitted steps before any undo operations
+  // This helps redo operations restore the correct submittedIndex
+  originalSubmittedIndex: number;
+
   // Prevents undo operations before this index (safety threshold)
   preventUndoBeforeIndex: number;
 

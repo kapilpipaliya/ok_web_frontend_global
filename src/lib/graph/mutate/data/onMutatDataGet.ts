@@ -6,8 +6,9 @@ import type { MutationResult } from "~/cypher/types/MutationArgs";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { useToast } from "~/components/styled/modal/Toast";
-import { updateEdgeId } from "~/lib/graph/mutate/core/edge";
+import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/core/edge";
 import {
+  deleteVertex,
   mergeVertexProperties,
   updateVertexId,
 } from "~/lib/graph/mutate/core/vertex";
@@ -42,11 +43,24 @@ export function onMutatDataGet(
       if (txnObject.deleteVertex) {
         handleDeleteVertex(
           txnObject.deleteVertex.error,
+          txnObject.deleteVertex.id,
           txnObject.deleteVertex.message,
+          graph,
+          setGraph,
           showErrorToast,
         );
       }
-      // TODO: handle other cases for replace, replaceEdge, deleteEdge,
+      if (txnObject.deleteEdge) {
+        handleDeleteEdge(
+          txnObject.deleteEdge.error,
+          txnObject.deleteEdge.id,
+          txnObject.deleteEdge.message,
+          graph,
+          setGraph,
+          showErrorToast,
+        );
+      }
+      // TODO: handle other cases for replace
     }
 
     /*if (isAllTxnProcessed(graph)) {
@@ -58,13 +72,37 @@ export function onMutatDataGet(
   });
 }
 
-function handleDeleteVertex(
+function handleDeleteEdge(
   error: boolean,
+  edgeId: string,
   message: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
   showErrorToast: (msg: string) => void,
 ) {
   if (error) {
     showErrorToast(message);
+  } else {
+    // If the edge was successfully deleted on the server,
+    // ensure it's also removed from the client-side graph
+    deleteEdge(0, edgeId, graph, setGraph);
+  }
+}
+
+function handleDeleteVertex(
+  error: boolean,
+  vertexId: string,
+  message: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  showErrorToast: (msg: string) => void,
+) {
+  if (error) {
+    showErrorToast(message);
+  } else {
+    // If the vertex was successfully deleted on the server,
+    // ensure it's also removed from the client-side graph
+    deleteVertex(0, vertexId, graph, setGraph);
   }
 }
 

@@ -16,7 +16,6 @@ import {
 } from "../../get/sync/store/getGlobalStore";
 import { updateEdgeIdsToNew } from "../../mutate/core/edge";
 import { updateVertexIdsToNew } from "../../mutate/core/vertex";
-import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 
 type ResultStep = {
@@ -36,10 +35,6 @@ export function commitTxn(
   const submittedIndex = txnVertex.P.submittedIndex ?? -1;
   const activeUndoIndex = getActiveUndoIndex(txnId, graph);
 
-  if (submittedIndex === activeUndoIndex) {
-    return;
-  }
-
   try {
     let revertSteps: TransactionValue[] = [];
     let steps: TransactionValue[];
@@ -52,9 +47,8 @@ export function commitTxn(
       revertSteps = [...removedSteps, ...txnVertex.P.revertSteps];
       steps = [];
     } else {
-      const startFromNextStep = submittedIndex === 0 ? 0 : submittedIndex + 1;
-      steps = txnVertex.P.steps.slice(startFromNextStep, activeUndoIndex + 1);
-      revertSteps = txnVertex.P.revertSteps || [];
+      steps = txnVertex.P.steps.slice(submittedIndex + 1, activeUndoIndex + 1);
+      revertSteps = [...txnVertex.P.revertSteps];
     }
 
     // Update transaction status
@@ -74,7 +68,7 @@ export function commitTxn(
     };
 
     // Process revert steps
-    const reverseStepsToCommit = revertSteps.reverse().map((txnDetail) => {
+    const reverseStepsToCommit = [...revertSteps].reverse().map((txnDetail) => {
       return removeUndefinedProperties({
         deleteEdge: txnDetail.insertEdge
           ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
@@ -147,6 +141,9 @@ export function commitTxn(
       // Merge steps operating on the same entity before returning
       const allSteps = [...reverseStepsToCommit, ...stepsToCommit];
       mutationArgs.transactions = mergeStepsForSameEntities(allSteps);
+      
+      // When committing successfully, the updateSubmittedIndex function will be 
+      // called separately after server response in submitDataCall
       return mutationArgs;
     }
   } catch (error) {
