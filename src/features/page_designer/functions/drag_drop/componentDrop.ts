@@ -164,34 +164,31 @@ function calculateInitialPosition(
     return toIndex;
   }
   
-  // Calculate pos based on position relative to toVertex
-  let calculatedPos = 1;
+  const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex);
+  const lastPos = childrenAttrs.length > 0 
+    ? Math.max(...childrenAttrs.map(child => child.P.pos || 0)) 
+    : 0;
   
+  // If no target vertex or center position, append at the end
   if (position === "center" || !toVertex) {
-    // If "center" or no toVertex, append at the end
-    const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex);
-    const lastPos = childrenAttrs.length > 0 
-      ? Math.max(...childrenAttrs.map(child => child.P.pos || 0)) 
-      : 0;
-    calculatedPos = lastPos + 1;
-  } else {
-    // Calculate position based on relative position to toVertex
-    const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex);
-    let posCounter = 1;
-    
-    for (const child of childrenAttrs) {
-      if (child.id === toVertex.id) {
-        if (position === "before" || position === "left") {
-          calculatedPos = posCounter - 0.5;
-          break;
-        } else if (position === "after" || position === "right") {
-          calculatedPos = posCounter + 0.5;
-          break;
-        }
-      }
-      posCounter++;
-    }
+    return lastPos + 1;
   }
   
-  return calculatedPos;
+  // Find the position of the target vertex
+  const targetIndex = childrenAttrs.findIndex(child => child.id === toVertex.id);
+  if (targetIndex === -1) {
+    return lastPos + 1;
+  }
+  
+  const posCounter = targetIndex + 1; // 1-based position
+  
+  if (position === "before" || position === "left") {
+    return posCounter - 0.5;
+  } else if (position === "after" || position === "right") {
+    // If this is the last item, add 1 instead of 0.5
+    return posCounter === lastPos ? posCounter + 1 : posCounter + 0.5;
+  }
+  
+  // Default fallback
+  return lastPos + 1;
 }

@@ -1,6 +1,6 @@
 import type { Config } from "@master/css";
 
-import { RuntimeCSS } from "@master/css-runtime";
+import { CSSRuntime } from "@master/css-runtime";
 import {
   createContext,
   createEffect,
@@ -11,15 +11,15 @@ import {
   useContext,
 } from "solid-js";
 
-const RuntimeCSSContext = createContext<RuntimeCSS | undefined>(undefined);
-export const useRuntimeCSS = () => useContext(RuntimeCSSContext);
+const CSSRuntimeContext = createContext<CSSRuntime | undefined>(undefined);
+export const useCSSRuntime = () => useContext(CSSRuntimeContext);
 
 export function CSSRuntimeProvider(props: {
   children: JSX.Element;
   config?: Config | Promise<any>;
   root?: Document | ShadowRoot;
 }) {
-  const [runtimeCSS, setRuntimeCSS] = createSignal<RuntimeCSS>();
+  const [runtimeCSS, setRuntimeCSS] = createSignal<CSSRuntime>();
 
   const resolveConfig = async () => {
     const configModule = await props.config;
@@ -32,7 +32,7 @@ export function CSSRuntimeProvider(props: {
       return;
     }
     setRuntimeCSS(
-      new RuntimeCSS(props.root ?? document, resolvedConfig).observe(),
+      new CSSRuntime(props.root ?? document, resolvedConfig).observe(),
     );
   };
 
@@ -96,8 +96,8 @@ export function CSSRuntimeProvider(props: {
   });
 
   return (
-    <RuntimeCSSContext.Provider value={runtimeCSS()}>
+    <CSSRuntimeContext.Provider value={runtimeCSS()}>
       {props.children}
-    </RuntimeCSSContext.Provider>
+    </CSSRuntimeContext.Provider>
   );
 }

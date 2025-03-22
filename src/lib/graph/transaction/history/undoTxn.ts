@@ -85,7 +85,7 @@ export function undoTxn(
         break;
 
       case "merge":
-        mergeVertexProperties(0, actualVertexId, graph, setGraph, originalData);
+        mergeVertexProperties(0, actualVertexId, graph, setGraph, originalData.P);
         break;
       case "replace":
         // Restore original vertex properties
@@ -94,14 +94,12 @@ export function undoTxn(
           actualVertexId,
           graph,
           setGraph,
-          originalData,
+          originalData.P,
         );
         break;
 
       case "replaceEdge":
-        // Restore original edge properties
-        // TODO: Fix this is not working
-        replaceEdgeProperties(0, actualEdgeId, graph, setGraph, originalData);
+        replaceEdgeProperties(0, actualEdgeId, graph, setGraph, originalData.P);
         break;
 
       default:

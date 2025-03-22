@@ -191,7 +191,7 @@ export function getUniqueName(
   formVertex: Vertex,
   layoutVertex: Vertex,
 ) {
-  let uniqueId = (formVertex.P.lastUniqueId || 0) + 1;
+  let uniqueId = 1;
 
   while (
     isUniqueIdUsed(
@@ -205,9 +205,6 @@ export function getUniqueName(
     uniqueId++;
   }
 
-  mergeVertexProperties(txnId, formVertex.id, graph, setGraph, {
-    lastUniqueId: uniqueId,
-  });
   return `unique_${uniqueId}`;
 }
 

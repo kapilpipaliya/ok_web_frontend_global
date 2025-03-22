@@ -31,7 +31,8 @@ export function redo(
 
   // Get current transaction state
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  const activeUndoIndex = txnValue.activeUndoIndex ?? txnValue.steps.length - 1;
+  const lastStepIndex = getLastTxnIndex(txnId, graph);
+  const activeUndoIndex = txnValue.activeUndoIndex ?? lastStepIndex;
 
   // Find next undo checkpoint or step
   let nextUndoIndex = txnValue.undoStepIndexes.find(
@@ -57,9 +58,16 @@ export function redo(
   }
 
   // Update transaction state in the graph
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {
-    cloneProperties: false,
-  });
+  replaceVertexProperties(
+    0, 
+    `txn${txnId}`, 
+    graph, 
+    setGraph, 
+    (txnValue as unknown) as { [key: string]: unknown }, 
+    {
+      cloneProperties: false,
+    }
+  );
 }
 
 /**

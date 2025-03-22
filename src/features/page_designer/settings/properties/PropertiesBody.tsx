@@ -14,6 +14,7 @@ import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { ComponentVariantsInput } from "./ComponentVariantsInput";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
@@ -56,6 +57,7 @@ export function PropertiesBody() {
       if (value === null) {
         clearFileSelection(meta);
       }
+      saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
     }
   };
 

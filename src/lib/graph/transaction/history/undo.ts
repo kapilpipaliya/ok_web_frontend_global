@@ -8,6 +8,7 @@ import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { undoTxn } from "./undoTxn";
+import { saveUndoPoint } from "../steps/saveUndoPoint";
 
 /**
  * Performs an undo operation on a transaction, reverting changes up to a specified point.
@@ -34,7 +35,7 @@ export function undo(
   if (!undoAllowed(txnId, graph, revertTransactionUpToIndex)) {
     return;
   }
-
+  saveUndoPoint(txnId, graph, setGraph);
   // Get current transaction state
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex =
