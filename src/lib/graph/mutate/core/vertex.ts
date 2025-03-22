@@ -21,7 +21,7 @@ export function addNewVertex(
   vertex: Vertex,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string },
+  options?: { skipPostMessage?: string; skipTransactionDetail?: boolean },
 ): {
   error: string;
   txnDetailIndex?: number;
@@ -50,18 +50,20 @@ export function addNewVertex(
       );
     }
     const data = klona(actualVertex);
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        id: actualVertexId,
-        insert: "insertVertex",
-        originalData: klona(vertex),
-      },
-      graph,
-      setGraph,
-      options,
-    );
+    if (!options?.skipTransactionDetail) {
+      transactionDetailAdd(
+        txnId,
+        {
+          data,
+          id: actualVertexId,
+          insert: "insertVertex",
+          originalData: klona(vertex),
+        },
+        graph,
+        setGraph,
+        options,
+      );
+    }
     broadcastToAllChannels(
       graph.broadcastChannels,
       options?.skipPostMessage ?? "",
@@ -80,7 +82,7 @@ export function deleteVertex(
   vertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string },
+  options?: { skipPostMessage?: string; skipTransactionDetail?: boolean },
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
@@ -143,18 +145,21 @@ export function deleteVertex(
       setGraph("vertexes", actualVertexId, undefined);
     });
 
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        deleteVertex: "deleteVertexFn",
-        id: actualVertexId,
-        originalData: klona(vertex),
-      },
-      graph,
-      setGraph,
-      options,
-    );
+    console.log("delete", vertex);
+    if (!options?.skipTransactionDetail) {
+      transactionDetailAdd(
+        txnId,
+        {
+          data,
+          deleteVertex: "deleteVertexFn",
+          id: actualVertexId,
+          originalData: klona(vertex),
+        },
+        graph,
+        setGraph,
+        options,
+      );
+    }
     broadcastToAllChannels(
       graph.broadcastChannels,
       options?.skipPostMessage ?? "",
@@ -183,7 +188,7 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: Partial<T>,
-  options?: { cloneProperties?: boolean; skipPostMessage?: string },
+  options?: { cloneProperties?: boolean; skipPostMessage?: string; skipTransactionDetail?: boolean },
 ): { error: string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId =
@@ -208,18 +213,20 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
     const data = updateVertexIdsToNew(klona(vertex), graph, true);
     data.P = clonedProperties;
 
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        id: actualVertexId,
-        merge: "mergeVertex",
-        originalData: originalVertex,
-      },
-      graph,
-      setGraph,
-      options,
-    );
+    if (!options?.skipTransactionDetail) {
+      transactionDetailAdd(
+        txnId,
+        {
+          data,
+          id: actualVertexId,
+          merge: "mergeVertex",
+          originalData: originalVertex,
+        },
+        graph,
+        setGraph,
+        options,
+      );
+    }
     broadcastToAllChannels(
       graph.broadcastChannels,
       options?.skipPostMessage ?? "",
@@ -249,7 +256,7 @@ export function replaceVertexProperties(
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: unknown },
   // clonning will reduce performance, so we can use this flag to disable it.
-  options?: { cloneProperties?: boolean; skipPostMessage?: string },
+  options?: { cloneProperties?: boolean; skipPostMessage?: string; skipTransactionDetail?: boolean },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId =
@@ -266,7 +273,7 @@ export function replaceVertexProperties(
       "P",
       reconcile(shouldClone ? klona(properties) : properties),
     );
-    if (txnId) {
+    if (txnId && !options?.skipTransactionDetail) {
       const originalVertex = klona(graph.vertexes[actualVertexId]);
       const data = updateVertexIdsToNew(
         klona(graph.vertexes[actualVertexId]),
@@ -304,7 +311,7 @@ export function updateVertexId(
   newVertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string },
+  options?: { skipPostMessage?: string; skipTransactionDetail?: boolean },
 ) {
   return untrack(() => {
     if (!graph.vertexes[oldVertexId]) {

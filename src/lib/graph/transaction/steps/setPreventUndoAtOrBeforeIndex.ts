@@ -14,9 +14,8 @@ export function setPreventUndoAtOrBeforeIndex(
   if (!txnId) {
     return;
   }
-  const lastTxnIndex = getLastTxnIndex(txnId, graph);
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  txnValue.preventUndoBeforeIndex = lastTxnIndex;
+  txnValue.preventUndoBeforeIndex = txnValue.activeUndoIndex;
   replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {
     cloneProperties: false,
   });

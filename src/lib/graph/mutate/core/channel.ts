@@ -48,6 +48,7 @@ export function handleChannelMessage(
   setGraph: SetStoreFunction<GraphInterface>,
   id: string,
   addChannelId?: string,
+  skipTransactionDetail?: boolean, // Transaction is processed on Iframe Itself.
 ) {
   const data = JSON.parse(msg);
   // initial data:
@@ -61,6 +62,7 @@ export function handleChannelMessage(
       );
     }
   }
+  console.warn("handleChannelMessage", data);
 
   // Vertex functions:
   if (data.addNewVertex) {
@@ -69,7 +71,7 @@ export function handleChannelMessage(
       data.addNewVertex.vertex,
       graph,
       setGraph,
-      { skipPostMessage: id },
+      { skipPostMessage: id, skipTransactionDetail },
     );
   }
   if (data.replaceVertexProperties) {
@@ -79,7 +81,7 @@ export function handleChannelMessage(
       graph,
       setGraph,
       data.replaceVertexProperties.properties,
-      { skipPostMessage: id },
+      { skipPostMessage: id, skipTransactionDetail },
     );
   }
   if (data.mergeVertexProperties) {
@@ -89,7 +91,7 @@ export function handleChannelMessage(
       graph,
       setGraph,
       data.mergeVertexProperties.properties,
-      { skipPostMessage: id },
+      { skipPostMessage: id, skipTransactionDetail },
     );
   }
   if (data.deleteVertex) {
@@ -98,7 +100,7 @@ export function handleChannelMessage(
       data.deleteVertex.vertexId,
       graph,
       setGraph,
-      { skipPostMessage: id },
+      { skipPostMessage: id, skipTransactionDetail },
     );
   }
   if (data.updateVertexId) {
@@ -107,13 +109,14 @@ export function handleChannelMessage(
       data.updateVertexId.newVertexId,
       graph,
       setGraph,
-      { skipPostMessage: id },
+      { skipPostMessage: id, skipTransactionDetail },
     );
   }
   // Edge functions:
   if (data.addNewEdge) {
     addNewEdge(data.addNewEdge.txnId, data.addNewEdge.edge, graph, setGraph, {
       skipPostMessage: id,
+      skipTransactionDetail,
     });
   }
   if (data.replaceEdgeProperties) {
@@ -123,12 +126,13 @@ export function handleChannelMessage(
       graph,
       setGraph,
       data.replaceEdgeProperties.properties,
-      { skipPostMessage: id },
+      { skipPostMessage: id, skipTransactionDetail },
     );
   }
   if (data.deleteEdge) {
     deleteEdge(data.deleteEdge.txnId, data.deleteEdge.edgeId, graph, setGraph, {
       skipPostMessage: id,
+      skipTransactionDetail,
     });
   }
   if (data.updateEdgeId) {
@@ -137,7 +141,7 @@ export function handleChannelMessage(
       data.updateEdgeId.newEdgeId,
       graph,
       setGraph,
-      { skipPostMessage: id },
+      { skipPostMessage: id, skipTransactionDetail },
     );
   }
   // setGraphData functions:
@@ -147,13 +151,14 @@ export function handleChannelMessage(
       data.updateVertex.vertexData,
       graph,
       setGraph,
-      { ...(data.updateVertex.options ?? {}), skipPostMessage: id },
+      { ...(data.updateVertex.options ?? {}), skipPostMessage: id, skipTransactionDetail },
     );
   }
   if (data.updateEdge) {
     updateEdge(data.updateEdge.edgeId, data.updateEdge.edge, graph, setGraph, {
       ...(data.updateEdge.options ?? {}),
       skipPostMessage: id,
+      skipTransactionDetail,
     });
   }
 }

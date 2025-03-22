@@ -6,6 +6,7 @@ import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { redoTxn } from "./redoTxn";
+import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 
 /**
  * Performs a redo operation on a transaction, restoring previously undone changes.
@@ -31,8 +32,7 @@ export function redo(
 
   // Get current transaction state
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  const lastStepIndex = getLastTxnIndex(txnId, graph);
-  const activeUndoIndex = txnValue.activeUndoIndex ?? lastStepIndex;
+  const activeUndoIndex = getActiveUndoIndex(txnId, graph);
 
   // Find next undo checkpoint or step
   let nextUndoIndex = txnValue.undoStepIndexes.find(
@@ -97,7 +97,6 @@ export function redoAllowed(
 
   const lastTxnIndex = getLastTxnIndex(txnId, graph);
   // Check if there are steps to redo
-  const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  const activeUndoIndex = txnValue.activeUndoIndex ?? lastTxnIndex;
+  const activeUndoIndex = getActiveUndoIndex(txnId, graph);
   return activeUndoIndex < lastTxnIndex;
 }

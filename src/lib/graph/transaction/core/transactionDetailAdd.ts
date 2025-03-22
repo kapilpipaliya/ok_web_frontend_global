@@ -9,6 +9,7 @@ import type { TransactionValue } from "../types/TransactionType";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
+import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 
 /**
  * Adds a new transaction step to the transaction history while managing undo/redo state.
@@ -46,8 +47,7 @@ export function transactionDetailAdd(
 
     const lastStepIndex = getLastTxnIndex(txnId, graph);
     // Get current position in undo history
-    const currentUndoPosition =
-      currentTxnState.activeUndoIndex ?? lastStepIndex;
+    const currentUndoPosition = getActiveUndoIndex(txnId, graph);
 
     // If we're adding a step after an undo, we need to handle the branching
     if (currentUndoPosition < lastStepIndex) {

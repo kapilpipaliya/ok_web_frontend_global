@@ -1,0 +1,21 @@
+import type { Store } from "solid-js/store";
+
+import type { GraphInterface } from "../../GraphContext";
+
+import { getLastTxnIndex } from "../value/getLastTxnIndex";
+
+export function getActiveUndoIndex(txnId: number, graph: Store<GraphInterface>) {
+  const txnVertex = graph.vertexes[`txn${txnId}`];
+
+  if (!txnVertex) {
+    return -1;
+  }
+  return txnVertex.P.activeUndoIndex ?? -1;
+  const lastTxnIndex = getLastTxnIndex(txnId, graph);
+
+  if (txnVertex.P.activeUndoIndex === -1) {
+    return lastTxnIndex;
+  }
+
+  return txnVertex.P.activeUndoIndex ?? lastTxnIndex;
+}

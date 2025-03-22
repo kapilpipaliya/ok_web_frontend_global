@@ -23,7 +23,7 @@ export function generateNewTxnId(
       OUT: {},
       P: {
         ...getDefaultTxnValue(),
-        undoStepIndexes: [0],
+        undoStepIndexes: [],
       },
     },
     graph,

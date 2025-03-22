@@ -16,7 +16,7 @@ export function saveStepIndex(
     return;
   }
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  txnValue.namedUndoStepIndexes[key] = getLastTxnIndex(txnId, graph);
+  txnValue.namedUndoStepIndexes[key] = txnValue.activeUndoIndex;
   replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue, {
     cloneProperties: false,
   });

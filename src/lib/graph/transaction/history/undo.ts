@@ -5,10 +5,11 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { TransactionDetail } from "../types/TransactionDetail";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
+import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
+import { saveUndoPoint } from "../steps/saveUndoPoint";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { undoTxn } from "./undoTxn";
-import { saveUndoPoint } from "../steps/saveUndoPoint";
 
 /**
  * Performs an undo operation on a transaction, reverting changes up to a specified point.
@@ -38,12 +39,15 @@ export function undo(
   saveUndoPoint(txnId, graph, setGraph);
   // Get current transaction state
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
-  const activeUndoIndex =
-    txnValue.activeUndoIndex ?? getLastTxnIndex(txnId, graph);
+  const activeUndoIndex = txnValue.activeUndoIndex;
 
   // Determine the target undo index
   const newUndoIndex =
     revertTransactionUpToIndex ?? getNewUndoIndex(txnValue, activeUndoIndex);
+
+  if (newUndoIndex >= activeUndoIndex) {
+    return;
+  }
 
   // Revert steps in reverse order up to the target index
   const stepsToUndo = txnValue.steps
@@ -104,7 +108,7 @@ export function undoAllowed(
 
   const lastTxnIndex = getLastTxnIndex(txnId, graph);
   // Check undo position constraints
-  const activeUndoIndex = txnValue.activeUndoIndex ?? lastTxnIndex;
+  const activeUndoIndex = getActiveUndoIndex(txnId, graph);
   const preventUndoBeforeIndex = txnValue.preventUndoBeforeIndex ?? -1;
 
   if (lastTxnIndex <= preventUndoBeforeIndex) {

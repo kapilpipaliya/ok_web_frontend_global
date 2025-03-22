@@ -17,6 +17,7 @@ import {
 import { updateEdgeIdsToNew } from "../../mutate/core/edge";
 import { updateVertexIdsToNew } from "../../mutate/core/vertex";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
+import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 
 type ResultStep = {
   [key in InsertFnKey]?: Edge | Vertex;
@@ -33,8 +34,7 @@ export function commitTxn(
 
   const txnVertex = graph.vertexes[`txn${txnId}`];
   const submittedIndex = txnVertex.P.submittedIndex ?? -1;
-  const activeUndoIndex =
-    txnVertex.P.activeUndoIndex ?? getLastTxnIndex(txnId, graph);
+  const activeUndoIndex = getActiveUndoIndex(txnId, graph);
 
   if (submittedIndex === activeUndoIndex) {
     return;

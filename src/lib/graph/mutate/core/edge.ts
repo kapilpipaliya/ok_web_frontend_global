@@ -20,7 +20,7 @@ export function addNewEdge(
   edge: Edge,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string },
+  options?: { skipPostMessage?: string; skipTransactionDetail?: boolean },
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
@@ -76,18 +76,20 @@ export function addNewEdge(
       );
     });
     const data = updateEdgeIdsToNew(edge, graph);
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        id: actualEdgeId,
-        insertEdge: "insertEdgeFn",
-        originalData: klona(edge),
-      },
-      graph,
-      setGraph,
-      options,
-    );
+    if (!options?.skipTransactionDetail) {
+      transactionDetailAdd(
+        txnId,
+        {
+          data,
+          id: actualEdgeId,
+          insertEdge: "insertEdgeFn",
+          originalData: klona(edge),
+        },
+        graph,
+        setGraph,
+        options,
+      );
+    }
     broadcastToAllChannels(
       graph.broadcastChannels,
       options?.skipPostMessage ?? "",
@@ -105,7 +107,7 @@ export function deleteEdge(
   edgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string },
+  options?: { skipPostMessage?: string; skipTransactionDetail?: boolean },
 ): {
   error: boolean | string;
   txnDetailIndex?: number;
@@ -141,18 +143,20 @@ export function deleteEdge(
 
     const data = klona(edge);
 
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        deleteEdge: "deleteEdgeFn",
-        id: actualEdgeId,
-        originalData: klona(edge),
-      },
-      graph,
-      setGraph,
-      options,
-    );
+    if (!options?.skipTransactionDetail) {
+      transactionDetailAdd(
+        txnId,
+        {
+          data,
+          deleteEdge: "deleteEdgeFn",
+          id: actualEdgeId,
+          originalData: klona(edge),
+        },
+        graph,
+        setGraph,
+        options,
+      );
+    }
     broadcastToAllChannels(
       graph.broadcastChannels,
       options?.skipPostMessage ?? "",
@@ -193,7 +197,7 @@ export function replaceEdgeProperties(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: unknown },
-  options?: { skipPostMessage?: string },
+  options?: { skipPostMessage?: string; skipTransactionDetail?: boolean },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualEdgeId = getEdgeOldIdToNewIdMap(graph)[edgeId] || edgeId;
@@ -204,18 +208,20 @@ export function replaceEdgeProperties(
     const originalEdge = klona(graph.edges[actualEdgeId]);
     setGraph("edges", actualEdgeId, "P", reconcile(klona(properties)));
     const data = updateEdgeIdsToNew(graph.edges[actualEdgeId], graph);
-    transactionDetailAdd(
-      txnId,
-      {
-        data,
-        id: actualEdgeId,
-        originalData: originalEdge,
-        replaceEdge: "replaceEdgeFn",
-      },
-      graph,
-      setGraph,
-      options,
-    );
+    if (!options?.skipTransactionDetail) {
+      transactionDetailAdd(
+        txnId,
+        {
+          data,
+          id: actualEdgeId,
+          originalData: originalEdge,
+          replaceEdge: "replaceEdgeFn",
+        },
+        graph,
+        setGraph,
+        options,
+      );
+    }
     broadcastToAllChannels(
       graph.broadcastChannels,
       options?.skipPostMessage ?? "",
@@ -234,7 +240,7 @@ export function updateEdgeId(
   newEdgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  options?: { skipPostMessage?: string },
+  options?: { skipPostMessage?: string; skipTransactionDetail?: boolean },
 ) {
   return untrack(() => {
     if (!graph.edges[oldEdgeId]) {

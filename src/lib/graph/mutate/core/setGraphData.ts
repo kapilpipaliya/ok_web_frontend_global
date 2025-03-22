@@ -12,6 +12,7 @@ import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 export interface UpdateOptions {
   skipExisting?: boolean;
   skipPostMessage?: string;
+  skipTransactionDetail?: boolean;
 }
 
 export function setGraphData(
