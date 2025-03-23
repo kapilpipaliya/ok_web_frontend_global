@@ -49,18 +49,29 @@ export const ResizeViewButtons = (props: {
     });
   };
 
-  const handleWidthChange = (width: string) => {
+  const handleDimensionChange = (dimension: "height" | "width", value: string) => {
     mergeVertexProperties(0, openedView(), graph, setGraph, {
+      [dimension]: value,
       view: "custom",
-      width,
     });
   };
 
-  const handleHeightChange = (height: string) => {
-    mergeVertexProperties(0, openedView(), graph, setGraph, {
-      height,
-      view: "custom",
-    });
+  const handleKeyDown = (e: KeyboardEvent, dimension: "height" | "width", currentValue: string) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+      
+      const numericMatch = currentValue.match(/(\d+)/);
+      if (numericMatch) {
+        const numericPart = parseInt(numericMatch[0], 10);
+        const prefix = currentValue.substring(0, numericMatch.index);
+        const suffix = currentValue.substring(numericMatch.index! + numericMatch[0].length);
+        
+        const newNumericValue = e.key === "ArrowUp" ? numericPart + 1 : numericPart - 1;
+        const newValue = `${prefix}${newNumericValue}${suffix}`;
+        
+        handleDimensionChange(dimension, newValue);
+      }
+    }
   };
 
   return (
@@ -80,14 +91,16 @@ export const ResizeViewButtons = (props: {
         <span class="flex ai:center">w:</span>
         <input
           class="b:1px|solid|primary-10 r:5 p:0.25rem w:5rem bg:base-0"
-          onInput={(e) => handleWidthChange(e.target.value)}
+          onChange={(e) => handleDimensionChange("width", e.target.value)}
+          onKeyDown={(e) => handleKeyDown(e, "width", viewVertex()?.P.width || "")}
           type="text"
           value={viewVertex()?.P.width || ""}
         />
         <span class="flex ai:center">h:</span>
         <input
           class="b:1px|solid|primary-10 r:5 p:0.25rem w:5rem bg:base-0"
-          onInput={(e) => handleHeightChange(e.target.value)}
+          onChange={(e) => handleDimensionChange("height", e.target.value)}
+          onKeyDown={(e) => handleKeyDown(e, "height", viewVertex()?.P.height || "")}
           type="text"
           value={viewVertex()?.P.height || ""}
         />
