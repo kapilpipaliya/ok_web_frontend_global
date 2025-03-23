@@ -133,8 +133,6 @@ export function FormElementTabs() {
 
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
-    { collection: "Component", title: "Library" },
-    { collection: "TemplatePage", title: "Templates" },
     { collection: "Form", title: "Forms" },
     { collection: "Page", title: "Pages" },
     // { collection: "EmailTemplate", title: "Email Template" },
@@ -175,13 +173,20 @@ export function FormElementTabs() {
                 <PageLevelComponents rootLevel={false} />
               </DesignerFormIdContext.Provider>
             </Show>
-          </Match>
-          <Match when={selectedTab().collection === "Component"}>
-            <Show keyed when={formStoreVertex()?.id}>
-              <DesignerFormIdContext.Provider value={formStoreVertex().id}>
-                <PageLevelComponents rootLevel={true} />
-              </DesignerFormIdContext.Provider>
-            </Show>
+            
+            <div class="mt:4">
+              <div class="p:12 font-weight:500">Global Components</div>
+              <Show keyed when={formStoreVertex()?.id}>
+                <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+                  <PageLevelComponents rootLevel={true} />
+                </DesignerFormIdContext.Provider>
+              </Show>
+            </div>
+            
+            <div class="mt:4">
+              <div class="p:12 font-weight:500">Templates</div>
+              <PagesList coll="TemplatePage" />
+            </div>
           </Match>
           <Match
             keyed
