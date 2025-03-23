@@ -701,7 +701,7 @@ export function DynamicComponent(
           props={null}
           readOnly={isReadOnly()}
           ref={setRef}
-          value={value()}
+          // value={value()}
         >
           <Show
             fallback={

@@ -6,22 +6,16 @@ import type { GenericComponentProps } from "./type/FieldType";
 interface IconFieldProps extends GenericComponentProps {
   class?: string;
   icon: string;
-  isViewMode?: boolean;
-  viewModeClass?: string;
 }
 
 export const IconField = (props: IconFieldProps) => {
   const [local, others] = splitProps(props, [
-    "componentName",
-    "value",
     "class",
-    "isViewMode",
-    "viewModeClass",
   ]);
 
   return (
     <Icon
-      class={`${local.isViewMode ? local.viewModeClass : local.class || ""}`}
+      class={`${local.class || ""}`}
       noobserver
       {...others}
     />

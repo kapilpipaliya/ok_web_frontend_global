@@ -4,12 +4,12 @@ export type DisplayComponentProps = {};
 
 export interface GenericComponentProps {
   children?: JSX.Element;
-  componentName?: string;
+  // componentName?: string;
   disabled?: boolean;
-  isRealTime?: boolean;
-  isTableInside?: boolean;
+  // isRealTime?: boolean;
+  // isTableInside?: boolean;
   // onChange?(data: any): void;
-  title?: string;
+  // title?: string;
 
-  value?: any;
+  // value?: any;
 }

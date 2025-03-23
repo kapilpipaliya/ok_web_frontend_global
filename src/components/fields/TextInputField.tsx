@@ -66,15 +66,9 @@ interface TextInputFieldProps
 export function TextInputField(props: Readonly<TextInputFieldProps>) {
   const [local, others] = splitProps(props, [
     "id",
-    "componentName",
-    "onChange",
-    "value",
-    "onChange",
     "inputProps",
     "error",
     "errorClass",
-    "isViewMode",
-    "onViewClick",
     "viewModeClass",
     "showValue",
     "suffixToValue",
@@ -126,7 +120,7 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
             class={`${others.class || ""} ${local.error && local.errorClass ? local.errorClass : ""}`}
             onChange={handleChange}
             ref={mergeRefs(setReference, others.ref)}
-            value={local.value ?? ""}
+            value={local.value ?? parentRenderContext()?.context.value ?? ""}
           />
         </Match>
       </Switch>

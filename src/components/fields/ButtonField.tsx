@@ -68,7 +68,6 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     "as",
     "ref",
     "children",
-    "value",
     "text",
     "onClick",
     "onLongPress",
@@ -176,7 +175,6 @@ export function ButtonField(props: Readonly<ButtonProps>) {
         onTouchStart={handlePressStart}
       >
         {local.text}
-        {local.value}
         {local.children}
       </Dynamic>
     </Show>

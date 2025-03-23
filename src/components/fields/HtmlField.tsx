@@ -25,12 +25,10 @@ export function HtmlField(
       as?: string;
       childrenBefore?: JSX.Element;
       class?: string;
-      isViewMode?: boolean;
       longPressDuration?: number;
       onLongPress?: (event: Event) => void;
       src?: string;
       text?: string;
-      viewModeClass?: string;
     },
 ) {
   const [graph, setGraph] = useGraph();
@@ -43,12 +41,8 @@ export function HtmlField(
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [local, others] = splitProps(props, [
-    "componentName",
-    "value",
     "as",
     "class",
-    "isViewMode",
-    "viewModeClass",
     "children",
     "text",
     "childrenBefore",
@@ -123,7 +117,7 @@ export function HtmlField(
       </Match>
       <Match when={local.as === "img"}>
         <img
-          class={`${local.isViewMode ? local.viewModeClass : local.class || ""}`}
+          class={`${local.class || ""}`}
           loading="lazy"
           {...(others as JSX.ImgHTMLAttributes<HTMLImageElement>)}
           src={replacePlaceholderWithUrl(
@@ -136,7 +130,7 @@ export function HtmlField(
       </Match>
       <Match when={true}>
         <Dynamic
-          class={`${local.isViewMode ? local.viewModeClass : local.class || ""}`}
+          class={`${local.class || ""}`}
           component={local.as || "div"}
           {...others}
         >

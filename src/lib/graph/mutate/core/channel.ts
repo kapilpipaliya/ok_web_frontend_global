@@ -62,7 +62,6 @@ export function handleChannelMessage(
       );
     }
   }
-  console.warn("handleChannelMessage", data);
 
   // Vertex functions:
   if (data.addNewVertex) {
