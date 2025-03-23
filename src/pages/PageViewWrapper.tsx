@@ -30,7 +30,6 @@ import {
   getInitialFormStore,
 } from "~/components/form/context/FormContext";
 import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
-import { PreviewPage } from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { PageView } from "~/features/page_attr_render/PageView";
 import {
@@ -384,8 +383,6 @@ export function PageViewWrapper(
       setFormStore("formMetaId", metaVertexResult.vertex!.id);
     }
 
-    setFormStore("isPreview", props.pageId === "preview");
-
     if (
       formStore().P.formMetaId &&
       !isNoPermissionCheck() &&
@@ -693,16 +690,7 @@ export function PageViewWrapper(
                   : true)
               }
             >
-              <Switch>
-                <Match when={!formStore().P.isPreview}>
-                  <Content />
-                </Match>
-                <Match when={formStore().P.isPreview}>
-                  <PreviewPage>
-                    <Content />
-                  </PreviewPage>
-                </Match>
-              </Switch>
+              <Content />
               {/* <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
                 <SaveCancelButton
                   closePopUp={props.closePopUp}

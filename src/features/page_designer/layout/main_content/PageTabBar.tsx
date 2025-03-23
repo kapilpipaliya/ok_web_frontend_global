@@ -9,7 +9,6 @@ import {
 } from "~/pages/settings/constants";
 
 import { DebugInfo } from "../page_tabbar/DebugInfo";
-import { PreviewButton } from "../page_tabbar/PreviewButton";
 import { RefreshButton } from "../page_tabbar/RefreshButton";
 import { ResizeViewButtons } from "../page_tabbar/ResizeViewButtons";
 import { SaveIconButton } from "../page_tabbar/SaveIconButton";
@@ -42,7 +41,6 @@ export function PageTabBar(props: {
             </Show> */}
       <div class="flex ai:center gap:2">
         <SaveIconButton formStoreId={props.formStoreId} />
-        <PreviewButton formStoreId={props.formStoreId} />
         <RefreshButton handleRefresh={props.handleRefresh} />
         <ShareButton formStoreId={props.formStoreId} />
         <Show when={props.previewsLength && props.previewsLength > 1}>

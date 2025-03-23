@@ -58,9 +58,9 @@ export function BorderOverlay(
     }
 
     if (isSelectedLayoutId(props.item.id)) {
-      boxShadow += " b:1px|solid|blue-60";
+      boxShadow += " b:1px|solid|purple-60";
     } else if (isSelectedHoverId(props.item.id)) {
-      boxShadow += " b:1px|solid|blue-80";
+      boxShadow += " b:1px|solid|orange-80";
     }
 
     return boxShadow;

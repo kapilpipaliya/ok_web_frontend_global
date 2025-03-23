@@ -28,7 +28,6 @@ export function getInitialFormStore(
     hoverId: -1 as Id | number,
     id: undefined as string | undefined,
     isFetching: false,
-    isPreview: false,
     mounted: false,
     multiHighlight: [] as Array<Id | number>,
     openedViews: [] as Id[],
