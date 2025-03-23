@@ -1,8 +1,9 @@
 import type { Id } from "~/lib/graph/graph";
-import { GraphInterface } from "~/lib/graph/GraphContext";
+
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 export function getTabLabel(openedFormId: Id, graph: GraphInterface) {
-  const baseLabel = graph.vertexes[openedFormId]?.P.label || '';
+  const baseLabel = graph.vertexes[openedFormId]?.P.label || "";
 
   // Get formId from openedFormId
   const formId = graph.vertexes[openedFormId]?.P.formId;

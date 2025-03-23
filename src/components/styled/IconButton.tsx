@@ -5,15 +5,24 @@ import { STYLES } from "~/pages/settings/constants";
 
 import { TooltipWrapper } from "./modal/TooltipWrapper";
 
-export interface IconButtonProps
-  extends JSX.ButtonHTMLAttributes<HTMLButtonElement> {
+export type IconButtonProps = {
+  href?: string;
   icon?: string;
   iconClass?: string;
   iconClassList?: { [k: string]: boolean | undefined };
   noCenter?: boolean;
   size?: number | string;
+  target?: string;
+  title?: JSX.Element | string;
   tooltipGroup?: string;
-}
+} & (
+  | (Omit<JSX.AnchorHTMLAttributes<HTMLAnchorElement>, "title"> & {
+      href: string;
+    })
+  | (Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, "title"> & {
+      href?: undefined;
+    })
+);
 
 export function IconButton(props: Readonly<IconButtonProps>) {
   const [local, others] = splitProps(props, [
@@ -44,19 +53,32 @@ export function IconButton(props: Readonly<IconButtonProps>) {
     </>
   );
 
-  return (
+  const InnerContent = () => (
     <Show
       fallback={
         <button
           class={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
           type="button"
-          {...others}
+          {...(others as JSX.ButtonHTMLAttributes<HTMLButtonElement>)}
         >
           <ButtonContent />
         </button>
       }
-      when={local.title}
+      when={props.href}
     >
+      <a
+        class={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
+        href={props.href!}
+        target={props.target}
+        {...(others as JSX.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      >
+        <ButtonContent />
+      </a>
+    </Show>
+  );
+
+  return (
+    <Show fallback={<InnerContent />} when={local.title}>
       <TooltipWrapper
         arrowClass={STYLES.tooltip.arrow}
         content={
@@ -66,6 +88,7 @@ export function IconButton(props: Readonly<IconButtonProps>) {
         }
         group={local.tooltipGroup}
         openDelay={300}
+        triggerAs={props.href ? "a" : "button"}
         triggerClass={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
         {...others}
       >
