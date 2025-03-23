@@ -6,7 +6,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
-import { capturePreview } from "~/lib/utils/capturePreview";
+import { capturePreview } from "~/lib/playwright/capturePreview";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
@@ -34,7 +34,7 @@ export function SaveAllButton() {
       graph.vertexes[
         graph.vertexes[openFormData].P.formId
       ] as Vertex<FormStoreObject>;
-    
+
     // Save the form
     const formSubmitError = await formSubmit(
       formStoreVertex,
@@ -45,17 +45,12 @@ export function SaveAllButton() {
       showLoadingToast,
       showWarningToast,
     )();
-    
+
     // If form saved successfully, capture preview
     if (!formSubmitError) {
-      return capturePreview(
-        formStoreVertex,
-        graph,
-        setGraph,
-        showErrorToast
-      );
+      return capturePreview(formStoreVertex, graph, setGraph, showErrorToast);
     }
-    
+
     return false;
   };
 
@@ -63,7 +58,7 @@ export function SaveAllButton() {
     const idsToSave = formStoreIds().filter(
       (openFormData) => !isDisabled(graph.vertexes[openFormData].P.formId),
     );
-    
+
     // Process forms sequentially to avoid UI conflicts
     for (const openFormData of idsToSave) {
       await saveAndCaptureForm(openFormData);

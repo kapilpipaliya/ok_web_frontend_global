@@ -22,13 +22,13 @@ import { handleDragOver } from "~/features/page_designer/event_handler/handleDra
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
-import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/getBoundingRectChildren";
+import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
-import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
 import { BorderOverlay } from "../overlays/BorderOverlay";
+import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
 
 interface PageAttrDnDWrapperProps {
   children: JSX.Element;

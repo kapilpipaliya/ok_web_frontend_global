@@ -40,7 +40,9 @@ export async function handleDeleteEdge(
       deletedEdges.push(id);
       txnResult.push({ deleteEdge: { error: false, id: edgeId } });
     } else {
-      txnResult.push({ deleteEdge: { error: true, id, message: "Edge not found" } });
+      txnResult.push({
+        deleteEdge: { error: true, id, message: "Edge not found" },
+      });
     }
   } catch (error: unknown) {
     throw new Error(

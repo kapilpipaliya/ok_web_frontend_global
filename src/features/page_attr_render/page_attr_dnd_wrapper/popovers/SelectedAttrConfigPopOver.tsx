@@ -11,14 +11,14 @@ import { getComponentLabel } from "~/features/page_designer/functions/component/
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
-import { ComponentName } from "../components/ComponentName";
 import { DeleteButton } from "../buttons/DeleteButton";
 import { DuplicateButton } from "../buttons/DuplicateButton";
 import { ImportHtmlButton } from "../buttons/ImportHtmlButton";
-import { InsertButtons } from "../menus/InsertButtons";
 import { ParentButton } from "../buttons/ParentButton";
 import { PreviewCSSButton } from "../buttons/PreviewCSSButton";
 import { SaveAsTemplateButton } from "../buttons/SaveAsTemplateButton";
+import { ComponentName } from "../components/ComponentName";
+import { InsertButtons } from "../menus/InsertButtons";
 
 interface SelectedAttrConfigPopOverProps {
   item: Vertex;

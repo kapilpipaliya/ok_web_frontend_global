@@ -3,18 +3,18 @@ import { Show } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { setPropertyValueGlobal } from "~/features/page_designer/functions/utils/setPropertyValueGlobal";
+import { setPropertyValueGlobal } from "~/features/page_designer/functions/layout/setPropertyValueGlobal";
 import { FunctionEditor } from "~/features/page_designer/settings/properties/FunctionEditor";
 import { JsonEditorFieldComponent } from "~/features/page_designer/settings/properties/JsonEditorField";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { ComponentVariantsInput } from "./ComponentVariantsInput";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
-import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();

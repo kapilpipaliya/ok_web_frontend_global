@@ -2,7 +2,6 @@ import type { Store } from "solid-js/store";
 
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { getLastTxnIndex } from "./getLastTxnIndex";
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 
 export function isDisabledTxn(
@@ -19,7 +18,9 @@ export function isDisabledTxn(
   const activeUndoIndex = getActiveUndoIndex(txnId, graph);
   return (
     txnVertex.P.steps.length === 0 ||
-    (activeUndoIndex !== -1 && txnVertex.P.preventUndoBeforeIndex !== -1 && activeUndoIndex === txnVertex.P.preventUndoBeforeIndex) ||
+    (activeUndoIndex !== -1 &&
+      txnVertex.P.preventUndoBeforeIndex !== -1 &&
+      activeUndoIndex === txnVertex.P.preventUndoBeforeIndex) ||
     false
   );
 }

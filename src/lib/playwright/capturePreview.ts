@@ -16,13 +16,14 @@ import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+
 import { setGraphData } from "../graph/mutate/core/setGraphData";
 
 export async function capturePreview(
   formStoreVertex: () => Vertex<FormStoreObject>,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  showErrorToast: (message: string) => void
+  showErrorToast: (message: string) => void,
 ) {
   // Store the current selectedId
   const currentSelectedId = formStoreVertex().P.selectedId;
@@ -37,18 +38,18 @@ export async function capturePreview(
         setGraph,
         {
           selectedId: -1,
-        }
+        },
       );
     }
 
     // Wait a small moment for the UI to update
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Get the iframe for this form
     const iframe = document.querySelector(
-      `iframe[name="${formStoreVertex().id}"]`
+      `iframe[name="${formStoreVertex().id}"]`,
     ) as HTMLIFrameElement;
-    
+
     if (!iframe) {
       throw new Error("Iframe not found");
     }
@@ -60,11 +61,12 @@ export async function capturePreview(
     const file = new File([blob], "preview.png", { type: "image/png" });
 
     const imgSaveTxnId = generateNewTxnId(graph, setGraph);
-    const existingPreview = evalExpression("->$0Preview", {
-      graph,
-      setGraph,
-      vertexes: [graph.vertexes[formStoreVertex().P.formDataId!]!],
-    }) || [];
+    const existingPreview =
+      evalExpression("->$0Preview", {
+        graph,
+        setGraph,
+        vertexes: [graph.vertexes[formStoreVertex().P.formDataId!]!],
+      }) || [];
 
     let previewData;
     if (existingPreview.length > 0) {
@@ -73,7 +75,7 @@ export async function capturePreview(
       previewData = await uploadFile(
         file,
         `${API.file.replaceFileUrl}?fileId=${preview.id}`,
-        "PUT"
+        "PUT",
       );
       if (previewData?.graph) {
         setGraphData(graph, setGraph, previewData.graph);
@@ -84,38 +86,39 @@ export async function capturePreview(
       if (previewData?.graph) {
         setGraphData(graph, setGraph, previewData.graph);
       }
-      
+
       if (previewData?.result) {
-        const previewVertexId = previewData.result[previewData.result.length - 1].id;
+        const previewVertexId =
+          previewData.result[previewData.result.length - 1].id;
         const previewEdge = newEdge(
           generateNewVertexId(graph, setGraph),
           getToEdge(
             { P: { key: "Preview" } } as unknown as Vertex,
-            graph.vertexes[formStoreVertex().P.formDataId!]
+            graph.vertexes[formStoreVertex().P.formDataId!],
           ),
           {},
           formStoreVertex().P.formDataId,
-          previewVertexId
+          previewVertexId,
         );
-        
+
         const addNewEdgeResult = addNewEdge(
           imgSaveTxnId,
           previewEdge,
           graph,
-          setGraph
+          setGraph,
         );
-        
+
         if (addNewEdgeResult.error) {
           throw new Error(addNewEdgeResult.error as string);
         }
-        
+
         const data = commitTxn(imgSaveTxnId, graph);
         if (data) {
           submitDataCall(data, graph, setGraph, imgSaveTxnId);
         }
       }
     }
-    
+
     if (!previewData?.result) {
       throw new Error("Failed to capture preview");
     }
@@ -123,7 +126,9 @@ export async function capturePreview(
     return true;
   } catch (error) {
     console.error("Failed to capture preview:", error);
-    showErrorToast(error instanceof Error ? error.message : "Failed to capture preview");
+    showErrorToast(
+      error instanceof Error ? error.message : "Failed to capture preview",
+    );
     return false;
   } finally {
     // Restore the selectedId
@@ -135,8 +140,8 @@ export async function capturePreview(
         setGraph,
         {
           selectedId: currentSelectedId,
-        }
+        },
       );
     }
   }
-} 
+}

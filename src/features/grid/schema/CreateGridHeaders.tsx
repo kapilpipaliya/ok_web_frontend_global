@@ -13,7 +13,7 @@ import type {
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { getSelectNameValue } from "~/features/grid/functions/getSelectNameValue";
 import { getTagValue } from "~/features/grid/functions/getTagValue";
-import { PageDesignerLabels } from "~/features/page_designer/functions/utils/PageDesignerLabels";
+import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";

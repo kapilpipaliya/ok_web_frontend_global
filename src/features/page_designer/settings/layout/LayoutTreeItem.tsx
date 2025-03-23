@@ -16,7 +16,7 @@ import { handleDragStart } from "~/features/page_designer/event_handler/handleDr
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
-import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/getDnDBoxShadowArgs";
+import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 

@@ -24,7 +24,6 @@ import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransactio
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { createLongPress } from "~/lib/hooks/createLongPress";
 
-import type { FunctionArgumentType } from "../form/type/FieldSchemaType";
 import type { GenericComponentProps } from "./type/FieldType";
 
 import {
@@ -35,10 +34,7 @@ import { useToast } from "../styled/modal/Toast";
 
 interface ButtonProps
   extends GenericComponentProps,
-    Omit<
-      JSX.ButtonHTMLAttributes<HTMLButtonElement>,
-      "value"
-    > {
+    Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, "value"> {
   as?: string;
   buttonType: "cancel" | "reset" | "submit";
   href?: string;

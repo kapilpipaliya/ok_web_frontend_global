@@ -3,14 +3,14 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { handlePageDrag } from "~/features/page_designer/functions/drag_drop/handlePageDrag";
-import { handleParentChange } from "~/features/page_designer/functions/drag_drop/handleParentChange";
-import { sortChildren } from "~/features/page_designer/functions/drag_drop/sortChildren";
-import { validateDragOver } from "~/features/page_designer/functions/drag_drop/validateDragOver";
+import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
+import { handlePageDrag } from "~/features/page_designer/functions/drag_drop/core/handlePageDrag";
+import { validateDragOver } from "~/features/page_designer/functions/drag_drop/core/validateDragOver";
+import { handleParentChange } from "~/features/page_designer/functions/drag_drop/hierachy/handleParentChange";
+import { sortChildren } from "~/features/page_designer/functions/drag_drop/hierachy/sortChildren";
 import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
-import { PageDesignerLabels } from "../utils/PageDesignerLabels";
 import { componentDrop } from "./componentDrop";
 
 export async function handleDropAtPosition(

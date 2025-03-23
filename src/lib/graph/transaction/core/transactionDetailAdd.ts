@@ -8,8 +8,8 @@ import type { TransactionDetail } from "../types/TransactionDetail";
 import type { TransactionValue } from "../types/TransactionType";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
-import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
+import { getLastTxnIndex } from "../value/getLastTxnIndex";
 
 /**
  * Adds a new transaction step to the transaction history while managing undo/redo state.
@@ -45,7 +45,8 @@ export function transactionDetailAdd(
     let undoStepIndexes = [...currentTxnState.undoStepIndexes];
     let revertSteps = [...currentTxnState.revertSteps];
     let submittedIndex = currentTxnState.submittedIndex;
-    let originalSubmittedIndex = currentTxnState.originalSubmittedIndex ?? submittedIndex;
+    let originalSubmittedIndex =
+      currentTxnState.originalSubmittedIndex ?? submittedIndex;
 
     const lastStepIndex = getLastTxnIndex(txnId, graph);
     // Get current position in undo history
@@ -72,7 +73,7 @@ export function transactionDetailAdd(
         );
         // discard steps should be first in the revertSteps array
         revertSteps = [...discardedSteps, ...revertSteps];
-        
+
         // When branching, adjust submittedIndex to current position
         submittedIndex = currentUndoPosition;
         // Reset originalSubmittedIndex as we're creating a new branch
@@ -95,7 +96,7 @@ export function transactionDetailAdd(
       originalSubmittedIndex,
       revertSteps,
       steps,
-      submittedIndex, 
+      submittedIndex,
       undoStepIndexes,
     };
 

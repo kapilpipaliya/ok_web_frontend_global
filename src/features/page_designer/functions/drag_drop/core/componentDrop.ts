@@ -6,18 +6,18 @@ import { batch } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drag_drop/createAttrCompMetaVertex";
-import { createAttrMetaVertex } from "~/features/page_designer/functions/drag_drop/createAttrMetaVertex";
-import { processChildrenAttrs } from "~/features/page_designer/functions/drag_drop/processChildrenAttrs";
+import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
+import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drag_drop/attributes/createAttrCompMetaVertex";
+import { createAttrMetaVertex } from "~/features/page_designer/functions/drag_drop/attributes/createAttrMetaVertex";
+import { processChildrenAttrs } from "~/features/page_designer/functions/drag_drop/hierachy/processChildrenAttrs";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
-import { uniqueNameKey } from "../../constants/constant";
-import { getUniqueName } from "../form/generateFormMetaAttributes";
-import { getChildrenAttrs } from "../layout/getChildrenAttrs";
-import { PageDesignerLabels } from "../utils/PageDesignerLabels";
-import { getComponentFromLayoutRow } from "./getComponentFromLayoutRow";
-import { getCompPropsObj } from "./getCompPropsObj";
+import { uniqueNameKey } from "../../../constants/constant";
+import { getUniqueName } from "../../form/generateFormMetaAttributes";
+import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
+import { getCompPropsObj } from "../attributes/getCompPropsObj";
+import { getComponentFromLayoutRow } from "../ui/getComponentFromLayoutRow";
 
 // @Note:
 // From Component To Layout drag:
@@ -33,7 +33,7 @@ export function componentDrop(
   toIndex?: number,
   properties?: { [key: string]: number | string },
   toVertex?: Vertex,
-  position: string = "center",
+  position = "center",
 ) {
   if (!fromVertex) {
     return -1;
@@ -71,11 +71,18 @@ export function componentDrop(
     vertexId?: string | undefined;
   };
   let props = properties ?? {};
-  
+
   // Calculate the position value
-  const posValue = calculateInitialPosition(graph, setGraph, toParentVertex, toVertex, position, toIndex);
+  const posValue = calculateInitialPosition(
+    graph,
+    setGraph,
+    toParentVertex,
+    toVertex,
+    position,
+    toIndex,
+  );
   props = { ...props, pos: posValue, [uniqueNameKey]: uniqueName };
-  
+
   if (fromVertex.L[0] === "Comp") {
     const compProps = getCompPropsObj(graph, fromVertex);
     props = { ...compProps, ...props, componentName: fromVertex.P.key };
@@ -156,39 +163,42 @@ function calculateInitialPosition(
   setGraph: SetStoreFunction<GraphInterface>,
   toParentVertex: Vertex,
   toVertex?: Vertex,
-  position: string = "center",
-  toIndex?: number
+  position = "center",
+  toIndex?: number,
 ): number {
   // If toIndex is provided, use it directly
   if (toIndex !== undefined) {
     return toIndex;
   }
-  
+
   const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex);
-  const lastPos = childrenAttrs.length > 0 
-    ? Math.max(...childrenAttrs.map(child => child.P.pos || 0)) 
-    : 0;
-  
+  const lastPos =
+    childrenAttrs.length > 0
+      ? Math.max(...childrenAttrs.map((child) => child.P.pos || 0))
+      : 0;
+
   // If no target vertex or center position, append at the end
   if (position === "center" || !toVertex) {
     return lastPos + 1;
   }
-  
+
   // Find the position of the target vertex
-  const targetIndex = childrenAttrs.findIndex(child => child.id === toVertex.id);
+  const targetIndex = childrenAttrs.findIndex(
+    (child) => child.id === toVertex.id,
+  );
   if (targetIndex === -1) {
     return lastPos + 1;
   }
-  
+
   const posCounter = targetIndex + 1; // 1-based position
-  
+
   if (position === "before" || position === "left") {
     return posCounter - 0.5;
   } else if (position === "after" || position === "right") {
     // If this is the last item, add 1 instead of 0.5
     return posCounter === lastPos ? posCounter + 1 : posCounter + 0.5;
   }
-  
+
   // Default fallback
   return lastPos + 1;
 }

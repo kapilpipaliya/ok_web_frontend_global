@@ -101,14 +101,16 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text:
-                                        options.dataContext.history?.P.email || "Anonymous",
+                                        options.dataContext.history?.P.email ||
+                                        "Anonymous",
                                     }),
                                   },
                                   {
                                     as: "div",
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
-                                      text: options.dataContext.history?.P.message,
+                                      text: options.dataContext.history?.P
+                                        .message,
                                     }),
                                   },
                                   {
@@ -117,7 +119,8 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: new Date(
-                                        options.dataContext.history?.P.createdAt,
+                                        options.dataContext.history?.P
+                                          .createdAt,
                                       ).toLocaleString(),
                                     }),
                                   },

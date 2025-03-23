@@ -4,7 +4,10 @@ import type { GraphInterface } from "../../GraphContext";
 
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 
-export function getActiveUndoIndex(txnId: number, graph: Store<GraphInterface>) {
+export function getActiveUndoIndex(
+  txnId: number,
+  graph: Store<GraphInterface>,
+) {
   const txnVertex = graph.vertexes[`txn${txnId}`];
 
   if (!txnVertex) {

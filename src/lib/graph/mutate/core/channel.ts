@@ -150,7 +150,11 @@ export function handleChannelMessage(
       data.updateVertex.vertexData,
       graph,
       setGraph,
-      { ...(data.updateVertex.options ?? {}), skipPostMessage: id, skipTransactionDetail },
+      {
+        ...(data.updateVertex.options ?? {}),
+        skipPostMessage: id,
+        skipTransactionDetail,
+      },
     );
   }
   if (data.updateEdge) {

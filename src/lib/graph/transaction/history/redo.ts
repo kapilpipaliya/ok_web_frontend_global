@@ -33,7 +33,7 @@ export function redo(
   // Get current transaction state
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex = getActiveUndoIndex(txnId, graph);
-  
+
   // Get the highest previous submitted index (may be higher than current submittedIndex after undo)
   const originalSubmittedIndex = txnValue.originalSubmittedIndex;
 
@@ -59,7 +59,7 @@ export function redo(
   )) {
     redoTxn(step, graph, setGraph);
   }
-  
+
   // When redoing steps, we need to restore the original submittedIndex if appropriate
   // If we're redoing back into previously committed steps
   if (nextUndoIndex <= originalSubmittedIndex) {
@@ -70,14 +70,14 @@ export function redo(
 
   // Update transaction state in the graph
   replaceVertexProperties(
-    0, 
-    `txn${txnId}`, 
-    graph, 
-    setGraph, 
-    (txnValue as unknown) as { [key: string]: unknown }, 
+    0,
+    `txn${txnId}`,
+    graph,
+    setGraph,
+    txnValue as unknown as { [key: string]: unknown },
     {
       cloneProperties: false,
-    }
+    },
   );
 }
 

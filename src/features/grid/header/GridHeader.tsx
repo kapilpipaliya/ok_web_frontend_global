@@ -13,8 +13,8 @@ import {
 } from "~/pages/settings/constants";
 
 import { IconButton } from "../../../components/styled/IconButton";
-import { AddNewButton } from "./AddNewButton";
 import { useDataGridContext } from "../context/DataGridContext";
+import { AddNewButton } from "./AddNewButton";
 
 interface GridHeaderProps {
   CustomAddNewButton?: (props: {

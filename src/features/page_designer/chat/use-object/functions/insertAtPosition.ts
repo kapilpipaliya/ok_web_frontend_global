@@ -7,7 +7,7 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
 import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/functions/openInNewInternalTab";
-import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/handleDropAtPosition";
+import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
 import { evalExpression } from "~/lib/expression_eval";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex";

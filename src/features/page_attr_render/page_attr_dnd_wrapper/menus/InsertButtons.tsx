@@ -7,7 +7,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
-import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/handleDropAtPosition";
+import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 

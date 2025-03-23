@@ -3,11 +3,11 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { componentDrop } from "~/features/page_designer/functions/drag_drop/componentDrop";
+import { componentDrop } from "~/features/page_designer/functions/drag_drop/core/componentDrop";
 import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
-import { sortChildren } from "../drag_drop/sortChildren";
+import { sortChildren } from "../drag_drop/hierachy/sortChildren";
 
 export function cloneLayoutAndChildren(
   layoutVertex: Vertex,

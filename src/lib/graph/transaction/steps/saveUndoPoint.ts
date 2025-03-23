@@ -28,8 +28,15 @@ export function saveUndoPoint(
       // insert the new undo point at the correct position, and move all the points after it one position to the right
       txnValue.undoStepIndexes.splice(insertIndex, 0, activeUndoIndex);
     }
-    replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue as { [key: string]: unknown }, {
-      cloneProperties: false,
-    });
+    replaceVertexProperties(
+      0,
+      `txn${txnId}`,
+      graph,
+      setGraph,
+      txnValue as { [key: string]: unknown },
+      {
+        cloneProperties: false,
+      },
+    );
   }
 }

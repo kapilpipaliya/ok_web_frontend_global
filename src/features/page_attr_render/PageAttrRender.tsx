@@ -53,7 +53,8 @@ export function PageAttrRender(
         };
         const DnDWrapper = () => {
           const PageAttrDnDWrapper = clientOnly(
-            () => import("./page_attr_dnd_wrapper/components/PageAttrDnDWrapper"),
+            () =>
+              import("./page_attr_dnd_wrapper/components/PageAttrDnDWrapper"),
           );
 
           return (

@@ -38,7 +38,6 @@ import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { createInputFilteredFormMetaData } from "~/lib/meta/functions/createInputFilteredFormMetaData";
 
-import { CreateGridHeaders } from "./schema/CreateGridHeaders";
 import {
   DataGridProvider,
   type DataGridState,
@@ -48,6 +47,7 @@ import {
 import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./header/GridHeader";
+import { CreateGridHeaders } from "./schema/CreateGridHeaders";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {

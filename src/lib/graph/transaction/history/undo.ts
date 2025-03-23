@@ -40,7 +40,7 @@ export function undo(
   // Get current transaction state
   const txnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const activeUndoIndex = txnValue.activeUndoIndex;
-  
+
   // Save the current submittedIndex value for reference
   const submittedIndex = txnValue.submittedIndex;
 
@@ -60,7 +60,7 @@ export function undo(
     undoTxn(txn, graph, setGraph);
   }
   txnValue.activeUndoIndex = newUndoIndex;
-  
+
   // Update submittedIndex if we're undoing past it
   // This prevents submittedIndex from being ahead of activeUndoIndex
   if (submittedIndex > newUndoIndex) {
@@ -76,11 +76,11 @@ export function undo(
     txnValue.undoStepIndexes = txnValue.undoStepIndexes.filter(
       (index) => index <= txnValue.activeUndoIndex,
     );
-    
+
     // If we're removing steps and some were committed, adjust submittedIndex
     if (submittedIndex > newUndoIndex) {
       txnValue.submittedIndex = newUndoIndex;
-      
+
       // If we're permanently removing steps, we should also update originalSubmittedIndex
       // to not exceed the new maximum length
       if (txnValue.originalSubmittedIndex > newUndoIndex) {
@@ -90,9 +90,16 @@ export function undo(
   }
 
   // Update transaction state in the graph
-  replaceVertexProperties(0, `txn${txnId}`, graph, setGraph, txnValue as unknown as { [key: string]: unknown }, {
-    cloneProperties: false,
-  });
+  replaceVertexProperties(
+    0,
+    `txn${txnId}`,
+    graph,
+    setGraph,
+    txnValue as unknown as { [key: string]: unknown },
+    {
+      cloneProperties: false,
+    },
+  );
 }
 
 /**

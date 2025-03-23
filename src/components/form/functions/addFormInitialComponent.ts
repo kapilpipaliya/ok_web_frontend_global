@@ -3,7 +3,7 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { Id, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/addComponentAttrInForm";
+import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/attributes/addComponentAttrInForm";
 
 // deprecated
 export function addFormInitialComponent(
@@ -150,7 +150,7 @@ function addComponent(
   type: string,
   attributes: any = {},
   toVertex?: Vertex,
-  position: string = "center",
+  position = "center",
 ) {
   const componentIndex = addComponentAttrInPage(
     formVertex,

@@ -4,6 +4,7 @@ import { type Accessor, createMemo } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
+import { nameExpr } from "~/features/page_designer/settings/functions/nameExpr";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
@@ -11,7 +12,6 @@ import { iconMap } from "~/lib/ui/iconMap";
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentName } from "../../functions/component/getComponentLabel";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
-import { nameExpr } from "../utils/nameExpr";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
 
 export function TreeItemContent(

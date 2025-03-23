@@ -188,7 +188,11 @@ export function mergeVertexProperties<T extends { [key: string]: any }>(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   properties: Partial<T>,
-  options?: { cloneProperties?: boolean; skipPostMessage?: string; skipTransactionDetail?: boolean },
+  options?: {
+    cloneProperties?: boolean;
+    skipPostMessage?: string;
+    skipTransactionDetail?: boolean;
+  },
 ): { error: string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId =
@@ -256,7 +260,11 @@ export function replaceVertexProperties(
   setGraph: SetStoreFunction<GraphInterface>,
   properties: { [key: string]: unknown },
   // clonning will reduce performance, so we can use this flag to disable it.
-  options?: { cloneProperties?: boolean; skipPostMessage?: string; skipTransactionDetail?: boolean },
+  options?: {
+    cloneProperties?: boolean;
+    skipPostMessage?: string;
+    skipTransactionDetail?: boolean;
+  },
 ): { error: boolean | string; txnDetailIndex?: number } {
   return untrack(() => {
     const actualVertexId =

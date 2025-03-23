@@ -5,13 +5,13 @@ import { klona } from "klona";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { getComponentFromLayoutRow } from "~/features/page_designer/functions/drag_drop/getComponentFromLayoutRow";
+import { getComponentFromLayoutRow } from "~/features/page_designer/functions/drag_drop/ui/getComponentFromLayoutRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
-import { uniqueNameKey } from "../../constants/constant";
-import { getUniqueName } from "../form/generateFormMetaAttributes";
-import { getChildrenAttrs } from "../layout/getChildrenAttrs";
+import { uniqueNameKey } from "../../../constants/constant";
+import { getUniqueName } from "../../form/generateFormMetaAttributes";
+import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
 import { sortChildren } from "./sortChildren";
 
 export function getRowProps(

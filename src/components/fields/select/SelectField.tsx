@@ -202,7 +202,7 @@ export function SelectField(
           } else if (getComponent() === "Select") {
             parsedValue = isObject(value[0])
               ? // @ts-expect-error ignore
-              value[0][meta().P.valueKey || "id"]
+                value[0][meta().P.valueKey || "id"]
               : value[0];
           } else {
             parsedValue = value;

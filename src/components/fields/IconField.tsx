@@ -9,15 +9,7 @@ interface IconFieldProps extends GenericComponentProps {
 }
 
 export const IconField = (props: IconFieldProps) => {
-  const [local, others] = splitProps(props, [
-    "class",
-  ]);
+  const [local, others] = splitProps(props, ["class"]);
 
-  return (
-    <Icon
-      class={`${local.class || ""}`}
-      noobserver
-      {...others}
-    />
-  );
+  return <Icon class={`${local.class || ""}`} noobserver {...others} />;
 };

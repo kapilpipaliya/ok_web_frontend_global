@@ -8,9 +8,7 @@ import type { GenericComponentProps } from "./type/FieldType";
 
 // this is currently not used, but may be used in future.
 export function PageField(props: Readonly<GenericComponentProps>) {
-  const [local, _others] = splitProps(props, [
-    "children",
-  ]);
+  const [local, _others] = splitProps(props, ["children"]);
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => parentRenderContext()?.context.meta;

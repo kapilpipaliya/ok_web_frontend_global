@@ -4,8 +4,8 @@ import { createStore } from "solid-js/store";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
-import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { getDataVertex } from "~/features/page_attr_render/functions/getDataVertex";
+import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import {
   PreviewContext,

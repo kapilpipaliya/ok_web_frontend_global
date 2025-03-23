@@ -85,7 +85,13 @@ export function undoTxn(
         break;
 
       case "merge":
-        mergeVertexProperties(0, actualVertexId, graph, setGraph, originalData.P);
+        mergeVertexProperties(
+          0,
+          actualVertexId,
+          graph,
+          setGraph,
+          originalData.P,
+        );
         break;
       case "replace":
         // Restore original vertex properties

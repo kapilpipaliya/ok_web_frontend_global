@@ -13,6 +13,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
+import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
@@ -25,7 +26,6 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "../context/LayoutContext";
-import { PageDesignerLabels } from "../functions/utils/PageDesignerLabels";
 import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
 import { openInNewInternalTab } from "./pages/functions/openInNewInternalTab";

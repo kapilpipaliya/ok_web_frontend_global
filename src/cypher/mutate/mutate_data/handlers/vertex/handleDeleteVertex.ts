@@ -26,7 +26,9 @@ export async function handleDeleteVertex(
       deletedVertexes.push(id);
       txnResult.push({ deleteVertex: { error: false, id } });
     } else {
-      txnResult.push({ deleteVertex: { error: true, id, message: "Vertex not found" } });
+      txnResult.push({
+        deleteVertex: { error: true, id, message: "Vertex not found" },
+      });
     }
   } catch (error: unknown) {
     throw new Error(

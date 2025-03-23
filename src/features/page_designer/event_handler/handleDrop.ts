@@ -5,10 +5,10 @@ import type { PageLayoutObject } from "~/features/page_designer/context/LayoutCo
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/handleDropAtPosition";
-import { loadPageData } from "~/features/page_designer/functions/utils/loadPageData";
+import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
+import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
+import { loadPageData } from "~/features/page_designer/functions/fetch/loadPageData";
 
-import { PageDesignerLabels } from "../functions/utils/PageDesignerLabels";
 import { onLayoutItemClick } from "./onLayoutItemClick";
 
 export async function handleDrop(
@@ -48,7 +48,7 @@ export async function handleDrop(
     if (PageDesignerLabels.includes(fromVertex.L[0])) {
       await loadPageData(graph, setGraph, fromVertex, showErrorToast);
     }
-    
+
     // NOTE: Multiple selected dragged vertexes may not drop before or after as expected. test it.
     const layoutId = await handleDropAtPosition(
       graph,

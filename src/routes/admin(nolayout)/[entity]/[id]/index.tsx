@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { Match, Switch } from "solid-js";
 
-import { PageDesignerLabels } from "~/features/page_designer/functions/utils/PageDesignerLabels";
+import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { PageDesignerWrapper } from "~/features/page_designer/layout/PageDesignerWrapper";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 

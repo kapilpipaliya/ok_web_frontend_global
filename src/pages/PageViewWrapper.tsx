@@ -29,7 +29,6 @@ import {
   type FormStoreObject,
   getInitialFormStore,
 } from "~/components/form/context/FormContext";
-import { addFormInitialComponent } from "~/components/form/functions/addFormInitialComponent";
 import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
 import { PreviewPage } from "~/components/styled/PreviewPage";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
@@ -38,8 +37,8 @@ import {
   getConfiguredPermissions,
   hasPermissions,
 } from "~/features/page_attr_render/permissions";
+import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
-import { PageDesignerLabels } from "~/features/page_designer/functions/utils/PageDesignerLabels";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useGraph } from "~/lib/graph/GraphContext";

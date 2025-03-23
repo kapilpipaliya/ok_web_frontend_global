@@ -11,9 +11,10 @@ import {
   Switch,
 } from "solid-js";
 
-import type { FunctionArgumentType } from "../form/type/FieldSchemaType";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+
+import type { FunctionArgumentType } from "../form/type/FieldSchemaType";
 
 export interface FormInputField extends Field {
   description?: GenericField | string;

@@ -143,8 +143,8 @@ export function commitTxn(
       // Merge steps operating on the same entity before returning
       const allSteps = [...reverseStepsToCommit, ...stepsToCommit];
       mutationArgs.transactions = mergeStepsForSameEntities(allSteps);
-      
-      // When committing successfully, the updateSubmittedIndex function will be 
+
+      // When committing successfully, the updateSubmittedIndex function will be
       // called separately after server response in submitDataCall
       return mutationArgs;
     }

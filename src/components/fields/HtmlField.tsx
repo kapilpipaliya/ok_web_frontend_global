@@ -10,7 +10,7 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
-import { setPropertyValueGlobal } from "~/features/page_designer/functions/utils/setPropertyValueGlobal";
+import { setPropertyValueGlobal } from "~/features/page_designer/functions/layout/setPropertyValueGlobal";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
@@ -55,7 +55,10 @@ export function HtmlField(
     }
 
     const target = e.target as HTMLSpanElement;
-    if (formStoreVertex()?.P.selectedId !== -1 && target.textContent !== local.text) {
+    if (
+      formStoreVertex()?.P.selectedId !== -1 &&
+      target.textContent !== local.text
+    ) {
       setPropertyValueGlobal(
         graph,
         setGraph,

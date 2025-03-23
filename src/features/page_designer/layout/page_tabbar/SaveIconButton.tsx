@@ -8,7 +8,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
-import { capturePreview } from "~/lib/utils/capturePreview";
+import { capturePreview } from "~/lib/playwright/capturePreview";
 import { headerIconButtonClass } from "~/pages/settings/constants";
 
 export function SaveIconButton(props: { formStoreId: string }) {
@@ -36,12 +36,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
 
     // If form saved successfully, capture preview
     if (!formSubmitError) {
-      await capturePreview(
-        formStoreVertex,
-        graph,
-        setGraph,
-        showErrorToast
-      );
+      await capturePreview(formStoreVertex, graph, setGraph, showErrorToast);
     }
 
     return !formSubmitError;

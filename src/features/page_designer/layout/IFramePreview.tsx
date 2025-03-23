@@ -18,7 +18,14 @@ export const IFramePreview = (props: {
   const onLoad = () => {
     const channel = getChannel(props.formStoreId);
     channel.onmessage = (msg) =>
-      handleChannelMessage(msg, graph, setGraph, props.formStoreId, undefined, true);
+      handleChannelMessage(
+        msg,
+        graph,
+        setGraph,
+        props.formStoreId,
+        undefined,
+        true,
+      );
     channel.postMessage(
       JSON.stringify({ graph: { ...graph, broadcastChannels: [] } }),
     );

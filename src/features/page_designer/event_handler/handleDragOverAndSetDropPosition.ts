@@ -6,8 +6,8 @@ import type { PageLayoutObject } from "~/features/page_designer/context/LayoutCo
 import type { Id, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { getIndicatorPosition } from "~/features/page_designer/functions/drag_drop/getIndicatorPosition";
-import { validateDragOver } from "~/features/page_designer/functions/drag_drop/validateDragOver";
+import { validateDragOver } from "~/features/page_designer/functions/drag_drop/core/validateDragOver";
+import { getIndicatorPosition } from "~/features/page_designer/functions/drag_drop/ui/getIndicatorPosition";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 export function handleDragOverAndSetDropPosition(
