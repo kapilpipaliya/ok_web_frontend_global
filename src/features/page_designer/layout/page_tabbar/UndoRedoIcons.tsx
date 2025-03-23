@@ -35,11 +35,8 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
       <For each={icons}>
         {(item) => (
           <IconButton
-            class={`${
-              item.disabled()
-                ? "cursor:not-allowed opacity:.5"
-                : "hover:color:#000"
-            } ${headerIconButtonClass}`}
+            class={`${headerIconButtonClass}`}
+            disabled={item.disabled()}
             icon={item.icon}
             onClick={item.onClick}
             size={22}

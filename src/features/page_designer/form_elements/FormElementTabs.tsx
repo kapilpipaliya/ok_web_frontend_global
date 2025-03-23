@@ -86,7 +86,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
           <div class="p:12 font-weight:500">Components</div>
         )}
         <IconButton
-          class={`${headerIconButtonClass} ml:1px cursor:not-allowed:disabled opacity:.5:disabled`}
+          class={`${headerIconButtonClass} ml:1px`}
           icon="ph:plus-circle"
           onClick={() => {
             if (!props.rootLevel) {

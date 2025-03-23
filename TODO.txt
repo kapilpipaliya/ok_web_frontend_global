@@ -3,11 +3,8 @@ Follow Guidelines:
 
 Bugs:
 - Drag Over is not as fast as pineGrow
-- after save it give error
-- dont change opacity:.5 opacity:1:hover, use color instead.
 - css properties editor, display property options not working properly on small screen. allow searching and resize height of options many.
 - The selcted component menu and hover menu should be different color.
--     "padding": "0.5rem 1rem", not working.
 
 Feature:
 

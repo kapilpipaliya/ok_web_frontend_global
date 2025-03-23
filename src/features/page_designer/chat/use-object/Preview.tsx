@@ -213,7 +213,7 @@ export function Preview(props: {
               </select>
 
               <IconButton
-                class={`${headerIconButtonClass} cursor:not-allowed:disabled opacity:.5:disabled`}
+                class={`${headerIconButtonClass}`}
                 disabled={
                   layoutStoreVertex()?.P.formId === formId ||
                   !layoutStoreVertex()?.P.formId ||

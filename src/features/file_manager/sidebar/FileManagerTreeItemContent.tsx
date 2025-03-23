@@ -31,7 +31,7 @@ export function FileManagerTreeItemContent(
         toggleExpand={props.toggleExpand}
       />
       <IconButton
-        class="cursor:pointer mr:5px opacity:.5 opacity:1:hover"
+        class="cursor:pointer mr:5px color:gray-50 color:gray-90:hover"
         icon={
           props.item.L[0] === "Folder"
             ? "ic:round-folder"

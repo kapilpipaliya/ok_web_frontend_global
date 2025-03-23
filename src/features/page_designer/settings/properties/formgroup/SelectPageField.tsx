@@ -5,6 +5,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";
+import { headerIconButtonClass } from "~/pages/settings/constants";
 
 import { Label } from "./Label";
 
@@ -29,7 +30,7 @@ export function SelectPageField(
         <span>{option.P.key}</span>
         <IconButton
           icon={"ph:gear"}
-          iconClass={"opacity:.5 opacity:1:hover"}
+          iconClass={headerIconButtonClass}
           onClick={(e) => {
             e.stopPropagation();
             window.open(`/admin/Page/${option.id}`, "_blank");
