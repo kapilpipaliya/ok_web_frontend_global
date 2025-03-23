@@ -112,58 +112,62 @@ export function SettingTabs() {
   );
 
   return (
-    <div class="flex flex:column h:100%">
-      <div class="bg:base-5">
+    <div class="display:grid grid-template-rows:auto|1fr grid-template-columns:1fr height:100%">
+      <div class="bg:base-5 overflow-x:auto">
         <Tabs />
       </div>
-      <div
-        class="p:5"
-        classList={{ "display:none": layoutStore().selectedTab !== "settings" }}
-      >
-        <FormConfig />
-      </div>
+      <div class="overflow:auto">
+        <div
+          class="p:5"
+          classList={{
+            "display:none": layoutStore().selectedTab !== "settings",
+          }}
+        >
+          <FormConfig />
+        </div>
 
-      <Show keyed when={formStoreVertex()?.id}>
-        <DesignerFormIdContext.Provider value={formStoreVertex().id}>
-          <FormContext.Provider value={formStoreVertex().id}>
-            <Show when={layoutStore().selectedTab === "status"}>
-              <FormStatus />
-            </Show>
-            {/* Keep Display:none to keep expanded state */}
-            <div
-              classList={{
-                "display:none": layoutStore().selectedTab !== "layers",
-              }}
-            >
-              <LayoutTree />
-            </div>
-
-            <Show
-              when={
-                graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] ===
-                "Form"
-              }
-            >
-              <Show when={layoutStore().selectedTab === "Keys"}>
-                {/* <PrimaryKey /> */}
-                <NameKey />
-                <Divider class="mt:10" />
-                <HeaderWithDescription
-                  description="Add unique constrains to your form to ensure that no duplicate data is submitted."
-                  title="Unique Constrains"
-                />
-                <UniqueConstrains />
+        <Show keyed when={formStoreVertex()?.id}>
+          <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+            <FormContext.Provider value={formStoreVertex().id}>
+              <Show when={layoutStore().selectedTab === "status"}>
+                <FormStatus />
               </Show>
-            </Show>
-            <Show when={layoutStore().selectedTab === "Permission"}>
-              <Permission />
-            </Show>
-            <Show when={layoutStore().selectedTab === "Variants"}>
-              <Variants />
-            </Show>
-          </FormContext.Provider>
-        </DesignerFormIdContext.Provider>
-      </Show>
+              {/* Keep Display:none to keep expanded state */}
+              <div
+                classList={{
+                  "display:none": layoutStore().selectedTab !== "layers",
+                }}
+              >
+                <LayoutTree />
+              </div>
+
+              <Show
+                when={
+                  graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] ===
+                  "Form"
+                }
+              >
+                <Show when={layoutStore().selectedTab === "Keys"}>
+                  {/* <PrimaryKey /> */}
+                  <NameKey />
+                  <Divider class="mt:10" />
+                  <HeaderWithDescription
+                    description="Add unique constrains to your form to ensure that no duplicate data is submitted."
+                    title="Unique Constrains"
+                  />
+                  <UniqueConstrains />
+                </Show>
+              </Show>
+              <Show when={layoutStore().selectedTab === "Permission"}>
+                <Permission />
+              </Show>
+              <Show when={layoutStore().selectedTab === "Variants"}>
+                <Variants />
+              </Show>
+            </FormContext.Provider>
+          </DesignerFormIdContext.Provider>
+        </Show>
+      </div>
     </div>
   );
 }

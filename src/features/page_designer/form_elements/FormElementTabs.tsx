@@ -156,14 +156,14 @@ export function FormElementTabs() {
   );
 
   return (
-    <div class="flex flex:column h:100%">
-      <div class="bg:base-5">
+    <div class="display:grid grid-template-rows:auto|1fr grid-template-columns:1fr height:100%">
+      <div class="bg:base-5 overflow-x:auto">
         <TabsContainer>
           <TabList />
         </TabsContainer>
       </div>
 
-      <div class={`flex:1 ${STYLES.overflow}`}>
+      <div class={`${STYLES.overflow}`}>
         <Switch>
           <Match when={selectedTab().collection === "Comp"}>
             <ComponentList

@@ -8,6 +8,7 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
+import { SettingTabs } from "~/features/page_designer/settings/SettingTabs";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { GraphView } from "~/pages/debug/GraphView";
@@ -17,7 +18,6 @@ import type { PageLayoutObject } from "../context/LayoutContext";
 
 import { UseObjectAIPanel } from "../chat/use-object/UseObjectAIPanel";
 import { HeaderRow } from "../header/header_row/HeaderRow";
-import { SettingsWrapper } from "../settings/SettingsWrapper";
 import { DeleteConfirmation } from "./main_content/DeleteConfirmation";
 import { FormElements } from "./main_content/FormElements";
 import { PageViewComponent } from "./main_content/PageViewComponent";
@@ -360,7 +360,7 @@ export function RenderMainContent() {
           resizeKey="rightWidth2"
           resizePosition="left"
         >
-          <SettingsWrapper />
+          <SettingTabs />
         </Panel>
       </div>
 
