@@ -44,7 +44,6 @@ export function HtmlField(
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [local, others] = splitProps(props, [
     "componentName",
-    "onChange",
     "value",
     "as",
     "class",

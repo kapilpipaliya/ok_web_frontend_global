@@ -213,7 +213,7 @@ export function TableInputField(
                     joinVertex={vertex}
                     meta={meta()!}
                     metaInstance={graph.vertexes[metaVertexId]}
-                    onChange={props.onChange}
+                    // onChange={props.onChange}
                     rowIndex={index()}
                     setDragFromIndex={setDragFromIndex}
                     setDragToIndex={setDragToIndex}

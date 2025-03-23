@@ -37,13 +37,12 @@ interface ButtonProps
   extends GenericComponentProps,
     Omit<
       JSX.ButtonHTMLAttributes<HTMLButtonElement>,
-      "onChange" | "onClick" | "value"
+      "value"
     > {
   as?: string;
   buttonType: "cancel" | "reset" | "submit";
   href?: string;
   longPressDuration?: number;
-  onClick?: (options: FunctionArgumentType) => void;
   onLongPress?: (event: Event) => void;
   text?: string;
 }
@@ -72,7 +71,6 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     "value",
     "text",
     "onClick",
-    "onChange",
     "onLongPress",
     "longPressDuration",
     "onMouseDown",
@@ -132,9 +130,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
       } else if (local.buttonType === "reset") {
         onReset();
       } else if (local.onClick) {
-        local.onClick(
-          parentRenderContext()?.context ?? ({} as FunctionArgumentType),
-        );
+        local.onClick();
       }
     });
   };

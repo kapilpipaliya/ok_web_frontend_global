@@ -10,11 +10,9 @@ import type { GenericComponentProps } from "./type/FieldType";
 export function PageField(props: Readonly<GenericComponentProps>) {
   const [local, _others] = splitProps(props, [
     "componentName",
-    "onChange",
     "value",
     "isRealTime",
     "isTableInside",
-    "txnId",
     "children",
   ]);
   const parentItems = usePageRenderContext();

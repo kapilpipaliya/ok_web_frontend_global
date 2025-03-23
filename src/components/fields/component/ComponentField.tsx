@@ -27,11 +27,9 @@ export function ComponentField(
 ) {
   const [_local, otherProps] = splitProps(props, [
     "componentName",
-    "onChange",
     "value",
     "isRealTime",
     "isTableInside",
-    "txnId",
     "componentId",
   ]);
 

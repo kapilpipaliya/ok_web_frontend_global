@@ -132,7 +132,7 @@ export const SortableRow = (
               isNoPermissionCheck={props.isNoPermissionCheck}
               isRealTime={props.isRealTime}
               joinVertex={props.joinVertex}
-              onChange={props.onChange}
+              // onChange={props.onChange}
               txnId={props.txnId}
             />
           )}
@@ -155,7 +155,7 @@ export const SortableRow = (
               isTableInside={false}
               // When we have a Table we pass original Table Meta Vertex
               meta={expandVertex()!}
-              onChange={props.onChange}
+              // onChange={props.onChange}
             />
           </td>
         </tr>

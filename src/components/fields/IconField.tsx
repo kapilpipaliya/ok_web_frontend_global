@@ -13,7 +13,6 @@ interface IconFieldProps extends GenericComponentProps {
 export const IconField = (props: IconFieldProps) => {
   const [local, others] = splitProps(props, [
     "componentName",
-    "onChange",
     "value",
     "class",
     "isViewMode",

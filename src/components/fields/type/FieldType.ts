@@ -8,7 +8,7 @@ export interface GenericComponentProps {
   disabled?: boolean;
   isRealTime?: boolean;
   isTableInside?: boolean;
-  onChange?(data: any): void;
+  // onChange?(data: any): void;
   title?: string;
 
   value?: any;

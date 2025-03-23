@@ -620,7 +620,6 @@ export function DynamicComponent(
   const ignoreMetaKeys = [
     "hide",
     "children",
-    "onChange",
     "projections",
     "props",
     "mounted",
@@ -698,7 +697,7 @@ export function DynamicComponent(
           // isRealTime={props.isRealTime}
           // isTableInside={props.isTableInside}
           // isViewMode={isViewMode()}
-          onChange={onChange}
+          // onChange={onChange}
           props={null}
           readOnly={isReadOnly()}
           ref={setRef}

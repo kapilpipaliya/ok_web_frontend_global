@@ -28,8 +28,6 @@ export function FileField(props: Readonly<Properties>) {
     "prefix",
     "help",
     "error",
-    "onchange",
-    "onChange",
   ]);
 
   // using XMLHttpRequest because fetch can't track upload process yet

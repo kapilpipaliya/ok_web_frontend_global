@@ -12,6 +12,8 @@ import {
 } from "solid-js";
 
 import type { FunctionArgumentType } from "../form/type/FieldSchemaType";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 
 export interface FormInputField extends Field {
   description?: GenericField | string;
@@ -29,7 +31,7 @@ export interface FormInputField extends Field {
   minLength?: number;
   name: string;
   noRequiredIndicator?: boolean;
-  onChange?: (options: FunctionArgumentType) => void;
+  onChange?: () => void;
   placeholder?: string;
   readOnly?: boolean;
   // regex?: RegexValidation[];
@@ -54,7 +56,7 @@ export interface TextInputFieldMeta extends FormInputField {
 interface TextInputFieldProps
   extends Omit<
       JSX.InputHTMLAttributes<HTMLInputElement>,
-      "children" | "hide" | "name" | "onChange" | "required" | "value"
+      "children" | "hide" | "name" | "required" | "value"
     >,
     TextInputFieldMeta {
   onChange?: (value: string) => void;
@@ -81,11 +83,17 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
   ]);
 
   const [reference, setReference] = createSignal<HTMLInputElement | null>(null);
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
   const handleChange = (event: Event) => {
     event.stopPropagation();
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-    local.onChange?.(target.value);
+    if (local.onChange) {
+      local.onChange(target.value);
+    } else {
+      parentRenderContext()?.context.onChange?.(target.value);
+    }
   };
 
   const handleViewClick = () => {

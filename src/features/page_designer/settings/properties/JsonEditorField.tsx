@@ -3,7 +3,7 @@ import { createEffect, createSignal, on } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { VanilaJsonEditor } from "~/components/fields/VanilaJsonEditor";
+import { VanilaJsonEditor } from "~/components/styled/VanilaJsonEditor";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";

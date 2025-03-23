@@ -49,7 +49,7 @@ export function DisplayProperty(
     isNoPermissionCheck?: boolean;
     isRealTime: boolean;
     joinVertex: Vertex;
-    onChange?: (data: any) => void;
+    // onChange?: (data: any) => void;
     txnId: number;
   }>,
 ) {

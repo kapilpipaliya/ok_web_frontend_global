@@ -42,6 +42,7 @@ export function SelectField(
       data?: Vertex;
       isRealTime?: boolean;
       meta?: Vertex;
+      onChange?: (value: string) => void;
       placeholder?: string;
       title: string;
       txnId?: number;
@@ -201,22 +202,24 @@ export function SelectField(
           } else if (getComponent() === "Select") {
             parsedValue = isObject(value[0])
               ? // @ts-expect-error ignore
-                value[0][meta().P.valueKey || "id"]
+              value[0][meta().P.valueKey || "id"]
               : value[0];
           } else {
             parsedValue = value;
           }
-          props.onChange
-            ? props.onChange(parsedValue)
-            : setValueGlobal(
-                graph,
-                setGraph,
-                txnId,
-                meta(),
-                data(),
-                parsedValue,
-                false,
-              );
+          if (props.onChange) {
+            props.onChange(parsedValue);
+          } else {
+            setValueGlobal(
+              graph,
+              setGraph,
+              txnId,
+              meta(),
+              data(),
+              parsedValue,
+              false,
+            );
+          }
         } else {
           setSelectValueHelper(
             txnId,
