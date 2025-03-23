@@ -17,6 +17,7 @@ import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { getTabLabel } from "./functions/getTabLabel";
 
 export function TabBar(props: { mainPanel: Id }) {
   const [graph, setGraph] = useGraph();
@@ -141,7 +142,7 @@ export function TabBar(props: { mainPanel: Id }) {
             onDrop={() => moveTab(props.mainPanel)}
           >
             <span class="user-select:none;">
-              {graph.vertexes[openedFormId].P.label}
+              {getTabLabel(openedFormId, graph)}
               {isUnsaved(graph.vertexes[openedFormId].P.formId) && "*"}
             </span>
             <IconButton
