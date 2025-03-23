@@ -44,7 +44,8 @@ export function SaveIconButton(props: { formStoreId: string }) {
 
   return (
     <IconButton
-      class={`${isDisabled() ? "cursor:not-allowed" : ""} ${headerIconButtonClass}`}
+      class={`${headerIconButtonClass}`}
+      disabled={isDisabled()}
       icon="ph:floppy-disk"
       onClick={isDisabled() ? undefined : saveAndCaptureForm}
       size={22}

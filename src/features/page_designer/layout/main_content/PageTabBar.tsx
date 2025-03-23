@@ -40,8 +40,8 @@ export function PageTabBar(props: {
               </div>
             </Show> */}
       <div class="flex ai:center gap:2">
-        <SaveIconButton formStoreId={props.formStoreId} />
         <RefreshButton handleRefresh={props.handleRefresh} />
+        <SaveIconButton formStoreId={props.formStoreId} />
         <ShareButton formStoreId={props.formStoreId} />
         <Show when={props.previewsLength && props.previewsLength > 1}>
           <IconButton

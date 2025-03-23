@@ -2,7 +2,7 @@ import type { Store } from "solid-js/store";
 
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
+import { commitTxn } from "../core/commitTxn";
 
 export function isDisabledTxn(
   txnId: number,
@@ -15,12 +15,5 @@ export function isDisabledTxn(
   if (!txnVertex) {
     return true;
   }
-  const activeUndoIndex = getActiveUndoIndex(txnId, graph);
-  return (
-    txnVertex.P.steps.length === 0 ||
-    (activeUndoIndex !== -1 &&
-      txnVertex.P.preventUndoBeforeIndex !== -1 &&
-      activeUndoIndex === txnVertex.P.preventUndoBeforeIndex) ||
-    false
-  );
+  return commitTxn(txnId, graph) === undefined;
 }

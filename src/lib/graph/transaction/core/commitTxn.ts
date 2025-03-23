@@ -52,6 +52,9 @@ export function commitTxn(
       steps = txnVertex.P.steps.slice(submittedIndex + 1, activeUndoIndex + 1);
       revertSteps = [...txnVertex.P.revertSteps];
     }
+    if (steps.length === 0 && revertSteps.length === 0) {
+      return;
+    }
 
     // Update transaction status
     // txnVertex.P.status = 'committed';
