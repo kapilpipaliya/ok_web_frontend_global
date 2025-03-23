@@ -19,12 +19,12 @@ import { FormMetaData } from "~/lib/meta/formMetaData";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { STYLES } from "~/pages/settings/constants";
 
-import type { DataGridState } from "./DataGridContext";
+import type { DataGridState } from "../context/DataGridContext";
 
-import { IconButton } from "../../components/styled/IconButton";
-import { TooltipWrapper } from "../../components/styled/modal/TooltipWrapper";
-import { selectedValue } from "../../lib/graph/get/sync/edge/selectedValue";
-import { ModifyJsonButton } from "./ModifyJsonButton";
+import { IconButton } from "../../../components/styled/IconButton";
+import { TooltipWrapper } from "../../../components/styled/modal/TooltipWrapper";
+import { selectedValue } from "../../../lib/graph/get/sync/edge/selectedValue";
+import { ModifyJsonButton } from "../cell/ModifyJsonButton";
 
 function ImageWrapper(props: { alt?: string; class?: string; src: string }) {
   return (

@@ -5,7 +5,7 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
-import type { PageLayoutObject } from "../../context/LayoutContext";
+import type { PageLayoutObject } from "../../../context/LayoutContext";
 
 export function onCompDragStart(
   e: DragEvent,

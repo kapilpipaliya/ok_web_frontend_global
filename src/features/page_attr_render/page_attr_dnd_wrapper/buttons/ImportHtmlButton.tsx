@@ -5,7 +5,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { IconButton } from "~/components/styled/IconButton";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
-import { ImportMenu } from "./ImportMenu";
+import { ImportMenu } from "../menus/ImportMenu";
 
 interface ImportHtmlButtonProps {
   item: Vertex;

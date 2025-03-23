@@ -28,7 +28,7 @@ import {
 import { PageDesignerLabels } from "../functions/utils/PageDesignerLabels";
 import { TabButton } from "../settings/TabButton";
 import { ComponentList } from "./components/ComponentList";
-import { openInNewInternalTab } from "./pages/openInNewInternalTab";
+import { openInNewInternalTab } from "./pages/functions/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
 

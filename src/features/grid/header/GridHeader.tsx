@@ -12,9 +12,9 @@ import {
   STYLES,
 } from "~/pages/settings/constants";
 
-import { IconButton } from "../../components/styled/IconButton";
+import { IconButton } from "../../../components/styled/IconButton";
 import { AddNewButton } from "./AddNewButton";
-import { useDataGridContext } from "./DataGridContext";
+import { useDataGridContext } from "../context/DataGridContext";
 
 interface GridHeaderProps {
   CustomAddNewButton?: (props: {

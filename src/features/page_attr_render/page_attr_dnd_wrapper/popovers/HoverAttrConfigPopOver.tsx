@@ -8,7 +8,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
-import { ComponentName } from "./ComponentName";
+import { ComponentName } from "../components/ComponentName";
 
 export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();

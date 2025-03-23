@@ -201,6 +201,9 @@ export function DynamicComponent(
         const errorVertexId = `${props.data?.id}-error`;
         replaceVertexProperties(0, errorVertexId, graph, setGraph, {});
       },
+      get componentName() {
+        return componentName();
+      },
       get context() {
         return previewStore.context;
       },

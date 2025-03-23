@@ -2,7 +2,7 @@ import type { CellContext } from "@tanstack/solid-table";
 
 import { For } from "solid-js";
 
-import type { DataGridStore } from "~/features/grid/DataGridContext";
+import type { DataGridStore } from "~/features/grid/context/DataGridContext";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { DataGrid } from "~/features/grid/DataGrid";

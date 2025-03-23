@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
-import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/openInNewInternalTab";
+import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/functions/openInNewInternalTab";
 import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/handleDropAtPosition";
 import { evalExpression } from "~/lib/expression_eval";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";

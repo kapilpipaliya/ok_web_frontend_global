@@ -12,7 +12,7 @@ import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
-import type { DataGridState } from "../DataGridContext";
+import type { DataGridState } from "../context/DataGridContext";
 
 export function useDeleteRowConfirm(
   gridState: DataGridState,

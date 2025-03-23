@@ -21,7 +21,7 @@ import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { STYLES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { getTreeData, type NavItem } from "../getTreeData";
+import { getTreeData, type NavItem } from "../functions/getTreeData";
 import { PageItem } from "./PageItem";
 
 export function PagesList(props: Readonly<{ coll: string }>) {

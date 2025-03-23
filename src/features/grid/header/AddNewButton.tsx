@@ -5,7 +5,7 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import {
   IconButton,
   type IconButtonProps,
-} from "../../components/styled/IconButton";
+} from "../../../components/styled/IconButton";
 
 export function AddNewButton(
   props: IconButtonProps & {

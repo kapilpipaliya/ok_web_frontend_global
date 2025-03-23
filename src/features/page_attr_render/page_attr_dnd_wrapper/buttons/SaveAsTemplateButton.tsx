@@ -6,7 +6,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
-import { SaveAsTemplateMenu } from "./SaveAsTemplateMenu";
+import { SaveAsTemplateMenu } from "../menus/SaveAsTemplateMenu";
 
 interface SaveAsTemplateButtonProps {
   item: Vertex;

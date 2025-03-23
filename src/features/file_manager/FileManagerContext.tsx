@@ -5,7 +5,7 @@ import { batch, createContext, type JSX, onMount, useContext } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import type { MongoFilter } from "~/cypher/queries/evaluate/mongoToCypher";
-import type { DataGridStore } from "~/features/grid/DataGridContext";
+import type { DataGridStore } from "~/features/grid/context/DataGridContext";
 import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 

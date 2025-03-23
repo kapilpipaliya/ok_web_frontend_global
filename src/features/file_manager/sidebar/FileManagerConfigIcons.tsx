@@ -8,7 +8,7 @@ import { ZIndex } from "~/components/fields/ZIndex";
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useToast } from "~/components/styled/modal/Toast";
-import { QuickEditModal } from "~/features/grid/QuickEditModal";
+import { QuickEditModal } from "~/features/grid/cell/QuickEditModal";
 import { CommonAddComponent } from "~/features/page_designer/settings/variants/header/CommonAddComponent";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph } from "~/lib/graph/GraphContext";

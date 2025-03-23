@@ -53,7 +53,7 @@ export function PageAttrRender(
         };
         const DnDWrapper = () => {
           const PageAttrDnDWrapper = clientOnly(
-            () => import("./page_attr_dnd_wrapper/PageAttrDnDWrapper"),
+            () => import("./page_attr_dnd_wrapper/components/PageAttrDnDWrapper"),
           );
 
           return (
@@ -66,39 +66,6 @@ export function PageAttrRender(
         // currently context is not reactive, but we are assuming it will work.
         return (
           <Switch>
-            {/* <Match when={parentComponent() === "TabList"}>
-              <Tab>
-                <Show
-                  fallback={<PageComponentWithPreview />}
-                  when={!previewMeta}
-                >
-                  <PageAttrDnDWrapper item={item}>
-                    <Content />
-                  </PageAttrDnDWrapper>
-                </Show>
-              </Tab>
-            </Match>
-            <Match when={parentComponent() === "TabContainer"}>
-              <TabContainer>
-                <Show
-                  fallback={<PageComponentWithPreview />}
-                  when={!previewMeta}
-                >
-                  <PageAttrDnDWrapper item={item}>
-                    <Content />
-                  </PageAttrDnDWrapper>
-                </Show>
-              </TabContainer>
-            </Match> */}
-            {/* <Match when={parentComponent() === "TreeViewChild"}>
-              <li>
-                <Show fallback={<Content />} when={previewStore.isDesignMode}>
-                  <PageAttrDnDWrapper item={item}>
-                    <Content />
-                  </PageAttrDnDWrapper>
-                </Show>
-              </li>
-            </Match> */}
             <Match when={true}>
               <Switch>
                 <Match when={!previewStore.isDesignMode}>

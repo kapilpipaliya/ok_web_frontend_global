@@ -14,8 +14,8 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-import { DialogHeader } from "../../../components/styled/dialog/DialogHeader";
-import { DialogSubTitle } from "../../../components/styled/dialog/DialogSubTitle";
+import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
+import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 
 export function ImportMenu(
   props: Readonly<{

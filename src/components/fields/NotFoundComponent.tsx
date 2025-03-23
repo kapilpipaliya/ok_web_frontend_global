@@ -1,7 +1,12 @@
-export function NotFoundComponent(props: { componentName: string }) {
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+
+export function NotFoundComponent() {
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
   return (
     <div
       class={"fg:error"}
-    >{`${props.componentName ?? "Component"} Not implemented`}</div>
+    >{`${parentRenderContext()?.context.componentName ?? "Component"} Not implemented`}</div>
   );
 }

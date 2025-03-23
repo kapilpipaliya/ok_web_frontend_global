@@ -23,10 +23,10 @@ import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
 import { TreeItemContainer } from "../../settings/layout/TreeItemContainer";
 import { TreeItemExpandButton } from "../../settings/layout/TreeItemExpandButton";
-import { openInNewInternalTab } from "../pages/openInNewInternalTab";
+import { openInNewInternalTab } from "../pages/functions/openInNewInternalTab";
 import { PreviewIsolated } from "../pages/PreviewIsolated";
-import { getCompChildren } from "./getCompChildren";
-import { onCompDragStart } from "./onCompDragStart";
+import { getCompChildren } from "./functions/getCompChildren";
+import { onCompDragStart } from "./functions/onCompDragStart";
 
 export function ComponentItem(
   props: Readonly<{

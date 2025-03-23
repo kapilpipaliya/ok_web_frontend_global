@@ -20,7 +20,7 @@ import {
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { ComponentItem } from "./ComonentItem";
-import { getCompChildren } from "./getCompChildren";
+import { getCompChildren } from "./functions/getCompChildren";
 export function ComponentList(props: {
   edgeName: string;
   isFetchData?: boolean;

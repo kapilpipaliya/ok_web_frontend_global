@@ -1,6 +1,6 @@
 import type { Strategy } from "@floating-ui/dom";
 
-// import createFloating from "@corvu/utils/create/floating";
+// import createFloating from "@corvu/functions/create/floating";
 import { getFloatingStyle } from "@corvu/utils/floating";
 import { type Accessor, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";

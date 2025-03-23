@@ -16,6 +16,7 @@ export type ComponentNameType = (options: FunctionArgumentType) => string;
 
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
+  componentName: string;
   data: Vertex;
   dataContext: Record<string | symbol, unknown>;
   deleteTxnIdAndCreateNew: (txnId: number) => number;

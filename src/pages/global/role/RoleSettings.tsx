@@ -1,4 +1,4 @@
-import type { DataGridStore } from "~/features/grid/DataGridContext";
+import type { DataGridStore } from "~/features/grid/context/DataGridContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { DataGrid } from "~/features/grid/DataGrid";

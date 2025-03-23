@@ -9,12 +9,12 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
-import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/openInNewInternalTab";
+import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/functions/openInNewInternalTab";
 import { onClickAddComponent } from "~/features/page_designer/functions/component/onClickAddComponent";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
-import type { NavItem } from "../getTreeData";
+import type { NavItem } from "../functions/getTreeData";
 
 import {
   type PageLayoutObject,

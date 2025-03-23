@@ -7,7 +7,7 @@ export interface CSSStore {
 
 export const CssEditorContext = createContext<
   [CSSStore, SetStoreFunction<CSSStore>]
->(createStore({}));
+>(createStore());
 
 export function useCssEditor() {
   return useContext(CssEditorContext);

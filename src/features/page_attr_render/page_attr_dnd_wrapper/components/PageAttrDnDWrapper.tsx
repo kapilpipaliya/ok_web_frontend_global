@@ -27,8 +27,8 @@ import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getC
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
-import { AttrConfigPopOverWrapper } from "./AttrConfigPopOverWrapper";
-import { BorderOverlay } from "./BorderOverlay";
+import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
+import { BorderOverlay } from "../overlays/BorderOverlay";
 
 interface PageAttrDnDWrapperProps {
   children: JSX.Element;
