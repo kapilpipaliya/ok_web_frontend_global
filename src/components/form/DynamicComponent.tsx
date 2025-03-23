@@ -681,6 +681,8 @@ export function DynamicComponent(
         <Dynamic
           {...otherProps}
           {...dynamicProps()}
+          // remove extra props, to reduce ssr size
+          componentName={null}
           hide={null}
           {...mergedClasses()}
           {...permissions()}

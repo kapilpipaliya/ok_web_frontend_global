@@ -239,8 +239,10 @@ export function createTextAreaField(
           class: PROPERTIES.Css.TextField,
           componentName: "TextArea",
           key,
-          props: () => ({
+          props: (options: FunctionArgumentType) => ({
+            onChange: options.onChange,
             rows,
+            value: options.value ?? "",
           }),
           validation,
         },
