@@ -103,13 +103,17 @@ export function ResizableContainer(
       }
 
       if (direction === "horizontal") {
-        const newWidth = `${Math.max(50, initialWidth + e.clientX - startX)}px`;
+        const newWidthValue = Math.max(50, initialWidth + e.clientX - startX);
+        const roundedWidth = Math.round(newWidthValue * 100) / 100;
+        const newWidth = `${roundedWidth}px`;
         setWidth(newWidth);
         mergeVertexProperties(0, props.view, graph, setGraph, {
           width: newWidth,
         });
       } else if (direction === "vertical") {
-        const newHeight = `${Math.max(50, initialHeight + e.clientY - startY)}px`;
+        const newHeightValue = Math.max(50, initialHeight + e.clientY - startY);
+        const roundedHeight = Math.round(newHeightValue * 100) / 100;
+        const newHeight = `${roundedHeight}px`;
         setHeight(newHeight);
         mergeVertexProperties(0, props.view, graph, setGraph, {
           height: newHeight,
@@ -165,7 +169,7 @@ export function ResizableContainer(
   return (
     <div class={`grid ${props.class} ${STYLES.overflow} flex-shrink:0`}>
       <div
-        class={`${STYLES.overflow} justify-self:center position:relative r:10 flex flex:col`}
+        class={`${STYLES.overflow} position:relative flex flex:col bl:1px|solid|lightgray`}
         classList={{
           "bg:primary-5": isDraggingOver(),
           "user-select:none": resizing(),
