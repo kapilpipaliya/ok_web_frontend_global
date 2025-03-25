@@ -23,7 +23,7 @@ export interface FunctionArgumentBaseType {
   ensureData: () => null | string;
   error: (key?: string) => string | undefined;
   evalExpression: (expression: string, options: object) => unknown;
-  fns?: (name: string) => ((...args: unknown[]) => unknown) | undefined;
+  fns: Record<string, ((...args: unknown[]) => unknown) | undefined>;
   graph: GraphInterface;
   hasDeletePermission: boolean | null | undefined;
   hasEditPermission: boolean | null | undefined;

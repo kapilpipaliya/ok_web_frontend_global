@@ -5,8 +5,7 @@ Bugs:
 
 Feature:
 
--Improve:
-- fix fns isnt callable from props
+Improve:
 
 Future Tasks:
 - add filters on users page (roles)

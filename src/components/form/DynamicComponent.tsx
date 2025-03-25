@@ -16,6 +16,7 @@ import {
   splitProps,
   Switch,
   untrack,
+  $PROXY
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
@@ -182,18 +183,22 @@ export function DynamicComponent(
     const permission = hasInsertPermission() || hasEditPermission();
     return permission ? undefined : true;
   };
-
-  const functionProxy = (key: string) => {
-    try {
-      if (dynamicProps().fns && key in dynamicProps().fns) {
-        return dynamicProps().fns[key];
-      }
-      return parentRenderContext()?.context.fns(key);
-    } catch (error) {
-      console.error("Error in functionProxy:", error);
-      return undefined;
-    }
-  };
+  const permissions = createMemo(() => {
+    return {
+      get hasDeletePermission() {
+        return hasDeletePermission();
+      },
+      get hasEditPermission() {
+        return hasEditPermission();
+      },
+      get hasInsertPermission() {
+        return hasInsertPermission();
+      },
+      get hasViewPermission() {
+        return hasViewPermission();
+      },
+    } as Record<string, boolean | null | undefined>;
+  });
 
   const getFunctionArgumentBase = () =>
     ({
@@ -265,7 +270,9 @@ export function DynamicComponent(
         return graph.vertexes[errorVertexId]?.P[key ?? props.meta.P.key];
       },
       evalExpression,
-      fns: functionProxy,
+      get fns() {
+        return functionProxy;
+      },
       // formInitialValues,
       // formSchema,
       formId,
@@ -424,23 +431,6 @@ export function DynamicComponent(
     }
   };
 
-  const permissions = createMemo(() => {
-    return {
-      get hasDeletePermission() {
-        return hasDeletePermission();
-      },
-      get hasEditPermission() {
-        return hasEditPermission();
-      },
-      get hasInsertPermission() {
-        return hasInsertPermission();
-      },
-      get hasViewPermission() {
-        return hasViewPermission();
-      },
-    } as Record<string, boolean | null | undefined>;
-  });
-
   const value = createMemo(() => {
     return ifNotNull(props.data?.P[props.meta.P[IdAttr]]);
   });
@@ -459,7 +449,44 @@ export function DynamicComponent(
       ) as FunctionArgumentType;
     });
   };
+  const dynamicFns = createMemo(() => {
+    try {
+      if (typeof props.meta.P.fns === "function") {
+        return props.meta.P.fns(getFunctionArgumentWithValue()) || {};
+      }
+      if (typeof props.meta.P.fns === "string") {
+        try {
+          const fnsFunction = new Function("args", props.meta.P.fns);
+          return fnsFunction(getFunctionArgumentWithValue()) || {};
+        } catch (error) {
+          console.error("Error evaluating fns function:", error);
+          return {};
+        }
+      }
+      return {};
+    } catch (error) {
+      console.error("Error in dynamicFns:", error);
+      return {};
+    }
+  });
 
+  const functionProxy = new Proxy({}, {
+    get(_, key: string) {
+      try {
+        // @ts-expect-error key is proxy after first use.
+        if (key === $PROXY) {
+          return dynamicFns();
+        }
+        if (dynamicFns()[key]) {
+          return dynamicFns()[key];
+        }
+        return parentRenderContext()?.context.fns?.[key];
+      } catch (error) {
+        console.error("Error in functionProxy:", error);
+        return undefined;
+      }
+    }
+  });
   const dynamicProps = createMemo(() => {
     try {
       if (typeof props.meta.P.props === "function") {
@@ -625,6 +652,7 @@ export function DynamicComponent(
     "children",
     "projections",
     "props",
+    "fns",
     "mounted",
     "hideLabel",
     "class",

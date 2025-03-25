@@ -120,12 +120,6 @@ export function PageViewWrapper(
   });
 
   addNewVertex(0, pageFormVertexObject, graph, setGraph);
-  createEffect(() => {
-    console.log(
-      "txnValue",
-      getExistingOrDefaultTxnValue(pageFormVertexObject.P.txnId, graph),
-    );
-  });
 
   const formStore = () =>
     graph.vertexes[pageFormVertexObject.id] as Vertex<FormStoreObject>;

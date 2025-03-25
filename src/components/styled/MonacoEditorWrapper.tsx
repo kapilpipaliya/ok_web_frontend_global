@@ -53,6 +53,7 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
       options={{
         autoIndent: "full",
         folding: false,
+        fontSize: 14,
         formatOnPaste: true,
         formatOnType: true,
         glyphMargin: false,

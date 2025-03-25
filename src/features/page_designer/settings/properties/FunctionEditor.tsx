@@ -17,6 +17,8 @@ import { validateFunction } from "../../../../lib/validation/validateFunction";
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
 export function FunctionEditor(props: {
+  keyName?: string;
+  label?: string;
   setPropertyValue: (meta: Vertex, value: unknown) => void;
 }) {
   const [graph] = useGraph();
@@ -24,9 +26,10 @@ export function FunctionEditor(props: {
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
-  const getOtherProps = () =>
-    graph.vertexes[formStoreVertex()?.P.selectedId].P.props ?? "";
-  const [editorValue, setEditorValue] = createSignal(getOtherProps());
+  const propertyKey = () => props.keyName || "props";
+  const getPropertyValue = () =>
+    graph.vertexes[formStoreVertex()?.P.selectedId].P[propertyKey()] ?? "";
+  const [editorValue, setEditorValue] = createSignal(getPropertyValue());
   const [isModalOpen, setIsModalOpen] = createSignal(false);
   let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
 
@@ -36,20 +39,20 @@ export function FunctionEditor(props: {
       () => {
         if (formStoreVertex()?.P.selectedId !== -1) {
           setIsFunctionValid(true);
-          setEditorValue(getOtherProps());
+          setEditorValue(getPropertyValue());
         }
       },
       { defer: true },
     ),
   );
 
-  const evaluateOtherProps = (value: string) => {
+  const evaluateProperty = (value: string) => {
     const validation = validateFunction(value);
     setIsFunctionValid(validation.isValid);
 
     if (validation.isValid) {
       props.setPropertyValue(
-        { P: { key: "props" } } as unknown as Vertex,
+        { P: { key: propertyKey() } } as unknown as Vertex,
         value,
       );
     } else {
@@ -58,7 +61,7 @@ export function FunctionEditor(props: {
   };
 
   const handleSave = () => {
-    evaluateOtherProps(editorValue());
+    evaluateProperty(editorValue());
     if (isFunctionValid()) {
       setIsModalOpen(false);
     }
@@ -111,7 +114,7 @@ export function FunctionEditor(props: {
     <>
       <div class="mt:5">
         <span class="flex ai:center">
-          Props Function
+          {props.label}
           <IconButton
             class="ml:6"
             icon="ph:arrow-square-out"
@@ -127,7 +130,7 @@ export function FunctionEditor(props: {
       <CustomModal
         open={isModalOpen}
         setOpen={setIsModalOpen}
-        title="Edit Props Function"
+        title={`Edit ${props.label}`}
       >
         <div class="p:3 width:600px height:600px">
           <EditorContent height="560px" />

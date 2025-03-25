@@ -38,7 +38,6 @@ export function SelectField(
   props: Readonly<
     GenericComponentProps & {
       class?: string;
-      componentName: string;
       data?: Vertex;
       isRealTime?: boolean;
       meta?: Vertex;
@@ -59,6 +58,7 @@ export function SelectField(
   const [loading, setLoading] = createSignal(false);
   const [options, setOptions] = createSignal([] as any[]);
   const [error, setError] = createSignal("");
+  const componentName = () => parentRenderContext()?.context.componentName!;
   const outerOwner = getOwner();
 
   const getCollection = () =>
@@ -173,10 +173,10 @@ export function SelectField(
   function getComponent() {
     // TODO: find when the direction is set?
     const direction = meta().P.dir;
-    if (!props.componentName && direction) {
+    if (!componentName() && direction) {
       return direction === "->" ? "Select" : "MultiSelect";
     }
-    return props.componentName;
+    return componentName();
   }
 
   onMount(() => {

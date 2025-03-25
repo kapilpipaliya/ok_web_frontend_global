@@ -145,7 +145,6 @@ export function deleteVertex(
       setGraph("vertexes", actualVertexId, undefined);
     });
 
-    console.log("delete", vertex);
     if (!options?.skipTransactionDetail) {
       transactionDetailAdd(
         txnId,

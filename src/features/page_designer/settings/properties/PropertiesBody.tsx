@@ -87,7 +87,16 @@ export function PropertiesBody() {
         <CollAndData />
       </Show>
       <JsonEditorFieldComponent />
-      <FunctionEditor setPropertyValue={setPropertyValue} />
+      <FunctionEditor 
+        keyName="fns" 
+        label="Function Definitions" 
+        setPropertyValue={setPropertyValue} 
+      />
+      <FunctionEditor 
+        keyName="props" 
+        label="Props Function" 
+        setPropertyValue={setPropertyValue} 
+      />
       <Show when={selectedAttr()?.P.componentName === "Component"}>
         <ComponentVariantsInput
           compVertex={selectedComp()}
