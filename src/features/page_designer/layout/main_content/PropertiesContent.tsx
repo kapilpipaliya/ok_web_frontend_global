@@ -6,6 +6,7 @@ import {
   FormContext,
   type FormStoreObject,
 } from "~/components/form/context/FormContext";
+import { PropertiesBody } from "~/features/page_designer/settings/properties/PropertiesBody";
 import { useGraph } from "~/lib/graph/GraphContext";
 
 import {
@@ -13,7 +14,6 @@ import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
-import { PropertiesWrapper } from "../../settings/properties/PropertiesWrapper";
 
 export function PropertiesContent() {
   const [graph] = useGraph();
@@ -35,7 +35,7 @@ export function PropertiesContent() {
       >
         <DesignerFormIdContext.Provider value={formStoreVertex().id}>
           <FormContext.Provider value={formStoreVertex().id}>
-            <PropertiesWrapper />
+            <PropertiesBody />
           </FormContext.Provider>
         </DesignerFormIdContext.Provider>
       </Show>

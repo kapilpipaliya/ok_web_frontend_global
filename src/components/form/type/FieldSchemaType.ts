@@ -2,16 +2,16 @@ import type { useNavigate, useSearchParams } from "@solidjs/router";
 import type { Accessor, Owner } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 
+import type { GraphData } from "~/cypher/types/ServerResult";
 import type {
   PageRenderObject,
   PageRenderStore,
 } from "~/features/page_attr_render/context/PageRenderContext";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
-import type { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
+import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 
 import type { FormStoreObject } from "../context/FormContext";
-
 export type ComponentNameType = (options: FunctionArgumentType) => string;
 
 export interface FunctionArgumentBaseType {
@@ -55,8 +55,8 @@ export interface FunctionArgumentBaseType {
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
     txnId: number,
-    args: Parameters<typeof setGraphDataWithTransaction>[3],
-    options: Parameters<typeof setGraphDataWithTransaction>[4],
+    args: GraphData,
+    options: UpdateOptions,
   ) => void;
   setSearchParams?: ReturnType<typeof useSearchParams>[1];
   showErrorToast: (message: string) => void;

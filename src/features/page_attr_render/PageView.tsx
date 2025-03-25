@@ -1,9 +1,10 @@
 import { createMemo, Match, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
+import { getComponentDefaultValues } from "~/components/fields/component/functions/getComponentDefaultValues";
 import { getDataVertex } from "~/features/page_attr_render/functions/getDataVertex";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
@@ -14,10 +15,7 @@ import {
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { useGraph } from "~/lib/graph/GraphContext";
 
-import type { FormStoreObject } from "../../components/form/context/FormContext";
-
-import { getComponentDefaultValues } from "../../components/fields/component/functions/getComponentDefaultValues";
-import { DataContext } from "./context/PageAttrContext";
+import { PageContext, usePageContext } from "./context/PageContext";
 
 export function PageView(
   props: Readonly<{
@@ -83,7 +81,7 @@ export function PageView(
   });
 
   const ComponentWrapper = () => {
-    const context = useRepeaterVertexContext() || {};
+    const context = usePageContext() || {};
     const formStoreId = useDesignerFormIdContext();
 
     const values = createMemo(() => {
@@ -106,13 +104,13 @@ export function PageView(
       },
     });
     return (
-      <DataContext.Provider value={repeaterStore}>
+      <PageContext.Provider value={repeaterStore}>
         <PageAttrRender
           data={props.data}
           isNoPermissionCheck={props.isNoPermissionCheck!}
           metaVertex={props.metaVertex!}
         />
-      </DataContext.Provider>
+      </PageContext.Provider>
     );
   };
 

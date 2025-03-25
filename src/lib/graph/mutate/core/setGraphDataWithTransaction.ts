@@ -2,7 +2,8 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { Edge, EdgeMap, Id, Vertex, VertexMap } from "~/lib/graph/graph";
+import type { GraphData } from "~/cypher/types/ServerResult";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 
@@ -22,14 +23,7 @@ export function setGraphDataWithTransaction(
   txnId: number,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  args: {
-    deleted_edges?: string[];
-    deleted_vertexes?: string[];
-    edges: EdgeMap;
-    timestamp?: number;
-    vertexes: VertexMap;
-    vertexLabelIdMap?: { [key: string]: Id[] };
-  },
+  args: GraphData,
   options: UpdateOptions = {},
 ): { error: boolean | string; txnDetailIndex?: number } {
   let error: boolean | string = false;

@@ -5,6 +5,6 @@ import { createContext, useContext } from "solid-js";
 // use Record<string | symbol, any> instead
 export const DataContext = createContext<Record<string | symbol, any>>();
 
-export function useRepeaterVertexContext() {
+export function useDataContext() {
   return useContext(DataContext);
 }

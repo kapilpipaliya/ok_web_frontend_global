@@ -2,7 +2,7 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import {
   DataContext,
-  useRepeaterVertexContext,
+  useDataContext,
 } from "~/features/page_attr_render/context/DataContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { isVertex } from "~/lib/graph/mutate/core/vertex";
@@ -14,7 +14,7 @@ export function DataInternal(props: {
   name: string;
   repeaterValue: any;
 }) {
-  const context = useRepeaterVertexContext() || {};
+  const context = useDataContext() || {};
   const repeaterStore = new Proxy(context, {
     get(target, key) {
       if (key === props.name) {

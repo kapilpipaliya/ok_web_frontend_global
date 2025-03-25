@@ -55,7 +55,7 @@ export const ResizeViewButtons = (props: {
   // Initialize dimensions if not set
   createEffect(() => {
     const view = viewVertex();
-    if ((view?.P.width && view?.P.height)) {
+    if (view?.P.width && view?.P.height) {
       // Determine initial orientation
       setIsLandscape(isDimensionsLandscape(view.P.width, view.P.height));
     } else {

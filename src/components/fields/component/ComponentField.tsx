@@ -4,8 +4,10 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { ComponentChildrenContext } from "~/components/fields/component/contexts/ComponentChildrenContext";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
-import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
-import { DataContext } from "~/features/page_attr_render/context/PageAttrContext";
+import {
+  PageContext,
+  usePageContext,
+} from "~/features/page_attr_render/context/PageContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
@@ -25,10 +27,7 @@ import { getComponentDefaultValues } from "./functions/getComponentDefaultValues
 export function ComponentField(
   props: Readonly<GenericComponentProps & { componentId?: string }>,
 ) {
-  const [_local, otherProps] = splitProps(props, [
-    "componentName",
-    "componentId",
-  ]);
+  const [, otherProps] = splitProps(props, ["componentId"]);
 
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
@@ -82,7 +81,7 @@ export function ComponentField(
   });
 
   const ComponentWrapper = () => {
-    const context = useRepeaterVertexContext() || {};
+    const context = usePageContext() || {};
     const values = createMemo(() => {
       return {
         ...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph),
@@ -99,9 +98,9 @@ export function ComponentField(
       },
     });
     return (
-      <DataContext.Provider value={repeaterStore}>
+      <PageContext.Provider value={repeaterStore}>
         <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
-      </DataContext.Provider>
+      </PageContext.Provider>
     );
   };
 

@@ -83,19 +83,19 @@ export function PropertiesBody() {
       {/* <div class="flex gap:2 jc:start"> */}
       {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
       {/* </div> */}
-      <Show when={selectedAttr()?.P.componentName === "Repeater"}>
+      <Show when={selectedAttr()?.P.componentName === "Data"}>
         <CollAndData />
       </Show>
       <JsonEditorFieldComponent />
-      <FunctionEditor 
-        keyName="fns" 
-        label="Function Definitions" 
-        setPropertyValue={setPropertyValue} 
+      <FunctionEditor
+        keyName="fns"
+        label="Function Definitions"
+        setPropertyValue={setPropertyValue}
       />
-      <FunctionEditor 
-        keyName="props" 
-        label="Props Function" 
-        setPropertyValue={setPropertyValue} 
+      <FunctionEditor
+        keyName="props"
+        label="Props Function"
+        setPropertyValue={setPropertyValue}
       />
       <Show when={selectedAttr()?.P.componentName === "Component"}>
         <ComponentVariantsInput

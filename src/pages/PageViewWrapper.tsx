@@ -58,7 +58,6 @@ import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransact
 import { saveStepIndex } from "~/lib/graph/transaction/steps/saveStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/steps/setPreventUndoAtOrBeforeIndex";
-import { getExistingOrDefaultTxnValue } from "~/lib/graph/transaction/value/getExistingOrDefaultTxnValue";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import {
   parentComponentAttribute,

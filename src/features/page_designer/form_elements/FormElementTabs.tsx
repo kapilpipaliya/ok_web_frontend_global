@@ -173,7 +173,7 @@ export function FormElementTabs() {
                 <PageLevelComponents rootLevel={false} />
               </DesignerFormIdContext.Provider>
             </Show>
-            
+
             <div class="mt:4">
               <div class="p:12 font-weight:500">Global Components</div>
               <Show keyed when={formStoreVertex()?.id}>
@@ -182,7 +182,7 @@ export function FormElementTabs() {
                 </DesignerFormIdContext.Provider>
               </Show>
             </div>
-            
+
             <div class="mt:4">
               <div class="p:12 font-weight:500">Templates</div>
               <PagesList coll="TemplatePage" />

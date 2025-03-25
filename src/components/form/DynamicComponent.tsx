@@ -2,6 +2,7 @@ import { createLazyMemo } from "@solid-primitives/memo";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
 import {
+  $PROXY,
   createEffect,
   createMemo,
   createSignal,
@@ -16,7 +17,6 @@ import {
   splitProps,
   Switch,
   untrack,
-  $PROXY
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
@@ -24,7 +24,7 @@ import { Dynamic } from "solid-js/web";
 import { getMetaProps } from "~/components/form/functions/getMetaProps";
 import { Label } from "~/features/css_editor/components/fields/Label";
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
-import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
+import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 import {
   PageRenderContextProvider,
   usePageRenderContext,
@@ -216,7 +216,7 @@ export function DynamicComponent(
         return props.data;
       },
       get dataContext() {
-        return runWithOwner(owner, () => useRepeaterVertexContext() || {});
+        return runWithOwner(owner, () => useDataContext() || {});
       },
       deleteTxnIdAndCreateNew: (txnId: number) => {
         // Delete existing transaction
@@ -470,23 +470,26 @@ export function DynamicComponent(
     }
   });
 
-  const functionProxy = new Proxy({}, {
-    get(_, key: string) {
-      try {
-        // @ts-expect-error key is proxy after first use.
-        if (key === $PROXY) {
-          return dynamicFns();
+  const functionProxy = new Proxy(
+    {},
+    {
+      get(_, key: string) {
+        try {
+          // @ts-expect-error key is proxy after first use.
+          if (key === $PROXY) {
+            return dynamicFns();
+          }
+          if (dynamicFns()[key]) {
+            return dynamicFns()[key];
+          }
+          return parentRenderContext()?.context.fns?.[key];
+        } catch (error) {
+          console.error("Error in functionProxy:", error);
+          return undefined;
         }
-        if (dynamicFns()[key]) {
-          return dynamicFns()[key];
-        }
-        return parentRenderContext()?.context.fns?.[key];
-      } catch (error) {
-        console.error("Error in functionProxy:", error);
-        return undefined;
-      }
-    }
-  });
+      },
+    },
+  );
   const dynamicProps = createMemo(() => {
     try {
       if (typeof props.meta.P.props === "function") {

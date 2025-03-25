@@ -194,12 +194,12 @@ export default class JsxParser {
         "key",
         "A",
       )!;
-    } else if (comp === "Repeater") {
+    } else if (comp === "Data") {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,
         "Comp",
         "key",
-        "Repeater",
+        "Data",
       )!;
     } else if (comp === "svg") {
       componentVertex = findVertexByLabelAndUniqueId(

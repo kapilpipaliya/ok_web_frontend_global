@@ -5,7 +5,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
-import { useRepeaterVertexContext } from "~/features/page_attr_render/context/DataContext";
+import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
@@ -30,7 +30,7 @@ export const DataField = (props: {
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
   const [errorMessage, setErrorMessage] = createSignal("");
-  const dataContext = useRepeaterVertexContext() || {};
+  const dataContext = useDataContext() || {};
 
   const selectionOptionsData = createAsync<null | ServerResult>(async () => {
     if (!props.expression) {

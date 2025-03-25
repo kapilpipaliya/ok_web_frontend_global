@@ -1,5 +1,4 @@
 import type { Id } from "~/lib/graph/graph";
-
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 export function getTabLabel(openedFormId: Id, graph: GraphInterface) {
