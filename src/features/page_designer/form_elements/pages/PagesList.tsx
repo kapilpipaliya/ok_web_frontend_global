@@ -4,6 +4,7 @@ import {
   createSignal,
   For,
   Match,
+  Suspense,
   Switch,
 } from "solid-js";
 
@@ -93,8 +94,8 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   };
 
   return (
-    <>
-      <Switch fallback={<LoaderNew loaderHeight="55vh" />}>
+    <Suspense fallback={<LoaderNew loaderHeight="55vh" />}>
+      <Switch>
         <Match when={data.error}>Error: {data.error}</Match>
         <Match when={!isFetchingData()}>
           <>
@@ -133,6 +134,6 @@ export function PagesList(props: Readonly<{ coll: string }>) {
           </>
         </Match>
       </Switch>
-    </>
+    </Suspense>
   );
 }
