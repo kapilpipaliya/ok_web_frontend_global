@@ -7,6 +7,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  createUniqueId,
   ErrorBoundary,
   getOwner,
   Match,
@@ -21,6 +22,7 @@ import {
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
+import { v7 as uuidv7 } from "uuid";
 
 import { getMetaProps } from "~/components/form/functions/getMetaProps";
 import { Label } from "~/features/css_editor/components/fields/Label";
@@ -516,15 +518,24 @@ export function DynamicComponent(
     }
   });
 
+  const styleId = createUniqueId();
   const cssStyle = createMemo(() => {
     try {
       if (typeof props.meta.P.cssFn === "function") {
-        return props.meta.P.cssFn!(getFunctionArgumentWithValue());
+        const style = props.meta.P.cssFn!(getFunctionArgumentWithValue());
+        if (style && style.includes('._id')) {
+          return style.replace(/\._id/g, `.${styleId}`);
+        }
+        return style;
       }
-      if (typeof props.meta.P.cssFn === "string") {
+      if (typeof props.meta.P.cssFn === "string" && props.meta.P.cssFn.trim() !== "") {
         try {
-          const cssFnFunction = new Function("args", props.meta.P.cssFn);
-          return cssFnFunction(getFunctionArgumentWithValue());
+          const cssFnFunction = new Function("args", `return \`${props.meta.P.cssFn}\``);
+          const style = cssFnFunction(getFunctionArgumentWithValue());
+          if (style && style.includes('._id')) {
+            return style.replace(/\._id/g, `.${styleId}`);
+          }
+          return style;
         } catch (error) {
           console.error("Error evaluating cssFn function:", error);
           return '';
@@ -738,6 +749,7 @@ export function DynamicComponent(
         <Dynamic
           {...otherProps}
           {...dynamicProps()}
+          classList={{ [styleId]: cssStyle() }}
           // remove extra props, to reduce ssr size
           componentName={null}
           hide={null}
