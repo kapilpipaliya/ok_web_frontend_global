@@ -13,6 +13,7 @@ import { PROPERTIES } from "~/pages/settings/constants";
 if (!window.MonacoEnvironment) {
   window.MonacoEnvironment = {
     getWorker(_moduleId: unknown, label: string) {
+      // try add support for stylus like: // https://github.com/d4rkr00t/language-stylus
       switch (label) {
         case "css":
           return new cssWorker();
@@ -47,7 +48,7 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
     <MonacoEditor
       class={`${PROPERTIES.Css.TextField} ${props.error ? "b:error" : ""}`}
       height={props.height ?? "200px"}
-      language={props.language ?? "javascript"}
+      language={props.language}
       onChange={(value) => props.onChange(value)}
       onMount={(monaco, editor) => props.onMount?.(monaco, editor)}
       options={{

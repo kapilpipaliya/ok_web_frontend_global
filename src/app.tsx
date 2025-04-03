@@ -55,33 +55,33 @@ export default function App() {
           // const location = useLocation();
           return (
             <GraphContext.Provider value={graph}>
-              <CSSRuntimeProvider
-                config={themeConfig(getGlobalThemeVertex(graph[0]))}
-              >
-                <MetaProvider>
-                  <ErrorBoundary
-                    fallback={(error, reset) => {
-                      // Log the UI error
-                      if (!isServer) {
-                        logError(error, { location: location.pathname });
-                      }
-                      return (
-                        <ErrorFallback
-                          error={error}
-                          resetErrorBoundary={reset}
-                        />
-                      );
-                    }}
+              <MetaProvider>
+                 <CSSRuntimeProvider
+                    config={themeConfig(getGlobalThemeVertex(graph[0]))}
                   >
-                    <Suspense fallback={<LoaderNew />}>
-                      {props.children}
-                    </Suspense>
-                  </ErrorBoundary>
-                  {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
-                  <Toaster />
-                  {/* </Show> */}
-                </MetaProvider>
-              </CSSRuntimeProvider>
+                    <ErrorBoundary
+                      fallback={(error, reset) => {
+                        // Log the UI error
+                        if (!isServer) {
+                          logError(error, { location: location.pathname });
+                        }
+                        return (
+                          <ErrorFallback
+                            error={error}
+                            resetErrorBoundary={reset}
+                          />
+                        );
+                      }}
+                    >
+                      <Suspense fallback={<LoaderNew />}>
+                        {props.children}
+                      </Suspense>
+                    </ErrorBoundary>
+                    {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
+                    <Toaster />
+                    {/* </Show> */}
+                  </CSSRuntimeProvider>
+              </MetaProvider>
             </GraphContext.Provider>
           );
         }}

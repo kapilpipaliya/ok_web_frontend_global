@@ -1,4 +1,5 @@
 import { createLazyMemo } from "@solid-primitives/memo";
+import { Style } from "@solidjs/meta";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
 import {
@@ -515,6 +516,27 @@ export function DynamicComponent(
     }
   });
 
+  const cssStyle = createMemo(() => {
+    try {
+      if (typeof props.meta.P.cssFn === "function") {
+        return props.meta.P.cssFn!(getFunctionArgumentWithValue());
+      }
+      if (typeof props.meta.P.cssFn === "string") {
+        try {
+          const cssFnFunction = new Function("args", props.meta.P.cssFn);
+          return cssFnFunction(getFunctionArgumentWithValue());
+        } catch (error) {
+          console.error("Error evaluating cssFn function:", error);
+          return '';
+        }
+      }
+      return '';
+    } catch (error) {
+      console.error("Error in cssFn:", error);
+      return '';
+    }
+  });
+
   const componentName = createMemo(() => {
     try {
       if (dynamicProps().componentName) {
@@ -664,6 +686,7 @@ export function DynamicComponent(
     "key",
     "pos",
     "isnopermissioncheck",
+    "cssFn",
   ];
   const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
 
@@ -777,6 +800,11 @@ export function DynamicComponent(
 
   return (
     <>
+      <Show when={cssStyle()}>
+        <Style>
+          {cssStyle()}
+        </Style>
+      </Show>
       {/* <Show when={!props.isNoPermissionCheck && getGlobalStore(graph).P.isDevelopment}>
         comp:{componentName()}
         <DebugPermissionInfo

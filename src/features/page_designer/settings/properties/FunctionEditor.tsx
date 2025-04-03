@@ -11,14 +11,15 @@ import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
 import { useGraph } from "~/lib/graph/GraphContext";
-
-import { validateFunction } from "../../../../lib/validation/validateFunction";
+import { validateFunction } from "~/lib/validation/validateFunction";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
 export function FunctionEditor(props: {
   keyName?: string;
   label?: string;
+  language?: string;
+  returnType?: "object" | "string";
   setPropertyValue: (meta: Vertex, value: unknown) => void;
 }) {
   const [graph] = useGraph();
@@ -47,7 +48,7 @@ export function FunctionEditor(props: {
   );
 
   const evaluateProperty = (value: string) => {
-    const validation = validateFunction(value);
+    const validation = validateFunction(value, props.returnType);
     setIsFunctionValid(validation.isValid);
 
     if (validation.isValid) {
@@ -81,11 +82,12 @@ export function FunctionEditor(props: {
     }
   };
 
-  const EditorContent = (props: { height?: string }) => (
+  const EditorContent = (p: { height?: string }) => (
     <>
       <MonacoEditorWrapper
         error={!isFunctionValid()}
-        height={props.height}
+        height={p.height}
+        language={props.language || "javascript"}
         onChange={(value) => setEditorValue(value)}
         onMount={(editor) => (editorRef = editor)}
         showMinimap={false}

@@ -132,7 +132,7 @@ export function ComponentList(props: {
   });
 
   return (
-    <>
+    <div>
       <SearchBar
         handleChange={(value) => {
           setSearchQuery(value);
@@ -155,9 +155,9 @@ export function ComponentList(props: {
             }
           >
             {(item) => (
-              <>
+         
                 <div class={"font-weight:600 my:8px"}>
-                  <ComponentItem
+                  {/* <ComponentItem
                     child={item}
                     edgeName={props.edgeName}
                     expandedKeys={expandedKeys}
@@ -167,13 +167,13 @@ export function ComponentList(props: {
                     setPreviewGraph={setPreviewGraph}
                     setPreviewPageId={setPreviewPageId}
                     toggleExpand={toggleExpand}
-                  />
+                  /> */}
                 </div>
-              </>
+              
             )}
           </For>
         </Show>
       </div>
-    </>
+    </div>
   );
 }

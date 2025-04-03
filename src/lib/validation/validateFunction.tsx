@@ -1,10 +1,14 @@
 /**
  * Validates if the provided function string is valid
  * @param value - The function string to validate
+ * @param returnType - The expected return type of the function ("string" | "object")
  * @returns An object with validation result and error message if any
  */
 
-export function validateFunction(value: string): {
+export function validateFunction(
+  value: string,
+  returnType: "object" | "string" = "object",
+): {
   error?: string;
   isValid: boolean;
 } {
@@ -13,8 +17,12 @@ export function validateFunction(value: string): {
       return { isValid: true };
     }
 
-    if (!value.includes("return {")) {
+    if (returnType === "object" && !value.includes("return {")) {
       return { error: "Function body must return an object", isValid: false };
+    }
+
+    if (returnType === "string") {
+      return { isValid: true };
     }
 
     return { isValid: true };
