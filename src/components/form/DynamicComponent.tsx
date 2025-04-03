@@ -521,29 +521,29 @@ export function DynamicComponent(
   const styleId = createUniqueId();
   const cssStyle = createMemo(() => {
     try {
-      if (typeof props.meta.P.cssFn === "function") {
-        const style = props.meta.P.cssFn!(getFunctionArgumentWithValue());
+      if (typeof props.meta.P.css === "function") {
+        const style = props.meta.P.css!(getFunctionArgumentWithValue());
         if (style && style.includes('._id')) {
           return style.replace(/\._id/g, `.${styleId}`);
         }
         return style;
       }
-      if (typeof props.meta.P.cssFn === "string" && props.meta.P.cssFn.trim() !== "") {
+      if (typeof props.meta.P.css === "string" && props.meta.P.css.trim() !== "") {
         try {
-          const cssFnFunction = new Function("args", `return \`${props.meta.P.cssFn}\``);
-          const style = cssFnFunction(getFunctionArgumentWithValue());
+          const cssFunction = new Function("args", `return \`${props.meta.P.css}\``);
+          const style = cssFunction(getFunctionArgumentWithValue());
           if (style && style.includes('._id')) {
             return style.replace(/\._id/g, `.${styleId}`);
           }
           return style;
         } catch (error) {
-          console.error("Error evaluating cssFn function:", error);
+          console.error("Error evaluating css function:", error);
           return '';
         }
       }
       return '';
     } catch (error) {
-      console.error("Error in cssFn:", error);
+      console.error("Error in css:", error);
       return '';
     }
   });
@@ -697,7 +697,7 @@ export function DynamicComponent(
     "key",
     "pos",
     "isnopermissioncheck",
-    "cssFn",
+    "css",
   ];
   const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
 

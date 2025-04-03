@@ -12,7 +12,6 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 
 import type { FormStoreObject } from "../context/FormContext";
-export type ComponentNameType = (options: FunctionArgumentType) => string;
 
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;

@@ -137,7 +137,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         }
       >
         <FunctionEditor
-          keyName="cssFn"
+          keyName="css"
           label="Stylus CSS"
           language="css"
           returnType="string"

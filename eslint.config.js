@@ -1,6 +1,6 @@
 import pluginJs from "@eslint/js";
 import masterCssPlugin from '@master/eslint-plugin-css';
-import perfectionist from 'eslint-plugin-perfectionist'
+// import perfectionist from 'eslint-plugin-perfectionist'
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -22,5 +22,5 @@ export default [
     {
         files: ['**/*.js', '**/*.cjs']
     },
-    perfectionist.configs['recommended-natural'],
+    // perfectionist.configs['recommended-natural'],
 ];
