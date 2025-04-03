@@ -97,13 +97,7 @@ export function PropertiesBody() {
         label="Props Function"
         setPropertyValue={setPropertyValue}
       />
-      <FunctionEditor
-        keyName="cssFn"
-        label="Stylus CSS"
-        language="css"
-        returnType="string"
-        setPropertyValue={setPropertyValue}
-      />
+
       <Show when={selectedAttr()?.P.componentName === "Component"}>
         <ComponentVariantsInput
           compVertex={selectedComp()}

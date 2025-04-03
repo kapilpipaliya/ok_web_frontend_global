@@ -41,6 +41,7 @@ import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
+import { FunctionEditor } from "../FunctionEditor";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
@@ -135,13 +136,20 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           selectedAttr()?.P.componentName === "Icon"
         }
       >
-        <ClassesComponent
+        <FunctionEditor
+          keyName="cssFn"
+          label="Stylus CSS"
+          language="css"
+          returnType="string"
+          setPropertyValue={props.onChange}
+        />
+        {/* <ClassesComponent
           metaAttributes={props.metaAttributes}
           onChange={props.onChange}
           selectedLayout={props.selectedLayout}
           txnId={props.txnId}
           vertexIds={vertexIds}
-        />
+        /> */}
       </Show>
     </>
   );
