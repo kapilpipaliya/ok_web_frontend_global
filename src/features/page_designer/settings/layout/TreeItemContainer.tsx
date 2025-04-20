@@ -1,4 +1,8 @@
 import { createMemo, type JSX, splitProps } from "solid-js";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { CssType } from "~/components/form/type/FieldSchemaType";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 export interface TreeItemContainerProps
   extends JSX.HTMLAttributes<HTMLDivElement> {
@@ -8,6 +12,7 @@ export interface TreeItemContainerProps
   isDragOver?: boolean;
   isHovered?: boolean;
   isSelected?: boolean;
+  css?: CssType;
 }
 
 export function TreeItemContainer(props: TreeItemContainerProps) {
@@ -17,25 +22,22 @@ export function TreeItemContainer(props: TreeItemContainerProps) {
     "isDragOver",
     "isHovered",
     "isSelected",
+    "css",
   ]);
 
-  const divClasses = createMemo(() => ({
-    "align-items:center": true,
-    "bg:#F2EDED": local.isHovered,
-    "bg:rgb(197,221,255)": local.isSelected,
-    // little dark shadow on top, little lite shadow on bottom
-    "box-shadow:rgba(0,0,0,0.2)|0.15px|-1px|5.15px|-0.9px":
-      !local.isDragOver && local.hasChildren,
-    "display:flex gap:6": true,
-    "font-size:14px": true,
-    "font-weight:bold": local.hasChildren,
-    "font-weight:normal": !local.hasChildren,
-    // "justify-content:space-between": true,
-    [local.class!]: !!local.class,
-    "r:0|5|5|0": !local.hasChildren,
-    "r:5|5|5|5": local.hasChildren,
-    "w:100%": true,
-  }));
+  // little dark shadow on top, little lite shadow on bottom
+  const containerStyles = createMemo(() => css`
+    align-items: center;
+    display: flex;
+    gap: 0.375rem;
+    font-size: 14px;
+    font-weight: ${local.hasChildren ? "bold" : "normal"};
+    width: 100%;
+    border-radius: ${local.hasChildren ? "5px" : "0 5px 5px 0"};
+    ${local.isHovered ? "background-color: #F2EDED;" : ""}
+    ${local.isSelected ? "background-color: rgb(197, 221, 255);" : ""}
+    ${!local.isDragOver && local.hasChildren ? "box-shadow: rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px;" : ""}
+  `);
 
-  return <div classList={divClasses()} {...others} />;
+  return <As as="div" css={[containerStyles(), ...ensureArray(props.css)]} {...others} />;
 }

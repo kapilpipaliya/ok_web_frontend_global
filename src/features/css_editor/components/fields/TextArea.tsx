@@ -7,6 +7,8 @@ import {
 } from "solid-js";
 
 import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 interface TextAreaFieldProps
   extends Omit<
@@ -41,10 +43,16 @@ export const TextAreaField: Component<TextAreaFieldProps> = (props) => {
   const [reference, setReference] = createSignal<HTMLTextAreaElement | null>(
     null,
   );
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
   const handleChange = (event: Event) => {
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-    local.onChange?.(target.value);
+    if (local.onChange) {
+      local.onChange(target.value);
+    } else {
+      parentRenderContext()?.context.onChange?.(target.value);
+    }
   };
 
   const handleViewClick = () => {
@@ -71,7 +79,7 @@ export const TextAreaField: Component<TextAreaFieldProps> = (props) => {
         class={`${others.class || ""} ${local.error && local.errorClass ? local.errorClass : ""}`}
         onChange={handleChange}
         ref={setReference}
-        value={local.value ?? ""}
+        value={local.value ?? parentRenderContext()?.context.value ?? ""}
       />
     </Show>
   );

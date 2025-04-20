@@ -1,21 +1,55 @@
+import { As } from "~/components/As";
 import { SimpleCard } from "./SimpleCard";
+import { css } from "~/lib/styles";
 
 export function CardGrids() {
   return (
-    <div class="max-width:80rem mx:auto px:1rem px:1.5rem@sm px:2rem@lg">
-      <div class="max-width:42rem max-width:none@lg mx:auto mx:0@lg">
-        <div class="flex align-items:center justify-content:space-between">
-          <h2 class="lh:1.5rem color:gray-90 f:1rem font-weight:600 leading:1.75rem">
+    <As as="div" css={css`
+  max-width: 80rem;
+  margin-left: auto; margin-right: auto;
+  padding-left: 1rem; padding-right: 1rem;
+  padding-left: 1.5rem@sm; padding-right: 1.5rem@sm;
+  padding-left: 2rem@lg; padding-right: 2rem@lg;
+`}>
+      <As as="div" css={css`
+  // max-width: 42rem;
+  /* max-width: none@lg; */
+  margin-left: auto; margin-right: auto;
+  margin-left: 0@lg; margin-right: 0@lg;
+`}>
+        <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`}>
+          <As as="h2" css={css`
+  color: #3b82f6;
+  font-size: 1rem;
+  font-weight: 600;
+`}>
             Recent Users
-          </h2>
-          <a
-            class="lh:1.25rem color:indigo-60 color:indigo-50:hover f:0.875rem font-weight:600 leading:1.5rem"
+          </As>
+          <As as="a"
+            css={css`
+  color: indigo_280;
+  font-size: 0.875rem;
+  font-weight: 600;
+  &:hover {
+    color: indigo;
+  }
+`}
             href="#"
           >
             View all<span class="sr-only">, clients</span>
-          </a>
-        </div>
-        <ul class="display:grid gap-x:1.5rem gap-x:2rem@xl gap-y:2rem grid-cols:1 grid-cols:3@lg mt:1.5rem">
+          </As>
+        </As>
+        <As as="ul" css={css`
+  display: grid;
+  column-gap: 1.5rem;
+  row-gap: 2rem;
+  grid-template-columns: repeat(1, 1fr);
+  margin-top: 1.5rem;
+`}>
           <SimpleCard
             amount="$2,000.00"
             imgSrc="https://tailwindui.com/img/logos/48x48/tuple.svg"
@@ -37,8 +71,8 @@ export function CardGrids() {
             status="Paid"
             title="Reform"
           />
-        </ul>
-      </div>
-    </div>
+        </As>
+      </As>
+    </As>
   );
 }

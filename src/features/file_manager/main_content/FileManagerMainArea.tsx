@@ -12,6 +12,8 @@ import { getFilesData } from "../sidebar/getFilesData";
 import { AddNewFileButton } from "./AddNewFileButton";
 import { getEditFileOrFolderSchema } from "./fileFormEditSchema";
 import { getComponentFormSchema } from "./getComponentFormSchema";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
   const [graph, setGraph] = useGraph();
@@ -58,20 +60,28 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
 
   return (
     <div>
-      <div class="d:flex gap:2 p:2">
+      <As as="div" css={[css`
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+`]}>
         <For each={breadcrumb()}>
           {(item, index) => (
-            <button
-              class={`c:primary ${index() === 0 ? "font-weight:600" : ""} cursor:pointer`}
+            <As as="button"
+              css={[css`
+  color: \${args.theme.var.color.primary};
+  background-color: transparent;
+  border: none;
+  ${index() === 0 ? "font-weight:600" : ""} cursor:pointer`]}
               onClick={() => setFileManagerStore("selectedItem", item)}
               type="button"
             >
               {item.P.key}
               {index() < breadcrumb().length - 1 && " / "}
-            </button>
+            </As>
           )}
         </For>
-      </div>
+      </As>
       <div>
         <DataGrid
           CustomAddNewButton={

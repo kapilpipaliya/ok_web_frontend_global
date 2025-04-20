@@ -8,7 +8,8 @@ import { PROPERTIES } from "~/pages/settings/constants";
 
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);
   const [stateName, setStateName] = createSignal("");
@@ -23,18 +24,42 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
     }
     setSelectedAllState([]);
     setState(stateName());
-    props.onClose();
+    props.onClose;
   };
 
   return (
-    <div class="radius-b:5 flex flex:column px:2 py:5">
+    <As as="div" css={css`
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+`}>
       <span>Add New State</span>
-      <div class="flex flex:column gap:4 jc:space-between mt:10">
-        <label class="flex flex:column">
+      <As as="div" css={css`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: space-between;
+  margin-top: 10px;
+`}>
+        <As as="label" css={css`
+  display: flex;
+  flex-direction: column;
+`}>
           Enter States
-          <div class="items-center flex h:100%">
-            <textarea
-              class={`${PROPERTIES.Css.TextField} h:100%`}
+          <As as="div" css={css`
+  align-items: center;
+  display: flex;
+  height: 100%;
+`}>
+            <As as="textarea"
+              css={[PROPERTIES.Css.TextFieldCss, css`
+  height: 100%;
+`]}
               onInput={(e) => setStateName(e.target.value)}
               placeholder="Enter State Name"
               ref={inputRef!}
@@ -46,11 +71,17 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
               iframeTitle="State Selectors"
               title="State Selectors"
             />
-          </div>
-        </label>
-        <label class="flex flex:column">
+          </As>
+        </As>
+        <As as="label" css={css`
+  display: flex;
+  flex-direction: column;
+`}>
           Find and add State Name
-          <div class="items-center flex ">
+          <As as="div" css={css`
+  align-items: center;
+  display: flex;
+`}>
             <MultiSelectField
               displayValueKey="title"
               onRemove={() => {
@@ -73,19 +104,21 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
               selectedValues={selectedAllState}
               selectionLimit={1}
             />
-          </div>
-        </label>
+          </As>
+        </As>
 
-        <button onClick={addNewState}>
-          <Icon
-            class="ml:2"
+        <As as="button" onClick={addNewState}>
+          <As as={Icon}
+            css={css`
+  margin-left: 2px;
+`}
             height={21}
             icon="ic:round-check"
             noobserver
             width={21}
           />
-        </button>
-      </div>
-    </div>
+        </As>
+      </As>
+    </As>
   );
 }

@@ -21,6 +21,8 @@ import {
 } from "../../context/LayoutContext";
 import { ComponentItem } from "./ComonentItem";
 import { getCompChildren } from "./functions/getCompChildren";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 export function ComponentList(props: {
   edgeName: string;
   isFetchData?: boolean;
@@ -141,7 +143,7 @@ export function ComponentList(props: {
         ref={(el) => props.onDoubleClick && setTimeout(() => el?.focus(), 0)}
         value={searchQuery()}
       />
-      <div class={`${STYLES.overflow}`}>
+      <As as="div" css={STYLES.overflowCss}>
         <Show
           fallback={<LoaderNew loaderHeight="55vh" />}
           when={!isFetchingData()}
@@ -149,15 +151,22 @@ export function ComponentList(props: {
           <For
             each={filteredChildren()}
             fallback={
-              <div class="m:20px|0px p:3 text-align:center">
+              <As as="div" css={css`
+  margin: 20px 0px;
+  padding: 3px;
+  text-align: center;
+`}>
                 No Component Found!
-              </div>
+              </As>
             }
           >
             {(item) => (
          
-                <div class={"font-weight:600 my:8px"}>
-                  {/* <ComponentItem
+                <As as="div" css={css`
+  font-weight: 600;
+  margin: 8px 0px;
+`}>
+                  <ComponentItem
                     child={item}
                     edgeName={props.edgeName}
                     expandedKeys={expandedKeys}
@@ -167,13 +176,13 @@ export function ComponentList(props: {
                     setPreviewGraph={setPreviewGraph}
                     setPreviewPageId={setPreviewPageId}
                     toggleExpand={toggleExpand}
-                  /> */}
-                </div>
+                  />
+                </As>
               
             )}
           </For>
         </Show>
-      </div>
+      </As>
     </div>
   );
 }

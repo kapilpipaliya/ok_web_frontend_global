@@ -1,6 +1,7 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
+import { css } from "~/lib/styles";
 import {
   PROPERTIES,
   SETTINGS_CONSTANTS,
@@ -15,10 +16,10 @@ import { getLogoSchema } from "~/routes/internal/page/(email)/baseEmailTemplate"
  */
 export function createFormHeader(title: string) {
   return [
-    getLogoSchema("grid place-items:center", "h:80px", "fg:base-20"),
+    getLogoSchema(css`display:grid; place-items:center;`, css`height:80px;`, css`color: \${args.theme.var.color.base_40};`),
     {
       as: "h1",
-      class: SETTINGS_CONSTANTS.TITLE_CLASS,
+      css: SETTINGS_CONSTANTS.TITLE_CSS,
       componentName: "Html",
       text: title,
     },
@@ -38,7 +39,7 @@ export function createFormSubmitButton(
 ) {
   return {
     as: "button",
-    class: `${STYLES.button2} w:100% mt:16`,
+    css: [STYLES.button2Css, css`width:100%; margin-top:16px;`],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       disabled: options.dataContext.submitState[0]?.isLoading,
@@ -60,20 +61,23 @@ export function createFormSubmitButton(
  * Creates a link button
  * @param text - Button text
  * @param onClick - Click handler
- * @param className - Additional CSS classes
+ * @param css - Additional CSS classes
  * @returns Link button schema
  */
 export function createLinkButton(
   text: (options: FunctionArgumentType) => string,
   onClick: (options: FunctionArgumentType) => Promise<void> | void,
-  className = "text:center mt:16px",
+  cssString = css`text-align:center; margin-top:16px;`,
 ) {
   return {
     as: "div",
     attributes: [
       {
         as: "a",
-        class: "fg:primary-50 cursor:pointer",
+        css: css`
+  color: #3b82f6;
+  cursor: pointer;
+`,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: async () => {
@@ -85,7 +89,7 @@ export function createLinkButton(
         }),
       },
     ],
-    class: className,
+    css: cssString,
     componentName: "Html",
   };
 }
@@ -111,7 +115,7 @@ export function createPasswordField(
   return [
     {
       as: "div",
-      class: `${SETTINGS_CONSTANTS.LABEL_CLASS} mt:5`,
+      css: [SETTINGS_CONSTANTS.LABEL_CSS, css`margin-top:5px;`],
       componentName: "Html",
       text: label,
     },
@@ -119,7 +123,7 @@ export function createPasswordField(
       as: "div",
       attributes: [
         {
-          class: PROPERTIES.Css.TextField,
+          css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextInput",
           key,
           props: (options: FunctionArgumentType) => ({
@@ -168,12 +172,19 @@ export function createPasswordField(
               }),
             },
           ],
-          class:
-            "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+          css: css`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+`,
           componentName: "Html",
         },
       ],
-      class: "position:rel",
+      css: css`
+  position: relative;
+`,
       componentName: "Html",
     },
     getErrorSchema(key),
@@ -201,7 +212,7 @@ export function createSubmitButton(
         text,
       },
     ],
-    class: `${STYLES.button2} w:100%`,
+    css: [STYLES.button2Css, css`width:100%`],
     componentName: "Html",
     props: () => ({
       disabled: isLoading,
@@ -228,7 +239,7 @@ export function createTextAreaField(
   return [
     {
       as: "div",
-      class: `${SETTINGS_CONSTANTS.LABEL_CLASS} mt:5`,
+      css: [SETTINGS_CONSTANTS.LABEL_CSS, css`margin-top:5px;`],
       componentName: "Html",
       text: label,
     },
@@ -236,7 +247,7 @@ export function createTextAreaField(
       as: "div",
       attributes: [
         {
-          class: PROPERTIES.Css.TextField,
+          css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextArea",
           key,
           props: (options: FunctionArgumentType) => ({
@@ -272,7 +283,7 @@ export function createTextField(
   return [
     {
       as: "div",
-      class: `${SETTINGS_CONSTANTS.LABEL_CLASS} mt:5`,
+      css: [SETTINGS_CONSTANTS.LABEL_CSS, css`margin-top:5px;`],
       componentName: "Html",
       text: label,
     },
@@ -280,7 +291,7 @@ export function createTextField(
       as: "div",
       attributes: [
         {
-          class: PROPERTIES.Css.TextField,
+          css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextInput",
           key,
           props: (options: FunctionArgumentType) => ({

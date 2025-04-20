@@ -4,6 +4,8 @@ import { type Accessor, Show } from "solid-js";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { CustomModal } from "./CustomModal";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 // prevents from being tree-shaken by TS
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 autofocus;
@@ -28,41 +30,31 @@ export function DialogWithButtons(
   return (
     <CustomModal
       customTitle={<span>{props.title}</span>}
-      dialogClass="min-w:20% r:10px p:0"
+      dialogCss={css`min-width: 20%; border-radius: 10px; padding: 0;`}
       footer={() => (
-        <div class={SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS}>
+        <As as="div" css={[SETTINGS_CONSTANTS.MODAL.FOOTER.CSS]}>
           <Show when={props.hasPermission ?? true}>
-            <button
-              class={SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CLASS}
-              onClick={handleConfirm}
-              type="button"
-            >
+            <As as="button" css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CSS]} onClick={handleConfirm} type="button">
               Confirm
-            </button>
+            </As>
           </Show>
-          <button
-            autofocus
-            class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS}
-            onClick={props.onCancel}
-            type="button"
-            use:autofocus
-          >
+          <As as="button" autofocus  css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]} onClick={props.onCancel} type="button" use:autofocus>
             Cancel
-          </button>
-        </div>
+          </As>
+        </As>
       )}
       open={props.open}
       setOpen={props.setOpen}
     >
       <Show
         fallback={
-          <p class={SETTINGS_CONSTANTS.MODAL.BODY.CLASS}>
+          <As as="p" css={[SETTINGS_CONSTANTS.MODAL.BODY.CSS]}>
             You do not have permission to perform the action.
-          </p>
+          </As>
         }
         when={props.hasPermission ?? true}
       >
-        <p class={SETTINGS_CONSTANTS.MODAL.BODY.CLASS}>{props.message}</p>
+        <As as="p" css={[SETTINGS_CONSTANTS.MODAL.BODY.CSS]}>{props.message}</As>
       </Show>
     </CustomModal>
   );

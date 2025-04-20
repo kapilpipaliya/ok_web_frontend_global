@@ -64,7 +64,7 @@ export function StatusChip(props: Readonly<{ status: string }>) {
 
   return (
     <span
-      style={`display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; text-transform: uppercase; ${getStatusStyles()}`}
+      style={`display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; text-transform: uppercase; ${getStatusStyles()};`}
     >
       {status()}
     </span>

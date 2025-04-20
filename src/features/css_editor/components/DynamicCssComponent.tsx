@@ -39,6 +39,8 @@ import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName"
 import { componentMap } from "./componentMap";
 import { LabelWrapper } from "./fields/LabelWrapper";
 import { RenderChildren } from "./RenderChildren";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 // similar to DynamicComponent in Seller Dorsey
 export function DynamicCSSComponent(
@@ -268,14 +270,16 @@ export function DynamicCSSComponent(
               hasConfiguredFields()
             }
           >
-            <div class={"w:full"}>
+            <As as="div" css={css`
+  width: 100%;
+`}>
               <LabelWrapper
                 meta={props.meta}
                 onResetIconClick={resetValue}
                 value={value()}
               />
               <Content />
-            </div>
+            </As>
           </Show>
         </Match>
         <Match when={props.meta.label}>
@@ -286,14 +290,19 @@ export function DynamicCSSComponent(
               hasConfiguredFields()
             }
           >
-            <div class={"flex ai:center jc:space-between w:full"}>
+            <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+`}>
               <LabelWrapper
                 meta={props.meta}
                 onResetIconClick={resetValue}
                 value={value()}
               />
               <Content />
-            </div>
+            </As>
           </Show>
         </Match>
         <Match when={true}>

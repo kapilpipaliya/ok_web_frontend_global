@@ -1,3 +1,4 @@
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -60,7 +61,7 @@ export const File: IFormMetaData = {
     // },
     // A brief description or notes about the file, which can provide context or additional details.
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextArea",
       displayName: "Description",
       key: "description",
@@ -137,7 +138,7 @@ export const Folder: IFormMetaData = {
     },
     // A brief description or notes about the directory.
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextArea",
       displayName: "Description",
       key: "description",
@@ -168,7 +169,7 @@ export const FileTag: IFormMetaData = {
     },
     // A brief description or notes about the tag.
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextArea",
       displayName: "Description",
       key: "description",

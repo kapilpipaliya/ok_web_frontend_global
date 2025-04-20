@@ -7,6 +7,8 @@ import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
 import FileManager from "~/features/file_manager/FileManager";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 export function FilePickerModal(props: {
   onFileSelected: (selectedFile: Vertex) => void;
@@ -17,12 +19,18 @@ export function FilePickerModal(props: {
 }) {
   return (
     <CustomModal
-      dialogClass="w:90vw r:10px p:0 h:90vh flex flex:column"
+      dialogCss={css`width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;`}
       footer={() => (
         <DialogFooter
           buttonText="Select"
-          class={`${SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS} ml:auto mr:8`}
-          containerClass="mt:auto"
+          css={[
+            SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
+            css`
+              margin-left: auto;
+              margin-right: 8px;
+            `
+          ]}
+          containerCss={css`margin-top: auto;`}
           onClick={() => {
             return props.onFileSelected(props.selectedFileVertex[0]);
           }}
@@ -34,7 +42,7 @@ export function FilePickerModal(props: {
       setOpen={props.setOpen}
       title="File Manager"
     >
-      <div>
+      <As as="div">
         <FileManager
           enableRowSelection={(vertex) =>
             (vertex as unknown as Vertex).L[0] === "File"
@@ -44,7 +52,7 @@ export function FilePickerModal(props: {
           setFileManagerStore={props.setFileManagerStore}
           toParentEdgeType="ParentFolder"
         />
-      </div>
+      </As>
     </CustomModal>
   );
 }

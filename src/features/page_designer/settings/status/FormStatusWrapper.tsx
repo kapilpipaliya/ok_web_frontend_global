@@ -4,6 +4,9 @@ import { createSignal } from "solid-js";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
 
 import { FormStatus } from "./FormStatus";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+
 // prevents from being tree-shaken by TS
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 autofocus;
@@ -20,28 +23,36 @@ export function FormStatusWrapper() {
       </button>
       <CustomModal
         customTitle={<span>{"Status Confirmation"}</span>}
-        dialogClass="min-w:20% r:10px p:0"
+        dialogCss={css`min-width: 20%; border-radius: 10px; padding: 0;`}
         footer={(_toggle) => (
-          <div class={"flex ai:center jc:end"}>
-            <button
+          <As as="div" css={css`
+  align-items: center;
+  display: flex;
+  justify-content: end;
+`}>
+            <As as="button"
               autofocus
-              class="danger mr:7px"
+              css={css`
+  margin-right: 7px;
+`}
               onClick={() => {
                 setIsOpen(false);
               }}
               use:autofocus
             >
               Cancel
-            </button>
-            <button
-              class="mr:10px"
+            </As>
+            <As as="button"
+              css={css`
+  margin-right: 10px;
+`}
               onClick={() => {
                 setIsOpen(false);
               }}
             >
               Confirm
-            </button>
-          </div>
+            </As>
+          </As>
         )}
         open={isOpen}
         setOpen={setIsOpen}

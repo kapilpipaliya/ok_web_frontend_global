@@ -1,5 +1,5 @@
 export interface ShadowAttributes {
-  "blur-radius": string;
+  "blur-radius"?: string;
   color?: string;
   inset?: string;
   "offset-x": string;
@@ -14,8 +14,8 @@ export function generateBoxShadow(
   if (!shadows) {
     return "";
   }
-  const separator = isView ? " " : "|";
-  const separator2 = isView ? ", " : ",";
+  const separator = isView ? " " : " ";
+  const separator2 = isView ? ", " : ", ";
 
   return shadows
     .filter((shadow) => shadow)

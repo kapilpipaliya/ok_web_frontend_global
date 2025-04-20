@@ -1,13 +1,14 @@
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
-import { headerIconButtonClass } from "~/pages/settings/constants";
+import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import {
   INITIAL_WIDTHS,
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { css } from "~/lib/styles";
 
 export function ToggleButtons() {
   const [graph, setGraph] = useGraph();
@@ -38,43 +39,43 @@ export function ToggleButtons() {
   return (
     <>
       <IconButton
-        class={`${headerIconButtonClass}`}
+        css={headerIconButtonCss}
         icon="ph:squares-four"
-        iconClass={`${layoutStore().isLeftOpen ? "color:#37c" : "color:gray-60"}`}
+        iconCss={css`${layoutStore().isLeftOpen ? "color:#37c" : "color:gray"};`}
         onClick={() => togglePanel("isLeftOpen")}
         size={22}
         title="Toggle Elements Panel"
         tooltipGroup="right-buttons"
       />
       <IconButton
-        class={`${headerIconButtonClass}`}
+        css={headerIconButtonCss}
         icon="ph:robot"
-        iconClass={`${layoutStore().isRight0Open ? "color:#37c" : "color:gray-60"}`}
+        iconCss={css`${layoutStore().isRight0Open ? "color:#37c" : "color:gray"};`}
         onClick={() => togglePanel("isRight0Open")}
         size={22}
         title="Toggle AI Panel"
         tooltipGroup="right-buttons"
       />
       <IconButton
-        class={`${headerIconButtonClass}`}
+        css={headerIconButtonCss}
         icon="ph:sliders"
-        iconClass={`${layoutStore().isRight1Open ? "color:#37c" : "color:gray-60"}`}
+        iconCss={css`${layoutStore().isRight1Open ? "color:#37c" : "color:gray"};`}
         onClick={() => togglePanel("isRight1Open")}
         size={22}
         title="Toggle Properties Panel"
         tooltipGroup="right-buttons"
       />
       <IconButton
-        class={`${headerIconButtonClass}`}
+        css={headerIconButtonCss}
         icon="ph:gear"
-        iconClass={`${layoutStore().isRight2Open ? "color:#37c" : "color:gray-60"}`}
+        iconCss={css`${layoutStore().isRight2Open ? "color:#37c" : "color:gray"};`}
         onClick={() => togglePanel("isRight2Open")}
         size={22}
         title="Toggle Settings Panel"
         tooltipGroup="right-buttons"
       />
       <IconButton
-        class={headerIconButtonClass}
+        css={headerIconButtonCss}
         icon="ph:arrows-counter-clockwise"
         onClick={resetLayout}
         size={22}

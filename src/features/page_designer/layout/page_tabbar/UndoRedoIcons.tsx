@@ -7,7 +7,9 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { redo, redoAllowed } from "~/lib/graph/transaction/history/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/history/undo";
-import { headerIconButtonClass } from "~/pages/settings/constants";
+import { headerIconButtonCss } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function UndoRedoIcons(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();
@@ -31,11 +33,16 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
   ];
 
   return (
-    <div class="ml:2 flex ai:center gap:2">
+    <As as="div" css={css`
+  margin-left: 2px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`}>
       <For each={icons}>
         {(item) => (
           <IconButton
-            class={`${headerIconButtonClass}`}
+            css={headerIconButtonCss}
             disabled={item.disabled()}
             icon={item.icon}
             onClick={item.onClick}
@@ -45,6 +52,6 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
           />
         )}
       </For>
-    </div>
+    </As>
   );
 }

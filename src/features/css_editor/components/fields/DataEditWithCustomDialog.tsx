@@ -15,6 +15,8 @@ import { useCssState } from "../../context/CssStateContext";
 import { useRenderContext } from "../../context/RenderContext";
 import { LabelWrapper } from "./LabelWrapper";
 import { CssPropertyRow } from "./shadow_editor/CssPropertyRow";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   const [, setCssState] = useCssEditor();
@@ -42,26 +44,37 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   };
 
   return (
-    <div
-      class={
-        "b:1px|solid|secondary color:secondary my:6 p:.2rem|.3rem position:relative r:5 w:-webkit-fill-available"
-      }
+    <As
+      as="div"
+      css={args => css`
+        border: 1px solid ${args.theme.var.color.secondary};
+        color: ${args.theme.var.color.secondary};
+        margin: 6px 0;
+        padding: 0.2rem 0.3rem;
+        position: relative;
+        border-radius: 5px;
+        width: -webkit-fill-available;
+      `}
     >
-      <div
-        class={`${
-          (props.value || []).length > 0
-            ? "bb:1px|solid|lightgrey m:1 pb:5"
-            : ""
-        } flex ai:center jc:space-between mb:6px`}
+      <As
+        as="div"
+        css={css`
+          ${(props.value || []).length > 0 ? "border-bottom: 1px solid lightgrey; margin: 1px; padding-bottom: 5px;" : ""}
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 6px;
+        `}
       >
         <LabelWrapper meta={meta()} />
-        <Icon
-          class={"cursor:pointer"}
-          icon={"ph:plus-circle"}
-          noobserver
-          onClick={addOption}
-        />
-      </div>
+        <As as="span" css={css`cursor: pointer;`}>
+          <Icon
+            icon={"ph:plus-circle"}
+            noobserver
+            onClick={addOption}
+          />
+        </As>
+      </As>
       <For each={props.value as unknown as { [key: string]: string }[]}>
         {(option, i) => (
           <CssPropertyRow
@@ -73,6 +86,6 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
           />
         )}
       </For>
-    </div>
+    </As>
   );
 };

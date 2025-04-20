@@ -8,12 +8,13 @@ import { MonacoEditor } from "solid-monaco";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 import { PROPERTIES } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "../As";
 
 // Initialize Monaco workers if not already done
 if (!window.MonacoEnvironment) {
   window.MonacoEnvironment = {
     getWorker(_moduleId: unknown, label: string) {
-      // try add support for stylus like: // https://github.com/d4rkr00t/language-stylus
       switch (label) {
         case "css":
           return new cssWorker();
@@ -45,8 +46,13 @@ export interface MonacoEditorWrapperProps {
 
 export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
   return (
-    <MonacoEditor
-      class={`${PROPERTIES.Css.TextField} ${props.error ? "b:error" : ""}`}
+    <As as={MonacoEditor}
+      css={[
+        PROPERTIES.Css.TextFieldCss,
+        css`
+          ${props.error ? "b: error" : ""}
+        `,
+      ]}
       height={props.height ?? "200px"}
       language={props.language}
       onChange={(value) => props.onChange(value)}

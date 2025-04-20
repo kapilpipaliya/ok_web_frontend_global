@@ -27,17 +27,19 @@ import {
 } from "../../../form/context/FormContext";
 import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export const getComponentClass = (componentName: string) => {
   switch (componentName) {
     case "CheckBox":
-      return "min-w:50px";
+      return "min-width:50px";
     case "Select":
-      return "min-w:200px";
+      return "min-width:200px";
     case "TextArea":
-      return "min-w:200px";
+      return "min-width:200px";
     default:
-      return "min-w:150px";
+      return "min-width:150px";
   }
 };
 
@@ -145,16 +147,22 @@ export function DisplayProperty(
   return (
     <Switch>
       <Match when={metaVertex().P.hide}>
-        <td class="align-content:center">
-          <div
-            class={`${getComponentClass(componentName())} flex ai:center jc:center`}
+        <As as="td" css={css`
+  align-content: center;
+`}>
+          <As as="div" css={css`
+            ${getComponentClass(componentName()!)}
+            display: flex;
+            align-items: center;
+            justify-content: center;
+`}
           >
             <DefaultValue
               joinVertex={props.joinVertex}
               metaVertex={metaVertex()}
             />
-          </div>
-        </td>
+          </As>
+        </As>
       </Match>
       <Match
         when={
@@ -163,43 +171,61 @@ export function DisplayProperty(
             (props.joinVertex?.P.key ?? "") === "class")
         }
       >
-        <td class="align-content:center">
-          <div class="flex ai:center jc:center">
+        <As as="td" css={css`
+  align-content: center;
+`}>
+          <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`}>
             <CssEditor
               joinVertex={props.joinVertex}
               metaVertex={metaVertex()}
               txnId={props.txnId}
             />
-          </div>
-        </td>
+          </As>
+        </As>
       </Match>
       <Match when={componentName() === "DynamicTable"}>
-        <td class="align-content:center">
+        <As as="td" css={css`
+  align-content: center;
+`}>
           <Show when={!props.disabled()}>
-            <div
-              class={`${getComponentClass(componentName())} flex ai:center jc:center`}
+            <As as="div"
+              css={css`
+  ${getComponentClass(componentName()!)}
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`}
             >
               <DefaultValue
                 joinVertex={props.joinVertex}
                 metaVertex={metaVertex()}
               />
               <Content />
-            </div>
+            </As>
           </Show>
-        </td>
+        </As>
       </Match>
       <Match when={true}>
-        <td
-          class={`${getComponentClass(componentName())} align-content:center padding:1px`}
+        <As as="td" css={css`
+  ${getComponentClass(componentName()!)}
+  align-content: center;
+  padding: 1px;
+`}
         >
-          <div class="align-items:center">
+          <As as="div" css={css`
+  align-items: center;
+`}>
             <DefaultValue
               joinVertex={props.joinVertex}
               metaVertex={metaVertex()}
             />
             <Content />
-          </div>
-        </td>
+          </As>
+        </As>
       </Match>
     </Switch>
   );

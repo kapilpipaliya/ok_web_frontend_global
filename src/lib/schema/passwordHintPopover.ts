@@ -11,6 +11,7 @@ import {
   validatePasswordConditions,
 } from "../validation/validatePassword";
 import { popoverWrapperSchema } from "./popoverWrapperSchema";
+import { css } from "../styles";
 
 /**
  * Creates a popover content component that dynamically shows password validation status
@@ -25,7 +26,12 @@ export function createPasswordHintPopoverContent(
     attributes: [
       {
         as: "h3",
-        class: "font-size:16px color:primary m:0 mb:8",
+        css: css`
+  font-size: 16px;
+  color: \${args.theme.var.color.primary};
+  margin: 0px;
+  margin-bottom: 8px;
+`,
         componentName: "Html",
         text: "Password Requirements",
       },
@@ -36,6 +42,20 @@ export function createPasswordHintPopoverContent(
           attributes: [
             {
               componentName: "Icon",
+              css: (options: FunctionArgumentType) => {
+                const validationState = options.dataContext.validationState;
+                const isValid =
+                  validationState?.[0]?.conditions?.[index]?.isValid;
+                const fieldValue = options.data?.P?.[passwordFieldKey];
+                const iconColor = fieldValue
+                  ? isValid
+                    ? "success"
+                    : "error"
+                  : "grey";
+                return css`
+  color: \${args.theme.var.color.${iconColor}};
+`;
+              },
               props: (options: FunctionArgumentType) => {
                 const validationState = options.dataContext.validationState;
                 const isValid =
@@ -46,14 +66,8 @@ export function createPasswordHintPopoverContent(
                     ? "ph:check-circle-fill"
                     : "ph:x-circle-fill"
                   : "ph:circle";
-                const iconColor = fieldValue
-                  ? isValid
-                    ? "color:success"
-                    : "color:danger"
-                  : "color:grey";
 
                 return {
-                  class: iconColor,
                   icon: iconName,
                 };
               },
@@ -61,28 +75,42 @@ export function createPasswordHintPopoverContent(
             {
               as: "span",
               componentName: "Html",
-              props: (options: FunctionArgumentType) => {
+              css: (options: FunctionArgumentType) => {
                 const validationState = options.dataContext.validationState;
                 const isValid =
                   validationState?.[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
                 const textColor = fieldValue
                   ? isValid
-                    ? "color:success"
-                    : "color:base-80"
-                  : "color:base-80";
+                    ? "success"
+                    : "base_640"
+                  : "base_640";
 
+                return css`
+  color: \${args.theme.var.color.${textColor}};
+`;
+              },
+              props: (options: FunctionArgumentType) => {
                 return {
-                  class: textColor,
                   text: condition.message,
                 };
               },
             },
           ],
-          class: "font-size:14px mb:4 d:flex align-items:center gap:8",
+          css: css`
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`,
           componentName: "Html",
         })),
-        class: "m:0 pl:16 list-style:none",
+        css: css`
+  margin: 0px;
+  padding-left: 16px;
+  list-style: none;
+`,
         componentName: "Html",
         props: (options: FunctionArgumentType) => {
           createEffect(() => {
@@ -106,7 +134,12 @@ export function createPasswordHintPopoverContent(
         },
       },
     ],
-    class: "p:12 bg:white shadow:lg r:4 max-width:300px",
+    css: css`
+  padding: 12px;
+  background-color: white;
+  border-radius: 4px;
+  max-width: 300px;
+`,
     componentName: "Html",
   };
 }
@@ -124,12 +157,23 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: label,
           },
           {
             componentName: "Icon",
+            css: (options: FunctionArgumentType) => {
+              const helpIconState = options.dataContext.helpIconState;
+              const iconColor = helpIconState?.[0]?.isValid
+                ? "success"
+                : helpIconState?.[0]?.hasContent
+                  ? "warning"
+                  : "grey";
+              return css`
+  color: \${args.theme.var.color.${iconColor}};
+`;
+            },
             props: (options: FunctionArgumentType) => {
               const helpIconState = options.dataContext.helpIconState;
               const iconName = helpIconState?.[0]?.isValid
@@ -137,20 +181,18 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
                 : helpIconState?.[0]?.hasContent
                   ? "ph:warning-circle"
                   : "ph:question-circle";
-              const iconColor = helpIconState?.[0]?.isValid
-                ? "color:success"
-                : helpIconState?.[0]?.hasContent
-                  ? "color:warning"
-                  : "color:grey";
 
               return {
-                class: iconColor,
                 icon: iconName,
               };
             },
           },
         ],
-        class: "d:flex gap:4 align-items:center",
+        css: css`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+`,
         componentName: "Html",
       },
     ],

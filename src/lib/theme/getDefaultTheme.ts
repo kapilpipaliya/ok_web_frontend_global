@@ -1,17 +1,20 @@
-// https://github.com/saadeghi/daisyui/blob/master/src/theming/themes.js
-// https://github.com/saadeghi/daisyui/blob/master/src/base/colors.css
+import { DEFAULT_INFO, DEFAULT_ACCENT, DEFAULT_WARNING, DEFAULT_BASE, DEFAULT_NEUTRAL, DEFAULT_ERROR, DEFAULT_SUCCESS } from "../styles/constants";
+
+import { DEFAULT_PRIMARY, DEFAULT_SECONDARY } from "../styles/constants";
+
+// https://github.com/bgrins/TinyColor/blob/master/npm/tinycolor.js#L784
 export function getDefaultTheme() {
   return `return {
-  "variables": {
-    "primary": variables.sky,
-    "secondary": variables.gray,
-    "accent": variables.amber,
-    "neutral": variables.beryl,
-    "base": variables.slate, // use base-5, base-10, base-20
-    "info": variables.blue,
-    "success": variables.green,
-    "warning": variables.yellow,
-    "error": variables.red
+  "var": {
+    "primary": "${DEFAULT_PRIMARY}",
+    "secondary": "${DEFAULT_SECONDARY}", 
+    "accent": "${DEFAULT_ACCENT}",
+    "neutral": "${DEFAULT_NEUTRAL}",
+    "base": "${DEFAULT_BASE}",
+    "info": "${DEFAULT_INFO}",
+    "success": "${DEFAULT_SUCCESS}",
+    "warning": "${DEFAULT_WARNING}",
+    "error": "${DEFAULT_ERROR}"
   }
 }`;
 }

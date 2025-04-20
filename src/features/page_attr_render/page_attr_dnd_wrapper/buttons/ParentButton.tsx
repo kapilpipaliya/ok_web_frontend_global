@@ -11,8 +11,11 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
-
+import { css } from "~/lib/styles";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { CssType } from "~/components/form/type/FieldSchemaType";
 interface ParentButtonProps {
+  css?: CssType;
   item: Vertex;
   size: number;
 }
@@ -28,7 +31,12 @@ export function ParentButton(props: Readonly<ParentButtonProps>) {
 
   return (
     <IconButton
-      class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
+      css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ...ensureArray(props.css),
+        css`
+          background-color: transparent;
+          border: none;
+        `,
+      ]}
       icon="ph:arrow-up"
       onClick={(e) => {
         e.stopPropagation();

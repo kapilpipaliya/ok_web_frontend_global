@@ -31,6 +31,8 @@ import { AttrConfigIcons } from "./AttrConfigIcons";
 import { HideShowIcon } from "./HideShowIcon";
 import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function LayoutTreeItem(
   props: Readonly<{
@@ -148,16 +150,16 @@ export function LayoutTreeItem(
       if (layoutStoreVertex()?.P.position !== "after") {
         const boxShadowProps = getDnDBoxShadowArgs(
           layoutStoreVertex()?.P.position,
-          "green-60",
+          "green",
         );
-        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
+        boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])};`;
       }
     }
 
     if (isSelectedLayoutId(props.metaVertex.id)) {
-      boxShadow += " bg:rgb(197,221,255)";
+      boxShadow += " background-color:rgb(197,221,255);";
     } else if (isSelectedHoverId(props.metaVertex.id)) {
-      boxShadow += " bg:#F2EDED";
+      boxShadow += " background-color:#F2EDED;";
     }
 
     return boxShadow;
@@ -166,7 +168,7 @@ export function LayoutTreeItem(
   return (
     <>
       <TreeItemContainer
-        class={getBorder()}
+        css={css`${getBorder()}`}
         draggable={"true"}
         hasChildren={!!children().length}
         isDragOver={isActiveTargetItem()}
@@ -217,7 +219,11 @@ export function LayoutTreeItem(
           children().length > 0
         }
       >
-        <ul class="pl:8 pt:5">
+        <As as="ul" css={css`
+  padding-left: 8px;
+  padding-top: 5px;
+  list-style: none;
+`}>
           <For each={children()}>
             {(vertex) => (
               <Show when={formStoreVertex()}>
@@ -229,10 +235,12 @@ export function LayoutTreeItem(
               </Show>
             )}
           </For>
-        </ul>
+        </As>
       </Show>
       <Show when={isAfter()}>
-        <div class="b:1px|solid|green-60" />
+        <As as="div" css={css`
+  border: 1px solid #3b82f6;
+`} />
       </Show>
     </>
   );

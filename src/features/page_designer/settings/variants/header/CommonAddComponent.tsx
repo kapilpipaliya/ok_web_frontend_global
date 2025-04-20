@@ -4,6 +4,8 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { PROPERTIES } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function CommonAddComponent(
   props: Readonly<{
@@ -27,30 +29,55 @@ export function CommonAddComponent(
   };
 
   return (
-    <div class="radius-b:5 flex flex:column px:2 py:5">
+    <As as="div" css={css`
+  /* radius-b: 5; */
+  display: flex;
+  flex-direction: column;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+`}>
       <span>{props.title}</span>
-      <div class="flex flex:column gap:4 jc:space-between mt:10">
-        <label class="flex flex:column">
+      <As as="div" css={css`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: space-between;
+  margin-top: 10px;
+`}>
+        <As as="label" css={css`
+  display: flex;
+  flex-direction: column;
+`}>
           {props.label}
-          <div class="items-center flex ">
-            <input
-              class={`${PROPERTIES.Css.TextField} h:100%`}
+          <As as="div" css={css`
+  align-items: center;
+  display: flex;
+`}>
+            <As as="input"
+              css={[
+                PROPERTIES.Css.TextFieldCss,
+                css`
+  height: 100%;
+`
+              ]}
               onInput={(e) => setStateName(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={props.placeholder}
               ref={inputRef!}
               value={stateName()}
             />
-          </div>
-        </label>
+          </As>
+        </As>
         <IconButton
           icon="ic:round-check"
-          iconClass="ml:2"
+          iconCss={css`margin-left: 2px;`}
           onClick={() => props.addNewState(stateName())}
           size={21}
         />
         {props.children}
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }

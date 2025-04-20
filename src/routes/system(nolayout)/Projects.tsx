@@ -7,20 +7,30 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export default function Projects() {
   return (
     <SystemLayoutRoute>
       <Title>Projects</Title>
-      <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
-        <div class="flex:1" />
-        <div class="ml:auto flex gap:4">
+      <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
+        <As as="div" css={css`
+  flex: 1;
+`} />
+        <As as="div" css={css`
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+`}>
           <UserDropdownMenuDisplay />
-        </div>
-      </header>
+        </As>
+      </As>
 
       <HeaderWithDescription
-        class="flex:1"
+        css={css`
+  flex: 1;
+`}
         description={
           <>
             Each project has a separate subdomain and database. Only
@@ -34,9 +44,11 @@ export default function Projects() {
         title="Projects"
       />
 
-      <div class="p:6">
+      <As as="div" css={css`
+  padding: 6px;
+`}>
         <SubDomainGrid />
-      </div>
+      </As>
     </SystemLayoutRoute>
   );
 }

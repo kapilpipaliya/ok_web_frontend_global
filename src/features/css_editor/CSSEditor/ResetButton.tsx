@@ -3,15 +3,32 @@ import { reconcile } from "solid-js/store";
 
 import { IconButton } from "../../../components/styled/IconButton";
 import { type CSSStore, useCssEditor } from "../context/CssEditorContext";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 export function ResetButton(props: Readonly<{ onReset: () => void }>) {
   const [cssState, setCssState] = useCssEditor();
 
   return (
     <Show when={Object.entries(filterTruthyCSSStore(cssState)).length}>
-      <div class="d:flex jc:end">
+      <As as="div" css={css`
+  display: flex;
+  justify-content: end;
+`}>
         <IconButton
-          class="bg:error bg:error-70:hover color:base-5 gap:10px px:16px py:8px r:6 transition:background-color|200ms"
+          css={(args: FunctionArgumentType) => css`
+  color: ${args.theme.var.color.base_10};
+  gap: 10px;
+  padding-left: 16px; padding-right: 16px;
+  padding-top: 8px; padding-bottom: 8px;
+  border-radius: 6px;
+  transition: background-color 200ms;
+  background-color: transparent;
+  border: none;
+  &:hover {
+    background-color: ${args.theme.var.color.error};
+  }
+`}
           icon="ph:x"
           onClick={() => {
             setCssState(reconcile({ "": {} }));
@@ -21,7 +38,7 @@ export function ResetButton(props: Readonly<{ onReset: () => void }>) {
         >
           <span>Reset</span>
         </IconButton>
-      </div>
+      </As>
     </Show>
   );
 }

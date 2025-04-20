@@ -1,10 +1,13 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { css } from "../styles";
 
 export function loadingIconSchema() {
   return {
     attributes: [
       {
-        class: "@rotate|2s|linear|infinite",
+        css: css`
+  rotate: 2s linear infinite;
+`,
         componentName: "Icon",
         height: 32,
         icon: "ph:spinner",

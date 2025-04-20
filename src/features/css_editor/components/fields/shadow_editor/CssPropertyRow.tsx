@@ -5,7 +5,8 @@ import type { DataEditorField } from "../../../constants/FieldSchemaType";
 
 import { CssPropertyRowContent } from "./CssPropertyRowContent";
 import { CssPropertyRowSettings } from "./CssPropertyRowSettings";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 export interface CssPropertyRowProps {
   deleteOption: (index: number) => void;
   index: Accessor<number>;
@@ -18,9 +19,20 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
   const openMenu = createSignal(false);
   return (
     <>
-      <div class="flex ai:center b:1px|solid|#ccc cursor:pointer mb:3px p:6 r:4">
+      <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  border: 1px solid #3b82f6;
+  cursor: pointer;
+  margin-bottom: 3px;
+  padding: 6px;
+  border-radius: 4px;
+`}>
         <Icon
-          class="cursor:pointer mr:8"
+          css={css`
+  cursor: pointer;
+  margin-right: 8px;
+`}
           icon="ph:dots-three-outline-fill"
           noobserver
           onClick={() => openMenu[1](true)}
@@ -33,12 +45,16 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
           option={props.option}
         />
         <Icon
-          class="cursor:pointer fg:error mr:8"
+          css={css`
+  cursor: pointer;
+  color: \${args.theme.var.color.error};
+  margin-right: 8px;
+`}
           icon="ph:x-circle"
           noobserver
           onClick={() => props.deleteOption(props.index())}
         />
-      </div>
+      </As>
       <CssPropertyRowSettings
         meta={props.meta}
         openMenu={openMenu}

@@ -27,13 +27,13 @@ export const userFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Email",
               validation: { required: true },
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextInput",
               key: "email",
               placeholder: "Enter email",
@@ -43,7 +43,7 @@ export const userFormSchema = {
               },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
         {
@@ -51,12 +51,12 @@ export const userFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Name",
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextInput",
               key: "name",
               placeholder: "Enter name",
@@ -73,7 +73,7 @@ export const userFormSchema = {
               },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
         {
@@ -81,12 +81,12 @@ export const userFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Username",
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextInput",
               key: "username",
               placeholder: "Enter username",
@@ -96,7 +96,7 @@ export const userFormSchema = {
               },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
         {
@@ -104,7 +104,7 @@ export const userFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Role",
             },
@@ -116,11 +116,11 @@ export const userFormSchema = {
               validation: { required: true },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
       ],
-      class: SETTINGS_CONSTANTS.FORM_CLASS,
+      css: SETTINGS_CONSTANTS.FORM_CSS,
       componentName: "Html",
     },
   ],
@@ -224,12 +224,12 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "span",
-        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         componentName: "Html",
         text: "Add New User",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
     componentName: "Html",
   };
 
@@ -238,7 +238,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
@@ -251,7 +251,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       },
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
@@ -263,7 +263,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         type: "button",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.FOOTER.CSS,
     componentName: "Html",
   };
 
@@ -280,7 +280,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                   {
                     as: "div",
                     attributes: [],
-                    class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       hide: !options.dataContext.modalState[0]?.showModal,
@@ -304,7 +304,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                         }),
                       },
                     ],
-                    class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
                     props: (options: FunctionArgumentType) => ({

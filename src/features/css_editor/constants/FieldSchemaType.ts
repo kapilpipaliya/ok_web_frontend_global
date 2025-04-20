@@ -1,4 +1,5 @@
 import type { JSXElement } from "solid-js";
+import { css } from "~/lib/styles";
 
 export interface AnotherOption {
   icon?: string;
@@ -125,7 +126,7 @@ export interface StringField extends FormField {
 // text field with unit options
 export interface TextFieldOptionsField extends FormField {
   componentName: "string";
-  containerClass?: string;
+  containerCss?: string | string[];
   inputProps?: any;
   isLabelOnTop?: boolean;
   label: string;
@@ -171,7 +172,13 @@ export const createGridOptions = (
   children: GenericField[],
 ): BoxField => ({
   children,
-  class: "grid ai:center gap:5px|10px grid-template-cols:repeat(2,auto) p:5px",
+  css: css`
+  display: grid;
+  align-items: center;
+  gap: 5pxpx 10px;
+  grid-template-columns: repeat(2,auto);
+  padding: 5px;
+`,
   componentName: "box",
   key,
   useParentProjection: true,

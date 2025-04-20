@@ -11,10 +11,11 @@ export function getComponentTree(): ComponentNode[] {
   - Portal
   - Data
   - Form
-  - Link
-  - Meta
+  - Head
   - ComponentChildren
 `;
+  //   - Link
+  //   - Meta
   // - Table
   // - Transition
   // - TransitionGroup

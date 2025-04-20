@@ -14,6 +14,8 @@ import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { STYLES } from "~/pages/settings/constants";
 
 import { useZIndex } from "../../fields/ZIndex";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 interface DrawerProps {
   children: JSX.Element;
@@ -95,8 +97,14 @@ export function Drawer(props: Readonly<DrawerProps>) {
     };
 
     return (
-      <div
-        class="cursor:ew-resize h:100% left:-5px position:absolute top:0 w:10px"
+      <As as="div" css={css`
+  cursor: ew-resize;
+  height: 100%;
+  left: -5px;
+  position: absolute;
+  top: 0px;
+  width: 10px;
+`}
         onMouseDown={handleMouseDown}
         onMouseEnter={() => setMainDivHover(true)}
         onMouseLeave={() => setMainDivHover(false)}
@@ -106,12 +114,12 @@ export function Drawer(props: Readonly<DrawerProps>) {
 
   const ResizerBorder = (p: { children: JSX.Element }) => {
     return (
-      <div
-        class={`${isOpen() ? "right:0" : `right:-${drawerWidth()}`} ${mainDivHover() ? "bl:2px|solid|#37c" : "bl:none"} bg:base-5 border-radius:15px|0|0|15px box-shadow:0|2px|5px|rgba(0,0,0,0.5) color:black h:100% position:fixed top:0 transition:right|0.5s w:${drawerWidth()} z:${zIndex}`}
+      <As as="div"
+        css={css`${isOpen() ? "right:0;" : `right:-${drawerWidth()};`} ${mainDivHover() ? "border-left:2px solid #37c;" : "border-left:none;"} background-color: \${args.theme.var.color.base_10}; border-radius:15px 0 0 15px; box-shadow:0 2px 5px rgba(0,0,0,0.5); color:black; height:100%; position:fixed; top:0; transition:right 0.5s; width:${drawerWidth()}; z-index:${zIndex};`}
         ref={setFloating}
       >
         {p.children}
-      </div>
+      </As>
     );
   };
   return (
@@ -121,9 +129,12 @@ export function Drawer(props: Readonly<DrawerProps>) {
         <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
       </Show>
       <ResizerBorder>
-        <div class={`${props.drawerClass} h:100% ${STYLES.overflow}`}>
+        <As as="div" css={[css`
+  ${props.drawerClass}
+  height: 100%;
+`, STYLES.overflowCss]}>
           {props.children}
-        </div>
+        </As>
         <Resizer />
       </ResizerBorder>
       {/* <div

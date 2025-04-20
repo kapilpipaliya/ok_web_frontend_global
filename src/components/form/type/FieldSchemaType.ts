@@ -12,6 +12,14 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 
 import type { FormStoreObject } from "../context/FormContext";
+import type { ThemeContext } from "~/lib/styles";
+
+export type ComponentNameType = (options: FunctionArgumentType) => string;
+
+// CSS-in-JS type definitions
+export type CssStringType = string | string[];
+export type CssFunctionType = (options: FunctionArgumentType) => CssStringType;
+export type CssType = CssStringType | CssFunctionType | Array<CssStringType | CssFunctionType>;
 
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
@@ -61,6 +69,7 @@ export interface FunctionArgumentBaseType {
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
   showWarningToast: (message: string) => void;
+  theme: ThemeContext;
   txnId: number;
   updateValue: (value: unknown) => void;
   zIndex: number;

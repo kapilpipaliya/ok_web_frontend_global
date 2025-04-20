@@ -10,6 +10,8 @@ import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { formCancel } from "./functions/formCancel";
 import { formSubmit } from "./functions/formSubmit";
+import { css } from "~/lib/styles";
+import { As } from "../As";
 
 export function SaveCancelButton(
   props: Readonly<{
@@ -42,31 +44,32 @@ export function SaveCancelButton(
     navigate,
   );
   return (
-    <div
-      class={`${props.buttonAlign ? `jc:${props.buttonAlign}` : "jc:start"} flex`}
-    >
-      <button
-        class={`${SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS} mr:7`}
+    <As as="div" css={css`
+      display: flex;
+      justify-content: ${props.buttonAlign ? `end` : "start"};
+    `}>
+      <As as="button" css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS, css`
+  margin-right: 7px;
+`]}
         onClick={onCancel}
         type="button"
       >
         Cancel
-      </button>
+      </As>
       <Show
         fallback={
-          <button
-            class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+          <As as="button" css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
             disabled={props.disabled}
             onClick={onSubmit}
             type="button"
           >
             Save
-          </button>
+          </As>
         }
         when={props.customSubmitButton}
       >
         {props.customSubmitButton}
       </Show>
-    </div>
+    </As>
   );
 }

@@ -17,7 +17,7 @@ export function AddNewThemeDialog() {
     <>
       <DialogFooter
         buttonText="Add New Theme"
-        class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+        css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
         onClick={() => setShowDialog(true)}
       />
       <Show when={showDialog()}>

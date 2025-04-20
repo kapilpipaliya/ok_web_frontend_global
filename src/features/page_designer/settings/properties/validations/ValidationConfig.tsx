@@ -4,6 +4,8 @@ import { createStore } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { validateInput } from "./validateInput";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 interface ValidationProps {
   componentName: string;
@@ -65,11 +67,25 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       value: any;
     }>,
   ) => (
-    <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
-      <label class="f:15 flex:.5">{inputProps.label}</label>
-      <input
+    <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`}>
+      <As as="label" css={css`
+  font-size: 15px;
+  display: flex;
+`}>{inputProps.label}</As>
+      <As as="input"
         checked={inputProps.type === "checkbox" ? inputProps.value : undefined}
-        class="border:1px|solid|base f:15 flex:1 p:2"
+        css={css`
+  border: 1px solid #3b82f6;
+  font-size: 15px;
+  display: flex;
+  padding: 2px;
+`}
         onChange={(e) => {
           inputProps.onChange(e);
           props.onChange(props.meta, values);
@@ -77,52 +93,97 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
         type={inputProps.type}
         value={inputProps.value}
       />
-    </div>
+    </As>
   );
 
   const RegexInput = (regexprops: Readonly<{ index: number }>) => (
     <div class="">
-      <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
-        <label class="f:15 flex:.5">Regex</label>
-        <input
-          class="border:1px|solid|base f:15 flex:1 p:2"
+      <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`}>
+        <As as="label" css={css`
+  font-size: 15px;
+  display: flex;
+`}>Regex</As>
+        <As as="input"
+          css={css`
+  border: 1px solid #3b82f6;
+  font-size: 15px;
+  display: flex;
+  padding: 2px;
+`}
           onChange={(e) =>
             setValues("regex", regexprops.index, "value", e.target.value)
           }
           type="text"
           value={values.regex[regexprops.index].value}
         />
-      </div>
-      <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
-        <label class="f:15 flex:.5">Enabled</label>
-        <input
+      </As>
+      <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`}>
+        <As as="label" css={css`
+  font-size: 15px;
+  display: flex;
+`}>Enabled</As>
+        <As as="input"
           checked={values.regex[regexprops.index].enabled}
-          class="border:1px|solid|base f:15 flex:1 p:2"
+          css={css`
+  border: 1px solid #3b82f6;
+  font-size: 15px;
+  display: flex;
+  padding: 2px;
+`}
           onChange={(e) =>
             setValues("regex", regexprops.index, "enabled", e.target.checked)
           }
           type="checkbox"
         />
-      </div>
-      <div class="flex ai:center gap:2 justify-content:space-between mt:6 ">
-        <label class="f:15 flex:.5">Message</label>
-        <input
-          class="border:1px|solid|base f:15 flex:1 p:2"
+      </As>
+      <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`}>
+        <As as="label" css={css`
+  font-size: 15px;
+  display: flex;
+`}>Message</As>
+        <As as="input"
+          css={css`
+  border: 1px solid #3b82f6;
+  font-size: 15px;
+  display: flex;
+  padding: 2px;
+`}
           onChange={(e) =>
             setValues("regex", regexprops.index, "message", e.target.value)
           }
           type="text"
           value={values.regex[regexprops.index].message}
         />
-      </div>
+      </As>
       <div>
-        <button
-          class="border:1px|solid|base p:2"
+        <As as="button"
+          css={css`
+  border: 1px solid #3b82f6;
+  padding: 2px;
+`}
           onClick={() => deleteRegex(regexprops.index)}
           type="button"
         >
           Delete Regex
-        </button>
+        </As>
       </div>
     </div>
   );
@@ -130,7 +191,9 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
   return (
     <div>
       <Show when={rules.length > 0}>
-        <h3 class="font-weight:bold">Validations:</h3>
+        <As as="h3" css={css`
+  font-weight: bold;
+`}>Validations:</As>
       </Show>
       <For each={rules}>
         {(rule) => (

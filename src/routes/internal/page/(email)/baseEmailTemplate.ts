@@ -1,11 +1,12 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
-
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { API } from "~/lib/api/endpoints";
+import { css } from "~/lib/styles";
 
 export function getLogoSchema(
-  containerClass = "",
-  imageClass = "h:80px mb:24",
-  borderClass = "fg:base-20 my:24",
+  containerCss = "",
+  imageCss = css`height:80px; margin-bottom:24px;`,
+  borderCss = css`color: \${args.theme.var.color.base_80}; margin-top:24px; margin-bottom:24px;`,
 ) {
   return {
     as: "div",
@@ -15,7 +16,7 @@ export function getLogoSchema(
         attributes: [
           {
             as: "img",
-            class: imageClass,
+            css: imageCss,
             componentName: "Html",
             pos: 1,
             props: `return {
@@ -30,14 +31,14 @@ export function getLogoSchema(
       },
       {
         as: "hr",
-        class: borderClass,
+        css: borderCss,
         componentName: "Html",
         pos: 2,
       },
     ],
-    class: containerClass,
+    css: containerCss,
     componentName: "Html",
-  };
+  } as FieldAttribute;
 }
 
 export const createEmailTemplate = (content: FieldAttribute[]) =>
@@ -59,23 +60,38 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             attributes: [
               {
                 as: "p",
-                class: "color:grey font-size:12px",
+                css: css`
+  color: grey;
+  font-size: 12px;
+`,
                 componentName: "Html",
                 pos: 1,
                 text: "© 2024 Your Company. All rights reserved.",
               },
             ],
-            class: "mt:32 text-align:center",
+            css: css`
+  margin-top: 32px;
+  text-align: center;
+`,
             componentName: "Html",
             pos: 2,
           },
         ],
-        class: "max-w:600px m:auto p:32 bg:base-1",
+        css: css`
+  max-width: 600px;
+  margin: auto;
+  padding: 32px;
+  background-color: \${args.theme.var.color.base_2};
+`,
         componentName: "Html",
         pos: 1,
       },
     ],
-    class: "min-h:100vh bg:base-2 p:32",
+    css: css`
+  min-height: 100vh;
+  background-color: \${args.theme.var.color.base_4};
+  padding: 32px;
+`,
     componentName: "Html",
     pos: 1,
   }) as FieldAttribute;

@@ -19,7 +19,9 @@ import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValu
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PROPERTIES } from "~/pages/settings/constants";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 export function CollAndData() {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
@@ -57,9 +59,19 @@ export function CollAndData() {
 
   return (
     <>
-      <div class="flex">
-        <span class="flex:.5 mt:5">Expression: </span>
-        <div class="flex ai:center f:15 flex:1">
+      <As as="div" css={css`
+  display: flex;
+`}>
+        <As as="span" css={css`
+  flex: 0.5;
+  margin-top: 5px;
+`}>Expression: </As>
+        <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  flex: 1;
+`}>
           <DynamicComponent
             data={graph.vertexes[formStoreVertex()?.P.selectedId]}
             disabled={false}
@@ -70,13 +82,23 @@ export function CollAndData() {
             txnId={formStoreVertex()?.P.txnId}
           />
           {/* 
-            <Icon icon="mdi:information-outline" noobserver class="ml:2 cursor:pointer" title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
+            <Icon icon="mdi:information-outline" noobserver css={css`
+  margin-left: 2px;
+  cursor: pointer;
+`} title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
           */}
-        </div>
-      </div>
+        </As>
+      </As>
 
-      <div class="text-center mb:2 mt:2">OR</div>
-      <span class="flex:.5 mt:5">Collection:</span>
+      <As as="div" css={css`
+  text-align: center;
+  margin-bottom: 2px;
+  margin-top: 2px;
+`}>OR</As>
+      <As as="span" css={css`
+  flex: 0.5;
+  margin-top: 5px;
+`}>Collection:</As>
       <SelectField
         componentName={"Select"}
         data={graph.vertexes[formStoreVertex()?.P.selectedId]}
@@ -87,7 +109,10 @@ export function CollAndData() {
         title={"Select Collection"}
         txnId={formStoreVertex()?.P.txnId}
       />
-      <span class="flex:.5 mt:5">Data:</span>
+      <As as="span" css={css`
+  flex: 0.5;
+  margin-top: 5px;
+`}>Data:</As>
       <SelectField
         componentName={"MultiSelect"}
         data={graph.vertexes[formStoreVertex()?.P.selectedId]}
@@ -122,7 +147,7 @@ function createFieldAttributes(
       key: "data",
     },
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextInput",
       key: "expression",
     },

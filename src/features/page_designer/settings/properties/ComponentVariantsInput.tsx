@@ -9,6 +9,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function ComponentVariantsInput(props: {
   compVertex: Vertex;
@@ -46,15 +48,39 @@ export function ComponentVariantsInput(props: {
             }) as Vertex[];
           });
           return (
-            <div class="flex ai:center gap:2 justify-content:space-between mt:6">
-              <span class="f:15 flex:.5">
+            <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`}>
+              <As as="span" css={css`
+  font-size: 15px;
+  flex: 0.5;
+`}>
                 {variant.P.label || variant.P.key}
-              </span>
-              <div class="flex f:15 flex:1 gap:1px">
+              </As>
+              <As as="div" css={css`
+  display: flex;
+  font-size: 15px;
+  flex: 1;
+  gap: 1px;
+`}>
                 <Switch>
                   <Match when={options()}>
-                    <select
-                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                    <As as="select"
+                      css={[
+                PROPERTIES.Css.TextFieldCss,
+                css`
+  flex: 1;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`]}
                       onChange={(e) =>
                         props.setPropertyValue(variant, e.currentTarget.value)
                       }
@@ -66,12 +92,22 @@ export function ComponentVariantsInput(props: {
                           <option value={option.P.value}>{option.P.key}</option>
                         )}
                       </For>
-                    </select>
+                    </As>
                   </Match>
                   <Match when={variant.P.type?.toLowerCase() === "boolean"}>
-                    <input
+                    <As as="input"
                       checked={props.dataVertex.P[variant.P.key]}
-                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                      css={[
+                PROPERTIES.Css.TextFieldCss,
+                css`
+  flex: 1;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`]}
                       onChange={(e) =>
                         props.setPropertyValue(variant, e.currentTarget.checked)
                       }
@@ -84,8 +120,16 @@ export function ComponentVariantsInput(props: {
                       variant.P.type?.toLowerCase() === "date"
                     }
                   >
-                    <input
-                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                    <As as="input"
+                      css={[
+                PROPERTIES.Css.TextFieldCss,
+                css`
+  flex: 1;
+  padding-left: 2px; padding-right: 2px;
+  padding-top: 1px; padding-bottom: 1px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`]}
                       onChange={(e) =>
                         props.setPropertyValue(
                           variant,
@@ -99,8 +143,16 @@ export function ComponentVariantsInput(props: {
                     />
                   </Match>
                   <Match when={true}>
-                    <input
-                      class={`${PROPERTIES.Css.TextField} flex-1 px:2 py:1 border rounded`}
+                    <As as="input"
+                      css={[
+                PROPERTIES.Css.TextFieldCss,
+                css`
+  flex: 1;
+  padding-left: 2px; padding-right: 2px;
+  padding-top: 1px; padding-bottom: 1px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`]}
                       onChange={(e) =>
                         props.setPropertyValue(variant, e.currentTarget.value)
                       }
@@ -116,14 +168,16 @@ export function ComponentVariantsInput(props: {
                   }
                 >
                   <IconButton
-                    class="color:error"
+                    css={css`
+  color: \${args.theme.var.color.error};
+`}
                     icon="ph:x"
                     onClick={() => props.setPropertyValue(variant, null)}
                     size={16}
                   />
                 </Show>
-              </div>
-            </div>
+              </As>
+            </As>
           );
         }}
       </For>

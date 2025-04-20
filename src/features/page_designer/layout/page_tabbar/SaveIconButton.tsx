@@ -9,7 +9,8 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { capturePreview } from "~/lib/playwright/capturePreview";
-import { headerIconButtonClass } from "~/pages/settings/constants";
+import { headerIconButtonCss } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
 
 export function SaveIconButton(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();
@@ -44,7 +45,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
 
   return (
     <IconButton
-      class={`${headerIconButtonClass}`}
+      css={headerIconButtonCss}
       disabled={isDisabled()}
       icon="ph:floppy-disk"
       onClick={isDisabled() ? undefined : saveAndCaptureForm}

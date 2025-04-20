@@ -10,6 +10,7 @@ import { postAPI } from "~/lib/api/general/postApi";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
+import { css } from "~/lib/styles";
 
 export function CompanySettings() {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -26,18 +27,18 @@ export function CompanySettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Company Name",
           },
           {
-            class: PROPERTIES.Css.TextField,
+            css: PROPERTIES.Css.TextFieldCss,
             componentName: "TextInput",
             key: "companyName",
             placeholder: "Enter company name",
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
       },
       {
@@ -45,18 +46,18 @@ export function CompanySettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Address",
           },
           {
-            class: PROPERTIES.Css.TextField,
+            css: PROPERTIES.Css.TextFieldCss,
             componentName: "TextArea",
             key: "address",
             placeholder: "Enter company address",
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
       },
       {
@@ -64,19 +65,19 @@ export function CompanySettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Contact Email",
           },
           {
-            class: PROPERTIES.Css.TextField,
+            css: PROPERTIES.Css.TextFieldCss,
             componentName: "TextInput",
             key: "contactEmail",
             placeholder: "Enter contact email",
             type: "email",
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
       },
       {
@@ -84,18 +85,18 @@ export function CompanySettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Phone",
           },
           {
-            class: PROPERTIES.Css.TextField,
+            css: PROPERTIES.Css.TextFieldCss,
             componentName: "TextInput",
             key: "phone",
             placeholder: "Enter phone number",
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
       },
       {
@@ -105,7 +106,7 @@ export function CompanySettings() {
             attributes: [
               {
                 as: "button",
-                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
@@ -146,11 +147,13 @@ export function CompanySettings() {
             }),
           },
         ],
-        class: "mt:24",
+        css: css`
+  margin-top: 24px;
+`,
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {

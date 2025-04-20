@@ -18,6 +18,8 @@ import {
   handleChannelMessage,
 } from "~/lib/graph/mutate/core/channel";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export default function PageShareView() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -65,7 +67,6 @@ function DroppableWrapper(props: { children: any; formStoreId: string }) {
   const [isDraggingOver, setIsDraggingOver] = createSignal(false);
   const queryParams = new URLSearchParams(window.location.search);
   const noMinHeight = queryParams.get("noMinHeight") === "true";
-  // const { showErrorToast } = useToast();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
@@ -73,11 +74,11 @@ function DroppableWrapper(props: { children: any; formStoreId: string }) {
     graph.vertexes[props.formStoreId] as Vertex<FormStoreObject>;
 
   return (
-    <div
-      class={noMinHeight ? undefined : "min-h:300px"}
-      classList={{
-        "bg:#f3f3f4": isDraggingOver(),
-      }}
+    <As as="div"
+      css={css`
+        ${!noMinHeight ? "min-height: 300px;" : ""}
+        ${isDraggingOver() ? "background-color: #f3f3f4;" : ""}
+      `}
       onDragLeave={() => {
         setIsDraggingOver(false);
       }}
@@ -104,13 +105,12 @@ function DroppableWrapper(props: { children: any; formStoreId: string }) {
           formStoreVertex(),
           graph,
           setGraph,
-          // showErrorToast
           (error) => console.error(error),
         );
         resetDragDropState(layoutStoreVertex(), graph, setGraph);
       }}
     >
       {props.children}
-    </div>
+    </As>
   );
 }

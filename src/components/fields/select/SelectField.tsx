@@ -37,7 +37,7 @@ import { isStaticOptions } from "./functions/isStaticOptions";
 export function SelectField(
   props: Readonly<
     GenericComponentProps & {
-      class?: string;
+      css?: string;
       data?: Vertex;
       isRealTime?: boolean;
       meta?: Vertex;
@@ -265,7 +265,7 @@ export function SelectField(
     >
       <MultiSelectField
         childrenKey={meta().P.childrenKey}
-        class={props.class}
+        css={props.css}
         disable={props.disabled}
         displayValueKey={
           meta().P.labelKey

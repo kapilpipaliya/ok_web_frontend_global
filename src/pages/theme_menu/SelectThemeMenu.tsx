@@ -22,6 +22,8 @@ import { SETTINGS_CONSTANTS } from "../settings/constants";
 import { AddNewThemeDialog } from "./AddNewThemeDialog";
 import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   const [graph, setGraph] = useGraph();
@@ -42,7 +44,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
     setLoading(false);
   };
 
-  onMount(async () => {
+  onMount(() => {
     loadThemes();
   });
 
@@ -62,13 +64,13 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
       return;
     }
 
-    const selectedThemeMetaVertex = {
+    const selectedThemeMetaVertex: Vertex = {
       id: "",
       IN: {},
       L: [],
       OUT: {},
       P: { type: "GlobalSettingTheme" },
-    } as Vertex;
+    };
 
     setSelectionValue(
       newFormTxnId,
@@ -97,11 +99,11 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   };
 
   const handleDeleteConfirmation = async () => {
-    if (confirmDelete() === null) {
+    const themeId = confirmDelete();
+    if (themeId === null) {
       return;
     }
 
-    const themeId = confirmDelete();
     setConfirmDelete(null);
 
     try {
@@ -112,11 +114,11 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
       );
       if (result.success) {
         setGraphData(graph, setGraph, result.graph);
+        showSuccessToast("Theme deleted successfully");
+        loadThemes(); // Reload themes after deletion
       }
-      showSuccessToast("Theme deleted successfully");
-      loadThemes(); // Reload themes after deletion
     } catch (error) {
-      showErrorToast(error.message || "Failed to delete theme");
+      showErrorToast((error as Error).message || "Failed to delete theme");
     }
   };
 
@@ -126,41 +128,77 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
         <DialogHeader title="Themes" />
       </Show>
       <Show when={error()}>
-        <div class="p:0.5rem fg:error">{error()}</div>
+        <As as="div" css={css`
+  padding: 0.5rem;
+  color: \${args.theme.var.color.error};
+`}>{error()}</As>
       </Show>
       <Show when={loading()}>
-        <div class="p:0.5rem">Loading...</div>
+        <As as="div" css={css`
+  padding: 0.5rem;
+`}>Loading...</As>
       </Show>
       <AddNewThemeDialog />
       <Show when={!(loading() || error())}>
-        <ul
-          class={`width:100% ${props.isStandalone ? "max-height:none" : "max-height:300px"} overflow-y:auto`}
+        <As as="ul" css={css`
+  width: 100%;
+  padding: 0;
+  ${props.isStandalone ? "max-height:none;" : "max-height: 300px;"}
+  overflow-y: auto;
+`}
         >
           <For each={graph.vertexLabelIdMap.Theme}>
             {(theme) => {
               const isSelected = () =>
                 getGlobalThemeVertex(graph)?.id === theme;
               return (
-                <li
-                  class={`${
-                    isSelected() ? "bg:primary-30" : ""
-                  } flex ai:center bg:primary-20:hover jc:space-between p:0.5rem cursor:pointer border-bottom:1px|solid|#eee`}
+                <As as="li" css={css`
+  ${isSelected() ? "background-color: ${args.theme.var.color.primary_60};" : ""}
+  display: flex;
+  align-items: center;  
+  justify-content: space-between;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  &:hover {
+    background-color: \${args.theme.var.color.primary_40};
+  }
+`}
                   onClick={() => handleThemeSelect(theme)}
                 >
-                  <div class="flex ai:center gap:0.5rem">
+                  <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`}>
                     <Show when={isSelected()}>
-                      <span class="fg:primary">✓</span>
+                      <As as="span" css={css`
+  color: \${args.theme.var.color.primary};
+`}>✓</As>
                     </Show>
                     <span>{graph.vertexes[theme].P.key}</span>
-                  </div>
-                  <div class="flex ai:center gap:0.5rem">
+                  </As>
+                  <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`}>
                     <ThemePreview item={graph.vertexes[theme]} />
 
                     <ThemeConfigButton item={graph.vertexes[theme]} size={18} />
 
                     <Show when={!isSelected()}>
                       <IconButton
-                        class="color:error"
+                        css={css`
+  color: \${args.theme.var.color.error};
+  background-color: transparent;
+  border: none;
+  padding: 1px;
+  cursor: pointer;
+  &:hover {
+    color: \${args.theme.var.color.error_400};
+  }
+`}
                         icon="ph:trash"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -171,39 +209,47 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                         tooltipGroup="theme-actions"
                       />
                     </Show>
-                  </div>
-                </li>
+                  </As>
+                </As>
               );
             }}
           </For>
-        </ul>
+        </As>
       </Show>
       <Show when={confirmDelete()}>
         <Portal>
-          <div class={`${SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS}`}>
-            <div class={SETTINGS_CONSTANTS.MODAL.HEADER.CLASS}>
-              <h3 class={SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS}>
+          <As as="div" css={args => css`
+  ${SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS}
+`}>
+            <As as="div" css={args => css`
+  ${SETTINGS_CONSTANTS.MODAL.HEADER.CSS}
+`}>
+              <As as="h3" css={args => css`
+  ${SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS}
+`}>
                 Delete Theme
-              </h3>
-            </div>
-            <p class={SETTINGS_CONSTANTS.MODAL.BODY.CLASS}>
+              </As>
+            </As>
+            <As as="p" css={args => css`
+  ${SETTINGS_CONSTANTS.MODAL.BODY.CSS}
+`}>
               Are you sure you want to delete this theme?
-            </p>
-            <div class={SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS}>
-              <button
-                class={SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CLASS}
-                onClick={handleDeleteConfirmation}
-              >
+            </As>
+            <As as="div" css={args => css`
+  ${SETTINGS_CONSTANTS.MODAL.FOOTER.CSS}
+`}>
+              <As as="button" css={args => css`
+                ${SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CSS}
+              `} onClick={handleDeleteConfirmation}>
                 Yes
-              </button>
-              <button
-                class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS}
-                onClick={() => setConfirmDelete(null)}
-              >
+              </As>
+              <As as="button" css={args => css`
+                ${SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS}
+              `} onClick={() => setConfirmDelete(null)}>
                 No
-              </button>
-            </div>
-          </div>
+              </As>
+            </As>
+          </As>
         </Portal>
       </Show>
     </>

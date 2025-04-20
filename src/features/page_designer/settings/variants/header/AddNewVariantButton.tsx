@@ -4,6 +4,8 @@ import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 
 import { AddNewVariant } from "./AddNewVariant";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function AddNewVariantButton() {
   let buttonRef: HTMLButtonElement;
@@ -14,17 +16,25 @@ export function AddNewVariantButton() {
   };
   return (
     <>
-      <button
-        class="bg:primary color:base-5 mb:2 p:2 r:5"
+      <As as="button"
+        css={css`
+  background-color: \${args.theme.var.color.primary};
+  color: #1e293b;
+  margin-bottom: 2px;
+  padding: 2px;
+  border-radius: 5px;
+`}
         onClick={addNewVariant}
         ref={buttonRef!}
       >
         Add New Variant
-      </button>
+      </As>
       <Show when={showDropdown()}>
         <ZIndex>
           <DropdownMenu
-            class="r:5"
+            css={css`
+  border-radius: 5px;
+`}
             onClickOutside={() => setShowDropdown(false)}
             parentRef={buttonRef!}
           >

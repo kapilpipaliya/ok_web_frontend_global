@@ -1,9 +1,10 @@
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 export const Import = {
   attributes: [
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextArea",
       height: 500,
       key: "csv",
@@ -81,7 +82,7 @@ export const Import = {
         },
         { componentName: "CheckBox", key: "skip" },
         {
-          class: PROPERTIES.Css.TextField,
+          css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextArea",
           key: "skipRow",
         },

@@ -25,23 +25,27 @@ import { Permission } from "./permission/Permission";
 import { FormStatus } from "./status/FormStatus";
 import { TabButton } from "./TabButton";
 import { Variants } from "./variants/Variants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType, CssType } from "~/components/form/type/FieldSchemaType";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 interface DividerProps {
   borderColor?: string;
   borderTopWidth?: string;
-  class?: string;
+  css?: CssType;
   width?: string;
 }
 
 export function Divider(props: Readonly<DividerProps>): JSX.Element {
   return (
-    <div
-      class={props.class || ""}
-      classList={{
-        [`border-color:${props.borderColor || "base"}`]: true,
-        [`border-top-width:${props.borderTopWidth || "1px"}`]: true,
-        [`width:${props.width || "100%"}`]: true,
-      }}
+    <As as="div"
+      css={(args: FunctionArgumentType) => css`
+        border-color:${props.borderColor || args.theme.var.color.base};
+        border-top-width:${props.borderTopWidth || "1px"};
+        width:${props.width || "100%"};
+      `}
+      {...props}
     />
   );
 }
@@ -99,7 +103,14 @@ export function SettingTabs() {
   const Tabs = () => (
     <>
       {/* <Icon
-        class="bg:base-5:hover color:#c1c1c1 cursor:pointer position:absolute right:0 top:0"
+        css={css`
+  background-color: #1e293b;
+  color: #c1c1c1;
+  cursor: pointer;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+`}
         height={30}
         icon={"ph:x-bold"}
         onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isRightOpen: false })}
@@ -112,19 +123,27 @@ export function SettingTabs() {
   );
 
   return (
-    <div class="display:grid grid-template-rows:auto|1fr grid-template-columns:1fr height:100%">
-      <div class="bg:base-5 overflow-x:auto">
+    <As as="div" css={css`
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+  height: 100%;
+`}>
+      <As as="div" css={(args: FunctionArgumentType) => css`
+  background-color: ${args.theme.var.color.base_10};
+  overflow-x: auto;
+`}>
         <Tabs />
-      </div>
-      <div class="overflow:auto">
-        <div
-          class="p:5"
-          classList={{
-            "display:none": layoutStore().selectedTab !== "settings",
-          }}
-        >
+      </As>
+      <As as="div" css={css`
+  overflow: auto;
+`}>
+        <As as="div" css={css`
+  padding: 5px;
+  ${layoutStore().selectedTab !== "settings" ? "display: none;" : ""}
+`}>
           <FormConfig />
-        </div>
+        </As>
 
         <Show keyed when={formStoreVertex()?.id}>
           <DesignerFormIdContext.Provider value={formStoreVertex().id}>
@@ -133,13 +152,11 @@ export function SettingTabs() {
                 <FormStatus />
               </Show>
               {/* Keep Display:none to keep expanded state */}
-              <div
-                classList={{
-                  "display:none": layoutStore().selectedTab !== "layers",
-                }}
-              >
+              <As as="div" css={css`
+  ${layoutStore().selectedTab !== "layers" ? "display: none;" : ""}
+`}>
                 <LayoutTree />
-              </div>
+              </As>
 
               <Show
                 when={
@@ -150,7 +167,9 @@ export function SettingTabs() {
                 <Show when={layoutStore().selectedTab === "Keys"}>
                   {/* <PrimaryKey /> */}
                   <NameKey />
-                  <Divider class="mt:10" />
+                  <Divider css={css`
+  margin-top: 10px;
+`} />
                   <HeaderWithDescription
                     description="Add unique constrains to your form to ensure that no duplicate data is submitted."
                     title="Unique Constrains"
@@ -167,7 +186,7 @@ export function SettingTabs() {
             </FormContext.Provider>
           </DesignerFormIdContext.Provider>
         </Show>
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }

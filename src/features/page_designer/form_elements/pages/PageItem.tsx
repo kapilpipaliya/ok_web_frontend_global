@@ -21,6 +21,8 @@ import {
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { PreviewIsolated } from "./PreviewIsolated";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function PageItem(
   props: Readonly<{
@@ -46,10 +48,26 @@ export function PageItem(
   let menuRef: HTMLDivElement;
 
   const baseStyle =
-    "align-items:center bg:white border-radius:.2rem box-shadow:rgba(0,0,0,0.2)|0px|0px|5px|0px display:flex flex-direction:row gap:10px height:35px margin:5px padding:10px transition:transform|0.2s|ease-in-out,box-shadow|0.2s|ease-in-out";
+    css`
+  align-items: center;
+  background-color: white;
+  border-radius: 0.2rem;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 5px 0px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  height: 35px;
+  margin: 5px;
+  padding: 10px;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+`;
 
   const hoverStyle =
-    "background-color:#F2EDED box-shadow:4px|4px|4px cursor:move";
+    css`
+  background-color: #F2EDED;
+  box-shadow: 4px 4px 4px;
+  cursor: move;
+`;
 
   const itemStyle = () =>
     hoverPageId() === props.child.id ? `${baseStyle} ${hoverStyle}` : baseStyle;
@@ -143,8 +161,10 @@ export function PageItem(
 
   return (
     <Show when={props.child.key}>
-      <div // NOSONAR
-        class={`relative ${itemStyle()}`}
+      <As as="div" // NOSONAR
+        css={[itemStyle(), css`
+  position: relative
+`]}
         draggable={"true"}
         ondblclick={handleDoubleClick}
         onDragStart={handleDragStart}
@@ -158,14 +178,22 @@ export function PageItem(
           noobserver
           width={22}
         />
-        <div class="font-size:14px">{toTitle(props.child.key)}</div>
-        <div class="margin-left:auto">
+        <As as="div" css={css`
+  font-size: 14px;
+`}>{toTitle(props.child.key)}</As>
+        <As as="div" css={css`
+  margin-left: auto;
+`}>
           <IconButton
+            css={css`
+              background-color: transparent;
+              border: none;
+            `}
             icon="ph:arrow-square-out"
             onClick={openInNewInternalTabClick}
             size={18}
           />
-        </div>
+        </As>
         <Show when={props.previewPageId === props.child.id}>
           <DropdownMenu
             onClickOutside={() => props.setPreviewPageId(null)}
@@ -180,7 +208,7 @@ export function PageItem(
             />
           </DropdownMenu>
         </Show>
-      </div>
+      </As>
     </Show>
   );
 }

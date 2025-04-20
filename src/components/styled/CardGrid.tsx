@@ -1,13 +1,24 @@
 import type { JSX } from "solid-js";
+import { css } from "~/lib/styles";
+import { As } from "../As";
 
 export function CardGrid(
   props: Readonly<{ cardSize: number; children: JSX.Element }>,
 ) {
   return (
-    <div
-      class={`display:grid gap-x:0.75rem gap-x:1rem@xl gap-y:1rem grid-cols:1 grid-cols:${props.cardSize}@lg mt:1.5rem`}
+    <As as="div" css={css`
+  display: grid;
+  column-gap: 0.75rem;
+  column-gap: 1rem;
+  row-gap: 1rem;
+  grid-template-columns: repeat(1, 1fr);
+  margin-top: 1.5rem;
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(${props.cardSize}, 1fr);
+  }
+`}
     >
       {props.children}
-    </div>
+    </As>
   );
 }

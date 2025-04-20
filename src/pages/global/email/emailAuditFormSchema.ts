@@ -42,13 +42,13 @@ export const emailAuditFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Subject",
               validation: { required: true },
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextInput",
               key: "subject",
               placeholder: "Enter email subject",
@@ -62,7 +62,7 @@ export const emailAuditFormSchema = {
               },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
         {
@@ -70,13 +70,13 @@ export const emailAuditFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Recipients",
               validation: { required: true },
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextInput",
               key: "recipients",
               placeholder: "Enter recipients",
@@ -90,7 +90,7 @@ export const emailAuditFormSchema = {
               },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
         {
@@ -98,13 +98,13 @@ export const emailAuditFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Content",
               validation: { required: true },
             },
             // {
-            //   class: PROPERTIES.Css.TextField,
+            //   css: PROPERTIES.Css.TextFieldCss,
             //   componentName: "TextArea",
             //   key: "content",
             //   placeholder: "Enter email content",
@@ -112,7 +112,7 @@ export const emailAuditFormSchema = {
             // },
             {
               as: "iframe",
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "Html",
               key: "content",
               props: (options: FunctionArgumentType) => ({
@@ -129,7 +129,7 @@ export const emailAuditFormSchema = {
               },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
         {
@@ -137,7 +137,7 @@ export const emailAuditFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Status",
             },
@@ -152,11 +152,11 @@ export const emailAuditFormSchema = {
               placeholder: "Select status",
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
       ],
-      class: SETTINGS_CONSTANTS.FORM_CLASS,
+      css: SETTINGS_CONSTANTS.FORM_CSS,
       componentName: "Html",
     },
   ],
@@ -222,12 +222,12 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "span",
-        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         componentName: "Html",
         text: "Add New Email Audit",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
     componentName: "Html",
   };
 
@@ -236,7 +236,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
     attributes: [
       // {
       //   as: "button",
-      //   class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+      //   css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
       //   componentName: "Html",
       //   props: (options: FunctionArgumentType) => ({
       //     disabled: options.dataContext.modalState[0]?.isLoading,
@@ -249,7 +249,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
       // },
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
@@ -261,7 +261,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
         type: "button",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.FOOTER.CSS,
     componentName: "Html",
   };
 
@@ -274,7 +274,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
           {
             as: "div",
             attributes: [],
-            class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+            css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: !options.dataContext.modalState[0]?.showModal,
@@ -291,7 +291,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
                       emailAuditFormSchema,
                       modalFooterSchema,
                     ],
-                    class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
                     props: (options: FunctionArgumentType) => ({

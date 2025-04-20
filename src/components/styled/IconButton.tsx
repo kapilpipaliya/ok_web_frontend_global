@@ -2,19 +2,22 @@ import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show, splitProps } from "solid-js";
 
 import { STYLES } from "~/pages/settings/constants";
-
+import { css } from "~/lib/styles";
+import { As } from "../As";
 import { TooltipWrapper } from "./modal/TooltipWrapper";
-
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { CssType } from "~/components/form/type/FieldSchemaType";
 export type IconButtonProps = {
   href?: string;
   icon?: string;
-  iconClass?: string;
+  iconCss?: CssType;
   iconClassList?: { [k: string]: boolean | undefined };
   noCenter?: boolean;
   size?: number | string;
   target?: string;
   title?: JSX.Element | string;
   tooltipGroup?: string;
+  css?: CssType;
 } & (
   | (Omit<JSX.AnchorHTMLAttributes<HTMLAnchorElement>, "title"> & {
       href: string;
@@ -24,24 +27,25 @@ export type IconButtonProps = {
     })
 );
 
-export function IconButton(props: Readonly<IconButtonProps>) {
+export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
   const [local, others] = splitProps(props, [
     "icon",
     "class",
-    "iconClass",
+    "iconCss",
     "iconClassList",
     "size",
     "children",
     "noCenter",
     "title",
     "tooltipGroup",
+    "css",
   ]);
 
   const ButtonContent = () => (
     <>
       <Show when={local.icon}>
-        <Icon
-          class={local.iconClass ?? ""}
+        <As as={Icon}
+          css={local.iconCss}
           classList={local.iconClassList}
           height={local.size ?? 24}
           icon={local.icon!}
@@ -56,40 +60,43 @@ export function IconButton(props: Readonly<IconButtonProps>) {
   const InnerContent = () => (
     <Show
       fallback={
-        <button
-          class={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
+        <As as="button"
+          css={[local.noCenter ? "" : STYLES.iconButtonCss, ...ensureArray(local.css)]}
           type="button"
           {...(others as JSX.ButtonHTMLAttributes<HTMLButtonElement>)}
         >
           <ButtonContent />
-        </button>
+        </As>
       }
       when={props.href}
     >
-      <a
-        class={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
+      <As as="a"
+        css={[...ensureArray(local.css), local.noCenter ? "" : STYLES.iconButtonCss]}
         href={props.href!}
         target={props.target}
         {...(others as JSX.AnchorHTMLAttributes<HTMLAnchorElement>)}
       >
         <ButtonContent />
-      </a>
+      </As>
     </Show>
   );
 
   return (
     <Show fallback={<InnerContent />} when={local.title}>
       <TooltipWrapper
-        arrowClass={STYLES.tooltip.arrow}
+        arrowCss={STYLES.tooltip.arrowCss}
         content={
-          <div class={STYLES.tooltip.content}>
-            <div class={"f:14 font-weight:500"}>{local.title}</div>
-          </div>
+          <As as="div" css={STYLES.tooltip.contentCss}>
+            <As as="div" css={css`
+              font-size: 14px;
+              font-weight: 500;
+            `}>{local.title}</As>
+          </As>
         }
         group={local.tooltipGroup}
         openDelay={300}
         triggerAs={props.href ? "a" : "button"}
-        triggerClass={`${local.class ?? ""} ${local.noCenter ? "" : STYLES.iconButton}`}
+        triggerCss={[...ensureArray(local.css), local.noCenter ? "" : STYLES.iconButtonCss]}
         {...others}
       >
         <ButtonContent />

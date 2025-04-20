@@ -16,6 +16,7 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
+import { css } from "~/lib/styles";
 
 export function PasswordChangeForm() {
   const [graph] = useGraph();
@@ -57,8 +58,15 @@ export function PasswordChangeForm() {
             attributes: [
               {
                 as: "button",
-                class:
-                  "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
+                css: css`
+  background-color: \${args.theme.var.color.primary};
+  color: \${args.theme.var.color.base_10};
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  margin-right: 8px;
+`,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
@@ -96,11 +104,13 @@ export function PasswordChangeForm() {
             }),
           },
         ],
-        class: "mt:24",
+        css: css`
+  margin-top: 24px;
+`,
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
@@ -129,7 +139,7 @@ function createPasswordFieldWithHint(
         as: "div",
         attributes: [
           {
-            class: PROPERTIES.Css.TextField,
+            css: PROPERTIES.Css.TextFieldCss,
             componentName: "TextInput",
             key,
             placeholder: placeholder || `Enter ${label.toLowerCase()}`,
@@ -154,16 +164,23 @@ function createPasswordFieldWithHint(
                 }),
               },
             ],
-            class:
-              "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+            css: css`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+`,
             componentName: "Html",
           },
         ],
-        class: "position:rel",
+        css: css`
+  position: relative;
+`,
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+    css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
     componentName: "Html",
   };
 }

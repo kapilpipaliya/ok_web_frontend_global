@@ -20,6 +20,7 @@ import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValu
 import { profileImage, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
+import { css } from "~/lib/styles";
 
 export function CompanyLogoSettings() {
   const [openRectangularDialog, setOpenRectangularDialog] = createSignal(false);
@@ -147,13 +148,17 @@ export function CompanyLogoSettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Rectangular Company Logo",
           },
           {
             as: "img",
-            class: "cursor:pointer h:60px object-fit:cover",
+            css: css`
+  cursor: pointer;
+  height: 60px;
+  object-fit: cover;
+`,
             componentName: "Html",
             key: "companyLogo",
             props: () => {
@@ -170,7 +175,7 @@ export function CompanyLogoSettings() {
           },
           {
             as: "button",
-            class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS + " mr:auto",
+            css: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS + css`margin-right: auto`,
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenRectangularDialog(true),
@@ -178,7 +183,7 @@ export function CompanyLogoSettings() {
             text: "Change Rectangular Logo",
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
         componentName: "Html",
       },
       {
@@ -186,13 +191,19 @@ export function CompanyLogoSettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Square Company Logo",
           },
           {
             as: "img",
-            class: "cursor:pointer h:60px w:60px rounded-full object-fit:cover",
+            css: css`
+  cursor: pointer;
+  height: 60px;
+  width: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+`,
             componentName: "Html",
             key: "companySquareLogo",
             props: () => {
@@ -209,7 +220,7 @@ export function CompanyLogoSettings() {
           },
           {
             as: "button",
-            class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS + " mr:auto",
+            css: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS + css`margin-right: auto`,
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenSquareDialog(true),
@@ -217,7 +228,7 @@ export function CompanyLogoSettings() {
             text: "Change Square Logo",
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
         componentName: "Html",
       },
       {
@@ -227,7 +238,7 @@ export function CompanyLogoSettings() {
             attributes: [
               {
                 as: "button",
-                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
@@ -280,7 +291,7 @@ export function CompanyLogoSettings() {
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {

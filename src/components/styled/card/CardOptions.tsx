@@ -1,5 +1,7 @@
 import { createSignal, type JSX } from "solid-js";
 import { For } from "solid-js/web";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 type CardOption = {
   action: () => void;
@@ -12,35 +14,65 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
 
   return (
     <CardOptionsContainer>
-      <button
+      <As as="button"
         aria-expanded={isDropdownOpen()}
         aria-haspopup="true"
-        class="color:rgb(156,163,175) color:rgb(107,114,128):hover display:block m:-0.625rem p:0.625rem"
+        css={css`
+  color: rgb(156,163,175);
+  display: block;
+  margin: -0.625rem;
+  padding: 0.625rem;
+  &:hover {
+    color: rgb(107,114,128);
+  }
+`}
         onClick={toggleDropdown}
         type="button"
       >
         <span class="sr-only">Open options</span>
-        <svg
+        <As as="svg"
           aria-hidden="true"
-          class="h:1.25rem w:1.25rem"
+          css={css`
+  height: 1.25rem;
+  width: 1.25rem;
+`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
           <path d="M3 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM8.5 10a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM15.5 8.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" />
-        </svg>
-      </button>
+        </As>
+      </As>
       {isDropdownOpen() && (
-        <div
+        <As as="div"
           aria-labelledby={`options-menu-${props.title}-button`}
           aria-orientation="vertical"
-          class="bg:rgb(255,255,255) border-radius:0.375rem box-shadow:0|0|0|1px|rgba(0,0,0,0.5) mt:0.125rem outline-offset:2px:focus outline:2px|solid|transparent position:absolute py:0.5rem right:0 transform-origin:top|right w:8rem z:10"
+          css={css`
+  background-color: rgb(255,255,255);
+  border-radius: 0.375rem;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+  margin-top: 0.125rem;
+  outline-offset: 2px;
+  outline: 2px solid transparent;
+  position: absolute;
+  padding-top: 0.5rem; padding-bottom: 0.5rem;
+  right: 0px;
+  transform-origin: top right;
+  width: 8rem;
+  z-index: 10;
+`}
           role="menu"
           tabindex="-1"
         >
           <For each={props.options}>
             {(option, index) => (
-              <a
-                class="lh:1.25rem color:rgb(17,24,39) display:block f:0.875rem leading:1.5rem px:0.75rem py:0.25rem"
+              <As as="a"
+                css={css`
+  color: rgb(17,24,39);
+  display: block;
+  font-size: 0.875rem;
+  padding-left: 0.75rem; padding-right: 0.75rem;
+  padding-top: 0.25rem; padding-bottom: 0.25rem;
+`}
                 href="#"
                 id={`options-menu-${props.title}-item-${index()}`}
                 onClick={(e) => {
@@ -52,15 +84,18 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
               >
                 {option.label}
                 <span class="sr-only">, {props.title}</span>
-              </a>
+              </As>
             )}
           </For>
-        </div>
+        </As>
       )}
     </CardOptionsContainer>
   );
 }
 
 export function CardOptionsContainer(props: { children: JSX.Element }) {
-  return <div class="ml:auto position:relative">{props.children}</div>;
+  return <As as="div" css={css`
+  margin-left: auto;
+  position: relative;
+`}>{props.children}</As>;
 }

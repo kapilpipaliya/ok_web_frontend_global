@@ -12,7 +12,9 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { validateFunction } from "~/lib/validation/validateFunction";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
 export function FunctionEditor(props: {
@@ -93,32 +95,61 @@ export function FunctionEditor(props: {
         showMinimap={false}
         value={editorValue()}
       />
-      <div class="flex gap:2 mt:2">
-        <button
-          class="px:3 py:1 bg:primary-60 fg:base-5 r:1"
+      <As as="div" css={css`
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+`}>
+        <As as="button"
+          css={(args: FunctionArgumentType) => css`
+  padding-left: 3px;
+  padding-right: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  background-color: ${args.theme.var.color.primary_280};
+  color: ${args.theme.var.color.base_10};
+  border-radius: 1px;
+`}
           onClick={handleSave}
         >
           Submit
-        </button>
-        <button
-          class="px:3 py:1 bg:gray-60 fg:base-5 r:1"
+        </As>
+        <As as="button"
+          css={(args: FunctionArgumentType) => css`
+  padding-left: 3px;
+  padding-right: 3px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  background-color: ${args.theme.var.color.primary_40};
+  color: ${args.theme.var.color.base_10};
+  border-radius: 1px;
+`}
           onClick={formatCode}
           title="Format Code with Prettier"
         >
           Format
-        </button>
-      </div>
-      {!isFunctionValid() && <span class="fg:error">Invalid Function</span>}
+        </As>
+      </As>
+      {!isFunctionValid() && <As as="span" css={css`
+  color: \${args.theme.var.color.error};
+`}>Invalid Function</As>}
     </>
   );
 
   return (
     <>
-      <div class="mt:5">
-        <span class="flex ai:center">
+      <As as="div" css={css`
+  margin-top: 5px;
+`}>
+        <As as="span" css={css`
+  display: flex;
+  align-items: center;
+`}>
           {props.label}
           <IconButton
-            class="ml:6"
+            css={css`
+  margin-left: 6px;
+`}
             icon="ph:arrow-square-out"
             onClick={(e) => {
               e.stopPropagation();
@@ -126,17 +157,21 @@ export function FunctionEditor(props: {
             }}
             title="Edit Function in Modal"
           />
-        </span>
+        </As>
         <EditorContent height="200px" />
-      </div>
+      </As>
       <CustomModal
         open={isModalOpen}
         setOpen={setIsModalOpen}
         title={`Edit ${props.label}`}
       >
-        <div class="p:3 width:600px height:600px">
+        <As as="div" css={css`
+  padding: 3px;
+  width: 600px;
+  height: 600px;
+`}>
           <EditorContent height="560px" />
-        </div>
+        </As>
       </CustomModal>
     </>
   );

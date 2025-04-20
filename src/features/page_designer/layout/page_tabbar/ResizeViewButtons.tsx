@@ -8,6 +8,9 @@ import { IconButton } from "~/components/styled/IconButton";
 import { DIMENSIONS } from "~/components/styled/ResizableDivView";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 type DimensionType = {
   height: string;
@@ -129,13 +132,29 @@ export const ResizeViewButtons = (props: {
     }
   };
 
-  const commonInputClass =
-    "b:1px|solid|primary-10 r:5 p:0.15rem w:4.5rem bg:base-0";
+  const commonInputCss = (args: FunctionArgumentType) => css`
+    border: 1px solid ${args.theme.var.color.primary_20};
+    border-radius: 5px;
+    padding: 0.15rem;
+    width: 4.5rem;
+    background-color: ${args.theme.var.color.base_2};
+  `;
 
   return (
-    <div class="flex gap:0.5rem ai:center text-size:0.8rem">
-      <select
-        class="b:1px|solid|primary-10 r:5 p:0.25rem bg:base-0 color:base-100"
+    <As as="div" css={css`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.8rem;
+`}>
+      <As as="select"
+        css={(args: FunctionArgumentType) => css`
+  border: 1px solid ${args.theme.var.color.primary_40};
+  border-radius: 5px;
+  padding: 0.25rem;
+  background-color: ${args.theme.var.color.base_2};
+  color: ${args.theme.var.color.base};
+`}
         onChange={(e) => handleDimensionSelect(e.target.value)}
         title="Select size"
         value={viewVertex()?.P.view?.toLowerCase()}
@@ -144,11 +163,16 @@ export const ResizeViewButtons = (props: {
           <option value={key}>{toTitle(value.id)}</option>
         ))}
         <option value="custom">Custom</option>
-      </select>
+      </As>
 
-      <div class="flex gap:0.25rem ai:center">
-        <input
-          class={commonInputClass}
+      <As as="div" css={css`
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+`}>
+        <As
+          as="input"
+          css={commonInputCss}
           onChange={(e) => handleDimensionChange("width", e.target.value)}
           onKeyDown={(e) =>
             handleKeyDown(e, "width", viewVertex()?.P.width || "")
@@ -157,9 +181,13 @@ export const ResizeViewButtons = (props: {
           type="text"
           value={viewVertex()?.P.width || ""}
         />
-        <span class="flex ai:center">×</span>
-        <input
-          class={commonInputClass}
+        <As as="span" css={css`
+  display: flex;
+  align-items: center;
+`}>×</As>
+        <As
+          as="input"
+          css={commonInputCss}
           onChange={(e) => handleDimensionChange("height", e.target.value)}
           onKeyDown={(e) =>
             handleKeyDown(e, "height", viewVertex()?.P.height || "")
@@ -168,16 +196,21 @@ export const ResizeViewButtons = (props: {
           type="text"
           value={viewVertex()?.P.height || ""}
         />
-      </div>
+      </As>
 
       <IconButton
-        class="b:1px|solid|primary-10 r:5 p:0.25rem bg:base-0"
+        css={(args: FunctionArgumentType) => css`
+  border: 1px solid ${args.theme.var.color.primary_40};
+  border-radius: 5px;
+  padding: 0.25rem;
+  background-color: ${args.theme.var.color.base_2};
+`}
         icon="ph:device-mobile-speaker"
-        iconClass={`transition:transform|0.2s ${isLandscape() ? "transform:rotate(90deg)" : ""}`}
+        iconCss={css`transition:transform 0.2s; ${isLandscape() ? "transform: rotate(90deg);" : ""}`}
         onClick={toggleOrientation}
         size={18}
         title={isLandscape() ? "Switch to Portrait" : "Switch to Landscape"}
       />
-    </div>
+    </As>
   );
 };

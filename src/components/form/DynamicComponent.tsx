@@ -68,6 +68,9 @@ import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
+import { generateNewCssUId } from "~/lib/graph/mutate/core/generateNewCssUId";
+import { useTheme } from "~/lib/context/ThemeContext";
+import { processCssContent } from "~/lib/styles/processCss";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -95,6 +98,7 @@ export function DynamicComponent(
   const [searchParams, setSearchParams] = useSearchParams();
   const zIndex = useZIndex();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   // const [parentItems] = usePageRenderVertexContext();
   // const parentComponent = createMemo(() => getComponentLabel(graph, getLastItem(parentItems?.vertexes || [], 2))?.P[IdAttr]);
@@ -315,6 +319,7 @@ export function DynamicComponent(
       get readOnly() {
         return isReadOnly();
       },
+      theme,
       ref,
       removeTxnIdAndCreateNew: (txnId: number) => {
         deleteVertex(0, `txn${txnId}`, graph, setGraph);
@@ -443,9 +448,13 @@ export function DynamicComponent(
       const functionArgumentDescriptors = Object.getOwnPropertyDescriptors(
         getFunctionArgument(),
       );
-      const valueDescriptor = Object.getOwnPropertyDescriptors({
-        value: value(),
-      });
+      const valueDescriptor = {
+        value: {
+          get: () => value(),
+          enumerable: true,
+          configurable: true
+        }
+      };
       return Object.defineProperties(
         {},
         { ...functionArgumentDescriptors, ...valueDescriptor },
@@ -518,36 +527,17 @@ export function DynamicComponent(
     }
   });
 
-  const styleId = createUniqueId();
+  const styleId = `cssUId-${createUniqueId()}`;
   const cssStyle = createMemo(() => {
     try {
-      if (typeof props.meta.P.css === "function") {
-        const style = props.meta.P.css!(getFunctionArgumentWithValue());
-        if (style && style.includes('._id')) {
-          return style.replace(/\._id/g, `.${styleId}`);
-        }
-        return style;
-      }
-      if (typeof props.meta.P.css === "string" && props.meta.P.css.trim() !== "") {
-        try {
-          const cssFunction = new Function("args", `return \`${props.meta.P.css}\``);
-          const style = cssFunction(getFunctionArgumentWithValue());
-          if (style && style.includes('._id')) {
-            return style.replace(/\._id/g, `.${styleId}`);
-          }
-          return style;
-        } catch (error) {
-          console.error("Error evaluating css function:", error);
-          return '';
-        }
-      }
-      return '';
+      const functionArgs = getFunctionArgumentWithValue();
+      return processCssContent(props.meta.P.css, functionArgs, styleId);
     } catch (error) {
       console.error("Error in css:", error);
       return '';
     }
   });
-
+  
   const componentName = createMemo(() => {
     try {
       if (dynamicProps().componentName) {
@@ -701,42 +691,45 @@ export function DynamicComponent(
   ];
   const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
 
-  // break the cyclic dependency by creating an intermediate state for the classes.
-  const [mergedClasses, setMergedClasses] = createSignal(
-    {} as Record<string, string>,
-  );
+  const mergedClasses = createMemo(() => {
+    const metaPropsKeys = Object.keys(props.meta.P);
+    const dynamicPropsValue = dynamicProps();
+    const style = cssStyle();
 
-  createEffect(
-    on(
-      [() => Object.keys(props.meta.P), dynamicProps],
-      ([metaPropsKeys, dynamicPropsValues]) => {
-        const classes = [
-          ...metaPropsKeys.filter((key) => key.toLowerCase().endsWith("class")),
-          ...Object.keys(dynamicPropsValues).filter((key) =>
-            key.toLowerCase().endsWith("class"),
-          ),
-        ].reduce(
-          (acc, key) => {
-            if (acc[key]) {
-              return acc;
-            }
-            const cssValue = props.meta.P[key];
-            acc[key] = `${
-              cssStateToString(
-                cssValue,
-                { P: { key: key } } as unknown as Vertex,
-                props.meta,
-                graph,
-              ) || ""
-            } ${dynamicPropsValues[key] || ""}`.trim();
-            return acc;
-          },
-          {} as Record<string, string>,
-        );
-        setMergedClasses(classes);
+    const classes = [
+      ...metaPropsKeys.filter((key) => key.toLowerCase().endsWith("class")),
+      ...Object.keys(dynamicPropsValue).filter((key) =>
+        key.toLowerCase().endsWith("class"),
+      ),
+    ].reduce(
+      (acc, key) => {
+        if (acc[key]) {
+          return acc;
+        }
+        const cssValue = props.meta.P[key];
+        acc[key] = `${
+          cssStateToString(
+            cssValue,
+            { P: { key: key } } as unknown as Vertex,
+            props.meta,
+            graph,
+          ) || ""
+        } ${dynamicPropsValue[key] || ""}`.trim();
+        return acc;
       },
-    ),
-  );
+      {} as Record<string, string>,
+    );
+
+    if (style) {
+      if (classes['class']) {
+        classes['class'] = `${classes['class']} ${styleId}`;
+      } else {
+        classes['class'] = styleId;
+      }
+    }
+
+    return classes;
+  });
 
   const Content = () => (
     <>
@@ -749,7 +742,6 @@ export function DynamicComponent(
         <Dynamic
           {...otherProps}
           {...dynamicProps()}
-          classList={{ [styleId]: cssStyle() }}
           // remove extra props, to reduce ssr size
           componentName={null}
           hide={null}

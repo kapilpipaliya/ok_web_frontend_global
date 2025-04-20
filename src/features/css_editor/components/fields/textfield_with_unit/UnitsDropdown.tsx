@@ -3,6 +3,8 @@ import { type Accessor, createSignal, For, Show } from "solid-js";
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 interface DropDownProps {
   isDropdownOpen: () => boolean;
@@ -25,12 +27,20 @@ export function UnitsDropdown(props: Readonly<DropDownProps>) {
 
   return (
     <Show when={props.unitOptions}>
-      <span // NOSONAR
-        class={"color:lightgrey cursor:pointer f:14 ml:5 pr:5 user-select:none"}
+      <As
+        as="span"
+        css={css`
+          color: lightgrey;
+          cursor: pointer;
+          font-size: 14px;
+          margin-left: 5px;
+          padding-right: 5px;
+          user-select: none;
+        `}
         onClick={props.toggleDropdown}
       >
         {props.selectedOption?.()}
-      </span>
+      </As>
       <Show when={props.isDropdownOpen()}>
         <ZIndex>
           <DropdownMenu
@@ -38,9 +48,14 @@ export function UnitsDropdown(props: Readonly<DropDownProps>) {
             parentRef={props.reference()!}
             useSize={true}
           >
-            <div class={"w:full"}>
-              <input
-                class="mb:5 p:5 w:full"
+            <As as="div" css={css`width: 100%;`}>
+              <As
+                as="input"
+                css={css`
+                  margin-bottom: 5px;
+                  padding: 5px;
+                  width: 100%;
+                `}
                 onInput={(e) => setSearchTerm(e.currentTarget.value)}
                 placeholder="Search..."
                 type="text"
@@ -48,22 +63,31 @@ export function UnitsDropdown(props: Readonly<DropDownProps>) {
               />
               <For each={filteredOptions()}>
                 {(option) => (
-                  <div // NOSONAR
-                    class={`${
-                      props.selectedOption?.() === option
-                        ? "bg:rgb(229,234,253) font-weight:medium"
-                        : "bg:transparent"
-                    } flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5`}
+                  <As
+                    as="div"
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      background: ${props.selectedOption?.() === option ? "rgb(229,234,253)" : "transparent"};
+                      font-weight: ${props.selectedOption?.() === option ? "500" : "normal"};
+                      cursor: pointer;
+                      justify-content: space-between;
+                      padding: 5px;
+                      border-radius: 5px;
+                      &:hover {
+                        background: #efefef;
+                      }
+                    `}
                     onClick={() => props.selectOption(option)}
                   >
                     {option}
                     <Show when={props.selectedOption?.() === option}>
                       <Icon icon={"ph:check"} noobserver />
                     </Show>
-                  </div>
+                  </As>
                 )}
               </For>
-            </div>
+            </As>
           </DropdownMenu>
         </ZIndex>
       </Show>

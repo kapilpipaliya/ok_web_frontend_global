@@ -25,6 +25,8 @@ import {
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
 import { useGraph } from "~/lib/graph/GraphContext";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,
@@ -47,23 +49,31 @@ export function BorderOverlay(
   const isActiveTargetItem = () => activeItemChanged(props.item.id);
 
   const getBorder = createMemo(() => {
-    let boxShadow = "";
+    let styles = {};
 
     if (isActiveTargetItem()) {
       const boxShadowProps = getDnDBoxShadowArgs(
         layoutStoreVertex()?.P.position,
-        "green-60",
+        "green",
       );
-      boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])}`;
+      styles = {
+        'box-shadow': generateBoxShadow([boxShadowProps])
+      };
     }
 
     if (isSelectedLayoutId(props.item.id)) {
-      boxShadow += " b:1px|solid|purple-60";
+      styles = {
+        ...styles,
+        border: "1px solid purple"
+      };
     } else if (isSelectedHoverId(props.item.id)) {
-      boxShadow += " b:1px|solid|orange-80";
+      styles = {
+        ...styles,
+        border: "1px solid orange"
+      };
     }
 
-    return boxShadow;
+    return styles;
   });
 
   const ShowBorder = () => {
@@ -119,9 +129,9 @@ export function BorderOverlay(
     return (
       <Portal>
         <div
-          class={getBorder()}
           ref={setFloating}
           style={{
+            ...getBorder(),
             height: `${store.maxHeight}px`,
             left: `${store.x}px`,
             "pointer-events": "none",
@@ -135,7 +145,7 @@ export function BorderOverlay(
   };
 
   return (
-    <Show when={getBorder()}>
+    <Show when={Object.keys(getBorder()).length > 0}>
       <ShowBorder />
     </Show>
   );

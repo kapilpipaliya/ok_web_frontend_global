@@ -7,6 +7,7 @@ import { PROPERTIES } from "~/pages/settings/constants";
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";
 import { FormMetaData } from "../formMetaData";
 import { collectionAttr } from "./collectionAttr";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export const Coll: (key: string) => IFormMetaData = (key) => {
   return {
@@ -69,7 +70,7 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
         parentLabel: "Dashboard",
       },
       {
-        class: PROPERTIES.Css.TextField,
+        css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextArea",
         key: "description",
       },

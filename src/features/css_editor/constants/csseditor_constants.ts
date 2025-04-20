@@ -1,5 +1,5 @@
-import { VALUE_UNITS } from "@master/css";
-
+// import { VALUE_UNITS } from "@master/css";
+const VALUE_UNITS = ["rem", "em", "px", "%", "vw", "vh"];
 const sizeTypes_ = ["rem", "em", "px", "%", "vw", "vh"];
 
 export const sizeTypes = [

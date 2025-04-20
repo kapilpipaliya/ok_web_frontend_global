@@ -22,6 +22,8 @@ import { getUserRPC } from "~/routes/api/auth/(user)/getUserRPC";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function ProfileSettings() {
   const [graph, setGraph] = useGraph();
@@ -58,22 +60,35 @@ export function ProfileSettings() {
                 attributes: [
                   {
                     as: "span",
-                    class: "fg:base-80",
+                    css: css`
+  color: \${args.theme.var.color.base};
+`,
                     componentName: "Html",
                     text: "Important!",
                   },
                   {
                     as: "span",
-                    class: "ml:4 mt:4px fg:base-60",
+                    css: css`
+  margin-left: 4px;
+  margin-top: 4px;
+  color: \${args.theme.var.color.base};
+`,
                     componentName: "Html",
                     text: "Changing your username or email will update them across all your projects.",
                   },
                 ],
-                class: "p:16px bg:primary-5 r:8px border:1px|solid|primary-10",
+                css: css`
+  padding: 16px;
+  background-color: \${args.theme.var.color.primary_20};
+  border-radius: 8px;
+  border: 1px solid \${args.theme.var.color.primary_40};
+`,
                 componentName: "Html",
               },
             ],
-            class: "mb:24px",
+            css: css`
+  margin-bottom: 24px;
+`,
             componentName: "Html",
             props: () => ({
               hide: !isSystemSubDomain(),
@@ -87,20 +102,20 @@ export function ProfileSettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Username",
             validation: { required: true },
           },
           {
-            class: PROPERTIES.Css.TextField,
+            css: PROPERTIES.Css.TextFieldCss,
             componentName: "TextInput",
             key: "username",
             placeholder: "Username",
             validation: { required: true },
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
         componentName: "Html",
       },
       {
@@ -108,13 +123,13 @@ export function ProfileSettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             key: "emailLabel",
             text: "Email Address",
           },
           {
-            class: PROPERTIES.Css.TextField,
+            css: PROPERTIES.Css.TextFieldCss,
             componentName: "TextInput",
             key: "email",
             placeholder: "Email Address",
@@ -122,7 +137,7 @@ export function ProfileSettings() {
             validation: { required: true }, // TODO: Add email validation
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
         componentName: "Html",
       },
       // {
@@ -130,7 +145,7 @@ export function ProfileSettings() {
       //   attributes: [
       //     {
       //       as: "span",
-      //       class: LABEL_CLASS,
+      //       css: SETTINGS_CONSTANTS.LABEL_CSS,
       //       componentName: "Html",
       //       text: "Country"
       //     },
@@ -145,7 +160,7 @@ export function ProfileSettings() {
       //       ],
       //     },
       //   ],
-      //   class: GRID_ITEM_CLASS,
+      //   css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
       //   componentName: "Html",
       // },
       {
@@ -156,7 +171,7 @@ export function ProfileSettings() {
             attributes: [
               {
                 as: "button",
-                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
@@ -166,12 +181,12 @@ export function ProfileSettings() {
                     // TODO: Run Form Validation
                     const user = graph.vertexes[formDataId];
 
-                    if (!user.P.username.trim()) {
+                    if (!user.P.username.trim) {
                       showErrorToast("Please enter username");
                       return;
                     }
 
-                    if (!user.P.email.trim()) {
+                    if (!user.P.email.trim) {
                       showErrorToast("Please enter email");
                       return;
                     }
@@ -207,12 +222,21 @@ export function ProfileSettings() {
               },
               // {
               //   as: "button",
-              //   class: "bg:#f3f4f6 fg:#374151 p:8|16 r:4 cursor:pointer border:1px|solid|#e5e7eb",
+//                 css: css`
+//   background-color: #f3f4f6;
+//   color: #374151;
+//   padding: 8px 16px;
+//   border-radius: 4px;
+//   cursor: pointer;
+//   border: 1px solid #3b82f6;
+// `,
               //   componentName: "Html",
               //   text: "Cancel",
               // },
             ],
-            class: "flex",
+            css: css`
+  display: flex;
+`,
             componentName: "Html",
           },
         ],
@@ -226,7 +250,7 @@ export function ProfileSettings() {
         }),
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
@@ -242,7 +266,7 @@ export function ProfileSettings() {
     } catch (err) {
       showErrorToast((err as Error).message);
     }
-  });
+  }, {deferStream: true});
   const setUserData = (user: UserData) => {
     if (user.user) {
       replaceVertexProperties(0, formDataId, graph, setGraph, user.user.P);
@@ -262,7 +286,7 @@ export function ProfileSettings() {
         formDataId={formDataId}
       />
       <Show when={!isSystemSubDomain()}>
-        <hr class={SETTINGS_CONSTANTS.SECTION_DIVIDER_CLASS} />
+        <As as="hr" css={SETTINGS_CONSTANTS.SECTION_DIVIDER_CSS} />
         <ProfileImageSettings />
       </Show>
     </div>

@@ -1,36 +1,61 @@
-import { Style } from "@solidjs/meta";
-import { For, JSX, Show, splitProps } from "solid-js";
+import { Component, JSX, createMemo, createUniqueId, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
+import { StyleRenderer } from "./StyleRenderer";
 
-type AsProps<T extends keyof JSX.IntrinsicElements> = {
+import type { CssType, FunctionArgumentType } from "./form/type/FieldSchemaType";
+import { useGraph } from "~/lib/graph/GraphContext";
+import { useTheme } from "~/lib/context/ThemeContext";
+import { processCssContent } from "~/lib/styles/processCss";
+
+type ElementProps<T extends keyof JSX.IntrinsicElements> = {
   as: T;
-  css?: string | string[];
-} & Omit<JSX.IntrinsicElements[T], 'as' | 'css'>;
+  css?: CssType;
+  class?: string;
+  asProp?: string;
+} & Omit<JSX.IntrinsicElements[T], 'as' | 'css' | 'class'>;
 
-export function As<T extends keyof JSX.IntrinsicElements>(
+type CustomComponentProps = {
+  as: Component<any>;
+  css?: CssType;
+  class?: string;
+  asProp?: string;
+  [key: string]: any;
+};
+
+type AsProps<T extends keyof JSX.IntrinsicElements | Component<any>> = T extends keyof JSX.IntrinsicElements 
+  ? ElementProps<T> 
+  : CustomComponentProps;
+
+export function As<T extends keyof JSX.IntrinsicElements | Component<any>>(
   props: AsProps<T>
 ): JSX.Element {
-  const [local, rest] = splitProps(props, ["as", "css"]);
+  const theme = useTheme();
+  const [local, rest] = splitProps(props, ["as", "css", "class", "asProp"]);
+  const uniqueId = `cssUId-${createUniqueId()}`;
+  
+  const getCssContent = createMemo(() => {
+    if (!local.css) return undefined;
+    
+    const functionArgs = { theme } as FunctionArgumentType;
+    return processCssContent(local.css, functionArgs, uniqueId);
+  });
+
+  const finalClass = () => {
+    const uniqueId2 = getCssContent() ? uniqueId : '';
+    return uniqueId2 ? `${uniqueId2} ${local.class || ''}`.trim() : local.class;
+  };
 
   return (
     <>
-      <Show when={Array.isArray(local.css)}>
-        <For each={local.css as string[]}>
-          {(style) => (
-            <Style>
-              {style}
-            </Style>
-          )}
-        </For>
-      </Show>
-
-      <Show when={local.css && !Array.isArray(local.css)}>
-        <Style>
-          {local.css as string}
-        </Style>
-      </Show>
-
-      <Dynamic<T> component={local.as} {...(rest as JSX.IntrinsicElements[T])} />
+      {/* @ts-ignore */}
+      <StyleRenderer cssContent={getCssContent()} id={uniqueId} />
+      {/* @ts-ignore */}
+      <Dynamic<T>
+        component={local.as} 
+        {...rest}
+        class={finalClass()}
+        as={local.asProp}
+      />
     </>
   );
 }

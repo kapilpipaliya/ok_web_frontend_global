@@ -8,6 +8,8 @@ import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { ComponentVariantsInput } from "../properties/ComponentVariantsInput";
 import { VariantsList } from "./body/VariantsList";
 import { VariantsHeader } from "./header/VariantsHeader";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function Variants() {
   const [graph, setGraph] = useGraph();
@@ -29,7 +31,9 @@ export function Variants() {
   };
 
   return (
-    <div class="w-full">
+    <As as="div" css={css`
+  width: 100%;
+`}>
       <VariantsHeader />
       <VariantsList />
       <ComponentVariantsInput
@@ -37,6 +41,6 @@ export function Variants() {
         dataVertex={graph.vertexes[formStoreVertex()?.P.componentValue!]}
         setPropertyValue={setPropertyValue}
       />
-    </div>
+    </As>
   );
 }

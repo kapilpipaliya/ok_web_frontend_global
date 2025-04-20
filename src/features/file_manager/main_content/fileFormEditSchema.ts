@@ -27,20 +27,20 @@ const editFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Name",
               validation: { required: true },
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextInput",
               key: "fileName",
               placeholder: "Enter name",
               validation: { required: true },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
         {
@@ -48,22 +48,22 @@ const editFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Description",
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextArea",
               key: "description",
               placeholder: "Enter description",
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
       ],
-      class: SETTINGS_CONSTANTS.FORM_CLASS,
+      css: SETTINGS_CONSTANTS.FORM_CSS,
       componentName: "Html",
     },
   ],
@@ -130,7 +130,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
         // options.removeTxnIdAndCreateNew(options.txnId);
         // as we are creating new transaction, we need to revert to previous state
         options.revertTransactionUpToIndex(options.txnId, -1);
-        options.ensureData();
+        options.ensureData;
         showSuccessToast("Item updated successfully");
         options.dataContext.modalState[1]("showModal", false);
         fileManagerStore.gridStore?.[0].fetchTableData();
@@ -151,12 +151,12 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "span",
-        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         componentName: "Html",
         text: "Edit Item",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
     componentName: "Html",
   };
 
@@ -165,7 +165,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
@@ -178,7 +178,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
       },
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
@@ -190,7 +190,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
         type: "button",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.FOOTER.CSS,
     componentName: "Html",
   };
 
@@ -207,7 +207,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
                   {
                     as: "div",
                     attributes: [],
-                    class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       hide: !options.dataContext.modalState[0]?.showModal,
@@ -223,7 +223,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
                       editFormSchema,
                       modalFooterSchema,
                     ],
-                    class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
                     props: (options: FunctionArgumentType) => ({

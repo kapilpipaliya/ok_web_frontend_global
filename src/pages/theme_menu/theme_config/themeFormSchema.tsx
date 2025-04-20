@@ -2,8 +2,9 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
+import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
 
+import { As } from "~/components/As";
 import { useToast } from "~/components/styled/modal/Toast";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
@@ -29,29 +30,29 @@ export const themeFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
               componentName: "Html",
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               text: "Theme Name",
               validation: { required: true },
             },
             {
-              class: PROPERTIES.Css.TextField,
               componentName: "TextInput",
+              css: PROPERTIES.Css.TextFieldCss,
               key: "key",
               placeholder: "Enter theme name",
               validation: { required: true },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
           componentName: "Html",
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         },
         {
           as: "div",
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
               componentName: "Html",
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               text: "Theme Configuration",
               validation: { required: true },
             },
@@ -79,8 +80,15 @@ export const themeFormSchema = {
               attributes: [
                 {
                   as: "button",
-                  class: "px:5 py:5 bg:gray-60 fg:base-5 r:5",
                   componentName: "Html",
+                  css: `
+                    ._id {
+                      padding: 5px;
+                      background-color: \${args.theme.var.color.gray_280};
+                      color: \${args.theme.var.color.base_10};
+                      border-radius: 5px;
+                    }
+                  `,
                   props: (options: FunctionArgumentType) => ({
                     onClick: async () => {
                       const editor = options.dataContext?.editorState[0]();
@@ -101,16 +109,22 @@ export const themeFormSchema = {
                   type: "button",
                 },
               ],
-              class: "flex ai:center gap:0.50rem",
               componentName: "Html",
+              css: `
+                ._id {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                }
+              `,
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
           componentName: "Html",
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         },
       ],
-      class: SETTINGS_CONSTANTS.FORM_CLASS,
       componentName: "Html",
+      css: SETTINGS_CONSTANTS.FORM_CSS,
     },
   ],
   componentName: "Html",
@@ -211,8 +225,8 @@ export const getThemeFormSchema = (
     attributes: [
       {
         as: "span",
-        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
         componentName: "Html",
+        css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         props: (options: FunctionArgumentType) => {
           return {
             text:
@@ -223,8 +237,8 @@ export const getThemeFormSchema = (
         },
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
     componentName: "Html",
+    css: SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
   };
 
   const modalFooterSchema = {
@@ -232,8 +246,8 @@ export const getThemeFormSchema = (
     attributes: [
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
         componentName: "Html",
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
@@ -245,8 +259,8 @@ export const getThemeFormSchema = (
       },
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
         componentName: "Html",
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
           onClick: () => {
@@ -259,8 +273,8 @@ export const getThemeFormSchema = (
         type: "button",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
     componentName: "Html",
+    css: SETTINGS_CONSTANTS.MODAL.FOOTER.CSS,
   };
 
   const schema = {
@@ -275,8 +289,8 @@ export const getThemeFormSchema = (
                   {
                     as: "div",
                     attributes: [],
-                    class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
                     componentName: "Html",
+                    css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     props: (options: FunctionArgumentType) => ({
                       hide: !options.dataContext.modalState[0]?.showModal,
                       style: {
@@ -299,8 +313,8 @@ export const getThemeFormSchema = (
                         }),
                       },
                     ],
-                    class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
                     componentName: "Html",
+                    css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     open: true,
                     props: (options: FunctionArgumentType) => ({
                       onClick: (event: MouseEvent) => {

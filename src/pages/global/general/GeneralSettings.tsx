@@ -17,6 +17,8 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function GeneralSettings() {
   const [graph, setGraph] = useGraph();
@@ -45,18 +47,18 @@ export function GeneralSettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Application Name",
           },
           {
-            class: PROPERTIES.Css.TextField,
+            css: PROPERTIES.Css.TextFieldCss,
             componentName: "TextInput",
             key: "appName",
             placeholder: "Enter application name",
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
       },
       {
@@ -64,7 +66,7 @@ export function GeneralSettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Default Language",
           },
@@ -80,7 +82,7 @@ export function GeneralSettings() {
             placeholder: "Select Default Language",
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
       },
       {
@@ -90,7 +92,7 @@ export function GeneralSettings() {
             attributes: [
               {
                 as: "button",
-                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
@@ -129,11 +131,13 @@ export function GeneralSettings() {
             }),
           },
         ],
-        class: "mt:24",
+        css: css`
+  margin-top: 24px;
+`,
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
@@ -171,7 +175,7 @@ export function GeneralSettings() {
         form={{ attributes: [form], key: "GeneralSettings" }}
         formDataId={formDataId}
       />
-      <hr class={SETTINGS_CONSTANTS.SECTION_DIVIDER_CLASS} />
+      <As as="hr" css={SETTINGS_CONSTANTS.SECTION_DIVIDER_CSS} />
       <CompanyLogoSettings />
     </div>
   );

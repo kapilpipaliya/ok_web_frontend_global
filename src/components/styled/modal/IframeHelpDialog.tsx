@@ -4,6 +4,8 @@ import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { IconButton } from "~/components/styled/IconButton";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 interface IframeHelpDialogProps {
   icon?: string;
@@ -24,18 +26,29 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
     <>
       <IconButton
         icon={props.icon}
+        css={css`
+          background-color: transparent;
+          border: none;
+        `}
         onClick={handleIconClick}
         size={props.iconSize || 24}
       />
       <Show when={open()}>
         <CustomModal
-          bodyClass="h:100%"
-          dialogClass="w:90vw r:10px p:0 h:90vh flex flex:column"
+          bodyCss={css`height: 100%;`}
+          dialogCss={css`width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;`}
           footer={() => (
             <DialogFooter
               buttonText="Close"
-              class={`${SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS} ml:auto mr:8 mt:4`}
-              containerClass="mt:auto"
+              css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
+                css`
+                margin-left: auto;
+                margin-right: 8px;
+                margin-top: 4px;
+              `]}
+              containerCss={css`
+  margin-top: auto;
+`}
               onClick={() => {
                 setOpen(false);
               }}
@@ -47,9 +60,13 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
           setOpen={setOpen}
           title={props.title}
         >
-          <iframe
+          <As 
+            as="iframe"
             allow="clipboard-write"
-            class="h:full w:full"
+            css={css`
+              height: 100%;
+              width: 100%;
+            `}
             src={props.iframeSrc}
             title={props.iframeTitle}
           />

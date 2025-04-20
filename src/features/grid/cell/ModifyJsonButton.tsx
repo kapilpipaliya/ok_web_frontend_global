@@ -5,9 +5,11 @@ import type { Vertex } from "~/lib/graph/graph";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { ModifyJsonMenu } from "./ModifyJsonMenu";
+import { css } from "~/lib/styles";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 export function ModifyJsonButton(props: {
-  class?: string;
+  css?: string;
   item: Vertex;
   size: number;
 }) {
@@ -17,7 +19,11 @@ export function ModifyJsonButton(props: {
   return (
     <>
       <IconButton
-        class={`${props.class} cursor:pointer`}
+        css={[...ensureArray(props.css), css`
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+`]}
         icon="ph:note-pencil"
         onClick={() => setShowModal(true)}
         ref={(el) => (saveAsTemplateRef = el)}

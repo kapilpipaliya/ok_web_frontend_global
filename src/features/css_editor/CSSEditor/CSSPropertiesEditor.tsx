@@ -27,6 +27,8 @@ import { cssStateToString } from "../utils/cssStateToString";
 import { getCssSelectedFileEdgeName } from "../utils/getCssSelectedFileEdgeName";
 import { AddNewCssState } from "./AddNewCssState";
 import { ResetButton } from "./ResetButton";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 const defaultStateLabel = "Default";
 
@@ -99,7 +101,7 @@ export function CSSPropertiesEditor() {
           data={graph.vertexes[formVertex()!.P.formDataId]}
           isNoPermissionCheck
           meta={
-            { P: { class: cssEditorProps!.data.P.value } } as unknown as Vertex
+            { P: { css: cssEditorProps!.data.P.value } } as unknown as Vertex
           }
         />
         <br />
@@ -116,7 +118,9 @@ export function CSSPropertiesEditor() {
         )}
       />
       Current State
-      <div class="flex" ref={buttonRef!}>
+      <As as="div" css={css`
+  display: flex;
+`} ref={buttonRef!}>
         <MultiSelectField
           onRemove={() => setState("")}
           onSelect={(_, value) => setState(value as string)}
@@ -126,22 +130,28 @@ export function CSSPropertiesEditor() {
           selectionLimit={1}
         />
         <Show when={Object.keys(cssState[state()] || {}).length > 0}>
-          <button
-            class="ai:center d:inline-flex"
+          <As as="button"
+            css={css`
+  align-items: center;
+  display: inline-flex;
+`}
             onClick={removeState}
             title="Remove State"
           >
             <Icon height={21} icon="ph:minus" noobserver width={21} />
-          </button>
+          </As>
         </Show>
-        <button
-          class="ai:center d:inline-flex"
+        <As as="button"
+          css={css`
+  align-items: center;
+  display: inline-flex;
+`}
           onClick={handleAddNewClick}
           ref={addNewStateButtonRef!}
           title="Add New State"
         >
           <Icon height={21} icon="ph:plus" noobserver width={21} />
-        </button>
+        </As>
         <IframeHelpDialog
           icon="ph:question"
           iconSize={21}
@@ -154,18 +164,26 @@ export function CSSPropertiesEditor() {
             parentRef={addNewStateButtonRef!}
             placement="bottom-end"
           >
-            <div
-              class={`${
-                Object.keys(cssState[state()] || {}).length > 0
-                  ? "bb:1px|solid|secondary m:1 pb:5"
-                  : ""
-              } flex ai:center jc:space-between mb:6px`}
+            <As as="div"
+              css={css`
+                ${Object.keys(cssState[state()] || {}).length > 0
+                ? `border-bottom: 1px solid secondary;
+  margin: 1px;
+  padding-bottom: 5px;`
+                : ""}
+  margin: 1px;
+  padding-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+`}
             >
               <AddNewCssState onClose={() => setShowDropdown(false)} />
-            </div>
+            </As>
           </DropdownMenu>
         </Show>
-      </div>
+      </As>
       <StyleEditor />
     </>
   );

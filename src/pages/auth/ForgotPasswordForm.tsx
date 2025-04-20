@@ -21,6 +21,7 @@ import {
   createTextField,
 } from "./functions/formComponents";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
+import { css } from "~/lib/styles";
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();
@@ -240,7 +241,10 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             as: "div",
-            class: "text:center mb:16px",
+            css: css`
+  white-space: center;
+  margin-bottom: 16px;
+`,
             componentName: "Html",
             text: `We've sent a verification code to ${userState.email || "your email"}. Please enter it below.`,
           },
@@ -278,11 +282,11 @@ export function ForgotPasswordForm() {
             },
           ),
         ],
-        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
+        css: SETTINGS_CONSTANTS.FORM_GRID_CSS,
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
   };
 
@@ -299,7 +303,7 @@ export function ForgotPasswordForm() {
             as: "div",
             attributes: [
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "newPassword",
                 props: (options: FunctionArgumentType) => ({
@@ -343,12 +347,19 @@ export function ForgotPasswordForm() {
                     }),
                   },
                 ],
-                class:
-                  "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                css: css`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+`,
                 componentName: "Html",
               },
             ],
-            class: "position:rel",
+            css: css`
+  position: relative;
+`,
             componentName: "Html",
           },
           getErrorSchema("newPassword"),
@@ -359,7 +370,7 @@ export function ForgotPasswordForm() {
             as: "div",
             attributes: [
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "confirmPassword",
                 props: (options: FunctionArgumentType) => ({
@@ -403,12 +414,19 @@ export function ForgotPasswordForm() {
                     }),
                   },
                 ],
-                class:
-                  "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                css: css`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+`,
                 componentName: "Html",
               },
             ],
-            class: "position:rel",
+            css: css`
+  position: relative;
+`,
             componentName: "Html",
           },
           getErrorSchema("confirmPassword"),
@@ -429,11 +447,11 @@ export function ForgotPasswordForm() {
             },
           ),
         ],
-        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
+        css: SETTINGS_CONSTANTS.FORM_GRID_CSS,
         componentName: "Html",
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
   } as FieldAttribute;
 

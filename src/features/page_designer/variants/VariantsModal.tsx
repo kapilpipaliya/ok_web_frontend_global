@@ -16,6 +16,8 @@ import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 
 import { Overlay } from "../settings/properties/formgroup/permission_field/Overlay";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 const getMetaAttributes = (selectedVariant?: null | Vertex) => {
   let metaAttribute = klona(
@@ -85,31 +87,78 @@ export function VariantsModal(
 
   return (
     <Portal>
-      <div
+      <As as="div"
         aria-labelledby="Variants Modal"
         aria-modal="true"
-        class={`position:relative z:${zIndex}`}
+        css={css`
+  position: relative;
+  z-index: ${zIndex};
+`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
       >
         <Overlay />
-        <div
-          class={`inset:0px overflow-y:auto position:fixed width:100vw z:${zIndex}`}
+        <As as="div"
+          css={css`
+  inset: 0px;
+  overflow-y: auto;
+  position: fixed;
+  width: 100vw;
+  z-index: ${zIndex};
+`}
         >
-          <div class="flex align-items:flex-end align-items:center@sm justify-content:center min-height:100% p:1rem padding:0@sm text-align:center">
-            <div class="~duration:150ms ~easing:cubic-bezier(0.4,0,0.2,1) ~property:all bg:rgb(255,255,255) border-radius:0.5rem box-shadow:0|20px|25px|-5px|rgba(0,0,0,0.1),0|10px|10px|-5px|rgba(0,0,0,0.04) max-width:90vw@sm my:2rem@sm overflow:hidden p:1.5rem@sm pb:1rem position:relative pt:1.25rem px:1rem text-align:left translate(0,0) width:100%@sm">
+          <As as="div" css={css`
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 100%;
+  padding: 1rem;
+  text-align: center;
+  @media (width >= 52.125rem) {
+     align-items: center;
+     padding: 0;
+  }
+`}>
+            <As as="div" css={css`
+  background-color: rgb(255,255,255);
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
+  overflow: hidden;
+  padding-bottom: 1rem;
+  position: relative;
+  padding-top: 1.25rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-align: left;
+  @media (width >= 52.125rem) {
+    padding: 0;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    width: 100%;
+    max-width:90vw;
+  }
+`}>
               <div>
                 <div class="">
-                  <h3
-                    class="lh:1.5rem color:rgb(17,24,39) f:1rem font-weight:600 leading:1.5rem"
+                  <As as="h3"
+                    css={css`
+  line-height: 1.5rem;
+  color: rgb(17,24,39);
+  font-size: 1rem;
+  font-weight: 600;
+  leading: 1.5rem;
+`}
                     id="modal-title"
                   >
                     {props.selectedVariant
                       ? `${props.selectedVariant.P.key} Variants`
                       : "All Variants"}{" "}
                     :
-                  </h3>
-                  <div class="mt:0.5rem">
+                  </As>
+                  <As as="div" css={css`
+  margin-top: 0.5rem;
+`}>
                     <TableInputField
                       data={
                         props.selectedVariant
@@ -121,23 +170,35 @@ export function VariantsModal(
                       meta={graph.vertexes[metaVertexId]}
                       txnId={formStoreVertex()?.P.txnId}
                     />
-                  </div>
+                  </As>
                 </div>
               </div>
-              <div class="display:grid@sm gap:0.75rem@sm grid-auto-flow:row|dense@sm grid-cols:2@sm mt:1.25rem mt:1.5rem@sm">
-                {error() && <div class="color:#FF0000">{error()}</div>}
-                <button onClick={onVariantsSubmit}>Submit</button>
-                <button
-                  class="border-color:#FF0000 color:#FF0000"
+              <As as="div" css={css`
+  display: grid;
+  gap: 0.75rem;
+  grid-auto-flow: row dense;
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 1.25rem;
+  margin-top: 1.5rem;
+`}>
+                {error() && <As as="div" css={css`
+  color: #FF0000;
+`}>{error()}</As>}
+                <As as="button"  onClick={onVariantsSubmit}>Submit</As>
+                <As as="button"
+                  css={css`
+  border-color: #FF0000;
+  color: #FF0000;
+`}
                   onClick={onVariantsCancel}
                 >
                   Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                </As>
+              </As>
+            </As>
+          </As>
+        </As>
+      </As>
     </Portal>
   );
 }

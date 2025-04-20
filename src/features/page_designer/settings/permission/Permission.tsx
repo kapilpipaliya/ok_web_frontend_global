@@ -10,6 +10,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function Permission() {
   const [graph] = useGraph();
@@ -31,14 +33,20 @@ export function Permission() {
   );
 
   return (
-    <div class="mt:6">
+    <As as="div" css={css`
+  margin-top: 6px;
+`}>
       <HeaderWithDescription
         description="All the permissions to the form level"
         paddingXSm="0.25rem"
         title="Form Permissions"
       />
 
-      <div class="mt:.5rem px:0.25rem">
+      <As as="div" css={css`
+  margin-top: 0.5rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+`}>
         <TableInputField
           data={graph.vertexes[formStoreVertex()?.P.formDataId!]}
           isNoPermissionCheck={true}
@@ -46,7 +54,7 @@ export function Permission() {
           meta={graph.vertexes[metaVertexId]}
           txnId={formStoreVertex()?.P.txnId}
         />
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }

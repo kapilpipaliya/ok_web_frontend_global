@@ -1,26 +1,23 @@
+import { css } from "~/lib/styles";
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 const content = [
   {
     as: "h1",
-    class: JSON.stringify({
-      "": {
-        "font-size": "24px",
-        "font-weight": "bold",
-        "margin-bottom": "16",
-      },
-    }),
+    css: css`
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    `,
     componentName: "Html",
     pos: 1,
     text: "Reset Your Password",
   },
   {
     as: "p",
-    class: JSON.stringify({
-      "": {
-        "margin-bottom": "16",
-      },
-    }),
+    css: css`
+      margin-bottom: 16px;
+    `,
     componentName: "Html",
     pos: 2,
     text: "We received a request to reset your password. Please use the following verification code to complete the process:",
@@ -30,13 +27,11 @@ const content = [
     attributes: [
       {
         as: "p",
-        class: JSON.stringify({
-          "": {
-            "font-size": "32px",
-            "font-weight": "bold",
-            "letter-spacing": "4px",
-          },
-        }),
+        css: css`
+          font-size: 32px;
+          font-weight: bold;
+          letter-spacing: 4px;
+        `,
         componentName: "Html",
         pos: 1,
         props: `return {
@@ -44,25 +39,21 @@ const content = [
           }`,
       },
     ],
-    class: JSON.stringify({
-      "": {
-        "background-color": "base-5",
-        "border-radius": "4",
-        "margin-bottom": "24",
-        padding: "16",
-        "text-align": "center",
-      },
-    }),
+    css: css`
+      background-color: \${args.theme.var.color.base_10};
+      border-radius: 4px;
+      margin-bottom: 24px;
+      padding: 16px;
+      text-align: center;
+    `,
     componentName: "Html",
     pos: 3,
   },
   {
     as: "p",
-    class: JSON.stringify({
-      "": {
-        color: "base",
-      },
-    }),
+    css: css`
+      color: \${args.theme.var.color.base};
+    `,
     componentName: "Html",
     pos: 4,
     text: "This code will expire in 10 minutes. If you didn't request this password reset, please ignore this email or contact support if you have concerns.",

@@ -18,7 +18,7 @@ import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
-import { headerIconButtonClass, STYLES } from "~/pages/settings/constants";
+import { headerIconButtonCss, STYLES } from "~/pages/settings/constants";
 
 import {
   DesignerFormIdContext,
@@ -31,13 +31,22 @@ import { ComponentList } from "./components/ComponentList";
 import { openInNewInternalTab } from "./pages/functions/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
-
-export const UlContainer = (props: ParentProps) => (
-  <ul
-    class={`flex ${STYLES.overflow} jc:space-around margin-bottom:-1px flex-wrap:nowrap`}
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";  
+  export const UlContainer = (props: ParentProps) => (
+    <As as="ul"
+    css={[STYLES.overflowCss, css`
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: -1px;
+  flex-wrap: nowrap;
+  list-style: none;
+  padding: 0;
+`]}
   >
     {props.children}
-  </ul>
+  </As>
 );
 const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const [graph, setGraph] = useGraph();
@@ -81,12 +90,23 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 
   return (
     <div>
-      <div class="flex ai:center gap:2">
+      <As as="div" css={[css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`]}>
         {props.rootLevel ? null : (
-          <div class="p:12 font-weight:500">Components</div>
+          <As as="div" css={[css`
+  padding: 12px;
+  font-weight: 500;
+`]}>Components</As>
         )}
         <IconButton
-          class={`${headerIconButtonClass} ml:1px`}
+          css={[headerIconButtonCss, css`
+  margin-left: 1px;
+  background-color: transparent;
+  border: none;
+`]}
           icon="ph:plus-circle"
           onClick={() => {
             if (!props.rootLevel) {
@@ -113,7 +133,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
             );
           }}
         />
-      </div>
+      </As>
       <ComponentList
         edgeName="ParentComponent"
         isFetchData={false}
@@ -154,14 +174,23 @@ export function FormElementTabs() {
   );
 
   return (
-    <div class="display:grid grid-template-rows:auto|1fr grid-template-columns:1fr height:100%">
-      <div class="bg:base-5 overflow-x:auto">
+    <As as="div" css={[css`
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+  height: 100%;
+`]}>
+      <As as="div" css={css`
+  background-color: \${args.theme.var.color.base_10};
+  overflow-x: auto;
+`}>
         <TabsContainer>
           <TabList />
         </TabsContainer>
-      </div>
+      </As>
 
-      <div class={`${STYLES.overflow}`}>
+      <As as="div" css={[STYLES.overflowCss, css`
+`]}>
         <Switch>
           <Match when={selectedTab().collection === "Comp"}>
             <ComponentList
@@ -174,19 +203,29 @@ export function FormElementTabs() {
               </DesignerFormIdContext.Provider>
             </Show>
 
-            <div class="mt:4">
-              <div class="p:12 font-weight:500">Global Components</div>
+            <As as="div" css={[css`
+  margin-top: 4px;
+`]}>
+              <As as="div" css={[css`
+  padding: 12px;
+  font-weight: 500;
+`]}>Global Components</As>
               <Show keyed when={formStoreVertex()?.id}>
                 <DesignerFormIdContext.Provider value={formStoreVertex().id}>
                   <PageLevelComponents rootLevel={true} />
                 </DesignerFormIdContext.Provider>
               </Show>
-            </div>
+            </As>
 
-            <div class="mt:4">
-              <div class="p:12 font-weight:500">Templates</div>
+            <As as="div" css={[css`
+  margin-top: 4px;
+`]}>
+              <As as="div" css={[css`
+  padding: 12px;
+  font-weight: 500;
+  `]}>Templates</As>
               <PagesList coll="TemplatePage" />
-            </div>
+            </As>
           </Match>
           <Match
             keyed
@@ -197,7 +236,7 @@ export function FormElementTabs() {
             <PagesList coll={selectedTab().collection} />
           </Match>
         </Switch>
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }

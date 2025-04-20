@@ -14,6 +14,8 @@ import {
   useFormContext,
 } from "../../../form/context/FormContext";
 import { DisplayProperty } from "../cell/DisplayProperty";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export const SortableRow = (
   props: Readonly<
@@ -71,17 +73,25 @@ export const SortableRow = (
 
   return (
     <>
-      <tr
-        class="border-bottom:1px|solid|#dddddd border-radius:10px text-align:center transition:background-color|0.2s|ease width:50px"
-        classList={{
-          "background-color:#e0e0e0": props.rowIndex === props.dragFromIndex(),
-          "background-color:#f0f0f0": props.rowIndex === props.dragToIndex(),
-          "background-color:white":
-            props.rowIndex !== props.dragFromIndex() &&
-            props.rowIndex !== props.dragToIndex(),
-          "border:1px|solid|#ddd": props.rowIndex !== props.dragToIndex(),
-          "border:2px|solid|green": props.rowIndex === props.dragToIndex(),
-        }}
+      <As as="tr" css={css`
+        border-bottom: 1px solid #dddddd;
+        border-radius: 10px;
+        text-align: center;
+        transition: background-color 0.2s ease;
+        width: 50px;
+        background-color: ${
+          props.rowIndex === props.dragFromIndex()
+            ? '#e0e0e0'
+            : props.rowIndex === props.dragToIndex()
+            ? '#f0f0f0'
+            : 'white'
+        };
+        border: ${
+          props.rowIndex === props.dragToIndex()
+            ? '2px solid green'
+            : '1px solid #ddd'
+        };
+      `}
         draggable={true}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -89,37 +99,60 @@ export const SortableRow = (
         onDrop={props.handleDrop}
       >
         <td>
-          <div class="flex ai:center jc:center">
+          <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`}>
             <IconButton
-              class="cursor:grab"
+              css={css`
+  cursor: grab;
+  background-color: transparent;
+  border: none;
+`}
               icon="material-symbols:drag-indicator"
-              iconClass="transition:transform|2s|ease-in-out"
+              iconCss={css`transition: transform 2s ease-in-out`}
               size={20}
             />
             <Show when={expandVertex()}>
               <IconButton
-                class="cursor:pointer"
+                css={css`
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+`}
                 icon={expanded() ? "ph:caret-right" : "ph:caret-down"}
-                iconClass="transition:transform|2s|ease-in-out"
+                iconCss={css`transition: transform 2s ease-in-out`}
                 onClick={toggleExpanded}
                 size={20}
               />
             </Show>
             <IconButton
-              class="color:error cursor:pointer m:5px"
+              css={css`
+  color: \${args.theme.var.color.error};
+  cursor: pointer;
+  margin: 5px;
+  background-color: transparent;
+  border: none;
+`}
               icon="mingcute:delete-line"
               onClick={handleDeleteRow}
               size={20}
             />
             <Show when={expandVertex()}>
               <IconButton
-                class="color:green cursor:pointer"
+                css={css`
+  color: green;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+`}
                 icon="icon-park-outline:plus"
                 onClick={handleAddNewRow}
                 size={20}
               />
             </Show>
-          </div>
+          </As>
           {/*<Show when={!disabled}>*/}
           {/*  <Icon icon="material-symbols:edit"  noobserver onClick={() => setDisabled((v) => !v)} />*/}
           {/*</Show>*/}
@@ -137,15 +170,20 @@ export const SortableRow = (
             />
           )}
         </For>
-      </tr>
+      </As>
       {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
       {/* {evalExpression("->$0", {
         graph,
         vertexes: [props.joinVertex],
       })?.length} */}
       <Show when={expandVertex() && expanded()}>
-        <tr class="border-bottom:1px|solid|#dddddd border-radius:10px">
-          <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
+        <As as="tr" css={css`
+  border-bottom: 1px solid #dddddd;
+  border-radius: 10px;
+`}>
+          <As as="td" css={css`
+  padding-left: 15px;
+`} colspan={rowColumnsMetaAttrs().length + 2}>
             <DynamicComponent
               componentName={"DynamicTable"}
               data={props.joinVertex}
@@ -157,8 +195,8 @@ export const SortableRow = (
               meta={expandVertex()!}
               // onChange={props.onChange}
             />
-          </td>
-        </tr>
+          </As>
+        </As>
       </Show>
     </>
   );

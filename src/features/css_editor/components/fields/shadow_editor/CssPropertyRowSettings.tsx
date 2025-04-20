@@ -3,6 +3,8 @@ import { type Accessor, For, type JSX, type Setter, Show } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { DynamicCSSComponent } from "~/features/css_editor/components/DynamicCssComponent";
 import { useCssState } from "~/features/css_editor/context/CssStateContext";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 import type { DataEditorField } from "../../../constants/FieldSchemaType";
 
@@ -23,24 +25,51 @@ export function CssPropertyRowSettings(
       props.openMenu[1](false);
     };
     return (
-      <div
-        class={"flex ai:center cursor:pointer jc:space-between mb:5"}
+      <As
+        as="div"
+        css={css`
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          justify-content: space-between;
+          margin-bottom: 5px;
+        `}
         onClick={closeMenu}
       >
-        <div class={"f:15 font-weight:bold"}>{props.meta.dialogLabel}</div>
+        <As 
+          as="div" 
+          css={css`
+            font-size: 15px;
+            font-weight: bold;
+          `}
+        >
+          {props.meta.dialogLabel}
+        </As>
         <IconButton
-          class={"fg:grey p:3"}
+          css={css`
+            color: grey;
+            padding: 3px;
+            background-color: transparent;
+            border: none;
+          `}
           icon={"ooui:collapse"}
           onClick={closeMenu}
           size={16}
         />
-      </div>
+      </As>
     );
   };
 
   return (
     <Show when={props.openMenu[0]()}>
-      <div class={"b:1px|solid|#ccc p:6 r:4"}>
+      <As
+        as="div"
+        css={css`
+          border: 1px solid #ccc;
+          padding: 6px;
+          border-radius: 4px;
+        `}
+      >
         <Header />
 
         <For each={props.meta.children || []}>
@@ -55,7 +84,7 @@ export function CssPropertyRowSettings(
             );
           }}
         </For>
-      </div>
+      </As>
     </Show>
   );
 }

@@ -1,6 +1,8 @@
 /* eslint-disable react/jsx-key */
 import { useChat } from "@ai-sdk/solid";
 import { For, Show } from "solid-js";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 export function UseChatTools() {
   const { addToolResult, handleInputChange, handleSubmit, input, messages } =
@@ -23,11 +25,20 @@ export function UseChatTools() {
     });
 
   return (
-    <div class="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      <For each={messages()} fallback={<div>No messages</div>}>
+    <As as="div" css={css`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 300px;
+  margin: 24px auto;
+  /* stretch */
+`}>
+      <For each={messages()} fallback={<As as="div">No messages</As>}>
         {(message) => (
-          <div class="whitespace-pre-wrap">
-            <strong>{`${message.role}: `}</strong>
+          <As as="div" css={css`
+  white-space: pre-wrap;
+`}>
+            <As as="strong">{`${message.role}: `}</As>
             {message.content}
             <For each={message.toolInvocations || []}>
               {(toolInvocation) => (
@@ -35,18 +46,22 @@ export function UseChatTools() {
                   fallback={
                     <Show
                       fallback={
-                        <div class="text-gray-500">
+                        <As as="div" css={args => css`
+  color: ${args.theme.var.color.gray};
+`}>
                           Calling {toolInvocation.toolName}...
-                        </div>
+                        </As>
                       }
                       keyed
                       when={"result" in toolInvocation && toolInvocation}
                     >
                       {(toolInvocation) => (
-                        <div class="text-gray-500">
+                        <As as="div" css={args => css`
+  color: ${args.theme.var.color.gray};
+`}>
                           Tool call {`${toolInvocation.toolName}: `}
                           {toolInvocation.result}
-                        </div>
+                        </As>
                       )}
                     </Show>
                   }
@@ -57,14 +72,25 @@ export function UseChatTools() {
                   }
                 >
                   {(toolInvocation) => (
-                    <div class="text-gray-500">
+                    <As as="div" css={args => css`
+  color: ${args.theme.var.color.gray};
+`}>
                       {toolInvocation.args.message}
-                      <div class="flex gap-2">
+                      <As as="div" css={args => css`
+  display: flex;
+  gap: 2px;
+`}>
                         <Show
                           fallback={
                             <>
-                              <button
-                                class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
+                              <As as="button"
+                                css={args => css`
+  padding: 4px;
+  font-weight: bold;
+  color: ${args.theme.var.color.white};
+  background-color: ${args.theme.var.color.blue};
+  border-radius: 4px;
+`}
                                 onClick={() =>
                                   addToolResult({
                                     result: "Yes, confirmed.",
@@ -73,9 +99,15 @@ export function UseChatTools() {
                                 }
                               >
                                 Yes
-                              </button>
-                              <button
-                                class="px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-700"
+                              </As>
+                              <As as="button"
+                                css={args => css`
+  padding: 4px;
+  font-weight: bold;
+  color: ${args.theme.var.color.white};
+  background-color: ${args.theme.var.color.red};
+  border-radius: 4px;
+`}
                                 onClick={() =>
                                   addToolResult({
                                     result: "No, denied",
@@ -84,7 +116,7 @@ export function UseChatTools() {
                                 }
                               >
                                 No
-                              </button>
+                              </As>
                             </>
                           }
                           keyed
@@ -92,26 +124,35 @@ export function UseChatTools() {
                         >
                           {(toolInvocation) => <b>{toolInvocation.result}</b>}
                         </Show>
-                      </div>
-                    </div>
+                      </As>
+                    </As>
                   )}
                 </Show>
               )}
             </For>
             <br />
             <br />
-          </div>
+          </As>
         )}
       </For>
 
       <form onSubmit={handleSubmit}>
-        <input
-          class="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
+        <As as="input"
+          css={args => css`
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: 300px;
+  padding: 2px;
+  border: 1px solid ${args.theme.var.color.gray_60};
+  border-radius: 4px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+`}
           onChange={handleInputChange}
           placeholder="Say something..."
           value={input()}
         />
       </form>
-    </div>
+    </As>
   );
 }

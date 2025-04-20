@@ -12,6 +12,8 @@ import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 
 import { getSupportTicketFormSchema } from "./functions/formSchema";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function SupportTickets() {
   const [graph, setGraph] = useGraph();
@@ -72,7 +74,11 @@ export function SupportTickets() {
             <div>
               <For each={getReplies()}>
                 {(reply: Vertex) => (
-                  <div class="white-space:nowrap overflow:hidden text-overflow:ellipsis">
+                  <As as="div" css={css`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`}>
                     {new Date(reply.P.createdAt).toLocaleDateString()}{" "}
                     {new Date(reply.P.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
@@ -80,7 +86,7 @@ export function SupportTickets() {
                     })}{" "}
                     - {reply.P.message.slice(0, 10)}... (by{" "}
                     {reply.P.email.slice(0, 5)}...)
-                  </div>
+                  </As>
                 )}
               </For>
             </div>

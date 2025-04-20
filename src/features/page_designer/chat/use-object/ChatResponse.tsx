@@ -7,6 +7,8 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 import type { DBMessage } from "./types";
 
 import { Preview } from "./Preview";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 interface ChatResponseProps {
   message: Vertex<DBMessage>;
@@ -14,27 +16,48 @@ interface ChatResponseProps {
 
 export function ChatResponse(props: ChatResponseProps) {
   return (
-    <div class="padding:12px border:1px|solid|secondary-20 border-radius:6px">
+    <As as="div" css={[css`
+  padding: 12px;
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+`]}>
       <ResponseContent response={props.message.P.response} />
       <ResponsePreview message={props.message} />
-    </div>
+    </As>
   );
 }
 
 function ResponseContent(props: { response: string }) {
   return (
     <>
-      <div class="font-weight:500 margin-bottom:4px">Response:</div>
-      <div class="white-space:pre-wrap">{props.response}</div>
+      <As as="div" css={[css`
+  font-weight: 500;
+  margin-bottom: 4px;
+`]}>Response:</As>
+      <As as="div" css={css`
+  white-space: pre-wrap;
+`}>{props.response}</As>
     </>
   );
 }
 
 function ResponsePreview(props: { message: Vertex<DBMessage> }) {
   return (
-    <div class="margin-top:16px border-top:1px|solid|rgb(229,231,235) padding-top:16px">
-      <div class="font-weight:500 margin-bottom:8px">Preview:</div>
-      <div class="border:1px|dashed|base padding:16px border-radius:6px min-height:100px">
+    <As as="div" css={[css`
+  margin-top: 16px;
+  border-top: 1px solid #3b82f6;
+  padding-top: 16px;
+`]}>
+      <As as="div" css={[css`
+  font-weight: 500;
+  margin-bottom: 8px;
+`]}>Preview:</As>
+        <As as="div" css={[css`
+  border: 1px dashed #3b82f6;
+  padding: 16px;
+  border-radius: 6px;
+  min-height: 100px;
+`]}>
         <For
           each={(() => {
             const parsed = JSON.parse(props.message.P.data || "[]");
@@ -47,7 +70,7 @@ function ResponsePreview(props: { message: Vertex<DBMessage> }) {
         >
           {(dataObj) => <Preview message={props.message} object={dataObj} />}
         </For>
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }

@@ -7,6 +7,8 @@ import type {
 
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 interface SuggestionsDropdownProps {
   isDropdownOpen: () => boolean;
@@ -26,20 +28,29 @@ export function SuggestionsDropdown(props: Readonly<SuggestionsDropdownProps>) {
             parentRef={props.reference()!}
             useSize={true}
           >
-            <div class={"w:full"}>
+            <As as="div" css={css`width: 100%;`}>
               <For each={props.options}>
                 {(option) => (
-                  <div // NOSONAR
-                    class={
-                      "flex ai:center bg:#efefef:hover cursor:pointer jc:space-between p:5 r:5"
-                    }
+                  <As
+                    as="div"
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      cursor: pointer;
+                      justify-content: space-between;
+                      padding: 5px;
+                      border-radius: 5px;
+                      &:hover {
+                        background: #efefef;
+                      }
+                    `}
                     onClick={() => props.selectOption(option)}
                   >
                     {typeof option === "string" ? option : option.label}
-                  </div>
+                  </As>
                 )}
               </For>
-            </div>
+            </As>
           </DropdownMenu>
         </ZIndex>
       </Show>

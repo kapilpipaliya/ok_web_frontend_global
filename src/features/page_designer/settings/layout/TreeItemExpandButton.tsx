@@ -3,6 +3,7 @@ import { Show } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
+import { css } from "~/lib/styles";
 
 export function TreeItemExpandButton(
   props: Readonly<{
@@ -16,13 +17,13 @@ export function TreeItemExpandButton(
     <Show when={props.hasChildren}>
       <IconButton
         icon={props.isCollapsed ? "ph:caret-right" : "ph:caret-down"}
-        iconClassList={{
-          "mx:4px": true,
-          // "transform:rotate(0deg)": props.isCollapsed,
-          // "transform:rotate(180deg)": !props.isCollapsed,
-          "transform 2s ease-in-out": true,
-          "transition:transform 0.2s|linear": true,
-        }}
+        css={css`
+          margin: 0 4px;
+          transform: ${props.isCollapsed ? "rotate(0deg)" : "rotate(180deg)"};
+          transition: transform 0.2s linear;
+          background-color: transparent;
+          border: none;
+        `}
         noCenter
         onClick={(e) => {
           e.stopPropagation();

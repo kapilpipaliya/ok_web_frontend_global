@@ -2,6 +2,8 @@ import { For } from "solid-js";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
+import { css } from "~/lib/styles";
+import { As } from "../As";
 
 export function TabsWithUnderline(
   props: Readonly<{
@@ -23,14 +25,48 @@ export function TabsWithUnderline(
   };
 
   return (
-    <div>
+    <As as="div">
       {/* Mobile view */}
-      <div class="display:none@sm">
-        <label class="sr-only" for="tabs">
+      <As as="div" css={css`
+        @media (width >= 52.125rem) {
+          display: none;
+        }
+      `}>
+        <As as="label" css={css`
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
+        `} for="tabs">
           Select a tab
-        </label>
-        <select
-          class="lh:1.5rem lh:1.25rem@sm border-color:base-5 border-color:primary:focus border-radius:0.375rem display:block outline-offset:2px:focus outline:2px|solid|transparent pl:0.75rem pr:2.5rem py:0.5rem width:100%"
+        </As>
+        <As as="select"
+          css={(args) => css`
+            line-height: 1.5rem;
+            @media (width >= 52.125rem) {
+              line-height: 1.25rem;
+            }
+            border-color: ${args.theme.var.color.base_10};
+            &:focus {
+              border-color: ${args.theme.var.color.primary};
+            }
+            border-radius: 0.375rem;
+            display: block;
+            &:focus {
+              outline-offset: 2px;
+              outline: 2px solid transparent;
+            }
+            padding-left: 0.75rem;
+            padding-right: 2.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            width: 100%;
+          `}
           id="tabs"
           onChange={(e) => props.onTabClick(e.currentTarget.value)}
           value={props.selectedKey}
@@ -42,29 +78,64 @@ export function TabsWithUnderline(
               </option>
             )}
           </For>
-        </select>
-      </div>
+        </As>
+      </As>
 
-      <div class="display:none display:block@sm">
-        <div class="border-bottom-width:1px border-color:base-5">
-          <nav aria-label="Tabs" class="flex gap:0.5rem margin-bottom:-1px">
+      <As as="div" css={css`
+        display: none;
+        @media (width >= 52.125rem) {
+          display: block;
+        }
+      `}>
+        <As as="div" css={(args) => css`
+          border-bottom-width: 1px;
+          border-color: ${args.theme.var.color.base_10};
+        `}>
+          <As as="nav" aria-label="Tabs" css={css`
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: -1px;
+          `}>
             <For each={props.tabs}>
               {(tab) => (
-                <button
+                <As as="button"
                   aria-current={
                     tab.id === props.selectedKey ? "page" : undefined
                   }
-                  class={`lh:1.25rem ${tab.id === props.selectedKey ? "border:primary-50 text:primary-60" : "border-color:transparent border:base-30:hover color:secondary-50 color:secondary-70:hover"} border-bottom-width:2px font-weight:500 px:0.25rem py:0.5rem white-space:nowrap`}
+                  css={(args) => css`
+                    line-height: 1.25rem;
+                    ${tab.id === props.selectedKey 
+                      ? `
+                        border-color: ${args.theme.var.color.primary};
+                        color: ${args.theme.var.color.primary_280};
+                      ` 
+                      : `
+                        border-color: transparent;
+                        &:hover {
+                          border-color: ${args.theme.var.color.base_60};
+                          color: ${args.theme.var.color.secondary_460};
+                        }
+                        color: ${args.theme.var.color.secondary};
+                      `}
+                    background-color: transparent;
+                    border-bottom-width: 2px;
+                    border-left:none;
+                    border-right:none;
+                    border-top:none;
+                    font-weight: 500;
+                    padding: 0.5rem 0.25rem;
+                    white-space: nowrap;
+                  `}
                   onClick={() => props.onTabClick(tab.id)}
                   type="button"
                 >
                   {getOptionLabel(tab)}
-                </button>
+                </As>
               )}
             </For>
-          </nav>
-        </div>
-      </div>
-    </div>
+          </As>
+        </As>
+      </As>
+    </As>
   );
 }

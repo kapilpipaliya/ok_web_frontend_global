@@ -5,6 +5,7 @@ import { createStore } from "solid-js/store";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 import type { FieldAttribute } from "../meta/FormMetadataType";
+import { css } from "../styles";
 
 /**
  * Creates a wrapper that displays a popover when the user hovers over an action element
@@ -68,6 +69,25 @@ export const popoverWrapperSchema = (
             as: "div",
             attributes: [popoverSchema],
             componentName: "Html",
+            css: (options: FunctionArgumentType) => {
+              const popoverState = options.dataContext
+              .popoverState as ReturnType<
+              typeof createStore<{
+                action: HTMLElement | null;
+                isVisible: boolean;
+                x: number;
+                y: number;
+              }>
+            >;
+              return popoverState[0]?.isVisible
+                ? css`
+              position:fixed;
+              z-index:9999;
+            `
+                : css`
+              display:none;
+            `;
+            },
             props: (options: FunctionArgumentType) => {
               const popoverState = options.dataContext
                 .popoverState as ReturnType<
@@ -80,9 +100,6 @@ export const popoverWrapperSchema = (
               >;
 
               return {
-                class: popoverState[0]?.isVisible
-                  ? "position:fixed z:9999"
-                  : "d:none",
                 onMount: () => {
                   const actionEl = popoverState[0]?.action;
 
@@ -129,7 +146,9 @@ export const popoverWrapperSchema = (
             },
           },
         ],
-        class: "position:relative",
+        css: css`
+  position: relative;
+`,
         componentName: "Html",
       },
     ],

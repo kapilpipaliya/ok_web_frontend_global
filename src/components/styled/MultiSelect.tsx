@@ -20,6 +20,9 @@ import { useZIndex, ZIndex } from "../fields/ZIndex";
 import { IconButton } from "./IconButton";
 import { DropdownMenu } from "./modal/DropdownMenu";
 import { useToast } from "./modal/Toast";
+import { css } from "~/lib/styles";
+import { As } from "../As";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 export type Option =
   | string
@@ -235,13 +238,19 @@ export function MultiSelectField(
       return (
         <Show
           fallback={
-            <div
-              class="bg:primary-10:hover cursor:pointer f:14 m:3 p:8px r:5 t:left"
-              classList={{
-                "bg:primary-20": selectedValue().some(
-                  (item) => getOptionValue(item) === getOptionValue(p.option),
-                ),
-              }}
+            <As as="div" css={({theme}) => css`
+  cursor: pointer;
+  font-size: 14px;
+  margin: 3px;
+  padding: 8px;
+  border-radius: 5px;
+  ${selectedValue().some(
+    (item) => getOptionValue(item) === getOptionValue(p.option)
+  ) ? `background-color: ${theme.var.color.primary_80};` : ""}
+  &:hover {
+    background-color: ${theme.var.color.primary_40};
+  }
+`}
               onClick={() =>
                 runWithOwner(owner, () => {
                   if (!hasChildren()) {
@@ -254,18 +263,27 @@ export function MultiSelectField(
               {props.renderLabel
                 ? props.renderLabel(p.option, false)
                 : getOptionLabel(p.option)}
-            </div>
+            </As>
           }
           when={hasChildren()}
         >
           <div>
-            <div // NOSONAR
-              class="flex ai:center bg:primary-10:hover cursor:pointer f:14 gap:2 m:3 p:8px r:5 t:left"
-              classList={{
-                "bg:primary-20": selectedValue().some(
-                  (item) => getOptionValue(item) === getOptionValue(p.option),
-                ),
-              }}
+            <As as="div" css={({theme}) => css`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  gap: 2px;
+  margin: 3px;
+  padding: 8px;
+  border-radius: 5px;
+  ${selectedValue().some(
+    (item) => getOptionValue(item) === getOptionValue(p.option)
+  ) ? `background-color: ${theme.var.color.primary_80};` : ""}
+  &:hover {
+    background-color: ${theme.var.color.primary_40};
+  }
+`}
               onClick={() => toggleExpandOption(p.option)}
             >
               <Icon
@@ -279,14 +297,16 @@ export function MultiSelectField(
                   ? props.renderLabel(p.option, false)
                   : getOptionLabel(p.option)}
               </span>
-            </div>
+            </As>
             <Show when={isExpanded()}>
-              <div class="pl:20px">
+              <As as="div" css={css`
+  padding-left: 20px;
+`}>
                 {/* @ts-expect-error ignore */}
                 <For each={p.option[childrenKey()]}>
                   {(childOption) => Option({ option: childOption })}
                 </For>
-              </div>
+              </As>
             </Show>
           </div>
         </Show>
@@ -294,50 +314,98 @@ export function MultiSelectField(
     };
 
     return (
-      <div
-        class={`radius:5 flex bg:base-5 flex:column max-h:200px ${STYLES.overflow} w:100% z-index:${zIndex}`}
+      <As as="div" css={[STYLES.overflowCss, ({theme}) => css`
+  border-radius: 5px;
+  display: flex;
+  background-color: ${theme.var.color.base_10};
+  display: flex;
+  flex-direction: column;
+  max-height: 200px;
+  width: 100%;
+  z-index: ${zIndex};
+`]}
       >
         <Show
-          fallback={<div class="cursor:pointer p:8px w:100%">Loading...</div>}
+          fallback={<As as="div" css={css`
+  cursor: pointer;
+  padding: 8px;
+  width: 100%;
+`}>Loading...</As>}
           when={!props.isLoadingOptions}
         >
           <For
             each={filteredOptions()}
             fallback={
-              <div class="cursor:pointer p:8px w:100%">No item found </div>
+              <As as="div" css={css`
+  cursor: pointer;
+  padding: 8px;
+  width: 100%;
+`}>No item found </As>
             }
           >
             {(option) => <Option option={option} />}
           </For>
         </Show>
-      </div>
+      </As>
     );
   };
 
   return (
-    <div
-      class={`b:1px|solid|base p:0px|3px r:4px text-align:left w:100% ${props.class}`}
-      classList={{
-        "b:1px|solid|error": !!props.error,
-      }}
+    <As as="div" css={[ensureArray(props.css), css`
+  border: 1px solid \${args.theme.var.color.base};
+  padding: 0 3px;
+  border-radius: 4px;
+  text-align: left;
+  width: 100%;
+  ${props.error ? `border: 1px solid \${args.theme.var.color.error};` : ""}
+`]}
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
     >
       {/* Main grid container */}
-      <div class="d:grid grid-template-columns:1fr|auto ai:center">
+      <As as="div" css={css`
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+`}>
         {/* Tags and input area */}
-        <div
-          class={`${props.selectionLimit !== 1 ? "flex:wrap" : ""} ai:center d:flex gap:5px p:4px|6px w:100%`}
+        <As as="div" css={[
+          props.selectionLimit !== 1 ? "flex-wrap: wrap" : "",
+          css`
+  align-items: center;
+  display: flex;
+  gap: 5px;
+  padding: 4px 6px;
+  width: 100%;
+`]}
         >
           <For each={selectedValue()}>
             {(tag) => (
-              <div class="ai:center bg:primary-20 cursor:default d:flex f:14 gap:5px p:2px|5px r:4px">
-                <span class="white-space:nowrap">
+              <As as="div" css={css`
+  align-items: center;
+  background-color: \${args.theme.var.color.primary_60};
+  cursor: default;
+  display: flex;
+  font-size: 14px;
+  gap: 5px;
+  padding: 2px 5px;
+  border-radius: 4px;
+`}>
+                <As as="span" css={css`
+  white-space: nowrap;
+`}>
                   {props.renderLabel
                     ? props.renderLabel(tag, true)
                     : getOptionLabel(tag)}
-                </span>
+                </As>
                 <IconButton
                   icon="ph:x"
+                  css={css`
+    background-color: transparent;
+    border: none;
+    &:hover {
+      color: \${args.theme.var.color.error};
+    }
+  `}
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopImmediatePropagation();
@@ -345,13 +413,25 @@ export function MultiSelectField(
                   }}
                   size={16}
                 />
-              </div>
+              </As>
             )}
           </For>
-          <div class="flex ai:center flex:1">
-            <input
+          <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  flex: 1;
+`}>
+            <As as="input"
               auto-complete="off"
-              class={`${props.selectionLimit === 1 && selectedValue().length === 1 ? "w:100px" : "min-w:100px"} border:none flex:1 outline:none p:5`}
+              css={[
+                css`
+  ${(props.selectionLimit === 1 && selectedValue().length === 1) ? "width: 100px;" : ""}
+  ${props.selectionLimit !== 1 ? "min-width: 100px;" : ""}
+  border: none;
+  flex: 1;
+  outline: none;
+  padding: 5px;
+`]}
               data-lpignore="true"
               disabled={props.disable}
               onFocus={handleInputFocus}
@@ -361,13 +441,22 @@ export function MultiSelectField(
               type="text"
               value={inputValue()}
             />
-          </div>
-        </div>
+          </As>
+        </As>
 
         {/* Dropdown icon area */}
-        <div class="d:flex ai:center jc:center h:100% p:0|8px">
-          <Icon
-            class="fg:base-50 cursor:pointer"
+        <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 8px;
+`}>
+          <As as={Icon}
+            css={({theme}) => css`
+  color: ${theme.var.color.base};
+  cursor: pointer;
+`}
             icon={dropdownVisible() ? "ph:caret-up-bold" : "ph:caret-down-bold"}
             noobserver
             onClick={() => {
@@ -379,17 +468,23 @@ export function MultiSelectField(
             }}
             width={20}
           />
-        </div>
-      </div>
+        </As>
+      </As>
 
       <Show when={props.error}>
-        <div class="fg:error f:12 p:2px">{props.error}</div>
+        <As as="div" css={css`
+  color: \${args.theme.var.color.error};
+  font-size: 12px;
+  padding: 2px;
+`}>{props.error}</As>
       </Show>
 
       <Show when={dropdownVisible()}>
         <ZIndex>
           <DropdownMenu
-            class="r:5"
+            css={css`
+  border-radius: 5px;
+`}
             onClickOutside={() => setDropdownVisible(false)}
             parentRef={reference()!}
           >
@@ -397,6 +492,6 @@ export function MultiSelectField(
           </DropdownMenu>
         </ZIndex>
       </Show>
-    </div>
+    </As>
   );
 }

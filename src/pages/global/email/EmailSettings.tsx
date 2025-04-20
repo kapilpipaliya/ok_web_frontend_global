@@ -11,6 +11,7 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 import { handleApiRequest } from "../../../lib/api/general/handleApiRequest";
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
+import { css } from "~/lib/styles";
 
 // Validation functions
 const validateRequired = (value: string) => {
@@ -95,12 +96,12 @@ export function EmailSettings() {
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "Email Provider",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "Select",
                 defaultValue: "",
                 key: "active",
@@ -113,21 +114,21 @@ export function EmailSettings() {
                 placeholder: "Select Email Provider",
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
-          getErrorSchema("active", "fg:red mt:-20"),
+          getErrorSchema("active", css`color:red; margin-top: -20px;`),
           {
             as: "div",
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "SMTP Host",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "smtpHost",
                 placeholder: "Enter SMTP host",
@@ -137,24 +138,24 @@ export function EmailSettings() {
                     : undefined,
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpHost", "fg:red mt:-20"),
+          getErrorSchema("smtpHost", css`color:red; margin-top: -20px;`),
           {
             as: "div",
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "SMTP Port",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "smtpPort",
                 placeholder: "Enter SMTP port",
@@ -163,24 +164,24 @@ export function EmailSettings() {
                   data.P.active === "smtp" ? validatePort(value) : undefined,
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpPort", "fg:red mt:-20"),
+          getErrorSchema("smtpPort", css`color:red; margin-top: -20px;`),
           {
             as: "div",
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "SMTP Username",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "smtpUsername",
                 placeholder: "Enter SMTP username",
@@ -190,24 +191,24 @@ export function EmailSettings() {
                     : undefined,
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpUsername", "fg:red mt:-20"),
+          getErrorSchema("smtpUsername", css`color:red; margin-top: -20px;`),
           {
             as: "div",
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "SMTP Password",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "smtpPassword",
                 placeholder: "Enter SMTP password",
@@ -218,24 +219,24 @@ export function EmailSettings() {
                     : undefined,
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpPassword", "fg:red mt:-20"),
+          getErrorSchema("smtpPassword", css`color:red; margin-top: -20px;`),
           {
             as: "div",
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "SendGrid API Key",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "sendGridApiKey",
                 placeholder: "Enter SendGrid API key",
@@ -246,24 +247,24 @@ export function EmailSettings() {
                     : undefined,
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "sendgrid",
             }),
           },
-          getErrorSchema("sendGridApiKey", "fg:red mt:-20"),
+          getErrorSchema("sendGridApiKey", css`color:red; margin-top: -20px;`),
           {
             as: "div",
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "From Email",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "fromEmail",
                 placeholder: "Enter from email address",
@@ -279,19 +280,19 @@ export function EmailSettings() {
                 },
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: () => !options.data?.P.active,
             }),
           },
-          getErrorSchema("fromEmail", "fg:red mt:-20"),
+          getErrorSchema("fromEmail", css`color:red; margin-top: -20px;`),
           {
             as: "div",
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "Use Secure Connection",
               },
@@ -300,13 +301,13 @@ export function EmailSettings() {
                 key: "secure",
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("secure", "fg:red mt:-20"),
+          getErrorSchema("secure", css`color:red; margin-top: -20px;`),
           {
             as: "div",
             attributes: [
@@ -314,7 +315,7 @@ export function EmailSettings() {
                 attributes: [
                   {
                     as: "button",
-                    class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                    css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       disabled: options.dataContext.saveState[0]?.isLoading,
@@ -367,7 +368,7 @@ export function EmailSettings() {
                 attributes: [
                   {
                     as: "button",
-                    class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS,
+                    css: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       disabled: options.dataContext.testState[0]?.isLoading,
@@ -444,11 +445,13 @@ export function EmailSettings() {
                 }),
               },
             ],
-            class: "mt:24",
+            css: css`
+  margin-top: 24px;
+`,
             componentName: "Html",
           },
         ],
-        class: SETTINGS_CONSTANTS.FORM_CLASS,
+        css: SETTINGS_CONSTANTS.FORM_CSS,
         componentName: "Html",
       },
     ],

@@ -22,6 +22,8 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatResponse } from "./ChatResponse";
 import { EXAMPLE_PROMPTS } from "./constants/EXAMPLE_PROMPTS";
 import { getChatHistory } from "./functions/getChatHistory";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();
@@ -184,11 +186,17 @@ Choose colors that work well for the context and maintain good contrast ratios.
   };
 
   return (
-    <div class="display:grid grid-template-rows:1fr|auto height:100%">
-      <div class={`${STYLES.overflow} chat-history`} ref={chatHistoryRef!}>
+    <As as="div" css={css`
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: 100%;
+`}>
+      <As as="div" css={[STYLES.overflowCss]} class="chat-history" ref={chatHistoryRef!}>
         <For each={messages()}>
           {(message, index) => (
-            <div class="margin-bottom:24px">
+            <As as="div" css={[css`
+  margin-bottom: 24px;
+`]}>
               <ChatMessage
                 index={index() + 1}
                 message={message}
@@ -203,39 +211,80 @@ Choose colors that work well for the context and maintain good contrast ratios.
                 }
               />
               <ChatResponse message={message} />
-            </div>
+            </As>
           )}
         </For>
 
         <Show when={error()}>
-          <div class="padding:16px margin-bottom:16px color:rgb(239,68,68) background:rgb(254,242,242) border-radius:6px">
+          <As as="div" css={[css`
+  padding: 16px;
+  margin-bottom: 16px;
+  color: rgb(239,68,68);
+  background: rgb(254,242,242);
+  border-radius: 6px;
+`]}>
             An error occurred. {error()?.message}
-            <button
-              class="padding:8px|16px margin-top:8px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255)"
+            <As as="button"
+              css={css`
+  padding: 8px 16px;
+  margin-top: 8px;
+  color: rgb(59,130,246);
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  &:hover {
+    background: rgb(239,246,255);
+  }
+`}
               onClick={() => reload()}
               type="button"
             >
               Retry
-            </button>
-          </div>
+            </As>
+          </As>
         </Show>
 
         <Show when={isLoading()}>
-          <div class="padding:16px color:rgb(107,114,128) display:flex gap:8px align-items:center">
-            <div class="display:flex align-items:center gap:8px">
-              <div class="width:16px height:16px border-radius:50% border:2px|solid|rgb(59,130,246) border-top-color:transparent @rotate|1s|infinite|linear" />
-              <span>AI is thinking...</span>
-            </div>
-            <button
-              class="padding:8px|16px color:rgb(59,130,246) border:1px|solid|rgb(59,130,246) border-radius:6px hover:background:rgb(239,246,255) cursor:pointer"
+          <As as="div" css={[css`
+  padding: 16px;
+  color: rgb(107,114,128);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`]}>
+            <As as="div" css={[css`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`]}>
+              <As as="div" css={[css`
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #3b82f6;
+  border-top-color: transparent;
+  animation: spin 1s infinite linear;
+`]} />
+              <As as="span">AI is thinking...</As>
+            </As>
+            <As as="button"
+              css={css`
+  padding: 8px 16px;
+  color: rgb(59,130,246);
+  border: 1px solid #3b82f6;
+  border-radius: 6px;
+  cursor: pointer;
+  &:hover {
+    background: rgb(239,246,255);
+  }
+`}
               onClick={() => stop()}
               type="button"
             >
               Stop
-            </button>
-          </div>
+            </As>
+          </As>
         </Show>
-      </div>
+      </As>
 
       <ChatInput
         chatMessages={chatMessages()}
@@ -253,6 +302,6 @@ Choose colors that work well for the context and maintain good contrast ratios.
         onSubmit={handleChatSubmit}
         showExamples={showExamples}
       />
-    </div>
+    </As>
   );
 }

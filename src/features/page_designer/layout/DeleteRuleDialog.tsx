@@ -8,6 +8,8 @@ import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { useDesignerFormIdContext } from "../context/LayoutContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 const getAttributeNames = (
   graph: GraphInterface,
@@ -22,13 +24,20 @@ const AttributeList = (
   props: Readonly<{ attributes: string[]; title: string }>,
 ) => (
   <Show when={props.attributes.length > 0}>
-    <div class="lh:1.25rem color:rgb(185,28,28) f:0.875rem mt:0.5rem">
-      <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem">
+    <As as="div" css={css`
+  color: rgb(185,28,28);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+`}>
+      <As as="ul" css={css`
+  list-style-type: disc;
+  padding-left: 1.25rem;
+`}>
         <li>
           {props.title} {props.attributes.join(", ")}.
         </li>
-      </ul>
-    </div>
+      </As>
+    </As>
   </Show>
 );
 
@@ -81,11 +90,20 @@ export function DeleteAttributeDialog() {
       onClose={handleClose}
       title="Delete Attribute"
     >
-      <div class="mt:1rem">
+      <As as="div" css={css`
+  margin-top: 1rem;
+`}>
         <For each={Object.keys(formStoreVertex()?.P.usedAttrsInRules)}>
           {(attr) => (
-            <div class="lh:1.25rem color:rgb(185,28,28) f:0.875rem mt:0.5rem">
-              <ul class="space-y:0.25rem list-style-type:disc pl:1.25rem">
+            <As as="div" css={css`
+  color: rgb(185,28,28);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+`}>
+              <As as="ul" css={css`
+  list-style-type: disc;
+  padding-left: 1.25rem;
+`}>
                 <li>
                   The attribute {graph.vertexes[attr]?.P.key} is used in the
                   following rules:{" "}
@@ -96,8 +114,8 @@ export function DeleteAttributeDialog() {
                     .join(", ")}
                   .
                 </li>
-              </ul>
-            </div>
+              </As>
+            </As>
           )}
         </For>
         <AttributeList
@@ -109,11 +127,15 @@ export function DeleteAttributeDialog() {
           title="The following attributes are used in unique constraints:"
         />
         <Show when={formStoreVertex()?.P.shouldContainAtLeastOneForm}>
-          <div class="lh:1.25rem color:error f:0.875rem mt:0.5rem">
+          <As as="div" css={css`
+  color: \${args.theme.var.color.error};
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+`}>
             Error: At least one form attribute should be present.
-          </div>
+          </As>
         </Show>
-      </div>
+      </As>
     </SimpleWithDismissButton>
   );
 }

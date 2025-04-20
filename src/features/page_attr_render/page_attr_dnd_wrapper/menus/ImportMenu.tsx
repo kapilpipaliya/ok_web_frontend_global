@@ -15,6 +15,8 @@ import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/rever
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function ImportMenu(
   props: Readonly<{
@@ -78,7 +80,9 @@ export function ImportMenu(
 
   return (
     <DropdownMenu
-      class="padding:0.50rem"
+      css={css`
+  padding: 0.50rem;
+`}
       onClickOutside={props.onClose}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
@@ -87,43 +91,62 @@ export function ImportMenu(
       <DialogSubTitle>Import HTML to the page.</DialogSubTitle>
 
       <div>
-        <label
-          class="lh:1.25rem  color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
+        <As as="label"
+          css={css`
+  color: #3b82f6;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+`}
           for="importHtml"
         >
           HTML
-        </label>
-        <div class="mt:2">
-          <textarea
-            class="lh:1.25rem@sm border-radius:0.375rem  border-width:0  box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus  color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
+        </As>
+        <As as="div" css={css`
+  margin-top: 2px;
+`}>
+          <As as="textarea"
+            css={css`
+  border-radius: 0.375rem;
+  border-width: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+  color: #3b82f6;
+  display: block;
+  font-size: 0.875rem;
+  padding-left: 0.75rem; padding-right: 0.75rem;
+  padding-top: 0.375rem; padding-bottom: 0.375rem;
+  width: 100%;
+`}
             id="importHtml"
             onChange={(e) => setHtmlContent(e.target.value)}
             placeholder="Paste HTML here"
             ref={nameInputRef!}
             value={htmlContent()}
           />
-        </div>
+        </As>
       </div>
       <Show when={error()}>
-        <div class="fg:error">{error()}</div>
+        <As as="div" css={css`
+  color: \${args.theme.var.color.error};
+`}>{error()}</As>
       </Show>
 
       <DialogFooter>
-        <button
-          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+        <As as="button"
+          css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
           disabled={!htmlContent()}
           onClick={onImport}
           type="button"
         >
           Import
-        </button>
-        <button
-          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS}
+        </As>
+        <As as="button"
+          css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]}
           onClick={onCancel}
           type="button"
         >
           Cancel
-        </button>
+        </As>
       </DialogFooter>
     </DropdownMenu>
   );

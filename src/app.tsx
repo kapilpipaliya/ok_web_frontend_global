@@ -4,14 +4,14 @@ import { clientOnly } from "@solidjs/start";
 import { FileRoutes } from "@solidjs/start/router";
 import { ToastProvider } from "solid-hot-toast";
 
-import "~/base.css";
+// import "~/base.css";
 
 import { ErrorBoundary, onMount, Suspense } from "solid-js";
 import { isServer } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
+import { ThemeProvider } from "~/lib/context/ThemeContext";
 
-import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
 import { LoaderNew } from "./components/styled/LoaderSimple";
 import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
@@ -40,6 +40,7 @@ export default function App() {
   const graph = createAppState();
   const Toaster = clientOnly(() => import("./Toaster"));
 
+
   // Set up global error handlers on client-side only
   onMount(() => {
     if (!isServer) {
@@ -54,35 +55,33 @@ export default function App() {
           // <A> and 'use' router primitives can be only used inside a Route.
           // const location = useLocation();
           return (
-            <GraphContext.Provider value={graph}>
-              <MetaProvider>
-                 <CSSRuntimeProvider
-                    config={themeConfig(getGlobalThemeVertex(graph[0]))}
+            <MetaProvider>
+              <GraphContext.Provider value={graph}>
+                <ThemeProvider>
+                  <ErrorBoundary
+                    fallback={(error, reset) => {
+                      // Log the UI error
+                      if (!isServer) {
+                        logError(error, { location: location.pathname });
+                      }
+                      return (
+                        <ErrorFallback
+                          error={error}
+                          resetErrorBoundary={reset}
+                        />
+                      );
+                    }}
                   >
-                    <ErrorBoundary
-                      fallback={(error, reset) => {
-                        // Log the UI error
-                        if (!isServer) {
-                          logError(error, { location: location.pathname });
-                        }
-                        return (
-                          <ErrorFallback
-                            error={error}
-                            resetErrorBoundary={reset}
-                          />
-                        );
-                      }}
-                    >
-                      <Suspense fallback={<LoaderNew />}>
-                        {props.children}
-                      </Suspense>
-                    </ErrorBoundary>
-                    {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
-                    <Toaster />
-                    {/* </Show> */}
-                  </CSSRuntimeProvider>
-              </MetaProvider>
-            </GraphContext.Provider>
+                    <Suspense fallback={<LoaderNew />}>
+                      {props.children}
+                    </Suspense>
+                  </ErrorBoundary>
+                  {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
+                  <Toaster />
+                  {/* </Show> */}
+                </ThemeProvider>
+              </GraphContext.Provider>
+            </MetaProvider>
           );
         }}
       >

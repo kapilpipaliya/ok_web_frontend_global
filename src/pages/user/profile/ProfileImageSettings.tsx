@@ -22,6 +22,7 @@ import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValu
 import { profileImage, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
+import { css } from "~/lib/styles";
 
 export function ProfileImageSettings() {
   const [openDialog, setOpenDialog] = createSignal(false);
@@ -95,13 +96,17 @@ export function ProfileImageSettings() {
         attributes: [
           {
             as: "span",
-            class: SETTINGS_CONSTANTS.LABEL_CLASS,
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
             componentName: "Html",
             text: "Profile Image",
           },
           {
             as: "img",
-            class: "cursor:pointer h:60px object-fit:cover",
+            css: css`
+  cursor: pointer;
+  height: 60px;
+  object-fit: cover;
+`,
             componentName: "Html",
             key: "profileImage",
             props: () => {
@@ -118,7 +123,7 @@ export function ProfileImageSettings() {
           },
           {
             as: "button",
-            class: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CLASS + " mr:auto",
+            css: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS + " margin-right:auto",
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenDialog(true),
@@ -129,7 +134,7 @@ export function ProfileImageSettings() {
             attributes: [
               {
                 as: "button",
-                class: SETTINGS_CONSTANTS.SAVE_BUTTON_CLASS,
+                css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.saveState[0]?.isLoading,
@@ -178,7 +183,7 @@ export function ProfileImageSettings() {
             }),
           },
         ],
-        class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS_NARROW,
+        css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onUnmount: () => {
@@ -187,7 +192,7 @@ export function ProfileImageSettings() {
         }),
       },
     ],
-    class: SETTINGS_CONSTANTS.FORM_CLASS,
+    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
   } as FieldAttribute;
 

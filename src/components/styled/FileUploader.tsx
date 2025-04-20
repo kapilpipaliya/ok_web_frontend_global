@@ -15,6 +15,8 @@ import type { Vertex } from "~/lib/graph/graph";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { runEvent } from "../solid_blocks/tools";
+import { css } from "~/lib/styles";
+import { As } from "../As";
 
 export type FileUploaderProps = JSX.HTMLAttributes<HTMLInputElement> & {
   data?: Vertex;
@@ -95,13 +97,13 @@ export function FileUploader(props: FileUploaderProps) {
 
   return (
     <>
-      <button
-        class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+      <As as="button"
+        css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
         onClick={handleFullBoxClick}
         type="button"
       >
         {localProps.label || `Select ${localProps.multiple ? "Files" : "File"}`}
-      </button>
+      </As>
 
       <input
         accept="image/*, video/*"
@@ -120,17 +122,17 @@ export function FileUploader(props: FileUploaderProps) {
           !(localProps.hidePreview ?? true)
         }
       >
-        <div // NOSONAR
-          class={`
-        background-position:center
-        background-size:cover
-        ${previewUrls().length === 0 ? "border:2px|dashed|#ccc" : ""}
-        border-radius:10px
-        cursor:pointer
-        min-height:200px
-        position:relative
-        text-align:center
-      `}
+        <As as="div"
+          css={css`
+  background-position: center;
+  background-size: cover;
+  ${previewUrls().length === 0 ? "border:2px dashed #ccc" : ""}
+  border-radius: 10px;
+  cursor: pointer;
+  min-height: 200px;
+  position: relative;
+  text-align: center;
+`}
           draggable={false}
           onClick={handleFullBoxClick}
           onDragOver={handleDragOver}
@@ -138,40 +140,62 @@ export function FileUploader(props: FileUploaderProps) {
         >
           <Switch>
             <Match when={files().length > 0 || previewUrls().length > 0}>
-              <div class="display:flex flex-wrap:wrap gap:10px justify-content:center p:10px">
+              <As as="div" css={css`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 10px;
+`}>
                 <For each={files().length > 0 ? files() : [null]}>
                   {(file, index) => (
-                    <div class="max-width:200px max-height:200px m:5px">
+                    <As as="div" css={css`
+  max-width: 200px;
+  max-height: 200px;
+  margin: 5px;
+`}>
                       <Switch>
                         <Match when={file?.type.startsWith("image/")}>
-                          <img
+                          <As as="img"
                             alt="Media"
-                            class="border-radius:10px max-height:100% max-width:100%"
+                            css={css`
+  border-radius: 10px;
+  max-height: 100%;
+  max-width: 100%;
+`}
                             src={previewUrls()[index()]}
                           />
                         </Match>
                         <Match when={file?.type.startsWith("video/")}>
-                          <video
-                            class="border-radius:10px max-height:100% max-width:100%"
+                          <As as="video"
+                            css={css`
+  border-radius: 10px;
+  max-height: 100%;
+  max-width: 100%;
+`}
                             controls
                             src={previewUrls()[index()]}
                           />
                         </Match>
                         <Match when={!file && previewUrls().length > 0}>
-                          <img
+                          <As as="img"
                             alt="Media"
-                            class="border-radius:10px max-height:100% max-width:100%"
+                            css={css`
+  border-radius: 10px;
+  max-height: 100%;
+  max-width: 100%;
+`}
                             src={previewUrls()[index()]}
                           />
                         </Match>
                       </Switch>
-                    </div>
+                    </As>
                   )}
                 </For>
-              </div>
+              </As>
             </Match>
           </Switch>
-        </div>
+        </As>
       </Show>
     </>
   );

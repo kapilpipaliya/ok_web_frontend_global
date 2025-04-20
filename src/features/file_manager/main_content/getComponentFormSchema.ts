@@ -145,12 +145,12 @@ export const getComponentFormSchema = (
     attributes: [
       {
         as: "span",
-        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         componentName: "Html",
         text: `Add New ${label()}`,
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
     componentName: "Html",
   };
 
@@ -165,20 +165,20 @@ export const getComponentFormSchema = (
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: `${label()} Name`,
                 validation: { required: true },
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "key",
                 placeholder: `Enter ${label().toLowerCase()} name`,
                 validation: { required: true },
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
           {
@@ -186,22 +186,22 @@ export const getComponentFormSchema = (
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "Description",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextArea",
                 key: "description",
                 placeholder: "Enter description",
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
         ],
-        class: SETTINGS_CONSTANTS.FORM_CLASS,
+        css: SETTINGS_CONSTANTS.FORM_CSS,
         componentName: "Html",
       },
     ],
@@ -213,7 +213,7 @@ export const getComponentFormSchema = (
     attributes: [
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
@@ -226,7 +226,7 @@ export const getComponentFormSchema = (
       },
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
@@ -240,7 +240,7 @@ export const getComponentFormSchema = (
         type: "button",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.FOOTER.CSS,
     componentName: "Html",
   };
 
@@ -257,7 +257,7 @@ export const getComponentFormSchema = (
                   {
                     as: "div",
                     attributes: [],
-                    class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
                       hide: !options.dataContext.modalState[0]?.showModal,
@@ -281,12 +281,12 @@ export const getComponentFormSchema = (
                         }),
                       },
                     ],
-                    class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
                     props: (options: FunctionArgumentType) => ({
                       onClick: (event: MouseEvent) => {
-                        event.stopPropagation();
+                        event.stopPropagation;
                       },
                       style: {
                         "z-index": options.zIndex + 1,

@@ -7,38 +7,46 @@ import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 import { HomeIcon } from "../left/HomeIcon";
 import { SaveAllButton } from "../right/SaveAllButton";
 import { ToggleButtons } from "../right/ToggleButtons";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { CssType } from "~/components/form/type/FieldSchemaType";
 
 interface HeaderProps {
   children?: JSX.Element;
-  class?: string;
+  css?: CssType;
   style?: JSX.CSSProperties;
 }
 
 const RightSection = () => {
   return (
-    <div class="flex ai:center gap:2">
+    <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`}>
       <ToggleButtons />
       <SaveAllButton />
       <SelectThemeButton />
       <UserDropdownMenuDisplay />
-    </div>
+    </As>
   );
 };
 
 export function Header(props: HeaderProps) {
   return (
-    <header
-      class={`${SETTINGS_CONSTANTS.HEADER_MENU_CLASS} ${props.class}`}
+    <As as="header"
+      css={[SETTINGS_CONSTANTS.HEADER_MENU_CSS, ...ensureArray(props.css)]}
       style={props.style}
     >
       {props.children}
-    </header>
+    </As>
   );
 }
 
 export function HeaderRow(props: HeaderProps) {
   return (
-    <Header class={props.class} style={props.style}>
+    <Header css={props.css} style={props.style}>
       <HomeIcon />
       <RightSection />
     </Header>

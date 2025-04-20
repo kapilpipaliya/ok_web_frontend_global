@@ -6,9 +6,11 @@ import { IconButton } from "~/components/styled/IconButton";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { getThemeFormSchema } from "./themeFormSchema";
+import { css } from "~/lib/styles";
+import { CssType } from "~/components/form/type/FieldSchemaType";
 
 export function ThemeConfigButton(props: {
-  class?: string;
+  css?: CssType;
   item: Vertex;
   size: number;
 }) {
@@ -22,7 +24,12 @@ export function ThemeConfigButton(props: {
   return (
     <>
       <IconButton
-        class={`${props.class} cursor:pointer`}
+        css={css`
+  ${props.css || ""}
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+`}
         icon="ph:pencil-simple"
         onClick={(e) => {
           e.stopPropagation();

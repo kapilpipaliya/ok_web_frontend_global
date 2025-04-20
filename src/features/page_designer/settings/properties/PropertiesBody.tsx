@@ -15,6 +15,7 @@ import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { ComponentVariantsInput } from "./ComponentVariantsInput";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
+import { css } from "~/lib/styles";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
@@ -80,9 +81,13 @@ export function PropertiesBody() {
         graph.vertexes[formStoreVertex()?.P.selectedId]
       }
     >
-      {/* <div class="flex gap:2 jc:start"> */}
-      {/* <button onClick={toggleImportsModal}>Import HTML</button> */}
-      {/* </div> */}
+      {/* <div css={css`
+  display: flex;
+  gap: 2px;
+  justify-content: start;
+`}> */}
+      {/* <button onClick={toggleImportsModal}>Import HTML</As> */}
+      {/* </As> */}
       <Show when={selectedAttr()?.P.componentName === "Data"}>
         <CollAndData />
       </Show>

@@ -14,6 +14,9 @@ import { IncrementButton } from "./IncrementButton";
 import { InputField } from "./InputField";
 import { SuggestionsDropdown } from "./SuggestionsDropdown";
 import { UnitsDropdown } from "./UnitsDropdown";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
   // input will automatically display value without units, if its number field.
@@ -29,7 +32,7 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
   const [local, _others] = splitProps(props, [
     "componentName",
     "onChange",
-    "containerClass",
+    "containerCss",
     "showFilePicker",
   ]);
 
@@ -173,8 +176,18 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
 
   return (
     <>
-      <div
-        class={`${local.containerClass ?? ""} ${props.isLabelOnTop ? "" : "max-w:50% w:50%"} flex rel ai:center b:1px|solid|#ccc jc:space-between p:0|5|0|5 r:5`}
+      <As
+        as="div"
+        css={[...ensureArray(props.containerCss), css`
+          ${props.isLabelOnTop ? "" : "max-width: 50%; width: 50%;"}
+          display: flex;
+          position: relative;
+          align-items: center;
+          border: 1px solid #ccc;
+          justify-content: space-between;
+          padding: 0 5px;
+          border-radius: 5px;
+        `]}
         ref={setReference}
       >
         <Show when={props.leftIcon || props.type === "number"}>
@@ -209,7 +222,7 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
           toggleDropdown={toggleDropdown}
           unitOptions={props.unitOptions ?? []}
         />
-      </div>
+      </As>
       <Show when={isAnotherDropdownOpen() && filteredOptions().length > 0}>
         <SuggestionsDropdown
           isDropdownOpen={isAnotherDropdownOpen}

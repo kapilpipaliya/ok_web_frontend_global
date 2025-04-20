@@ -1,3 +1,4 @@
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/pages/settings/constants";
@@ -14,7 +15,7 @@ export const collectionAttr = [
     key: "key",
   },
   {
-    class: PROPERTIES.Css.TextField,
+    css: PROPERTIES.Css.TextFieldCss,
     componentName: "TextArea",
     key: "definition",
   },

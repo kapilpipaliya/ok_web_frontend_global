@@ -7,6 +7,8 @@ import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
 import { STYLES } from "~/pages/settings/constants";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 /*
 ┌───────────┐
@@ -30,46 +32,69 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
   };
 
   return (
-    <span
-      class={`${
-        props.class ?? ""
-      } flex ai:center font-weight:400 font:14 gap:5 white-space:nowrap`}
+    <As
+      as="span"
+      css={css`
+        ${props.class ?? ""}
+        display: flex;
+        align-items: center;
+        font-weight: 400;
+        font-size: 14px;
+        gap: 5px;
+        white-space: nowrap;
+      `}
     >
       {props.title}
       <Show when={props.info}>
         <TooltipWrapper
-          arrowClass={STYLES.tooltip.arrow}
+          arrowCss={STYLES.tooltip.arrowCss}
           content={
-            <div class={STYLES.tooltip.content}>
+            <As
+              as="div"
+              css={STYLES.tooltip.contentCss}
+            >
               <Show when={props.title}>
-                <div class={"f:14 font-weight:500"}>{props.title}</div>
+                <As
+                  as="div"
+                  css={css`
+                    font-size: 14px;
+                    font-weight: 500;
+                  `}
+                >
+                  {props.title}
+                </As>
               </Show>
               {"Click for more Info"}
-            </div>
+            </As>
           }
           triggerAs="a"
         >
-          <a
-            class="flex ai:center"
+          <As
+            as="a"
+            css={css`
+              display: flex;
+              align-items: center;
+            `}
             href={getUrl()}
             rel="noreferrer"
             target="_blank"
           >
             <Icon height={14} icon="ph:info" noobserver width={14} />
-          </a>
+          </As>
         </TooltipWrapper>
       </Show>
       <Show when={props.showResetIcon ?? false}>
-        <Icon
-          class="cursor:pointer fg:accent"
-          height={26}
-          icon="ph:x"
-          noobserver
-          onClick={props.onResetIconClick}
-          width={26}
-        />
+        <As as="span" css={args => css`cursor: pointer; color: \${args.theme.var.color.accent};`}>
+          <Icon
+            height={26}
+            icon="ph:x"
+            noobserver
+            onClick={props.onResetIconClick}
+            width={26}
+          />
+        </As>
       </Show>
-    </span>
+    </As>
   );
 };
 
@@ -83,7 +108,7 @@ export function InsertButtonsMenu(
 ) {
   return (
     <DropdownMenu
-      class="padding:0.50rem"
+      css={css`padding: 0.50rem;`}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
       useSize={true}

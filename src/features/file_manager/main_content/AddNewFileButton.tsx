@@ -16,6 +16,8 @@ import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { getFolderFormSchema } from "./folderFormSchema";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 interface UploadResponse {
   result: Array<{
@@ -127,9 +129,12 @@ export function AddNewFileButton() {
   };
 
   return (
-    <div class="d:flex gap:4">
+    <As as="div" css={[css`
+  display: flex;
+  gap: 4px;
+`]}>
       <FileUploader handleFileSelect={handleFileSelect} label="Upload File" />
       <SchemaRenderer form={getFolderFormSchema(() => {})} />
-    </div>
+    </As>
   );
 }

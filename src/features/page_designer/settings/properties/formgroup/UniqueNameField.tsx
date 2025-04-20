@@ -9,6 +9,8 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { Label } from "./Label";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function UniqueNameField(
   props: Readonly<{
@@ -58,13 +60,32 @@ export function UniqueNameField(
   }
 
   return (
-    <div
-      class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
-    >
-      <span class="f:15 flex:.5">
+    <As as="div"
+      css={css`
+    ${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? `
+  border: 2px solid #008000;
+  border-bottom: none;
+  border-top: none;
+  padding: 2px 3px;
+  border-radius: 5px;
+` : ""}
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`}
+  >
+      <As as="span" css={css`
+  font-size: 15px;
+  flex: 0.5;
+`}>
         <Label meta={props.meta} />
-      </span>
-      <span class="f:15 flex:1">
+      </As>
+      <As as="span" css={css`
+  font-size: 15px;
+  flex: 1;
+`}>
         <DynamicComponent
           data={props.selectedLayout}
           isNoPermissionCheck={true}
@@ -74,7 +95,7 @@ export function UniqueNameField(
           onChange={(data: string) => setUniqueNameValue(props.meta, data)}
           txnId={0}
         />
-      </span>
-    </div>
+      </As>
+    </As>
   );
 }

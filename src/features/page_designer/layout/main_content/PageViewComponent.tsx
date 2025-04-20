@@ -13,6 +13,8 @@ import {
 } from "../../context/LayoutContext";
 import { IFramePreview } from "../IFramePreview";
 import { PageTabBar } from "./PageTabBar";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function PageViewComponent(props: { mainPanel: Id }) {
   const [graph, setGraph] = useGraph();
@@ -55,7 +57,11 @@ export function PageViewComponent(props: { mainPanel: Id }) {
   };
 
   return (
-    <div class="flex gap:8 flex:nowrap">
+    <As as="div" css={css`
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+`}>
       <For
         each={layoutStore().openedFormIds.filter(
           (id) => graph.vertexes[id].P.mainPanel === props.mainPanel,
@@ -83,7 +89,9 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                       previewsLength={formStoreVertex()?.P.openedViews.length}
                     />
                     <ResizableContainer
-                      class={isActive() ? "" : "hidden"}
+                      css={isActive() ? "" : css`
+  display: none;
+`}
                       view={openedViewId}
                     >
                       <Show when={isPreview()}>
@@ -104,6 +112,6 @@ export function PageViewComponent(props: { mainPanel: Id }) {
           );
         }}
       </For>
-    </div>
+    </As>
   );
 }

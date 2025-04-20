@@ -7,9 +7,12 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { deleteLayoutAttr } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { CssType } from "~/components/form/type/FieldSchemaType";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 interface DeleteButtonProps {
-  class?: string;
+  css?: CssType;
   componentName: string;
   item: Vertex;
   size: number;
@@ -25,7 +28,11 @@ export function DeleteButton(props: Readonly<DeleteButtonProps>) {
 
   return (
     <IconButton
-      class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.delete} ${props.class ?? ""}`}
+      css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.deleteCss, ...ensureArray(props.css), css`
+        color: \${args.theme.var.color.error};
+        background-color: transparent;
+        border: none;
+      `]}
       icon="ph:trash"
       onClick={(e) => {
         e.stopPropagation();

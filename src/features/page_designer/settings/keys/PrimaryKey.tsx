@@ -7,6 +7,8 @@ import { modifyFieldMetaAllFields } from "~/features/page_designer/settings/prop
 import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function PrimaryKey() {
   const [graph, setGraph] = useGraph();
@@ -16,9 +18,21 @@ export function PrimaryKey() {
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   return (
-    <div class="flex ai:center gap:2 justify-content:space-between mt:6">
-      <span class="f:15 flex:.5">Primary Key</span>
-      <span class="f:15 flex:1">
+    <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`}>
+      <As as="span" css={css`
+  font-size: 15px;
+  flex: 0.5;
+`}>Primary Key</As>
+      <As as="span" css={css`
+  font-size: 15px;
+  flex: 1;
+`}>
         <DynamicComponent
           componentName={"MultiSelect"}
           data={graph.vertexes[formStoreVertex()?.P.formDataId!]}
@@ -37,7 +51,7 @@ export function PrimaryKey() {
           }
           txnId={formStoreVertex()?.P.txnId}
         />
-      </span>
-    </div>
+      </As>
+    </As>
   );
 }

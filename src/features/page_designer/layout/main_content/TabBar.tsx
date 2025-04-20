@@ -18,6 +18,8 @@ import {
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { getTabLabel } from "./functions/getTabLabel";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function TabBar(props: { mainPanel: Id }) {
   const [graph, setGraph] = useGraph();
@@ -110,8 +112,14 @@ export function TabBar(props: { mainPanel: Id }) {
   };
 
   return (
-    <div
-      class="display:flex gap:5px padding:5px border-bottom:1px|solid|#ccc bg:#f5f5f5"
+    <As as="div"
+      css={css`
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+  background-color: #f5f5f5;
+`}
       onDragOver={(e) => e.preventDefault()}
       onDrop={() => moveTab(props.mainPanel)}
     >
@@ -127,8 +135,17 @@ export function TabBar(props: { mainPanel: Id }) {
         )}
       >
         {(openedFormId, index) => (
-          <div
-            class={`align-items:center border-radius:4px display:flex gap:5px padding:5px ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background:#e0e0e0" : ""} ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "bb:2px|solid|red" : ""} cursor:move`}
+          <As as="div"
+            css={css`
+  align-items: center;
+  border-radius: 4px;
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background-color: #e0e0e0;" : ""}
+  ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "border-bottom: 2px solid red;" : ""}
+  cursor: move;
+`}
             draggable={"true"}
             onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
             onDragOver={(e) => e.preventDefault()}
@@ -141,10 +158,12 @@ export function TabBar(props: { mainPanel: Id }) {
             }}
             onDrop={() => moveTab(props.mainPanel)}
           >
-            <span class="user-select:none;">
+            <As as="span" css={css`
+  user-select: none;
+`}>
               {getTabLabel(openedFormId, graph)}
               {isUnsaved(graph.vertexes[openedFormId].P.formId) && "*"}
-            </span>
+            </As>
             <IconButton
               icon="ph:plus"
               onClick={() => {
@@ -181,12 +200,14 @@ export function TabBar(props: { mainPanel: Id }) {
                 title="Close Tab"
               />
             </Show>
-          </div>
+          </As>
         )}
       </For>
       <Show when={layoutStore().mainPanel.length > 1}>
         <IconButton
-          class="ml:auto"
+          css={css`
+  margin-left: auto;
+`}
           icon="ph:x-circle"
           onClick={() => {
             const panelIndex = layoutStore().mainPanel.indexOf(props.mainPanel);
@@ -214,6 +235,6 @@ export function TabBar(props: { mainPanel: Id }) {
           title="Close Panel"
         />
       </Show>
-    </div>
+    </As>
   );
 }

@@ -10,6 +10,8 @@ import { useFileManagerStore } from "../FileManagerContext";
 import { FileManagerConfigIcons } from "./FileManagerConfigIcons";
 import { FileManagerTreeItemContent } from "./FileManagerTreeItemContent";
 import { getExpressionForFilesData, getFilesData } from "./getFilesData";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   const [children, setChildren] = createSignal<Vertex[]>([]);
@@ -109,11 +111,16 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
         />
       </TreeItemContainer>
       <Show when={fileManagerStore.expandedKeys.includes(props.item.id)}>
-        <ul class="pl:8 pt:5">
+        <As as="ul" css={[css`
+  padding-left: 8px;
+  padding-top: 5px;
+  list-style: none;
+  padding: 0;
+`]}>
           <For each={children()?.filter((item) => item.L[0] !== "File")}>
             {(child) => <FileManagerTreeItem item={child} />}
           </For>
-        </ul>
+        </As>
       </Show>
     </>
   );

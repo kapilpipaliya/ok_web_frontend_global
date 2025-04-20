@@ -23,6 +23,8 @@ import { FormElements } from "./main_content/FormElements";
 import { PageViewComponent } from "./main_content/PageViewComponent";
 import { PropertiesContent } from "./main_content/PropertiesContent";
 import { TabBar } from "./main_content/TabBar";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 interface ResizeHandleProps {
   activeResizeKey: null | string;
@@ -38,14 +40,15 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
   const [isHovered, setIsHovered] = createSignal(false);
 
   return (
-    <div
-      class={`
-        ${isHorizontal ? "width:3px height:100%" : "width:100% height:3px"}
-        ${isHorizontal ? "cursor:col-resize" : "cursor:row-resize"}
-        ${isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey) ? "bg:gray-60" : "bg:transparent"}
-        touch-action:none
-        transition:background-color|0.2s
-        height:100%
+    <As as="div"
+      css={css`
+        width: ${isHorizontal ? "3px" : "100%"};
+        height: ${isHorizontal ? "100%" : "3px"};
+        cursor: ${isHorizontal ? "col-resize" : "row-resize"};
+        background-color: ${isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey) ? "rgb(163,163,163)" : "transparent"};
+        touch-action: none;
+        transition: background-color 0.2s;
+        height: 100%;
       `}
       onMouseEnter={() => !props.isResizing && setIsHovered(true)}
       onMouseLeave={() => !props.isResizing && setIsHovered(false)}
@@ -70,21 +73,29 @@ const Panel: Component<PanelProps> = (props) => {
   const Content = () => {
     return (
       <Show
-        fallback={<div class={`${STYLES.overflow}`}>{props.children}</div>}
+        fallback={<As as="div" css={STYLES.overflowCss}>{props.children}</As>}
         when={props.title}
       >
-        <div class={"d:grid grid-template-rows:auto|1fr height:100%"}>
-          <div class="background:rgb(243,244,246) border-bottom:1px|solid|rgb(229,231,235) padding:4">
-            <h1 class="font-weight:600">{props.title}</h1>
-          </div>
-          <div class={`${STYLES.overflow}`}>{props.children}</div>
-        </div>
+        <As as="div" css={css`
+          display: grid;
+          grid-template-rows: auto 1fr;
+          height: 100%;
+        `}>
+          <As as="div" css={css`
+            background: rgb(243,244,246);
+            border-bottom: 1px solid rgb(229,231,235);
+            padding: 4px;
+          `}>
+            <As as="h1" css={css`font-weight: 600; font-size: inherit;`}>{props.title}</As>
+          </As>
+          <As as="div" css={STYLES.overflowCss}>{props.children}</As>
+        </As>
       </Show>
     );
   };
   return (
-    <div
-      class={`${STYLES.overflow}`}
+    <As as="div"
+      css={STYLES.overflowCss}
       ref={props.ref}
       style={{
         // 'background-color': '#f0f0f0',
@@ -133,7 +144,7 @@ const Panel: Component<PanelProps> = (props) => {
           resizeKey={props.resizeKey || ""}
         />
       </div>
-    </div>
+    </As>
   );
 };
 
@@ -229,32 +240,34 @@ export function RenderMainContent() {
     };
 
   return (
-    <div
-      class={`
-      display:grid
-      grid-template-cols:${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px|` : ""}${layoutStore()
-        .mainPanel?.map(
-          (panel) => layoutStore()[`mainPanel${panel}Width`] ?? "1fr",
-        )
-        .join(
-          "|",
-        )}${layoutStore().mainPanel?.findIndex((panel) => layoutStore()[`mainPanel${panel}Width`] === "1fr") !== -1 ? "|0px" : "|1fr"}${layoutStore().isRight0Open ? `|${layoutStore().rightWidth0}px` : ""}${layoutStore().isRight1Open ? `|${layoutStore().rightWidth1}px` : ""}${layoutStore().isRight2Open ? `|${layoutStore().rightWidth2}px` : ""}
-      width:100vw
-      height:100vh
-      grid-template-rows:38px|1fr
-    `}
+    <As as="div"
+      css={css`
+        display: grid;
+        grid-template-columns: ${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px ` : ""}${layoutStore()
+          .mainPanel?.map(
+            (panel) => layoutStore()[`mainPanel${panel}Width`] ?? "1fr",
+          )
+          .join(
+            " ",
+          )}${layoutStore().mainPanel?.findIndex((panel) => layoutStore()[`mainPanel${panel}Width`] === "1fr") !== -1 ? " 0px" : " 1fr"}${layoutStore().isRight0Open ? ` ${layoutStore().rightWidth0}px` : ""}${layoutStore().isRight1Open ? ` ${layoutStore().rightWidth1}px` : ""}${layoutStore().isRight2Open ? ` ${layoutStore().rightWidth2}px` : ""};
+        width: 100vw;
+        height: 100vh;
+        grid-template-rows: 38px 1fr;
+      `}
       // overflow:hidden
       //  grid-template-rows:1fr|${sizes.bottomHeight}px
     >
       <HeaderRow
-        class="ai:center"
+        css={css`
+          align-items: center;
+        `}
         style={{
           "grid-column": `1 / span ${layoutStore().mainPanel?.length + 1 + 4}`,
         }}
       />
 
-      <div
-        class={`${STYLES.overflow}`}
+      <As as="div"
+        css={STYLES.overflowCss}
         style={{ display: layoutStore().isLeftOpen ? "block" : "none" }}
       >
         <Panel
@@ -267,7 +280,7 @@ export function RenderMainContent() {
         >
           <FormElements />
         </Panel>
-      </div>
+      </As>
 
       <For each={layoutStore().mainPanel}>
         {(mainPanel) => (
@@ -301,8 +314,8 @@ export function RenderMainContent() {
 
       <div />
 
-      <div
-        class={STYLES.overflow}
+      <As as="div"
+        css={STYLES.overflowCss}
         style={{ display: layoutStore().isRight0Open ? "block" : "none" }}
       >
         <Panel
@@ -316,10 +329,10 @@ export function RenderMainContent() {
         >
           <UseObjectAIPanel />
         </Panel>
-      </div>
+      </As>
 
-      <div
-        class={STYLES.overflow}
+      <As as="div"
+        css={STYLES.overflowCss}
         style={{ display: layoutStore().isRight1Open ? "block" : "none" }}
       >
         <Panel
@@ -333,9 +346,13 @@ export function RenderMainContent() {
         >
           {/* <Show
             fallback={
-              <div class="bl:1|solid|lightgrey pl:8 pt:8">
+              <div css={css`
+  border-left: 1 solid lightgrey;
+  padding-left: 8px;
+  padding-top: 8px;
+`}>
                 Element is not selected
-              </div>
+              </As>
             }
             when={
               formStoreVertex()?.P.selectedId !== -1 &&
@@ -346,10 +363,10 @@ export function RenderMainContent() {
           <PropertiesContent />
           {/* </Show> */}
         </Panel>
-      </div>
+      </As>
 
-      <div
-        class={STYLES.overflow}
+      <As as="div"
+        css={STYLES.overflowCss}
         style={{ display: layoutStore().isRight2Open ? "block" : "none" }}
       >
         <Panel
@@ -362,7 +379,7 @@ export function RenderMainContent() {
         >
           <SettingTabs />
         </Panel>
-      </div>
+      </As>
 
       {/* <Panel
         style={{ 'grid-column': '1 / span 4' }}
@@ -384,7 +401,7 @@ export function RenderMainContent() {
       <Show when={showGraphView()}>
         <GraphView />
       </Show>
-    </div>
+    </As>
   );
 }
 

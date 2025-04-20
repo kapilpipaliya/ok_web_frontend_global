@@ -8,6 +8,8 @@ import { Drawer } from "~/components/styled/modal/Drawer";
 import { CSSPropertiesEditorWrapper } from "~/features/css_editor/CSSEditor/CSSPropertiesEditorWrapper";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 // Component for handling the CSS Editor
 export function CssEditor(
@@ -17,8 +19,12 @@ export function CssEditor(
   const [showCssEditor, setShowCssEditor] = createSignal(false);
   return (
     <>
-      <button
-        class="b:1px|solid|lightgrey p:6 r:6"
+      <As as="button"
+        css={css`
+  border: 1px solid #3b82f6;
+  padding: 6px;
+  border-radius: 6px;
+`}
         onClick={() => setShowCssEditor(true)}
         type="button"
       >
@@ -28,7 +34,7 @@ export function CssEditor(
           noobserver
           width={20}
         />
-      </button>
+      </As>
       <Show when={showCssEditor()}>
         <ZIndex>
           <Drawer

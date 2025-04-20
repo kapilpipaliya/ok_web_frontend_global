@@ -37,6 +37,8 @@ import { STYLES } from "~/pages/settings/constants";
 
 import { insertNewRow } from "./functions/insertNewRow";
 import { SortableRow } from "./row/SortableRow";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function TableInputField(
   props: Readonly<
@@ -153,22 +155,39 @@ export function TableInputField(
         />
         {/* </Show> */}
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
-        <div
-          class={`m:2 ${STYLES.overflow} r:10`}
-          classList={{
-            "border:1px|solid|#37c": sortedVertexes().length > 0, // slate-70
-          }}
-        >
-          <table
-            class="b:none border-collapse:collapse border-radius:0.4rem box-shadow:0|0|20px|rgba(0,0,0,0.15) font-size:0.9em"
-            classList={{ "width:-webkit-fill-available": props.isTableInside }}
-          >
+        <As as="div" css={[css`
+  margin: 2px;
+  border-radius: 10px;
+  ${sortedVertexes().length > 0 ? 'border: 1px solid #37c;' : ''}
+`, STYLES.overflowCss]}>
+          <As as="table" css={css`
+  border: none;
+  border-collapse: collapse;
+  border-radius: 0.4rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  font-size: 0.9em;
+  ${props.isTableInside ? 'width: -webkit-fill-available;' : ''}
+`}>
             <Show when={sortedVertexes().length}>
               <thead>
-                <tr class="background-color:#37c color:#ffffff height:35px text-align:center width:max-content">
-                  <td class="text-align-last:center align-content:center align-items:center color:#ffffff font-weight:medium p:0px|10px text-align:left">
+                <As as="tr" css={css`
+  background-color: #37c;
+  color: #ffffff;
+  height: 35px;
+  text-align: center;
+  width: max-content;
+`}>
+                  <As as="td" css={css`
+  text-align: center;
+  align-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-weight: 500;
+  padding: 0 10px;
+  text-align: left;
+`}>
                     &nbsp;Actions
-                  </td>
+                  </As>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => (
                       <Switch>
@@ -179,7 +198,11 @@ export function TableInputField(
                         <Match
                           when={!attribute.P.hide || attribute.P.defaultValue}
                         >
-                          <th class="font-weight:medium jc:center p:0px|10px">
+                          <As as="th" css={css`
+  font-weight: 500;
+  justify-content: center;
+  padding: 0 10px;
+`}>
                             {toTitle(
                               attribute.P.label ||
                                 attribute.P.displayName ||
@@ -188,9 +211,11 @@ export function TableInputField(
                             )}
                             {/* Add Proper Validation check */}
                             {attribute.P.validation?.required && (
-                              <span class="color:error"> *</span>
+                              <As as="span" css={css`
+  color: \${args.theme.var.color.error};
+`}> *</As>
                             )}
-                          </th>
+                          </As>
                         </Match>
                         <Match when={true}>
                           <th />
@@ -198,7 +223,7 @@ export function TableInputField(
                       </Switch>
                     )}
                   </For>
-                </tr>
+                </As>
               </thead>
             </Show>
             <tbody>
@@ -223,8 +248,8 @@ export function TableInputField(
                 )}
               </For>
             </tbody>
-          </table>
-        </div>
+          </As>
+        </As>
         {/*<Show when={Page}>*/}
         {/*  <For each={Object.values(Page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
         {/*</Show>*/}

@@ -7,6 +7,8 @@ import { createSignal, type JSX, splitProps } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { useToast } from "~/components/styled/modal/Toast";
+import { css } from "~/lib/styles";
+import { As } from "../As";
 
 interface Properties
   extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {
@@ -119,8 +121,9 @@ export function FileField(props: Readonly<Properties>) {
 
   return (
     <>
-      <progress
-        class="width:300px"
+      <As as="progress" css={css`
+  width: 300px;
+`}
         max={progressBar.max}
         value={progressBar.value}
       />

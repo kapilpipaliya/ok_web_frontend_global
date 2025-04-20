@@ -67,9 +67,9 @@ import {
 import {
   fetchFormData,
   type FetchFormDataResult,
-  fetchFormMetaData,
   type FetchFormMetaDataResult,
 } from "./functions/fetchPageData";
+import { fetchFormMetaData } from "./functions/fetchFormMetaData";
 
 export function PageViewWrapper(
   props: Readonly<{
@@ -252,6 +252,9 @@ export function PageViewWrapper(
       constants.isDesignMode,
       constants.pageKeyName,
     );
+    if (!metaResult) {
+      return { error: "No meta data found" };
+    }
 
     let formMetaId = constants.formMetaId;
     if (metaResult.data) {
@@ -321,7 +324,7 @@ export function PageViewWrapper(
     }
 
     return { formMetaId, metaResult };
-  });
+  }, {deferStream: true});
 
   async function handleFormMetaData(
     metaResult?: FetchFormMetaDataResult,

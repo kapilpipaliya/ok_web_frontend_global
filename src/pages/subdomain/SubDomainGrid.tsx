@@ -10,6 +10,8 @@ import { getAPI } from "~/lib/api/general/getApi";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export interface SubDomain {
   domain: string;
@@ -48,14 +50,17 @@ export const SubDomainGrid = () => {
         as: "span",
         cell: (info: CellContext<Vertex<SubDomain>, unknown>) => {
           return (
-            <a
-              class="color:primary text-decoration:none hover:text-decoration:underline"
+            <As as="a" css={css`
+  color: \${args.theme.var.color.primary};
+  text-decoration: none;
+  hover: text-decoration;
+`}
               href={getSubdomainUrl(info.row.original.P.key)}
               rel="noreferrer"
               target="_blank"
             >
               {info.row.original.P.key}
-            </a>
+            </As>
           );
         },
         componentName: "Html",
@@ -66,14 +71,17 @@ export const SubDomainGrid = () => {
         as: "span",
         cell: (info: CellContext<Vertex<SubDomain>, unknown>) => {
           return (
-            <a
-              class="color:primary text-decoration:none hover:text-decoration:underline"
+            <As as="a" css={css`
+  color: \${args.theme.var.color.primary};
+  text-decoration: none;
+  hover: text-decoration;
+`}
               href={getDomainUrl(info.row.original.P.domain)}
               rel="noreferrer"
               target="_blank"
             >
               {info.row.original.P.domain}
-            </a>
+            </As>
           );
         },
         componentName: "Html",

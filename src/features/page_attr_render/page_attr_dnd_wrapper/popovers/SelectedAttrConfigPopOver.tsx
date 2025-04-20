@@ -19,7 +19,9 @@ import { PreviewCSSButton } from "../buttons/PreviewCSSButton";
 import { SaveAsTemplateButton } from "../buttons/SaveAsTemplateButton";
 import { ComponentName } from "../components/ComponentName";
 import { InsertButtons } from "../menus/InsertButtons";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 interface SelectedAttrConfigPopOverProps {
   item: Vertex;
 }
@@ -38,12 +40,29 @@ export function SelectedAttrConfigPopOver(
 
   const iconSize = 20;
   return (
-    <span class="position:relative">
-      <div
-        class={`flex ai:center bg:primary-40 bottom:100% color:base-5 gap:5px p:0.25rem position:absolute r:5px|5px|0px|0px z:${zIndex}`}
-      >
+    <As as="span" css={[css`
+  position: relative;
+`]}>
+      <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  background-color: \${args.theme.var.color.primary};
+  bottom: 100%;
+  color: \${args.theme.var.color.base_10};
+  gap: 5px;
+  padding: 0.25rem;
+  position: absolute;
+  border-radius: 5px;
+  z-index: ${zIndex};
+  button {
+    color: white;
+  }
+`}>
         <IconButton
-          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
+          css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, css`
+            background-color: transparent;
+            border: none;
+          `]}
           draggable={true}
           icon="ph:dots-six-vertical-bold"
           onClick={() => {}}
@@ -61,12 +80,11 @@ export function SelectedAttrConfigPopOver(
         <PreviewCSSButton item={props.item} size={iconSize} />
         <ImportHtmlButton item={props.item} size={iconSize} />
         <DeleteButton
-          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.delete}`}
           componentName={getComponentName()!}
           item={props.item}
           size={iconSize}
         />
-      </div>
-    </span>
+      </As>
+    </As>
   );
 }

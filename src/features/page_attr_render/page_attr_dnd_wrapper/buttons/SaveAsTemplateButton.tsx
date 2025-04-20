@@ -7,8 +7,12 @@ import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { SaveAsTemplateMenu } from "../menus/SaveAsTemplateMenu";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { CssType } from "~/components/form/type/FieldSchemaType";
 interface SaveAsTemplateButtonProps {
+  css?: CssType;
   item: Vertex;
   size: number;
 }
@@ -32,7 +36,12 @@ export function SaveAsTemplateButton(
   return (
     <>
       <IconButton
-        class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
+        css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ...ensureArray(props.css),
+          css`
+            background-color: transparent;
+            border: none;
+          `,
+        ]}
         icon="ph:floppy-disk"
         onClick={(e) => {
           e.stopPropagation();
@@ -44,25 +53,41 @@ export function SaveAsTemplateButton(
       />
       <Show when={showModal()}>
         <DropdownMenu
-          class="padding:0.50rem"
+          css={css`
+  padding: 0.50rem;
+`}
           onClickOutside={() => setShowModal(false)}
           // onMouseLeave={() => setShowModal(false)}
           parentRef={saveAsTemplateRef!}
         >
-          <div class="flex flex-col gap:0.5rem">
-            <button
-              class="text-align:left px:1rem py:0.5rem hover:bg:gray-10"
+          <As as="div" css={css`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`}>
+            <As as="button"
+              css={css`
+  text-align: left;
+  padding-left: 1rem; padding-right: 1rem;
+  padding-top: 0.5rem; padding-bottom: 0.5rem;
+  /* hover: bg; */
+`}
               onClick={() => handleMenuSelect("Template")}
             >
               Save as Template
-            </button>
-            <button
-              class="text-align:left px:1rem py:0.5rem hover:bg:gray-10"
+            </As>
+            <As as="button"
+              css={css`
+  text-align: left;
+  padding-left: 1rem; padding-right: 1rem;
+  padding-top: 0.5rem; padding-bottom: 0.5rem;
+  /* hover: bg; */
+`}
               onClick={() => handleMenuSelect("Component")}
             >
               Save as Component
-            </button>
-          </div>
+            </As>
+          </As>
         </DropdownMenu>
       </Show>
 

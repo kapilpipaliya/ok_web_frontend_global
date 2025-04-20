@@ -7,7 +7,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 export function UserDropdownMenuDisplay(): JSX.Element {
   const [graph] = useGraph();
   const [isOpen, setIsOpen] = createSignal(false);
@@ -18,8 +19,25 @@ export function UserDropdownMenuDisplay(): JSX.Element {
 
   return (
     <>
-      <button
-        class={`flex ai:center bg:primary-5 bg:primary-10:hover h:36px p:6 r:7 width:36px mr:3 background-size:cover border:none cursor:pointer bg:primary-5 background-image:url(${getProfileImageUrl(graph)})`}
+      <As as="button"
+        css={css`
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 6px;
+  border-radius: 7px;
+  width: 36px;
+  margin-right: 3px;
+  background-size: cover;
+  border: none;
+  cursor: pointer;
+  background-color: \${args.theme.var.color.primary_10};
+  background-image: url(${getProfileImageUrl(graph)});
+
+  &:hover {
+    background-color: \${args.theme.var.color.primary_40};
+  }
+`}
         id="user-dropdown-toggle"
         onClick={handleOpen}
         ref={btnEl!}
@@ -27,16 +45,25 @@ export function UserDropdownMenuDisplay(): JSX.Element {
       <Show when={isOpen()}>
         <ZIndex>
           <DropdownMenu
-            class="r:5"
+            css={css`
+  border-radius: 5px;
+`}
             onClickOutside={handleClose}
             parentRef={btnEl!}
             placement="bottom-end"
           >
-            <ul class="list-style-type:none m:0 p:0 position:relative">
+            <As as="ul" css={css`
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+`}>
               <ProfileHeader />
-              <hr class="color:base-20" />
+              <As as="hr" css={css`
+  color: #1e293b;
+`} />
               <MenuItems onClose={handleClose} />
-            </ul>
+            </As>
           </DropdownMenu>
         </ZIndex>
       </Show>

@@ -13,6 +13,7 @@ import {
   parentTemplateAttribute,
 } from "../base/Comp";
 import { pageAttr } from "./pageAttr";
+import { css } from "~/lib/styles";
 
 export const wrapWithTitle = (
   title: string,
@@ -28,20 +29,30 @@ export const wrapWithTitle = (
           ? [
               {
                 as: "span",
-                class: "color:error",
+                css: css`
+  color: \${args.theme.var.color.error};
+`,
                 componentName: "Html",
                 text: " *",
               },
             ]
           : [],
-        class: "flex:.5",
+        css: css`
+  flex: 0.5;
+`,
         componentName: "Html",
         // key: `${title}`,
         text: title,
       },
       children,
     ],
-    class: "flex ai:center gap:2 justify-content:space-between mt:6",
+    css: css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`,
     componentName: "Html",
   };
 };
@@ -62,13 +73,23 @@ export const Page: IFormMetaData = {
           // type: "Preview",
         },
         wrapWithTitle("Title", false, {
-          class: `${PROPERTIES.Css.TextField} flex:1`,
+          css: [
+              PROPERTIES.Css.TextFieldCss,
+              css`
+                flex: 1;
+              `,
+            ],
           componentName: "TextInput",
           key: "title",
           // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
         }),
         wrapWithTitle("Key", true, {
-          class: `${PROPERTIES.Css.TextField} flex:1`,
+          css: [
+              PROPERTIES.Css.TextFieldCss,
+              css`
+                flex: 1;
+              `,
+            ],
           componentName: "TextInput",
           key: "key",
           validation: { required: true },
@@ -100,7 +121,12 @@ export const Page: IFormMetaData = {
           ],
         }),
         wrapWithTitle("Description", false, {
-          class: `${PROPERTIES.Css.TextField} flex:1`,
+          css: [
+              PROPERTIES.Css.TextFieldCss,
+              css`
+                flex: 1;
+              `,
+            ],
           componentName: "TextArea",
           key: "description",
         }),
@@ -170,7 +196,11 @@ export const Page: IFormMetaData = {
           type: "ChatHistory",
         },
       ],
-      class: "d:flex flex:col gap:8",
+      css: css`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`,
       componentName: "Html",
     },
   ],
@@ -181,7 +211,7 @@ export const Page: IFormMetaData = {
 export const variantAttributes = {
   attributes: [
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextInput",
       displayName: "Variant Name",
       key: "key",
@@ -203,14 +233,17 @@ string`,
           displayName: "Default Value",
           key: "defValue",
           // componentName: "::'P.type'",
+          css: (options: FunctionArgumentType) => {
+            const type =
+              options.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
+                return type === "CheckBox"
+                  ? PROPERTIES.Css.CheckBoxCss
+                  : PROPERTIES.Css.TextFieldCss;
+          },
           props: (options: FunctionArgumentType) => {
             const type =
               options.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
             return {
-              class:
-                type === "CheckBox"
-                  ? PROPERTIES.Css.CheckBox
-                  : PROPERTIES.Css.TextField,
               componentName: type,
             };
           },
@@ -224,7 +257,12 @@ string`,
               size: 16,
             },
           ],
-          class: "flex ai:center gap:2 color:error",
+          css: css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: \${args.theme.var.color.error};
+`,
           componentName: "Html",
           key: "button",
           props: (options: FunctionArgumentType) => {
@@ -251,7 +289,11 @@ string`,
           type: "button",
         },
       ],
-      class: "flex ai:center gap:2",
+      css: css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`,
       componentName: "Html",
       displayName: "Default Value",
     },

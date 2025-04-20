@@ -42,6 +42,7 @@ import { SelectPermissionField } from "./permission_field/SelectPermissionField"
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
 import { FunctionEditor } from "../FunctionEditor";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
@@ -138,7 +139,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       >
         <FunctionEditor
           keyName="css"
-          label="Stylus CSS"
+          label="CSS"
           language="css"
           returnType="string"
           setPropertyValue={props.onChange}
@@ -193,7 +194,7 @@ function createVertices(
     {
       id: vertexIds.key,
       P: {
-        class: PROPERTIES.Css.TextField,
+        css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
         displayName: "Unique ID",
         key: uniqueNameKey,
@@ -253,7 +254,7 @@ function createVertices(
     {
       id: vertexIds.src,
       P: {
-        class: PROPERTIES.Css.TextField,
+        css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
         displayName: "Source",
         key: "src",
@@ -263,7 +264,7 @@ function createVertices(
     {
       id: vertexIds.icon,
       P: {
-        class: PROPERTIES.Css.TextField,
+        css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
         displayName: "Icon",
         key: "icon",
@@ -272,7 +273,7 @@ function createVertices(
     {
       id: vertexIds.width,
       P: {
-        class: PROPERTIES.Css.TextField,
+        css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
         displayName: "Width",
         key: "width",
@@ -282,7 +283,7 @@ function createVertices(
     {
       id: vertexIds.height,
       P: {
-        class: PROPERTIES.Css.TextField,
+        css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
         displayName: "Height",
         key: "height",
@@ -292,7 +293,7 @@ function createVertices(
     {
       id: vertexIds.attrLabel,
       P: {
-        class: PROPERTIES.Css.TextField,
+        css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
         displayName: "Attribute Label",
         key: "attrLabel",
@@ -301,7 +302,7 @@ function createVertices(
     {
       id: vertexIds.text,
       P: {
-        class: PROPERTIES.Css.TextField,
+        css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
         displayName: "Text",
         key: "text",

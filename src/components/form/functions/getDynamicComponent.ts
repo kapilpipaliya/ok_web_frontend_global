@@ -1,7 +1,3 @@
-// import Accordion from "@corvu/accordion";
-// import Dialog from "@corvu/dialog";
-// import Disclosure from "@corvu/disclosure";
-// import Drawer from "@corvu/drawer";
 // This will not work with server side rendering, because keys are lost
 import { clientOnly } from "@solidjs/start";
 import { Portal, Show } from "solid-js/web";
@@ -28,68 +24,7 @@ import { MetaLink, MetaMeta, MetaTitle } from "../../fields/MetaTitle";
 import { FileUploader } from "../../styled/FileUploader";
 // const OtpField = clientOnly(() => import("~/components/ssr/otpfield/OtpField"));
 // OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
-const Popover = clientOnly(() => import("~/components/ssr/popover/Popover"));
-// @ts-expect-error ignore
-Popover.Anchor = clientOnly(
-  () => import("~/components/ssr/popover/PopoverAnchor"),
-);
-// @ts-expect-error ignore
-Popover.Arrow = clientOnly(
-  () => import("~/components/ssr/popover/PopoverArrow"),
-);
-// @ts-expect-error ignore
-Popover.Close = clientOnly(
-  () => import("~/components/ssr/popover/PopoverClose"),
-);
-// @ts-expect-error ignore
-Popover.Content = clientOnly(
-  () => import("~/components/ssr/popover/PopoverContent"),
-);
-// @ts-expect-error ignore
-Popover.Description = clientOnly(
-  () => import("~/components/ssr/popover/PopoverDescription"),
-);
-// @ts-expect-error ignore
-Popover.Label = clientOnly(
-  () => import("~/components/ssr/popover/PopoverLabel"),
-);
-// @ts-expect-error ignore
-Popover.Overlay = clientOnly(
-  () => import("~/components/ssr/popover/PopoverOverlay"),
-);
-// @ts-expect-error ignore
-Popover.Portal = clientOnly(
-  () => import("~/components/ssr/popover/PopoverPortal"),
-);
-// @ts-expect-error ignore
-Popover.Trigger = clientOnly(
-  () => import("~/components/ssr/popover/PopoverTrigger"),
-);
-// const Resizable = clientOnly(() => import("~/components/ssr/resizer/Resizable"));
-// Resizable.Handle = clientOnly(() => import("~/components/ssr/resizer/Handle"));
-// Resizable.Panel = clientOnly(() => import("~/components/ssr/resizer/Panel"));
 
-const Tooltip = clientOnly(() => import("~/components/ssr/tooltip/Tooltip"));
-// @ts-expect-error ignore
-Tooltip.Anchor = clientOnly(
-  () => import("~/components/ssr/tooltip/TooltipAnchor"),
-);
-// @ts-expect-error ignore
-Tooltip.Arrow = clientOnly(
-  () => import("~/components/ssr/tooltip/TooltipArrow"),
-);
-// @ts-expect-error ignore
-Tooltip.Content = clientOnly(
-  () => import("~/components/ssr/tooltip/TooltipContent"),
-);
-// @ts-expect-error ignore
-Tooltip.Portal = clientOnly(
-  () => import("~/components/ssr/tooltip/TooltipPortal"),
-);
-// @ts-expect-error ignore
-Tooltip.Trigger = clientOnly(
-  () => import("~/components/ssr/tooltip/TooltipTrigger"),
-);
 
 export const corvuComponents = {
   // Accordion,
@@ -97,9 +32,9 @@ export const corvuComponents = {
   // Disclosure,
   // Drawer,
   // OtpField,
-  Popover,
+  // Popover,
   // Resizable,
-  Tooltip,
+  // Tooltip,
 };
 
 export const componentsMap: Record<string, any> = {

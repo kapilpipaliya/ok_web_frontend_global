@@ -22,6 +22,8 @@ import {
   generateTransition,
   type TransitionAttributes,
 } from "../../../utils/generate/generateTransition";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 export interface CssPropertyRowContentProps {
   centerComponent?: JSX.Element;
@@ -47,7 +49,7 @@ export function CssPropertyRowContent(
           onClick={handleButtonClick}
         />
         <RenderPreview
-          class={`box-shadow:${generateBoxShadow([props.option as ShadowAttributes])}`}
+          previewCss={css`box-shadow:${generateBoxShadow([props.option as ShadowAttributes])}`}
         />
       </Match>
       <Match when={props.meta.key === "text-shadow"}>
@@ -59,7 +61,7 @@ export function CssPropertyRowContent(
           onClick={handleButtonClick}
         />
         <RenderPreview
-          class={`text-shadow:${generateTextShadow([props.option as TextShadowAttributes])}`}
+          previewCss={css`text-shadow:${generateTextShadow([props.option as TextShadowAttributes])}`}
         />
       </Match>
       <Match when={props.meta.key === "filter"}>
@@ -96,12 +98,32 @@ export function CssPropertyRowContent(
 
 function RenderButton(props: { label: string; onClick: () => void }) {
   return (
-    <button class="f:14 flex:1 mr:8px" onClick={props.onClick} type="button">
+    <As 
+      as="button" 
+      css={css`
+        flex: 1;
+        font-size: 14px;
+        margin-right: 8px;
+      `} 
+      onClick={props.onClick} 
+      type="button"
+    >
       {props.label}
-    </button>
+    </As>
   );
 }
 
-function RenderPreview(props: { class: string }) {
-  return <div class={`${props.class} h:20px mr:10 r:5 w:20px`} />;
+function RenderPreview(props: { previewCss: string }) {
+  return (
+    <As 
+      as="div" 
+      css={css`
+        ${props.previewCss};
+        height: 20px;
+        margin-right: 10px;
+        border-radius: 5px;
+        width: 20px;
+      `}
+    />
+  );
 }

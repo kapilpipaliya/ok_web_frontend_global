@@ -24,6 +24,8 @@ import { STYLES } from "~/pages/settings/constants";
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../functions/getTreeData";
 import { PageItem } from "./PageItem";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();
@@ -111,13 +113,20 @@ export function PagesList(props: Readonly<{ coll: string }>) {
               placeholder={`Search ${props.coll}...`}
               value={searchQuery()}
             />
-            <div class={`${STYLES.overflow} grid `}>
+            <As as="div" css={[STYLES.overflowCss, css`
+  display: grid;
+`]}>
               <For
                 each={filteredData()}
                 fallback={
-                  <div class="font-weight:bold m:20px|0px p:3 text-align:center">
+                  <As as="div" css={css`
+  font-weight: bold;
+  margin: 20px 0px;
+  padding: 3px;
+  text-align: center;
+`}>
                     No {props.coll} Found!
-                  </div>
+                  </As>
                 }
               >
                 {(item) => (
@@ -130,7 +139,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
                   />
                 )}
               </For>
-            </div>
+            </As>
           </>
         </Match>
       </Switch>

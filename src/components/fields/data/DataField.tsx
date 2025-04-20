@@ -15,6 +15,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 import { DataInternal } from "./DataInternal";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export const DataField = (props: {
   data: (() => any[]) | any[];
@@ -47,7 +49,7 @@ export const DataField = (props: {
         vertexes: [data()],
       },
     );
-  });
+  }, {deferStream: true});
 
   createEffect(() => {
     if (!props.expression) {
@@ -115,7 +117,9 @@ export const DataField = (props: {
         <div>...</div>
       </Match>
       <Match when={errorMessage()}>
-        <div class="bg-red-500">{errorMessage()}</div>
+        <As as="div" css={args => css`
+  background-color: ${args.theme.var.color.error};
+`}>{errorMessage()}</As>
       </Match>
       <Match when={Array.isArray(options()) && props.loop}>
         <For each={options()}>

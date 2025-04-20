@@ -17,6 +17,9 @@ import type { FormStoreObject } from "../form/context/FormContext";
 
 import { useToast } from "./modal/Toast";
 import { ResizeOverlay } from "./ResizeOverlay";
+import { css } from "~/lib/styles";
+import { As } from "../As";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 export const DIMENSIONS = {
   desktop: {
@@ -167,13 +170,20 @@ export function ResizableContainer(
   };
 
   return (
-    <div class={`grid ${props.class} ${STYLES.overflow} flex-shrink:0`}>
-      <div
-        class={`${STYLES.overflow} position:relative flex flex:col bl:1px|solid|lightgray`}
-        classList={{
-          "bg:primary-5": isDraggingOver(),
-          "user-select:none": resizing(),
-        }}
+    <As as="div" css={[...ensureArray(props.class), STYLES.overflowCss, css`
+  display: grid;
+  flex-shrink: 0;
+`]}>
+      <As as="div" css={[STYLES.overflowCss, css`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid lightgray;
+`, 
+          css`
+  ${isDraggingOver() ? `background-color: \${args.theme.var.color.primary_10};` : ''}
+  ${resizing() ? `user-select: none;` : ''}
+`]}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDropEvent}
@@ -194,11 +204,11 @@ export function ResizableContainer(
             "width: 100%; height: 4px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;"
           }
         />
-      </div>
+      </As>
 
       <Show when={resizing()}>
         <ResizeOverlay />
       </Show>
-    </div>
+    </As>
   );
 }

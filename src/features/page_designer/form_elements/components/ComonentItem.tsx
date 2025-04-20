@@ -27,6 +27,8 @@ import { openInNewInternalTab } from "../pages/functions/openInNewInternalTab";
 import { PreviewIsolated } from "../pages/PreviewIsolated";
 import { getCompChildren } from "./functions/getCompChildren";
 import { onCompDragStart } from "./functions/onCompDragStart";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function ComponentItem(
   props: Readonly<{
@@ -108,7 +110,7 @@ export function ComponentItem(
   return (
     <>
       <TreeItemContainer
-        class={isNegative(props.child.id) ? "bg:#e8ffe8" : ""}
+        css={isNegative(props.child.id) ? css`background-color:#e8ffe8;` : ""}
         draggable={"true"}
         hasChildren={!!children().length}
         isHovered={isHovered()}
@@ -131,11 +133,12 @@ export function ComponentItem(
         onMouseLeave={handleMouseLeave}
         ref={menuRef!}
       >
-        <div
-          classList={{
-            "bl:1px|dashed|black pl:10": !children().length,
-            "d:flex ai:center": true,
-          }}
+        <As as="div"
+          css={css`
+  display: flex;
+  align-items: center;
+  ${!children().length && "border-left:1px dashed black; padding-left:10px;"}
+`}
         >
           <TreeItemExpandButton
             hasChildren={!!children().length}
@@ -145,7 +148,12 @@ export function ComponentItem(
           />
           <Show when={isHovered()}>
             <OpenComponentSettings
-              class="cursor:pointer position:absolute right:3px top:3px"
+              css={css`
+  cursor: pointer;
+  position: absolute;
+  right: 3px;
+  top: 3px;
+`}
               id={props.child.id}
             />
           </Show>
@@ -156,15 +164,24 @@ export function ComponentItem(
               selectedComponents().has(graph.vertexes[props.child.id])
             }
           >
-            <input
+            <As as="input"
               checked={selectedComponents().has(graph.vertexes[props.child.id])}
-              class="left:7px position:absolute top:2px"
+              css={css`
+  left: 7px;
+  position: absolute;
+  top: 2px;
+`}
               onChange={(e) => handleCheckboxChange(e, props.child.id)}
               type="checkbox"
               // wrapperClass="height:19px width:19px"
             />
           </Show>
-          <div class="flex cursor:pointer gap:5px pt:5px">
+          <As as="div" css={css`
+  display: flex;
+  cursor: pointer;
+  gap: 5px;
+  padding-top: 5px;
+`}>
             <Show when={false}>
               <Icon
                 height={24}
@@ -176,14 +193,21 @@ export function ComponentItem(
                 width={24}
               />
             </Show>
-            <span
-              class={`${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? "color:error" : ""} font-size:14px`}
-            >
+            <As as="span" css={css`
+  font-size: 14px;
+  ${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? "color:${args.theme.var.color.error};" : ""}
+`}>
               {props.child?.P.label || props.child?.P.key}
-            </span>
+            </As>
             <Show when={props.child.L[0] !== "Comp"}>
-              <div class="margin-left:auto">
+              <As as="div" css={css`
+  margin-left: auto;
+`}>
                 <IconButton
+                  css={css`
+                    background-color: transparent;
+                    border: none;
+                  `}
                   icon="ph:arrow-square-out"
                   onClick={() =>
                     openInNewInternalTab(
@@ -195,10 +219,10 @@ export function ComponentItem(
                   }
                   size={18}
                 />
-              </div>
+              </As>
             </Show>
-          </div>
-        </div>
+          </As>
+        </As>
       </TreeItemContainer>
       <Show
         when={
@@ -225,7 +249,12 @@ export function ComponentItem(
         </DropdownMenu>
       </Show>
       <Show when={props.expandedKeys.includes(props.child.id)}>
-        <ul class="pl:8 pt:5">
+        <As as="ul" css={css`
+  padding-left: 8px;
+  padding-top: 5px;
+  list-style: none;
+  padding: 0;
+`}>
           <For each={children()}>
             {(child) => (
               <ComponentItem
@@ -241,7 +270,7 @@ export function ComponentItem(
               />
             )}
           </For>
-        </ul>
+        </As>
       </Show>
     </>
   );

@@ -1,13 +1,22 @@
 import { Icon } from "@iconify-icon/solid";
+import { Style } from "@solidjs/meta";
+import { createUniqueId } from "solid-js";
 
 import type { Id } from "~/lib/graph/graph";
+import { css } from "~/lib/styles";
 
 export function OpenComponentSettings(
-  props: Readonly<{ class?: string; id: Id }>,
+  props: Readonly<{ css?: string; id: Id }>,
 ) {
-  return (
+  const id = createUniqueId();
+  return (<>
+  <Style>
+    {css`
+  ${props.css}
+`.replaceAll("._id", `.${id}`)}
+  </Style>
     <Icon
-      class={`${props.class ?? ""}`}
+      class={id}
       height={21}
       icon={"ph:gear"}
       noobserver
@@ -20,6 +29,6 @@ export function OpenComponentSettings(
         window.open(navigateUrl, "_blank");
       }}
       width={21}
-    />
+    /></>
   );
 }

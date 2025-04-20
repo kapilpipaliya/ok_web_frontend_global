@@ -25,7 +25,7 @@ export function PermissionGuard(props: {
   const permissionResult = createAsync(async () => {
     // Check if the user has permission to access this path
     return await checkRoutePermission(undefined, pathToCheck());
-  });
+  }, {deferStream: true}); // required for server side rendering
 
   // Handle unauthorized access
   const handleUnauthorized = () => {

@@ -67,6 +67,7 @@ interface DataGridProps {
   tableId: string;
 }
 
+// TODO: make it ssr compatible
 export function DataGrid(props: Readonly<DataGridProps>) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();

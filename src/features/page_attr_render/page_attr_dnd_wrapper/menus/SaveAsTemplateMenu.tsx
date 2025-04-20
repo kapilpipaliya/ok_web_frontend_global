@@ -23,6 +23,8 @@ import {
   parentTemplateAttribute,
 } from "~/lib/meta/base/Comp";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -123,7 +125,9 @@ export function SaveAsTemplateMenu(
 
   return (
     <DropdownMenu
-      class="padding:0.50rem"
+      css={css`
+  padding: 0.50rem;
+`}
       onClickOutside={props.onClickOutside}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
@@ -136,15 +140,32 @@ export function SaveAsTemplateMenu(
       </DialogSubTitle>
 
       <div>
-        <label
-          class="lh:1.25rem  color:gray-90 display:block f:0.875rem font-weight:500 leading:1.5rem"
+        <As as="label"
+          css={css`
+  color: #3b82f6;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+`}
           for="templateName"
         >
           {label()} Name
-        </label>
-        <div class="mt:2">
-          <input
-            class="lh:1.25rem@sm border-radius:0.375rem  border-width:0  box-shadow:0|0|0|1px|rgba(0,0,0,0.5) box-shadow:0|0|0|2px|rgba(0,0,0,0.5):focus  color:gray-90 color:gray-40::placeholder display:block f:0.875rem leading:1.5rem@sm px:0.75rem py:0.375rem width:100%"
+        </As>
+        <As as="div" css={css`
+  margin-top: 2px;
+`}>
+          <As as="input"
+            css={css`
+  border-radius: 0.375rem;
+  border-width: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+  color: #3b82f6;
+  display: block;
+  font-size: 0.875rem;
+  padding-left: 0.75rem; padding-right: 0.75rem;
+  padding-top: 0.375rem; padding-bottom: 0.375rem;
+  width: 100%;
+`}
             id="templateName"
             onChange={(e) => setTemplateName(e.target.value)}
             placeholder={`New ${label()} Name`}
@@ -152,25 +173,35 @@ export function SaveAsTemplateMenu(
             type="text"
             value={templateName()}
           />
-        </div>
-        <div class="mt:2">
-          <label class="display:flex gap:0.5rem align-items:center">
-            <input
+        </As>
+        <As as="div" css={css`
+  margin-top: 2px;
+`}>
+          <As as="label" css={css`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+`}>
+            <As as="input"
               checked={saveInCurrentPage()}
               onChange={(e) => setSaveInCurrentPage(e.target.checked)}
               type="checkbox"
             />
-            <span class="f:0.875rem">Save in current page</span>
-          </label>
-        </div>
+            <As as="span" css={css`
+  font-size: 0.875rem;
+`}>Save in current page</As>
+          </As>
+        </As>
       </div>
       <Show when={error()}>
-        <div class="fg:error">{error()}</div>
+        <As as="div" css={css`
+  color: \${args.theme.var.color.error};
+`}>{error()}</As>
       </Show>
 
       <DialogFooter
         buttonText="Save"
-        class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+        css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
         disabled={!templateName()}
         onClick={() => saveAsTemplate(templateName())}
       />

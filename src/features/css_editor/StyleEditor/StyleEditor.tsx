@@ -4,7 +4,8 @@ import { useSearchContext } from "../context/SearchContext";
 import { filterSections } from "../utils/filterSections";
 import { SearchBar } from "./SearchBar";
 import { SectionList } from "./SectionList";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 export function StyleEditor() {
   const [searchQuery, setSearchQuery] = useSearchContext();
   const [filteredSections, setFilteredSections] = createSignal(
@@ -21,7 +22,15 @@ export function StyleEditor() {
   }
 
   return (
-    <div class="flex ai:start flex-direction:column jc:space-between mb:10 mt:10 w:full">
+    <As as="div" css={css`
+  display: flex;
+  align-items: start;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width: 100%;
+`}>
       <SearchBar
         handleChange={handleSearch}
         placeholder="Search Style..."
@@ -31,6 +40,6 @@ export function StyleEditor() {
         filteredSections={filteredSections}
         searchQuery={searchQuery()}
       />
-    </div>
+    </As>
   );
 }

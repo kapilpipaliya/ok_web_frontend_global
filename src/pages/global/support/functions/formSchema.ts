@@ -17,6 +17,7 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { loadingIconSchema } from "../../../../lib/schema/loadingIconSchema";
+import { css } from "~/lib/styles";
 
 export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   const actionButtonsSchema = {
@@ -24,7 +25,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
@@ -37,7 +38,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       },
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
@@ -49,7 +50,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         type: "button",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS.replace("top", "bottom"),
+    css: SETTINGS_CONSTANTS.MODAL.FOOTER.CSS.replace("top", "bottom"),
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       hide: !isAdminRole(options.graph),
@@ -70,7 +71,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       },
       {
         as: "span",
-        class: SETTINGS_CONSTANTS.LABEL_CLASS,
+        css: SETTINGS_CONSTANTS.LABEL_CSS,
         componentName: "Html",
         text: "Replies",
       },
@@ -97,7 +98,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                 attributes: [
                                   {
                                     as: "div",
-                                    class: "font-weight:bold",
+                                    css: css`
+  font-weight: bold;
+`,
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text:
@@ -115,7 +118,10 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                   },
                                   {
                                     as: "div",
-                                    class: "font-size:12px color:base-50",
+                                    css: css`
+  font-size: 12px;
+  color: \${args.theme.var.color.base};
+`,
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: new Date(
@@ -130,8 +136,12 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                   // const isUser = options.data?.P.email !== "Support";
                                   // ${isUser ? 'bg:primary-10' : 'bg:base-10'}
                                   return {
-                                    class:
-                                      "display:inline-block p:8 r:6 bg:base-10",
+                                    css: css`
+  display: inline-block;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: \${args.theme.var.color.base_20};
+`,
                                   };
                                 },
                               },
@@ -139,9 +149,11 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                             componentName: "Html",
                             props: () => {
                               // const isUser = options.data?.P.email !== "Support";
-                              // isUser ? 'text-align:right' : ''}`
+                              // isUser ? 'text-align:right;' : ''}`
                               return {
-                                class: "mb:12",
+                                css: css`
+  margin-bottom: 12px;
+`,
                               };
                             },
                           },
@@ -166,14 +178,26 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     }),
                     // emptyState: {
                     //   as: "div",
-                    //   class: "p:8 text-align:center color:base-50",
+                    //   css: css`
+//   padding: 8px;
+//   text-align: center;
+//   color: #1e293b;
+// `,
                     //   componentName: "Html",
                     //   text: "No messages yet",
                     // },
                   },
                 ],
-                class:
-                  "max-h:300px min-h:100px overflow-y:auto border:1px|solid|base-20 r:6 p:12 bg:base-5 chat-history-container",
+                css: css`
+  max-height: 300px;
+  min-height: 100px;
+  overflow-y: auto;
+  border: 1px solid \${args.theme.var.color.base_40};
+  border-radius: 6px;
+  padding: 12px;
+  background-color: \${args.theme.var.color.base_20};
+  /* chat-history-container */
+`,
                 componentName: "Html",
               },
               {
@@ -183,7 +207,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     as: "div",
                     attributes: [
                       {
-                        class: PROPERTIES.Css.TextField + " flex-grow:1 mr:8",
+                        css: PROPERTIES.Css.TextFieldCss + " flex-grow:1 mr:8",
                         componentName: "TextArea",
                         key: "newReply",
                         placeholder: "Type your reply here...",
@@ -200,7 +224,12 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                       },
                       {
                         as: "button",
-                        class: "bg:primary color:white p:8|16 r:6",
+                        css: css`
+  background-color: \${args.theme.var.color.primary};
+  color: \${args.theme.var.color.base};
+  padding: 8px 16px;  
+  border-radius: 6px;
+`,
                         componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
                           disabled:
@@ -275,7 +304,10 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         type: "button",
                       },
                     ],
-                    class: "display:flex mt:8",
+                    css: css`
+  display: flex;
+  margin-top: 8px;
+`,
                     componentName: "Html",
                   },
                 ],
@@ -309,12 +341,12 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "Status",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 collection: "g:'SupportStatus'",
                 componentName: "Select",
                 key: "SupportStatus",
@@ -325,7 +357,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 title: "Status",
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
           {
@@ -333,12 +365,12 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             attributes: [
               {
                 as: "span",
-                class: SETTINGS_CONSTANTS.LABEL_CLASS,
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
                 text: "Message",
               },
               {
-                class: PROPERTIES.Css.TextField,
+                css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextArea",
                 key: "message",
                 props: (options: FunctionArgumentType) => ({
@@ -347,12 +379,12 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 }),
               },
             ],
-            class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
           actionButtonsSchema,
         ],
-        class: SETTINGS_CONSTANTS.FORM_CLASS,
+        css: SETTINGS_CONSTANTS.FORM_CSS,
         componentName: "Html",
       },
     ],
@@ -431,7 +463,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "span",
-        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         componentName: "Html",
         text: "Edit Support Ticket",
       },
@@ -443,8 +475,16 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             icon: "ph:x",
           },
         ],
-        class:
-          "border:none bg:transparent cursor:pointer color:base-50 hover:color:primary font-size:20px",
+        css: css`
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  color: \${args.theme.var.color.base};
+  font-size: 20px;
+  &:hover {
+    color: \${args.theme.var.color.primary};
+  }
+`,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
@@ -454,9 +494,13 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         }),
       },
     ],
-    class:
-      SETTINGS_CONSTANTS.MODAL.HEADER.CLASS +
-      " flex ai:center justify-content:space-between",
+    css: [SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
+      css`
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      `,
+    ],
     componentName: "Html",
   };
 
@@ -469,7 +513,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
           {
             as: "div",
             attributes: [],
-            class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+            css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: !options.dataContext.modalState[0]?.showModal,
@@ -487,11 +531,13 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                       {
                         as: "div",
                         attributes: [chatHistorySchema],
-                        class: "p:4",
+                        css: css`
+  padding: 4px;
+`,
                         componentName: "Html",
                       },
                     ],
-                    class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
                     props: (options: FunctionArgumentType) => ({

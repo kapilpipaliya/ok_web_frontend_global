@@ -1,5 +1,5 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
-
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 export const parentCompAttribute = {
@@ -83,7 +83,7 @@ export const Comp: IFormMetaData = {
     //   key: "hide",
     // },
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextArea",
       key: "description",
     },
@@ -150,7 +150,7 @@ export const Comp: IFormMetaData = {
         //   // componentName: "->$0Comp<-CompChild::'P.key'||->$0Comp::'P.key'||->$0DataType->$0Default::'P.key'||defaultComp|->$0DataType::'P.key'",
         // },
         {
-          class: PROPERTIES.Css.TextField,
+          css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextArea",
           key: "description",
           // autoResizeEnabled: true,
@@ -185,7 +185,7 @@ export const Comp: IFormMetaData = {
           key: "label",
         },
         {
-          class: PROPERTIES.Css.TextField,
+          css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextArea",
           key: "description",
 

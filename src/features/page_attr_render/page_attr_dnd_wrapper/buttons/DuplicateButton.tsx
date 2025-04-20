@@ -6,8 +6,11 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layout/cloneLayoutAndChildren";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
-
+import { css } from "~/lib/styles";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { CssType } from "~/components/form/type/FieldSchemaType";
 interface DuplicateButtonProps {
+  css?: CssType;
   item: Vertex;
   size: number;
 }
@@ -20,7 +23,10 @@ export function DuplicateButton(props: Readonly<DuplicateButtonProps>) {
 
   return (
     <IconButton
-      class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
+      css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ...ensureArray(props.css), css`
+        background-color: transparent;
+        border: none;
+      `]}
       icon="ph:copy"
       onClick={(e) => {
         e.stopPropagation();

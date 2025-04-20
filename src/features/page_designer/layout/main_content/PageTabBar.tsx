@@ -4,8 +4,8 @@ import type { Id } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import {
-  headerIconButtonClass,
-  toolBarClass,
+  headerIconButtonCss,
+  toolBarCss,
 } from "~/pages/settings/constants";
 
 import { DebugInfo } from "../page_tabbar/DebugInfo";
@@ -14,6 +14,8 @@ import { ResizeViewButtons } from "../page_tabbar/ResizeViewButtons";
 import { SaveIconButton } from "../page_tabbar/SaveIconButton";
 import { ShareButton } from "../page_tabbar/ShareButton";
 import { UndoRedoIcons } from "../page_tabbar/UndoRedoIcons";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function PageTabBar(props: {
   formStoreId: Id;
@@ -23,36 +25,47 @@ export function PageTabBar(props: {
   previewsLength?: number;
 }) {
   return (
-    <header class={toolBarClass}>
-      <div class="flex ai:center gap:2">
+    <As as="header" css={toolBarCss}>
+      <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`}>
         <UndoRedoIcons formStoreId={props.formStoreId} />
         <ResizeViewButtons
           formStoreId={props.formStoreId}
           openIndex={props.openIndex}
         />
         {/* <SettingPageIcon /> */}
-      </div>
+      </As>
 
       <DebugInfo formStoreId={props.formStoreId} />
       {/* <Show when={layoutStore().selectedSection === "setting"}>
-              <div class="flex ai:center">
+              <div css={css`
+  display: flex;
+  align-items: center;
+`}>
                 <MiddleSectionButtons />
-              </div>
+              </As>
             </Show> */}
-      <div class="flex ai:center gap:2">
+        <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`}>
         <RefreshButton handleRefresh={props.handleRefresh} />
         <SaveIconButton formStoreId={props.formStoreId} />
         <ShareButton formStoreId={props.formStoreId} />
         <Show when={props.previewsLength && props.previewsLength > 1}>
           <IconButton
-            class={headerIconButtonClass}
+            css={headerIconButtonCss}
             icon="ph:x-circle"
             onClick={props.onClose}
             title="Close Tab"
             tooltipGroup="page-buttons"
           />
         </Show>
-      </div>
-    </header>
+      </As>
+    </As>
   );
 }

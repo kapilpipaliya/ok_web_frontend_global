@@ -11,6 +11,8 @@ import { Dynamic } from "solid-js/web";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { useGraph } from "~/lib/graph/GraphContext";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 import {
   type FormStoreObject,
@@ -72,24 +74,23 @@ export function Label(
       : props.position,
   );
 
-  const generateLabelClass = () => {
-    const styles: { [key: string]: string } = {};
+  const generateLabelCss = () => {
+    const styles = [];
     if (position() === "top") {
-      styles.mb = "5px";
+      styles.push("margin-bottom: 5px;");
     }
     if (position() === "right") {
-      styles.ml = "5px";
+      styles.push("margin-left: 5px;");
     }
     if (position() === "left") {
-      styles.mr = "5px";
+      styles.push("margin-right: 5px;");
     }
     if (position() === "bottom") {
-      styles.mt = "5px";
+      styles.push("margin-top: 5px;");
     }
-    return Object.entries(styles)
-      .map(([key, value]) => `${key}:${value}`)
-      .join(" ");
+    return styles.join(" ");
   };
+
   const [local, restProps] = splitProps(props, [
     "label",
     "position",
@@ -107,18 +108,27 @@ export function Label(
   );
 
   return (
-    <Dynamic
-      class={`${props.inline ? "inline-flex" : "flex"}  ${local.layoutClass ?? ""} align-items:${position() === "left" || position() === "right" ? "center" : "flex-start"} flex-direction:${position() === "top" || position() === "bottom" ? "column" : "row"}`}
-      component={component()}
+    <As
+      as={component()}
+      css={css`
+        ${props.inline ? "display: inline-flex;" : "display: flex;"}
+        ${local.layoutClass ?? ""}
+        align-items: ${position() === "left" || position() === "right" ? "center" : "flex-start"};
+        flex-direction: ${position() === "top" || position() === "bottom" ? "column" : "row"};
+      `}
     >
       <Switch fallback={resolvedChildren()}>
         <Match
           when={local.label && (position() === "top" || position() === "left")}
         >
-          <span class={generateLabelClass()} {...restProps}>
+          <As
+            as="span"
+            css={css`${generateLabelCss()}`}
+            {...restProps}
+          >
             {local.label}
-            {local.required && <span class="color:error"> *</span>}
-          </span>
+            {local.required && <As as="span" css={css`color: \${args.theme.var.color.error};`}> *</As>}
+          </As> 
           {resolvedChildren()}
         </Match>
         <Match
@@ -127,12 +137,16 @@ export function Label(
           }
         >
           {resolvedChildren()}
-          <span class={generateLabelClass()} {...restProps}>
+          <As
+            as="span"
+            css={css`${generateLabelCss()}`}
+            {...restProps}
+          >
             {local.label}
-            {local.required && <span class="color:error"> *</span>}
-          </span>
+            {local.required && <As as="span" css={args => css`color: ${args.theme.var.color.error};`}> *</As>}
+          </As>
         </Match>
       </Switch>
-    </Dynamic>
+    </As>
   );
 }

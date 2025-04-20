@@ -2,6 +2,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
+import { css } from "~/lib/styles";
 
 export function addEditButtonSchema(label: string) {
   return {
@@ -11,7 +12,7 @@ export function addEditButtonSchema(label: string) {
         attributes: [
           {
             as: "button",
-            class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+            css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {
@@ -39,7 +40,16 @@ export function addEditButtonSchema(label: string) {
                 width: 20,
               },
             ],
-            class: "flex ai:center",
+            css: css`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  &:hover {
+    background-color: \${args.theme.var.color.base_20};
+  }
+`,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {

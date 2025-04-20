@@ -1,45 +1,68 @@
 import type { JSX } from "solid-js";
 
 import { STYLES } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "../As";
+import { CssType } from "../form/type/FieldSchemaType";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 export function Table(
-  props: Readonly<{ children: JSX.Element; class?: string; headers: number }>,
+  props: Readonly<{ children: JSX.Element; css?: string; headers: number }>,
 ) {
   return (
-    <div class={`${STYLES.overflow} position:relative r:10`}>
-      <div
-        class={`${props.class || ""} grid bb:2px|solid|#37c font-size:0.9em grid-template-columns:repeat(${props.headers},1fr) ${STYLES.overflow} r:10 width:100%`}
+    <As as="div" css={[css`
+      position: relative;
+      border-radius: 10px;
+    `, STYLES.overflowCss]}>
+      <As as="div"
+        css={[...ensureArray(props.css), css`
+          display: grid;
+          border-bottom: 2px solid #37c;
+          font-size: 0.9em;
+          grid-template-columns: repeat(${props.headers}, 1fr);
+          border-radius: 10px;
+          width: 100%;
+        `, STYLES.overflowCss]}
       >
         {props.children}
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }
 
 export function TableBodyCell(
   props: Readonly<{
     children: JSX.Element;
-    class?: string;
+    css?: CssType;
     index?: number;
   }>,
 ) {
   return (
-    <div
-      class={`${props.class ?? ""} @fade|.4s align-content:center p:2 text:center`}
-      classList={{
-        "bg:primary-5": props.index ? props.index % 2 !== 0 : false,
-        // "": props.index ? props.index % 2 === 0 : false,
-      }}
+    <As as="div"
+      css={[css`
+        animation: fade 0.4s;
+        align-content: center;
+        padding: 2px;
+        text-align: center;
+        ${props.index && props.index % 2 !== 0 ? `background-color: \${args.theme.var.color.primary_10};` : ""}
+      `, ...ensureArray(props.css)]}
     >
       {props.children}
-    </div>
+    </As>
   );
 }
 
 export function TableHeadCell(props: Readonly<{ children: JSX.Element }>) {
   return (
-    <div class="bg:primary-50 b:1px|solid|primary-60 color:base-5 font-weight:600 p:10px text-align:center">
+    <As as="div" css={css`
+      background-color: \${args.theme.var.color.primary_90};
+      border: 1px solid \${args.theme.var.color.primary_200};
+      color: \${args.theme.var.color.base_10};
+      font-weight: 600;
+      padding: 10px;
+      text-align: center;
+    `}>
       {props.children}
-    </div>
+    </As>
   );
 }

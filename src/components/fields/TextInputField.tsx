@@ -15,6 +15,8 @@ import { usePageRenderContext } from "~/features/page_attr_render/context/PageRe
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type { FunctionArgumentType } from "../form/type/FieldSchemaType";
+import { css } from "~/lib/styles";
+import { As } from "../As";
 
 export interface FormInputField extends Field {
   description?: GenericField | string;
@@ -137,15 +139,20 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
         </div>
       </Match>
       <Match when={local.showValue}>
-        <div class="w-full">
+        <As as="div" css={css`
+  width: 100%;
+`}>
           <Content />
           <Show when={local.showValue && local.value}>
-            <div class="text-sm text-gray-600">
+            <As as="div" css={args => css`
+  font-size: 12px;
+  color: ${args.theme.var.color.base_280};
+`}>
               {local.value}
               {local.suffixToValue ? ` ${local.suffixToValue}` : ""}
-            </div>
+            </As>
           </Show>
-        </div>
+        </As>
       </Match>
       <Match when={!local.isViewMode}>
         <Content />

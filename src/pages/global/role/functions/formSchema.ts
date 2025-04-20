@@ -19,6 +19,7 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { loadingIconSchema } from "../../../../lib/schema/loadingIconSchema";
+import { css } from "~/lib/styles";
 
 export const permissionsTableSchema = (label: string) =>
   ({
@@ -59,13 +60,13 @@ export const roleFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Name",
               validation: { required: true },
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextInput",
               key: "key",
               placeholder: "Enter role name",
@@ -78,7 +79,7 @@ export const roleFormSchema = {
               validation: { required: true },
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
         {
@@ -86,22 +87,22 @@ export const roleFormSchema = {
           attributes: [
             {
               as: "span",
-              class: SETTINGS_CONSTANTS.LABEL_CLASS,
+              css: SETTINGS_CONSTANTS.LABEL_CSS,
               componentName: "Html",
               text: "Description",
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextInput",
               key: "description",
               placeholder: "Enter role description",
             },
           ],
-          class: SETTINGS_CONSTANTS.GRID_ITEM_CLASS,
+          css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
           componentName: "Html",
         },
       ],
-      class: SETTINGS_CONSTANTS.FORM_CLASS,
+      css: SETTINGS_CONSTANTS.FORM_CSS,
       componentName: "Html",
     },
     {
@@ -111,8 +112,19 @@ export const roleFormSchema = {
           attributes: [
             {
               as: "button",
-              class: "cursor:pointer p:8|16 ",
               componentName: "Html",
+              css: (args: FunctionArgumentType) => {
+                return [css`
+                cursor: pointer;
+                padding: 8px 16px;
+                background-color: transparent;
+                border-left: none;
+                border-right: none;
+                border-top: none;
+                `, args.dataContext.tabState[0]?.activeTab === "Perm"
+                      ? css`border-bottom: 2px solid ${args.theme.var.color.primary};`
+                      : css`border-bottom: 2px solid transparent;`];
+              },
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RolePerm", {
                   graph: options.graph,
@@ -120,10 +132,6 @@ export const roleFormSchema = {
                   vertexes: [options.data],
                 });
                 return {
-                  class:
-                    options.dataContext.tabState[0]?.activeTab === "Perm"
-                      ? "bb:2px|solid|primary"
-                      : "bb:2px|solid|transparent",
                   onClick: () =>
                     options.dataContext.tabState[1]("activeTab", "Perm"),
                   text: `Permissions ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
@@ -133,8 +141,17 @@ export const roleFormSchema = {
             },
             {
               as: "button",
-              class: "cursor:pointer p:8|16 ",
               componentName: "Html",
+              css: (options: FunctionArgumentType) => [css`
+                cursor: pointer;
+                padding: 8px 16px;
+                background-color: transparent;
+                border-left: none;
+                border-right: none;
+                border-top: none;
+              `, options.dataContext.tabState[0]?.activeTab === "Page"
+              ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
+              : css`border-bottom: 2px solid transparent;`],
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RolePage", {
                   graph: options.graph,
@@ -142,10 +159,6 @@ export const roleFormSchema = {
                   vertexes: [options.data],
                 });
                 return {
-                  class:
-                    options.dataContext.tabState[0]?.activeTab === "Page"
-                      ? "bb:2px|solid|primary"
-                      : "bb:2px|solid|transparent",
                   onClick: () =>
                     options.dataContext.tabState[1]("activeTab", "Page"),
                   text: `Pages ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
@@ -155,8 +168,17 @@ export const roleFormSchema = {
             },
             {
               as: "button",
-              class: "cursor:pointer p:8|16 ",
               componentName: "Html",
+              css: (options: FunctionArgumentType) => [css`
+                cursor: pointer;
+                padding: 8px 16px;
+                background-color: transparent;
+                border-left: none;
+                border-right: none;
+                border-top: none;
+              `, options.dataContext.tabState[0]?.activeTab === "Form"
+              ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
+              : css`border-bottom: 2px solid transparent;`],
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RoleForm", {
                   graph: options.graph,
@@ -164,10 +186,6 @@ export const roleFormSchema = {
                   vertexes: [options.data],
                 });
                 return {
-                  class:
-                    options.dataContext.tabState[0]?.activeTab === "Form"
-                      ? "bb:2px|solid|primary"
-                      : "bb:2px|solid|transparent",
                   onClick: () =>
                     options.dataContext.tabState[1]("activeTab", "Form"),
                   text: `Forms ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
@@ -176,7 +194,10 @@ export const roleFormSchema = {
               type: "button",
             },
           ],
-          class: "display:flex bb:1px|solid|base-20",
+          css: css`
+  display: flex;
+  border-bottom: 1px solid \${args.theme.var.color.base_40};
+`,
           componentName: "Html",
         },
         {
@@ -186,38 +207,32 @@ export const roleFormSchema = {
               as: "div",
               attributes: [permissionsTableSchema("Perm")],
               componentName: "Html",
-              props: (options: FunctionArgumentType) => ({
-                class:
-                  options.dataContext.tabState[0]?.activeTab === "Perm"
+              css: (options: FunctionArgumentType) => options.dataContext.tabState[0]?.activeTab === "Perm"
                     ? ""
-                    : "d:none",
-              }),
+                    : css`display:none`,
             },
             {
               as: "div",
               attributes: [permissionsTableSchema("Page")],
               componentName: "Html",
-              props: (options: FunctionArgumentType) => ({
-                class:
-                  options.dataContext.tabState[0]?.activeTab === "Page"
-                    ? ""
-                    : "d:none",
-              }),
+              css: (options: FunctionArgumentType) => options.dataContext.tabState[0]?.activeTab === "Page"
+              ? ""
+              : css`display:none`,
             },
 
             {
               as: "div",
               attributes: [permissionsTableSchema("Form")],
               componentName: "Html",
-              props: (options: FunctionArgumentType) => ({
-                class:
-                  options.dataContext.tabState[0]?.activeTab === "Form"
-                    ? ""
-                    : "d:none",
-              }),
+              css: (options: FunctionArgumentType) => options.dataContext.tabState[0]?.activeTab === "Form"
+              ? ""
+              : css`display:none`,
             },
           ],
-          class: "mt:16 p:8",
+          css: css`
+  margin-top: 16px;
+  padding: 8px;
+`,
           componentName: "Html",
         },
       ],
@@ -311,12 +326,12 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "span",
-        class: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         componentName: "Html",
         text: "Add New Role",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.HEADER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
     componentName: "Html",
   };
 
@@ -325,7 +340,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
     attributes: [
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           disabled: options.dataContext.modalState[0]?.isLoading,
@@ -338,7 +353,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
       },
       {
         as: "button",
-        class: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS,
+        css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
@@ -351,7 +366,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
         type: "button",
       },
     ],
-    class: SETTINGS_CONSTANTS.MODAL.FOOTER.CLASS,
+    css: SETTINGS_CONSTANTS.MODAL.FOOTER.CSS,
     componentName: "Html",
   };
 
@@ -364,7 +379,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
           {
             as: "div",
             attributes: [],
-            class: SETTINGS_CONSTANTS.MODAL.OVERLAY_CLASS,
+            css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               hide: !options.dataContext.modalState[0]?.showModal,
@@ -389,7 +404,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                         }),
                       },
                     ],
-                    class: SETTINGS_CONSTANTS.MODAL.CONTAINER_CLASS,
+                    css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
                     props: (options: FunctionArgumentType) => ({

@@ -9,6 +9,7 @@ import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { STYLES } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
 
 export interface MenuItem {
   adminOnly?: boolean;
@@ -71,7 +72,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
             }),
           },
           {
-            class: "flex:1",
+            css: css`
+  flex: 1;
+`,
             // @ts-expect-error - HeaderWithDescription is a function component
             componentName: HeaderWithDescription,
             props: () => ({
@@ -95,8 +98,12 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             attributes: [
                               {
                                 as: "div",
-                                class:
-                                  "text:14px fg:#6B7280 font-weight:500 mb:8px",
+                                css: css`
+  font-size: 14px;
+  color: #6B7280;
+  font-weight: 500;
+  margin-bottom: 8px;
+`,
                                 componentName: "Html",
                                 props: (args: FunctionArgumentType) => ({
                                   text: (
@@ -117,13 +124,27 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                               {
                                 as: "div",
                                 componentName: "Html",
+                                css: args => css`
+                                padding: 12px;
+                                cursor: pointer;
+                                border-radius: 4px;
+                                margin-bottom: 8px;
+                                ${
+                                  selectedMenu() ===
+                                  (args.dataContext.menuItems as MenuItem).id
+                                    ? `
+                                      background-color: ${args.theme.var.color.primary};
+                                      color: ${args.theme.var.color.base_10};
+                                    `
+                                    : `
+                                      color: ${args.theme.var.color.base_820};
+                                      &:hover {
+                                        background-color: ${args.theme.var.color.primary_20};
+                                      }
+                                    `
+                                }
+                              `,
                                 props: (args: FunctionArgumentType) => ({
-                                  class: `p:12px cursor:pointer r:4px mb:8px ${
-                                    selectedMenu() ===
-                                    (args.dataContext.menuItems as MenuItem).id
-                                      ? "bg:primary fg:base-5"
-                                      : "bg:primary-10:hover fg:base-90"
-                                  }`,
                                   hide:
                                     (args.dataContext.menuItems as MenuItem)
                                       .adminOnly && !isAdminRole(graph),
@@ -147,7 +168,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             }),
                           },
                         ],
-                        class: "mb:16px",
+                        css: css`
+  margin-bottom: 16px;
+`,
                         componentName: "Html",
                         props: (args: FunctionArgumentType) => ({
                           show: (
@@ -167,7 +190,10 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                     }),
                   },
                 ],
-                class: `${STYLES.overflow} h:calc(100vh-140px) border-right:1px|solid|#eee`,
+                css: [STYLES.overflowCss, css`
+  height:calc(100vh - 140px);
+  border-right:1px solid #eee;
+`],
                 componentName: "Html",
               },
               {
@@ -182,11 +208,18 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                     }),
                   },
                 ],
-                class: "flex:1 p:6",
+                css: css`
+  flex: 1;
+  padding: 6px;
+`,
                 componentName: "Html",
               },
             ],
-            class: "display:grid grid-template-columns:250px|1fr p:6",
+            css: css`
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  padding: 6px;
+`,
             componentName: "Html",
           },
         ],

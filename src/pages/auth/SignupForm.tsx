@@ -19,6 +19,7 @@ import { useFormRefs } from "./functions/useFormRefs";
 import { useFormSubmit } from "./functions/useFormSubmit";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { validateFormData } from "./functions/validateFormData";
+import { css } from "~/lib/styles";
 
 export function SignupForm() {
   const navigate = useNavigate();
@@ -42,10 +43,10 @@ export function SignupForm() {
     await submitForm(formData, {
       apiCall: (data) =>
         postAPI(API.auth.signUpUrl, {
-          email: data.P.email.toLowerCase(),
+          email: data.P.email.toLowerCase,
           password: data.P.password,
           subDomain: data.P.subDomain,
-          username: data.P.username.toLowerCase(),
+          username: data.P.username.toLowerCase,
         }),
       loadMessage: "Registering User...",
       navigate,
@@ -118,7 +119,7 @@ export function SignupForm() {
                 as: "div",
                 attributes: [
                   {
-                    class: PROPERTIES.Css.TextField,
+                    css: PROPERTIES.Css.TextFieldCss,
                     componentName: "TextInput",
                     key: "password",
                     props: (options: FunctionArgumentType) => ({
@@ -171,18 +172,25 @@ export function SignupForm() {
                         }),
                       },
                     ],
-                    class:
-                      "position:abs right:10px top:50% transform:translateY(-50%) cursor:pointer",
+                    css: css`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+`,
                     componentName: "Html",
                   },
                 ],
-                class: "position:rel",
+                css: css`
+  position: relative;
+`,
                 componentName: "Html",
               },
               getErrorSchema("password"),
               {
                 as: "button",
-                class: `${STYLES.button2} w:100% mt:16`,
+                css: [STYLES.button2Css, css`width:100%; margin-top:16px;`],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.submitState[0]?.isLoading,
@@ -216,13 +224,18 @@ export function SignupForm() {
             attributes: [
               {
                 as: "span",
-                class: "fg:base",
+                css: css`
+  color: \${args.theme.var.color.base};
+`,
                 componentName: "Html",
                 text: "Already have an account? ",
               },
               {
                 as: "a",
-                class: "fg:primary-50 cursor:pointer",
+                css: css`
+  color: \${args.theme.var.color.primary};
+  cursor: pointer;
+`,
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
@@ -232,11 +245,14 @@ export function SignupForm() {
                 text: "Login",
               },
             ],
-            class: "text:center mt:16px",
+            css: css`
+  white-space: center;
+  margin-top: 16px;
+`,
             componentName: "Html",
           },
         ],
-        class: SETTINGS_CONSTANTS.FORM_GRID_CLASS,
+        css: SETTINGS_CONSTANTS.FORM_GRID_CSS,
         componentName: "Html",
       },
     ],

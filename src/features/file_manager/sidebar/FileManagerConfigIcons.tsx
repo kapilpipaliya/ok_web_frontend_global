@@ -18,6 +18,8 @@ import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { getDownloadLink, openInNewTab } from "./getDownloadLink";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function FileManagerConfigIcons(
   props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,
@@ -106,7 +108,10 @@ export function FileManagerConfigIcons(
   };
 
   return (
-    <div class="flex ai:center">
+    <As as="div" css={[css`
+  display: flex;
+  align-items: center;
+`]}>
       <Show
         when={
           state.showDialog ||
@@ -116,26 +121,41 @@ export function FileManagerConfigIcons(
       >
         <Show when={props.metaVertex.L[0] === "File"}>
           <IconButton
-            class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
+            css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+              css`
+                background-color: transparent;
+                border: none;
+              `,
+            ]}
             icon="ic:round-download"
-            iconClass="transition:transform|0.2s"
+            iconCss={css`transition: transform 0.2s`}
             onClick={() => openInNewTab(getDownloadLink(props.metaVertex))}
             size={18}
             title="Download"
           />
         </Show>
         <IconButton
-          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
+            css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+              css`
+                background-color: transparent;
+                border: none;
+              `,
+            ]}
           icon="ph:gear"
-          iconClass="transition:transform|0.2s"
+          iconCss={css`transition: transform 0.2s`}
           onClick={() => setIsEditModalOpen(true)}
           size={18}
           title="Settings"
         />
         <IconButton
-          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
+          css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+            css`
+              background-color: transparent;
+              border: none;
+            `,
+          ]}
           icon="ph:folder-plus"
-          iconClass="transition:transform|0.2s"
+          iconCss={css`transition: transform 0.2s`}
           onClick={(e) =>
             openDialog(
               "Add New Directory",
@@ -149,9 +169,14 @@ export function FileManagerConfigIcons(
           title="Create New Directory"
         />
         <IconButton
-          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
+          css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+            css`
+              background-color: transparent;
+              border: none;
+            `,
+          ]}
           icon="ph:file-plus"
-          iconClass="transition:transform|0.2s"
+          iconCss={css`transition: transform 0.2s`}
           onClick={(e) =>
             openDialog(
               "Add New File",
@@ -172,9 +197,14 @@ export function FileManagerConfigIcons(
           }
         >
           <IconButton
-            class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default} ${ICON_BUTTON_STYLES.spacing}`}
+            css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+              css`
+                background-color: transparent;
+                border: none;
+              `,
+            ]}
             icon="ph:textbox"
-            iconClass="transition:transform|0.2s"
+            iconCss={css`transition: transform 0.2s`}
             onClick={(e) =>
               openDialog(
                 `Rename ${props.metaVertex.L[0]}`,
@@ -188,9 +218,14 @@ export function FileManagerConfigIcons(
             title="Rename"
           />
           <IconButton
-            class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.delete} ${ICON_BUTTON_STYLES.spacing}`}
+            css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.deleteCss, ICON_BUTTON_STYLES.spacingCss, 
+              css`
+                background-color: transparent;
+                border: none;
+              `,
+            ]}
             icon="ph:trash"
-            iconClass="transition:transform|0.2s"
+            iconCss={css`transition: transform 0.2s`}
             onClick={() => {}}
             size={18}
             title="Delete"
@@ -200,7 +235,11 @@ export function FileManagerConfigIcons(
       <Show when={state.showDialog}>
         <ZIndex>
           <DropdownMenu
-            class="r:5"
+            css={css`
+  border-radius: 5px;
+  background-color: transparent;
+  border: none;
+`}
             onClickOutside={() => setState("showDialog", false)}
             parentRef={state.buttonRef!}
           >
@@ -225,6 +264,6 @@ export function FileManagerConfigIcons(
           tableId={props.metaVertex.L[0]}
         />
       </Show>
-    </div>
+    </As>
   );
 }

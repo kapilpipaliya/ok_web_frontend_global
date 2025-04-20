@@ -10,6 +10,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function UniqueConstrains() {
   const [graph, setGraph] = useGraph();
@@ -34,7 +36,9 @@ export function UniqueConstrains() {
   );
 
   return (
-    <div class="mt:6">
+    <As as="div" css={css`
+  margin-top: 6px;
+`}>
       <TableInputField
         data={formStoreVertex()}
         isNoPermissionCheck={true}
@@ -42,6 +46,6 @@ export function UniqueConstrains() {
         meta={graph.vertexes[metaVertexId]}
         txnId={formStoreVertex()?.P.txnId}
       />
-    </div>
+    </As>
   );
 }

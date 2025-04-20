@@ -9,6 +9,8 @@ import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export default function Admin() {
   return (
@@ -24,12 +26,18 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
     <PermissionGuard>
       <GetInitialData authenticate>
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
-        <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
-          <div class="flex:1" />
-          <div class="ml:auto flex gap:4">
+        <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
+          <As as="div" css={css`
+  flex: 1;
+`} />
+          <As as="div" css={css`
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+`}>
             <UserDropdownMenuDisplay />
-          </div>
-        </header>
+          </As>
+        </As>
         {props.children}
       </GetInitialData>
     </PermissionGuard>

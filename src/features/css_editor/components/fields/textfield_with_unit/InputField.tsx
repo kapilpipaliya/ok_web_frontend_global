@@ -1,34 +1,51 @@
 import { type JSX, splitProps } from "solid-js";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 import { getValueWithoutUnits } from "../../../../../lib/data_structure/number/getValueWithoutUnits";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
-interface InputFieldProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+export interface InputFieldProps {
   handleChange: (event: Event) => void;
-  inputProps?: JSX.InputHTMLAttributes<HTMLInputElement>;
+  inputProps?: {
+    min?: number;
+    max?: number;
+    step?: number;
+  };
   label?: string;
+  onFocus?: () => void;
   placeholder?: string;
   type?: string;
-  value: string;
+  value?: string;
+  css?: string | string[];
 }
 
-export function InputField(props: Readonly<InputFieldProps>) {
+export const InputField = (props: Readonly<InputFieldProps>) => {
   const [local, others] = splitProps(props, [
-    "class",
     "value",
     "handleChange",
     "label",
     "type",
     "placeholder",
     "inputProps",
+    "onFocus",
+    "css",
   ]);
 
   const InnerInput = () => (
-    <input
-      class={`${local.class ?? ""} f:14 outline:none p:5 w:100%`}
-      onInput={local.handleChange}
+    <As
+      as="input"
+      css={[...ensureArray(local.css), css`
+        width: 100%;
+        border: none;
+        outline: none;
+        padding: 5px;
+        background: transparent;
+      `]}
+      onChange={local.handleChange}
+      onFocus={local.onFocus}
       placeholder={local.type === "number" ? "0" : (local.placeholder ?? "")}
-      step="any"
-      type={local.type || "text"}
+      type={local.type ?? "text"}
       value={
         local.type === "number"
           ? getValueWithoutUnits(local.value)
@@ -40,4 +57,4 @@ export function InputField(props: Readonly<InputFieldProps>) {
   );
 
   return <InnerInput />;
-}
+};

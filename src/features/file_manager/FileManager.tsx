@@ -10,6 +10,8 @@ import {
 } from "./FileManagerContext";
 import { FileManagerMainContent } from "./main_content/FileManagerMainContent";
 import { Sidebar } from "./sidebar/FileManagerSideBar";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export default function FileManager(
   props: Readonly<{
@@ -32,10 +34,14 @@ export default function FileManager(
       setFileManagerStore={props.setFileManagerStore}
       toParentEdgeType={props.toParentEdgeType}
     >
-      <div class="grid gap:4px grid-template-columns:repeat(2,20%|calc(80%-4px))">
+      <As as="div" css={[css`
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(2, 20% calc(80% - 4px));
+`]}>
         <Sidebar />
         <FileManagerMainContent />
-      </div>
+      </As>
     </FileManagerStoreProvider>
   );
 }

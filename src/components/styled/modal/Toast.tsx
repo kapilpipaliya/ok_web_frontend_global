@@ -10,6 +10,9 @@ import {
 
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { toastValue } from "~/toastValue";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 type Renderable = JSX.Element;
 
@@ -17,12 +20,24 @@ const DismissButton: Component<{
   onDismiss: () => void;
 }> = (props) => {
   return (
-    <button
-      class="align-items:center background-color:rgba(229,|231,|235,|0.8) border-radius:9999px display:flex height:1.5rem justify-content:center position:absolute right:0.625rem top:50% transform:translateY(-50%) width:1.5rem"
+    <As as="button"
+      css={css`
+  align-items: center;
+  background-color: rgba(229, 231, 235, 0.8);
+  border-radius: 9999px;
+  display: flex;
+  height: 1.5rem;
+  justify-content: center;
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.5rem;
+`}
       onClick={props.onDismiss}
     >
       &times;
-    </button>
+    </As>
   );
 };
 
@@ -43,9 +58,20 @@ export function useToast() {
   function showCustomToast(message: string, showDismiss: boolean) {
     toastValue.toast.custom(
       (t) => (
-        <div class="background-color:base-5 border-radius:10px box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-1px|rgba(0,0,0,0.06) font-weight:500 padding:0.75rem|3rem|0.75rem|1.5rem position:relative">
-          <div class="flex ai:center jc:center">
-            <div>{message}</div>
+        <As as="div" css={(args: FunctionArgumentType) => css`
+  background-color: ${args.theme.var.color.base_10};
+  border-radius: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
+  font-weight: 500;
+  padding: 0.75rem 3rem 0.75rem 1.5rem;
+  position: relative;
+`}>
+          <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`}>
+            <As as="div">{message}</As>
             <Show when={showDismiss}>
               <DismissButton
                 onDismiss={() => {
@@ -53,8 +79,8 @@ export function useToast() {
                 }}
               />
             </Show>
-          </div>
-        </div>
+          </As>
+        </As>
       ),
       {
         duration: 5000000,
@@ -149,17 +175,50 @@ export function useToast() {
         });
 
         return (
-          <div
-            class={`animation:${t.visible ? "enterAnimation|1s|forwards" : "leaveAnimation|1s|forwards"} background-color:#0891b2 border-radius:6px box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-2px|rgba(0,0,0,0.1) min-width:350px padding:12px`}
+          <As as="div"
+            css={[css`
+  animation: ${t.visible ? "enterAnimation 1s forwards" : "leaveAnimation 1s forwards"};
+`, css`
+  background-color: #0891b2;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  min-width: 350px;
+  padding: 12px;
+`]}
           >
-            <div class="display:flex gap:8px">
-              <div class="display:flex flex-direction:column flex:1">
-                <div class="color:base-5 font-weight:medium">{title}</div>
-                <div class="color:#ecfeff font-size:13px">{subtitle}</div>
-              </div>
-              <div class="items-center flex">
-                <button
-                  class="background-color:#0e7490 border-radius:6px color:base-5 font-size:13px font-weight:500 height:80% letter-spacing:0.025em padding:14px"
+            <As as="div" css={css`
+  display: flex;
+  gap: 8px;
+`}>
+              <As as="div" css={css`
+  display: flex;
+  flex-direction: column;
+  display: flex;
+`}>
+                <As as="div" css={(args: FunctionArgumentType) => css`
+  color: ${args.theme.var.color.base_10};
+  font-weight: medium;
+`}>{title}</As>
+                <As as="div" css={css`
+  color: #ecfeff;
+  font-size: 13px;
+`}>{subtitle}</As>
+              </As>
+              <As as="div" css={css`
+  align-items: center;
+  display: flex;
+`}>
+                <As as="button"
+                  css={(args: FunctionArgumentType) => css`
+  background-color: ${args.theme.var.color.primary};
+  border-radius: 6px;
+  color: ${args.theme.var.color.base_10};
+  font-size: 13px;
+  font-weight: 500;
+  height: 80%;
+  letter-spacing: 0.025em;
+  padding: 14px;
+`}
                   onClick={() => toastValue.toast.dismiss(t.id)}
                   onMouseOut={(e) =>
                     (e.currentTarget.style.backgroundColor = "#0e7490")
@@ -170,11 +229,25 @@ export function useToast() {
                   }
                 >
                   CANCEL
-                </button>
-              </div>
-              <div class="items-center flex">
-                <button
-                  class="align-items:center background-color:rgba(14,116,144,0.4) border-radius:6px color:base-5 display:flex font-size:24px height:80% letter-spacing:0.025em padding:10px position:relative"
+                </As>
+              </As>
+              <As as="div" css={css`
+  align-items: center;
+  display: flex;
+`}>
+                <As as="button"
+                  css={css`
+  align-items: center;
+  background-color: rgba(14,116,144,0.4);
+  border-radius: 6px;
+  color: #1e293b;
+  display: flex;
+  font-size: 24px;
+  height: 80%;
+  letter-spacing: 0.025em;
+  padding: 10px;
+  position: relative;
+`}
                   onClick={() => toastValue.toast.dismiss(t.id)}
                   onMouseOut={(e) =>
                     (e.currentTarget.style.backgroundColor =
@@ -186,16 +259,30 @@ export function useToast() {
                   }
                 >
                   x
-                </button>
-              </div>
-            </div>
-            <div class="padding-top:16px position:relative">
-              <div class="background-color:#164e63 border-radius:9999px height:4px width:100%" />
-              <div
-                class={`background-color:#ecfeff border-radius:9999px height:4px position:absolute top:16px width:${life()}%`}
+                </As>
+              </As>
+            </As>
+            <As as="div" css={css`
+  padding-top: 16px;
+  position: relative;
+`}>
+              <As as="div" css={css`
+  background-color: #164e63;
+  border-radius: 9999px;
+  height: 4px;
+  width: 100%;
+`} />
+              <As as="div" css={css`
+  background-color: #ecfeff;
+  border-radius: 9999px;
+  height: 4px;
+  position: absolute;
+  top: 16px;
+  width: ${life()}%;
+`}
               />
-            </div>
-          </div>
+            </As>
+          </As>
         );
       },
       {

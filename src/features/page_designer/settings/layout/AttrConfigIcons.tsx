@@ -15,7 +15,9 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentLabel } from "../../functions/component/getComponentLabel";
 import { HideShowIcon } from "./HideShowIcon";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 export function AttrConfigIcons(
   props: Readonly<{ metaVertex: Vertex; parentRef: HTMLElement }>,
 ) {
@@ -41,7 +43,12 @@ export function AttrConfigIcons(
       placement="right"
       useFlip={false}
     >
-      <div class="flex flex:col ai:center bg:base-5">
+      <As as="div" css={(args: FunctionArgumentType) => css`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: ${args.theme.var.color.base_10};
+`}>
         <Show when={isSelectedLayoutId(props.metaVertex.id)}>
           <InsertButtons item={props.metaVertex} size={iconSize} />
         </Show>
@@ -53,14 +60,13 @@ export function AttrConfigIcons(
           <ImportHtmlButton item={props.metaVertex} size={iconSize} />
           <HideShowIcon iconSize={iconSize} metaVertex={props.metaVertex} />
           <DeleteButton
-            class="color:error"
             componentName={getComponent()!}
             item={props.metaVertex}
             size={iconSize}
           />
           &nbsp;
         </Show>
-      </div>
+      </As>
     </DropdownMenu>
   );
 }

@@ -14,6 +14,8 @@ import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { VariantsModal } from "../../../variants/VariantsModal";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function VariantsList() {
   const [graph, setGraph] = useGraph();
@@ -110,7 +112,9 @@ export function VariantsList() {
           onConfirm={() => deleteVariant(selectedVariantToDelete()!)}
           title="Delete Variant"
         >
-          <div class="mt:1rem">
+          <As as="div" css={css`
+  margin-top: 1rem;
+`}>
             <p>
               The variant is used at {variantUsage().length} attributes. It will
               be removed from all places where it is used.
@@ -118,7 +122,7 @@ export function VariantsList() {
             <For each={variantUsage()}>
               {(id) => <div>{graph.vertexes[id].P.key}</div>}
             </For>
-          </div>
+          </As>
         </SimpleWithDismissButton>
       </ZIndex>
     );
@@ -128,21 +132,39 @@ export function VariantsList() {
     <>
       <For each={variants()}>
         {(variant, index) => (
-          <div
-            class="lh:1.25rem flex align-items:center b:1px|solid|lightgrey bg:gray-10:hover color:rgb(55,65,81) f:0.875rem jc:space-between px:1rem py:0.5rem"
-            classList={{
-              "bt:none": index() !== 0,
-            }}
+          <As as="div"
+            css={css`
+  line-height: 1.25rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid lightgray;
+  color: rgb(55,65,81);
+  font-size: 0.875rem;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  ${index() !== 0 ? "border-top: none;" : ""}
+  &:hover {
+    background-color: gray_20;
+  }
+`}
             onMouseEnter={() => highlightVariant(variant)}
             onMouseLeave={() => unhighlightVariant()}
           >
-            <span class="flex:1">
+            <As as="span" css={css`
+  display: flex;
+`}>
               {variant.P.key} ({variantUsageCount(variant).length} usage
               {variantUsageCount(variant).length > 1 ? "s" : ""})
-            </span>
-            <div class="flex gap:2">
+            </As>
+            <As as="div" css={css`
+  display: flex;
+  gap: 2px;
+`}>
               <IconButton
-                class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
+                css={[
+  ICON_BUTTON_STYLES.baseCss,
+  ICON_BUTTON_STYLES.defaultCss,
+]}
                 icon="ph:gear"
                 onClick={() => openVariantSettings(variant)}
                 size={22}
@@ -150,15 +172,18 @@ export function VariantsList() {
                 type="button"
               />
               <IconButton
-                class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.delete}`}
+                css={[
+  ICON_BUTTON_STYLES.baseCss,
+  ICON_BUTTON_STYLES.deleteCss,
+]}
                 icon="mage:trash"
                 onClick={() => setSelectedVariantToDelete(variant)}
                 size={22}
                 title="Delete Variant"
                 type="button"
               />
-            </div>
-          </div>
+            </As>
+          </As>
         )}
       </For>
       <Show when={selectedVariant()}>

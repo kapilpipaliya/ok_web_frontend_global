@@ -1,5 +1,3 @@
-import { variables } from "@master/css";
-
 import type { Vertex } from "../../../graph";
 
 export function themeConfig(themeVertex?: Vertex) {
@@ -19,7 +17,7 @@ export function themeConfig(themeVertex?: Vertex) {
   if (themeConfig.trim()) {
     try {
       const configFunction = new Function("variables", themeConfig);
-      return configFunction(variables) || {};
+      return configFunction({}) || {};
     } catch (error) {
       console.error("Error evaluating theme config function:", error);
       return {};

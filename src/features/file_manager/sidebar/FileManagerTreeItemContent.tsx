@@ -4,6 +4,8 @@ import { IconButton } from "~/components/styled/IconButton";
 import { TreeItemExpandButton } from "~/features/page_designer/settings/layout/TreeItemExpandButton";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function FileManagerTreeItemContent(
   props: Readonly<{
@@ -17,11 +19,16 @@ export function FileManagerTreeItemContent(
     setFileManagerStore("selectedItem", props.item);
   };
   return (
-    <div // NOSONAR
-      class="ai:center cursor:pointer d:flex flex:1"
-      classList={{
-        "bl:1px|dashed|black pl:10": !props.hasChildren,
-      }}
+    <As as="div" css={css`
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  ${!props.hasChildren ? `
+    border-left: 1px dashed black;
+    padding-left: 10px;
+  ` : ''}
+`}
       onClick={handleDoubleClick}
     >
       <TreeItemExpandButton
@@ -31,7 +38,17 @@ export function FileManagerTreeItemContent(
         toggleExpand={props.toggleExpand}
       />
       <IconButton
-        class="cursor:pointer mr:5px color:gray-50 color:gray-90:hover"
+        css={css`
+  cursor: pointer;
+  margin-right: 5px;
+  color: gray;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  &:hover {
+    color: gray_890;
+  }
+`}
         icon={
           props.item.L[0] === "Folder"
             ? "ic:round-folder"
@@ -41,6 +58,6 @@ export function FileManagerTreeItemContent(
       />
       &nbsp;&nbsp;
       <span>{props.item.P.key || "no key"}</span>
-    </div>
+    </As>
   );
 }

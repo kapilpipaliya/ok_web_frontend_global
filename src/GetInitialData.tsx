@@ -13,6 +13,8 @@ import { getGlobalStore } from "./lib/graph/get/sync/store/getGlobalStore";
 import { setGraphData } from "./lib/graph/mutate/core/setGraphData";
 import { mergeVertexProperties } from "./lib/graph/mutate/core/vertex";
 import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
+import { css } from "~/lib/styles";
+import {As} from "~/components/As";
 
 interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;
@@ -83,12 +85,18 @@ export function GetInitialData(props: GetInitialDataProps) {
         <Match
           when={props.authenticate && !(data()?.userData as UserData)?.user}
         >
-          <div class="bg:error-20 p:1rem">Not Authorized</div>
+          <As as={"div"} css={css`
+  background-color: red;
+  padding: 1px;
+`}>Not Authorized</As>
         </Match>
         <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-          <div class="bg:error p:1">
+          <As as="div" css={css`
+  background-color: red;
+  padding: 1px;
+`}>
             {getGlobalStore(graph[0]).P.initialDataFetchError}
-          </div>
+          </As>
         </Match>
         <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
           {props.children}

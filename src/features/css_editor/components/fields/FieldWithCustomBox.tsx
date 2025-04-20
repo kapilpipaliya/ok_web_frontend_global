@@ -13,6 +13,8 @@ import { useCssState } from "../../context/CssStateContext";
 import { useRenderContext } from "../../context/RenderContext";
 import { useSearchContext } from "../../context/SearchContext";
 import { ButtonGroups } from "./ButtonGroups";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export const FieldWithCustomBox = (
   props: Readonly<FieldWithCustomProperty>,
@@ -56,7 +58,11 @@ export const FieldWithCustomBox = (
 
   return (
     <div>
-      <div class="grid gap:5px grid-template-columns:1fr|63px">
+      <As as="div" css={css`
+  display: grid;
+  gap: 5px;
+  grid-template-columns: 1fr 63px;
+`}>
         <DynamicCSSComponent
           meta={
             {
@@ -89,10 +95,18 @@ export const FieldWithCustomBox = (
           ]}
           value={optionType()}
         />
-      </div>
+      </As>
       <Show when={optionType() === "custom"}>
-        <div
-          class={`grid b:1px|solid|lightgray gap:10px grid-template-columns:${props.gridType ?? "repeat(2,auto)"} m:5|10 p:0|10 pb:7 r:5`}
+        <As as="div" css={css`
+  display: grid;
+  border: 1px solid #3b82f6;
+  gap: 10px;
+  grid-template-columns: ${props.gridType ?? "repeat(2,auto)"};
+  margin: 5px 10px;
+  padding: 0 10px;
+  padding-bottom: 7px;
+  border-radius: 5px;
+`}
         >
           <For each={props.customProperty}>
             {(item) => {
@@ -110,7 +124,7 @@ export const FieldWithCustomBox = (
               );
             }}
           </For>
-        </div>
+        </As>
       </Show>
     </div>
   );

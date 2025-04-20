@@ -1,19 +1,32 @@
 import { Icon } from "@iconify-icon/solid";
 
 import { IconButton } from "~/components/styled/IconButton";
+import { css } from "~/lib/styles";
+import { As } from "../As";
 
 // deprecated, not used function
 export function ImportExportButtons(
   props: Readonly<{ setPopup: (value: boolean) => void }>,
 ) {
   return (
-    <div class="flex justify-content:end mb:10px">
-      <button class="flex" onClick={() => props.setPopup(true)} type="button">
+    <As as="div" css={css`
+  display: flex;
+  justify-content: end;
+  margin-bottom: 10px;
+`}>
+      <As as="button" css={css`
+  display: flex;
+`} onClick={() => props.setPopup(true)} type="button">
         <Icon height={22} icon={"ph:arrow-square-in"} noobserver width={22} />
         Import
-      </button>
+      </As>
       <IconButton
-        class="flex b:primary"
+        css={css`
+  display: flex;
+  border: 1px solid \${args.theme.var.color.primary};
+  background-color: transparent;
+  border: none;
+`}
         icon="ph:arrow-square-out"
         onClick={() => props.setPopup(true)}
         size={22}
@@ -21,6 +34,6 @@ export function ImportExportButtons(
       >
         Export
       </IconButton>
-    </div>
+    </As>
   );
 }

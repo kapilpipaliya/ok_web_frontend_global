@@ -20,6 +20,7 @@ import { useFormRefs } from "./functions/useFormRefs";
 import { useFormSubmit } from "./functions/useFormSubmit";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { validateFormData } from "./functions/validateFormData";
+import { css } from "~/lib/styles";
 // Import all utilities from the index file
 
 export function LoginForm() {
@@ -114,7 +115,11 @@ export function LoginForm() {
                 attributes: [
                   {
                     as: "a",
-                    class: "fg:primary-50 text:sm cursor:pointer",
+                    css: css`
+  color: \${args.theme.var.color.primary};
+  font-size: 14px;
+  cursor: pointer;
+`,
                     componentName: "Html",
                     props: () => ({
                       onClick: () => {
@@ -124,12 +129,15 @@ export function LoginForm() {
                     text: "Forgot Password?",
                   },
                 ],
-                class: "text:right mb:16px",
+                css: css`
+  text-align: right;;
+  margin-bottom: 16px;
+`,
                 componentName: "Html",
               },
               {
                 as: "button",
-                class: `${STYLES.button2} w:100%`,
+                css: [STYLES.button2Css, css`width:100%`],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
                   disabled: options.dataContext.submitState[0]?.isLoading,
@@ -162,13 +170,18 @@ export function LoginForm() {
             attributes: [
               {
                 as: "span",
-                class: "fg:base",
+                css: css`
+  color: \${args.theme.var.color.base};
+`,
                 componentName: "Html",
                 text: "Don't have an account? ",
               },
               {
                 as: "a",
-                class: "fg:primary-50 cursor:pointer",
+                css: css`
+  color: \${args.theme.var.color.primary};
+  cursor: pointer;
+`,
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
@@ -178,7 +191,10 @@ export function LoginForm() {
                 text: "Sign Up",
               },
             ],
-            class: "text:center mt:16px",
+            css: css`
+  white-space: center;
+  margin-top: 16px;
+`,
             componentName: "Html",
           },
         ],

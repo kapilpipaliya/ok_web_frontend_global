@@ -9,7 +9,8 @@ import { API } from "~/lib/api/endpoints";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { useGraph } from "~/lib/graph/GraphContext";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 export interface AuthenticatedMenuProps {
   onClose: () => void;
 }
@@ -80,52 +81,74 @@ export function AuthenticatedMenu(
   };
 
   return (
-    <div class="p:10px">
+    <As as="div" css={css`
+  padding: 10px;
+`}>
       <For each={getMenuItems()}>
         {(item) => (
-          <li class="mb:8px last:mb:0">
-            <a
-              class="
-                flex ai:center 
-                bg:primary-20:hover 
-                fg:base-80
-                p:8px|12px 
-                r:6px 
-                text-decoration:none
-              "
+          <As as="li" css={css`
+  margin-bottom: 8px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+`}>
+            <As as="a"
+              css={args => css`
+  display: flex;
+  align-items: center;
+  color: ${args.theme.var.color.base};
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  &:hover {
+    background-color: ${args.theme.var.color.primary_30};
+  }
+`}
               href={item.href}
               onclick={props.onClose}
               target={item.target}
             >
-              <Icon
-                class="mr:10px color:primary-60"
+              <As as={Icon} css={args => css`
+  margin-right: 10px;
+  color: ${args.theme.var.color.primary};
+`}
                 icon={item.icon}
                 width="20"
               />
               {item.label}
-            </a>
-          </li>
+            </As>
+          </As>
         )}
       </For>
-      <hr class="my:8px color:base-20" />
+      <As as="hr" css={args => css`
+  margin-top: 8px;
+  margin-bottom: 8px;
+  color: ${args.theme.var.color.base_40};
+`} />
       <li>
-        <a
-          class="
-            flex ai:center w:100%
-            bg:error-10:hover
-            fg:error-70
-            p:8px|12px
-            r:6px
-            text-decoration:none
-            border:none
-            cursor:pointer
-          "
+        <As as="a"
+          css={args => css`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: ${args.theme.var.color.error};
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    background-color: ${args.theme.var.color.error_30};
+  }
+`}
           href={API.urls.user.logout}
         >
-          <Icon class="mr:10px" icon="ph:sign-out" width="20" />
+          <As as={Icon} css={css`
+  margin-right: 10px;
+`} icon="ph:sign-out" width="20" />
           Sign Out
-        </a>
+        </As>
       </li>
-    </div>
+    </As>
   );
 }

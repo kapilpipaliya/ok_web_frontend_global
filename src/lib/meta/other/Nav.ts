@@ -1,3 +1,4 @@
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/entity/findVertex";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { PROPERTIES } from "~/pages/settings/constants";
@@ -40,7 +41,7 @@ export const Nav = {
       ],
     },
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextArea",
       key: "description",
     },
@@ -52,7 +53,7 @@ export const Nav = {
           key: "key",
         },
         {
-          class: PROPERTIES.Css.TextField,
+          css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextArea",
           key: "definition",
         },
@@ -111,7 +112,7 @@ Url`,
               key: "key",
             },
             {
-              class: PROPERTIES.Css.TextField,
+              css: PROPERTIES.Css.TextFieldCss,
               componentName: "TextArea",
               key: "definition",
             },
@@ -170,7 +171,7 @@ Url`,
                   key: "key",
                 },
                 {
-                  class: PROPERTIES.Css.TextField,
+                  css: PROPERTIES.Css.TextFieldCss,
                   componentName: "TextArea",
                   key: "definition",
                 },
@@ -229,7 +230,7 @@ Url`,
                       key: "key",
                     },
                     {
-                      class: PROPERTIES.Css.TextField,
+                      css: PROPERTIES.Css.TextFieldCss,
                       componentName: "TextArea",
                       key: "definition",
                     },

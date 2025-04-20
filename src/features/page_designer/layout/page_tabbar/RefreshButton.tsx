@@ -1,10 +1,10 @@
 import { IconButton } from "~/components/styled/IconButton";
-import { headerIconButtonClass } from "~/pages/settings/constants";
+import { headerIconButtonCss } from "~/pages/settings/constants";
 
 export function RefreshButton(props: { handleRefresh: () => void }) {
   return (
     <IconButton
-      class={headerIconButtonClass}
+      css={headerIconButtonCss}
       icon="ph:arrows-counter-clockwise"
       onClick={props.handleRefresh}
       title="Refresh Preview"

@@ -1,28 +1,38 @@
 import { type JSX, Show, splitProps } from "solid-js";
+import { As } from "~/components/As";
+import { CssType } from "~/components/form/type/FieldSchemaType";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { css } from "~/lib/styles";
 
 // TODO: Depricate this component
 export function DialogFooter(
   props: JSX.IntrinsicElements["button"] & {
     buttonText?: string;
     children?: any;
-    containerClass?: string;
+    containerCss?: string;
     disabled?: boolean;
+    css?: CssType;
   },
 ) {
   const [local, buttonProps] = splitProps(props, [
     "children",
     "buttonText",
-    "containerClass",
+    "containerCss",
   ]);
 
   return (
-    <div class={`flex ai:center gap:0.50rem ${local.containerClass} mb:6`}>
+    <As  as="div" css={[...ensureArray(local.containerCss), css`
+  display: flex;
+  align-items: center;
+  gap: 0.50rem;
+  margin-bottom: 6px;
+`]}>
       <Show when={local.children}>{local.children}</Show>
       <Show when={!local.children}>
-        <button {...buttonProps} type="button">
+        <As as="button" {...buttonProps} type="button">
           {local.buttonText || "Save"}
-        </button>
+        </As>
       </Show>
-    </div>
+    </As>
   );
 }

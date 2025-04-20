@@ -1,32 +1,36 @@
 import { SelectThemeMenu } from "~/pages/theme_menu/SelectThemeMenu";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function ThemeSettings() {
   return (
-    <div class="flex flex:col gap:1rem">
-      <div class="flex flex:col gap:0.5rem">
-        <h2 class="text:1.2rem font:medium">Theme Management</h2>
-        <p class="fg:neutral-60">
+    <As as="div" css={css`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`}>
+      <As as="div"   css={css`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`}>
+        <As as="h2" css={css`
+  white-space: 1.2rem;
+  font-size: medium;
+`}>Theme Management</As>
+        <As as="p" css={css`
+  color: \${args.theme.var.color.neutral_400};
+`}>
           Customize the look and feel of your application by managing themes.
-        </p>
-        <p class="fg:neutral-60">
-          We are using the master CSS engine to compile class names to CSS. You
-          can customize the theme of the master CSS by specifying variables in
-          the config file. For more information, visit:
-          <a
-            class="text:primary"
-            href="https://rc.css.master.co/guide/variables"
-            rel="noreferrer"
-            target="_blank"
-          >
-            {" "}
-            this guide
-          </a>
-          .
-        </p>
-      </div>
-      <div class="bg:base-1 r:md p:1rem">
+        </As>
+      </As>
+      <As as="div" css={css`
+  background-color: \${args.theme.var.color.base_4};
+  border-radius: 6px;
+  padding: 1rem;
+`}>
         <SelectThemeMenu isStandalone={true} />
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }

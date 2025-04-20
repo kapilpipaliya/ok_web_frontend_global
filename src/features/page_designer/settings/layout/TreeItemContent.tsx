@@ -13,6 +13,8 @@ import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentName } from "../../functions/component/getComponentLabel";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function TreeItemContent(
   props: Readonly<{
@@ -39,12 +41,14 @@ export function TreeItemContent(
     getComponentName(componentVertex(), props.metaVertex);
 
   return (
-    <div
-      classList={{
-        "d:flex gap:4 ai:center": true,
-        "pl:27": !children().length, // bl:1px|dashed|black
-      }}
-    >
+    <As as="div" css={css`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  ${!children().length ? "padding-left: 27px;" : ""}
+`}
+// bl:1px|dashed|black
+>
       <TreeItemExpandButton
         hasChildren={!!children().length}
         isCollapsed={props.collapsedKeys().includes(props.metaVertex.id)}
@@ -62,6 +66,6 @@ export function TreeItemContent(
         width={17}
       />
       {nameExpr(props.metaVertex, componentName(), graph)}
-    </div>
+    </As>
   );
 }

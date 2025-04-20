@@ -18,11 +18,11 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { css } from "~/lib/styles";
 
 import { FilePickerModal } from "./FilePickerModal";
 
-interface FilePickerButtonProps
-  extends JSX.InputHTMLAttributes<HTMLInputElement> {
+interface FilePickerButtonProps {
   handleChange: (event: Event) => void;
   value: string;
 }
@@ -110,7 +110,13 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
   return (
     <>
       <IconButton
-        class={selectedFileVertex()?.length > 0 ? "color:green" : ""}
+        css={[
+          selectedFileVertex()?.length > 0 ? css`color: green;` : '',
+          css`
+            background-color: transparent;
+            border: none;
+          `,
+        ]}
         icon={"ph:image-square"}
         onClick={() => setOpenDialog(true)}
         size={16}

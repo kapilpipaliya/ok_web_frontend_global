@@ -6,6 +6,8 @@ import type { TransactionDetail } from "~/lib/graph/transaction/types/Transactio
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useGraph } from "~/lib/graph/GraphContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function DebugInfo(props: { formStoreId: string }) {
   const [graph] = useGraph();
@@ -21,13 +23,17 @@ export function DebugInfo(props: { formStoreId: string }) {
     <Show
       when={formStoreVertex()?.P.txnId && getGlobalStore(graph).P.isDevelopment}
     >
-      <div class="flex flex:row gap:2">
+      <As as="div" css={css`
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+`}>
         <span>Txn ID: {formStoreVertex()?.P.txnId}</span>
         <span>Steps: {tnxVertex()?.P.steps.length}</span>
         <span>Submitted Step: {tnxVertex()?.P.submittedIndex}</span>
         <span>Active Undo Point Index: {tnxVertex()?.P.activeUndoIndex}</span>
         <span>Undo Points: {tnxVertex()?.P.undoStepIndexes.join(", ")}</span>
-      </div>
+      </As>
     </Show>
   );
 }

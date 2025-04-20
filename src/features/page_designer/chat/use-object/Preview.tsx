@@ -17,8 +17,8 @@ import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId"
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import {
-  headerIconButtonClass,
-  toolBarClass,
+  headerIconButtonCss,
+  toolBarCss,
 } from "~/pages/settings/constants";
 
 import {
@@ -30,6 +30,8 @@ import {
   insertAtPosition,
   insertComponents,
 } from "./functions/insertAtPosition";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function Preview(props: {
   message: Vertex;
@@ -54,9 +56,6 @@ export function Preview(props: {
       OUT: {},
       P: {
         ...vertex.P,
-        ...(vertex.P.class && typeof vertex.P.class === "object"
-          ? { class: JSON.stringify(vertex.P.class) }
-          : {}),
       },
     };
 
@@ -178,7 +177,9 @@ export function Preview(props: {
           ).length > 0
         }
       >
-        <div class="display:none">
+        <As as="div" css={css`
+  display: none;
+`}>
           <PageViewWrapper
             formDataId={parentId}
             hideSaveCancelButton
@@ -186,34 +187,62 @@ export function Preview(props: {
             pageVertexName="Page"
             uuid={formId}
           />
-        </div>
+        </As>
 
         <Show when={graph.vertexes[formId]}>
-          <div class={toolBarClass}>
+          <As as="div" css={[toolBarCss, css`
+  display: none;
+`]}>
             <IconButton
-              class="bg:transparent hover:bg:neutral-100 p:4 r:4"
+              css={css`
+  background-color: transparent;
+  padding: 4px;
+  border-radius: 4px;
+  hover: {
+    background-color: \${args.theme.var.color.neutral_20};
+  }
+`}
               icon="ph:arrows-clockwise"
               onClick={handleRefresh}
             />
-          </div>
+          </As>
           <Show when={isPreview()}>
             <IFramePreview formStoreId={formId} noMinHeight />
           </Show>
 
-          <div class="display:flex gap:8px margin-top:12px justify-content:space-between">
-            <div class="display:flex gap:8px">
-              <select
-                class="padding:8px border:1px|solid|base border-radius:6px"
+          <As as="div" css={[css`
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: space-between;
+`]}>
+              <As as="div" css={[css`
+  display: flex;
+  gap: 8px;
+`]}>
+              <As as="select" 
+                css={css`
+  padding: 8px;
+  border: 1px solid \${args.theme.var.color.base};
+  border-radius: 6px;
+`}
                 onChange={(e) => setInsertMode(e.currentTarget.value as any)}
                 value={insertMode()}
               >
                 <option value="before">Insert Before</option>
                 <option value="after">Insert After</option>
                 <option value="center">Insert Into</option>
-              </select>
+              </As>
 
               <IconButton
-                class={`${headerIconButtonClass}`}
+                css={css`
+  background-color: transparent;
+  padding: 4px;
+  border-radius: 4px;
+  hover: {
+    background-color: \${args.theme.var.color.neutral_20};
+  }
+`}
                 disabled={
                   layoutStoreVertex()?.P.formId === formId ||
                   !layoutStoreVertex()?.P.formId ||
@@ -234,8 +263,8 @@ export function Preview(props: {
                 }
                 title="Insert"
               />
-            </div>
-          </div>
+            </As>
+          </As>
         </Show>
       </Show>
     );
@@ -255,8 +284,12 @@ export function Preview(props: {
           const [isPreview, setIsPreview] = createSignal(true);
           const formId = uuidv7();
           return (
-            <div class="margin-bottom:24px">
-              <div class="display:none">
+            <As as="div" css={[css`
+  margin-bottom: 24px;
+`]}>
+              <As as="div" css={[css`
+  display: none;
+`]}>
                 <PageViewWrapper
                   formDataId={componentVertex.id}
                   hideSaveCancelButton
@@ -264,27 +297,47 @@ export function Preview(props: {
                   pageVertexName="Component"
                   uuid={formId}
                 />
-              </div>
+              </As>
 
               <Show when={graph.vertexes[formId]}>
-                <div class={toolBarClass}>
+                <As as="div" css={[toolBarCss, css`
+  display: none;
+`]}>
                   <IconButton
-                    class="bg:transparent hover:bg:neutral-100 p:4 r:4"
+                    css={css`
+  background-color: transparent;
+  padding: 4px;
+  border-radius: 4px;
+  hover: {
+    background-color: \${args.theme.var.color.neutral_20};
+  }
+`}
                     icon="ph:arrows-clockwise"
                     onClick={() => {
                       setIsPreview(false);
                       setTimeout(() => setIsPreview(true), 100);
                     }}
                   />
-                </div>
+                </As>
 
                 <Show when={isPreview()}>
                   <IFramePreview formStoreId={formId} noMinHeight />
                 </Show>
 
-                <div class="display:flex gap:8px margin-top:12px">
+                <As as="div" css={[css`
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+`]}>
                   <IconButton
-                    class={headerIconButtonClass}
+                    css={css`
+  background-color: transparent;
+  padding: 4px;
+  border-radius: 4px;
+  hover: {
+    background-color: \${args.theme.var.color.neutral_20};
+  }
+`}
                     disabled={
                       layoutStoreVertex()?.P.formId === formId ||
                       !layoutStoreVertex()?.P.formId
@@ -300,9 +353,9 @@ export function Preview(props: {
                     }
                     title="Insert Component"
                   />
-                </div>
+                </As>
               </Show>
-            </div>
+            </As>
           );
         }}
       </For>
@@ -312,9 +365,13 @@ export function Preview(props: {
     <div>
       <Show
         fallback={
-          <div class="text-align:center padding:16px color:gray-600">
+          <As as="div" css={[css`
+  text-align: center;
+  padding: 16px;
+  color: #3b82f6;
+`]}>
             No Preview Available
-          </div>
+          </As>
         }
         when={
           props.object.vertexes?.length > 0 &&

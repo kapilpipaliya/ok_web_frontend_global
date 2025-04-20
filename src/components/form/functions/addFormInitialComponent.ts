@@ -4,6 +4,7 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/attributes/addComponentAttrInForm";
+import { css } from "~/lib/styles";
 
 // deprecated
 export function addFormInitialComponent(
@@ -19,7 +20,7 @@ export function addFormInitialComponent(
     txnId,
     setGraph,
     "Html",
-    { as: "div", class: JSON.stringify({ "": { padding: "10px" } }) },
+    { as: "div", css: css`padding: 10px;` },
   );
   if (layoutRowId === -1) {
     return -1;
@@ -46,13 +47,11 @@ export function addFormInitialComponent(
     "Html",
     {
       as: "div",
-      class: JSON.stringify({
-        "": {
-          display: "flex",
-          gap: "0.5rem",
-          padding: "10px",
-        },
-      }),
+      css: css`
+        display: flex;
+        gap: 0.5rem;
+        padding: 10px;
+      `,
     },
   );
 
@@ -68,14 +67,12 @@ export function addFormInitialComponent(
     setGraph,
     "TextInput",
     {
-      class: JSON.stringify({
-        "": {
-          "border-radius": "6px",
-          "border-style": "solid",
-          "border-width": "1px",
-          padding: "0.5rem",
-        },
-      }),
+      css: css`
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        padding: 0.5rem;
+      `,
       label: "First Name",
     },
   );
@@ -93,13 +90,11 @@ export function addFormInitialComponent(
     "Html",
     {
       as: "div",
-      class: JSON.stringify({
-        "": {
-          display: "flex",
-          gap: "0.5rem",
-          padding: "10px",
-        },
-      }),
+      css: css`
+        display: flex;
+        gap: 0.5rem;
+        padding: 10px;
+      `,
     },
   );
 

@@ -6,6 +6,8 @@ import {
   IconButton,
   type IconButtonProps,
 } from "../../../components/styled/IconButton";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 export function AddNewButton(
   props: IconButtonProps & {
@@ -16,14 +18,14 @@ export function AddNewButton(
 
   return (
     <IconButton
-      class={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CLASS}
+      css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
       icon="ph:plus"
-      iconClass="mr:5"
+      iconCss={css`margin-right: 5px;`}
       size={22}
       title="Add New"
       {...rest}
     >
-      <span>{local.buttonText || "Add New"}</span>
+      <As as="span">{local.buttonText || "Add New"}</As>
     </IconButton>
   );
 }

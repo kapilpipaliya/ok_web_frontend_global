@@ -8,6 +8,8 @@ import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function PreviewCSSMenu(
   props: Readonly<{
@@ -24,7 +26,9 @@ export function PreviewCSSMenu(
 
   return (
     <DropdownMenu
-      class="padding:0.50rem"
+      css={css`
+  padding: 0.50rem;
+`}
       onClickOutside={props.onClose}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
@@ -33,18 +37,20 @@ export function PreviewCSSMenu(
       <DialogHeader title="Preview CSS" />
       <DialogSubTitle>View the CSS content below:</DialogSubTitle>
 
-      <div class="mt:2">
+      <As as="div" css={css`
+  margin-top: 2px;
+`}>
         <code>{cssContent()}</code>
-      </div>
+      </As>
 
       <DialogFooter>
-        <button
-          class={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CLASS}
+        <As as="button"
+          css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]}
           onClick={props.onClose}
           type="button"
         >
           Close
-        </button>
+        </As>
       </DialogFooter>
     </DropdownMenu>
   );

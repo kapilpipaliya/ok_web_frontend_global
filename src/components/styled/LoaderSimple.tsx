@@ -1,11 +1,19 @@
+import { css } from "~/lib/styles";
+import { As } from "../As";
+
 export function LoaderNew(
   props: Readonly<{ class?: string; loaderHeight?: string }>,
 ) {
   return (
-    <div
-      class={`display:grid height:${props.loaderHeight ?? "100vh"} place-content:center`}
+    <As as="div" css={css`
+  display: grid;
+  height: ${props.loaderHeight ?? "100vh"};
+  place-content: center;
+`}
     >
-      <div class={`${props.class ?? ""}`}>Loading</div>
-    </div>
+      <As as="div" css={css`
+  ${props.class ?? ""}
+`}>Loading</As>
+    </As>
   );
 }

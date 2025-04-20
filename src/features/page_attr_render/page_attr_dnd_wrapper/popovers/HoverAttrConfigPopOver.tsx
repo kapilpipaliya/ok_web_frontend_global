@@ -9,23 +9,36 @@ import { iconMap } from "~/lib/ui/iconMap";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { ComponentName } from "../components/ComponentName";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();
   const [graph] = useGraph();
   const getComponentName = () => getComponentLabel(graph, props.item);
   return (
-    <span class="position:relative ">
-      <div
-        class={`flex ai:center bg:primary-40 bottom:100% color:base-5 p:0.25rem position:absolute r:5px|5px|0px|0px right:0 z:${zIndex}`}
-      >
-        <Icon
-          class={`${ICON_BUTTON_STYLES.base} ${ICON_BUTTON_STYLES.default}`}
+    <As as="span" css={[css`
+  position: relative;
+`]}>
+      <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  background-color: \${args.theme.var.color.primary};
+  bottom: 100%;
+  color: \${args.theme.var.color.base_5};
+  padding: 0.25rem;
+  position: absolute;
+  border-radius: 5px 5px 0px 0px;
+  right: 0px;
+  z-index: ${zIndex};
+`}>
+        <As as={Icon}
+          css={[ICON_BUTTON_STYLES.baseCss]}
           icon={iconMap[getComponentName() as keyof typeof iconMap]}
           noobserver
         />
         <ComponentName componentName={getComponentName()!} />
-      </div>
-    </span>
+      </As>
+    </As>
   );
 };

@@ -7,6 +7,8 @@ import { VanilaJsonEditor } from "~/components/styled/VanilaJsonEditor";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function JsonEditorFieldComponent() {
   const [graph, setGraph] = useGraph();
@@ -46,20 +48,18 @@ export function JsonEditorFieldComponent() {
   );
 
   return (
-    <div class="mt:5">
+    <As as="div" css={css`
+  margin-top: 5px;
+`}>
       JSON
-      {/* <textarea
-          placeholder="Enter value here"
-          value={JSON.stringify(graph.vertexes[formStoreVertex()?.P.selectedId].P, null, 2)}
-          onChange={(e) => replacePropertyValue(e.currentTarget.value)}
-          class={`${PROPERTIES.Css.TextField} ${!isJsonValid() ? 'b:error' : ''}`}
-          style={{ height: "200px" }}
-        /> */}
+
       <VanilaJsonEditor
         json={graph.vertexes[formStoreVertex()?.P.selectedId]?.P ?? {}}
         onChange={replacePropertyValue}
       />
-      {!isJsonValid() && <span class="fg:error">Invalid JSON</span>}
-    </div>
+      {!isJsonValid() && <As as="span" css={css`
+  color: \${args.theme.var.color.error};
+`}>Invalid JSON</As>}
+    </As>
   );
 }

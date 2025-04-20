@@ -1,46 +1,228 @@
+// CSS-in-JS versions of the constants
 export const SETTINGS_CONSTANTS = {
-  FORM_CLASS: "p:10 grid gap:20",
-  FORM_GRID_CLASS:
-    "grid grid-cols:1 grid-cols:2@xs grid-template-cols:auto|1fr@xs gap-y:8 gap-y:24@xs gap-x:32@xs ai:center",
-  GRID_ITEM_CLASS: "grid grid-template-columns:200px|400px ai:center gap:8",
-  GRID_ITEM_CLASS_NARROW:
-    "grid grid-template-columns:150px|500px ai:center gap:8",
-  HEADER_MENU_CLASS: "flex bg:base-5 jc:space-between r:7",
-  LABEL_CLASS: "color:base-50 font-weight:500 font:15",
+  FORM_CSS: `
+    ._id {
+      padding: 10px;
+      display: grid;
+      gap: 20px;
+    }
+  `,
+  FORM_GRID_CSS: `
+    ._id {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      align-items: center;
+      
+      @media (min-width: 480px) {
+        grid-template-columns: auto 1fr;
+        gap-y: 24px;
+        gap-x: 32px;
+      }
+    }
+  `,
+  GRID_ITEM_CSS: `
+    ._id {
+      display: grid;
+      grid-template-columns: 200px 400px;
+      align-items: center;
+      gap: 8px;
+    }
+  `,
+  GRID_ITEM_NARROW_CSS: `
+    ._id {
+      display: grid;
+      grid-template-columns: 150px 500px;
+      align-items: center;
+      gap: 8px;
+    }
+  `,
+  HEADER_MENU_CSS: `
+    ._id {
+      display: flex;
+      background-color: \${args.theme.var.color.base_6};
+      justify-content: space-between;
+      border-radius: 7px;
+    }
+  `,
+  LABEL_CSS: `
+    ._id {
+      color: \${args.theme.var.color.base};
+      font-weight: 500;
+      font-size: 15px;
+    }
+  `,
   MODAL: {
     BODY: {
-      CLASS: "p:16",
-      TEXT_CLASS: "font-size:18 font-weight:500",
+      CSS: `
+        ._id {
+          padding: 16px;
+        }
+      `,
+      TEXT_CSS: `
+        ._id {
+          font-size: 18px;
+          font-weight: 500;
+        }
+      `,
     },
     BUTTONS: {
-      CANCEL_CLASS:
-        "bg:base-10 fg:base-80 p:8|16 r:4 cursor:pointer border:1px|solid|base-20",
-      DELETE_CLASS: "bg:error fg:base-5 p:8|16 r:4 cursor:pointer border:none",
-      SAVE_CLASS: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
+      CANCEL_CSS: `
+        ._id {
+          background-color: \${args.theme.var.color.base_20};
+          color: \${args.theme.var.color.base_640};
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          border: 1px solid \${args.theme.var.color.base_40};
+        }
+      `,
+      DELETE_CSS: `
+        ._id {
+          background-color: \${args.theme.var.color.error};
+          color: \${args.theme.var.color.base_10};
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          border: none;
+        }
+      `,
+      SAVE_CSS: `
+        ._id {
+          background-color: \${args.theme.var.color.primary};
+          color: \${args.theme.var.color.base_10};
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          border: none;
+        }
+      `,
     },
-    CONTAINER_CLASS:
-      "border:1px|solid|base-20 r:4 p:0 position:fixed top:50% left:50% transform:translate(-50%,-50%) bg:base-5",
+    CONTAINER_CSS: `
+      ._id {
+        border: 1px solid \${args.theme.var.color.base_40};
+        border-radius: 4px;
+        padding: 0;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: \${args.theme.var.color.base_10};
+      }
+    `,
     FOOTER: {
-      CLASS: "display:flex p:16 gap:6 border-top:1px|solid|base-20 bg:base-5",
+      CSS: `
+        ._id {
+          display: flex;
+          padding: 16px;
+          gap: 6px;
+          border-top: 1px solid \${args.theme.var.color.base_40};
+          background-color: \${args.theme.var.color.base_10};
+        }
+      `,
     },
     HEADER: {
-      CLASS: "p:16 border-bottom:1px|solid|base-20",
-      TEXT_CLASS: "font-size:18 font-weight:500",
+      CSS: `
+        ._id {
+          padding: 16px;
+          border-bottom: 1px solid \${args.theme.var.color.base_40};
+        }
+      `,
+      TEXT_CSS: `
+        ._id {
+          font-size: 18px;
+          font-weight: 500;
+        }
+      `,
     },
-    OVERLAY_CLASS:
-      "position:fixed top:0 left:0 w:100% h:100% bg:base-10 opacity:0.5",
+    OVERLAY_CSS: `
+      ._id {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: \${args.theme.var.color.base_20};
+        opacity: 0.5;
+      }
+    `,
   },
-  SAVE_BUTTON_CLASS:
-    "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8",
-  SECONDARY_BUTTON_CLASS:
-    "bg:secondary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
-  SECTION_DIVIDER_CLASS: "my-8 border-t border-gray-200",
-  TITLE_CLASS: "font-size:24 font-weight:bold text-align:center color:base-50",
+  SAVE_BUTTON_CSS: `
+    ._id {
+      background-color: \${args.theme.var.color.primary};
+      color: \${args.theme.var.color.base_10};
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      margin-right: 8px;
+    }
+  `,
+  SECONDARY_BUTTON_CSS: `
+    ._id {
+      background-color: \${args.theme.var.color.secondary};
+      color: \${args.theme.var.color.base_10};
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+    }
+  `,
+  SECTION_DIVIDER_CSS: `
+    ._id {
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      border-top: 1px solid \${args.theme.var.color.base_40};
+    }
+  `,
+  TITLE_CSS: `
+    ._id {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+      color: \${args.theme.var.color.base};
+    }
+  `,
 } as const;
 
-export const headerIconButtonClass =
-  "b:1px|solid|base-20 bg:base-5 color:base-50 color:gray-20:disabled cursor:not-allowed:disabled color:primary-50:hover jc:center p:6 r:7";
-export const toolBarClass = "flex bg:base-5 gap:2 r:7";
+// CSS-in-JS functions for standalone constants
+export const headerIconButtonCss = `
+  ._id {
+    border: 1px solid \${args.theme.var.color.base_40};
+    background-color: \${args.theme.var.color.base_6};
+    color: \${args.theme.var.color.base};
+    justify-content: center;
+    padding: 6px;
+    border-radius: 7px;
+    &:hover {
+      color: \${args.theme.var.color.primary};
+    }
+    &:disabled {
+      color: \${args.theme.var.color.gray_40};
+      cursor: not-allowed;
+    }
+  }
+  
+  ._id:disabled {
+    color: \${args.theme.var.color.gray_40};
+    cursor: not-allowed;
+  }
+  
+  ._id:hover:not(:disabled) {
+    color: \${args.theme.var.color.primary};
+  }
+`;
+
+export const toolBarCss = `
+  ._id {
+    display: flex;
+    background-color: \${args.theme.var.color.base_10};
+    gap: 0.5rem;
+    border-radius: 7px;
+  }
+`;
+
+
 export const profileImage = "/images/profile.png";
 
 export const EMAIL_TEMPLATES = {
@@ -61,57 +243,215 @@ export const EMAIL_TEMPLATES = {
 } as const;
 
 export const isDev = false;
+
+// CSS-in-JS version of CONSTANTS
 export const CONSTANTS = {
-  fullWidth: "w:100%",
-  inputBorderRadius: "r:6",
-  inputFieldBorder: "border:1px|solid|base",
-  inputFieldPadding: "p:7", // use p:7 to make select and text input same height
+  fullWidthCss: `
+    ._id {
+      width: 100%;
+    }
+  `,
+  inputBorderRadiusCss: `
+    ._id {
+      border-radius: 6px;
+    }
+  `,
+  inputFieldBorderCss: `
+    ._id {
+      border: 1px solid \${args.theme.var.color.base};
+    }
+  `,
+  inputFieldPaddingCss: `
+    ._id {
+      padding: 7px;
+    }
+  `,
 };
+
+// CSS-in-JS version of PROPERTIES
 export const PROPERTIES = {
   Css: {
-    CheckBox: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
-    RadioButton: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
-    TextField: `${CONSTANTS.inputFieldBorder} ${CONSTANTS.fullWidth} ${CONSTANTS.inputFieldPadding} ${CONSTANTS.inputBorderRadius}`,
+    CheckBoxCss: `
+      ._id {
+        border: 1px solid \${args.theme.var.color.base};
+        padding: 7px;
+        border-radius: 6px;
+      }
+    `,
+    RadioButtonCss: `
+      ._id {
+        border: 1px solid \${args.theme.var.color.base};
+        padding: 7px;
+        border-radius: 6px;
+      }
+    `,
+    TextFieldCss: `
+      ._id {
+        border: 1px solid \${args.theme.var.color.base};
+        width: 100%;
+        padding: 7px;
+        border-radius: 6px;
+      }
+    `,
   },
 };
+
+// CSS-in-JS version of STYLES
 export const STYLES = {
   // Common button styles
-  button: "cursor:pointer transition:transform|0.2s|linear",
-  button2: "bg:primary fg:base-5 p:8|16 r:4 cursor:pointer border:none",
+  buttonCss: `
+    ._id {
+      cursor: pointer;
+      transition: transform 0.2s linear;
+    }
+  `,
+  button2Css: `
+    ._id {
+      background-color: \${args.theme.var.color.primary};
+      color: \${args.theme.var.color.base_10};
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+    }
+  `,
+  
   // Container styles
   container: {
-    base: "flex w:full",
-    section: "b:1px|solid|lightgray p:5|10 w:full",
-    withBorder: "b:1px|solid|lightgray r:5",
+    baseCss: `
+      ._id {
+        display: flex;
+        width: 100%;
+      }
+    `,
+    sectionCss: `
+      ._id {
+        border: 1px solid \${args.theme.var.color.base_40};
+        padding: 5px 10px;
+        width: 100%;
+      }
+    `,
+    withBorderCss: `
+      ._id {
+        border: 1px solid \${args.theme.var.color.base_40};
+        border-radius: 5px;
+      }
+    `,
   },
 
-  iconButton: "ai:center d:inline-flex",
+  iconButtonCss: `
+    ._id {
+      align-items: center;
+      display: inline-flex;
+    
+    }
+  `,
 
   // Input styles
   input: {
-    base: "b:1px|solid|#ccc outline:none r:6px w:100%",
-    color: "b:none f:14 outline:none w:100%",
-    text: "f:14 p:10px",
+    baseCss: `
+      ._id {
+        border: 1px solid #ccc;
+        outline: none;
+        border-radius: 6px;
+        width: 100%;
+      }
+    `,
+    colorCss: `
+      ._id {
+        border: none;
+        font-size: 14px;
+        outline: none;
+        width: 100%;
+      }
+    `,
+    textCss: `
+      ._id {
+        font-size: 14px;
+        padding: 10px;
+      }
+    `,
   },
 
   // Label styles
-  label: "flex ai:center font-weight:400 f:14 gap:5 white-space:nowrap",
+  labelCss: `
+    ._id {
+      display: flex;
+      align-items: center;
+      font-weight: 400;
+      font-size: 14px;
+      gap: 5px;
+      white-space: nowrap;
+    }
+  `,
 
-  overflow: "overflow:auto scrollbar-color:lightgrey {scrollbar-width:thin}",
+  overflowCss: `
+    ._id {
+      overflow: auto;
+      scrollbar-color: \${args.theme.var.color.base_40};
+      scrollbar-width: thin;
+    }
+  `,
+  
   // Tooltip styles
   tooltip: {
-    animation: "",
-    arrow: "color:base-60",
-    content:
-      "center bg:base-60 color:base-5 f:13 font-family:poppins font-weight:300 max-w:fit-content min-w:fit-content p:3|10 r:5 text:nowrap w:full z-index:1",
+    animationCss: ``,
+    arrowCss: `
+      ._id {
+        color: \${args.theme.var.color.base_280};
+      }
+    `,
+    contentCss: `
+      ._id {
+        text-align: center;
+        background-color: \${args.theme.var.color.base_280};
+        color: \${args.theme.var.color.base_10};
+        font-size: 13px;
+        font-family: poppins;
+        font-weight: 300;
+        max-width: fit-content;
+        min-width: fit-content;
+        padding: 3px 10px;
+        border-radius: 5px;
+        text-wrap: nowrap;
+        width: 100%;
+        z-index: 1;
+      }
+    `,
   },
 } as const;
+
 export const APP_VERSION = "1.0.0";
 export const APP_NAME = "DecodeUI";
 
+// CSS-in-JS version of ICON_BUTTON_STYLES
 export const ICON_BUTTON_STYLES = {
-  base: "cursor:pointer transition:color|0.2s",
-  default: "color:base-5 color:primary-20:hover",
-  delete: "color:error-50 color:error-40:hover",
-  spacing: "mr:2",
+  baseCss: `
+    ._id {
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0;
+    }
+  `,
+  defaultCss: `
+    ._id {
+      color: \${args.theme.var.color.base_80};
+    }
+    ._id:hover {
+      color: \${args.theme.var.color.primary_40};
+    }
+  `,
+  deleteCss: `
+    ._id {
+      color: \${args.theme.var.color.error};
+    }
+    ._id:hover {
+      color: \${args.theme.var.color.error_80};
+    }
+  `,
+  spacingCss: `
+    ._id {
+      margin-right: 0.125rem;
+    }
+  `,
 } as const;

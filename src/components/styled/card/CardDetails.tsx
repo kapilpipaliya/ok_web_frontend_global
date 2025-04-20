@@ -1,11 +1,22 @@
 import type { JSX } from "solid-js";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 export function CardDetailRow(props: { children: JSX.Element; label: string }) {
   return (
-    <div class="flex gap-x:1rem justify-content:space-between py:0.75rem">
-      <dt class="color:gray-50">{props.label}</dt>
-      <dd class="color:gray-50">{props.children}</dd>
-    </div>
+    <As as="div" css={css`
+  display: flex;
+  column-gap: 1rem;
+  justify-content: space-between;
+  padding-top: 0.75rem; padding-bottom: 0.75rem;
+`}>
+      <As as="dt" css={css`
+  color: #3b82f6;
+`}>{props.label}</As>
+    <As as="dd" css={css`
+  color: #3b82f6;
+`}>{props.children}</As>
+    </As>
   );
 }
 
@@ -25,17 +36,22 @@ export function CardDetails(props: {
 
 export function CardDetailsContainer(props: { children: JSX.Element }) {
   return (
-    <dl class="lh:1.25rem bt:1|solid|gray-10>*+* f:0.875rem leading:1.5rem my:-0.75rem px:1.5rem py:1rem">
+    <As as="dl" css={css`
+  font-size: 0.875rem;
+  margin-top: -0.75rem; margin-bottom: -0.75rem;
+  padding-left: 1.5rem; padding-right: 1.5rem;
+  padding-top: 1rem; padding-bottom: 1rem;
+`}>
       {props.children}
-    </dl>
+    </As>
   );
 }
 
 /*export function Status(props: { status: string }) {
   return <div
     class={`border-radius:0.375rem py:0.25rem px:0.5rem f:0.75rem lh:1rem font-weight:500 box-shadow:0|0|0|1px|rgba(0,0,0,0.5) ring-inset ${props.status === "Overdue"
-      ? "color:rgb(185,28,28) bg:rgb(254,242,242)"
-      : "color:rgb(4,120,87) bg:rgb(236,253,245)"} box-shadow:0|0|0|calc(1px+10px)|${props.status === "Overdue" ? "rgba(220,38,38,0.1)" : "rgba(22,163,74,0.2)"}`}
+      ? "color:rgb(185,28,28) bg:rgb(254,242,242);"
+      : "color:rgb(4,120,87) bg:rgb(236,253,245);"} box-shadow:0|0|0|calc(1px + 10px)|${props.status === "Overdue" ? "rgba(220,38,38,0.1);" : "rgba(22,163,74,0.2);"}`}
   >
     {props.status}
   </div>;

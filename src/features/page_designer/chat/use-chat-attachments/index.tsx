@@ -2,6 +2,8 @@
 import { useChat } from "@ai-sdk/solid";
 import { getTextFromDataUrl } from "@ai-sdk/ui-utils";
 import { createSignal, For } from "solid-js";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 export function UseChatAttachments() {
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
@@ -33,93 +35,184 @@ export function UseChatAttachments() {
   };
 
   return (
-    <div class="flex flex-col gap-2">
-      <div class="flex flex-col p-2 gap-2">
+    <As as="div" css={css`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`}>
+      <As as="div" css={css`
+  display: flex;
+  flex-direction: column;
+  padding: 2px;
+  gap: 2px;
+`}>
         <For each={messages()}>
           {(message) => (
-            <div class="flex flex-row gap-2">
-              <div class="w-24 text-zinc-500 flex-shrink-0">
+            <As as="div" css={args => css`
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+`}>
+              <As as="div" css={args => css`
+  width: 24px;
+  color: ${args.theme.var.color.gray};
+  flex-shrink: 0;
+`}>
                 {`${message.role}: `}
-              </div>
+              </As>
 
-              <div class="flex flex-col gap-2">
+              <As as="div" css={args => css`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`}>
                 {message.content}
 
-                <div class="flex flex-row gap-2">
+                <As as="div" css={args => css`
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+`}>
                   <For each={message.experimental_attachments}>
                     {(attachment, _index) =>
                       attachment.contentType?.includes("image/") ? (
-                        <img
+                        <As as="img"
                           alt={attachment.name}
-                          class="w-24 rounded-md"
+                          css={css`
+  width: 24px;
+  border-radius: 4px;
+`}
                           src={attachment.url}
                         />
                       ) : attachment.contentType?.includes("text/") ? (
-                        <div class="w-32 h-24 rounded-md text-xs overflow-hidden p-2 text-zinc-500 border">
+                        <As as="div" css={args => css`
+  width: 32px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  padding: 2px;
+  color: ${args.theme.var.color.gray};
+  border: 1px solid ${args.theme.var.color.gray_40};
+`}>
                           {getTextFromDataUrl(attachment.url)}
-                        </div>
+                        </As>
                       ) : null
                     }
                   </For>
-                </div>
-              </div>
-            </div>
+                </As>
+              </As>
+            </As>
           )}
         </For>
-      </div>
+      </As>
 
       {isLoading() && (
-        <div class="mt-4 text-gray-500">
-          <div>Loading...</div>
-          <button
-            class="px-4 py-2 mt-4 text-blue-500 border border-blue-500 rounded-md"
+        <As as="div" css={args => css`
+  margin-top: 4px;
+  color: ${args.theme.var.color.gray};
+`}>
+          <As as="div">Loading...</As>
+          <As as="button"
+            css={args => css`
+  padding: 4px;
+  margin-top: 4px;
+  color: ${args.theme.var.color.blue};
+  border: 1px solid ${args.theme.var.color.blue};
+  border-radius: 4px;
+`}
             onClick={stop}
             type="button"
           >
             Stop
-          </button>
-        </div>
+          </As>
+        </As>
       )}
 
       {error() && (
-        <div class="mt-4">
-          <div class="text-red-500">An error occurred.</div>
-          <button
-            class="px-4 py-2 mt-4 text-blue-500 border border-blue-500 rounded-md"
+        <As as="div" css={args => css`
+  margin-top: 4px;
+`}>
+          <As as="div" css={args => css`
+  color: ${args.theme.var.color.red};
+`}>An error occurred.</As>
+          <As as="button"
+            css={args => css`
+  padding: 4px;
+  margin-top: 4px;
+  color: ${args.theme.var.color.blue};
+  border: 1px solid ${args.theme.var.color.blue};
+  border-radius: 4px;
+`}
             onClick={() => reload()}
             type="button"
           >
             Retry
-          </button>
-        </div>
+          </As>
+        </As>
       )}
 
-      <form
-        class="flex flex-col gap-2 fixed bottom-0 p-2 w-full bg-white"
+      <As as="form"
+        css={args => css`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: fixed;
+  bottom: 0;
+  padding:   2px;
+  width: 100%;
+  background-color: ${args.theme.var.color.white};
+`}
         onSubmit={onSend}
       >
-        <div class="flex flex-row gap-2 fixed right-2 bottom-14 items-end">
+        <As as="div" css={css`
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  fixed;
+  right: 2px;
+  bottom: 14px;
+  align-items: end;
+`}>
           <For each={files() ? Array.from(files()!) : []}>
             {(attachment) => {
               const type = attachment.type;
               return type.startsWith("image/") ? (
                 <div>
-                  <img
+                  <As as="img"
                     alt={attachment.name}
-                    class="w-24 rounded-md"
+                    css={css`
+  width: 24px;
+  border-radius: 4px;
+`}
                     src={URL.createObjectURL(attachment)}
                   />
-                  <span class="text-sm text-zinc-500">{attachment.name}</span>
+                  <As as="span" css={args => css`
+  font-size: 12px;
+  color: ${args.theme.var.color.gray};
+`}>{attachment.name}</As>
                 </div>
               ) : type.startsWith("text/") ? (
-                <div class="w-24 text-zinc-500 flex-shrink-0 text-sm flex flex-col gap-1">
-                  <div class="w-16 h-20 bg-zinc-100 rounded-md" />
+                <As as="div" css={args => css`
+  width: 24px;
+  color: ${args.theme.var.color.gray};
+  flex-shrink: 0;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+`}>
+                  <As as="div" css={args => css`
+  width: 16px;
+  height: 20px;
+  background-color: ${args.theme.var.color.gray_20};
+  border-radius: 4px;
+`} />
                   {attachment.name}
-                </div>
+                </As>
               ) : null;
             }}
           </For>
-        </div>
+        </As>
 
         <input
           multiple
@@ -128,14 +221,18 @@ export function UseChatAttachments() {
           type="file"
         />
 
-        <input
-          class="bg-zinc-100 w-full p-2"
+        <As as="input"
+          css={args => css`
+  background-color: ${args.theme.var.color.gray_20};
+  width: 100%;
+  padding: 2px;
+`}
           disabled={isLoading()}
           onInput={handleInputChange}
           placeholder="Send message..."
           value={input()}
         />
-      </form>
-    </div>
+      </As>
+    </As>
   );
 }

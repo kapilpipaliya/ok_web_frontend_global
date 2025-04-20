@@ -19,6 +19,8 @@ import { DynamicCSSComponent } from "../components/DynamicCssComponent";
 import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";
 import { ShowConfiguredOnlyContext } from "../context/ShowConfiguredOnlyContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export const CollapsibleSection = (
   props: Readonly<{
@@ -76,32 +78,51 @@ export const CollapsibleSection = (
 
   return (
     <Show when={hasConfiguredFields()}>
-      <div
-        class="b:1px|solid|lightgray p:5|10 w:full"
-        classList={{
-          "r:0|0|5|5": props.index === props.sectionCount() - 1,
-          "r:5": props.index === 0 && props.sectionCount() === 1,
-          "r:5|5|0|0": props.index === 0 && props.sectionCount() > 1,
-        }}
+      <As as="div"
+        css={css`
+  border: 1px solid #3b82f6;
+  padding: 5px 10px;
+  width: 100%;
+  border-radius: ${(() => {
+    if (props.index === props.sectionCount() - 1) return "0 0 5px 5px";
+    if (props.index === 0 && props.sectionCount() === 1) return "5px";
+    if (props.index === 0 && props.sectionCount() > 1) return "5px 5px 0 0";
+    return "0";
+  })()};
+`}
       >
         <IconButton
-          class="w:full"
+          css={css`
+  width: 100%;
+  background-color: transparent;
+  border: none;
+`}
           icon="ph:caret-up"
-          iconClass={`cursor:pointer transform:${isOpen() ? "rotate(180deg)" : "rotate(90deg)"} transition:transform|0.2s|linear`}
+          iconCss={css`
+  cursor: pointer;
+  transform: ${isOpen() ? "rotate(180deg)" : "rotate(90deg)"};
+  transition: transform 0.2s linear;
+`}
           onClick={() => setIsOpen(!isOpen())}
           type="button"
         >
-          <span class="f:15 font-weight:600">{props.title}</span>
+          <As as="span" css={css`
+  font-size: 15px;
+  font-weight: 600;
+`}>{props.title}</As>
         </IconButton>
         <Show when={isOpen()}>
-          <hr class="color:#e1e1e1 m:2" />
+          <As as="hr" css={css`
+  color: #e1e1e1;
+  margin: 2px;
+`} />
           <For each={Object.entries(props.propertyFieldMap)}>
             {([, value]) => (
               <DynamicCSSComponent meta={value} projections={[state() || ""]} />
             )}
           </For>
         </Show>
-      </div>
+      </As>
     </Show>
   );
 };
@@ -138,10 +159,19 @@ export const SectionList = (
 
   return (
     <ShowConfiguredOnlyContext.Provider value={showConfiguredOnly}>
-      <div class="flex jc:end mb:2 w:100%">
+      <As as="div" css={css`
+  display: flex;
+  justify-content: end;
+  margin-bottom: 2px;
+  width: 100%;
+`}>
         <IconButton
           icon={showConfiguredOnly() ? "ph:eye-slash" : "ph:eye"}
-          iconClass="transition:transform|0.2s|linear"
+          css={css`
+            background-color: transparent;
+            border: none;
+          `}
+          iconCss={css`transition: transform 0.2s linear;`}
           onClick={toggleConfigured}
           size={25}
           title={
@@ -151,22 +181,30 @@ export const SectionList = (
           }
         />
         <IconButton
-          class="ml:2"
+          css={css`
+            background-color: transparent;
+            border: none;
+            margin-left: 2px;
+          `}
           icon="ph:arrows-in"
-          iconClass="transition:transform|0.2s|linear"
+          iconCss={css`transition: transform 0.2s linear;`}
           onClick={collapseAll}
           size={25}
           title="Collapse all"
         />
         <IconButton
-          class="ml:2"
+          css={css`
+            background-color: transparent;
+            border: none;
+            margin-left: 2px;
+          `}
           icon="ph:arrows-out"
-          iconClass="transition:transform|0.2s|linear"
+          iconCss={css`transition: transform 0.2s linear;`}
           onClick={expandAll}
           size={25}
           title="Expand all"
         />
-      </div>
+      </As>
       <For each={Object.entries(props.filteredSections())} fallback={""}>
         {(section, index) => {
           const [sectionName, { isOpen, propertyFieldMap }] = section;

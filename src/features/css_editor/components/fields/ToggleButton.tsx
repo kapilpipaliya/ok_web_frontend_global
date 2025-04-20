@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, splitProps } from "solid-js";
+import { As } from "../../../../components/As";
 
 import type { ToggleField } from "../../constants/FieldSchemaType";
 
@@ -9,27 +10,39 @@ export const ToggleButton = (props: Readonly<ToggleField>) => {
   const isSelected = (option: any) => props.value === option.value;
 
   return (
-    <div
-      class={`${
-        !props.isLabelOnTop && props.label ? "w:50%" : "w:100%"
-      } inline-flex b:1px|solid|#ccc overflow:hidden r:5`}
+    <As
+      as="div"
+      css={`
+        display: inline-flex;
+        border: 1px solid #ccc;
+        overflow: hidden;
+        border-radius: 5px;
+        width: ${!props.isLabelOnTop && props.label ? "50%" : "100%"};
+      `}
     >
       <For each={props.options}>
         {(option) => {
           return (
-            <div // NOSONAR
-              class={`flex ai:center bg:${
-                isSelected(option) ? "#e0e7f3" : "transparent"
-              } color:${isSelected(option) ? "#5252f1" : "black"} cursor:pointer f:14 jc:center p:2|5
-                 r:${
-                   props.options.indexOf(option) === 0
-                     ? "5|0|0|5"
-                     : props.options.indexOf(option) ===
-                         props.options.length - 1
-                       ? "0|5|5|0"
-                       : "0"
-                 }
-                 w:-webkit-fill-available`}
+            <As
+              as="div"
+              css={`
+                display: flex;
+                align-items: center;
+                background: ${isSelected(option) ? "#e0e7f3" : "transparent"};
+                color: ${isSelected(option) ? "#5252f1" : "black"};
+                cursor: pointer;
+                font-size: 14px;
+                justify-content: center;
+                padding: 2px 5px;
+                border-radius: ${
+                  props.options.indexOf(option) === 0
+                    ? "5px 0 0 5px"
+                    : props.options.indexOf(option) === props.options.length - 1
+                    ? "0 5px 5px 0"
+                    : "0"
+                };
+                width: -webkit-fill-available;
+              `}
               onClick={() => {
                 local.onChange?.(option.value);
               }}
@@ -39,10 +52,10 @@ export const ToggleButton = (props: Readonly<ToggleField>) => {
               ) : (
                 option.key
               )}
-            </div>
+            </As>
           );
         }}
       </For>
-    </div>
+    </As>
   );
 };

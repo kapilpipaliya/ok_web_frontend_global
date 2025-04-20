@@ -6,7 +6,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { headerIconButtonClass } from "~/pages/settings/constants";
+import { headerIconButtonCss } from "~/pages/settings/constants";
 
 export function ShareButton(props: { formStoreId: string }) {
   const [graph] = useGraph();
@@ -45,7 +45,7 @@ export function ShareButton(props: { formStoreId: string }) {
   return (
     <Show when={isSaved()}>
       <IconButton
-        class={headerIconButtonClass}
+        css={headerIconButtonCss}
         href={getLink()}
         icon="ph:arrow-square-out"
         target="_blank"

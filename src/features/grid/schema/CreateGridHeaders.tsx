@@ -25,11 +25,17 @@ import { IconButton } from "../../../components/styled/IconButton";
 import { TooltipWrapper } from "../../../components/styled/modal/TooltipWrapper";
 import { selectedValue } from "../../../lib/graph/get/sync/edge/selectedValue";
 import { ModifyJsonButton } from "../cell/ModifyJsonButton";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
-function ImageWrapper(props: { alt?: string; class?: string; src: string }) {
+function ImageWrapper(props: { alt?: string; css?: string; src: string }) {
   return (
     <Show when={props.src}>
-      <img alt={props.alt || "Preview"} class={props.class} src={props.src} />
+      <As as="img" 
+        alt={props.alt || "Preview"}
+        css={props.css}
+        src={props.src}
+      />
     </Show>
   );
 }
@@ -99,37 +105,44 @@ export function CreateGridHeaders(
               }
             >
               <TooltipWrapper
-                arrowClass={STYLES.tooltip.arrow}
+                arrowCss={STYLES.tooltip.arrowCss}
                 content={
-                  <div class={"b:2px|solid|#ccc"}>
-                    {/* <Show when={info.getValue<string>()}>
-                      <div class={"f:14 font-weight:500"}>
-                        {info.getValue<string>()}
-                      </div>
-                    </Show> */}
-                    {/* {
-                      getPreviewVertex(attribute, info.row.original, graph)?.P
-                        .fileName
-                    } */}
-                    <div class="bg:white p:8">
+                  <As as="div" css={css`
+                    border: 2px solid #ccc;
+                  `}>
+                    <As as="div" css={css`
+                      background: white;
+                      padding: 8px;
+                    `}>
                       <ImageWrapper
                         alt="Preview"
-                        // class="r:4px h:200px object-fit:cover"
+                        
                         src={getPreviewURL(attribute, info.row.original, graph)}
                       />
-                    </div>
-                  </div>
+                    </As>
+                  </As>
                 }
                 triggerAs="span"
-                triggerClass="flex ai:center"
+                triggerCss={css`
+                  display: flex;
+                  align-items: center;
+                `}
               >
-                <span class="flex ai:center gap:8px">
+                <As as="span" css={css`
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                `}>
                   <ImageWrapper
                     alt="Preview"
-                    class="r:4px h:30px object-fit:cover"
+                    css={css`
+                      border-radius: 4px;
+                      height: 30px;
+                      object-fit: cover;
+                    `}
                     src={getPreviewURL(attribute, info.row.original, graph)}
                   />
-                </span>
+                </As>
               </TooltipWrapper>
             </Match>
             <Match
@@ -167,26 +180,30 @@ export function CreateGridHeaders(
             </Match>
             <Match when={tableId === "File" && attribute.key === "fileName"}>
               <TooltipWrapper
-                arrowClass={STYLES.tooltip.arrow}
+                arrowCss={STYLES.tooltip.arrowCss}
                 content={
-                  <div class={STYLES.tooltip.content}>
-                    {/* <Show when={info.getValue<string>()}>
-                      <div class={"f:14 font-weight:500"}>
-                        {info.getValue<string>()}
-                      </div>
-                    </Show> */}
-                    {/* {getDownloadLink(info.row.original)} */}
+                  <As as="div" css={STYLES.tooltip.contentCss}>
                     <ImageWrapper
                       alt="Preview"
-                      class="r:4px h:200px object-fit:cover"
+                      css={css`
+                        border-radius: 4px;
+                        height: 200px;
+                        object-fit: cover;
+                      `}
                       src={getDownloadLink(info.row.original)}
                     />
-                  </div>
+                  </As>
                 }
                 triggerAs="span"
-                triggerClass="flex ai:center"
+                triggerCss={css`
+                  display: flex;
+                  align-items: center;
+                `}
               >
-                <span class="flex ai:center">{info.getValue<string>()}</span>
+                <As as="span" css={css`
+                  display: flex;
+                  align-items: center;
+                `}>{info.getValue<string>()}</As>
               </TooltipWrapper>
             </Match>
             <Match when={true}>{info.getValue<string>()}</Match>
@@ -229,9 +246,13 @@ export function CreateGridHeaders(
       accessorKey: "Actions",
       cell: (info) => {
         return (
-          <div
-            class={`${formNew.isInlineEditable ? "" : "py:0.25rem r:7"} flex ai:center gap:10px jc:center`}
-          >
+          <As as="div" css={css`
+            ${formNew.isInlineEditable ? "" : "padding: 0.25rem 0; border-radius: 7px;"}
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+          `}>
             <Show
               when={
                 !hideEditAction &&
@@ -262,7 +283,16 @@ export function CreateGridHeaders(
                       )
                     }
                     icon="ph:pen"
-                    iconClass="color:#3477CC"
+                    css={css`
+                      color: \${args.theme.var.color.primary};
+                      background-color: transparent;
+                      border: none;
+                      padding: 1px;
+                      cursor: pointer;
+                      &:hover {
+                        color: \${args.theme.var.color.primary_400};
+                      }
+                    `}
                     onClick={() => {
                       return navigate(
                         `/admin/${tableId}/${info.row.original.id}`,
@@ -289,7 +319,15 @@ export function CreateGridHeaders(
                   !gridState.hasDeletePermission()
                 }
                 icon="ph:trash"
-                iconClass="color:rgb(255,0,0)"
+                css={css`color: \${args.theme.var.color.error};
+                  background-color: transparent;
+                  border: none;
+                  padding: 1px;
+                  cursor: pointer;
+                  &:hover {
+                    color: \${args.theme.var.color.error_400};
+                  }
+                `}
                 onClick={() => setDeleteRowId(info.row.original.id)}
                 size={22}
               />
@@ -298,7 +336,10 @@ export function CreateGridHeaders(
             <Show when={tableId === "Form"}>
               <IconButton
                 icon="ph:database"
-                iconClass="color:#3477CC"
+                css={css`color: \${args.theme.var.color.primary};
+                  background-color: transparent;
+                  border: none;
+                `}
                 onClick={() => {
                   const newUrl = `/admin/${info.row.original.P.key}`;
                   window.open(newUrl, "_blank");
@@ -308,12 +349,20 @@ export function CreateGridHeaders(
             </Show>
             <Show when={!(hideEditJsonAction || FormMetaData[tableId])}>
               <ModifyJsonButton
-                class="color:#FFA500"
+                css={css`
+                  color: \${args.theme.var.color.warning};
+                  border: none;
+                  padding: 1px;
+                  cursor: pointer;
+                  &:hover {
+                    color: \${args.theme.var.color.warning_400};
+                  }
+                `}
                 item={info.row.original}
                 size={21}
               />
             </Show>
-          </div>
+          </As>
         );
       },
       footer: "",

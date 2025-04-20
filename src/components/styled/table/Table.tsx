@@ -30,7 +30,9 @@ import {
 
 import { CardGrid } from "../CardGrid";
 import { TableActions } from "./TableActions";
-
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 type TableProps = {
   allConfiguredPermission: Vertex[];
   cardSize: number;
@@ -117,11 +119,15 @@ export function CommonTable(props: Readonly<TableProps>) {
   );
 
   const FallBack = () => (
-    <div
-      class={`display:flex grid-column-span:${props.headers.length} justify-content:center padding:1rem`}
+    <As as="div" css={css`
+  display: flex;
+  grid-column: span ${props.headers.length} / span ${props.headers.length};
+  justify-content: center;
+  padding: 1rem;
+`}
     >
       No records to display
-    </div>
+    </As>
   );
 
   const hideHeaders = () =>
@@ -146,7 +152,12 @@ export function CommonTable(props: Readonly<TableProps>) {
   };
 
   return (
-    <div class="border-radius:10px box-shadow:0|0|20px|rgba(0,0,0,0.15) p:4|10 width:100%">
+    <As as="div" css={css`
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.15);
+  padding: 4px 10px;
+  width: 100%;
+`}>
       <Switch>
         <Match when={props.layout === "table"}>
           <Table
@@ -259,7 +270,7 @@ export function CommonTable(props: Readonly<TableProps>) {
           onClick={() => props.onLoadMore(props.data.length, rowsPerPage())}
         />
       </Show>
-    </div>
+    </As>
   );
 }
 
@@ -304,14 +315,23 @@ const Content = (props: { header: ColumnDef<any>; row: Vertex }) =>
 
 function LoadMoreButton(props: Readonly<{ onClick: () => void }>) {
   return (
-    <div class="display:flex justify-content:end padding:5px|10px">
-      <button
-        class="bg:primary br:5px cursor:pointer p:10px text:base-5"
+    <As as="div" css={css`
+  display: flex;
+  justify-content: end;
+  padding: 5px 10px;
+`}>
+      <As as="button" css={(args: FunctionArgumentType) => css`
+  background-color: ${args.theme.var.color.primary};
+  border-right: 5pxpx solid;
+  cursor: pointer;
+  padding: 10px;
+  color: ${args.theme.var.color.base_10};
+`}
         onClick={props.onClick}
       >
         Load More
-      </button>
-    </div>
+      </As>
+    </As>
   );
 }
 
@@ -345,7 +365,7 @@ function TableBody(
             when={props.enableMultiRowSelection || props.enableRowSelection}
           >
             <TableBodyCell
-              class={props.selectedRows.includes(row) ? "bg:primary-20" : ""}
+              css={props.selectedRows.includes(row) ? (args: FunctionArgumentType) => css`background-color:${args.theme.var.color.primary_40};` : ""}
               index={index()}
             >
               <Show
@@ -364,7 +384,7 @@ function TableBody(
           <For each={props.headers}>
             {(header: any) => (
               <TableBodyCell
-                class={props.selectedRows.includes(row) ? "bg:primary-20" : ""}
+                css={props.selectedRows.includes(row) ? (args: FunctionArgumentType) => css`background-color:${args.theme.var.color.primary_40};` : ""}
                 index={index()}
               >
                 <Content header={header} row={row} />

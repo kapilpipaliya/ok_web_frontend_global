@@ -1,3 +1,4 @@
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/pages/settings/constants";
@@ -13,7 +14,7 @@ export const FormCategory: IFormMetaData = {
       key: "label",
     },
     {
-      class: PROPERTIES.Css.TextField,
+      css: PROPERTIES.Css.TextFieldCss,
       componentName: "TextArea",
       key: "description",
     },

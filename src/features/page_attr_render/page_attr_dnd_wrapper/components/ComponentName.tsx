@@ -1,10 +1,16 @@
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
+
 export function ComponentName(props: { componentName: string }) {
   return (
-    <div
-      class="font-size:0.875rem line-height:1.25rem margin-right:4px"
+    <As as="div"
+      css={css`
+  font-size: 0.875rem;
+  margin-right: 4px;
+`}
       title="Name"
     >
       {props.componentName}
-    </div>
+    </As>
   );
 }

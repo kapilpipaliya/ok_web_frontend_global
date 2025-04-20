@@ -5,9 +5,11 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { headerIconButtonClass } from "~/pages/settings/constants";
+import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import { Label } from "./Label";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export function SelectPageField(
   props: Readonly<{
@@ -26,24 +28,30 @@ export function SelectPageField(
 
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     return (
-      <div class="flex ai:center gap:4">
+      <As as="div" css={css`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`}>
         <span>{option.P.key}</span>
         <IconButton
           icon={"ph:gear"}
-          iconClass={headerIconButtonClass}
+          iconCss={headerIconButtonCss}
           onClick={(e) => {
             e.stopPropagation();
             window.open(`/admin/Page/${option.id}`, "_blank");
           }}
           size={22}
         />
-      </div>
+      </As>
     );
   };
 
   const meta = {
     P: {
-      class: "flex:1",
+      css: css`
+  display: flex;
+`,
       collection: `g:'Page'`,
       componentName: "Select",
       displayName: props.meta.P.displayName,
@@ -81,17 +89,36 @@ export function SelectPageField(
   };
 
   return (
-    <div
-      class={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? "b:2px|solid|#008000 bb:none bt:none p:2|3 r:5px" : ""} flex ai:center gap:2 justify-content:space-between mt:6`}
+    <As as="div"
+      css={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? css`
+  border: 2px solid #008000;
+  border-bottom: none;
+  border-top: none;
+  padding: 2px 3px;
+  border-radius: 5px;
+` : ""} ${css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: space-between;
+  margin-top: 6px;
+`}`}
     >
-      <span class="f:15 flex:.5">
+      <As as="span" css={css`
+  font-size: 15px;
+  flex: 0.5;
+`}>
         {/* Show Page After Submission Form */}
         <Label meta={props.meta} />
-      </span>
-      <div class="flex f:15 flex:1" ref={buttonRef!}>
+      </As>
+      <As as="div" css={css`
+  display: flex;
+  font-size: 15px;
+  flex: 1;
+`} ref={buttonRef!}>
         <SelectThankYouPage />
         <AddNewPageButton />
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }

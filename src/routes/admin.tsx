@@ -9,6 +9,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
@@ -16,12 +18,16 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
     <PermissionGuard>
       <GetInitialData authenticate>
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
-        <header class={SETTINGS_CONSTANTS.HEADER_MENU_CLASS}>
+        <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <HomeIcon />
-          <div class="ml:auto flex gap:4">
+          <As as="div" css={css`
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+`}>
             <UserDropdownMenuDisplay />
-          </div>
-        </header>
+          </As>
+        </As>
         {props.children}
       </GetInitialData>
     </PermissionGuard>

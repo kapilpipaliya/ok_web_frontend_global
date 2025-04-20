@@ -7,6 +7,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import type { PageLayoutObject } from "../../context/LayoutContext";
 
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import { css } from "~/lib/styles";
 
 export const MiddleSectionButtons = () => {
   const layoutStoreId = useDesignerLayoutStore();
@@ -16,14 +17,24 @@ export const MiddleSectionButtons = () => {
     <For each={["Build", "Setting"]}>
       {(section) => (
         <IconButton
-          class={
-            "ai:center b:1px|solid|lightgrey color:rgb(17,24,39) cursor:default d:inline-flex f:0.875rem font-weight:600 px:0.75rem py:0.5rem"
-          }
-          classList={{
-            "bg-color:#E0E7F3 bl:none color:#5252F1 r:0|5|5|0":
-              section !== "Build",
-            "color:grey r:5|0|0|5": section === "Build",
-          }}
+          css={[
+            css`
+              align-items: center;
+              border: 1px solid lightgrey;
+              color: rgb(17, 24, 39);
+              cursor: default;
+              display: inline-flex;
+              font-size: 0.875rem;
+              font-weight: 600;
+              padding: 0.75rem 0.5rem;
+            `,
+            css`
+              background-color: #E0E7F3;
+              border-left: none;
+              color: #5252F1;
+              border-radius: 0 0.5rem 0.5rem 0;
+            `,
+          ]}
           icon={section === "Build" ? "ph:hammer" : "ph:gear"}
           onclick={() =>
             mergeVertexProperties<PageLayoutObject>(

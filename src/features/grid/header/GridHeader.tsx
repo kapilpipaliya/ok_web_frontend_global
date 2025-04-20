@@ -7,7 +7,7 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import {
-  headerIconButtonClass,
+  headerIconButtonCss,
   PROPERTIES,
   STYLES,
 } from "~/pages/settings/constants";
@@ -15,6 +15,8 @@ import {
 import { IconButton } from "../../../components/styled/IconButton";
 import { useDataGridContext } from "../context/DataGridContext";
 import { AddNewButton } from "./AddNewButton";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
 
 interface GridHeaderProps {
   CustomAddNewButton?: (props: {
@@ -37,7 +39,12 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
   };
 
   return (
-    <div class="flex ai:center jc:space-between p:4|10">
+    <As as="div" css={[css`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+`]}>
       <Dynamic
         component={props.CustomAddNewButton || AddNewButton}
         disabled={
@@ -47,22 +54,27 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
         }
         onClick={onAddNew}
       />
-      <div class="flex ai:center gap:8 mb:10">
+        <As as="div" css={[css`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+`]}>
         <SearchBar
           handleChange={props.onSearch}
           placeholder="Search Data..."
           value={gridState.search}
         />
         <IconButton
-          class={headerIconButtonClass}
+          css={[headerIconButtonCss]}
           disabled={gridState.isLoading}
           icon={gridState.isLoading ? "ph:spinner-gap" : "ph:arrows-clockwise"}
-          iconClass={gridState.isLoading ? "@rotate|1s|infinite|linear" : ""}
+          iconCss={gridState.isLoading ? css`transition: transform 1s infinite linear;` : ""}
           onClick={handleRefresh}
           title="Refresh Data"
         />
         <IconButton
-          class={headerIconButtonClass}
+          css={[headerIconButtonCss]}
           disabled={gridState.isLoading}
           icon={isTableLayout() ? "ph:identification-card" : "ph:table"}
           onClick={() =>
@@ -72,11 +84,11 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
         />
         <Show when={!isTableLayout()}>
           <TooltipWrapper
-            arrowClass={STYLES.tooltip.arrow}
+            arrowCss={STYLES.tooltip.arrowCss}
             content="Column Size"
           >
-            <input
-              class={`${PROPERTIES.Css.TextField.replace("w:100%", "")}`}
+            <As as="input"
+              css={[PROPERTIES.Css.TextFieldCss]}
               max="10"
               min="1"
               onInput={(e) =>
@@ -87,7 +99,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
             />
           </TooltipWrapper>
         </Show>
-      </div>
-    </div>
+      </As>
+    </As>
   );
 }

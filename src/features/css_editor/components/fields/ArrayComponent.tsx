@@ -1,4 +1,6 @@
 import { createSignal, For } from "solid-js";
+import { As } from "~/components/As";
+import { css } from "~/lib/styles";
 
 import { TextFieldWithSelect } from "./textfield_with_unit/TextFieldWithSelect";
 
@@ -34,28 +36,61 @@ export function ArrayComponent(
   };
 
   return (
-    <div class="d:flex flex:col gap:8">
+    <As
+      as="div"
+      css={css`
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      `}
+    >
       <For each={items()}>
         {(item, index) => (
-          <div class="flex ai:center gap:8">
+          <As
+            as="div"
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            `}
+          >
             <TextFieldWithSelect
+              // componentName="string"
+              // key={`array-item-${index()}`}
+              // label=""
               onChange={(value) => updateItem(index(), value)}
+              // options={[]}
               type={props.type}
               unitOptions={props.unitOptions}
               value={item.toString()}
             />
-            <button
-              class="c:white rounded bg:error px:8 py:4"
+            <As
+              as="button"
+              css={args => css`
+                color: white;
+                border-radius: 4px;
+                background: ${args.theme.var.color.error};
+                padding: 4px 8px;
+              `}
               onClick={() => removeItem(index())}
             >
               Remove
-            </button>
-          </div>
+            </As>
+          </As>
         )}
       </For>
-      <button class="c:white rounded bg:primary px:8 py:4" onClick={addItem}>
+      <As
+        as="button"
+        css={args => css`
+          color: white;
+          border-radius: 4px;
+          background: ${args.theme.var.color.primary};
+          padding: 4px 8px;
+        `}
+        onClick={addItem}
+      >
         Add Item
-      </button>
-    </div>
+      </As>
+    </As>
   );
 }

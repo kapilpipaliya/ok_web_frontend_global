@@ -2,9 +2,10 @@ import { createSignal, Show } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
-import { headerIconButtonClass } from "~/pages/settings/constants";
+import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import { SelectThemeMenu } from "./SelectThemeMenu";
+import { css } from "~/lib/styles";
 
 export function SelectThemeButton() {
   const [isThemeOptionsOpen, setIsThemeOptionsOpen] = createSignal(false);
@@ -13,7 +14,7 @@ export function SelectThemeButton() {
   return (
     <>
       <IconButton
-        class={headerIconButtonClass}
+        css={headerIconButtonCss}
         icon="ph:paint-bucket"
         onClick={() => setIsThemeOptionsOpen(true)}
         ref={setButtonRef}
