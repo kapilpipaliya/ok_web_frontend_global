@@ -74,9 +74,10 @@ function DroppableWrapper(props: { children: any; formStoreId: string }) {
     graph.vertexes[props.formStoreId] as Vertex<FormStoreObject>;
 
   return (
-    <As as="div"
+    <As
+      as="div"
       css={css`
-        ${!noMinHeight ? "min-height: 300px;" : ""}
+        ${noMinHeight ? "" : "min-height: 300px;"}
         ${isDraggingOver() ? "background-color: #f3f3f4;" : ""}
       `}
       onDragLeave={() => {

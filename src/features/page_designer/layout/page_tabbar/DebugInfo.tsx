@@ -23,11 +23,14 @@ export function DebugInfo(props: { formStoreId: string }) {
     <Show
       when={formStoreVertex()?.P.txnId && getGlobalStore(graph).P.isDevelopment}
     >
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   flex-direction: row;
   gap: 2px;
-`}>
+`}
+      >
         <span>Txn ID: {formStoreVertex()?.P.txnId}</span>
         <span>Steps: {tnxVertex()?.P.steps.length}</span>
         <span>Submitted Step: {tnxVertex()?.P.submittedIndex}</span>

@@ -147,10 +147,15 @@ export function DisplayProperty(
   return (
     <Switch>
       <Match when={metaVertex().P.hide}>
-        <As as="td" css={css`
+        <As
+          as="td"
+          css={css`
   align-content: center;
-`}>
-          <As as="div" css={css`
+`}
+        >
+          <As
+            as="div"
+            css={css`
             ${getComponentClass(componentName()!)}
             display: flex;
             align-items: center;
@@ -171,14 +176,20 @@ export function DisplayProperty(
             (props.joinVertex?.P.key ?? "") === "class")
         }
       >
-        <As as="td" css={css`
+        <As
+          as="td"
+          css={css`
   align-content: center;
-`}>
-          <As as="div" css={css`
+`}
+        >
+          <As
+            as="div"
+            css={css`
   display: flex;
   align-items: center;
   justify-content: center;
-`}>
+`}
+          >
             <CssEditor
               joinVertex={props.joinVertex}
               metaVertex={metaVertex()}
@@ -188,11 +199,15 @@ export function DisplayProperty(
         </As>
       </Match>
       <Match when={componentName() === "DynamicTable"}>
-        <As as="td" css={css`
+        <As
+          as="td"
+          css={css`
   align-content: center;
-`}>
+`}
+        >
           <Show when={!props.disabled()}>
-            <As as="div"
+            <As
+              as="div"
               css={css`
   ${getComponentClass(componentName()!)}
   display: flex;
@@ -210,15 +225,20 @@ export function DisplayProperty(
         </As>
       </Match>
       <Match when={true}>
-        <As as="td" css={css`
+        <As
+          as="td"
+          css={css`
   ${getComponentClass(componentName()!)}
   align-content: center;
   padding: 1px;
 `}
         >
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   align-items: center;
-`}>
+`}
+          >
             <DefaultValue
               joinVertex={props.joinVertex}
               metaVertex={metaVertex()}

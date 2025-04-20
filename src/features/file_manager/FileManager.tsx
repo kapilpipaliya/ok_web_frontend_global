@@ -34,11 +34,16 @@ export default function FileManager(
       setFileManagerStore={props.setFileManagerStore}
       toParentEdgeType={props.toParentEdgeType}
     >
-      <As as="div" css={[css`
+      <As
+        as="div"
+        css={[
+          css`
   display: grid;
   gap: 4px;
   grid-template-columns: repeat(2, 20% calc(80% - 4px));
-`]}>
+`,
+        ]}
+      >
         <Sidebar />
         <FileManagerMainContent />
       </As>

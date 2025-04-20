@@ -9,6 +9,7 @@ import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+
 export function UserDropdownMenuDisplay(): JSX.Element {
   const [graph] = useGraph();
   const [isOpen, setIsOpen] = createSignal(false);
@@ -19,7 +20,8 @@ export function UserDropdownMenuDisplay(): JSX.Element {
 
   return (
     <>
-      <As as="button"
+      <As
+        as="button"
         css={css`
   display: flex;
   align-items: center;
@@ -52,16 +54,22 @@ export function UserDropdownMenuDisplay(): JSX.Element {
             parentRef={btnEl!}
             placement="bottom-end"
           >
-            <As as="ul" css={css`
+            <As
+              as="ul"
+              css={css`
   list-style-type: none;
   margin: 0;
   padding: 0;
   position: relative;
-`}>
+`}
+            >
               <ProfileHeader />
-              <As as="hr" css={css`
+              <As
+                as="hr"
+                css={css`
   color: #1e293b;
-`} />
+`}
+              />
               <MenuItems onClose={handleClose} />
             </As>
           </DropdownMenu>

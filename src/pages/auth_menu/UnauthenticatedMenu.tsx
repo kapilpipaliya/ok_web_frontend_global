@@ -11,11 +11,15 @@ export function UnauthenticatedMenu(
 ): JSX.Element {
   return (
     <>
-      <As as="li" css={css`
+      <As
+        as="li"
+        css={css`
   margin: 5px 10px;
   margin-top: 5px;
-`}>
-        <As as="a"
+`}
+      >
+        <As
+          as="a"
           css={css`
   display: flex;
   align-items: center;
@@ -34,11 +38,15 @@ export function UnauthenticatedMenu(
           Log In
         </As>
       </As>
-      <As as="li" css={css`
+      <As
+        as="li"
+        css={css`
   margin: 5px 10px;
   margin-top: 5px;
-`}>
-        <As as="a"
+`}
+      >
+        <As
+          as="a"
           css={css`
   display: flex;
   align-items: center;

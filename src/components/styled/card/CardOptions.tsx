@@ -14,7 +14,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
 
   return (
     <CardOptionsContainer>
-      <As as="button"
+      <As
+        as="button"
         aria-expanded={isDropdownOpen()}
         aria-haspopup="true"
         css={css`
@@ -30,7 +31,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
         type="button"
       >
         <span class="sr-only">Open options</span>
-        <As as="svg"
+        <As
+          as="svg"
           aria-hidden="true"
           css={css`
   height: 1.25rem;
@@ -43,7 +45,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
         </As>
       </As>
       {isDropdownOpen() && (
-        <As as="div"
+        <As
+          as="div"
           aria-labelledby={`options-menu-${props.title}-button`}
           aria-orientation="vertical"
           css={css`
@@ -65,7 +68,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
         >
           <For each={props.options}>
             {(option, index) => (
-              <As as="a"
+              <As
+                as="a"
                 css={css`
   color: rgb(17,24,39);
   display: block;
@@ -94,8 +98,15 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
 }
 
 export function CardOptionsContainer(props: { children: JSX.Element }) {
-  return <As as="div" css={css`
+  return (
+    <As
+      as="div"
+      css={css`
   margin-left: auto;
   position: relative;
-`}>{props.children}</As>;
+`}
+    >
+      {props.children}
+    </As>
+  );
 }

@@ -22,10 +22,13 @@ export function PermissionGuard(props: {
   const pathToCheck = () => props.path || location.pathname;
 
   // Create a resource to check permissions
-  const permissionResult = createAsync(async () => {
-    // Check if the user has permission to access this path
-    return await checkRoutePermission(undefined, pathToCheck());
-  }, {deferStream: true}); // required for server side rendering
+  const permissionResult = createAsync(
+    async () => {
+      // Check if the user has permission to access this path
+      return await checkRoutePermission(undefined, pathToCheck());
+    },
+    { deferStream: true },
+  ); // required for server side rendering
 
   // Handle unauthorized access
   const handleUnauthorized = () => {

@@ -3,8 +3,7 @@ import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
-import { FetchFormMetaDataResult } from "./fetchPageData";
-
+import type { FetchFormMetaDataResult } from "./fetchPageData";
 
 export async function fetchFormMetaData(
   // graph: GraphInterface,
@@ -12,7 +11,7 @@ export async function fetchFormMetaData(
   formId?: string,
   expression?: string,
   isDesignMode?: boolean,
-  pageKeyName?: string
+  pageKeyName?: string,
 ): Promise<FetchFormMetaDataResult> {
   "use server";
   let form: IFormMetaData | null = null;
@@ -25,7 +24,8 @@ export async function fetchFormMetaData(
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
   const data = await fetchDataFromDB({
-    expression: expression ??
+    expression:
+      expression ??
       (formId
         ? `id:'${formId}'`
         : `g:'${pageVertexName ?? "Form"}[${pageKeyName}]'`),

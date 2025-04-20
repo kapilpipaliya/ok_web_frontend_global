@@ -21,7 +21,7 @@ export async function fetchDataFromDB(
 ): Promise<ServerResult> {
   "use server";
   let dbSession: Session;
-  let subDomain = "";
+  let _subDomain = "";
   // @ts-expect-error ignore
   if (expression.adminui) {
     context.adminui = true;
@@ -30,7 +30,7 @@ export async function fetchDataFromDB(
   if (context.dbSession) {
     dbSession = context.dbSession;
   } else {
-    ({ dbSession, subDomain } = await getDBSessionForSubdomain(
+    ({ dbSession, _subDomain } = await getDBSessionForSubdomain(
       context.adminui
         ? ({ url: "http://localhost/?adminui=true" } as Request)
         : undefined,

@@ -1,4 +1,4 @@
-import { type JSX, splitProps } from "solid-js";
+import { splitProps } from "solid-js";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
 
@@ -35,13 +35,16 @@ export const InputField = (props: Readonly<InputFieldProps>) => {
   const InnerInput = () => (
     <As
       as="input"
-      css={[...ensureArray(local.css), css`
+      css={[
+        ...ensureArray(local.css),
+        css`
         width: 100%;
         border: none;
         outline: none;
         padding: 5px;
         background: transparent;
-      `]}
+      `,
+      ]}
       onChange={local.handleChange}
       onFocus={local.onFocus}
       placeholder={local.type === "number" ? "0" : (local.placeholder ?? "")}

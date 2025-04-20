@@ -15,7 +15,7 @@ export const NumberField = (props: any) => {
       local.onChange?.("");
     } else {
       const parsedValue = Number.parseFloat(targetValue);
-      local.onChange?.(isNaN(parsedValue) ? "" : (parsedValue as any));
+      local.onChange?.(Number.isNaN(parsedValue) ? "" : (parsedValue as any));
     }
 
     // Force the input value to update the props.value,
@@ -28,7 +28,8 @@ export const NumberField = (props: any) => {
   };
 
   return (
-    <As as="input"
+    <As
+      as="input"
       css={[PROPERTIES.Css.TextFieldCss]}
       type="number"
       {...others}

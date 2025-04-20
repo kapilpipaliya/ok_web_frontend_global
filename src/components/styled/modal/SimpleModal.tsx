@@ -23,7 +23,8 @@ export function SimpleWithDismissButton(
   const zIndex = useZIndex();
   return (
     <ModalContext.Provider value={props}>
-      <As as="div"
+      <As
+        as="div"
         aria-labelledby="modal-title"
         aria-modal="true"
         css={css`
@@ -41,18 +42,23 @@ export function SimpleWithDismissButton(
 
 function Backdrop() {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   background-color: rgb(107,114,128);
   inset: 0px;
   position: fixed;
-`} />
+`}
+    />
   );
 }
 
 function DismissButton() {
   const props = useContext(ModalContext)!;
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: none;
   position: absolute;
   padding-right: 1rem;
@@ -62,8 +68,11 @@ function DismissButton() {
   @media (width >= 52.125rem) {
     display: block;
   }
-`}>
-      <As as="button" css={css`
+`}
+    >
+      <As
+        as="button"
+        css={css`
   background-color: rgb(255,255,255);
   border-radius: 0.375rem;
   box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
@@ -79,7 +88,8 @@ function DismissButton() {
         type="button"
       >
         <span class="sr-only">Close</span>
-        <As as="svg"
+        <As
+          as="svg"
           aria-hidden="true"
           css={css`
   height: 1.5rem;
@@ -109,7 +119,9 @@ function ModalBody() {
 function ModalContent() {
   const zIndex = useZIndex();
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   inset: 0px;
   overflow-y: auto;
   position: fixed;
@@ -117,7 +129,9 @@ function ModalContent() {
   z-index: ${zIndex};
 `}
     >
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -128,7 +142,8 @@ function ModalContent() {
     align-items: center;
     padding: 0;
   }
-`}>
+`}
+      >
         <ModalPanel />
       </As>
     </As>
@@ -138,16 +153,21 @@ function ModalContent() {
 function ModalFooter() {
   const props = useContext(ModalContext)!;
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   margin-top: 1.25rem;
   @media (width >= 52.125rem) {
     display: flex;
     flex-direction: row-reverse;
     margin-top: 1rem;
   }
-`}>
+`}
+    >
       <Show when={props.confirmButtonText}>
-        <As as="button" css={css`
+        <As
+          as="button"
+          css={css`
   background-color: rgb(220,38,38);
   border-radius: 0.375rem;
   box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
@@ -174,7 +194,9 @@ function ModalFooter() {
         </As>
       </Show>
       <Show when={props.closeButtonText}>
-        <As as="button" css={css`
+        <As
+          as="button"
+          css={css`
   background-color: rgb(255,255,255);
   border-radius: 0.375rem;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
@@ -208,13 +230,18 @@ function ModalFooter() {
 function ModalHeader() {
   const props = useContext(ModalContext)!;
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   @media (width >= 52.125rem) {
     display: flex;
     align-items: flex-start;
   }
-`}>
-      <As as="div" css={css`
+`}
+    >
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   background-color: rgb(254,226,226);
@@ -227,8 +254,10 @@ function ModalHeader() {
     margin-left: 0; margin-right: 0;
     width: 2.5rem;
   }
-`}>
-        <As as="svg"
+`}
+      >
+        <As
+          as="svg"
           aria-hidden="true"
           css={css`
   color: rgb(220,38,38);
@@ -247,7 +276,9 @@ function ModalHeader() {
           />
         </As>
       </As>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   
   margin-top: 0.75rem;
   text-align: center;
@@ -256,8 +287,11 @@ function ModalHeader() {
     margin-top: 0;
     text-align: left;
   }
-`}>
-        <As as="h3" css={css`
+`}
+      >
+        <As
+          as="h3"
+          css={css`
   color: rgb(17,24,39);
   font-size: 1rem;
   font-weight: 600;
@@ -266,13 +300,19 @@ function ModalHeader() {
         >
           {props.title}
         </As>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   margin-top: 0.5rem;
-`}>
-          <As as="p" css={css`
+`}
+        >
+          <As
+            as="p"
+            css={css`
   color: rgb(107,114,128);
   font-size: 0.875rem;
-`}>
+`}
+          >
             {props.description}
           </As>
         </As>
@@ -283,7 +323,9 @@ function ModalHeader() {
 
 function ModalPanel() {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   background-color: rgb(255,255,255);
   border-radius: 0.5rem;
   box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
@@ -300,7 +342,8 @@ function ModalPanel() {
     margin-top: 2rem; margin-bottom: 2rem;
     width: 100%;
   }
-`}>
+`}
+    >
       <DismissButton />
       <ModalHeader />
       <ModalBody />

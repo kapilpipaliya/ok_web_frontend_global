@@ -20,11 +20,14 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <HomeIcon />
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   margin-left: auto;
   display: flex;
   gap: 4px;
-`}>
+`}
+          >
             <UserDropdownMenuDisplay />
           </As>
         </As>

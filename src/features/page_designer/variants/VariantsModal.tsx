@@ -87,7 +87,8 @@ export function VariantsModal(
 
   return (
     <Portal>
-      <As as="div"
+      <As
+        as="div"
         aria-labelledby="Variants Modal"
         aria-modal="true"
         css={css`
@@ -98,7 +99,8 @@ export function VariantsModal(
         role="dialog"
       >
         <Overlay />
-        <As as="div"
+        <As
+          as="div"
           css={css`
   inset: 0px;
   overflow-y: auto;
@@ -107,7 +109,9 @@ export function VariantsModal(
   z-index: ${zIndex};
 `}
         >
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -118,8 +122,11 @@ export function VariantsModal(
      align-items: center;
      padding: 0;
   }
-`}>
-            <As as="div" css={css`
+`}
+          >
+            <As
+              as="div"
+              css={css`
   background-color: rgb(255,255,255);
   border-radius: 0.5rem;
   box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
@@ -138,10 +145,12 @@ export function VariantsModal(
     width: 100%;
     max-width:90vw;
   }
-`}>
+`}
+            >
               <div>
                 <div class="">
-                  <As as="h3"
+                  <As
+                    as="h3"
                     css={css`
   line-height: 1.5rem;
   color: rgb(17,24,39);
@@ -156,9 +165,12 @@ export function VariantsModal(
                       : "All Variants"}{" "}
                     :
                   </As>
-                  <As as="div" css={css`
+                  <As
+                    as="div"
+                    css={css`
   margin-top: 0.5rem;
-`}>
+`}
+                  >
                     <TableInputField
                       data={
                         props.selectedVariant
@@ -173,19 +185,32 @@ export function VariantsModal(
                   </As>
                 </div>
               </div>
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   display: grid;
   gap: 0.75rem;
   grid-auto-flow: row dense;
   grid-template-columns: repeat(2, 1fr);
   margin-top: 1.25rem;
   margin-top: 1.5rem;
-`}>
-                {error() && <As as="div" css={css`
+`}
+              >
+                {error() && (
+                  <As
+                    as="div"
+                    css={css`
   color: #FF0000;
-`}>{error()}</As>}
-                <As as="button"  onClick={onVariantsSubmit}>Submit</As>
-                <As as="button"
+`}
+                  >
+                    {error()}
+                  </As>
+                )}
+                <As as="button" onClick={onVariantsSubmit}>
+                  Submit
+                </As>
+                <As
+                  as="button"
                   css={css`
   border-color: #FF0000;
   color: #FF0000;

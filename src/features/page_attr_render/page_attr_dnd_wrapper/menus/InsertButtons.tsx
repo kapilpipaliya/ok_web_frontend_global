@@ -28,7 +28,10 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   return (
     <>
       <IconButton
-        css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss,
+        css={[
+          ICON_BUTTON_STYLES.baseCss,
+          ICON_BUTTON_STYLES.defaultCss,
+          ICON_BUTTON_STYLES.spacingCss,
           css`
             background-color: transparent;
             border: none;
@@ -65,7 +68,10 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
       </Show>
 
       <IconButton
-        css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss,
+        css={[
+          ICON_BUTTON_STYLES.baseCss,
+          ICON_BUTTON_STYLES.defaultCss,
+          ICON_BUTTON_STYLES.spacingCss,
           css`
             background-color: transparent;
             border: none;
@@ -102,7 +108,10 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
       </Show>
 
       <IconButton
-        css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss,
+        css={[
+          ICON_BUTTON_STYLES.baseCss,
+          ICON_BUTTON_STYLES.defaultCss,
+          ICON_BUTTON_STYLES.spacingCss,
           css`
             background-color: transparent;
             border: none;

@@ -270,9 +270,12 @@ export function DynamicCSSComponent(
               hasConfiguredFields()
             }
           >
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
   width: 100%;
-`}>
+`}
+            >
               <LabelWrapper
                 meta={props.meta}
                 onResetIconClick={resetValue}
@@ -290,12 +293,15 @@ export function DynamicCSSComponent(
               hasConfiguredFields()
             }
           >
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-`}>
+`}
+            >
               <LabelWrapper
                 meta={props.meta}
                 onResetIconClick={resetValue}

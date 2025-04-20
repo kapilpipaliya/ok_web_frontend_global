@@ -14,7 +14,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { validateFunction } from "~/lib/validation/validateFunction";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
 export function FunctionEditor(props: {
@@ -95,12 +96,16 @@ export function FunctionEditor(props: {
         showMinimap={false}
         value={editorValue()}
       />
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   gap: 2px;
   margin-top: 2px;
-`}>
-        <As as="button"
+`}
+      >
+        <As
+          as="button"
           css={(args: FunctionArgumentType) => css`
   padding-left: 3px;
   padding-right: 3px;
@@ -114,7 +119,8 @@ export function FunctionEditor(props: {
         >
           Submit
         </As>
-        <As as="button"
+        <As
+          as="button"
           css={(args: FunctionArgumentType) => css`
   padding-left: 3px;
   padding-right: 3px;
@@ -130,21 +136,34 @@ export function FunctionEditor(props: {
           Format
         </As>
       </As>
-      {!isFunctionValid() && <As as="span" css={css`
+      {!isFunctionValid() && (
+        <As
+          as="span"
+          css={css`
   color: \${args.theme.var.color.error};
-`}>Invalid Function</As>}
+`}
+        >
+          Invalid Function
+        </As>
+      )}
     </>
   );
 
   return (
     <>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   margin-top: 5px;
-`}>
-        <As as="span" css={css`
+`}
+      >
+        <As
+          as="span"
+          css={css`
   display: flex;
   align-items: center;
-`}>
+`}
+        >
           {props.label}
           <IconButton
             css={css`
@@ -165,11 +184,14 @@ export function FunctionEditor(props: {
         setOpen={setIsModalOpen}
         title={`Edit ${props.label}`}
       >
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   padding: 3px;
   width: 600px;
   height: 600px;
-`}>
+`}
+        >
           <EditorContent height="560px" />
         </As>
       </CustomModal>

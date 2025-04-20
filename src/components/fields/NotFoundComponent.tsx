@@ -7,8 +7,11 @@ export function NotFoundComponent() {
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   return (
-    <As as="div" css={args => css`
+    <As
+      as="div"
+      css={(args) => css`
   color: ${args.theme.var.color.error};
-`}>{`${parentRenderContext()?.context.componentName ?? "Component"} Not implemented`}</As>
+`}
+    >{`${parentRenderContext()?.context.componentName ?? "Component"} Not implemented`}</As>
   );
 }

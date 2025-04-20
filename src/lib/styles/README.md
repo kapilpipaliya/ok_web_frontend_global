@@ -1,6 +1,7 @@
 # CSS-in-JS Styling System
 
-This styling system replaces Master CSS with a CSS-in-JS approach that uses the `<As>` component for HTML elements and CSS strings for styling.
+This styling system replaces Master CSS with a CSS-in-JS approach that uses the `<As>` component for HTML elements and
+CSS strings for styling.
 
 ## Key Components
 
@@ -70,6 +71,7 @@ To migrate from Master CSS:
 ### Example
 
 Before:
+
 ```tsx
 <div class="p:10 grid gap:20">
   <span class="color:base-50 font-weight:500 font:15">Label</span>
@@ -77,6 +79,7 @@ Before:
 ```
 
 After:
+
 ```tsx
 import { As } from "~/components/As";
 
@@ -118,7 +121,7 @@ const buttonCss = () => `
 `;
 ```
 
-## Usage 
+## Usage
 
 You can import the style utilities using either the path alias or the full path:
 

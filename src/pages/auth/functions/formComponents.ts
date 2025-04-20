@@ -16,7 +16,11 @@ import { getLogoSchema } from "~/routes/internal/page/(email)/baseEmailTemplate"
  */
 export function createFormHeader(title: string) {
   return [
-    getLogoSchema(css`display:grid; place-items:center;`, css`height:80px;`, css`color: \${args.theme.var.color.base_40};`),
+    getLogoSchema(
+      css`display:grid; place-items:center;`,
+      css`height:80px;`,
+      css`color: \${args.theme.var.color.base_40};`,
+    ),
     {
       as: "h1",
       css: SETTINGS_CONSTANTS.TITLE_CSS,

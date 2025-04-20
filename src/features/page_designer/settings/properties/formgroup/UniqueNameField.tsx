@@ -60,32 +60,44 @@ export function UniqueNameField(
   }
 
   return (
-    <As as="div"
+    <As
+      as="div"
       css={css`
-    ${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? `
+    ${
+      props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined &&
+      props.selectedLayout?.P[props.meta.P[IdAttr]] !== null
+        ? `
   border: 2px solid #008000;
   border-bottom: none;
   border-top: none;
   padding: 2px 3px;
   border-radius: 5px;
-` : ""}
+`
+        : ""
+    }
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
 `}
-  >
-      <As as="span" css={css`
+    >
+      <As
+        as="span"
+        css={css`
   font-size: 15px;
   flex: 0.5;
-`}>
+`}
+      >
         <Label meta={props.meta} />
       </As>
-      <As as="span" css={css`
+      <As
+        as="span"
+        css={css`
   font-size: 15px;
   flex: 1;
-`}>
+`}
+      >
         <DynamicComponent
           data={props.selectedLayout}
           isNoPermissionCheck={true}

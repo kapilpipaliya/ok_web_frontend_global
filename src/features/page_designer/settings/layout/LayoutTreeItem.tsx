@@ -219,11 +219,14 @@ export function LayoutTreeItem(
           children().length > 0
         }
       >
-        <As as="ul" css={css`
+        <As
+          as="ul"
+          css={css`
   padding-left: 8px;
   padding-top: 5px;
   list-style: none;
-`}>
+`}
+        >
           <For each={children()}>
             {(vertex) => (
               <Show when={formStoreVertex()}>
@@ -238,9 +241,12 @@ export function LayoutTreeItem(
         </As>
       </Show>
       <Show when={isAfter()}>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   border: 1px solid #3b82f6;
-`} />
+`}
+        />
       </Show>
     </>
   );

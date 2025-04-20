@@ -5,7 +5,6 @@ import { FileRoutes } from "@solidjs/start/router";
 import { ToastProvider } from "solid-hot-toast";
 
 // import "~/base.css";
-
 import { ErrorBoundary, onMount, Suspense } from "solid-js";
 import { isServer } from "solid-js/web";
 
@@ -15,8 +14,6 @@ import { ThemeProvider } from "~/lib/context/ThemeContext";
 import { LoaderNew } from "./components/styled/LoaderSimple";
 import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
-import { getGlobalThemeVertex } from "./lib/graph/get/sync/store/getGlobalThemeVertex";
-import { themeConfig } from "./lib/graph/get/sync/theme/themeConfig";
 import { GraphContext } from "./lib/graph/GraphContext";
 import { toastValue } from "./toastValue";
 
@@ -39,7 +36,6 @@ const ErrorFallback = (props: {
 export default function App() {
   const graph = createAppState();
   const Toaster = clientOnly(() => import("./Toaster"));
-
 
   // Set up global error handlers on client-side only
   onMount(() => {

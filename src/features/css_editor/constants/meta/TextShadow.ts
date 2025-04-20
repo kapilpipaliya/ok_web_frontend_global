@@ -3,9 +3,9 @@ import type {
   DataEditorField,
   TextFieldOptionsField,
 } from "../FieldSchemaType";
+import { createGridOptions } from "../FieldSchemaType";
 
 import { defaultPixelSizeTypes } from "../csseditor_constants";
-import { createGridOptions } from "../FieldSchemaType";
 
 export const TextShadow = {
   textShadow: {

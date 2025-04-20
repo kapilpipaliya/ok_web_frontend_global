@@ -19,11 +19,14 @@ export function ModifyJsonButton(props: {
   return (
     <>
       <IconButton
-        css={[...ensureArray(props.css), css`
+        css={[
+          ...ensureArray(props.css),
+          css`
   cursor: pointer;
   background-color: transparent;
   border: none;
-`]}
+`,
+        ]}
         icon="ph:note-pencil"
         onClick={() => setShowModal(true)}
         ref={(el) => (saveAsTemplateRef = el)}

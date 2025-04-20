@@ -58,11 +58,14 @@ export const FieldWithCustomBox = (
 
   return (
     <div>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: grid;
   gap: 5px;
   grid-template-columns: 1fr 63px;
-`}>
+`}
+      >
         <DynamicCSSComponent
           meta={
             {
@@ -97,7 +100,9 @@ export const FieldWithCustomBox = (
         />
       </As>
       <Show when={optionType() === "custom"}>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   display: grid;
   border: 1px solid #3b82f6;
   gap: 10px;

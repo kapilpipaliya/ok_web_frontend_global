@@ -34,11 +34,23 @@ export function DialogWithButtons(
       footer={() => (
         <As as="div" css={[SETTINGS_CONSTANTS.MODAL.FOOTER.CSS]}>
           <Show when={props.hasPermission ?? true}>
-            <As as="button" css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CSS]} onClick={handleConfirm} type="button">
+            <As
+              as="button"
+              css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CSS]}
+              onClick={handleConfirm}
+              type="button"
+            >
               Confirm
             </As>
           </Show>
-          <As as="button" autofocus  css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]} onClick={props.onCancel} type="button" use:autofocus>
+          <As
+            as="button"
+            autofocus
+            css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]}
+            onClick={props.onCancel}
+            type="button"
+            use:autofocus
+          >
             Cancel
           </As>
         </As>
@@ -54,7 +66,9 @@ export function DialogWithButtons(
         }
         when={props.hasPermission ?? true}
       >
-        <As as="p" css={[SETTINGS_CONSTANTS.MODAL.BODY.CSS]}>{props.message}</As>
+        <As as="p" css={[SETTINGS_CONSTANTS.MODAL.BODY.CSS]}>
+          {props.message}
+        </As>
       </Show>
     </CustomModal>
   );

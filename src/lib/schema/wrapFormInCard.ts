@@ -1,6 +1,6 @@
 import type { FieldAttribute } from "../meta/FormMetadataType";
 import { css } from "../styles";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+
 export const wrapFormInCard = (formSchema: FieldAttribute) => {
   return {
     as: "div",

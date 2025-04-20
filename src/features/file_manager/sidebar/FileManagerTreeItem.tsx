@@ -111,12 +111,17 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
         />
       </TreeItemContainer>
       <Show when={fileManagerStore.expandedKeys.includes(props.item.id)}>
-        <As as="ul" css={[css`
+        <As
+          as="ul"
+          css={[
+            css`
   padding-left: 8px;
   padding-top: 5px;
   list-style: none;
   padding: 0;
-`]}>
+`,
+          ]}
+        >
           <For each={children()?.filter((item) => item.L[0] !== "File")}>
             {(child) => <FileManagerTreeItem item={child} />}
           </For>

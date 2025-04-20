@@ -4,9 +4,9 @@ import type {
   SelectField,
   TextFieldOptionsField,
 } from "../FieldSchemaType";
+import { createSelectOptions } from "../FieldSchemaType";
 
 import { sizeTypes } from "../csseditor_constants";
-import { createSelectOptions } from "../FieldSchemaType";
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 
 export const TypographySection = {

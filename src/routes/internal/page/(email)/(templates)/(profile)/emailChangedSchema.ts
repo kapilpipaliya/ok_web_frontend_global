@@ -1,5 +1,6 @@
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 import { css } from "~/lib/styles";
+
 const content = [
   {
     as: "h1",

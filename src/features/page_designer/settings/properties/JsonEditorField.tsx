@@ -48,18 +48,27 @@ export function JsonEditorFieldComponent() {
   );
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   margin-top: 5px;
-`}>
+`}
+    >
       JSON
-
       <VanilaJsonEditor
         json={graph.vertexes[formStoreVertex()?.P.selectedId]?.P ?? {}}
         onChange={replacePropertyValue}
       />
-      {!isJsonValid() && <As as="span" css={css`
+      {!isJsonValid() && (
+        <As
+          as="span"
+          css={css`
   color: \${args.theme.var.color.error};
-`}>Invalid JSON</As>}
+`}
+        >
+          Invalid JSON
+        </As>
+      )}
     </As>
   );
 }

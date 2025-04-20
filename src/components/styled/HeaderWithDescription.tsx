@@ -28,7 +28,7 @@ export function HeaderWithDescription(
         border-color: ${props.borderColor || "rgb(229,231,235)"};
         border-bottom-width: 1px;
         padding: ${props.paddingY || "1.25rem"} ${props.paddingX || "1rem"};`,
-        css`@media (min-width: 640px) { padding: ${props.paddingY || "1.25rem"}; ${props.paddingXSm || "1.5rem"}; }`
+        css`@media (min-width: 640px) { padding: ${props.paddingY || "1.25rem"}; ${props.paddingXSm || "1.5rem"}; }`,
       ]}
     >
       <As

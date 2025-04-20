@@ -1,8 +1,8 @@
 import type { JSX } from "solid-js";
+import { For } from "solid-js";
 
 import { Icon } from "@iconify-icon/solid";
 import { useNavigate } from "@solidjs/router";
-import { For } from "solid-js";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -11,6 +11,7 @@ import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+
 export interface AuthenticatedMenuProps {
   onClose: () => void;
 }
@@ -81,19 +82,26 @@ export function AuthenticatedMenu(
   };
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   padding: 10px;
-`}>
+`}
+    >
       <For each={getMenuItems()}>
         {(item) => (
-          <As as="li" css={css`
+          <As
+            as="li"
+            css={css`
   margin-bottom: 8px;
   &:last-child {
     margin-bottom: 0;
   }
-`}>
-            <As as="a"
-              css={args => css`
+`}
+          >
+            <As
+              as="a"
+              css={(args) => css`
   display: flex;
   align-items: center;
   color: ${args.theme.var.color.base};
@@ -108,7 +116,9 @@ export function AuthenticatedMenu(
               onclick={props.onClose}
               target={item.target}
             >
-              <As as={Icon} css={args => css`
+              <As
+                as={Icon}
+                css={(args) => css`
   margin-right: 10px;
   color: ${args.theme.var.color.primary};
 `}
@@ -120,14 +130,18 @@ export function AuthenticatedMenu(
           </As>
         )}
       </For>
-      <As as="hr" css={args => css`
+      <As
+        as="hr"
+        css={(args) => css`
   margin-top: 8px;
   margin-bottom: 8px;
   color: ${args.theme.var.color.base_40};
-`} />
+`}
+      />
       <li>
-        <As as="a"
-          css={args => css`
+        <As
+          as="a"
+          css={(args) => css`
   display: flex;
   align-items: center;
   width: 100%;
@@ -143,9 +157,14 @@ export function AuthenticatedMenu(
 `}
           href={API.urls.user.logout}
         >
-          <As as={Icon} css={css`
+          <As
+            as={Icon}
+            css={css`
   margin-right: 10px;
-`} icon="ph:sign-out" width="20" />
+`}
+            icon="ph:sign-out"
+            width="20"
+          />
           Sign Out
         </As>
       </li>

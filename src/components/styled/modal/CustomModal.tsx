@@ -15,6 +15,7 @@ import { useZIndex } from "../../fields/ZIndex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+
 interface CustomModalProps {
   bodyCss?: string | string[];
   children: JSX.Element;
@@ -55,7 +56,9 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
             {props.title}
           </Show>
           <Show when={props.closeButton !== false}>
-            <As as="button" css={css`
+            <As
+              as="button"
+              css={css`
   float: right;
   padding: 0 5px;
   border-radius: 5px;
@@ -74,19 +77,34 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
       );
     };
     return (
-      <As as="div"
+      <As
+        as="div"
         aria-modal="true"
-        css={[SETTINGS_CONSTANTS.MODAL.BODY.CSS, ...ensureArray(props.dialogCss),css`border-radius: 10px;`]}
+        css={[
+          SETTINGS_CONSTANTS.MODAL.BODY.CSS,
+          ...ensureArray(props.dialogCss),
+          css`border-radius: 10px;`,
+        ]}
         ref={setFloating}
         role="dialog"
       >
         <Header />
-        <As as="hr" css={css`
+        <As
+          as="hr"
+          css={css`
   color: lightgrey;
-`} />
-        <As as="div" css={[...ensureArray(props.bodyCss), STYLES.overflowCss,css`
+`}
+        />
+        <As
+          as="div"
+          css={[
+            ...ensureArray(props.bodyCss),
+            STYLES.overflowCss,
+            css`
   padding: 3px;
-`]}>
+`,
+          ]}
+        >
           {props.children}
         </As>
         {props.footer?.(setOpen)}

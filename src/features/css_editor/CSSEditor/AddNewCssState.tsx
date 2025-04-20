@@ -10,6 +10,7 @@ import { useCssEditor } from "../context/CssEditorContext";
 import { useCssState } from "../context/CssStateContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+
 export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   const [selectedAllState, setSelectedAllState] = createSignal<Option[]>([]);
   const [stateName, setStateName] = createSignal("");
@@ -28,7 +29,9 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   };
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   display: flex;
@@ -37,29 +40,43 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
   padding-right: 2px;
   padding-top: 5px;
   padding-bottom: 5px;
-`}>
+`}
+    >
       <span>Add New State</span>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   flex-direction: column;
   gap: 4px;
   justify-content: space-between;
   margin-top: 10px;
-`}>
-        <As as="label" css={css`
+`}
+      >
+        <As
+          as="label"
+          css={css`
   display: flex;
   flex-direction: column;
-`}>
+`}
+        >
           Enter States
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   align-items: center;
   display: flex;
   height: 100%;
-`}>
-            <As as="textarea"
-              css={[PROPERTIES.Css.TextFieldCss, css`
+`}
+          >
+            <As
+              as="textarea"
+              css={[
+                PROPERTIES.Css.TextFieldCss,
+                css`
   height: 100%;
-`]}
+`,
+              ]}
               onInput={(e) => setStateName(e.target.value)}
               placeholder="Enter State Name"
               ref={inputRef!}
@@ -73,15 +90,21 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
             />
           </As>
         </As>
-        <As as="label" css={css`
+        <As
+          as="label"
+          css={css`
   display: flex;
   flex-direction: column;
-`}>
+`}
+        >
           Find and add State Name
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   align-items: center;
   display: flex;
-`}>
+`}
+          >
             <MultiSelectField
               displayValueKey="title"
               onRemove={() => {
@@ -108,7 +131,8 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
         </As>
 
         <As as="button" onClick={addNewState}>
-          <As as={Icon}
+          <As
+            as={Icon}
             css={css`
   margin-left: 2px;
 `}

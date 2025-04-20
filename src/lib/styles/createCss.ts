@@ -1,4 +1,10 @@
-import { oklch, interpolate, formatHex, formatRgb, wcagLuminance } from "culori";
+import {
+  formatHex,
+  formatRgb,
+  interpolate,
+  oklch,
+  wcagLuminance,
+} from "culori";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
@@ -13,6 +19,7 @@ export interface ThemeColors {
   success: string;
   warning: string;
   error: string;
+
   [key: string]: string;
 }
 
@@ -33,33 +40,39 @@ export const defaultColors: ThemeColors = {
 export function getColorShade(baseColor: string, shade: number): string {
   // Ensure shade is between 0 and 100
   const safeShade = Math.max(0, Math.min(100, shade));
-  
+
   // Get the base color in OKLCH
   const baseOklch = oklch(baseColor);
-  if (!baseOklch) return baseColor;
-  
+  if (!baseOklch) {
+    return baseColor;
+  }
+
   if (safeShade === 50) {
     // Return the base color at 50% shade
     return formatHex(baseOklch) || baseColor;
-  } else if (safeShade < 50) {
+  }
+  if (safeShade < 50) {
     // For lighter shades (0-49)
     // Linearly interpolate from white (0) to base color (50)
     const ratio = safeShade / 50;
     const white = oklch("white");
-    if (!white) return baseColor;
-    
+    if (!white) {
+      return baseColor;
+    }
+
     const interpolated = interpolate([white, baseOklch])(ratio);
     return formatHex(interpolated) || baseColor;
-  } else {
-    // For darker shades (51-100)
-    // Linearly interpolate from base color (50) to black (100)
-    const ratio = (safeShade - 50) / 50;
-    const black = oklch("black");
-    if (!black) return baseColor;
-    
-    const interpolated = interpolate([baseOklch, black])(ratio);
-    return formatHex(interpolated) || baseColor;
   }
+  // For darker shades (51-100)
+  // Linearly interpolate from base color (50) to black (100)
+  const ratio = (safeShade - 50) / 50;
+  const black = oklch("black");
+  if (!black) {
+    return baseColor;
+  }
+
+  const interpolated = interpolate([baseOklch, black])(ratio);
+  return formatHex(interpolated) || baseColor;
 }
 
 // Helper to create CSS with ._id selector
@@ -68,28 +81,35 @@ export function createIdCss(cssContent: string): string {
 }
 
 // Helper to create a CSS function
-export function createCssFunction(cssGenerator: (options?: FunctionArgumentType) => string) {
+export function createCssFunction(
+  cssGenerator: (options?: FunctionArgumentType) => string,
+) {
   return (options?: FunctionArgumentType) => cssGenerator(options);
 }
 
 // Merge multiple CSS strings
-export function mergeCss(...cssFunctions: ((options?: FunctionArgumentType) => string)[]): (options?: FunctionArgumentType) => string {
+export function mergeCss(
+  ...cssFunctions: ((options?: FunctionArgumentType) => string)[]
+): (options?: FunctionArgumentType) => string {
   return (options?: FunctionArgumentType) => {
-    return cssFunctions.map(fn => fn(options)).join('\n');
+    return cssFunctions.map((fn) => fn(options)).join("\n");
   };
 }
 
 // Create a responsive variation of a CSS function
-export function responsive(cssGenerator: (options?: FunctionArgumentType) => string, breakpoints: Record<string, string> = {
-  sm: '640px',
-  md: '768px',
-  lg: '1024px',
-  xl: '1280px',
-  '2xl': '1536px',
-}): (options?: FunctionArgumentType) => string {
+export function responsive(
+  cssGenerator: (options?: FunctionArgumentType) => string,
+  breakpoints: Record<string, string> = {
+    sm: "640px",
+    md: "768px",
+    lg: "1024px",
+    xl: "1280px",
+    "2xl": "1536px",
+  },
+): (options?: FunctionArgumentType) => string {
   return (options?: FunctionArgumentType) => {
     let css = cssGenerator(options);
-    
+
     // Add media queries
     Object.entries(breakpoints).forEach(([name, width]) => {
       css += `
@@ -100,7 +120,7 @@ export function responsive(cssGenerator: (options?: FunctionArgumentType) => str
         }
       `;
     });
-    
+
     return css;
   };
 }
@@ -109,71 +129,85 @@ export function responsive(cssGenerator: (options?: FunctionArgumentType) => str
 export const colors = {
   lighten: (color: string, amount: number) => {
     const c = oklch(color);
-    if (!c) return color;
-    
+    if (!c) {
+      return color;
+    }
+
     c.l = Math.min(1, (c.l || 0) + amount / 200); // Smaller steps for OKLCH lightness
     return formatHex(c) || color;
   },
-  
+
   darken: (color: string, amount: number) => {
     const c = oklch(color);
-    if (!c) return color;
-    
+    if (!c) {
+      return color;
+    }
+
     c.l = Math.max(0, (c.l || 0) - amount / 200); // Smaller steps for OKLCH lightness
     return formatHex(c) || color;
   },
-  
+
   setAlpha: (color: string, alpha: number) => {
     const c = oklch(color);
-    if (!c) return color;
-    
+    if (!c) {
+      return color;
+    }
+
     c.alpha = alpha;
     return formatRgb(c) || color;
   },
-  
+
   spin: (color: string, amount: number) => {
     const c = oklch(color);
-    if (!c) return color;
-    
+    if (!c) {
+      return color;
+    }
+
     c.h = ((c.h || 0) + amount) % 360;
-    if (c.h < 0) c.h += 360;
+    if (c.h < 0) {
+      c.h += 360;
+    }
     return formatHex(c) || color;
   },
-  
+
   complement: (color: string) => {
     const c = oklch(color);
-    if (!c) return color;
-    
+    if (!c) {
+      return color;
+    }
+
     c.h = ((c.h || 0) + 180) % 360;
     return formatHex(c) || color;
   },
-  
+
   mix: (color1: string, color2: string, amount = 50) => {
     const c1 = oklch(color1);
     const c2 = oklch(color2);
-    if (!c1 || !c2) return color1;
-    
+    if (!(c1 && c2)) {
+      return color1;
+    }
+
     // Convert amount from percentage to 0-1 range
     const ratio = amount / 100;
     const mixed = interpolate([c1, c2])(ratio);
     return formatHex(mixed) || color1;
   },
-  
-  mostReadable: (color: string, options: string[] = ['#fff', '#000']) => {
+
+  mostReadable: (color: string, options: string[] = ["#fff", "#000"]) => {
     const bgLuminanceVal = wcagLuminance(color);
-    
+
     // Calculate contrast ratios for each option
-    const contrastRatios = options.map(optionColor => {
+    const contrastRatios = options.map((optionColor) => {
       const luminanceVal = wcagLuminance(optionColor);
       const light = Math.max(luminanceVal, bgLuminanceVal);
       const dark = Math.min(luminanceVal, bgLuminanceVal);
       return {
         color: optionColor,
-        ratio: (light + 0.05) / (dark + 0.05)
+        ratio: (light + 0.05) / (dark + 0.05),
       };
     });
-    
+
     // Return the color with the highest contrast ratio
     return contrastRatios.sort((a, b) => b.ratio - a.ratio)[0].color;
-  }
-}; 
+  },
+};

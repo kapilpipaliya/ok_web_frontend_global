@@ -1,8 +1,8 @@
 /* eslint-disable perfectionist/sort-objects */
 import type { TextFieldOptionsField } from "../FieldSchemaType";
+import { createSelectOptions } from "../FieldSchemaType";
 
 import { sizeTypes } from "../csseditor_constants";
-import { createSelectOptions } from "../FieldSchemaType";
 import { CSSWideKeywords } from "./CSSMetadata";
 
 export const ColumnsSection = {

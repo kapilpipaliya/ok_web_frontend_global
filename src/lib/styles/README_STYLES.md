@@ -1,6 +1,7 @@
 # @styles Decorator System
 
-This styling system provides a clean, type-safe way to define styles for components using the `@styles` decorator pattern. Unlike the CSS variables approach, this system uses direct color values and transforms.
+This styling system provides a clean, type-safe way to define styles for components using the `@styles` decorator
+pattern. Unlike the CSS variables approach, this system uses direct color values and transforms.
 
 ## Key Features
 

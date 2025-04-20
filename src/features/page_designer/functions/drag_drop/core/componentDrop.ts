@@ -194,7 +194,8 @@ function calculateInitialPosition(
 
   if (position === "before" || position === "left") {
     return posCounter - 0.5;
-  } else if (position === "after" || position === "right") {
+  }
+  if (position === "after" || position === "right") {
     // If this is the last item, add 1 instead of 0.5
     return posCounter === lastPos ? posCounter + 1 : posCounter + 0.5;
   }

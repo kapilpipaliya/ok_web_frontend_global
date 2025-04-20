@@ -46,7 +46,7 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
   return (
     <As
       as="div"
-      css={args => css`
+      css={(args) => css`
         border: 1px solid ${args.theme.var.color.secondary};
         color: ${args.theme.var.color.secondary};
         margin: 6px 0;
@@ -68,11 +68,7 @@ export const DataEditWithCustomDialog = (props: Readonly<DataEditorField>) => {
       >
         <LabelWrapper meta={meta()} />
         <As as="span" css={css`cursor: pointer;`}>
-          <Icon
-            icon={"ph:plus-circle"}
-            noobserver
-            onClick={addOption}
-          />
+          <Icon icon={"ph:plus-circle"} noobserver onClick={addOption} />
         </As>
       </As>
       <For each={props.value as unknown as { [key: string]: string }[]}>

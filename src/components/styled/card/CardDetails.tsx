@@ -4,18 +4,31 @@ import { css } from "~/lib/styles";
 
 export function CardDetailRow(props: { children: JSX.Element; label: string }) {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   column-gap: 1rem;
   justify-content: space-between;
   padding-top: 0.75rem; padding-bottom: 0.75rem;
-`}>
-      <As as="dt" css={css`
+`}
+    >
+      <As
+        as="dt"
+        css={css`
   color: #3b82f6;
-`}>{props.label}</As>
-    <As as="dd" css={css`
+`}
+      >
+        {props.label}
+      </As>
+      <As
+        as="dd"
+        css={css`
   color: #3b82f6;
-`}>{props.children}</As>
+`}
+      >
+        {props.children}
+      </As>
     </As>
   );
 }
@@ -36,12 +49,15 @@ export function CardDetails(props: {
 
 export function CardDetailsContainer(props: { children: JSX.Element }) {
   return (
-    <As as="dl" css={css`
+    <As
+      as="dl"
+      css={css`
   font-size: 0.875rem;
   margin-top: -0.75rem; margin-bottom: -0.75rem;
   padding-left: 1.5rem; padding-right: 1.5rem;
   padding-top: 1rem; padding-bottom: 1rem;
-`}>
+`}
+    >
       {props.children}
     </As>
   );

@@ -73,7 +73,9 @@ export const SortableRow = (
 
   return (
     <>
-      <As as="tr" css={css`
+      <As
+        as="tr"
+        css={css`
         border-bottom: 1px solid #dddddd;
         border-radius: 10px;
         text-align: center;
@@ -81,15 +83,15 @@ export const SortableRow = (
         width: 50px;
         background-color: ${
           props.rowIndex === props.dragFromIndex()
-            ? '#e0e0e0'
+            ? "#e0e0e0"
             : props.rowIndex === props.dragToIndex()
-            ? '#f0f0f0'
-            : 'white'
+              ? "#f0f0f0"
+              : "white"
         };
         border: ${
           props.rowIndex === props.dragToIndex()
-            ? '2px solid green'
-            : '1px solid #ddd'
+            ? "2px solid green"
+            : "1px solid #ddd"
         };
       `}
         draggable={true}
@@ -99,11 +101,14 @@ export const SortableRow = (
         onDrop={props.handleDrop}
       >
         <td>
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   display: flex;
   align-items: center;
   justify-content: center;
-`}>
+`}
+          >
             <IconButton
               css={css`
   cursor: grab;
@@ -177,13 +182,20 @@ export const SortableRow = (
         vertexes: [props.joinVertex],
       })?.length} */}
       <Show when={expandVertex() && expanded()}>
-        <As as="tr" css={css`
+        <As
+          as="tr"
+          css={css`
   border-bottom: 1px solid #dddddd;
   border-radius: 10px;
-`}>
-          <As as="td" css={css`
+`}
+        >
+          <As
+            as="td"
+            css={css`
   padding-left: 15px;
-`} colspan={rowColumnsMetaAttrs().length + 2}>
+`}
+            colspan={rowColumnsMetaAttrs().length + 2}
+          >
             <DynamicComponent
               componentName={"DynamicTable"}
               data={props.joinVertex}

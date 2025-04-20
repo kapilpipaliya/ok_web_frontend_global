@@ -129,10 +129,15 @@ export function AddNewFileButton() {
   };
 
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   display: flex;
   gap: 4px;
-`]}>
+`,
+      ]}
+    >
       <FileUploader handleFileSelect={handleFileSelect} label="Upload File" />
       <SchemaRenderer form={getFolderFormSchema(() => {})} />
     </As>

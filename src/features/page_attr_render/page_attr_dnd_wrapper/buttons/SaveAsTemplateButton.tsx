@@ -10,7 +10,8 @@ import { SaveAsTemplateMenu } from "../menus/SaveAsTemplateMenu";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import { CssType } from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/FieldSchemaType";
+
 interface SaveAsTemplateButtonProps {
   css?: CssType;
   item: Vertex;
@@ -36,7 +37,10 @@ export function SaveAsTemplateButton(
   return (
     <>
       <IconButton
-        css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ...ensureArray(props.css),
+        css={[
+          ICON_BUTTON_STYLES.baseCss,
+          ICON_BUTTON_STYLES.defaultCss,
+          ...ensureArray(props.css),
           css`
             background-color: transparent;
             border: none;
@@ -60,12 +64,16 @@ export function SaveAsTemplateButton(
           // onMouseLeave={() => setShowModal(false)}
           parentRef={saveAsTemplateRef!}
         >
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-`}>
-            <As as="button"
+`}
+          >
+            <As
+              as="button"
               css={css`
   text-align: left;
   padding-left: 1rem; padding-right: 1rem;
@@ -76,7 +84,8 @@ export function SaveAsTemplateButton(
             >
               Save as Template
             </As>
-            <As as="button"
+            <As
+              as="button"
               css={css`
   text-align: left;
   padding-left: 1rem; padding-right: 1rem;

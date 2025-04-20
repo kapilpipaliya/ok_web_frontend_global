@@ -67,18 +67,27 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       value: any;
     }>,
   ) => (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}>
-      <As as="label" css={css`
+`}
+    >
+      <As
+        as="label"
+        css={css`
   font-size: 15px;
   display: flex;
-`}>{inputProps.label}</As>
-      <As as="input"
+`}
+      >
+        {inputProps.label}
+      </As>
+      <As
+        as="input"
         checked={inputProps.type === "checkbox" ? inputProps.value : undefined}
         css={css`
   border: 1px solid #3b82f6;
@@ -98,18 +107,27 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
 
   const RegexInput = (regexprops: Readonly<{ index: number }>) => (
     <div class="">
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}>
-        <As as="label" css={css`
+`}
+      >
+        <As
+          as="label"
+          css={css`
   font-size: 15px;
   display: flex;
-`}>Regex</As>
-        <As as="input"
+`}
+        >
+          Regex
+        </As>
+        <As
+          as="input"
           css={css`
   border: 1px solid #3b82f6;
   font-size: 15px;
@@ -123,18 +141,27 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
           value={values.regex[regexprops.index].value}
         />
       </As>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}>
-        <As as="label" css={css`
+`}
+      >
+        <As
+          as="label"
+          css={css`
   font-size: 15px;
   display: flex;
-`}>Enabled</As>
-        <As as="input"
+`}
+        >
+          Enabled
+        </As>
+        <As
+          as="input"
           checked={values.regex[regexprops.index].enabled}
           css={css`
   border: 1px solid #3b82f6;
@@ -148,18 +175,27 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
           type="checkbox"
         />
       </As>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}>
-        <As as="label" css={css`
+`}
+      >
+        <As
+          as="label"
+          css={css`
   font-size: 15px;
   display: flex;
-`}>Message</As>
-        <As as="input"
+`}
+        >
+          Message
+        </As>
+        <As
+          as="input"
           css={css`
   border: 1px solid #3b82f6;
   font-size: 15px;
@@ -174,7 +210,8 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
         />
       </As>
       <div>
-        <As as="button"
+        <As
+          as="button"
           css={css`
   border: 1px solid #3b82f6;
   padding: 2px;
@@ -191,9 +228,14 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
   return (
     <div>
       <Show when={rules.length > 0}>
-        <As as="h3" css={css`
+        <As
+          as="h3"
+          css={css`
   font-weight: bold;
-`}>Validations:</As>
+`}
+        >
+          Validations:
+        </As>
       </Show>
       <For each={rules}>
         {(rule) => (

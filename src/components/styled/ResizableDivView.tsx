@@ -170,20 +170,32 @@ export function ResizableContainer(
   };
 
   return (
-    <As as="div" css={[...ensureArray(props.class), STYLES.overflowCss, css`
+    <As
+      as="div"
+      css={[
+        ...ensureArray(props.class),
+        STYLES.overflowCss,
+        css`
   display: grid;
   flex-shrink: 0;
-`]}>
-      <As as="div" css={[STYLES.overflowCss, css`
+`,
+      ]}
+    >
+      <As
+        as="div"
+        css={[
+          STYLES.overflowCss,
+          css`
   position: relative;
   display: flex;
   flex-direction: column;
   border-left: 1px solid lightgray;
-`, 
+`,
           css`
-  ${isDraggingOver() ? `background-color: \${args.theme.var.color.primary_10};` : ''}
-  ${resizing() ? `user-select: none;` : ''}
-`]}
+  ${isDraggingOver() ? "background-color: ${args.theme.var.color.primary_10};" : ""}
+  ${resizing() ? "user-select: none;" : ""}
+`,
+        ]}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDropEvent}

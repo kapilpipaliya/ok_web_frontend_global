@@ -28,7 +28,7 @@ export function FilePickerModal(props: {
             css`
               margin-left: auto;
               margin-right: 8px;
-            `
+            `,
           ]}
           containerCss={css`margin-top: auto;`}
           onClick={() => {

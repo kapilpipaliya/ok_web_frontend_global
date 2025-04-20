@@ -36,9 +36,12 @@ export function UniqueConstrains() {
   );
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   margin-top: 6px;
-`}>
+`}
+    >
       <TableInputField
         data={formStoreVertex()}
         isNoPermissionCheck={true}

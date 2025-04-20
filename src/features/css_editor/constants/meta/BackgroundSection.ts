@@ -4,7 +4,6 @@ import type {
   FieldWithCustomProperty,
   TextFieldOptionsField,
 } from "../FieldSchemaType";
-
 import { createSelectOptions } from "../FieldSchemaType";
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 

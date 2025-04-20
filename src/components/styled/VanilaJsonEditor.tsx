@@ -5,9 +5,10 @@ import type {
   MenuSeparator,
   RenderMenuContext,
 } from "vanilla-jsoneditor";
+import { createJSONEditor } from "vanilla-jsoneditor";
 
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
-import { createJSONEditor } from "vanilla-jsoneditor";
+
 // import 'vanilla-jsoneditor/themes/jse-theme-dark.css';
 
 interface VanilaJsonEditorProps {

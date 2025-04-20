@@ -11,16 +11,23 @@ import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { ComponentName } from "../components/ComponentName";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+
 export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();
   const [graph] = useGraph();
   const getComponentName = () => getComponentLabel(graph, props.item);
   return (
-    <As as="span" css={[css`
+    <As
+      as="span"
+      css={[
+        css`
   position: relative;
-`]}>
-      <As as="div" css={css`
+`,
+      ]}
+    >
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   background-color: \${args.theme.var.color.primary};
@@ -31,8 +38,10 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   border-radius: 5px 5px 0px 0px;
   right: 0px;
   z-index: ${zIndex};
-`}>
-        <As as={Icon}
+`}
+      >
+        <As
+          as={Icon}
           css={[ICON_BUTTON_STYLES.baseCss]}
           icon={iconMap[getComponentName() as keyof typeof iconMap]}
           noobserver

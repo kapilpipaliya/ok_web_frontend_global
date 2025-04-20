@@ -222,14 +222,14 @@ export function ProfileSettings() {
               },
               // {
               //   as: "button",
-//                 css: css`
-//   background-color: #f3f4f6;
-//   color: #374151;
-//   padding: 8px 16px;
-//   border-radius: 4px;
-//   cursor: pointer;
-//   border: 1px solid #3b82f6;
-// `,
+              //                 css: css`
+              //   background-color: #f3f4f6;
+              //   color: #374151;
+              //   padding: 8px 16px;
+              //   border-radius: 4px;
+              //   cursor: pointer;
+              //   border: 1px solid #3b82f6;
+              // `,
               //   componentName: "Html",
               //   text: "Cancel",
               // },
@@ -260,13 +260,16 @@ export function ProfileSettings() {
   } as FieldAttribute;
 
   // Get user data and update vertex properties
-  const loadUserData = createAsync(async () => {
-    try {
-      return await getUserRPC();
-    } catch (err) {
-      showErrorToast((err as Error).message);
-    }
-  }, {deferStream: true});
+  const loadUserData = createAsync(
+    async () => {
+      try {
+        return await getUserRPC();
+      } catch (err) {
+        showErrorToast((err as Error).message);
+      }
+    },
+    { deferStream: true },
+  );
   const setUserData = (user: UserData) => {
     if (user.user) {
       replaceVertexProperties(0, formDataId, graph, setGraph, user.user.P);

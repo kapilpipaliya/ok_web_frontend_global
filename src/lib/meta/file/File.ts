@@ -1,4 +1,3 @@
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
   FieldAttribute,
   IFormMetaData,

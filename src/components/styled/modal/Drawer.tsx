@@ -97,7 +97,9 @@ export function Drawer(props: Readonly<DrawerProps>) {
     };
 
     return (
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   cursor: ew-resize;
   height: 100%;
   left: -5px;
@@ -114,7 +116,8 @@ export function Drawer(props: Readonly<DrawerProps>) {
 
   const ResizerBorder = (p: { children: JSX.Element }) => {
     return (
-      <As as="div"
+      <As
+        as="div"
         css={css`${isOpen() ? "right:0;" : `right:-${drawerWidth()};`} ${mainDivHover() ? "border-left:2px solid #37c;" : "border-left:none;"} background-color: \${args.theme.var.color.base_10}; border-radius:15px 0 0 15px; box-shadow:0 2px 5px rgba(0,0,0,0.5); color:black; height:100%; position:fixed; top:0; transition:right 0.5s; width:${drawerWidth()}; z-index:${zIndex};`}
         ref={setFloating}
       >
@@ -129,10 +132,16 @@ export function Drawer(props: Readonly<DrawerProps>) {
         <props.customButton isOpen={isOpen()} onClick={toggleDrawer} />
       </Show>
       <ResizerBorder>
-        <As as="div" css={[css`
+        <As
+          as="div"
+          css={[
+            css`
   ${props.drawerClass}
   height: 100%;
-`, STYLES.overflowCss]}>
+`,
+            STYLES.overflowCss,
+          ]}
+        >
           {props.children}
         </As>
         <Resizer />

@@ -1,6 +1,5 @@
 /* eslint-disable perfectionist/sort-objects */
 import type { TextFieldOptionsField } from "../FieldSchemaType";
-
 import { createSelectOptions } from "../FieldSchemaType";
 import { CSSWideKeywords, extraPropertyValues } from "./CSSMetadata";
 

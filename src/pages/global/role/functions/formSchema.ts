@@ -114,16 +114,19 @@ export const roleFormSchema = {
               as: "button",
               componentName: "Html",
               css: (args: FunctionArgumentType) => {
-                return [css`
+                return [
+                  css`
                 cursor: pointer;
                 padding: 8px 16px;
                 background-color: transparent;
                 border-left: none;
                 border-right: none;
                 border-top: none;
-                `, args.dataContext.tabState[0]?.activeTab === "Perm"
-                      ? css`border-bottom: 2px solid ${args.theme.var.color.primary};`
-                      : css`border-bottom: 2px solid transparent;`];
+                `,
+                  args.dataContext.tabState[0]?.activeTab === "Perm"
+                    ? css`border-bottom: 2px solid ${args.theme.var.color.primary};`
+                    : css`border-bottom: 2px solid transparent;`,
+                ];
               },
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RolePerm", {
@@ -142,16 +145,19 @@ export const roleFormSchema = {
             {
               as: "button",
               componentName: "Html",
-              css: (options: FunctionArgumentType) => [css`
+              css: (options: FunctionArgumentType) => [
+                css`
                 cursor: pointer;
                 padding: 8px 16px;
                 background-color: transparent;
                 border-left: none;
                 border-right: none;
                 border-top: none;
-              `, options.dataContext.tabState[0]?.activeTab === "Page"
-              ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
-              : css`border-bottom: 2px solid transparent;`],
+              `,
+                options.dataContext.tabState[0]?.activeTab === "Page"
+                  ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
+                  : css`border-bottom: 2px solid transparent;`,
+              ],
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RolePage", {
                   graph: options.graph,
@@ -169,16 +175,19 @@ export const roleFormSchema = {
             {
               as: "button",
               componentName: "Html",
-              css: (options: FunctionArgumentType) => [css`
+              css: (options: FunctionArgumentType) => [
+                css`
                 cursor: pointer;
                 padding: 8px 16px;
                 background-color: transparent;
                 border-left: none;
                 border-right: none;
                 border-top: none;
-              `, options.dataContext.tabState[0]?.activeTab === "Form"
-              ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
-              : css`border-bottom: 2px solid transparent;`],
+              `,
+                options.dataContext.tabState[0]?.activeTab === "Form"
+                  ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
+                  : css`border-bottom: 2px solid transparent;`,
+              ],
               props: (options: FunctionArgumentType) => {
                 const permissions = evalExpression("->RoleForm", {
                   graph: options.graph,
@@ -207,26 +216,29 @@ export const roleFormSchema = {
               as: "div",
               attributes: [permissionsTableSchema("Perm")],
               componentName: "Html",
-              css: (options: FunctionArgumentType) => options.dataContext.tabState[0]?.activeTab === "Perm"
-                    ? ""
-                    : css`display:none`,
+              css: (options: FunctionArgumentType) =>
+                options.dataContext.tabState[0]?.activeTab === "Perm"
+                  ? ""
+                  : css`display:none`,
             },
             {
               as: "div",
               attributes: [permissionsTableSchema("Page")],
               componentName: "Html",
-              css: (options: FunctionArgumentType) => options.dataContext.tabState[0]?.activeTab === "Page"
-              ? ""
-              : css`display:none`,
+              css: (options: FunctionArgumentType) =>
+                options.dataContext.tabState[0]?.activeTab === "Page"
+                  ? ""
+                  : css`display:none`,
             },
 
             {
               as: "div",
               attributes: [permissionsTableSchema("Form")],
               componentName: "Html",
-              css: (options: FunctionArgumentType) => options.dataContext.tabState[0]?.activeTab === "Form"
-              ? ""
-              : css`display:none`,
+              css: (options: FunctionArgumentType) =>
+                options.dataContext.tabState[0]?.activeTab === "Form"
+                  ? ""
+                  : css`display:none`,
             },
           ],
           css: css`

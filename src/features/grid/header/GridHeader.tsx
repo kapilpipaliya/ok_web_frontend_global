@@ -12,7 +12,7 @@ import {
   STYLES,
 } from "~/pages/settings/constants";
 
-import { IconButton } from "../../../components/styled/IconButton";
+import { IconButton } from "~/components/styled/IconButton";
 import { useDataGridContext } from "../context/DataGridContext";
 import { AddNewButton } from "./AddNewButton";
 import { css } from "~/lib/styles";
@@ -39,12 +39,17 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
   };
 
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 4px 10px;
-`]}>
+`,
+      ]}
+    >
       <Dynamic
         component={props.CustomAddNewButton || AddNewButton}
         disabled={
@@ -54,12 +59,17 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
         }
         onClick={onAddNew}
       />
-        <As as="div" css={[css`
+      <As
+        as="div"
+        css={[
+          css`
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
-`]}>
+`,
+        ]}
+      >
         <SearchBar
           handleChange={props.onSearch}
           placeholder="Search Data..."
@@ -69,7 +79,11 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           css={[headerIconButtonCss]}
           disabled={gridState.isLoading}
           icon={gridState.isLoading ? "ph:spinner-gap" : "ph:arrows-clockwise"}
-          iconCss={gridState.isLoading ? css`transition: transform 1s infinite linear;` : ""}
+          iconCss={
+            gridState.isLoading
+              ? css`transition: transform 1s infinite linear;`
+              : ""
+          }
           onClick={handleRefresh}
           title="Refresh Data"
         />
@@ -87,7 +101,8 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
             arrowCss={STYLES.tooltip.arrowCss}
             content="Column Size"
           >
-            <As as="input"
+            <As
+              as="input"
               css={[PROPERTIES.Css.TextFieldCss]}
               max="10"
               min="1"

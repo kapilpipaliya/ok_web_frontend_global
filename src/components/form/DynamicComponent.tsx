@@ -4,14 +4,12 @@ import { useNavigate, useSearchParams } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
 import {
   $PROXY,
-  createEffect,
   createMemo,
   createSignal,
   createUniqueId,
   ErrorBoundary,
   getOwner,
   Match,
-  on,
   onCleanup,
   onMount,
   runWithOwner,
@@ -22,7 +20,6 @@ import {
 } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
-import { v7 as uuidv7 } from "uuid";
 
 import { getMetaProps } from "~/components/form/functions/getMetaProps";
 import { Label } from "~/features/css_editor/components/fields/Label";
@@ -68,7 +65,6 @@ import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
-import { generateNewCssUId } from "~/lib/graph/mutate/core/generateNewCssUId";
 import { useTheme } from "~/lib/context/ThemeContext";
 import { processCssContent } from "~/lib/styles/processCss";
 
@@ -452,8 +448,8 @@ export function DynamicComponent(
         value: {
           get: () => value(),
           enumerable: true,
-          configurable: true
-        }
+          configurable: true,
+        },
       };
       return Object.defineProperties(
         {},
@@ -534,10 +530,10 @@ export function DynamicComponent(
       return processCssContent(props.meta.P.css, functionArgs, styleId);
     } catch (error) {
       console.error("Error in css:", error);
-      return '';
+      return "";
     }
   });
-  
+
   const componentName = createMemo(() => {
     try {
       if (dynamicProps().componentName) {
@@ -721,10 +717,10 @@ export function DynamicComponent(
     );
 
     if (style) {
-      if (classes['class']) {
-        classes['class'] = `${classes['class']} ${styleId}`;
+      if (classes.class) {
+        classes.class = `${classes.class} ${styleId}`;
       } else {
-        classes['class'] = styleId;
+        classes.class = styleId;
       }
     }
 
@@ -805,9 +801,7 @@ export function DynamicComponent(
   return (
     <>
       <Show when={cssStyle()}>
-        <Style>
-          {cssStyle()}
-        </Style>
+        <Style>{cssStyle()}</Style>
       </Show>
       {/* <Show when={!props.isNoPermissionCheck && getGlobalStore(graph).P.isDevelopment}>
         comp:{componentName()}

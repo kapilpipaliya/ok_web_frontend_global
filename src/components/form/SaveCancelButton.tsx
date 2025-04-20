@@ -44,13 +44,21 @@ export function SaveCancelButton(
     navigate,
   );
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
       display: flex;
-      justify-content: ${props.buttonAlign ? `end` : "start"};
-    `}>
-      <As as="button" css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS, css`
+      justify-content: ${props.buttonAlign ? "end" : "start"};
+    `}
+    >
+      <As
+        as="button"
+        css={[
+          SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
+          css`
   margin-right: 7px;
-`]}
+`,
+        ]}
         onClick={onCancel}
         type="button"
       >
@@ -58,7 +66,9 @@ export function SaveCancelButton(
       </As>
       <Show
         fallback={
-          <As as="button" css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
+          <As
+            as="button"
+            css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
             disabled={props.disabled}
             onClick={onSubmit}
             type="button"

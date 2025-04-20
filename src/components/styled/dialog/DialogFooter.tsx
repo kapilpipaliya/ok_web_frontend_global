@@ -1,6 +1,6 @@
 import { type JSX, Show, splitProps } from "solid-js";
 import { As } from "~/components/As";
-import { CssType } from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { css } from "~/lib/styles";
 
@@ -21,12 +21,18 @@ export function DialogFooter(
   ]);
 
   return (
-    <As  as="div" css={[...ensureArray(local.containerCss), css`
+    <As
+      as="div"
+      css={[
+        ...ensureArray(local.containerCss),
+        css`
   display: flex;
   align-items: center;
   gap: 0.50rem;
   margin-bottom: 6px;
-`]}>
+`,
+      ]}
+    >
       <Show when={local.children}>{local.children}</Show>
       <Show when={!local.children}>
         <As as="button" {...buttonProps} type="button">

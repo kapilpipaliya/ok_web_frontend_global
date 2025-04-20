@@ -33,20 +33,26 @@ export function Permission() {
   );
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   margin-top: 6px;
-`}>
+`}
+    >
       <HeaderWithDescription
         description="All the permissions to the form level"
         paddingXSm="0.25rem"
         title="Form Permissions"
       />
 
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   margin-top: 0.5rem;
   padding-left: 0.25rem;
   padding-right: 0.25rem;
-`}>
+`}
+      >
         <TableInputField
           data={graph.vertexes[formStoreVertex()?.P.formDataId!]}
           isNoPermissionCheck={true}

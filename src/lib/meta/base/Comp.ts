@@ -1,5 +1,4 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 export const parentCompAttribute = {

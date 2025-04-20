@@ -6,6 +6,7 @@ import { SearchBar } from "./SearchBar";
 import { SectionList } from "./SectionList";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+
 export function StyleEditor() {
   const [searchQuery, setSearchQuery] = useSearchContext();
   const [filteredSections, setFilteredSections] = createSignal(
@@ -22,7 +23,9 @@ export function StyleEditor() {
   }
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   align-items: start;
   flex-direction: column;
@@ -30,7 +33,8 @@ export function StyleEditor() {
   margin-bottom: 10px;
   margin-top: 10px;
   width: 100%;
-`}>
+`}
+    >
       <SearchBar
         handleChange={handleSearch}
         placeholder="Search Style..."

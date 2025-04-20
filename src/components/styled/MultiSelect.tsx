@@ -238,15 +238,21 @@ export function MultiSelectField(
       return (
         <Show
           fallback={
-            <As as="div" css={({theme}) => css`
+            <As
+              as="div"
+              css={({ theme }) => css`
   cursor: pointer;
   font-size: 14px;
   margin: 3px;
   padding: 8px;
   border-radius: 5px;
-  ${selectedValue().some(
-    (item) => getOptionValue(item) === getOptionValue(p.option)
-  ) ? `background-color: ${theme.var.color.primary_80};` : ""}
+  ${
+    selectedValue().some(
+      (item) => getOptionValue(item) === getOptionValue(p.option),
+    )
+      ? `background-color: ${theme.var.color.primary_80};`
+      : ""
+  }
   &:hover {
     background-color: ${theme.var.color.primary_40};
   }
@@ -268,7 +274,9 @@ export function MultiSelectField(
           when={hasChildren()}
         >
           <div>
-            <As as="div" css={({theme}) => css`
+            <As
+              as="div"
+              css={({ theme }) => css`
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -277,9 +285,13 @@ export function MultiSelectField(
   margin: 3px;
   padding: 8px;
   border-radius: 5px;
-  ${selectedValue().some(
-    (item) => getOptionValue(item) === getOptionValue(p.option)
-  ) ? `background-color: ${theme.var.color.primary_80};` : ""}
+  ${
+    selectedValue().some(
+      (item) => getOptionValue(item) === getOptionValue(p.option),
+    )
+      ? `background-color: ${theme.var.color.primary_80};`
+      : ""
+  }
   &:hover {
     background-color: ${theme.var.color.primary_40};
   }
@@ -299,9 +311,12 @@ export function MultiSelectField(
               </span>
             </As>
             <Show when={isExpanded()}>
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   padding-left: 20px;
-`}>
+`}
+              >
                 {/* @ts-expect-error ignore */}
                 <For each={p.option[childrenKey()]}>
                   {(childOption) => Option({ option: childOption })}
@@ -314,7 +329,11 @@ export function MultiSelectField(
     };
 
     return (
-      <As as="div" css={[STYLES.overflowCss, ({theme}) => css`
+      <As
+        as="div"
+        css={[
+          STYLES.overflowCss,
+          ({ theme }) => css`
   border-radius: 5px;
   display: flex;
   background-color: ${theme.var.color.base_10};
@@ -323,24 +342,37 @@ export function MultiSelectField(
   max-height: 200px;
   width: 100%;
   z-index: ${zIndex};
-`]}
+`,
+        ]}
       >
         <Show
-          fallback={<As as="div" css={css`
+          fallback={
+            <As
+              as="div"
+              css={css`
   cursor: pointer;
   padding: 8px;
   width: 100%;
-`}>Loading...</As>}
+`}
+            >
+              Loading...
+            </As>
+          }
           when={!props.isLoadingOptions}
         >
           <For
             each={filteredOptions()}
             fallback={
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   cursor: pointer;
   padding: 8px;
   width: 100%;
-`}>No item found </As>
+`}
+              >
+                No item found{" "}
+              </As>
             }
           >
             {(option) => <Option option={option} />}
@@ -351,36 +383,49 @@ export function MultiSelectField(
   };
 
   return (
-    <As as="div" css={[ensureArray(props.css), css`
+    <As
+      as="div"
+      css={[
+        ensureArray(props.css),
+        css`
   border: 1px solid \${args.theme.var.color.base};
   padding: 0 3px;
   border-radius: 4px;
   text-align: left;
   width: 100%;
-  ${props.error ? `border: 1px solid \${args.theme.var.color.error};` : ""}
-`]}
+  ${props.error ? "border: 1px solid ${args.theme.var.color.error};" : ""}
+`,
+      ]}
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
     >
       {/* Main grid container */}
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-`}>
+`}
+      >
         {/* Tags and input area */}
-        <As as="div" css={[
-          props.selectionLimit !== 1 ? "flex-wrap: wrap" : "",
-          css`
+        <As
+          as="div"
+          css={[
+            props.selectionLimit !== 1 ? "flex-wrap: wrap" : "",
+            css`
   align-items: center;
   display: flex;
   gap: 5px;
   padding: 4px 6px;
   width: 100%;
-`]}
+`,
+          ]}
         >
           <For each={selectedValue()}>
             {(tag) => (
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   align-items: center;
   background-color: \${args.theme.var.color.primary_60};
   cursor: default;
@@ -389,10 +434,14 @@ export function MultiSelectField(
   gap: 5px;
   padding: 2px 5px;
   border-radius: 4px;
-`}>
-                <As as="span" css={css`
+`}
+              >
+                <As
+                  as="span"
+                  css={css`
   white-space: nowrap;
-`}>
+`}
+                >
                   {props.renderLabel
                     ? props.renderLabel(tag, true)
                     : getOptionLabel(tag)}
@@ -416,22 +465,27 @@ export function MultiSelectField(
               </As>
             )}
           </For>
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   display: flex;
   align-items: center;
   flex: 1;
-`}>
-            <As as="input"
+`}
+          >
+            <As
+              as="input"
               auto-complete="off"
               css={[
                 css`
-  ${(props.selectionLimit === 1 && selectedValue().length === 1) ? "width: 100px;" : ""}
+  ${props.selectionLimit === 1 && selectedValue().length === 1 ? "width: 100px;" : ""}
   ${props.selectionLimit !== 1 ? "min-width: 100px;" : ""}
   border: none;
   flex: 1;
   outline: none;
   padding: 5px;
-`]}
+`,
+              ]}
               data-lpignore="true"
               disabled={props.disable}
               onFocus={handleInputFocus}
@@ -445,15 +499,19 @@ export function MultiSelectField(
         </As>
 
         {/* Dropdown icon area */}
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
   padding: 0 8px;
-`}>
-          <As as={Icon}
-            css={({theme}) => css`
+`}
+        >
+          <As
+            as={Icon}
+            css={({ theme }) => css`
   color: ${theme.var.color.base};
   cursor: pointer;
 `}
@@ -472,11 +530,16 @@ export function MultiSelectField(
       </As>
 
       <Show when={props.error}>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   color: \${args.theme.var.color.error};
   font-size: 12px;
   padding: 2px;
-`}>{props.error}</As>
+`}
+        >
+          {props.error}
+        </As>
       </Show>
 
       <Show when={dropdownVisible()}>

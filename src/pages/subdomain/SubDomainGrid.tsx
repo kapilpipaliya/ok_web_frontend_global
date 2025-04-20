@@ -50,7 +50,9 @@ export const SubDomainGrid = () => {
         as: "span",
         cell: (info: CellContext<Vertex<SubDomain>, unknown>) => {
           return (
-            <As as="a" css={css`
+            <As
+              as="a"
+              css={css`
   color: \${args.theme.var.color.primary};
   text-decoration: none;
   hover: text-decoration;
@@ -71,7 +73,9 @@ export const SubDomainGrid = () => {
         as: "span",
         cell: (info: CellContext<Vertex<SubDomain>, unknown>) => {
           return (
-            <As as="a" css={css`
+            <As
+              as="a"
+              css={css`
   color: \${args.theme.var.color.primary};
   text-decoration: none;
   hover: text-decoration;

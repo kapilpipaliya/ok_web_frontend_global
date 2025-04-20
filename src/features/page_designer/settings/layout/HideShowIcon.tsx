@@ -25,14 +25,14 @@ export function HideShowIcon(props: { iconSize: number; metaVertex: Vertex }) {
   return (
     <IconButton
       css={[
-  ICON_BUTTON_STYLES.baseCss,
-  ICON_BUTTON_STYLES.defaultCss,
-  ICON_BUTTON_STYLES.spacingCss,
-  css`
+        ICON_BUTTON_STYLES.baseCss,
+        ICON_BUTTON_STYLES.defaultCss,
+        ICON_BUTTON_STYLES.spacingCss,
+        css`
     background-color: transparent;
     border: none;
   `,
-]}
+      ]}
       icon={icon()}
       iconCss={css`transition:transform 0.2s;`}
       onClick={(e) => {

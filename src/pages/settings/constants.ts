@@ -222,7 +222,6 @@ export const toolBarCss = `
   }
 `;
 
-
 export const profileImage = "/images/profile.png";
 
 export const EMAIL_TEMPLATES = {
@@ -315,7 +314,7 @@ export const STYLES = {
       border: none;
     }
   `,
-  
+
   // Container styles
   container: {
     baseCss: `
@@ -392,10 +391,10 @@ export const STYLES = {
       scrollbar-width: thin;
     }
   `,
-  
+
   // Tooltip styles
   tooltip: {
-    animationCss: ``,
+    animationCss: "",
     arrowCss: `
       ._id {
         color: \${args.theme.var.color.base_280};

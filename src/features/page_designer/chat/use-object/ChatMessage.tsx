@@ -17,12 +17,17 @@ interface ChatMessageProps {
 
 export function ChatMessage(props: ChatMessageProps) {
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   padding: 12px;
   background: rgb(243,244,246);
   border-radius: 6px;
   margin-bottom: 8px;
-`]}>
+`,
+      ]}
+    >
       <MessageHeader
         index={props.index}
         message={props.message}
@@ -30,17 +35,23 @@ export function ChatMessage(props: ChatMessageProps) {
       />
       <div>{props.message.P?.prompt}</div>
       {props.message.P?.timestamp && (
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   font-size: 10px;
   color: rgb(107,114,128);
-`}>
+`}
+        >
           {new Date(props.message.P.timestamp).toLocaleTimeString()}
         </As>
       )}
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   font-size: 10px;
   color: rgb(107,114,128);
-`}>
+`}
+      >
         Model: {props.message.P?.model}
       </As>
       {/* Commenting out file attachments for now
@@ -81,18 +92,26 @@ function MessageHeader(props: {
 }) {
   return (
     <>
-      <As as="div" css={[css`
+      <As
+        as="div"
+        css={[
+          css`
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: 500;
   margin-bottom: 4px;
-`]}>
-        <As as="div" css={css`
+`,
+        ]}
+      >
+        <As
+          as="div"
+          css={css`
   display: flex;
   gap: 8px;
   align-items: center;
-`}>
+`}
+        >
           <As as="span">Prompt #{props.index}</As>
           {props.message.P?.hasFile && (
             <Icon
@@ -105,11 +124,14 @@ function MessageHeader(props: {
           )}
         </As>
         <IconButton
-          css={[headerIconButtonCss, css`
+          css={[
+            headerIconButtonCss,
+            css`
   color: rgb(239,68,68);
   background-color: transparent;
   border: none;
-`]}
+`,
+          ]}
           icon="ph:trash"
           onClick={() => props.onDelete(props.message)}
           title="Delete"

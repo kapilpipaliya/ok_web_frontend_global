@@ -3,9 +3,9 @@ import { createEffect, Match, type ParentProps, Show, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
+import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
 
 import { type GlobalProperties, useGraph } from "~/lib/graph/GraphContext";
-import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
 import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 
 import { getInitialData } from "./cypher/get/getInitialData";
@@ -14,7 +14,7 @@ import { setGraphData } from "./lib/graph/mutate/core/setGraphData";
 import { mergeVertexProperties } from "./lib/graph/mutate/core/vertex";
 import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
 import { css } from "~/lib/styles";
-import {As} from "~/components/As";
+import { As } from "~/components/As";
 
 interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;
@@ -85,16 +85,24 @@ export function GetInitialData(props: GetInitialDataProps) {
         <Match
           when={props.authenticate && !(data()?.userData as UserData)?.user}
         >
-          <As as={"div"} css={css`
+          <As
+            as={"div"}
+            css={css`
   background-color: red;
   padding: 1px;
-`}>Not Authorized</As>
+`}
+          >
+            Not Authorized
+          </As>
         </Match>
         <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   background-color: red;
   padding: 1px;
-`}>
+`}
+          >
             {getGlobalStore(graph[0]).P.initialDataFetchError}
           </As>
         </Match>

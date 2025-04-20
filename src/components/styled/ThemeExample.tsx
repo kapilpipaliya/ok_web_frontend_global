@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { As } from "../As";
 import { css, withStates } from "~/lib/styles";
 import { useTheme } from "~/lib/context/ThemeContext";
-import { hsl, rgb, formatHex, formatRgb, wcagContrast, wcagLuminance } from "culori";
+import { formatHex, formatRgb, hsl, rgb, wcagContrast } from "culori";
 
 // CSS generation functions using the new approach with ThemeContext
 const containerCss = () => css`
@@ -30,12 +30,16 @@ const headerCss = () => {
 const buttonCss = () => {
   const theme = useTheme();
   const baseColor = theme.primaryColor;
-  
+
   // Darken color for hover/active states
   const hslColor = hsl(baseColor);
-  const hoverColor = formatHex(hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.1) }));
-  const activeColor = formatHex(hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.15) }));
-  
+  const hoverColor = formatHex(
+    hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.1) }),
+  );
+  const activeColor = formatHex(
+    hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.15) }),
+  );
+
   return withStates(
     `
       background-color: ${baseColor};
@@ -49,19 +53,23 @@ const buttonCss = () => {
     `,
     `background-color: ${hoverColor};`,
     undefined,
-    `background-color: ${activeColor};`
+    `background-color: ${activeColor};`,
   );
 };
 
 const secondaryButtonCss = () => {
   const theme = useTheme();
   const baseColor = theme.secondaryColor;
-  
+
   // Darken color for hover/active states
   const hslColor = hsl(baseColor);
-  const hoverColor = formatHex(hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.1) }));
-  const activeColor = formatHex(hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.15) }));
-  
+  const _hoverColor = formatHex(
+    hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.1) }),
+  );
+  const _activeColor = formatHex(
+    hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.15) }),
+  );
+
   return withStates(
     `
       background-color: transparent;
@@ -76,7 +84,7 @@ const secondaryButtonCss = () => {
     `,
     `background-color: ${formatRgb(rgb({ ...rgb(baseColor), alpha: 0.1 }))};`,
     undefined,
-    `background-color: ${formatRgb(rgb({ ...rgb(baseColor), alpha: 0.2 }))};`
+    `background-color: ${formatRgb(rgb({ ...rgb(baseColor), alpha: 0.2 }))};`,
   );
 };
 
@@ -88,7 +96,7 @@ const inputCss = () => {
   const theme = useTheme();
   const baseColor = theme.baseColor;
   const primaryColor = theme.primaryColor;
-  
+
   return withStates(
     `
       border: 1px solid ${formatRgb(rgb({ ...rgb(baseColor), alpha: 0.2 }))};
@@ -102,7 +110,7 @@ const inputCss = () => {
     `
       outline: 2px solid ${formatRgb(rgb({ ...rgb(primaryColor), alpha: 0.5 }))};
       border-color: ${primaryColor};
-    `
+    `,
   );
 };
 
@@ -115,10 +123,10 @@ const colorPaletteCss = () => css`
 
 const colorBoxCss = (color: string, name: string) => {
   // Calculate contrast to determine text color
-  const blackContrast = wcagContrast('#000000', color);
-  const whiteContrast = wcagContrast('#ffffff', color);
-  const textColor = blackContrast > whiteContrast ? '#000000' : '#ffffff';
-  
+  const blackContrast = wcagContrast("#000000", color);
+  const whiteContrast = wcagContrast("#ffffff", color);
+  const textColor = blackContrast > whiteContrast ? "#000000" : "#ffffff";
+
   return css`
     height: 80px;
     background-color: ${color};
@@ -146,80 +154,114 @@ export function ThemeExample() {
   const [count, setCount] = createSignal(0);
   const [name, setName] = createSignal("");
   const theme = useTheme();
-  
+
   // Theme colors to display
   const themeColorEntries = [
-    ['primary', theme.primaryColor],
-    ['secondary', theme.secondaryColor],
-    ['accent', theme.accentColor],
-    ['neutral', theme.neutralColor],
-    ['base', theme.baseColor],
-    ['info', theme.infoColor],
-    ['success', theme.successColor],
-    ['warning', theme.warningColor],
-    ['error', theme.errorColor]
+    ["primary", theme.primaryColor],
+    ["secondary", theme.secondaryColor],
+    ["accent", theme.accentColor],
+    ["neutral", theme.neutralColor],
+    ["base", theme.baseColor],
+    ["info", theme.infoColor],
+    ["success", theme.successColor],
+    ["warning", theme.warningColor],
+    ["error", theme.errorColor],
   ];
-  
+
   return (
     <As as="div" css={containerCss()}>
-      <As as="h1" css={headerCss()}>CSS-in-JS Example</As>
-      
+      <As as="h1" css={headerCss()}>
+        CSS-in-JS Example
+      </As>
+
       <As as="div" css={sectionCss()}>
-        <As as="input" 
-          css={inputCss()} 
-          type="text" 
+        <As
+          as="input"
+          css={inputCss()}
+          type="text"
           placeholder="Enter your name"
           value={name()}
           onInput={(e) => setName(e.currentTarget.value)}
         />
-        
+
         <As as="div">
-          <As as="button" css={buttonCss()} onClick={() => setCount(c => c + 1)}>
+          <As
+            as="button"
+            css={buttonCss()}
+            onClick={() => setCount((c) => c + 1)}
+          >
             Count: {count()}
           </As>
-          
-          <As as="button" css={secondaryButtonCss()} onClick={() => setCount(0)}>
+
+          <As
+            as="button"
+            css={secondaryButtonCss()}
+            onClick={() => setCount(0)}
+          >
             Reset
           </As>
         </As>
       </As>
-      
+
       <As as="div" css={sectionCss()}>
-        <As as="h1" css={headerCss()}>Color Palette</As>
+        <As as="h1" css={headerCss()}>
+          Color Palette
+        </As>
         <As as="div" css={colorPaletteCss()}>
-          {themeColorEntries.filter(([_, color]) => !!color).map(([name, color]) => (
-            <As as="div" css={colorBoxCss(color as string, name as string)}>{name}</As>
-          ))}
+          {themeColorEntries
+            .filter(([_, color]) => !!color)
+            .map(([name, color]) => (
+              <As as="div" css={colorBoxCss(color as string, name as string)}>
+                {name}
+              </As>
+            ))}
         </As>
       </As>
-      
+
       <As as="div" css={sectionCss()}>
-        <As as="h1" css={headerCss()}>Color Shades</As>
+        <As as="h1" css={headerCss()}>
+          Color Shades
+        </As>
         <As as="div" css={colorPaletteCss()}>
-          {[10, 20, 30, 40, 50, 60, 70, 80, 90, 200, 400, 600, 800, 1000].map((shade) => (
-            <As as="div" css={colorBoxCss(theme[`primaryColor_${shade};`] as string, `primary-${shade}`)}>
-              {shade}
-            </As>
-          ))}
+          {[10, 20, 30, 40, 50, 60, 70, 80, 90, 200, 400, 600, 800, 1000].map(
+            (shade) => (
+              <As
+                as="div"
+                css={colorBoxCss(
+                  theme[`primaryColor_${shade};`] as string,
+                  `primary-${shade}`,
+                )}
+              >
+                {shade}
+              </As>
+            ),
+          )}
         </As>
       </As>
-      
+
       <As as="div" css={sectionCss()}>
-        <As as="h1" css={headerCss()}>Theme Controls</As>
-        <As as="div" css={css`
+        <As as="h1" css={headerCss()}>
+          Theme Controls
+        </As>
+        <As
+          as="div"
+          css={css`
           display: flex;
           gap: 1rem;
           margin-bottom: 1rem;
-        `}>
-          <As as="button" 
-            css={buttonCss()} 
+        `}
+        >
+          <As
+            as="button"
+            css={buttonCss()}
             onClick={() => theme.toggleColorMode?.()}
           >
-            Toggle {theme.colorMode === 'dark' ? 'Light' : 'Dark'} Mode
+            Toggle {theme.colorMode === "dark" ? "Light" : "Dark"} Mode
           </As>
-          
-          <As as="button" 
-            css={secondaryButtonCss()} 
+
+          <As
+            as="button"
+            css={secondaryButtonCss()}
             onClick={() => theme.resetTheme?.()}
           >
             Reset Theme
@@ -228,4 +270,4 @@ export function ThemeExample() {
       </As>
     </As>
   );
-} 
+}

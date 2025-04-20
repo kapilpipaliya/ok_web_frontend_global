@@ -37,14 +37,18 @@ export function PreviewCSSMenu(
       <DialogHeader title="Preview CSS" />
       <DialogSubTitle>View the CSS content below:</DialogSubTitle>
 
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   margin-top: 2px;
-`}>
+`}
+      >
         <code>{cssContent()}</code>
       </As>
 
       <DialogFooter>
-        <As as="button"
+        <As
+          as="button"
           css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]}
           onClick={props.onClose}
           type="button"

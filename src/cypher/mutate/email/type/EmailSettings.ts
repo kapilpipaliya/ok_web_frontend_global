@@ -1,6 +1,4 @@
 export interface EmailSettings {
-  [key: string]: unknown;
-
   active?: string; // 'smtp', 'sendgrid', etc. Empty means not configured
   fromEmail?: string;
   secure?: boolean;
@@ -10,7 +8,8 @@ export interface EmailSettings {
   smtpHost?: string;
   smtpPassword?: string;
   smtpPort?: number;
-
   smtpUsername?: string;
+
+  [key: string]: unknown;
   // Add other provider settings as needed
 }

@@ -74,22 +74,22 @@ export const Page: IFormMetaData = {
         },
         wrapWithTitle("Title", false, {
           css: [
-              PROPERTIES.Css.TextFieldCss,
-              css`
+            PROPERTIES.Css.TextFieldCss,
+            css`
                 flex: 1;
               `,
-            ],
+          ],
           componentName: "TextInput",
           key: "title",
           // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
         }),
         wrapWithTitle("Key", true, {
           css: [
-              PROPERTIES.Css.TextFieldCss,
-              css`
+            PROPERTIES.Css.TextFieldCss,
+            css`
                 flex: 1;
               `,
-            ],
+          ],
           componentName: "TextInput",
           key: "key",
           validation: { required: true },
@@ -122,11 +122,11 @@ export const Page: IFormMetaData = {
         }),
         wrapWithTitle("Description", false, {
           css: [
-              PROPERTIES.Css.TextFieldCss,
-              css`
+            PROPERTIES.Css.TextFieldCss,
+            css`
                 flex: 1;
               `,
-            ],
+          ],
           componentName: "TextArea",
           key: "description",
         }),
@@ -236,9 +236,9 @@ string`,
           css: (options: FunctionArgumentType) => {
             const type =
               options.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
-                return type === "CheckBox"
-                  ? PROPERTIES.Css.CheckBoxCss
-                  : PROPERTIES.Css.TextFieldCss;
+            return type === "CheckBox"
+              ? PROPERTIES.Css.CheckBoxCss
+              : PROPERTIES.Css.TextFieldCss;
           },
           props: (options: FunctionArgumentType) => {
             const type =

@@ -32,7 +32,8 @@ import { CardGrid } from "../CardGrid";
 import { TableActions } from "./TableActions";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+
 type TableProps = {
   allConfiguredPermission: Vertex[];
   cardSize: number;
@@ -119,7 +120,9 @@ export function CommonTable(props: Readonly<TableProps>) {
   );
 
   const FallBack = () => (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   grid-column: span ${props.headers.length} / span ${props.headers.length};
   justify-content: center;
@@ -152,12 +155,15 @@ export function CommonTable(props: Readonly<TableProps>) {
   };
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0,0,0,0.15);
   padding: 4px 10px;
   width: 100%;
-`}>
+`}
+    >
       <Switch>
         <Match when={props.layout === "table"}>
           <Table
@@ -315,12 +321,17 @@ const Content = (props: { header: ColumnDef<any>; row: Vertex }) =>
 
 function LoadMoreButton(props: Readonly<{ onClick: () => void }>) {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   justify-content: end;
   padding: 5px 10px;
-`}>
-      <As as="button" css={(args: FunctionArgumentType) => css`
+`}
+    >
+      <As
+        as="button"
+        css={(args: FunctionArgumentType) => css`
   background-color: ${args.theme.var.color.primary};
   border-right: 5pxpx solid;
   cursor: pointer;
@@ -365,7 +376,12 @@ function TableBody(
             when={props.enableMultiRowSelection || props.enableRowSelection}
           >
             <TableBodyCell
-              css={props.selectedRows.includes(row) ? (args: FunctionArgumentType) => css`background-color:${args.theme.var.color.primary_40};` : ""}
+              css={
+                props.selectedRows.includes(row)
+                  ? (args: FunctionArgumentType) =>
+                      css`background-color:${args.theme.var.color.primary_40};`
+                  : ""
+              }
               index={index()}
             >
               <Show
@@ -384,7 +400,12 @@ function TableBody(
           <For each={props.headers}>
             {(header: any) => (
               <TableBodyCell
-                css={props.selectedRows.includes(row) ? (args: FunctionArgumentType) => css`background-color:${args.theme.var.color.primary_40};` : ""}
+                css={
+                  props.selectedRows.includes(row)
+                    ? (args: FunctionArgumentType) =>
+                        css`background-color:${args.theme.var.color.primary_40};`
+                    : ""
+                }
                 index={index()}
               >
                 <Content header={header} row={row} />

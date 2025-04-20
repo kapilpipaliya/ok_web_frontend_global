@@ -4,32 +4,45 @@ import { css } from "~/lib/styles";
 
 export function CardGrids() {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   max-width: 80rem;
   margin-left: auto; margin-right: auto;
   padding-left: 1rem; padding-right: 1rem;
   padding-left: 1.5rem@sm; padding-right: 1.5rem@sm;
   padding-left: 2rem@lg; padding-right: 2rem@lg;
-`}>
-      <As as="div" css={css`
+`}
+    >
+      <As
+        as="div"
+        css={css`
   // max-width: 42rem;
   /* max-width: none@lg; */
   margin-left: auto; margin-right: auto;
   margin-left: 0@lg; margin-right: 0@lg;
-`}>
-        <As as="div" css={css`
+`}
+      >
+        <As
+          as="div"
+          css={css`
   display: flex;
   align-items: center;
   justify-content: space-between;
-`}>
-          <As as="h2" css={css`
+`}
+        >
+          <As
+            as="h2"
+            css={css`
   color: #3b82f6;
   font-size: 1rem;
   font-weight: 600;
-`}>
+`}
+          >
             Recent Users
           </As>
-          <As as="a"
+          <As
+            as="a"
             css={css`
   color: indigo_280;
   font-size: 0.875rem;
@@ -43,13 +56,16 @@ export function CardGrids() {
             View all<span class="sr-only">, clients</span>
           </As>
         </As>
-        <As as="ul" css={css`
+        <As
+          as="ul"
+          css={css`
   display: grid;
   column-gap: 1.5rem;
   row-gap: 2rem;
   grid-template-columns: repeat(1, 1fr);
   margin-top: 1.5rem;
-`}>
+`}
+        >
           <SimpleCard
             amount="$2,000.00"
             imgSrc="https://tailwindui.com/img/logos/48x48/tuple.svg"

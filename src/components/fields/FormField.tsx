@@ -122,6 +122,7 @@ export function FormField(
       );
     }
   }
+
   initForm();
 
   async function loadData() {

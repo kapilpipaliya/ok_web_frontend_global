@@ -42,7 +42,17 @@
 // https://drafts.csswg.org/css-cascade-5/#revert-layer
 
 // import { BORDER_STYLE_VALUES } from "@master/css";
-const BORDER_STYLE_VALUES = ["hidden", "inset", "groove", "ridge", "outset", "dotted", "dashed", "solid", "double"];
+const BORDER_STYLE_VALUES = [
+  "hidden",
+  "inset",
+  "groove",
+  "ridge",
+  "outset",
+  "dotted",
+  "dashed",
+  "solid",
+  "double",
+];
 
 export const CSSWideKeywords = [
   "inherit",

@@ -15,26 +15,37 @@ export function ShareButton(props: { formStoreId: string }) {
     graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
 
   const isSaved = () => {
-    if (!formStoreVertex()) return false;
+    if (!formStoreVertex()) {
+      return false;
+    }
 
     const formStoreVertexObj = formStoreVertex();
-    if (!formStoreVertexObj?.P?.formDataId) return false;
+    if (!formStoreVertexObj?.P?.formDataId) {
+      return false;
+    }
 
     const formDataVertex = graph.vertexes[formStoreVertexObj.P.formDataId];
-    if (!formDataVertex) return false;
+    if (!formDataVertex) {
+      return false;
+    }
 
     return !isNegative(formDataVertex.id) && formDataVertex.P?.key;
   };
 
   const getLink = () => {
-    if (!formStoreVertex()) return "";
+    if (!formStoreVertex()) {
+      return "";
+    }
 
     const formStoreVertexObj = formStoreVertex();
-    if (!formStoreVertexObj?.P?.formDataId) return "";
+    if (!formStoreVertexObj?.P?.formDataId) {
+      return "";
+    }
 
     const formDataVertex = graph.vertexes[formStoreVertexObj.P.formDataId];
-    if (!formDataVertex || !formDataVertex.L || !formDataVertex.P?.key)
+    if (!(formDataVertex?.L && formDataVertex.P?.key)) {
       return "";
+    }
 
     const { hostname, port, protocol } = window.location;
     const formattedPort = port ? `:${port}` : "";

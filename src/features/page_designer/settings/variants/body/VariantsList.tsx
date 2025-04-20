@@ -112,9 +112,12 @@ export function VariantsList() {
           onConfirm={() => deleteVariant(selectedVariantToDelete()!)}
           title="Delete Variant"
         >
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   margin-top: 1rem;
-`}>
+`}
+          >
             <p>
               The variant is used at {variantUsage().length} attributes. It will
               be removed from all places where it is used.
@@ -132,7 +135,8 @@ export function VariantsList() {
     <>
       <For each={variants()}>
         {(variant, index) => (
-          <As as="div"
+          <As
+            as="div"
             css={css`
   line-height: 1.25rem;
   display: flex;
@@ -150,21 +154,27 @@ export function VariantsList() {
             onMouseEnter={() => highlightVariant(variant)}
             onMouseLeave={() => unhighlightVariant()}
           >
-            <As as="span" css={css`
+            <As
+              as="span"
+              css={css`
   display: flex;
-`}>
+`}
+            >
               {variant.P.key} ({variantUsageCount(variant).length} usage
               {variantUsageCount(variant).length > 1 ? "s" : ""})
             </As>
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
   display: flex;
   gap: 2px;
-`}>
+`}
+            >
               <IconButton
                 css={[
-  ICON_BUTTON_STYLES.baseCss,
-  ICON_BUTTON_STYLES.defaultCss,
-]}
+                  ICON_BUTTON_STYLES.baseCss,
+                  ICON_BUTTON_STYLES.defaultCss,
+                ]}
                 icon="ph:gear"
                 onClick={() => openVariantSettings(variant)}
                 size={22}
@@ -172,10 +182,7 @@ export function VariantsList() {
                 type="button"
               />
               <IconButton
-                css={[
-  ICON_BUTTON_STYLES.baseCss,
-  ICON_BUTTON_STYLES.deleteCss,
-]}
+                css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.deleteCss]}
                 icon="mage:trash"
                 onClick={() => setSelectedVariantToDelete(variant)}
                 size={22}

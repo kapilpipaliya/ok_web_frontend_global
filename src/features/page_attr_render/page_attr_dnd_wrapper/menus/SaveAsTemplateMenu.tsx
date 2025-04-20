@@ -140,7 +140,8 @@ export function SaveAsTemplateMenu(
       </DialogSubTitle>
 
       <div>
-        <As as="label"
+        <As
+          as="label"
           css={css`
   color: #3b82f6;
   display: block;
@@ -151,10 +152,14 @@ export function SaveAsTemplateMenu(
         >
           {label()} Name
         </As>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   margin-top: 2px;
-`}>
-          <As as="input"
+`}
+        >
+          <As
+            as="input"
             css={css`
   border-radius: 0.375rem;
   border-width: 0;
@@ -174,29 +179,46 @@ export function SaveAsTemplateMenu(
             value={templateName()}
           />
         </As>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   margin-top: 2px;
-`}>
-          <As as="label" css={css`
+`}
+        >
+          <As
+            as="label"
+            css={css`
   display: flex;
   gap: 0.5rem;
   align-items: center;
-`}>
-            <As as="input"
+`}
+          >
+            <As
+              as="input"
               checked={saveInCurrentPage()}
               onChange={(e) => setSaveInCurrentPage(e.target.checked)}
               type="checkbox"
             />
-            <As as="span" css={css`
+            <As
+              as="span"
+              css={css`
   font-size: 0.875rem;
-`}>Save in current page</As>
+`}
+            >
+              Save in current page
+            </As>
           </As>
         </As>
       </div>
       <Show when={error()}>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   color: \${args.theme.var.color.error};
-`}>{error()}</As>
+`}
+        >
+          {error()}
+        </As>
       </Show>
 
       <DialogFooter

@@ -34,22 +34,25 @@ export const DataField = (props: {
   const [errorMessage, setErrorMessage] = createSignal("");
   const dataContext = useDataContext() || {};
 
-  const selectionOptionsData = createAsync<null | ServerResult>(async () => {
-    if (!props.expression) {
-      return null;
-    }
-    if (props.data) {
-      return null;
-    }
-    return fetchDataFromDB(
-      { expression: props.expression },
-      {
-        nodes: {},
-        relationships: {},
-        vertexes: [data()],
-      },
-    );
-  }, {deferStream: true});
+  const selectionOptionsData = createAsync<null | ServerResult>(
+    async () => {
+      if (!props.expression) {
+        return null;
+      }
+      if (props.data) {
+        return null;
+      }
+      return fetchDataFromDB(
+        { expression: props.expression },
+        {
+          nodes: {},
+          relationships: {},
+          vertexes: [data()],
+        },
+      );
+    },
+    { deferStream: true },
+  );
 
   createEffect(() => {
     if (!props.expression) {
@@ -117,9 +120,14 @@ export const DataField = (props: {
         <div>...</div>
       </Match>
       <Match when={errorMessage()}>
-        <As as="div" css={args => css`
+        <As
+          as="div"
+          css={(args) => css`
   background-color: ${args.theme.var.color.error};
-`}>{errorMessage()}</As>
+`}
+        >
+          {errorMessage()}
+        </As>
       </Match>
       <Match when={Array.isArray(options()) && props.loop}>
         <For each={options()}>

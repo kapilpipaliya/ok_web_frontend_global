@@ -17,7 +17,8 @@ import { getComponentLabel } from "../../functions/component/getComponentLabel";
 import { HideShowIcon } from "./HideShowIcon";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+
 export function AttrConfigIcons(
   props: Readonly<{ metaVertex: Vertex; parentRef: HTMLElement }>,
 ) {
@@ -43,12 +44,15 @@ export function AttrConfigIcons(
       placement="right"
       useFlip={false}
     >
-      <As as="div" css={(args: FunctionArgumentType) => css`
+      <As
+        as="div"
+        css={(args: FunctionArgumentType) => css`
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: ${args.theme.var.color.base_10};
-`}>
+`}
+      >
         <Show when={isSelectedLayoutId(props.metaVertex.id)}>
           <InsertButtons item={props.metaVertex} size={iconSize} />
         </Show>

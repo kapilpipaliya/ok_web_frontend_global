@@ -25,19 +25,25 @@ export function UseChatTools() {
     });
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 300px;
   margin: 24px auto;
   /* stretch */
-`}>
+`}
+    >
       <For each={messages()} fallback={<As as="div">No messages</As>}>
         {(message) => (
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   white-space: pre-wrap;
-`}>
+`}
+          >
             <As as="strong">{`${message.role}: `}</As>
             {message.content}
             <For each={message.toolInvocations || []}>
@@ -46,9 +52,12 @@ export function UseChatTools() {
                   fallback={
                     <Show
                       fallback={
-                        <As as="div" css={args => css`
+                        <As
+                          as="div"
+                          css={(args) => css`
   color: ${args.theme.var.color.gray};
-`}>
+`}
+                        >
                           Calling {toolInvocation.toolName}...
                         </As>
                       }
@@ -56,9 +65,12 @@ export function UseChatTools() {
                       when={"result" in toolInvocation && toolInvocation}
                     >
                       {(toolInvocation) => (
-                        <As as="div" css={args => css`
+                        <As
+                          as="div"
+                          css={(args) => css`
   color: ${args.theme.var.color.gray};
-`}>
+`}
+                        >
                           Tool call {`${toolInvocation.toolName}: `}
                           {toolInvocation.result}
                         </As>
@@ -72,19 +84,26 @@ export function UseChatTools() {
                   }
                 >
                   {(toolInvocation) => (
-                    <As as="div" css={args => css`
+                    <As
+                      as="div"
+                      css={(args) => css`
   color: ${args.theme.var.color.gray};
-`}>
+`}
+                    >
                       {toolInvocation.args.message}
-                      <As as="div" css={args => css`
+                      <As
+                        as="div"
+                        css={(_args) => css`
   display: flex;
   gap: 2px;
-`}>
+`}
+                      >
                         <Show
                           fallback={
                             <>
-                              <As as="button"
-                                css={args => css`
+                              <As
+                                as="button"
+                                css={(args) => css`
   padding: 4px;
   font-weight: bold;
   color: ${args.theme.var.color.white};
@@ -100,8 +119,9 @@ export function UseChatTools() {
                               >
                                 Yes
                               </As>
-                              <As as="button"
-                                css={args => css`
+                              <As
+                                as="button"
+                                css={(args) => css`
   padding: 4px;
   font-weight: bold;
   color: ${args.theme.var.color.white};
@@ -137,8 +157,9 @@ export function UseChatTools() {
       </For>
 
       <form onSubmit={handleSubmit}>
-        <As as="input"
-          css={args => css`
+        <As
+          as="input"
+          css={(args) => css`
   position: fixed;
   bottom: 0;
   width: 100%;

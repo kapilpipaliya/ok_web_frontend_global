@@ -1,4 +1,3 @@
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/pages/settings/constants";

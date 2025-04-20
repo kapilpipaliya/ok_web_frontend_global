@@ -42,15 +42,21 @@ export function HighlightSetValueContent(
   );
 
   return (
-    <As as="div"
+    <As
+      as="div"
       css={css`
-  ${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? `
+  ${
+    props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined &&
+    props.selectedLayout?.P[props.meta.P[IdAttr]] !== null
+      ? `
   border: 2px solid #008000;
   border-bottom: none;
   border-top: none;
   padding: 2px 3px;
   border-radius: 5px;
-` : ""}
+`
+      : ""
+  }
   display: flex;
   align-items: center;
   gap: 2px;
@@ -58,16 +64,22 @@ export function HighlightSetValueContent(
   margin-top: 6px;
 `}
     >
-      <As as="span" css={css`
+      <As
+        as="span"
+        css={css`
   font-size: 15px;
   flex: 0.5;
-`}>
+`}
+      >
         <Label meta={props.meta} />
       </As>
-      <As as="span" css={css`
+      <As
+        as="span"
+        css={css`
   font-size: 15px;
   flex: 1;
-`}>
+`}
+      >
         <Switch>
           <Match when={props.meta.P.key === "defaultValue"}>
             <DefaultValueContent
@@ -90,10 +102,13 @@ export function HighlightSetValueContent(
             }
           >
             <div>
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   display: flex;
   gap: 2px;
-`}>
+`}
+              >
                 <DynamicComponent
                   data={props.selectedLayout}
                   isNoPermissionCheck={true}
@@ -118,10 +133,13 @@ export function HighlightSetValueContent(
             }
           >
             <div>
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   display: flex;
   gap: 2px;
-`}>
+`}
+              >
                 <DynamicComponent
                   data={props.selectedLayout}
                   isNoPermissionCheck={true}

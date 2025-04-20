@@ -1,7 +1,4 @@
 import type { JSX } from "solid-js";
-
-import { mergeRefs } from "@solid-primitives/refs";
-import { useNavigate } from "@solidjs/router";
 import {
   createSignal,
   getOwner,
@@ -9,6 +6,9 @@ import {
   Show,
   splitProps,
 } from "solid-js";
+
+import { mergeRefs } from "@solid-primitives/refs";
+import { useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
 
 import type { Vertex } from "~/lib/graph/graph";

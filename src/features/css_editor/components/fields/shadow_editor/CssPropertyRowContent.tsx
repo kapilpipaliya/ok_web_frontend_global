@@ -98,14 +98,14 @@ export function CssPropertyRowContent(
 
 function RenderButton(props: { label: string; onClick: () => void }) {
   return (
-    <As 
-      as="button" 
+    <As
+      as="button"
       css={css`
         flex: 1;
         font-size: 14px;
         margin-right: 8px;
-      `} 
-      onClick={props.onClick} 
+      `}
+      onClick={props.onClick}
       type="button"
     >
       {props.label}
@@ -115,8 +115,8 @@ function RenderButton(props: { label: string; onClick: () => void }) {
 
 function RenderPreview(props: { previewCss: string }) {
   return (
-    <As 
-      as="div" 
+    <As
+      as="div"
       css={css`
         ${props.previewCss};
         height: 20px;

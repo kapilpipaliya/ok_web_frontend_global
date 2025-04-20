@@ -6,7 +6,6 @@ import {
   splitProps,
   Switch,
 } from "solid-js";
-import { Dynamic } from "solid-js/web";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -121,14 +120,15 @@ export function Label(
         <Match
           when={local.label && (position() === "top" || position() === "left")}
         >
-          <As
-            as="span"
-            css={css`${generateLabelCss()}`}
-            {...restProps}
-          >
+          <As as="span" css={css`${generateLabelCss()}`} {...restProps}>
             {local.label}
-            {local.required && <As as="span" css={css`color: \${args.theme.var.color.error};`}> *</As>}
-          </As> 
+            {local.required && (
+              <As as="span" css={css`color: \${args.theme.var.color.error};`}>
+                {" "}
+                *
+              </As>
+            )}
+          </As>
           {resolvedChildren()}
         </Match>
         <Match
@@ -137,13 +137,17 @@ export function Label(
           }
         >
           {resolvedChildren()}
-          <As
-            as="span"
-            css={css`${generateLabelCss()}`}
-            {...restProps}
-          >
+          <As as="span" css={css`${generateLabelCss()}`} {...restProps}>
             {local.label}
-            {local.required && <As as="span" css={args => css`color: ${args.theme.var.color.error};`}> *</As>}
+            {local.required && (
+              <As
+                as="span"
+                css={(args) => css`color: ${args.theme.var.color.error};`}
+              >
+                {" "}
+                *
+              </As>
+            )}
           </As>
         </Match>
       </Switch>

@@ -1,5 +1,4 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { JSX } from "solid-js";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { css } from "~/lib/styles";
@@ -15,9 +14,12 @@ export function TextEditor(props: Readonly<TextAreaProps>) {
   const [text, setText] = createWritableMemo(() => props.value);
 
   return (
-    <As as="textarea"
+    <As
+      as="textarea"
       {...props}
-      css={[...ensureArray(props.css), css`
+      css={[
+        ...ensureArray(props.css),
+        css`
   color: black;
   border: 1px solid #3b82f6;
   margin-top: 5px; margin-bottom: 5px;
@@ -25,7 +27,8 @@ export function TextEditor(props: Readonly<TextAreaProps>) {
   padding: 6px;
   border-radius: 6px;
   width: 100%;
-`]}
+`,
+      ]}
       onInput={(e) => {
         setText(e.target.value);
         props.onValueChange?.(e.target.value);

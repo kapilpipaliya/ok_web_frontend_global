@@ -108,8 +108,10 @@ export const SupportTicketSection = (
         parentVertexId: props.id,
         subAction: "get",
       });
-      
-      const vertexes = message.vertexes as Array<{ properties: any }> | undefined;
+
+      const vertexes = message.vertexes as
+        | Array<{ properties: any }>
+        | undefined;
       setMessages(
         vertexes && vertexes.length > 0
           ? vertexes.map((v) => v.properties)
@@ -129,25 +131,36 @@ export const SupportTicketSection = (
     return (
       <Show
         fallback={
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   text-align: center;
-`}>
-            <As as="img"
+`}
+          >
+            <As
+              as="img"
               alt="No messages yet"
               css={css`
   height: 30vh;
 `}
               src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg"
             />
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
   font-weight: 600;
   text-align: center;
-`}>No messages yet</As>
+`}
+            >
+              No messages yet
+            </As>
           </As>
         }
         when={messages().length > 0}
       >
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -156,8 +169,11 @@ export const SupportTicketSection = (
   overflow: hidden;
   top: 50%;
   z-index: 2;
-`}>
-          <As as="div" css={css`
+`}
+        >
+          <As
+            as="div"
+            css={css`
   flex-direction: column;
   display: grid;
   overflow-y: auto;
@@ -169,29 +185,36 @@ export const SupportTicketSection = (
           >
             <For each={messages()}>
               {(msg: any) => (
-                <As as="div" css={css`
+                <As
+                  as="div"
+                  css={css`
   position: relative;
   margin-bottom: 10px;
   margin-top: 10px;
-`}>
-                  <As as="div"
-                    css={args => css`
+`}
+                >
+                  <As
+                    as="div"
+                    css={(args) => css`
   border-radius: 5px;
   margin-bottom: 5px;
   padding: 5px;
   color: ${args.theme.var.color.base_10};
-  ${msg.personal 
-    ? `float: right; 
+  ${
+    msg.personal
+      ? `float: right; 
        text-align: right; 
-       background: linear-gradient(120deg,#248A52,#257287);` 
-    : `float: left; 
+       background: linear-gradient(120deg,#248A52,#257287);`
+      : `float: left; 
        text-align: left; 
-       background: rgb(29,92,194,0.76);`}
+       background: rgb(29,92,194,0.76);`
+  }
 `}
                   >
                     {msg.text}
                   </As>
-                  <As as="div"
+                  <As
+                    as="div"
                     css={css`
   position: absolute;
   bottom: -10px;
@@ -201,15 +224,18 @@ export const SupportTicketSection = (
                   >
                     {msg.timestamp}
                   </As>
-                  <As as="div"
+                  <As
+                    as="div"
                     css={css`
   font-size: 8px;
   transform: skew(298deg,22deg);
   width: 10px;
   position: absolute;
-  ${msg.personal 
-    ? `right: 0; background: #267e70; height: 7px; bottom: 7px;` 
-    : `left: 0; background: #5783d2; height: 7px; bottom: 8px;`}
+  ${
+    msg.personal
+      ? "right: 0; background: #267e70; height: 7px; bottom: 7px;"
+      : "left: 0; background: #5783d2; height: 7px; bottom: 8px;"
+  }
 `}
                   />
                 </As>
@@ -237,18 +263,25 @@ export const SupportTicketSection = (
         <CustomModal
           dialogCss={css`min-width: 30%; border-radius: 10px; padding: 0;`}
           footer={() => (
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
   display: flex;
   align-items: center;
   justify-content: center;
-`}>
-              <As as="div" css={css`
+`}
+            >
+              <As
+                as="div"
+                css={css`
   border: 1.5px solid #3b82f6;
   position: relative;
   border-radius: 5px;
   width: 100%;
-`}>
-                <As as="input"
+`}
+              >
+                <As
+                  as="input"
                   css={css`
   background: none;
   border: none;
@@ -267,7 +300,8 @@ export const SupportTicketSection = (
                   type="text"
                   value={inputMessage()}
                 />
-                <As as="div"
+                <As
+                  as="div"
                   css={css`
   display: flex;
   background: #248A52;
@@ -350,30 +384,47 @@ export const SupportTicketSection = (
   };
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   width: 100%;
 
   @media (min-width: 1024px) {
     width: 80%;
   }
-`}>
-      <As as="div" css={css`
+`}
+    >
+      <As
+        as="div"
+        css={css`
   margin: 10px 20px;
-`}>
-        <As as="div" css={css`
+`}
+      >
+        <As
+          as="div"
+          css={css`
   font-weight: 700;
-`}>Support Ticket Details</As>
-        <As as="span" css={css`
+`}
+        >
+          Support Ticket Details
+        </As>
+        <As
+          as="span"
+          css={css`
   color: grey;
   font-size: 14px;
   font-weight: 500;
-`}>
+`}
+        >
           List of all your contacts with our platforms
         </As>
       </As>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   margin: 0 15px;
-`}>
+`}
+      >
         <Table headers={6}>
           <For each={["ID", "Name", "Subject", "Message", "Status", "Actions"]}>
             {(header) => <TableHeadCell>{header}</TableHeadCell>}
@@ -382,12 +433,15 @@ export const SupportTicketSection = (
           <For
             each={props.contactList()}
             fallback={
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   display: flex;
   grid-column-span: 6;
   justify-content: center;
   padding: 1rem;
-`}>
+`}
+              >
                 No Tickets Found
               </As>
             }
@@ -405,11 +459,14 @@ export const SupportTicketSection = (
                   />
                 </TableBodyCell>
                 <TableBodyCell>
-                  <As as="div" css={css`
+                  <As
+                    as="div"
+                    css={css`
   display: flex;
   align-items: center;
   justify-content: center;
-`}>
+`}
+                  >
                     <OpenDialog id={row.id} />
                     <IconButton
                       icon="fluent:delete-48-regular"

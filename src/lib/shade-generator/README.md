@@ -1,4 +1,5 @@
 https://www.npmjs.com/package/shade-generator
+
 # shade-generator
 
 #### This will output a `Record<Shade, string>`.

@@ -14,7 +14,6 @@ import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
-
 import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
@@ -133,7 +132,8 @@ export function ComponentItem(
         onMouseLeave={handleMouseLeave}
         ref={menuRef!}
       >
-        <As as="div"
+        <As
+          as="div"
           css={css`
   display: flex;
   align-items: center;
@@ -164,7 +164,8 @@ export function ComponentItem(
               selectedComponents().has(graph.vertexes[props.child.id])
             }
           >
-            <As as="input"
+            <As
+              as="input"
               checked={selectedComponents().has(graph.vertexes[props.child.id])}
               css={css`
   left: 7px;
@@ -176,12 +177,15 @@ export function ComponentItem(
               // wrapperClass="height:19px width:19px"
             />
           </Show>
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   display: flex;
   cursor: pointer;
   gap: 5px;
   padding-top: 5px;
-`}>
+`}
+          >
             <Show when={false}>
               <Icon
                 height={24}
@@ -193,16 +197,22 @@ export function ComponentItem(
                 width={24}
               />
             </Show>
-            <As as="span" css={css`
+            <As
+              as="span"
+              css={css`
   font-size: 14px;
   ${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? "color:${args.theme.var.color.error};" : ""}
-`}>
+`}
+            >
               {props.child?.P.label || props.child?.P.key}
             </As>
             <Show when={props.child.L[0] !== "Comp"}>
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   margin-left: auto;
-`}>
+`}
+              >
                 <IconButton
                   css={css`
                     background-color: transparent;
@@ -249,12 +259,15 @@ export function ComponentItem(
         </DropdownMenu>
       </Show>
       <Show when={props.expandedKeys.includes(props.child.id)}>
-        <As as="ul" css={css`
+        <As
+          as="ul"
+          css={css`
   padding-left: 8px;
   padding-top: 5px;
   list-style: none;
   padding: 0;
-`}>
+`}
+        >
           <For each={children()}>
             {(child) => (
               <ComponentItem

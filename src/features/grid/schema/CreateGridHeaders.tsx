@@ -31,7 +31,8 @@ import { As } from "~/components/As";
 function ImageWrapper(props: { alt?: string; css?: string; src: string }) {
   return (
     <Show when={props.src}>
-      <As as="img" 
+      <As
+        as="img"
         alt={props.alt || "Preview"}
         css={props.css}
         src={props.src}
@@ -107,16 +108,21 @@ export function CreateGridHeaders(
               <TooltipWrapper
                 arrowCss={STYLES.tooltip.arrowCss}
                 content={
-                  <As as="div" css={css`
+                  <As
+                    as="div"
+                    css={css`
                     border: 2px solid #ccc;
-                  `}>
-                    <As as="div" css={css`
+                  `}
+                  >
+                    <As
+                      as="div"
+                      css={css`
                       background: white;
                       padding: 8px;
-                    `}>
+                    `}
+                    >
                       <ImageWrapper
                         alt="Preview"
-                        
                         src={getPreviewURL(attribute, info.row.original, graph)}
                       />
                     </As>
@@ -128,11 +134,14 @@ export function CreateGridHeaders(
                   align-items: center;
                 `}
               >
-                <As as="span" css={css`
+                <As
+                  as="span"
+                  css={css`
                   display: flex;
                   align-items: center;
                   gap: 8px;
-                `}>
+                `}
+                >
                   <ImageWrapper
                     alt="Preview"
                     css={css`
@@ -200,10 +209,15 @@ export function CreateGridHeaders(
                   align-items: center;
                 `}
               >
-                <As as="span" css={css`
+                <As
+                  as="span"
+                  css={css`
                   display: flex;
                   align-items: center;
-                `}>{info.getValue<string>()}</As>
+                `}
+                >
+                  {info.getValue<string>()}
+                </As>
               </TooltipWrapper>
             </Match>
             <Match when={true}>{info.getValue<string>()}</Match>
@@ -246,13 +260,16 @@ export function CreateGridHeaders(
       accessorKey: "Actions",
       cell: (info) => {
         return (
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
             ${formNew.isInlineEditable ? "" : "padding: 0.25rem 0; border-radius: 7px;"}
             display: flex;
             align-items: center;
             gap: 4px;
             justify-content: center;
-          `}>
+          `}
+          >
             <Show
               when={
                 !hideEditAction &&

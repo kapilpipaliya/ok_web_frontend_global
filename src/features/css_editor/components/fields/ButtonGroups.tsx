@@ -1,5 +1,4 @@
 import { Icon } from "@iconify-icon/solid";
-import { clientOnly } from "@solidjs/start";
 import { For, type JSX, splitProps } from "solid-js";
 
 import type { ButtonGroupField } from "../../constants/FieldSchemaType";
@@ -19,7 +18,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
   return (
     <As
       as="div"
-      css={args => css`
+      css={(args) => css`
         display: flex;
         border: 1px solid ${args.theme.var.color.secondary};
         box-shadow: 0 0 0px 1px ${args.theme.var.color.secondary};
@@ -34,10 +33,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
       <For each={props.options}>
         {(option) => {
           return (
-            <As
-              as="label"
-              css={css`flex: 1; text-align: center;`}
-            >
+            <As as="label" css={css`flex: 1; text-align: center;`}>
               <TooltipWrapper
                 openDelay={200}
                 triggerAs="span"
@@ -66,7 +62,7 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                     {option.tooltip ?? option.value}
                   </As>
                 }
-                contentCss={args => css`
+                contentCss={(args) => css`
                   border-radius: 8px;
                   background: ${args.theme.var.color.base_10};
                   padding: 8px 12px;
@@ -109,14 +105,16 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                 />
                 <As
                   as="span"
-                  css={args => css`
-                    ${props.value === option.value
-                      ? `
+                  css={(args) => css`
+                    ${
+                      props.value === option.value
+                        ? `
                         border-bottom: 1px solid ${args.theme.var.color.primary};
                         color: ${args.theme.var.color.primary};
                         font-weight: 500;
                       `
-                      : ""}
+                        : ""
+                    }
                     display: flex;
                     align-items: center;
                     border: none;

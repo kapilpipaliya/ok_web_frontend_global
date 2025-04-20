@@ -9,12 +9,15 @@ export function VariantsHeader() {
     <>
       <HeaderWithDescription description="Define the variants." title="" />
 
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 10px;
-`}>
+`}
+      >
         {/* We dont allow configuring a single variant, because we have many properties to edit with variant name, we need a saprate modal for it */}
         {/* <AddNewVariantButton /> */}
         <DisplayAllVariants />

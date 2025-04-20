@@ -27,12 +27,17 @@ export function TabsWithUnderline(
   return (
     <As as="div">
       {/* Mobile view */}
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
         @media (width >= 52.125rem) {
           display: none;
         }
-      `}>
-        <As as="label" css={css`
+      `}
+      >
+        <As
+          as="label"
+          css={css`
           position: absolute;
           width: 1px;
           height: 1px;
@@ -42,10 +47,13 @@ export function TabsWithUnderline(
           clip: rect(0, 0, 0, 0);
           white-space: nowrap;
           border-width: 0;
-        `} for="tabs">
+        `}
+          for="tabs"
+        >
           Select a tab
         </As>
-        <As as="select"
+        <As
+          as="select"
           css={(args) => css`
             line-height: 1.5rem;
             @media (width >= 52.125rem) {
@@ -81,42 +89,55 @@ export function TabsWithUnderline(
         </As>
       </As>
 
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
         display: none;
         @media (width >= 52.125rem) {
           display: block;
         }
-      `}>
-        <As as="div" css={(args) => css`
+      `}
+      >
+        <As
+          as="div"
+          css={(args) => css`
           border-bottom-width: 1px;
           border-color: ${args.theme.var.color.base_10};
-        `}>
-          <As as="nav" aria-label="Tabs" css={css`
+        `}
+        >
+          <As
+            as="nav"
+            aria-label="Tabs"
+            css={css`
             display: flex;
             gap: 0.5rem;
             margin-bottom: -1px;
-          `}>
+          `}
+          >
             <For each={props.tabs}>
               {(tab) => (
-                <As as="button"
+                <As
+                  as="button"
                   aria-current={
                     tab.id === props.selectedKey ? "page" : undefined
                   }
                   css={(args) => css`
                     line-height: 1.25rem;
-                    ${tab.id === props.selectedKey 
-                      ? `
+                    ${
+                      tab.id === props.selectedKey
+                        ? `
                         border-color: ${args.theme.var.color.primary};
                         color: ${args.theme.var.color.primary_280};
-                      ` 
-                      : `
+                      `
+                        : `
                         border-color: transparent;
                         &:hover {
                           border-color: ${args.theme.var.color.base_60};
                           color: ${args.theme.var.color.secondary_460};
                         }
                         color: ${args.theme.var.color.secondary};
-                      `}
+                      `
+                    }
                     background-color: transparent;
                     border-bottom-width: 2px;
                     border-left:none;

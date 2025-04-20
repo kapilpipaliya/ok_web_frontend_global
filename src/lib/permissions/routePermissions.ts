@@ -42,7 +42,7 @@ export const routePermissions: RoutePermission[] = [
 
   // Example of custom permission check
   {
-    customPermissionCheck: (user, path) => {
+    customPermissionCheck: (_user, _path) => {
       // Example: Check if user has specific project access
       // In a real implementation, you might extract project ID from path
       // and check against user permissions

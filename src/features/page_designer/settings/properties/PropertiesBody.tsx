@@ -15,7 +15,6 @@ import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { CollAndData } from "./CollAndData";
 import { ComponentVariantsInput } from "./ComponentVariantsInput";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
-import { css } from "~/lib/styles";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();

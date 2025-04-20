@@ -29,7 +29,9 @@ export function CommonAddComponent(
   };
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   /* radius-b: 5; */
   display: flex;
   flex-direction: column;
@@ -37,30 +39,41 @@ export function CommonAddComponent(
   padding-right: 2px;
   padding-top: 5px;
   padding-bottom: 5px;
-`}>
+`}
+    >
       <span>{props.title}</span>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   flex-direction: column;
   gap: 4px;
   justify-content: space-between;
   margin-top: 10px;
-`}>
-        <As as="label" css={css`
+`}
+      >
+        <As
+          as="label"
+          css={css`
   display: flex;
   flex-direction: column;
-`}>
+`}
+        >
           {props.label}
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   align-items: center;
   display: flex;
-`}>
-            <As as="input"
+`}
+          >
+            <As
+              as="input"
               css={[
                 PROPERTIES.Css.TextFieldCss,
                 css`
   height: 100%;
-`
+`,
               ]}
               onInput={(e) => setStateName(e.target.value)}
               onKeyDown={handleKeyDown}

@@ -4,7 +4,8 @@ This directory contains a permission validation system for controlling access to
 
 ## Overview
 
-The permission system provides a flexible way to define access rules for different routes in the application. It supports:
+The permission system provides a flexible way to define access rules for different routes in the application. It
+supports:
 
 - Role-based access control with multiple roles per user
 - Custom permission checks
@@ -39,7 +40,8 @@ Users can have multiple roles from the following:
 
 ### Role Assignment
 
-Roles are assigned to users through database relationships. The system uses the following Cypher pattern to determine a user's roles:
+Roles are assigned to users through database relationships. The system uses the following Cypher pattern to determine a
+user's roles:
 
 ```cypher
 MATCH (u:User {uuid: $uuid})
@@ -86,7 +88,8 @@ For more complex permission requirements, you can use a custom permission check:
 
 ### Using the Common Permission Check Function
 
-The system provides a common function `checkRoutePermission` that can be used anywhere in the application to check if a user has permission to access a specific route:
+The system provides a common function `checkRoutePermission` that can be used anywhere in the application to check if a
+user has permission to access a specific route:
 
 ```typescript
 import { checkRoutePermission } from "~/lib/permissions/checkRoutePermission";
@@ -123,7 +126,8 @@ if (permissionResult.hasPermission) {
 
 ### Direct URL Access Validation
 
-If you need to directly validate URL access without the full route checking process, you can use the `validateUrlAccess` function:
+If you need to directly validate URL access without the full route checking process, you can use the `validateUrlAccess`
+function:
 
 ```typescript
 import { validateUrlAccess } from "~/lib/permissions/isPermission";

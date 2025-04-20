@@ -6,11 +6,15 @@ export function getTabLabel(openedFormId: Id, graph: GraphInterface) {
 
   // Get formId from openedFormId
   const formId = graph.vertexes[openedFormId]?.P.formId;
-  if (!formId) return baseLabel;
+  if (!formId) {
+    return baseLabel;
+  }
 
   // Get formDataId from formId
   const formDataId = graph.vertexes[formId]?.P.formDataId;
-  if (!formDataId) return baseLabel;
+  if (!formDataId) {
+    return baseLabel;
+  }
 
   // Get key from formDataId
   const key = graph.vertexes[formDataId]?.P.key;

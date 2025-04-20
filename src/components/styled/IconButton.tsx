@@ -6,7 +6,8 @@ import { css } from "~/lib/styles";
 import { As } from "../As";
 import { TooltipWrapper } from "./modal/TooltipWrapper";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import { CssType } from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/FieldSchemaType";
+
 export type IconButtonProps = {
   href?: string;
   icon?: string;
@@ -44,7 +45,8 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
   const ButtonContent = () => (
     <>
       <Show when={local.icon}>
-        <As as={Icon}
+        <As
+          as={Icon}
           css={local.iconCss}
           classList={local.iconClassList}
           height={local.size ?? 24}
@@ -60,8 +62,12 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
   const InnerContent = () => (
     <Show
       fallback={
-        <As as="button"
-          css={[local.noCenter ? "" : STYLES.iconButtonCss, ...ensureArray(local.css)]}
+        <As
+          as="button"
+          css={[
+            local.noCenter ? "" : STYLES.iconButtonCss,
+            ...ensureArray(local.css),
+          ]}
           type="button"
           {...(others as JSX.ButtonHTMLAttributes<HTMLButtonElement>)}
         >
@@ -70,8 +76,12 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
       }
       when={props.href}
     >
-      <As as="a"
-        css={[...ensureArray(local.css), local.noCenter ? "" : STYLES.iconButtonCss]}
+      <As
+        as="a"
+        css={[
+          ...ensureArray(local.css),
+          local.noCenter ? "" : STYLES.iconButtonCss,
+        ]}
         href={props.href!}
         target={props.target}
         {...(others as JSX.AnchorHTMLAttributes<HTMLAnchorElement>)}
@@ -87,16 +97,24 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
         arrowCss={STYLES.tooltip.arrowCss}
         content={
           <As as="div" css={STYLES.tooltip.contentCss}>
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
               font-size: 14px;
               font-weight: 500;
-            `}>{local.title}</As>
+            `}
+            >
+              {local.title}
+            </As>
           </As>
         }
         group={local.tooltipGroup}
         openDelay={300}
         triggerAs={props.href ? "a" : "button"}
-        triggerCss={[...ensureArray(local.css), local.noCenter ? "" : STYLES.iconButtonCss]}
+        triggerCss={[
+          ...ensureArray(local.css),
+          local.noCenter ? "" : STYLES.iconButtonCss,
+        ]}
         {...others}
       >
         <ButtonContent />

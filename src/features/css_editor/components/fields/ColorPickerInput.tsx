@@ -19,7 +19,7 @@ export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
   return (
     <As
       as="div"
-      css={args => css`
+      css={(args) => css`
         ${props.isLabelOnTop ? "" : "max-width: 50%; width: 50%;"}
         display: flex;
         align-items: center;
@@ -30,7 +30,7 @@ export const ColorPickerInput = (props: Readonly<ColorPickerField>) => {
     >
       <As
         as="label"
-        css={args => css`
+        css={(args) => css`
           border: 1px solid ${args.theme.var.color.secondary};
           background: ${props.value || args.theme.var.color.base_10};
           cursor: pointer;

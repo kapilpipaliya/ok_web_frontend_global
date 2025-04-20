@@ -40,12 +40,14 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
           footer={() => (
             <DialogFooter
               buttonText="Close"
-              css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
+              css={[
+                SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
                 css`
                 margin-left: auto;
                 margin-right: 8px;
                 margin-top: 4px;
-              `]}
+              `,
+              ]}
               containerCss={css`
   margin-top: auto;
 `}
@@ -60,7 +62,7 @@ export function IframeHelpDialog(props: IframeHelpDialogProps) {
           setOpen={setOpen}
           title={props.title}
         >
-          <As 
+          <As
             as="iframe"
             allow="clipboard-write"
             css={css`

@@ -14,7 +14,6 @@ import {
 
 import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-
 import { useFormContext } from "~/components/form/context/FormContext";
 import { AddNewButton } from "~/features/grid/header/AddNewButton";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
@@ -155,29 +154,43 @@ export function TableInputField(
         />
         {/* </Show> */}
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
-        <As as="div" css={[css`
+        <As
+          as="div"
+          css={[
+            css`
   margin: 2px;
   border-radius: 10px;
-  ${sortedVertexes().length > 0 ? 'border: 1px solid #37c;' : ''}
-`, STYLES.overflowCss]}>
-          <As as="table" css={css`
+  ${sortedVertexes().length > 0 ? "border: 1px solid #37c;" : ""}
+`,
+            STYLES.overflowCss,
+          ]}
+        >
+          <As
+            as="table"
+            css={css`
   border: none;
   border-collapse: collapse;
   border-radius: 0.4rem;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
   font-size: 0.9em;
-  ${props.isTableInside ? 'width: -webkit-fill-available;' : ''}
-`}>
+  ${props.isTableInside ? "width: -webkit-fill-available;" : ""}
+`}
+          >
             <Show when={sortedVertexes().length}>
               <thead>
-                <As as="tr" css={css`
+                <As
+                  as="tr"
+                  css={css`
   background-color: #37c;
   color: #ffffff;
   height: 35px;
   text-align: center;
   width: max-content;
-`}>
-                  <As as="td" css={css`
+`}
+                >
+                  <As
+                    as="td"
+                    css={css`
   text-align: center;
   align-content: center;
   align-items: center;
@@ -185,7 +198,8 @@ export function TableInputField(
   font-weight: 500;
   padding: 0 10px;
   text-align: left;
-`}>
+`}
+                  >
                     &nbsp;Actions
                   </As>
                   <For each={tableColumnsTemplate()}>
@@ -198,11 +212,14 @@ export function TableInputField(
                         <Match
                           when={!attribute.P.hide || attribute.P.defaultValue}
                         >
-                          <As as="th" css={css`
+                          <As
+                            as="th"
+                            css={css`
   font-weight: 500;
   justify-content: center;
   padding: 0 10px;
-`}>
+`}
+                          >
                             {toTitle(
                               attribute.P.label ||
                                 attribute.P.displayName ||
@@ -211,9 +228,15 @@ export function TableInputField(
                             )}
                             {/* Add Proper Validation check */}
                             {attribute.P.validation?.required && (
-                              <As as="span" css={css`
+                              <As
+                                as="span"
+                                css={css`
   color: \${args.theme.var.color.error};
-`}> *</As>
+`}
+                              >
+                                {" "}
+                                *
+                              </As>
                             )}
                           </As>
                         </Match>

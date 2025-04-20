@@ -78,15 +78,22 @@ export const CollapsibleSection = (
 
   return (
     <Show when={hasConfiguredFields()}>
-      <As as="div"
+      <As
+        as="div"
         css={css`
   border: 1px solid #3b82f6;
   padding: 5px 10px;
   width: 100%;
   border-radius: ${(() => {
-    if (props.index === props.sectionCount() - 1) return "0 0 5px 5px";
-    if (props.index === 0 && props.sectionCount() === 1) return "5px";
-    if (props.index === 0 && props.sectionCount() > 1) return "5px 5px 0 0";
+    if (props.index === props.sectionCount() - 1) {
+      return "0 0 5px 5px";
+    }
+    if (props.index === 0 && props.sectionCount() === 1) {
+      return "5px";
+    }
+    if (props.index === 0 && props.sectionCount() > 1) {
+      return "5px 5px 0 0";
+    }
     return "0";
   })()};
 `}
@@ -106,16 +113,24 @@ export const CollapsibleSection = (
           onClick={() => setIsOpen(!isOpen())}
           type="button"
         >
-          <As as="span" css={css`
+          <As
+            as="span"
+            css={css`
   font-size: 15px;
   font-weight: 600;
-`}>{props.title}</As>
+`}
+          >
+            {props.title}
+          </As>
         </IconButton>
         <Show when={isOpen()}>
-          <As as="hr" css={css`
+          <As
+            as="hr"
+            css={css`
   color: #e1e1e1;
   margin: 2px;
-`} />
+`}
+          />
           <For each={Object.entries(props.propertyFieldMap)}>
             {([, value]) => (
               <DynamicCSSComponent meta={value} projections={[state() || ""]} />
@@ -159,12 +174,15 @@ export const SectionList = (
 
   return (
     <ShowConfiguredOnlyContext.Provider value={showConfiguredOnly}>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   justify-content: end;
   margin-bottom: 2px;
   width: 100%;
-`}>
+`}
+      >
         <IconButton
           icon={showConfiguredOnly() ? "ph:eye-slash" : "ph:eye"}
           css={css`

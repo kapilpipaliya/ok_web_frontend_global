@@ -10,7 +10,8 @@ export function CardHeader(props: {
   return (
     <>
       <Show when={props.imgSrc}>
-        <As as="img"
+        <As
+          as="img"
           alt={props.title}
           css={css`
   background-color: rgb(255,255,255);
@@ -24,11 +25,14 @@ export function CardHeader(props: {
           src={props.imgSrc}
         />
       </Show>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   color: rgb(17,24,39);
   font-size: 0.875rem;
   font-weight: 500;
-`}>
+`}
+      >
         {props.title}
       </As>
       {props.children}

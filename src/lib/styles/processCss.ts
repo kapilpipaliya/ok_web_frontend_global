@@ -1,5 +1,7 @@
-import { CssType, FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import { ThemeContext } from "~/lib/styles";
+import type {
+  CssType,
+  FunctionArgumentType,
+} from "~/components/form/type/FieldSchemaType";
 
 /**
  * Processes CSS content from different formats into a single string
@@ -13,9 +15,11 @@ import { ThemeContext } from "~/lib/styles";
 export const processCssContent = (
   cssContent: CssType,
   functionArgs: FunctionArgumentType,
-  uniqueId: string
+  uniqueId: string,
 ): string | undefined => {
-  if (!cssContent) return undefined;
+  if (!cssContent) {
+    return undefined;
+  }
 
   // Handle array of CSS strings/functions
   if (Array.isArray(cssContent)) {
@@ -46,9 +50,11 @@ export const processCssContent = (
 export const processStyle = (
   style: string | string[] | undefined,
   functionArgs: FunctionArgumentType,
-  uniqueId: string
+  uniqueId: string,
 ): string => {
-  if (!style) return "";
+  if (!style) {
+    return "";
+  }
 
   if (Array.isArray(style)) {
     return style
@@ -59,11 +65,12 @@ export const processStyle = (
 
   if (typeof style === "string") {
     // Handle template string evaluation
-    if (style.trim() !== "" && (style.includes("args."))) {
+    if (style.trim() !== "" && style.includes("args.")) {
       try {
         const cssFunction = new Function("args", `return \`${style}\``);
         const evaluatedStyle = cssFunction(functionArgs);
-        return typeof evaluatedStyle === "string" && evaluatedStyle.includes("._id")
+        return typeof evaluatedStyle === "string" &&
+          evaluatedStyle.includes("._id")
           ? evaluatedStyle.replace(/\._id/g, `.${uniqueId}`)
           : evaluatedStyle || "";
       } catch (error) {
@@ -71,12 +78,12 @@ export const processStyle = (
         return "";
       }
     }
-    
+
     // Handle plain CSS with ._id replacement
     if (style.includes("._id")) {
       return style.replace(/\._id/g, `.${uniqueId}`);
     }
-    
+
     return style;
   }
 

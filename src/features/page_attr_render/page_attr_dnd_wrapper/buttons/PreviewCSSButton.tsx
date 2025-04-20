@@ -7,8 +7,9 @@ import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { PreviewCSSMenu } from "../menus/PreviewCSSMenu";
 import { css } from "~/lib/styles";
-import { ensureArray } from "~/lib/data_structure/array/ensureArray"; 
-import { CssType } from "~/components/form/type/FieldSchemaType";
+import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import type { CssType } from "~/components/form/type/FieldSchemaType";
+
 interface PreviewCSSButtonProps {
   css?: CssType;
   item: Vertex;
@@ -44,7 +45,10 @@ export function PreviewCSSButton(props: Readonly<PreviewCSSButtonProps>) {
   return (
     <>
       <IconButton
-        css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ...ensureArray(props.css),
+        css={[
+          ICON_BUTTON_STYLES.baseCss,
+          ICON_BUTTON_STYLES.defaultCss,
+          ...ensureArray(props.css),
           css`
             background-color: transparent;
             border: none;

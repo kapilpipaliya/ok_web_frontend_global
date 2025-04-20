@@ -62,7 +62,9 @@ export function AttrConfigPopOverWrapper(
         eventClickPath.includes(props.reference()!)
       )
     ) {
-      const formStore = graph.vertexes[formStoreId!] as Vertex<PageLayoutObject>;
+      const formStore = graph.vertexes[
+        formStoreId!
+      ] as Vertex<PageLayoutObject>;
       if (formStore?.P.selectedId !== null) {
         mergeVertexProperties<PageLayoutObject>(
           0,

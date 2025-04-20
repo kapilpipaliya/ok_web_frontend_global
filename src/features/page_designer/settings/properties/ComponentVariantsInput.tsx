@@ -48,31 +48,41 @@ export function ComponentVariantsInput(props: {
             }) as Vertex[];
           });
           return (
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}>
-              <As as="span" css={css`
+`}
+            >
+              <As
+                as="span"
+                css={css`
   font-size: 15px;
   flex: 0.5;
-`}>
+`}
+              >
                 {variant.P.label || variant.P.key}
               </As>
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   display: flex;
   font-size: 15px;
   flex: 1;
   gap: 1px;
-`}>
+`}
+              >
                 <Switch>
                   <Match when={options()}>
-                    <As as="select"
+                    <As
+                      as="select"
                       css={[
-                PROPERTIES.Css.TextFieldCss,
-                css`
+                        PROPERTIES.Css.TextFieldCss,
+                        css`
   flex: 1;
   padding-left: 2px;
   padding-right: 2px;
@@ -80,7 +90,8 @@ export function ComponentVariantsInput(props: {
   padding-bottom: 1px;
   border: 1px solid #ccc;
   border-radius: 4px;
-`]}
+`,
+                      ]}
                       onChange={(e) =>
                         props.setPropertyValue(variant, e.currentTarget.value)
                       }
@@ -95,11 +106,12 @@ export function ComponentVariantsInput(props: {
                     </As>
                   </Match>
                   <Match when={variant.P.type?.toLowerCase() === "boolean"}>
-                    <As as="input"
+                    <As
+                      as="input"
                       checked={props.dataVertex.P[variant.P.key]}
                       css={[
-                PROPERTIES.Css.TextFieldCss,
-                css`
+                        PROPERTIES.Css.TextFieldCss,
+                        css`
   flex: 1;
   padding-left: 2px;
   padding-right: 2px;
@@ -107,7 +119,8 @@ export function ComponentVariantsInput(props: {
   padding-bottom: 1px;
   border: 1px solid #ccc;
   border-radius: 4px;
-`]}
+`,
+                      ]}
                       onChange={(e) =>
                         props.setPropertyValue(variant, e.currentTarget.checked)
                       }
@@ -120,16 +133,18 @@ export function ComponentVariantsInput(props: {
                       variant.P.type?.toLowerCase() === "date"
                     }
                   >
-                    <As as="input"
+                    <As
+                      as="input"
                       css={[
-                PROPERTIES.Css.TextFieldCss,
-                css`
+                        PROPERTIES.Css.TextFieldCss,
+                        css`
   flex: 1;
   padding-left: 2px; padding-right: 2px;
   padding-top: 1px; padding-bottom: 1px;
   border: 1px solid #ccc;
   border-radius: 4px;
-`]}
+`,
+                      ]}
                       onChange={(e) =>
                         props.setPropertyValue(
                           variant,
@@ -143,16 +158,18 @@ export function ComponentVariantsInput(props: {
                     />
                   </Match>
                   <Match when={true}>
-                    <As as="input"
+                    <As
+                      as="input"
                       css={[
-                PROPERTIES.Css.TextFieldCss,
-                css`
+                        PROPERTIES.Css.TextFieldCss,
+                        css`
   flex: 1;
   padding-left: 2px; padding-right: 2px;
   padding-top: 1px; padding-bottom: 1px;
   border: 1px solid #ccc;
   border-radius: 4px;
-`]}
+`,
+                      ]}
                       onChange={(e) =>
                         props.setPropertyValue(variant, e.currentTarget.value)
                       }

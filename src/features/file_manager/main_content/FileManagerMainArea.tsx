@@ -60,19 +60,27 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
 
   return (
     <div>
-      <As as="div" css={[css`
+      <As
+        as="div"
+        css={[
+          css`
   display: flex;
   gap: 2px;
   padding: 2px;
-`]}>
+`,
+        ]}
+      >
         <For each={breadcrumb()}>
           {(item, index) => (
-            <As as="button"
-              css={[css`
+            <As
+              as="button"
+              css={[
+                css`
   color: \${args.theme.var.color.primary};
   background-color: transparent;
   border: none;
-  ${index() === 0 ? "font-weight:600" : ""} cursor:pointer`]}
+  ${index() === 0 ? "font-weight:600" : ""} cursor:pointer`,
+              ]}
               onClick={() => setFileManagerStore("selectedItem", item)}
               type="button"
             >

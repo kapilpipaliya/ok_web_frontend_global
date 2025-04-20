@@ -9,14 +9,22 @@ export function ImportExportButtons(
   props: Readonly<{ setPopup: (value: boolean) => void }>,
 ) {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   justify-content: end;
   margin-bottom: 10px;
-`}>
-      <As as="button" css={css`
+`}
+    >
+      <As
+        as="button"
+        css={css`
   display: flex;
-`} onClick={() => props.setPopup(true)} type="button">
+`}
+        onClick={() => props.setPopup(true)}
+        type="button"
+      >
         <Icon height={22} icon={"ph:arrow-square-in"} noobserver width={22} />
         Import
       </As>

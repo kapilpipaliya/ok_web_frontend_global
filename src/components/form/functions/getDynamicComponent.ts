@@ -1,5 +1,3 @@
-// This will not work with server side rendering, because keys are lost
-import { clientOnly } from "@solidjs/start";
 import { Portal, Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
@@ -24,7 +22,6 @@ import { MetaLink, MetaMeta, MetaTitle } from "../../fields/MetaTitle";
 import { FileUploader } from "../../styled/FileUploader";
 // const OtpField = clientOnly(() => import("~/components/ssr/otpfield/OtpField"));
 // OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
-
 
 export const corvuComponents = {
   // Accordion,

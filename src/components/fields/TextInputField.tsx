@@ -1,7 +1,5 @@
 // import { TextFieldWithSelect } from "./TextFieldWithSelect";
 import type { JSXElement } from "solid-js";
-
-import { mergeRefs } from "@solid-primitives/refs";
 import {
   createSignal,
   type JSX,
@@ -10,6 +8,8 @@ import {
   splitProps,
   Switch,
 } from "solid-js";
+
+import { mergeRefs } from "@solid-primitives/refs";
 
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
@@ -139,15 +139,21 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
         </div>
       </Match>
       <Match when={local.showValue}>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   width: 100%;
-`}>
+`}
+        >
           <Content />
           <Show when={local.showValue && local.value}>
-            <As as="div" css={args => css`
+            <As
+              as="div"
+              css={(args) => css`
   font-size: 12px;
   color: ${args.theme.var.color.base_280};
-`}>
+`}
+            >
               {local.value}
               {local.suffixToValue ? ` ${local.suffixToValue}` : ""}
             </As>

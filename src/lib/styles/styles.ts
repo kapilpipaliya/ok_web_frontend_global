@@ -1,10 +1,8 @@
-import { createCssFunction } from './createCss';
-import { DEFAULT_BREAKPOINTS } from './index';
-import type { ThemeContext } from './index';
+import { createCssFunction } from "./createCss";
 
 /**
  * A decorator function to create reusable style functions
- * 
+ *
  * Usage:
  * ```
  * const buttonStyle = styles({
@@ -25,50 +23,52 @@ import type { ThemeContext } from './index';
  */
 export function styles(styleDefinition: StyleDefinition) {
   return createCssFunction(() => {
-    let css = '';
-    
+    let css = "";
+
     // Process base styles
     if (styleDefinition.base) {
       css += `._id {\n${objectToCssProperties(styleDefinition.base)}\n}\n`;
     }
-    
+
     // Process interactive states
     const states = {
-      hover: ':hover',
-      active: ':active',
-      focus: ':focus',
-      focusVisible: ':focus-visible',
-      disabled: ':disabled',
-      checked: ':checked',
-      visited: ':visited'
+      hover: ":hover",
+      active: ":active",
+      focus: ":focus",
+      focusVisible: ":focus-visible",
+      disabled: ":disabled",
+      checked: ":checked",
+      visited: ":visited",
     };
-    
+
     Object.entries(states).forEach(([state, pseudoClass]) => {
       if (styleDefinition[state]) {
         css += `\n._id${pseudoClass} {\n${objectToCssProperties(styleDefinition[state])}\n}\n`;
       }
     });
-    
+
     // Process media queries
     if (styleDefinition.media) {
       Object.entries(styleDefinition.media).forEach(([query, mediaStyles]) => {
         css += `\n@media ${query} {\n  ._id {\n${objectToCssProperties(mediaStyles, 4)}\n  }\n}\n`;
       });
     }
-    
+
     // Process child selectors
     if (styleDefinition.children) {
-      Object.entries(styleDefinition.children).forEach(([selector, childStyles]) => {
-        css += `\n._id ${selector} {\n${objectToCssProperties(childStyles)}\n}\n`;
-      });
+      Object.entries(styleDefinition.children).forEach(
+        ([selector, childStyles]) => {
+          css += `\n._id ${selector} {\n${objectToCssProperties(childStyles)}\n}\n`;
+        },
+      );
     }
-    
+
     // Process pseudo elements
     const pseudoElements = {
-      before: '::before',
-      after: '::after'
+      before: "::before",
+      after: "::after",
     };
-    
+
     Object.entries(pseudoElements).forEach(([element, pseudoSelector]) => {
       if (styleDefinition[element]) {
         const content = styleDefinition[element].content || '""';
@@ -76,21 +76,21 @@ export function styles(styleDefinition: StyleDefinition) {
         css += `\n._id${pseudoSelector} {\n${objectToCssProperties(pseudoStyles)}\n}\n`;
       }
     });
-    
+
     return css;
   });
 }
 
 // Helper function to convert a style object to CSS properties string
 function objectToCssProperties(obj: Record<string, any>, indent = 2): string {
-  const indentStr = ' '.repeat(indent);
+  const indentStr = " ".repeat(indent);
   return Object.entries(obj)
     .map(([key, value]) => {
       // Convert camelCase to kebab-case
-      const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+      const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
       return `${indentStr}${cssKey}: ${value};`;
     })
-    .join('\n');
+    .join("\n");
 }
 
 // Define types
@@ -115,7 +115,7 @@ export type StyleDefinition = {
  */
 export function mergeStyles(...styleFuncs: ReturnType<typeof styles>[]) {
   return createCssFunction(() => {
-    return styleFuncs.map(func => func()).join('\n');
+    return styleFuncs.map((func) => func()).join("\n");
   });
 }
 
@@ -125,10 +125,11 @@ export function mergeStyles(...styleFuncs: ReturnType<typeof styles>[]) {
 export function conditionalStyles(
   condition: boolean | (() => boolean),
   trueStyles: ReturnType<typeof styles>,
-  falseStyles?: ReturnType<typeof styles>
+  falseStyles?: ReturnType<typeof styles>,
 ) {
   return createCssFunction(() => {
-    const shouldApply = typeof condition === 'function' ? condition() : condition;
-    return shouldApply ? trueStyles() : (falseStyles ? falseStyles() : '');
+    const shouldApply =
+      typeof condition === "function" ? condition() : condition;
+    return shouldApply ? trueStyles() : falseStyles ? falseStyles() : "";
   });
-} 
+}

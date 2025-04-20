@@ -19,15 +19,21 @@ export function FileManagerTreeItemContent(
     setFileManagerStore("selectedItem", props.item);
   };
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   align-items: center;
   cursor: pointer;
   display: flex;
   flex: 1;
-  ${!props.hasChildren ? `
+  ${
+    props.hasChildren
+      ? ""
+      : `
     border-left: 1px dashed black;
     padding-left: 10px;
-  ` : ''}
+  `
+  }
 `}
       onClick={handleDoubleClick}
     >

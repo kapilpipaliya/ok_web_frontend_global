@@ -74,11 +74,14 @@ export function SupportTickets() {
             <div>
               <For each={getReplies()}>
                 {(reply: Vertex) => (
-                  <As as="div" css={css`
+                  <As
+                    as="div"
+                    css={css`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-`}>
+`}
+                  >
                     {new Date(reply.P.createdAt).toLocaleDateString()}{" "}
                     {new Date(reply.P.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",

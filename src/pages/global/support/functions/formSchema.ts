@@ -179,10 +179,10 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     // emptyState: {
                     //   as: "div",
                     //   css: css`
-//   padding: 8px;
-//   text-align: center;
-//   color: #1e293b;
-// `,
+                    //   padding: 8px;
+                    //   text-align: center;
+                    //   color: #1e293b;
+                    // `,
                     //   componentName: "Html",
                     //   text: "No messages yet",
                     // },
@@ -494,7 +494,8 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         }),
       },
     ],
-    css: [SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
+    css: [
+      SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
       css`
         display: flex;
         align-items: center;

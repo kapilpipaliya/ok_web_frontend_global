@@ -17,7 +17,8 @@ export function SimpleWarningAlert(
   props: Readonly<WithAccentBorderProps>,
 ): JSX.Element {
   return (
-    <As as="div"
+    <As
+      as="div"
       style={{
         "background-color": props.backgroundColor || "rgb(255,251,235)",
         "border-color": props.borderColor || "rgb(251,191,36)",
@@ -25,13 +26,23 @@ export function SimpleWarningAlert(
         padding: props.padding || "1rem",
       }}
     >
-      <As as="div" css={[css`
+      <As
+        as="div"
+        css={[
+          css`
   display: flex;
-`]}>
-        <As as="div" css={[css`
+`,
+        ]}
+      >
+        <As
+          as="div"
+          css={[
+            css`
   flex-shrink: 0;
-`]}>
-          <As 
+`,
+          ]}
+        >
+          <As
             as="svg"
             aria-hidden="true"
             css={css`
@@ -49,23 +60,37 @@ export function SimpleWarningAlert(
             />
           </As>
         </As>
-        <As as="div" css={[css`
+        <As
+          as="div"
+          css={[
+            css`
   margin-left: 0.75rem;
-`]}>
-          <As as="p" css={[css`
+`,
+          ]}
+        >
+          <As
+            as="p"
+            css={[
+              css`
   line-height: 1.25rem;
   font-size: 0.875rem;
-`]} style={{ color: "rgb(180,83,9)" }}>
+`,
+            ]}
+            style={{ color: "rgb(180,83,9)" }}
+          >
             {props.message || "Warning"}
-            <As as="a"
-             css={[css`
+            <As
+              as="a"
+              css={[
+                css`
                 color:rgb(180,83,9);
                 font-weight:500;
                 text-decoration:underline;
                 &:hover {
                   color:${props.linkHoverColor ?? "rgb(217,119,6)"};
                 }
-              `]}
+              `,
+              ]}
               href={props.linkHref || "#"}
             >
               {props.linkText || ""}

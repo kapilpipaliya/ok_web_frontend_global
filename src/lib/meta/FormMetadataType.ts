@@ -1,7 +1,6 @@
-import {CssType} from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/FieldSchemaType";
 
 export interface FieldAttribute {
-  [key: string]: any;
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes?: FieldAttribute[];
   css?: CssType;
@@ -9,8 +8,9 @@ export interface FieldAttribute {
   displayName?: string;
   key?: string;
   meta?: string;
-
   validationRules?: Array<{}>;
+
+  [key: string]: any;
 }
 
 export interface IFormMetaData {

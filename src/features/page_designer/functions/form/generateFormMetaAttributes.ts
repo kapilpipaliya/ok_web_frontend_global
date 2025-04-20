@@ -185,7 +185,7 @@ export function getAllFieldsUsedInRootLevelSetting(
 
 // use it when new field is drag and drop.
 export function getUniqueName(
-  txnId: number,
+  _txnId: number,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formVertex: Vertex,

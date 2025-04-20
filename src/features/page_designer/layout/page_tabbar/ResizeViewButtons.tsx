@@ -10,7 +10,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 type DimensionType = {
   height: string;
@@ -141,13 +141,17 @@ export const ResizeViewButtons = (props: {
   `;
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   gap: 0.5rem;
   align-items: center;
   font-size: 0.8rem;
-`}>
-      <As as="select"
+`}
+    >
+      <As
+        as="select"
         css={(args: FunctionArgumentType) => css`
   border: 1px solid ${args.theme.var.color.primary_40};
   border-radius: 5px;
@@ -165,11 +169,14 @@ export const ResizeViewButtons = (props: {
         <option value="custom">Custom</option>
       </As>
 
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   gap: 0.25rem;
   align-items: center;
-`}>
+`}
+      >
         <As
           as="input"
           css={commonInputCss}
@@ -181,10 +188,15 @@ export const ResizeViewButtons = (props: {
           type="text"
           value={viewVertex()?.P.width || ""}
         />
-        <As as="span" css={css`
+        <As
+          as="span"
+          css={css`
   display: flex;
   align-items: center;
-`}>×</As>
+`}
+        >
+          ×
+        </As>
         <As
           as="input"
           css={commonInputCss}

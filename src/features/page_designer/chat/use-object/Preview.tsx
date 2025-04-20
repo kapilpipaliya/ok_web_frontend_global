@@ -16,10 +16,7 @@ import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValu
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
-import {
-  headerIconButtonCss,
-  toolBarCss,
-} from "~/pages/settings/constants";
+import { toolBarCss } from "~/pages/settings/constants";
 
 import {
   type PageLayoutObject,
@@ -177,9 +174,12 @@ export function Preview(props: {
           ).length > 0
         }
       >
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   display: none;
-`}>
+`}
+        >
           <PageViewWrapper
             formDataId={parentId}
             hideSaveCancelButton
@@ -190,9 +190,15 @@ export function Preview(props: {
         </As>
 
         <Show when={graph.vertexes[formId]}>
-          <As as="div" css={[toolBarCss, css`
+          <As
+            as="div"
+            css={[
+              toolBarCss,
+              css`
   display: none;
-`]}>
+`,
+            ]}
+          >
             <IconButton
               css={css`
   background-color: transparent;
@@ -210,17 +216,28 @@ export function Preview(props: {
             <IFramePreview formStoreId={formId} noMinHeight />
           </Show>
 
-          <As as="div" css={[css`
+          <As
+            as="div"
+            css={[
+              css`
   display: flex;
   gap: 8px;
   margin-top: 12px;
   justify-content: space-between;
-`]}>
-              <As as="div" css={[css`
+`,
+            ]}
+          >
+            <As
+              as="div"
+              css={[
+                css`
   display: flex;
   gap: 8px;
-`]}>
-              <As as="select" 
+`,
+              ]}
+            >
+              <As
+                as="select"
                 css={css`
   padding: 8px;
   border: 1px solid \${args.theme.var.color.base};
@@ -284,12 +301,22 @@ export function Preview(props: {
           const [isPreview, setIsPreview] = createSignal(true);
           const formId = uuidv7();
           return (
-            <As as="div" css={[css`
+            <As
+              as="div"
+              css={[
+                css`
   margin-bottom: 24px;
-`]}>
-              <As as="div" css={[css`
+`,
+              ]}
+            >
+              <As
+                as="div"
+                css={[
+                  css`
   display: none;
-`]}>
+`,
+                ]}
+              >
                 <PageViewWrapper
                   formDataId={componentVertex.id}
                   hideSaveCancelButton
@@ -300,9 +327,15 @@ export function Preview(props: {
               </As>
 
               <Show when={graph.vertexes[formId]}>
-                <As as="div" css={[toolBarCss, css`
+                <As
+                  as="div"
+                  css={[
+                    toolBarCss,
+                    css`
   display: none;
-`]}>
+`,
+                  ]}
+                >
                   <IconButton
                     css={css`
   background-color: transparent;
@@ -324,11 +357,16 @@ export function Preview(props: {
                   <IFramePreview formStoreId={formId} noMinHeight />
                 </Show>
 
-                <As as="div" css={[css`
+                <As
+                  as="div"
+                  css={[
+                    css`
   display: flex;
   gap: 8px;
   margin-top: 12px;
-`]}>
+`,
+                  ]}
+                >
                   <IconButton
                     css={css`
   background-color: transparent;
@@ -365,11 +403,16 @@ export function Preview(props: {
     <div>
       <Show
         fallback={
-          <As as="div" css={[css`
+          <As
+            as="div"
+            css={[
+              css`
   text-align: center;
   padding: 16px;
   color: #3b82f6;
-`]}>
+`,
+            ]}
+          >
             No Preview Available
           </As>
         }

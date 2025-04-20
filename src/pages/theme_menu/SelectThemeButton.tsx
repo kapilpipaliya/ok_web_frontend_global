@@ -5,7 +5,6 @@ import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import { SelectThemeMenu } from "./SelectThemeMenu";
-import { css } from "~/lib/styles";
 
 export function SelectThemeButton() {
   const [isThemeOptionsOpen, setIsThemeOptionsOpen] = createSignal(false);

@@ -124,7 +124,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                               {
                                 as: "div",
                                 componentName: "Html",
-                                css: args => css`
+                                css: (args) => css`
                                 padding: 12px;
                                 cursor: pointer;
                                 border-radius: 4px;
@@ -190,10 +190,13 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                     }),
                   },
                 ],
-                css: [STYLES.overflowCss, css`
+                css: [
+                  STYLES.overflowCss,
+                  css`
   height:calc(100vh - 140px);
   border-right:1px solid #eee;
-`],
+`,
+                ],
                 componentName: "Html",
               },
               {

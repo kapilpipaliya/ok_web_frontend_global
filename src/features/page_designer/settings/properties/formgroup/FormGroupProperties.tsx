@@ -35,21 +35,19 @@ import { PROPERTIES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
-import { ClassesComponent } from "./ClassesComponent";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
 import { SelectPermissionField } from "./permission_field/SelectPermissionField";
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
 import { FunctionEditor } from "../FunctionEditor";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
-  onChange(meta: Vertex, data: unknown): void;
   selectedLayout: Vertex;
-
   txnId: number;
+
+  onChange(meta: Vertex, data: unknown): void;
 }
 
 interface PropertyFieldProps {

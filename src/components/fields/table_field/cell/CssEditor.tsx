@@ -19,7 +19,8 @@ export function CssEditor(
   const [showCssEditor, setShowCssEditor] = createSignal(false);
   return (
     <>
-      <As as="button"
+      <As
+        as="button"
         css={css`
   border: 1px solid #3b82f6;
   padding: 6px;

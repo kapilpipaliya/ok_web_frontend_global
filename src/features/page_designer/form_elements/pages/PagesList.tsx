@@ -113,18 +113,27 @@ export function PagesList(props: Readonly<{ coll: string }>) {
               placeholder={`Search ${props.coll}...`}
               value={searchQuery()}
             />
-            <As as="div" css={[STYLES.overflowCss, css`
+            <As
+              as="div"
+              css={[
+                STYLES.overflowCss,
+                css`
   display: grid;
-`]}>
+`,
+              ]}
+            >
               <For
                 each={filteredData()}
                 fallback={
-                  <As as="div" css={css`
+                  <As
+                    as="div"
+                    css={css`
   font-weight: bold;
   margin: 20px 0px;
   padding: 3px;
   text-align: center;
-`}>
+`}
+                  >
                     No {props.coll} Found!
                   </As>
                 }

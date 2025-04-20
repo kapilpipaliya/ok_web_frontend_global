@@ -1,12 +1,19 @@
-import * as Models from "./models";
-import { oklch, formatHex, formatRgb, rgb as rgbConverter, wcagLuminance, type Rgb } from "culori";
+import type * as Models from "./models";
+import {
+  formatHex,
+  formatRgb,
+  oklch,
+  rgb as rgbConverter,
+  type Rgb,
+  wcagLuminance,
+} from "culori";
 
 const clamp = (val: number, min: number, max: number) => {
   return Math.min(Math.max(val, min), max);
 };
 
 export const hexOpacityToAlpha = (hexAlpha: string): number => {
-  const alphaHexToDec = parseInt(hexAlpha, 16);
+  const alphaHexToDec = Number.parseInt(hexAlpha, 16);
   const alpha = +(((alphaHexToDec / 255) * 1000) / 1000).toFixed(2);
   return alpha;
 };
@@ -20,7 +27,7 @@ export const hexToRgba = (hexColor: string) => {
         r: Math.round(color.r * 255),
         g: Math.round(color.g * 255),
         b: Math.round(color.b * 255),
-        a: color.alpha !== undefined ? color.alpha : 1
+        a: color.alpha !== undefined ? color.alpha : 1,
       };
     }
   } catch {
@@ -41,19 +48,19 @@ export const hexToRgba = (hexColor: string) => {
   const hasAlpha = hex.length === 8;
 
   if (shortHand) {
-    rgba.r = +parseInt(`${hex[0]}${hex[0]}`, rdx);
-    rgba.g = +parseInt(`${hex[1]}${hex[1]}`, rdx);
-    rgba.b = +parseInt(`${hex[2]}${hex[2]}`, rdx);
+    rgba.r = +Number.parseInt(`${hex[0]}${hex[0]}`, rdx);
+    rgba.g = +Number.parseInt(`${hex[1]}${hex[1]}`, rdx);
+    rgba.b = +Number.parseInt(`${hex[2]}${hex[2]}`, rdx);
     rgba.a = 1;
   } else if (longHand) {
-    rgba.r = +parseInt(`${hex[0]}${hex[1]}`, rdx);
-    rgba.g = +parseInt(`${hex[2]}${hex[3]}`, rdx);
-    rgba.b = +parseInt(`${hex[4]}${hex[5]}`, rdx);
+    rgba.r = +Number.parseInt(`${hex[0]}${hex[1]}`, rdx);
+    rgba.g = +Number.parseInt(`${hex[2]}${hex[3]}`, rdx);
+    rgba.b = +Number.parseInt(`${hex[4]}${hex[5]}`, rdx);
     rgba.a = 1;
   } else if (hasAlpha) {
-    rgba.r = +parseInt(`${hex[0]}${hex[1]}`, rdx);
-    rgba.g = +parseInt(`${hex[2]}${hex[3]}`, rdx);
-    rgba.b = +parseInt(`${hex[4]}${hex[5]}`, rdx);
+    rgba.r = +Number.parseInt(`${hex[0]}${hex[1]}`, rdx);
+    rgba.g = +Number.parseInt(`${hex[2]}${hex[3]}`, rdx);
+    rgba.b = +Number.parseInt(`${hex[4]}${hex[5]}`, rdx);
     rgba.a = hexOpacityToAlpha(`${hex[6]}${hex[7]}`);
   }
 
@@ -73,20 +80,20 @@ export const decToHex = (val: number, isAlpha = false) => {
 export const rgbaToHex = (
   rgba: Models.Rgba,
   hash?: boolean,
-  withAlpha = false
+  withAlpha = false,
 ) => {
   // Use culori for better color conversion
   const color: Rgb = {
-    mode: "rgb", 
-    r: rgba.r / 255, 
-    g: rgba.g / 255, 
-    b: rgba.b / 255
+    mode: "rgb",
+    r: rgba.r / 255,
+    g: rgba.g / 255,
+    b: rgba.b / 255,
   };
-  
+
   if (rgba.a !== undefined && rgba.a !== null) {
     color.alpha = rgba.a;
   }
-  
+
   // Try using culori's formatHex
   try {
     let result = formatHex(color);
@@ -122,23 +129,23 @@ export const rgbToHsl = (rgba: Models.Rgba) => {
   // Use culori for better color conversion
   try {
     const color: Rgb = {
-      mode: "rgb", 
-      r: rgba.r / 255, 
-      g: rgba.g / 255, 
-      b: rgba.b / 255
+      mode: "rgb",
+      r: rgba.r / 255,
+      g: rgba.g / 255,
+      b: rgba.b / 255,
     };
-    
+
     if (rgba.a !== undefined && rgba.a !== null) {
       color.alpha = rgba.a;
     }
-    
+
     const oklchColor = oklch(color);
-    
+
     if (oklchColor) {
-      return { 
-        h: Math.round(oklchColor.h || 0), 
+      return {
+        h: Math.round(oklchColor.h || 0),
         s: Math.round((oklchColor.c || 0) * 100), // Chroma maps roughly to saturation
-        l: Math.round((oklchColor.l || 0) * 100)  // Lightness
+        l: Math.round((oklchColor.l || 0) * 100), // Lightness
       };
     }
   } catch {
@@ -156,20 +163,31 @@ export const rgbToHsl = (rgba: Models.Rgba) => {
   let s = 0;
   let l = 0;
 
-  if (max === min) h = 0;
-  else if (r === max) h = (g - b) / delta;
-  else if (g === max) h = 2 + (b - r) / delta;
-  else if (b === max) h = 4 + (r - g) / delta;
+  if (max === min) {
+    h = 0;
+  } else if (r === max) {
+    h = (g - b) / delta;
+  } else if (g === max) {
+    h = 2 + (b - r) / delta;
+  } else if (b === max) {
+    h = 4 + (r - g) / delta;
+  }
 
   h = Math.min(h * 60, 360);
 
-  if (h < 0) h += 360;
+  if (h < 0) {
+    h += 360;
+  }
 
   l = (min + max) / 2;
 
-  if (max === min) s = 0;
-  else if (l <= 0.5) s = delta / (max + min);
-  else s = delta / (2 - max - min);
+  if (max === min) {
+    s = 0;
+  } else if (l <= 0.5) {
+    s = delta / (max + min);
+  } else {
+    s = delta / (2 - max - min);
+  }
 
   return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
 };
@@ -178,25 +196,25 @@ export const rgbToHsv = (rgba: Models.Rgba) => {
   // Use culori for better color conversions if possible
   try {
     const color: Rgb = {
-      mode: "rgb", 
-      r: rgba.r / 255, 
-      g: rgba.g / 255, 
-      b: rgba.b / 255
+      mode: "rgb",
+      r: rgba.r / 255,
+      g: rgba.g / 255,
+      b: rgba.b / 255,
     };
-    
+
     if (rgba.a !== undefined && rgba.a !== null) {
       color.alpha = rgba.a;
     }
-    
+
     const oklchColor = oklch(color);
-    
+
     if (oklchColor) {
       // Approximate HSV from OKLCH
       // Note: This is a rough approximation as HSV and OKLCH have different models
-      return { 
-        h: Math.round(oklchColor.h || 0), 
+      return {
+        h: Math.round(oklchColor.h || 0),
         s: Math.round((oklchColor.c || 0) * 250), // Amplify chroma for better saturation range
-        v: Math.round((oklchColor.l || 0) * 100)  // Value is similar to lightness
+        v: Math.round((oklchColor.l || 0) * 100), // Value is similar to lightness
       };
     }
   } catch {
@@ -214,24 +232,34 @@ export const rgbToHsv = (rgba: Models.Rgba) => {
   let s = 0;
   let v = 0;
 
-  if (max === 0) s = 0;
-  else s = ((delta / max) * 1000) / 10;
+  if (max === 0) {
+    s = 0;
+  } else {
+    s = ((delta / max) * 1000) / 10;
+  }
 
-  if (max === min) h = 0;
-  else if (r === max) h = (g - b) / delta;
-  else if (g === max) h = 2 + (b - r) / delta;
-  else if (b === max) h = 4 + (r - g) / delta;
+  if (max === min) {
+    h = 0;
+  } else if (r === max) {
+    h = (g - b) / delta;
+  } else if (g === max) {
+    h = 2 + (b - r) / delta;
+  } else if (b === max) {
+    h = 4 + (r - g) / delta;
+  }
 
   h = Math.min(h * 60, 360);
 
-  if (h < 0) h += 360;
+  if (h < 0) {
+    h += 360;
+  }
 
   v = ((max / 255) * 1000) / 10;
 
   return { h: Math.round(h), s: Math.round(s), v: Math.round(v) };
 };
 
-export const isHexColor = (color?: string, strict: boolean = true) => {
+export const isHexColor = (color?: string, strict = true) => {
   // Use culori to validate
   if (color) {
     try {
@@ -259,12 +287,12 @@ export const luminance = (rgba: Models.Rgba) => {
   // Use culori's wcagLuminance for more accurate results
   try {
     const color: Rgb = {
-      mode: "rgb", 
-      r: rgba.r / 255, 
-      g: rgba.g / 255, 
-      b: rgba.b / 255
+      mode: "rgb",
+      r: rgba.r / 255,
+      g: rgba.g / 255,
+      b: rgba.b / 255,
     };
-    
+
     return wcagLuminance(color);
   } catch {
     // Fallback to manual calculation
@@ -272,18 +300,16 @@ export const luminance = (rgba: Models.Rgba) => {
 
   // Manual luminance calculation as fallback
   const { r, g, b } = rgba;
-  const sRGB = [r, g, b].map(function (value) {
+  const sRGB = [r, g, b].map((value) => {
     value /= 255;
-    return value <= 0.03928
-      ? value / 12.92
-      : Math.pow((value + 0.055) / 1.055, 2.4);
+    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
   });
   return sRGB[0] * 0.2126 + sRGB[1] * 0.7152 + sRGB[2] * 0.0722;
 };
 
 export const contrastRatio = (
   foreground: Models.Rgba,
-  background: Models.Rgba
+  background: Models.Rgba,
 ) => {
   const L1 = luminance(foreground);
   const L2 = luminance(background);
@@ -297,16 +323,16 @@ export const formatRgba = ({ r, g, b, a }: Models.Rgba) => {
   // Use culori for more consistent formatting
   try {
     const color: Rgb = {
-      mode: "rgb", 
-      r: r / 255, 
-      g: g / 255, 
-      b: b / 255
+      mode: "rgb",
+      r: r / 255,
+      g: g / 255,
+      b: b / 255,
     };
-    
+
     if (a !== undefined && a !== null) {
       color.alpha = a;
     }
-    
+
     return formatRgb(color);
   } catch {
     // Fallback to manual formatting

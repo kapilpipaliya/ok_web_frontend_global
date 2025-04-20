@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { type JSX, splitProps } from "solid-js";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { css } from "~/lib/styles";
 
 export function SearchBar(
@@ -13,15 +13,19 @@ export function SearchBar(
 ) {
   const [_local, inputProps] = splitProps(props, ["handleChange"]);
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   /* lh: 28px; */
   display: flex;
   align-items: center;
   padding: 5px 0px;
   position: relative;
   width: 100%;
-`}>
-      <As as={Icon}
+`}
+    >
+      <As
+        as={Icon}
         css={(args: FunctionArgumentType) => css`
   color: ${args.theme.var.color.base_80};
   padding-left: 6px;
@@ -32,7 +36,8 @@ export function SearchBar(
         noobserver
         width={18}
       />
-      <As as="input"
+      <As
+        as="input"
         css={css`
   line-height: 28px;
   border: 1px solid \${args.theme.var.color.base_40};

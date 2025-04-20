@@ -1,6 +1,14 @@
-import { DEFAULT_INFO, DEFAULT_ACCENT, DEFAULT_WARNING, DEFAULT_BASE, DEFAULT_NEUTRAL, DEFAULT_ERROR, DEFAULT_SUCCESS } from "../styles/constants";
-
-import { DEFAULT_PRIMARY, DEFAULT_SECONDARY } from "../styles/constants";
+import {
+  DEFAULT_ACCENT,
+  DEFAULT_BASE,
+  DEFAULT_ERROR,
+  DEFAULT_INFO,
+  DEFAULT_NEUTRAL,
+  DEFAULT_PRIMARY,
+  DEFAULT_SECONDARY,
+  DEFAULT_SUCCESS,
+  DEFAULT_WARNING,
+} from "../styles/constants";
 
 // https://github.com/bgrins/TinyColor/blob/master/npm/tinycolor.js#L784
 export function getDefaultTheme() {

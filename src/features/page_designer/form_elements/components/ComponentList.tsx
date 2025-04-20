@@ -23,6 +23,7 @@ import { ComponentItem } from "./ComonentItem";
 import { getCompChildren } from "./functions/getCompChildren";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+
 export function ComponentList(props: {
   edgeName: string;
   isFetchData?: boolean;
@@ -151,34 +152,38 @@ export function ComponentList(props: {
           <For
             each={filteredChildren()}
             fallback={
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   margin: 20px 0px;
   padding: 3px;
   text-align: center;
-`}>
+`}
+              >
                 No Component Found!
               </As>
             }
           >
             {(item) => (
-         
-                <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   font-weight: 600;
   margin: 8px 0px;
-`}>
-                  <ComponentItem
-                    child={item}
-                    edgeName={props.edgeName}
-                    expandedKeys={expandedKeys}
-                    onDoubleClick={props.onDoubleClick}
-                    previewGraph={previewGraph}
-                    previewPageId={previewPageId()}
-                    setPreviewGraph={setPreviewGraph}
-                    setPreviewPageId={setPreviewPageId}
-                    toggleExpand={toggleExpand}
-                  />
-                </As>
-              
+`}
+              >
+                <ComponentItem
+                  child={item}
+                  edgeName={props.edgeName}
+                  expandedKeys={expandedKeys}
+                  onDoubleClick={props.onDoubleClick}
+                  previewGraph={previewGraph}
+                  previewPageId={previewPageId()}
+                  setPreviewGraph={setPreviewGraph}
+                  setPreviewPageId={setPreviewPageId}
+                  toggleExpand={toggleExpand}
+                />
+              </As>
             )}
           </For>
         </Show>

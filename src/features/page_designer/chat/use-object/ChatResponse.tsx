@@ -16,11 +16,16 @@ interface ChatResponseProps {
 
 export function ChatResponse(props: ChatResponseProps) {
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   padding: 12px;
   border: 1px solid #3b82f6;
   border-radius: 6px;
-`]}>
+`,
+      ]}
+    >
       <ResponseContent response={props.message.P.response} />
       <ResponsePreview message={props.message} />
     </As>
@@ -30,34 +35,63 @@ export function ChatResponse(props: ChatResponseProps) {
 function ResponseContent(props: { response: string }) {
   return (
     <>
-      <As as="div" css={[css`
+      <As
+        as="div"
+        css={[
+          css`
   font-weight: 500;
   margin-bottom: 4px;
-`]}>Response:</As>
-      <As as="div" css={css`
+`,
+        ]}
+      >
+        Response:
+      </As>
+      <As
+        as="div"
+        css={css`
   white-space: pre-wrap;
-`}>{props.response}</As>
+`}
+      >
+        {props.response}
+      </As>
     </>
   );
 }
 
 function ResponsePreview(props: { message: Vertex<DBMessage> }) {
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   margin-top: 16px;
   border-top: 1px solid #3b82f6;
   padding-top: 16px;
-`]}>
-      <As as="div" css={[css`
+`,
+      ]}
+    >
+      <As
+        as="div"
+        css={[
+          css`
   font-weight: 500;
   margin-bottom: 8px;
-`]}>Preview:</As>
-        <As as="div" css={[css`
+`,
+        ]}
+      >
+        Preview:
+      </As>
+      <As
+        as="div"
+        css={[
+          css`
   border: 1px dashed #3b82f6;
   padding: 16px;
   border-radius: 6px;
   min-height: 100px;
-`]}>
+`,
+        ]}
+      >
         <For
           each={(() => {
             const parsed = JSON.parse(props.message.P.data || "[]");

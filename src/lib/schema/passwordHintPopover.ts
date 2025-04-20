@@ -90,7 +90,7 @@ export function createPasswordHintPopoverContent(
   color: \${args.theme.var.color.${textColor}};
 `;
               },
-              props: (options: FunctionArgumentType) => {
+              props: (_options: FunctionArgumentType) => {
                 return {
                   text: condition.message,
                 };

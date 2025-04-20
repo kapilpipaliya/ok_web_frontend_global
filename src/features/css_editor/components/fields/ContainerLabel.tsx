@@ -49,10 +49,7 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
         <TooltipWrapper
           arrowCss={STYLES.tooltip.arrowCss}
           content={
-            <As
-              as="div"
-              css={STYLES.tooltip.contentCss}
-            >
+            <As as="div" css={STYLES.tooltip.contentCss}>
               <Show when={props.title}>
                 <As
                   as="div"
@@ -84,7 +81,12 @@ export const ContainerLabel = (props: Readonly<ContainerLabelProps>) => {
         </TooltipWrapper>
       </Show>
       <Show when={props.showResetIcon ?? false}>
-        <As as="span" css={args => css`cursor: pointer; color: \${args.theme.var.color.accent};`}>
+        <As
+          as="span"
+          css={(_args) =>
+            css`cursor: pointer; color: \${args.theme.var.color.accent};`
+          }
+        >
           <Icon
             height={26}
             icon="ph:x"

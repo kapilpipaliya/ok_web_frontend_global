@@ -31,9 +31,12 @@ export function Variants() {
   };
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   width: 100%;
-`}>
+`}
+    >
       <VariantsHeader />
       <VariantsList />
       <ComponentVariantsInput

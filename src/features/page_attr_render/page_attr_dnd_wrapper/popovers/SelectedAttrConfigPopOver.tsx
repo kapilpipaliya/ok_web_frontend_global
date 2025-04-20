@@ -21,7 +21,7 @@ import { ComponentName } from "../components/ComponentName";
 import { InsertButtons } from "../menus/InsertButtons";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+
 interface SelectedAttrConfigPopOverProps {
   item: Vertex;
 }
@@ -40,10 +40,17 @@ export function SelectedAttrConfigPopOver(
 
   const iconSize = 20;
   return (
-    <As as="span" css={[css`
+    <As
+      as="span"
+      css={[
+        css`
   position: relative;
-`]}>
-      <As as="div" css={css`
+`,
+      ]}
+    >
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   background-color: \${args.theme.var.color.primary};
@@ -57,12 +64,17 @@ export function SelectedAttrConfigPopOver(
   button {
     color: white;
   }
-`}>
+`}
+      >
         <IconButton
-          css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, css`
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            css`
             background-color: transparent;
             border: none;
-          `]}
+          `,
+          ]}
           draggable={true}
           icon="ph:dots-six-vertical-bold"
           onClick={() => {}}

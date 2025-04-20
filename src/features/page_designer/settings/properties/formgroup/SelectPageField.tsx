@@ -28,11 +28,14 @@ export function SelectPageField(
 
   const RenderLabel = (option: Vertex, _isSelected: boolean) => {
     return (
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   gap: 4px;
-`}>
+`}
+      >
         <span>{option.P.key}</span>
         <IconButton
           icon={"ph:gear"}
@@ -89,14 +92,20 @@ export function SelectPageField(
   };
 
   return (
-    <As as="div"
-      css={`${props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined && props.selectedLayout?.P[props.meta.P[IdAttr]] !== null ? css`
+    <As
+      as="div"
+      css={`${
+        props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined &&
+        props.selectedLayout?.P[props.meta.P[IdAttr]] !== null
+          ? css`
   border: 2px solid #008000;
   border-bottom: none;
   border-top: none;
   padding: 2px 3px;
   border-radius: 5px;
-` : ""} ${css`
+`
+          : ""
+      } ${css`
   display: flex;
   align-items: center;
   gap: 2px;
@@ -104,18 +113,25 @@ export function SelectPageField(
   margin-top: 6px;
 `}`}
     >
-      <As as="span" css={css`
+      <As
+        as="span"
+        css={css`
   font-size: 15px;
   flex: 0.5;
-`}>
+`}
+      >
         {/* Show Page After Submission Form */}
         <Label meta={props.meta} />
       </As>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   font-size: 15px;
   flex: 1;
-`} ref={buttonRef!}>
+`}
+        ref={buttonRef!}
+      >
         <SelectThankYouPage />
         <AddNewPageButton />
       </As>

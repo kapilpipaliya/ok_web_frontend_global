@@ -27,8 +27,10 @@ import { TabButton } from "./TabButton";
 import { Variants } from "./variants/Variants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType, CssType } from "~/components/form/type/FieldSchemaType";
-import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import type {
+  CssType,
+  FunctionArgumentType,
+} from "~/components/form/type/FieldSchemaType";
 
 interface DividerProps {
   borderColor?: string;
@@ -39,7 +41,8 @@ interface DividerProps {
 
 export function Divider(props: Readonly<DividerProps>): JSX.Element {
   return (
-    <As as="div"
+    <As
+      as="div"
       css={(args: FunctionArgumentType) => css`
         border-color:${props.borderColor || args.theme.var.color.base};
         border-top-width:${props.borderTopWidth || "1px"};
@@ -123,25 +126,37 @@ export function SettingTabs() {
   );
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
   height: 100%;
-`}>
-      <As as="div" css={(args: FunctionArgumentType) => css`
+`}
+    >
+      <As
+        as="div"
+        css={(args: FunctionArgumentType) => css`
   background-color: ${args.theme.var.color.base_10};
   overflow-x: auto;
-`}>
+`}
+      >
         <Tabs />
       </As>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   overflow: auto;
-`}>
-        <As as="div" css={css`
+`}
+      >
+        <As
+          as="div"
+          css={css`
   padding: 5px;
   ${layoutStore().selectedTab !== "settings" ? "display: none;" : ""}
-`}>
+`}
+        >
           <FormConfig />
         </As>
 
@@ -152,9 +167,12 @@ export function SettingTabs() {
                 <FormStatus />
               </Show>
               {/* Keep Display:none to keep expanded state */}
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   ${layoutStore().selectedTab !== "layers" ? "display: none;" : ""}
-`}>
+`}
+              >
                 <LayoutTree />
               </As>
 
@@ -167,9 +185,11 @@ export function SettingTabs() {
                 <Show when={layoutStore().selectedTab === "Keys"}>
                   {/* <PrimaryKey /> */}
                   <NameKey />
-                  <Divider css={css`
+                  <Divider
+                    css={css`
   margin-top: 10px;
-`} />
+`}
+                  />
                   <HeaderWithDescription
                     description="Add unique constrains to your form to ensure that no duplicate data is submitted."
                     title="Unique Constrains"

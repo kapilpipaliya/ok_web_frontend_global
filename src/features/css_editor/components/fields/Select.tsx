@@ -39,10 +39,13 @@ export const Select = (props: Readonly<SelectField>) => {
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   ${props.isLabelOnTop ? "width: 100%" : "width: 50%"}
   position: relative;
-`}>
+`}
+    >
       <DropdownButton
         isActive={isActive()}
         setReference={setReference}
@@ -76,7 +79,8 @@ interface DropdownButtonProps {
 }
 
 const DropdownButton = (props: DropdownButtonProps) => (
-  <As as="div"
+  <As
+    as="div"
     css={[
       css`
         display: flex;
@@ -86,12 +90,13 @@ const DropdownButton = (props: DropdownButtonProps) => (
         justify-content: space-between;
         padding: 2px 7px;
         border-radius: 5px;
-      `
+      `,
     ]}
     onClick={props.toggleDropdown}
     ref={props.setReference}
   >
-    <As as="button" // NOSONAR Temparary ignore it
+    <As
+      as="button" // NOSONAR Temparary ignore it
       aria-controls="select-dropdown"
       aria-expanded={props.isActive}
       aria-haspopup="listbox"
@@ -99,14 +104,20 @@ const DropdownButton = (props: DropdownButtonProps) => (
       class="select-button"
       role="combobox"
     >
-      <As as="span" css={css`
+      <As
+        as="span"
+        css={css`
   ${props.value ? "color: lightgray" : ""}
-`}>
+`}
+      >
         {props.value ? formatString(props.value) : "Select Value"}
       </As>
-      <As as="span" css={css`
+      <As
+        as="span"
+        css={css`
   /* arrow */
-`} />
+`}
+      />
     </As>
     <Icon
       height={16}
@@ -128,14 +139,18 @@ interface DropdownListProps {
 }
 
 const DropdownList = (props: DropdownListProps) => (
-  <As as="ul" css={css`
+  <As
+    as="ul"
+    css={css`
   width: 100%;
-`}>
+`}
+  >
     <For each={props.options}>
       {(option) => {
         const label = () => option.value || option;
         return (
-          <As as="li"
+          <As
+            as="li"
             css={[
               css`
                 ${props.value === label() && "bg:rgb(229,234,253)"}
@@ -151,7 +166,8 @@ const DropdownList = (props: DropdownListProps) => (
                 hover: {
                   ${props.value !== label() && "bg:#efefef"}
                 }
-            `]}
+            `,
+            ]}
             onClick={() => props.selectOption(option)}
           >
             <label>{formatString(label())}</label>

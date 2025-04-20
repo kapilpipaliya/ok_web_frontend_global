@@ -13,7 +13,8 @@ export function DisplayAllVariants() {
   };
   return (
     <>
-      <As as="button"
+      <As
+        as="button"
         css={css`
   background-color: \${args.theme.var.color.primary};
   color: #1e293b;

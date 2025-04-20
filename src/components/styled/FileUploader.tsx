@@ -97,7 +97,8 @@ export function FileUploader(props: FileUploaderProps) {
 
   return (
     <>
-      <As as="button"
+      <As
+        as="button"
         css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
         onClick={handleFullBoxClick}
         type="button"
@@ -122,7 +123,8 @@ export function FileUploader(props: FileUploaderProps) {
           !(localProps.hidePreview ?? true)
         }
       >
-        <As as="div"
+        <As
+          as="div"
           css={css`
   background-position: center;
   background-size: cover;
@@ -140,23 +142,30 @@ export function FileUploader(props: FileUploaderProps) {
         >
           <Switch>
             <Match when={files().length > 0 || previewUrls().length > 0}>
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
   padding: 10px;
-`}>
+`}
+              >
                 <For each={files().length > 0 ? files() : [null]}>
                   {(file, index) => (
-                    <As as="div" css={css`
+                    <As
+                      as="div"
+                      css={css`
   max-width: 200px;
   max-height: 200px;
   margin: 5px;
-`}>
+`}
+                    >
                       <Switch>
                         <Match when={file?.type.startsWith("image/")}>
-                          <As as="img"
+                          <As
+                            as="img"
                             alt="Media"
                             css={css`
   border-radius: 10px;
@@ -167,7 +176,8 @@ export function FileUploader(props: FileUploaderProps) {
                           />
                         </Match>
                         <Match when={file?.type.startsWith("video/")}>
-                          <As as="video"
+                          <As
+                            as="video"
                             css={css`
   border-radius: 10px;
   max-height: 100%;
@@ -178,7 +188,8 @@ export function FileUploader(props: FileUploaderProps) {
                           />
                         </Match>
                         <Match when={!file && previewUrls().length > 0}>
-                          <As as="img"
+                          <As
+                            as="img"
                             alt="Media"
                             css={css`
   border-radius: 10px;

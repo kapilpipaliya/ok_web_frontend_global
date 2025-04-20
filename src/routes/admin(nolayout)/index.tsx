@@ -27,14 +27,20 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
       <GetInitialData authenticate>
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   flex: 1;
-`} />
-          <As as="div" css={css`
+`}
+          />
+          <As
+            as="div"
+            css={css`
   margin-left: auto;
   display: flex;
   gap: 4px;
-`}>
+`}
+          >
             <UserDropdownMenuDisplay />
           </As>
         </As>

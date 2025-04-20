@@ -41,14 +41,16 @@ export function TreeItemContent(
     getComponentName(componentVertex(), props.metaVertex);
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   gap: 4px;
   align-items: center;
-  ${!children().length ? "padding-left: 27px;" : ""}
+  ${children().length ? "" : "padding-left: 27px;"}
 `}
-// bl:1px|dashed|black
->
+      // bl:1px|dashed|black
+    >
       <TreeItemExpandButton
         hasChildren={!!children().length}
         isCollapsed={props.collapsedKeys().includes(props.metaVertex.id)}

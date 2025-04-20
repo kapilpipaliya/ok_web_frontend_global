@@ -7,6 +7,7 @@ import { CssPropertyRowContent } from "./CssPropertyRowContent";
 import { CssPropertyRowSettings } from "./CssPropertyRowSettings";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+
 export interface CssPropertyRowProps {
   deleteOption: (index: number) => void;
   index: Accessor<number>;
@@ -19,7 +20,9 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
   const openMenu = createSignal(false);
   return (
     <>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   border: 1px solid #3b82f6;
@@ -27,7 +30,8 @@ export function CssPropertyRow(props: Readonly<CssPropertyRowProps>) {
   margin-bottom: 3px;
   padding: 6px;
   border-radius: 4px;
-`}>
+`}
+      >
         <Icon
           css={css`
   cursor: pointer;

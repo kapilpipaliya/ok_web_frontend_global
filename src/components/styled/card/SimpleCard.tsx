@@ -16,12 +16,15 @@ type SimpleCardProps = {
 
 export function CardContainer(props: { children: JSX.Element }) {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   border-color: gray-20;
   border-radius: 0.75rem;
   border-width: 1px;
   overflow: hidden;
-`}>
+`}
+    >
       {props.children}
     </As>
   );
@@ -29,7 +32,9 @@ export function CardContainer(props: { children: JSX.Element }) {
 
 export function CardHeaderContainer(props: { children: JSX.Element }) {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   align-items: center;
   background-color: rgb(249,250,251);
@@ -37,7 +42,8 @@ export function CardHeaderContainer(props: { children: JSX.Element }) {
   border-color: rgb(17,24,39,0.05);
   column-gap: 1rem;
   padding: 1.5rem;
-`}>
+`}
+    >
       {props.children}
     </As>
   );

@@ -3,9 +3,9 @@ import type {
   FieldWithCustomProperty,
   TextFieldOptionsField,
 } from "../FieldSchemaType";
+import { createGridOptions } from "../FieldSchemaType";
 
 import { sizeTypes } from "../csseditor_constants";
-import { createGridOptions } from "../FieldSchemaType";
 
 export const Transform = {
   transform: {

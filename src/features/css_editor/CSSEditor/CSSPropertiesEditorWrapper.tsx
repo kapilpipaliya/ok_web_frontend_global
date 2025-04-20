@@ -7,7 +7,6 @@ import type { Vertex } from "~/lib/graph/graph";
 import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { CSSStore } from "../context/CssEditorContext";
-
 import { CssEditorContext } from "../context/CssEditorContext";
 import { CssEditorPropsProvider } from "../context/CSSEditorPropsContext";
 import { CssStateContext } from "../context/CssStateContext";

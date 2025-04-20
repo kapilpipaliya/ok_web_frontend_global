@@ -40,7 +40,8 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
   const [isHovered, setIsHovered] = createSignal(false);
 
   return (
-    <As as="div"
+    <As
+      as="div"
       css={css`
         width: ${isHorizontal ? "3px" : "100%"};
         height: ${isHorizontal ? "100%" : "3px"};
@@ -73,28 +74,43 @@ const Panel: Component<PanelProps> = (props) => {
   const Content = () => {
     return (
       <Show
-        fallback={<As as="div" css={STYLES.overflowCss}>{props.children}</As>}
+        fallback={
+          <As as="div" css={STYLES.overflowCss}>
+            {props.children}
+          </As>
+        }
         when={props.title}
       >
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
           display: grid;
           grid-template-rows: auto 1fr;
           height: 100%;
-        `}>
-          <As as="div" css={css`
+        `}
+        >
+          <As
+            as="div"
+            css={css`
             background: rgb(243,244,246);
             border-bottom: 1px solid rgb(229,231,235);
             padding: 4px;
-          `}>
-            <As as="h1" css={css`font-weight: 600; font-size: inherit;`}>{props.title}</As>
+          `}
+          >
+            <As as="h1" css={css`font-weight: 600; font-size: inherit;`}>
+              {props.title}
+            </As>
           </As>
-          <As as="div" css={STYLES.overflowCss}>{props.children}</As>
+          <As as="div" css={STYLES.overflowCss}>
+            {props.children}
+          </As>
         </As>
       </Show>
     );
   };
   return (
-    <As as="div"
+    <As
+      as="div"
       css={STYLES.overflowCss}
       ref={props.ref}
       style={{
@@ -240,7 +256,8 @@ export function RenderMainContent() {
     };
 
   return (
-    <As as="div"
+    <As
+      as="div"
       css={css`
         display: grid;
         grid-template-columns: ${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px ` : ""}${layoutStore()
@@ -266,7 +283,8 @@ export function RenderMainContent() {
         }}
       />
 
-      <As as="div"
+      <As
+        as="div"
         css={STYLES.overflowCss}
         style={{ display: layoutStore().isLeftOpen ? "block" : "none" }}
       >
@@ -314,7 +332,8 @@ export function RenderMainContent() {
 
       <div />
 
-      <As as="div"
+      <As
+        as="div"
         css={STYLES.overflowCss}
         style={{ display: layoutStore().isRight0Open ? "block" : "none" }}
       >
@@ -331,7 +350,8 @@ export function RenderMainContent() {
         </Panel>
       </As>
 
-      <As as="div"
+      <As
+        as="div"
         css={STYLES.overflowCss}
         style={{ display: layoutStore().isRight1Open ? "block" : "none" }}
       >
@@ -365,7 +385,8 @@ export function RenderMainContent() {
         </Panel>
       </As>
 
-      <As as="div"
+      <As
+        as="div"
         css={STYLES.overflowCss}
         style={{ display: layoutStore().isRight2Open ? "block" : "none" }}
       >

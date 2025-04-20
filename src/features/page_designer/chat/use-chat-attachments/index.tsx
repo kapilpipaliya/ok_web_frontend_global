@@ -35,48 +35,67 @@ export function UseChatAttachments() {
   };
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   flex-direction: column;
   gap: 2px;
-`}>
-      <As as="div" css={css`
+`}
+    >
+      <As
+        as="div"
+        css={css`
   display: flex;
   flex-direction: column;
   padding: 2px;
   gap: 2px;
-`}>
+`}
+      >
         <For each={messages()}>
           {(message) => (
-            <As as="div" css={args => css`
+            <As
+              as="div"
+              css={(_args) => css`
   display: flex;
   flex-direction: row;
   gap: 2px;
-`}>
-              <As as="div" css={args => css`
+`}
+            >
+              <As
+                as="div"
+                css={(args) => css`
   width: 24px;
   color: ${args.theme.var.color.gray};
   flex-shrink: 0;
-`}>
+`}
+              >
                 {`${message.role}: `}
               </As>
 
-              <As as="div" css={args => css`
+              <As
+                as="div"
+                css={(_args) => css`
   display: flex;
   flex-direction: column;
   gap: 2px;
-`}>
+`}
+              >
                 {message.content}
 
-                <As as="div" css={args => css`
+                <As
+                  as="div"
+                  css={(_args) => css`
   display: flex;
   flex-direction: row;
   gap: 2px;
-`}>
+`}
+                >
                   <For each={message.experimental_attachments}>
                     {(attachment, _index) =>
                       attachment.contentType?.includes("image/") ? (
-                        <As as="img"
+                        <As
+                          as="img"
                           alt={attachment.name}
                           css={css`
   width: 24px;
@@ -85,7 +104,9 @@ export function UseChatAttachments() {
                           src={attachment.url}
                         />
                       ) : attachment.contentType?.includes("text/") ? (
-                        <As as="div" css={args => css`
+                        <As
+                          as="div"
+                          css={(args) => css`
   width: 32px;
   height: 24px;
   border-radius: 4px;
@@ -93,7 +114,8 @@ export function UseChatAttachments() {
   padding: 2px;
   color: ${args.theme.var.color.gray};
   border: 1px solid ${args.theme.var.color.gray_40};
-`}>
+`}
+                        >
                           {getTextFromDataUrl(attachment.url)}
                         </As>
                       ) : null
@@ -107,13 +129,17 @@ export function UseChatAttachments() {
       </As>
 
       {isLoading() && (
-        <As as="div" css={args => css`
+        <As
+          as="div"
+          css={(args) => css`
   margin-top: 4px;
   color: ${args.theme.var.color.gray};
-`}>
+`}
+        >
           <As as="div">Loading...</As>
-          <As as="button"
-            css={args => css`
+          <As
+            as="button"
+            css={(args) => css`
   padding: 4px;
   margin-top: 4px;
   color: ${args.theme.var.color.blue};
@@ -129,14 +155,23 @@ export function UseChatAttachments() {
       )}
 
       {error() && (
-        <As as="div" css={args => css`
+        <As
+          as="div"
+          css={(_args) => css`
   margin-top: 4px;
-`}>
-          <As as="div" css={args => css`
+`}
+        >
+          <As
+            as="div"
+            css={(args) => css`
   color: ${args.theme.var.color.red};
-`}>An error occurred.</As>
-          <As as="button"
-            css={args => css`
+`}
+          >
+            An error occurred.
+          </As>
+          <As
+            as="button"
+            css={(args) => css`
   padding: 4px;
   margin-top: 4px;
   color: ${args.theme.var.color.blue};
@@ -151,8 +186,9 @@ export function UseChatAttachments() {
         </As>
       )}
 
-      <As as="form"
-        css={args => css`
+      <As
+        as="form"
+        css={(args) => css`
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -164,7 +200,9 @@ export function UseChatAttachments() {
 `}
         onSubmit={onSend}
       >
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   display: flex;
   flex-direction: row;
   gap: 2px;
@@ -172,13 +210,15 @@ export function UseChatAttachments() {
   right: 2px;
   bottom: 14px;
   align-items: end;
-`}>
+`}
+        >
           <For each={files() ? Array.from(files()!) : []}>
             {(attachment) => {
               const type = attachment.type;
               return type.startsWith("image/") ? (
                 <div>
-                  <As as="img"
+                  <As
+                    as="img"
                     alt={attachment.name}
                     css={css`
   width: 24px;
@@ -186,13 +226,20 @@ export function UseChatAttachments() {
 `}
                     src={URL.createObjectURL(attachment)}
                   />
-                  <As as="span" css={args => css`
+                  <As
+                    as="span"
+                    css={(args) => css`
   font-size: 12px;
   color: ${args.theme.var.color.gray};
-`}>{attachment.name}</As>
+`}
+                  >
+                    {attachment.name}
+                  </As>
                 </div>
               ) : type.startsWith("text/") ? (
-                <As as="div" css={args => css`
+                <As
+                  as="div"
+                  css={(args) => css`
   width: 24px;
   color: ${args.theme.var.color.gray};
   flex-shrink: 0;
@@ -200,13 +247,17 @@ export function UseChatAttachments() {
   display: flex;
   flex-direction: column;
   gap: 1px;
-`}>
-                  <As as="div" css={args => css`
+`}
+                >
+                  <As
+                    as="div"
+                    css={(args) => css`
   width: 16px;
   height: 20px;
   background-color: ${args.theme.var.color.gray_20};
   border-radius: 4px;
-`} />
+`}
+                  />
                   {attachment.name}
                 </As>
               ) : null;
@@ -221,8 +272,9 @@ export function UseChatAttachments() {
           type="file"
         />
 
-        <As as="input"
-          css={args => css`
+        <As
+          as="input"
+          css={(args) => css`
   background-color: ${args.theme.var.color.gray_20};
   width: 100%;
   padding: 2px;

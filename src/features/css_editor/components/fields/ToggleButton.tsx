@@ -38,8 +38,8 @@ export const ToggleButton = (props: Readonly<ToggleField>) => {
                   props.options.indexOf(option) === 0
                     ? "5px 0 0 5px"
                     : props.options.indexOf(option) === props.options.length - 1
-                    ? "0 5px 5px 0"
-                    : "0"
+                      ? "0 5px 5px 0"
+                      : "0"
                 };
                 width: -webkit-fill-available;
               `}

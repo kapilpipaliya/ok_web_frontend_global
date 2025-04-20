@@ -33,12 +33,15 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
   ];
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   margin-left: 2px;
   display: flex;
   align-items: center;
   gap: 2px;
-`}>
+`}
+    >
       <For each={icons}>
         {(item) => (
           <IconButton

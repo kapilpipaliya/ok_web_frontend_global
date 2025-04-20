@@ -25,12 +25,16 @@ export function FormStatusWrapper() {
         customTitle={<span>{"Status Confirmation"}</span>}
         dialogCss={css`min-width: 20%; border-radius: 10px; padding: 0;`}
         footer={(_toggle) => (
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   align-items: center;
   display: flex;
   justify-content: end;
-`}>
-            <As as="button"
+`}
+          >
+            <As
+              as="button"
               autofocus
               css={css`
   margin-right: 7px;
@@ -42,7 +46,8 @@ export function FormStatusWrapper() {
             >
               Cancel
             </As>
-            <As as="button"
+            <As
+              as="button"
               css={css`
   margin-right: 10px;
 `}

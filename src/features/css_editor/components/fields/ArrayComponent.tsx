@@ -66,7 +66,7 @@ export function ArrayComponent(
             />
             <As
               as="button"
-              css={args => css`
+              css={(args) => css`
                 color: white;
                 border-radius: 4px;
                 background: ${args.theme.var.color.error};
@@ -81,7 +81,7 @@ export function ArrayComponent(
       </For>
       <As
         as="button"
-        css={args => css`
+        css={(args) => css`
           color: white;
           border-radius: 4px;
           background: ${args.theme.var.color.primary};

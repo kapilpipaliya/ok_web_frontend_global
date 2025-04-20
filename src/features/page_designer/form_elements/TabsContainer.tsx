@@ -4,7 +4,10 @@ import { css } from "~/lib/styles";
 
 export function TabsContainer(props: ParentProps) {
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   lh: 1rem;
   border-bottom-width: 1px;
   border-color: rgb(229,231,235);
@@ -13,7 +16,9 @@ export function TabsContainer(props: ParentProps) {
   font-weight: 500;
   margin-bottom: 10px;
   text-align: center;
-`]}>
+`,
+      ]}
+    >
       {props.children}
     </As>
   );

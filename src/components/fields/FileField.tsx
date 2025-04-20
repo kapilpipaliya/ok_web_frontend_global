@@ -121,7 +121,9 @@ export function FileField(props: Readonly<Properties>) {
 
   return (
     <>
-      <As as="progress" css={css`
+      <As
+        as="progress"
+        css={css`
   width: 300px;
 `}
         max={progressBar.max}

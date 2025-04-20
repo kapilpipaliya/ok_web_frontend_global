@@ -306,4 +306,3 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
 
   return { attributes: [schema], key: "ActivityLog" } as IFormMetaData;
 }
-

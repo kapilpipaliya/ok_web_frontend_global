@@ -2,9 +2,9 @@ import type {
   DataEditorField,
   TextFieldOptionsField,
 } from "../FieldSchemaType";
+import { createGridOptions, createSelectOptions } from "../FieldSchemaType";
 
 import { timesTypes } from "../csseditor_constants";
-import { createGridOptions, createSelectOptions } from "../FieldSchemaType";
 
 export const Transition = {
   transition: {

@@ -162,6 +162,7 @@ export function commitTxn(
     return;
   }
 }
+
 // Helper function to merge steps that operate on the same entity
 function mergeStepsForSameEntities(steps: ResultStep[]): ResultStep[] {
   const seenEntityIds = new Set<string>();
@@ -265,8 +266,10 @@ function mergeStepsForSameEntities(steps: ResultStep[]): ResultStep[] {
       // Remove any previous operations for this edge ID
       const filteredResult = result.filter(
         (s) =>
-          !(s.insertEdge && s.insertEdge.id === edgeId) &&
-          !(s.replaceEdge && s.replaceEdge.id === edgeId),
+          !(
+            (s.insertEdge && s.insertEdge.id === edgeId) ||
+            (s.replaceEdge && s.replaceEdge.id === edgeId)
+          ),
       );
 
       result.length = 0;

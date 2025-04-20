@@ -36,8 +36,8 @@ export function CssPropertyRowSettings(
         `}
         onClick={closeMenu}
       >
-        <As 
-          as="div" 
+        <As
+          as="div"
           css={css`
             font-size: 15px;
             font-weight: bold;

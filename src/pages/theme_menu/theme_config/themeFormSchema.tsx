@@ -2,9 +2,10 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { FieldAttribute, IFormMetaData } from "~/lib/meta/FormMetadataType";
-
-import { As } from "~/components/As";
+import type {
+  FieldAttribute,
+  IFormMetaData,
+} from "~/lib/meta/FormMetadataType";
 import { useToast } from "~/components/styled/modal/Toast";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";

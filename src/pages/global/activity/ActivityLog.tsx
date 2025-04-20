@@ -59,7 +59,7 @@ export function ActivityLog() {
 
   return (
     <DataGrid
-      CustomAddNewButton={() => <div></div>}
+      CustomAddNewButton={() => <div />}
       editSchema={editSchema}
       formSchema={ActivityLogSchema}
       getTableData={getTableData}

@@ -47,8 +47,7 @@ export function PageItem(
 
   let menuRef: HTMLDivElement;
 
-  const baseStyle =
-    css`
+  const baseStyle = css`
   align-items: center;
   background-color: white;
   border-radius: 0.2rem;
@@ -62,8 +61,7 @@ export function PageItem(
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 `;
 
-  const hoverStyle =
-    css`
+  const hoverStyle = css`
   background-color: #F2EDED;
   box-shadow: 4px 4px 4px;
   cursor: move;
@@ -161,10 +159,14 @@ export function PageItem(
 
   return (
     <Show when={props.child.key}>
-      <As as="div" // NOSONAR
-        css={[itemStyle(), css`
+      <As
+        as="div" // NOSONAR
+        css={[
+          itemStyle(),
+          css`
   position: relative
-`]}
+`,
+        ]}
         draggable={"true"}
         ondblclick={handleDoubleClick}
         onDragStart={handleDragStart}
@@ -178,12 +180,20 @@ export function PageItem(
           noobserver
           width={22}
         />
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   font-size: 14px;
-`}>{toTitle(props.child.key)}</As>
-        <As as="div" css={css`
+`}
+        >
+          {toTitle(props.child.key)}
+        </As>
+        <As
+          as="div"
+          css={css`
   margin-left: auto;
-`}>
+`}
+        >
           <IconButton
             css={css`
               background-color: transparent;

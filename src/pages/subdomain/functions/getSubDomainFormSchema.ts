@@ -14,6 +14,7 @@ import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { addEditButtonSchema } from "./addEditButtonSchema";
+
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();
   const validateForm = (formData: Vertex) => {

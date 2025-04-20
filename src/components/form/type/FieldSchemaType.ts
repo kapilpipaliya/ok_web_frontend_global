@@ -19,7 +19,10 @@ export type ComponentNameType = (options: FunctionArgumentType) => string;
 // CSS-in-JS type definitions
 export type CssStringType = string | string[];
 export type CssFunctionType = (options: FunctionArgumentType) => CssStringType;
-export type CssType = CssStringType | CssFunctionType | Array<CssStringType | CssFunctionType>;
+export type CssType =
+  | CssStringType
+  | CssFunctionType
+  | Array<CssStringType | CssFunctionType>;
 
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;

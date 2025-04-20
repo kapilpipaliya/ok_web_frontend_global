@@ -112,7 +112,8 @@ export function TabBar(props: { mainPanel: Id }) {
   };
 
   return (
-    <As as="div"
+    <As
+      as="div"
       css={css`
   display: flex;
   gap: 5px;
@@ -135,7 +136,8 @@ export function TabBar(props: { mainPanel: Id }) {
         )}
       >
         {(openedFormId, index) => (
-          <As as="div"
+          <As
+            as="div"
             css={css`
   align-items: center;
   border-radius: 4px;
@@ -158,9 +160,12 @@ export function TabBar(props: { mainPanel: Id }) {
             }}
             onDrop={() => moveTab(props.mainPanel)}
           >
-            <As as="span" css={css`
+            <As
+              as="span"
+              css={css`
   user-select: none;
-`}>
+`}
+            >
               {getTabLabel(openedFormId, graph)}
               {isUnsaved(graph.vertexes[openedFormId].P.formId) && "*"}
             </As>

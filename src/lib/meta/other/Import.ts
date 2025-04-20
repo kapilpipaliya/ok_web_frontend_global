@@ -1,4 +1,3 @@
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 export const Import = {

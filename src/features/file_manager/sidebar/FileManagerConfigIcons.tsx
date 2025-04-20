@@ -108,10 +108,15 @@ export function FileManagerConfigIcons(
   };
 
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   display: flex;
   align-items: center;
-`]}>
+`,
+      ]}
+    >
       <Show
         when={
           state.showDialog ||
@@ -121,7 +126,10 @@ export function FileManagerConfigIcons(
       >
         <Show when={props.metaVertex.L[0] === "File"}>
           <IconButton
-            css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+            css={[
+              ICON_BUTTON_STYLES.baseCss,
+              ICON_BUTTON_STYLES.defaultCss,
+              ICON_BUTTON_STYLES.spacingCss,
               css`
                 background-color: transparent;
                 border: none;
@@ -135,12 +143,15 @@ export function FileManagerConfigIcons(
           />
         </Show>
         <IconButton
-            css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
-              css`
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            ICON_BUTTON_STYLES.spacingCss,
+            css`
                 background-color: transparent;
                 border: none;
               `,
-            ]}
+          ]}
           icon="ph:gear"
           iconCss={css`transition: transform 0.2s`}
           onClick={() => setIsEditModalOpen(true)}
@@ -148,7 +159,10 @@ export function FileManagerConfigIcons(
           title="Settings"
         />
         <IconButton
-          css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            ICON_BUTTON_STYLES.spacingCss,
             css`
               background-color: transparent;
               border: none;
@@ -169,7 +183,10 @@ export function FileManagerConfigIcons(
           title="Create New Directory"
         />
         <IconButton
-          css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            ICON_BUTTON_STYLES.spacingCss,
             css`
               background-color: transparent;
               border: none;
@@ -197,7 +214,10 @@ export function FileManagerConfigIcons(
           }
         >
           <IconButton
-            css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ICON_BUTTON_STYLES.spacingCss, 
+            css={[
+              ICON_BUTTON_STYLES.baseCss,
+              ICON_BUTTON_STYLES.defaultCss,
+              ICON_BUTTON_STYLES.spacingCss,
               css`
                 background-color: transparent;
                 border: none;
@@ -218,7 +238,10 @@ export function FileManagerConfigIcons(
             title="Rename"
           />
           <IconButton
-            css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.deleteCss, ICON_BUTTON_STYLES.spacingCss, 
+            css={[
+              ICON_BUTTON_STYLES.baseCss,
+              ICON_BUTTON_STYLES.deleteCss,
+              ICON_BUTTON_STYLES.spacingCss,
               css`
                 background-color: transparent;
                 border: none;

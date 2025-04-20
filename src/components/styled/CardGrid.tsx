@@ -6,7 +6,9 @@ export function CardGrid(
   props: Readonly<{ cardSize: number; children: JSX.Element }>,
 ) {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: grid;
   column-gap: 0.75rem;
   column-gap: 1rem;

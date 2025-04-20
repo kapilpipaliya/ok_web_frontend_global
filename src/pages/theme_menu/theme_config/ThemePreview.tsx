@@ -22,13 +22,18 @@ export function ThemePreview(props: { item: Vertex }) {
   const colorVariables = ["primary", "secondary", "accent", "neutral"];
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   gap: 0.25rem;
-`}>
+`}
+    >
       <For each={colorVariables}>
         {(variable) => (
-          <As as="div" css={css`
+          <As
+            as="div"
+            css={css`
   ${getColorClass(themeData()?.variables?.[variable])}
   height: 20px;
   width: 0.5rem;

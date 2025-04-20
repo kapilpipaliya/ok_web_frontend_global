@@ -13,7 +13,6 @@ import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransact
 import { PROPERTIES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();
@@ -49,61 +48,79 @@ export function FormStatus() {
 
   return (
     <>
-      <As as="div" css={css`
-  /* space-y: 3rem; */
-`}>
-        <As as="div" css={css`
-  /* border-bottom-width: 1px; */
-  /* border-color: rgb(17,24,39,0.1); */
-  padding-bottom: 3rem;
-`}>
-          <As as="h2" css={css`
-  color: rgb(17,24,39);
-  font-size: 1rem;
-  font-weight: 600;
-`}>
+      <As
+        as="div"
+        css={css`
+            /* space-y: 3rem; */
+        `}
+      >
+        <As
+          as="div"
+          css={css`
+              /* border-bottom-width: 1px; */
+              /* border-color: rgb(17,24,39,0.1); */
+              padding-bottom: 3rem;
+          `}
+        >
+          <As
+            as="h2"
+            css={css`
+                color: rgb(17, 24, 39);
+                font-size: 1rem;
+                font-weight: 600;
+            `}
+          >
             Form Properties
           </As>
-          <As as="div" css={css`
-  display: grid;
-  column-gap: 1.5rem;
-  row-gap: 2rem;
-  grid-template-columns: repeat(1, 1fr);
-  margin-top: 2.5rem;
-`}>
+          <As
+            as="div"
+            css={css`
+                display: grid;
+                column-gap: 1.5rem;
+                row-gap: 2rem;
+                grid-template-columns: repeat(1, 1fr);
+                margin-top: 2.5rem;
+            `}
+          >
             <For each={metaAttributes()}>
               {(metaVertex) => {
                 return (
-                  <As as="div" css={css`
-  grid-col-span: 4@sm;
-`}>
+                  <As
+                    as="div"
+                    css={css`
+                        grid-col-span: 4 @sm;
+                    `}
+                  >
                     <Show when={metaVertex.P.key === "formStatus"}>
                       <div>
-                        <As as="label"
+                        <As
+                          as="label"
                           css={css`
-  line-height: 1.25rem;
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  leading: 1.5rem;
-`}
+                              line-height: 1.25rem;
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              font-weight: 500;
+                              leading: 1.5rem;
+                          `}
                           for="form-status"
                         >
                           Form Status
                         </As>
-                        <As as="select"
+                        <As
+                          as="select"
                           css={css`
-  border-radius: 0.375rem;
-  border-width: 0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  padding-top: 0.375rem; padding-bottom: 0.375rem;
-  width: 100%;
-`}
+                              border-radius: 0.375rem;
+                              border-width: 0;
+                              box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+                              box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              padding-top: 0.375rem;
+                              padding-bottom: 0.375rem;
+                              width: 100%;
+                          `}
                           id="form-status"
                           onInput={(e) => setFormStatus(e.currentTarget.value)}
                           value={formStatus()}
@@ -132,32 +149,35 @@ export function FormStatus() {
                       }
                     >
                       <div>
-                        <As as="label"
+                        <As
+                          as="label"
                           css={css`
-  line-height: 1.25rem;
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  leading: 1.5rem;
-`}
+                              line-height: 1.25rem;
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              font-weight: 500;
+                              leading: 1.5rem;
+                          `}
                           for="expiration-date"
                         >
                           Expiration Date
                         </As>
-                        <As as="input"
+                        <As
+                          as="input"
                           css={css`
-  border-radius: 0.375rem;
-  border-width: 0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  leading: 1.5rem;
-  padding-top: 0.375rem; padding-bottom: 0.375rem;
-  width: 100%;
-`}
+                              border-radius: 0.375rem;
+                              border-width: 0;
+                              box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+                              box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              leading: 1.5rem;
+                              padding-top: 0.375rem;
+                              padding-bottom: 0.375rem;
+                              width: 100%;
+                          `}
                           id="expiration-date"
                           onInput={(e) =>
                             setExpirationDate(e.currentTarget.value)
@@ -165,31 +185,34 @@ export function FormStatus() {
                           type="date"
                           value={expirationDate()}
                         />
-                        <As as="label"
+                        <As
+                          as="label"
                           css={css`
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  leading: 1.5rem;
-`}
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              font-weight: 500;
+                              leading: 1.5rem;
+                          `}
                           for="expiration-time"
                         >
                           Expiration Time
                         </As>
-                        <As as="input"
+                        <As
+                          as="input"
                           css={css`
-  border-radius: 0.375rem;
-  border-width: 0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  leading: 1.5rem;
-  padding-top: 0.375rem; padding-bottom: 0.375rem;
-  width: 100%;
-`}
+                              border-radius: 0.375rem;
+                              border-width: 0;
+                              box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+                              box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              leading: 1.5rem;
+                              padding-top: 0.375rem;
+                              padding-bottom: 0.375rem;
+                              width: 100%;
+                          `}
                           id="expiration-time"
                           onInput={(e) =>
                             setExpirationTime(e.currentTarget.value)
@@ -210,32 +233,35 @@ export function FormStatus() {
                       }
                     >
                       <div>
-                        <As as="label"
+                        <As
+                          as="label"
                           css={css`
-  line-height: 1.25rem;
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  leading: 1.5rem;
-`}
+                              line-height: 1.25rem;
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              font-weight: 500;
+                              leading: 1.5rem;
+                          `}
                           for="submission-limit"
                         >
                           Submission Limit
                         </As>
-                        <As as="input"
+                        <As
+                          as="input"
                           css={css`
-  border-radius: 0.375rem;
-  border-width: 0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  leading: 1.5rem;
-  padding-top: 0.375rem; padding-bottom: 0.375rem;
-  width: 100%;
-`}
+                              border-radius: 0.375rem;
+                              border-width: 0;
+                              box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+                              box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              leading: 1.5rem;
+                              padding-top: 0.375rem;
+                              padding-bottom: 0.375rem;
+                              width: 100%;
+                          `}
                           id="submission-limit"
                           onInput={(e) =>
                             setSubmissionLimit(e.currentTarget.value)
@@ -257,32 +283,35 @@ export function FormStatus() {
                       }
                     >
                       <div>
-                        <As as="label"
+                        <As
+                          as="label"
                           css={css`
-  line-height: 1.25rem;
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  leading: 1.5rem;
-`}
+                              line-height: 1.25rem;
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              font-weight: 500;
+                              leading: 1.5rem;
+                          `}
                           for="warning-message"
                         >
                           Warning Message
                         </As>
-                        <As as="input"
+                        <As
+                          as="input"
                           css={css`
-  border-radius: 0.375rem;
-  border-width: 0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
-  color: rgb(17,24,39);
-  display: block;
-  font-size: 0.875rem;
-  leading: 1.5rem;
-  padding-top: 0.375rem; padding-bottom: 0.375rem;
-  width: 100%;
-`}
+                              border-radius: 0.375rem;
+                              border-width: 0;
+                              box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+                              box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5);
+                              color: rgb(17, 24, 39);
+                              display: block;
+                              font-size: 0.875rem;
+                              leading: 1.5rem;
+                              padding-top: 0.375rem;
+                              padding-bottom: 0.375rem;
+                              width: 100%;
+                          `}
                           id="warning-message"
                           onInput={(e) =>
                             setWarningMessage(e.currentTarget.value)
@@ -300,35 +329,42 @@ export function FormStatus() {
         </As>
       </As>
 
-      <As as="div" css={css`
-  display: flex;
-  column-gap: 1.5rem;
-  margin-top: 1.5rem;
-`}>
-        <As as="button"
+      <As
+        as="div"
+        css={css`
+            display: flex;
+            column-gap: 1.5rem;
+            margin-top: 1.5rem;
+        `}
+      >
+        <As
+          as="button"
           css={css`
-  color: rgb(17,24,39);
-    font-size: 0.875rem;
-  font-weight: 600;
-  leading: 1.5rem;
-`}
+              color: rgb(17, 24, 39);
+              font-size: 0.875rem;
+              font-weight: 600;
+              leading: 1.5rem;
+          `}
           type="button"
         >
           Cancel
         </As>
-        <As as="button" 
+        <As
+          as="button"
           css={css`
-  background-color: rgb(79,70,229);
-  background-color: rgb(99,102,241);
-  border-radius: 0.375rem;
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-  color: rgb(255,255,255);
-  font-size: 0.875rem;
-  font-weight: 600;
-  leading: 1.5rem;
-  padding-left: 0.75rem; padding-right: 0.75rem;
-  padding-top: 0.5rem; padding-bottom: 0.5rem;
-`}
+              background-color: rgb(79, 70, 229);
+              background-color: rgb(99, 102, 241);
+              border-radius: 0.375rem;
+              box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+              color: rgb(255, 255, 255);
+              font-size: 0.875rem;
+              font-weight: 600;
+              leading: 1.5rem;
+              padding-left: 0.75rem;
+              padding-right: 0.75rem;
+              padding-top: 0.5rem;
+              padding-bottom: 0.5rem;
+          `}
           type="button"
         >
           Submit

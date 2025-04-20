@@ -3,10 +3,7 @@ import { Show } from "solid-js";
 import type { Id } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import {
-  headerIconButtonCss,
-  toolBarCss,
-} from "~/pages/settings/constants";
+import { headerIconButtonCss, toolBarCss } from "~/pages/settings/constants";
 
 import { DebugInfo } from "../page_tabbar/DebugInfo";
 import { RefreshButton } from "../page_tabbar/RefreshButton";
@@ -26,11 +23,14 @@ export function PageTabBar(props: {
 }) {
   return (
     <As as="header" css={toolBarCss}>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   gap: 2px;
-`}>
+`}
+      >
         <UndoRedoIcons formStoreId={props.formStoreId} />
         <ResizeViewButtons
           formStoreId={props.formStoreId}
@@ -48,11 +48,14 @@ export function PageTabBar(props: {
                 <MiddleSectionButtons />
               </As>
             </Show> */}
-        <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   align-items: center;
   gap: 2px;
-`}>
+`}
+      >
         <RefreshButton handleRefresh={props.handleRefresh} />
         <SaveIconButton formStoreId={props.formStoreId} />
         <ShareButton formStoreId={props.formStoreId} />

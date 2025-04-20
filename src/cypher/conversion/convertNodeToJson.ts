@@ -1,5 +1,4 @@
 import type { Node, Relationship } from "neo4j-driver";
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { types } from "neo4j-driver";
 

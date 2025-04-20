@@ -32,10 +32,7 @@ export async function deleteFile(
         try {
           await fs.access(filePath); // Check if file exists
           await fs.unlink(filePath); // Delete the file from the disk only if it exists
-        } catch (fileError) {
-          // File doesn't exist or can't be accessed, continue with metadata deletion
-          console.log(`File not found on disk: ${filePath}`);
-        }
+        } catch (_fileError) {}
       }
 
       await createActivityLog(

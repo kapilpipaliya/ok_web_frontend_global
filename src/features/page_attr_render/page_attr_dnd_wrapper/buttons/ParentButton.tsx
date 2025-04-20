@@ -13,7 +13,8 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import { CssType } from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/FieldSchemaType";
+
 interface ParentButtonProps {
   css?: CssType;
   item: Vertex;
@@ -31,7 +32,10 @@ export function ParentButton(props: Readonly<ParentButtonProps>) {
 
   return (
     <IconButton
-      css={[ICON_BUTTON_STYLES.baseCss, ICON_BUTTON_STYLES.defaultCss, ...ensureArray(props.css),
+      css={[
+        ICON_BUTTON_STYLES.baseCss,
+        ICON_BUTTON_STYLES.defaultCss,
+        ...ensureArray(props.css),
         css`
           background-color: transparent;
           border: none;

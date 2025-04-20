@@ -5,7 +5,6 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 
 export function OpenComponentURL(
@@ -23,7 +22,8 @@ export function OpenComponentURL(
   return (
     <Switch>
       <Match when={componentUrl() !== null}>
-        <As as="a"
+        <As
+          as="a"
           css={props.css}
           href={componentUrl()!}
           rel="noreferrer"

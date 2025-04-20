@@ -8,7 +8,6 @@ import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
 import { STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 interface ChatInputProps {
   chatMessages: Message[];
@@ -39,7 +38,8 @@ export function ChatInput(props: ChatInputProps) {
   };
 
   return (
-    <As as="form"
+    <As
+      as="form"
       css={css`
   background: \${args.theme.var.color.base_10};
   border-top: 1px solid \${args.theme.var.color.base_16};
@@ -48,11 +48,14 @@ export function ChatInput(props: ChatInputProps) {
 `}
       onSubmit={handleSubmit}
     >
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   flex-direction: column;
   gap: 8px;
-`}>
+`}
+      >
         <ModelSelector
           isLoading={props.isLoading}
           models={[
@@ -72,11 +75,15 @@ export function ChatInput(props: ChatInputProps) {
           chatMessages={props.chatMessages}
           onClearMessages={props.onClearMessages}
         />
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   display: flex;
   gap: 8px;
-`}>
-          <As as="textarea"
+`}
+        >
+          <As
+            as="textarea"
             css={css`
   display: flex;
   padding: 8px;
@@ -144,15 +151,19 @@ export function ChatInput(props: ChatInputProps) {
             onMouseLeave={() => props.onExamplesToggle(false)}
             parentRef={props.examplesButtonRef!}
           >
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 8px;
-`}>
+`}
+            >
               <For each={props.examples}>
                 {(example) => (
-                  <As as="button"
+                  <As
+                    as="button"
                     css={css`
   text-align: left;
   padding: 8px;
@@ -180,10 +191,13 @@ function FileInput(props: {
   ref: HTMLInputElement | undefined;
 }) {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   gap: 8px;
-`}>
+`}
+    >
       <IconButton
         css={css`
           cursor: pointer;
@@ -195,7 +209,8 @@ function FileInput(props: {
         size={22}
         title="Select File"
       />
-      <As as="input"
+      <As
+        as="input"
         css={css`
   display: none;
 `}
@@ -207,19 +222,27 @@ function FileInput(props: {
         type="file"
       />
       <Show when={props.files()}>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
-`}>
+`}
+        >
           <For each={Array.from(props.files()!)}>
             {(file) => (
-              <As as="div" css={css`
+              <As
+                as="div"
+                css={css`
   position: relative;
-`}>
+`}
+              >
                 <Switch
                   fallback={
-                    <As as="div" css={css`
+                    <As
+                      as="div"
+                      css={css`
   width: 48px;
   height: 48px;
   display: flex;
@@ -227,15 +250,22 @@ function FileInput(props: {
   align-items: center;
   background: rgb(243,244,246);
   border-radius: 4px;
-`}>
-                      <As as="span" css={css`
+`}
+                    >
+                      <As
+                        as="span"
+                        css={css`
   font-size: 24px;
-`}>📄</As>
+`}
+                      >
+                        📄
+                      </As>
                     </As>
                   }
                 >
                   <Match when={file.type.startsWith("image/")}>
-                    <As as="img"
+                    <As
+                      as="img"
                       alt={file.name}
                       css={css`
   width: 48px;
@@ -247,7 +277,8 @@ function FileInput(props: {
                     />
                   </Match>
                   <Match when={file.type.startsWith("video/")}>
-                    <As as="video"
+                    <As
+                      as="video"
                       css={css`
   width: 48px;
   height: 48px;
@@ -258,7 +289,9 @@ function FileInput(props: {
                     />
                   </Match>
                   <Match when={file.type.startsWith("audio/")}>
-                    <As as="div" css={css`
+                    <As
+                      as="div"
+                      css={css`
   width: 48px;
   height: 48px;
   display: flex;
@@ -266,10 +299,16 @@ function FileInput(props: {
   align-items: center;
   background: rgb(243,244,246);
   border-radius: 4px;
-`}>
-                      <As as="span" css={css`
+`}
+                    >
+                      <As
+                        as="span"
+                        css={css`
   font-size: 24px;
-`}>🎵</As>
+`}
+                      >
+                        🎵
+                      </As>
                     </As>
                   </Match>
                 </Switch>
@@ -314,30 +353,49 @@ function MessagesCount(props: {
 
   return (
     <Show when={props.chatMessages.length > 0}>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   justify-content: space-between;
   align-items: center;
-`}>
+`}
+      >
         <TooltipWrapper
           arrowCss={STYLES.tooltip.arrowCss}
           content={
-            <As as="div" css={[STYLES.overflowCss, STYLES.tooltip.contentCss, css`
+            <As
+              as="div"
+              css={[
+                STYLES.overflowCss,
+                STYLES.tooltip.contentCss,
+                css`
   max-height: 600px;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 2px;
-`]}
+`,
+              ]}
             >
               <For each={props.chatMessages}>
                 {(msg) => (
                   <>
-                    <As as="span" css={css`
+                    <As
+                      as="span"
+                      css={css`
   font-weight: bold;
-`}>{msg.role}:</As>
-                    <As as="span" css={css`
+`}
+                    >
+                      {msg.role}:
+                    </As>
+                    <As
+                      as="span"
+                      css={css`
   white-space: pre-wrap;
-`}>{msg.content}</As>
+`}
+                    >
+                      {msg.content}
+                    </As>
                   </>
                 )}
               </For>
@@ -345,9 +403,12 @@ function MessagesCount(props: {
           }
           triggerCss={css`color:rgb(107,114,128);`}
         >
-          <As as="span" css={css`
+          <As
+            as="span"
+            css={css`
   color: rgb(107,114,128);
-`}>
+`}
+          >
             Messages: {props.chatMessages.length}
           </As>
         </TooltipWrapper>
@@ -367,19 +428,31 @@ function MessagesCount(props: {
             onClickOutside={() => setShowDeleteConfirm(false)}
             parentRef={deleteButtonRef!}
           >
-            <As as="div" css={css`
+            <As
+              as="div"
+              css={css`
   padding: 0.50rem;
-`}>
-              <As as="div" css={css`
+`}
+            >
+              <As
+                as="div"
+                css={css`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-`}>
-                <As as="div" css={css`
+`}
+              >
+                <As
+                  as="div"
+                  css={css`
   padding-left: 1rem; padding-right: 1rem;
   padding-top: 0.5rem; padding-bottom: 0.5rem;
-`}>Are you sure?</As>
-                <As as="button"
+`}
+                >
+                  Are you sure?
+                </As>
+                <As
+                  as="button"
                   css={css`
   text-align: left;
   padding-left: 1rem; padding-right: 1rem;
@@ -395,7 +468,8 @@ function MessagesCount(props: {
                 >
                   Yes, clear messages
                 </As>
-                <As as="button"
+                <As
+                  as="button"
                   css={css`
   text-align: left;
   padding-left: 1rem; padding-right: 1rem;
@@ -424,7 +498,8 @@ function ModelSelector(props: {
   setSelectedModel: (model: string) => void;
 }) {
   return (
-    <As as="select"
+    <As
+      as="select"
       css={css`
   padding: 8px;
   border: 1px solid \${args.theme.var.color.base_16};

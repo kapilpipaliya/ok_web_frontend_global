@@ -1,4 +1,4 @@
-import { Breakpoint, DEFAULT_BREAKPOINTS } from "~/lib/styles";
+import { type Breakpoint, DEFAULT_BREAKPOINTS } from "~/lib/styles";
 
 /**
  * Get media query for a specific breakpoint
@@ -10,7 +10,7 @@ export function getMediaQuery(breakpoint: Breakpoint): string {
 /**
  * Get prefers-color-scheme media query
  */
-export function getPrefersColorSchemeQuery(mode: 'light' | 'dark'): string {
+export function getPrefersColorSchemeQuery(mode: "light" | "dark"): string {
   return `@media (prefers-color-scheme: ${mode})`;
 }
 
@@ -26,12 +26,12 @@ export function getContainerQuery(size: string): string {
  */
 export function getAnimationDefinition(
   name: string,
-  duration: string = '300ms',
-  timing: string = 'ease',
-  delay: string = '0ms',
+  duration = "300ms",
+  timing = "ease",
+  delay = "0ms",
   iterationCount: string | number = 1,
-  direction: string = 'normal',
-  fillMode: string = 'none'
+  direction = "normal",
+  fillMode = "none",
 ): string {
   return `${name} ${duration} ${timing} ${delay} ${iterationCount} ${direction} ${fillMode}`;
-} 
+}

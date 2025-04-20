@@ -178,7 +178,9 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
     <>
       <As
         as="div"
-        css={[...ensureArray(props.containerCss), css`
+        css={[
+          ...ensureArray(props.containerCss),
+          css`
           ${props.isLabelOnTop ? "" : "max-width: 50%; width: 50%;"}
           display: flex;
           position: relative;
@@ -187,7 +189,8 @@ export const TextFieldWithSelect = (props: Readonly<TextFieldOptionsField>) => {
           justify-content: space-between;
           padding: 0 5px;
           border-radius: 5px;
-        `]}
+        `,
+        ]}
         ref={setReference}
       >
         <Show when={props.leftIcon || props.type === "number"}>

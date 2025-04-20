@@ -23,8 +23,7 @@ import {
   size,
   type Strategy,
 } from "@floating-ui/dom";
-import { createSignal, mergeProps, onCleanup } from "solid-js";
-import { createEffect } from "solid-js";
+import { createEffect, createSignal, mergeProps, onCleanup } from "solid-js";
 
 export type FloatingOptions = {
   arrow?: Padding;

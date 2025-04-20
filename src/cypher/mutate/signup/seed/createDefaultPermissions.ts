@@ -17,6 +17,7 @@ export async function createDefaultPermissions(tx: Session | Transaction) {
     throw error;
   }
 }
+
 /*
 // Create permissions
 UNWIND [

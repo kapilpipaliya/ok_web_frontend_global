@@ -10,7 +10,7 @@ import { ToggleButtons } from "../right/ToggleButtons";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import { CssType } from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/FieldSchemaType";
 
 interface HeaderProps {
   children?: JSX.Element;
@@ -20,11 +20,14 @@ interface HeaderProps {
 
 const RightSection = () => {
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: flex;
   align-items: center;
   gap: 2px;
-`}>
+`}
+    >
       <ToggleButtons />
       <SaveAllButton />
       <SelectThemeButton />
@@ -35,7 +38,8 @@ const RightSection = () => {
 
 export function Header(props: HeaderProps) {
   return (
-    <As as="header"
+    <As
+      as="header"
       css={[SETTINGS_CONSTANTS.HEADER_MENU_CSS, ...ensureArray(props.css)]}
       style={props.style}
     >

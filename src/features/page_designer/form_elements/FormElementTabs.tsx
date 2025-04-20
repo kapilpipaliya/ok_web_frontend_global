@@ -33,17 +33,21 @@ import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";  
-  export const UlContainer = (props: ParentProps) => (
-    <As as="ul"
-    css={[STYLES.overflowCss, css`
+
+export const UlContainer = (props: ParentProps) => (
+  <As
+    as="ul"
+    css={[
+      STYLES.overflowCss,
+      css`
   display: flex;
   justify-content: space-around;
   margin-bottom: -1px;
   flex-wrap: nowrap;
   list-style: none;
   padding: 0;
-`]}
+`,
+    ]}
   >
     {props.children}
   </As>
@@ -90,23 +94,38 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 
   return (
     <div>
-      <As as="div" css={[css`
+      <As
+        as="div"
+        css={[
+          css`
   display: flex;
   align-items: center;
   gap: 2px;
-`]}>
+`,
+        ]}
+      >
         {props.rootLevel ? null : (
-          <As as="div" css={[css`
+          <As
+            as="div"
+            css={[
+              css`
   padding: 12px;
   font-weight: 500;
-`]}>Components</As>
+`,
+            ]}
+          >
+            Components
+          </As>
         )}
         <IconButton
-          css={[headerIconButtonCss, css`
+          css={[
+            headerIconButtonCss,
+            css`
   margin-left: 1px;
   background-color: transparent;
   border: none;
-`]}
+`,
+          ]}
           icon="ph:plus-circle"
           onClick={() => {
             if (!props.rootLevel) {
@@ -174,23 +193,37 @@ export function FormElementTabs() {
   );
 
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
   height: 100%;
-`]}>
-      <As as="div" css={css`
+`,
+      ]}
+    >
+      <As
+        as="div"
+        css={css`
   background-color: \${args.theme.var.color.base_10};
   overflow-x: auto;
-`}>
+`}
+      >
         <TabsContainer>
           <TabList />
         </TabsContainer>
       </As>
 
-      <As as="div" css={[STYLES.overflowCss, css`
-`]}>
+      <As
+        as="div"
+        css={[
+          STYLES.overflowCss,
+          css`
+`,
+        ]}
+      >
         <Switch>
           <Match when={selectedTab().collection === "Comp"}>
             <ComponentList
@@ -203,13 +236,25 @@ export function FormElementTabs() {
               </DesignerFormIdContext.Provider>
             </Show>
 
-            <As as="div" css={[css`
+            <As
+              as="div"
+              css={[
+                css`
   margin-top: 4px;
-`]}>
-              <As as="div" css={[css`
+`,
+              ]}
+            >
+              <As
+                as="div"
+                css={[
+                  css`
   padding: 12px;
   font-weight: 500;
-`]}>Global Components</As>
+`,
+                ]}
+              >
+                Global Components
+              </As>
               <Show keyed when={formStoreVertex()?.id}>
                 <DesignerFormIdContext.Provider value={formStoreVertex().id}>
                   <PageLevelComponents rootLevel={true} />
@@ -217,13 +262,25 @@ export function FormElementTabs() {
               </Show>
             </As>
 
-            <As as="div" css={[css`
+            <As
+              as="div"
+              css={[
+                css`
   margin-top: 4px;
-`]}>
-              <As as="div" css={[css`
+`,
+              ]}
+            >
+              <As
+                as="div"
+                css={[
+                  css`
   padding: 12px;
   font-weight: 500;
-  `]}>Templates</As>
+  `,
+                ]}
+              >
+                Templates
+              </As>
               <PagesList coll="TemplatePage" />
             </As>
           </Match>

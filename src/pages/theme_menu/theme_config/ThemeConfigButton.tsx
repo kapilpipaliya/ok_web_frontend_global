@@ -7,7 +7,7 @@ import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { getThemeFormSchema } from "./themeFormSchema";
 import { css } from "~/lib/styles";
-import { CssType } from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/FieldSchemaType";
 
 export function ThemeConfigButton(props: {
   css?: CssType;

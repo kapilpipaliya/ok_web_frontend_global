@@ -71,14 +71,14 @@ export const popoverWrapperSchema = (
             componentName: "Html",
             css: (options: FunctionArgumentType) => {
               const popoverState = options.dataContext
-              .popoverState as ReturnType<
-              typeof createStore<{
-                action: HTMLElement | null;
-                isVisible: boolean;
-                x: number;
-                y: number;
-              }>
-            >;
+                .popoverState as ReturnType<
+                typeof createStore<{
+                  action: HTMLElement | null;
+                  isVisible: boolean;
+                  x: number;
+                  y: number;
+                }>
+              >;
               return popoverState[0]?.isVisible
                 ? css`
               position:fixed;

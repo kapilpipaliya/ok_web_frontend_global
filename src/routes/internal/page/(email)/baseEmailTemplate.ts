@@ -1,5 +1,4 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { API } from "~/lib/api/endpoints";
 import { css } from "~/lib/styles";
 

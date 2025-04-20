@@ -6,10 +6,10 @@
 // @ts-nocheck
 import {
   createSequence,
-  isDeepEqual as deepEquals,
   getFunctionArity,
   isArrayOfNumbers,
   isArrayOfStrings,
+  isDeepEqual as deepEquals,
   isFunction,
   isLambda,
   isNumeric,

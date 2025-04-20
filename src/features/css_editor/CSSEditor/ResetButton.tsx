@@ -5,16 +5,20 @@ import { IconButton } from "../../../components/styled/IconButton";
 import { type CSSStore, useCssEditor } from "../context/CssEditorContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+
 export function ResetButton(props: Readonly<{ onReset: () => void }>) {
   const [cssState, setCssState] = useCssEditor();
 
   return (
     <Show when={Object.entries(filterTruthyCSSStore(cssState)).length}>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
   justify-content: end;
-`}>
+`}
+      >
         <IconButton
           css={(args: FunctionArgumentType) => css`
   color: ${args.theme.var.color.base_10};

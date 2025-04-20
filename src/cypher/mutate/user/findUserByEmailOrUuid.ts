@@ -19,7 +19,7 @@ export async function findUserByEmailOrUuid(
   email?: null | string,
   uuid?: null | string,
 ): Promise<UserResult> {
-  if (!email && !uuid) {
+  if (!(email || uuid)) {
     return getGuestOnlyResult(dbSession);
   }
 

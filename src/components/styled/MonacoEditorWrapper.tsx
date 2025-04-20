@@ -46,7 +46,8 @@ export interface MonacoEditorWrapperProps {
 
 export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
   return (
-    <As as={MonacoEditor}
+    <As
+      as={MonacoEditor}
       css={[
         PROPERTIES.Css.TextFieldCss,
         css`

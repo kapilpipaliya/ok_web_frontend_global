@@ -104,7 +104,7 @@ function buildUserCreationQuery(
   // Add database-specific fields or conditionally include fields
   const dbSpecificFields = [];
 
-  if (dbType === "UserDB" || additionalFields["isSystemUser"]) {
+  if (dbType === "UserDB" || additionalFields.isSystemUser) {
     dbSpecificFields.push("isSystemUser: $isSystemUser");
   }
 

@@ -186,17 +186,30 @@ Choose colors that work well for the context and maintain good contrast ratios.
   };
 
   return (
-    <As as="div" css={css`
+    <As
+      as="div"
+      css={css`
   display: grid;
   grid-template-rows: 1fr auto;
   height: 100%;
-`}>
-      <As as="div" css={[STYLES.overflowCss]} class="chat-history" ref={chatHistoryRef!}>
+`}
+    >
+      <As
+        as="div"
+        css={[STYLES.overflowCss]}
+        class="chat-history"
+        ref={chatHistoryRef!}
+      >
         <For each={messages()}>
           {(message, index) => (
-            <As as="div" css={[css`
+            <As
+              as="div"
+              css={[
+                css`
   margin-bottom: 24px;
-`]}>
+`,
+              ]}
+            >
               <ChatMessage
                 index={index() + 1}
                 message={message}
@@ -216,15 +229,21 @@ Choose colors that work well for the context and maintain good contrast ratios.
         </For>
 
         <Show when={error()}>
-          <As as="div" css={[css`
+          <As
+            as="div"
+            css={[
+              css`
   padding: 16px;
   margin-bottom: 16px;
   color: rgb(239,68,68);
   background: rgb(254,242,242);
   border-radius: 6px;
-`]}>
+`,
+            ]}
+          >
             An error occurred. {error()?.message}
-            <As as="button"
+            <As
+              as="button"
               css={css`
   padding: 8px 16px;
   margin-top: 8px;
@@ -244,29 +263,45 @@ Choose colors that work well for the context and maintain good contrast ratios.
         </Show>
 
         <Show when={isLoading()}>
-          <As as="div" css={[css`
+          <As
+            as="div"
+            css={[
+              css`
   padding: 16px;
   color: rgb(107,114,128);
   display: flex;
   gap: 8px;
   align-items: center;
-`]}>
-            <As as="div" css={[css`
+`,
+            ]}
+          >
+            <As
+              as="div"
+              css={[
+                css`
   display: flex;
   align-items: center;
   gap: 8px;
-`]}>
-              <As as="div" css={[css`
+`,
+              ]}
+            >
+              <As
+                as="div"
+                css={[
+                  css`
   width: 16px;
   height: 16px;
   border-radius: 50%;
   border: 2px solid #3b82f6;
   border-top-color: transparent;
   animation: spin 1s infinite linear;
-`]} />
+`,
+                ]}
+              />
               <As as="span">AI is thinking...</As>
             </As>
-            <As as="button"
+            <As
+              as="button"
               css={css`
   padding: 8px 16px;
   color: rgb(59,130,246);

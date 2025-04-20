@@ -107,10 +107,9 @@ async function convertRelativeLinksToAbsolute(page: Page): Promise<void> {
       if (relativeUrl.startsWith("/")) {
         // Absolute path relative to domain
         return `${baseUrl}${relativeUrl}`;
-      } else {
-        // Relative path
-        return `${baseUrl}/${relativeUrl}`;
       }
+      // Relative path
+      return `${baseUrl}/${relativeUrl}`;
     }
 
     /**
@@ -149,7 +148,7 @@ async function convertRelativeLinksToAbsolute(page: Page): Promise<void> {
         const style = (element as HTMLElement).style;
         const backgroundImage = style.backgroundImage;
 
-        if (backgroundImage && backgroundImage.includes("url(")) {
+        if (backgroundImage?.includes("url(")) {
           const url = extractUrlFromCssValue(backgroundImage);
           if (url && !url.startsWith("http") && !url.startsWith("data:")) {
             style.backgroundImage = `url("${toAbsoluteUrl(url, baseUrl)}")`;
@@ -181,10 +180,7 @@ async function convertRelativeLinksToAbsolute(page: Page): Promise<void> {
               const style = rule.style;
 
               // Check for background-image property
-              if (
-                style.backgroundImage &&
-                style.backgroundImage.includes("url(")
-              ) {
+              if (style.backgroundImage?.includes("url(")) {
                 const url = extractUrlFromCssValue(style.backgroundImage);
                 if (
                   url &&
@@ -196,7 +192,7 @@ async function convertRelativeLinksToAbsolute(page: Page): Promise<void> {
               }
 
               // Also check for background shorthand property
-              if (style.background && style.background.includes("url(")) {
+              if (style.background?.includes("url(")) {
                 const url = extractUrlFromCssValue(style.background);
                 if (
                   url &&

@@ -1,19 +1,22 @@
 // Export the type using export type for isolatedModules
-export type { StyleDefinition } from './styles';
+export type { StyleDefinition } from "./styles";
 
 // ============================
 // = CORE CSS HELPER FUNCTIONS
 // ============================
 
 // Template literal helper for CSS - Converts template strings to scoped CSS
-export const css = (strings: TemplateStringsArray, ...values: unknown[]): string => {
+export const css = (
+  strings: TemplateStringsArray,
+  ...values: unknown[]
+): string => {
   const rawCss = String.raw({ raw: strings }, ...values);
-  
+
   // Add ._id wrapper if not already present
-  if (!rawCss.includes('._id')) {
-    return `._id {\n  ${rawCss.replace(/\n/g, '\n  ')}\n}`;
+  if (!rawCss.includes("._id")) {
+    return `._id {\n  ${rawCss.replace(/\n/g, "\n  ")}\n}`;
   }
-  
+
   return rawCss;
 };
 
@@ -22,37 +25,75 @@ export const css = (strings: TemplateStringsArray, ...values: unknown[]): string
 // ======================================
 
 // Define color properties that can have shades
-export type ThemeColorKey = 
-  | 'primary' 
-  | 'secondary' 
-  | 'accent' 
-  | 'neutral' 
-  | 'base' 
-  | 'info' 
-  | 'success' 
-  | 'warning' 
-  | 'error';
+export type ThemeColorKey =
+  | "primary"
+  | "secondary"
+  | "accent"
+  | "neutral"
+  | "base"
+  | "info"
+  | "success"
+  | "warning"
+  | "error";
 
 // Space scale options
-export type SpacingScale = 'compact' | 'default' | 'loose';
+export type SpacingScale = "compact" | "default" | "loose";
 
 // Border radius size options
-export type RadiusSize = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+export type RadiusSize = "none" | "sm" | "md" | "lg" | "xl" | "full";
 
 // Font preset keys
-export type FontPreset = 'system' | 'sans' | 'serif' | 'mono' | 'heading';
+export type FontPreset = "system" | "sans" | "serif" | "mono" | "heading";
 
 // Animation easing presets
-export type EasingPreset = 'linear' | 'ease' | 'easeIn' | 'easeOut' | 'easeInOut' | 'easeInQuad' | 'easeOutQuad' | 'easeInOutQuad';
+export type EasingPreset =
+  | "linear"
+  | "ease"
+  | "easeIn"
+  | "easeOut"
+  | "easeInOut"
+  | "easeInQuad"
+  | "easeOutQuad"
+  | "easeInOutQuad";
 
 // Media breakpoints
-export type Breakpoint = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+export type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
 
 // Color modes
-export type ColorMode = 'light' | 'dark' | 'system';
+export type ColorMode = "light" | "dark" | "system";
 
 // Color shade range (5% increments from 0-100)
-export type ShadeNumber = 0 | 5 | 10 | 15 | 20 | 25 | 30 | 35 | 40 | 45 | 50 | 55 | 60 | 65 | 70 | 75 | 80 | 85 | 90 | 95 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900 | 1000;
+export type ShadeNumber =
+  | 0
+  | 5
+  | 10
+  | 15
+  | 20
+  | 25
+  | 30
+  | 35
+  | 40
+  | 45
+  | 50
+  | 55
+  | 60
+  | 65
+  | 70
+  | 75
+  | 80
+  | 85
+  | 90
+  | 95
+  | 100
+  | 200
+  | 300
+  | 400
+  | 500
+  | 600
+  | 700
+  | 800
+  | 900
+  | 1000;
 
 // Color adjustment options
 export interface ColorAdjustments {
@@ -91,12 +132,13 @@ export interface ColorScheme {
 
 // Advanced variable system
 export interface ThemeVariables {
-  [key: string]: string | { '@light': string; '@dark': string };
+  [key: string]: string | { "@light": string; "@dark": string };
 }
 
 // CSS generation context
 export interface CssContext {
   theme?: ThemeContext;
+
   [key: string]: unknown;
 }
 
@@ -105,7 +147,7 @@ export interface ThemeContext {
   var: {
     // Base theme settings
     colorMode?: ColorMode;
-    
+
     // Color settings (base colors)
     color: {
       primary: string;
@@ -119,7 +161,7 @@ export interface ThemeContext {
       error: string;
       [key: string]: string;
     };
-    
+
     // Typography settings
     fontFamily?: string;
     fontHeading?: string;
@@ -127,25 +169,25 @@ export interface ThemeContext {
     fontSizeBase?: string;
     lineHeightBase?: string | number;
     fontWeightBase?: number;
-    
+
     // Layout settings
     borderRadius?: string;
     spacingScale?: SpacingScale;
     containerPadding?: string;
     sectionPadding?: string;
-    
+
     // Animation settings
     transitionDurationFast?: string;
     transitionDurationNormal?: string;
     transitionDurationSlow?: string;
     defaultEasing?: EasingPreset;
-    
+
     // Advanced theming
     variables?: ThemeVariables;
-    
+
     [key: string]: unknown;
-  }
-  
+  };
+
   // ===========================================
   // = DYNAMIC ACCESS PATTERNS (PROXY-POWERED)
   // ===========================================
@@ -159,62 +201,68 @@ export interface ThemeContext {
   // - Border radius: theme.radiusNone, theme.radiusMd, theme.radiusFull
   // - Semantic colors: theme.textColor, theme.surfaceColor, theme.borderColor
   // - Dynamic HSL variants: theme.primaryColorH, theme.primaryColorS, theme.primaryColorL
-  
+
   // ===========================================
   // = THEME MODIFICATION FUNCTIONS
   // ===========================================
-  
+
   // Basic theme helpers
   setTheme?: (newTheme: Partial<ThemeContext>) => void;
   setColorMode?: (mode: ColorMode) => void;
   toggleColorMode?: () => void;
   setColor?: (colorName: ThemeColorKey | string, value: string) => void;
   resetTheme?: () => void;
-  
+
   // Advanced theme helpers
   setSpacingScale?: (scale: SpacingScale) => void;
   setTypography?: (settings: TypographySettings) => void;
   setAllColors?: (colors: Record<ThemeColorKey, string>) => void;
   setColorScheme?: (baseColor: string, colorKeys?: ThemeColorKey[]) => void;
   getBorderRadius?: (size: RadiusSize) => string;
-  
+
   // ===========================================
   // = COLOR UTILITY FUNCTIONS
   // ===========================================
-  
+
   // Color manipulation
   adjustColor?: (color: string, adjustments: ColorAdjustments) => string;
   getColorPalette?: (color: string) => ColorPalette;
   getColorScheme?: (color: string) => ColorScheme;
   getContrastColor?: (color: string) => string;
-  
+
   // Advanced color utilities
-  getSemanticColor?: (context: 'text' | 'background' | 'border' | 'surface' | 'muted') => string;
+  getSemanticColor?: (
+    context: "text" | "background" | "border" | "surface" | "muted",
+  ) => string;
   mixColors?: (color1: string, color2: string, amount?: number) => string;
-  createGradient?: (type: 'linear' | 'radial', colors: string[], stops?: number[]) => string;
-  getHsl?: (color: string) => { h: number, s: number, l: number, a: number };
+  createGradient?: (
+    type: "linear" | "radial",
+    colors: string[],
+    stops?: number[],
+  ) => string;
+  getHsl?: (color: string) => { h: number; s: number; l: number; a: number };
 
   // Accessibility helpers
   getContrastRatio: (color1: string, color2: string) => number;
   meetsAccessibilityStandards: (
-    foreground: string, 
-    background: string, 
-    level?: 'AA' | 'AAA',
-    size?: 'normal' | 'large'
+    foreground: string,
+    background: string,
+    level?: "AA" | "AAA",
+    size?: "normal" | "large",
   ) => boolean;
   findAccessibleColor: (
     baseColor: string,
     backgroundColor: string,
-    level?: 'AA' | 'AAA',
-    size?: 'normal' | 'large'
+    level?: "AA" | "AAA",
+    size?: "normal" | "large",
   ) => string;
-  
+
   // ===========================================
   // = MEDIA QUERY HELPERS
   // ===========================================
-  
+
   getMediaQuery?: (breakpoint: Breakpoint) => string;
-  getPrefersColorSchemeQuery?: (mode: 'light' | 'dark') => string;
+  getPrefersColorSchemeQuery?: (mode: "light" | "dark") => string;
   getContainerQuery?: (size: string) => string;
 
   // Animation helpers
@@ -225,9 +273,9 @@ export interface ThemeContext {
     delay?: string,
     iterationCount?: string | number,
     direction?: string,
-    fillMode?: string
+    fillMode?: string,
   ) => string;
-  
+
   // Dynamic property access (enables all proxy-based functionality)
   [key: string]: unknown;
 }
@@ -251,44 +299,44 @@ export const withStates = (
   focusStyles?: string,
   activeStyles?: string,
   focusVisibleStyles?: string,
-  disabledStyles?: string
+  disabledStyles?: string,
 ): string => {
-  let result = `._id {\n  ${baseStyles.replace(/\n/g, '\n  ')}\n}`;
-  
+  let result = `._id {\n  ${baseStyles.replace(/\n/g, "\n  ")}\n}`;
+
   if (hoverStyles) {
-    result += `\n\n._id:hover:not(:disabled) {\n  ${hoverStyles.replace(/\n/g, '\n  ')}\n}`;
+    result += `\n\n._id:hover:not(:disabled) {\n  ${hoverStyles.replace(/\n/g, "\n  ")}\n}`;
   }
-  
+
   if (focusStyles) {
-    result += `\n\n._id:focus {\n  ${focusStyles.replace(/\n/g, '\n  ')}\n}`;
+    result += `\n\n._id:focus {\n  ${focusStyles.replace(/\n/g, "\n  ")}\n}`;
   }
-  
+
   if (focusVisibleStyles) {
-    result += `\n\n._id:focus-visible {\n  ${focusVisibleStyles.replace(/\n/g, '\n  ')}\n}`;
+    result += `\n\n._id:focus-visible {\n  ${focusVisibleStyles.replace(/\n/g, "\n  ")}\n}`;
   }
-  
+
   if (activeStyles) {
-    result += `\n\n._id:active:not(:disabled) {\n  ${activeStyles.replace(/\n/g, '\n  ')}\n}`;
+    result += `\n\n._id:active:not(:disabled) {\n  ${activeStyles.replace(/\n/g, "\n  ")}\n}`;
   }
-  
+
   if (disabledStyles) {
-    result += `\n\n._id:disabled {\n  ${disabledStyles.replace(/\n/g, '\n  ')}\n}`;
+    result += `\n\n._id:disabled {\n  ${disabledStyles.replace(/\n/g, "\n  ")}\n}`;
   }
-  
+
   return result;
 };
 
 // Helper to create styled components using the As component
 export const styled = <T extends keyof HTMLElementTagNameMap>(
   tag: T,
-  styles: string | ((props?: Record<string, unknown>) => string)
+  styles: string | ((props?: Record<string, unknown>) => string),
 ) => {
   return (props: Record<string, unknown> = {}) => {
-    const cssContent = typeof styles === 'function' ? styles(props) : styles;
+    const cssContent = typeof styles === "function" ? styles(props) : styles;
     return {
       as: tag,
       css: cssContent,
-      ...props
+      ...props,
     };
   };
 };
@@ -303,15 +351,20 @@ export const themeVar = (name: string, fallback?: string) => {
 };
 
 // Access a theme color with a specific shade
-export const colorWithShade = (colorName: ThemeColorKey | string, shade: ShadeNumber = 50) => {
-  return shade === 50 ? themeVar(colorName as string) : themeVar(`${colorName}-${shade}`);
+export const colorWithShade = (
+  colorName: ThemeColorKey | string,
+  shade: ShadeNumber = 50,
+) => {
+  return shade === 50
+    ? themeVar(colorName as string)
+    : themeVar(`${colorName}-${shade}`);
 };
 
 // Creates a conditional CSS block based on color mode
 export const colorModeStyle = (
   lightStyles: string,
   darkStyles: string,
-  systemStyles?: string
+  systemStyles?: string,
 ) => {
   let css = `
   @media (prefers-color-scheme: light) {
@@ -333,7 +386,7 @@ export const colorModeStyle = (
   :root[data-theme='dark'] ._id {
     ${darkStyles}
   }`;
-  
+
   // Add optional system-based styles
   if (systemStyles) {
     css += `
@@ -342,7 +395,7 @@ export const colorModeStyle = (
     ${systemStyles}
   }`;
   }
-  
+
   return css;
 };
 
@@ -352,37 +405,37 @@ export const colorModeStyle = (
 
 // Default breakpoints for responsive design
 export const DEFAULT_BREAKPOINTS: Record<Breakpoint, string> = {
-  sm: '640px',
-  md: '768px',
-  lg: '1024px',
-  xl: '1280px',
-  '2xl': '1536px',
+  sm: "640px",
+  md: "768px",
+  lg: "1024px",
+  xl: "1280px",
+  "2xl": "1536px",
 };
 
 // Helper for responsive styles with breakpoints
 export const responsiveStyles = (
   styles: Record<string, string>,
-  breakpoints: Record<string, string> = DEFAULT_BREAKPOINTS
+  breakpoints: Record<string, string> = DEFAULT_BREAKPOINTS,
 ) => {
-  let result = `._id {\n  ${styles.base.replace(/\n/g, '\n  ')}\n}`;
-  
+  let result = `._id {\n  ${styles.base.replace(/\n/g, "\n  ")}\n}`;
+
   Object.entries(styles).forEach(([breakpoint, style]) => {
-    if (breakpoint !== 'base' && breakpoints[breakpoint as Breakpoint]) {
-      result += `\n\n@media (min-width: ${breakpoints[breakpoint as Breakpoint]}) {\n  ._id {\n    ${style.replace(/\n/g, '\n    ')}\n  }\n}`;
+    if (breakpoint !== "base" && breakpoints[breakpoint as Breakpoint]) {
+      result += `\n\n@media (min-width: ${breakpoints[breakpoint as Breakpoint]}) {\n  ._id {\n    ${style.replace(/\n/g, "\n    ")}\n  }\n}`;
     }
   });
-  
+
   return result;
 };
 
 // Create styles that apply at specific breakpoints without requiring a "base"
 export const atBreakpoint = (breakpoint: Breakpoint, styles: string) => {
-  return `@media (min-width: ${DEFAULT_BREAKPOINTS[breakpoint]}) {\n  ._id {\n    ${styles.replace(/\n/g, '\n    ')}\n  }\n}`;
+  return `@media (min-width: ${DEFAULT_BREAKPOINTS[breakpoint]}) {\n  ._id {\n    ${styles.replace(/\n/g, "\n    ")}\n  }\n}`;
 };
 
 // Creates styles for container queries
 export const containerQuery = (size: string, styles: string) => {
-  return `@container (min-width: ${size}) {\n  ._id {\n    ${styles.replace(/\n/g, '\n    ')}\n  }\n}`;
+  return `@container (min-width: ${size}) {\n  ._id {\n    ${styles.replace(/\n/g, "\n    ")}\n  }\n}`;
 };
 
 // ======================================
@@ -390,45 +443,50 @@ export const containerQuery = (size: string, styles: string) => {
 // ======================================
 
 // Combine multiple CSS generators
-export const composeCss = (...cssGenerators: Array<string | (() => string)>) => {
-  return () => cssGenerators
-    .map(generator => typeof generator === 'function' ? generator() : generator)
-    .join('\n\n');
+export const composeCss = (
+  ...cssGenerators: Array<string | (() => string)>
+) => {
+  return () =>
+    cssGenerators
+      .map((generator) =>
+        typeof generator === "function" ? generator() : generator,
+      )
+      .join("\n\n");
 };
 
 // Create scoped CSS for child selectors
 export const withChildSelector = (selector: string, styles: string) => {
-  return `._id ${selector} {\n  ${styles.replace(/\n/g, '\n  ')}\n}`;
+  return `._id ${selector} {\n  ${styles.replace(/\n/g, "\n  ")}\n}`;
 };
 
 // Create CSS for pseudo-elements
 export const withPseudoElement = (
-  element: 'before' | 'after',
+  element: "before" | "after",
   styles: string,
-  content: string = '""'
+  content = '""',
 ) => {
-  return `._id::${element} {\n  content: ${content};\n  ${styles.replace(/\n/g, '\n  ')}\n}`;
+  return `._id::${element} {\n  content: ${content};\n  ${styles.replace(/\n/g, "\n  ")}\n}`;
 };
 
 // Create CSS with animation keyframes
 export const withAnimation = (
   name: string,
   keyframes: Record<string, string>,
-  duration: string = '1s',
-  timing: string = 'ease',
+  duration = "1s",
+  timing = "ease",
   iterationCount: string | number = 1,
-  direction: string = 'normal',
-  fillMode: string = 'none'
+  direction = "normal",
+  fillMode = "none",
 ) => {
   let keyframesString = `@keyframes ${name} {\n`;
-  
+
   Object.entries(keyframes).forEach(([key, value]) => {
-    keyframesString += `  ${key} {\n    ${value.replace(/\n/g, '\n    ')}\n  }\n`;
+    keyframesString += `  ${key} {\n    ${value.replace(/\n/g, "\n    ")}\n  }\n`;
   });
-  
-  keyframesString += `}\n\n`;
-  
+
+  keyframesString += "}\n\n";
+
   const animationValue = `${name} ${duration} ${timing} ${iterationCount} ${direction} ${fillMode}`;
-  
+
   return `${keyframesString}._id {\n  animation: ${animationValue};\n}`;
-}; 
+};

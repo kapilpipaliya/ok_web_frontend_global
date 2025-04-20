@@ -23,17 +23,24 @@ export function TableActions(
 ) {
   return (
     <Show when={props.displayedRows().length > 0}>
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   align-items: center;
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 1rem;
-`}>
-        <As as="div" css={css`
+`}
+      >
+        <As
+          as="div"
+          css={css`
   margin-right: 1rem;
-`}>
+`}
+        >
           <label html-for="rowsPerPage">Rows per page:</label>
-          <As as="select"
+          <As
+            as="select"
             css={css`
   margin-left: 0.5rem;
 `}
@@ -46,19 +53,25 @@ export function TableActions(
             </For>
           </As>
         </As>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   font-weight: 500;
   margin-right: 1rem;
-`}>
+`}
+        >
           <span>{`${props.currentPage() * props.rowsPerPage() + 1}-${Math.min(
             (props.currentPage() + 1) * props.rowsPerPage(),
             props.data.length,
           )} of ${props.data.length}`}</span>
         </As>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   display: flex;
   gap: 10px;
-`}>
+`}
+        >
           <IconButton
             css={css`
   justify-content: center;

@@ -87,7 +87,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
     <>
       <IconButton
         css={[
-          selectedFileVertex()?.length > 0 ? css`color: green;` : '',
+          selectedFileVertex()?.length > 0 ? css`color: green;` : "",
           css`
             background-color: transparent;
             border: none;

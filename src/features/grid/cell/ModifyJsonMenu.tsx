@@ -87,7 +87,8 @@ export function ModifyJsonMenu(props: {
       </DialogSubTitle>
 
       <div>
-        <As as="label"
+        <As
+          as="label"
           css={css`
   color: #3b82f6;
   display: block;
@@ -98,10 +99,14 @@ export function ModifyJsonMenu(props: {
         >
           JSON Data
         </As>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   margin-top: 2px;
-`}>
-          <As as="textarea"
+`}
+        >
+          <As
+            as="textarea"
             css={css`
   border-radius: 0.375rem;
   border-width: 0;
@@ -123,9 +128,14 @@ export function ModifyJsonMenu(props: {
         </As>
       </div>
       <Show when={error()}>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   color: \${args.theme.var.color.error};
-`}>{error()}</As>
+`}
+        >
+          {error()}
+        </As>
       </Show>
 
       <DialogFooter

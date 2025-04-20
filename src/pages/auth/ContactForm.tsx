@@ -19,6 +19,7 @@ import {
   createTextField,
 } from "./functions/formComponents";
 import { useFormSubmit } from "./functions/useFormSubmit";
+
 export function ContactForm() {
   const navigate = useNavigate();
   const { showErrorToast } = useToast();

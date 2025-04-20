@@ -4,11 +4,16 @@ import { As } from "../As";
 
 export function VersionDisplay() {
   return (
-    <As as="div" css={[css`
+    <As
+      as="div"
+      css={[
+        css`
   color: \${args.theme.var.color.secondary};
   font-size: 12px;
   opacity: 0.8;
-`]}>
+`,
+      ]}
+    >
       {APP_NAME} v{APP_VERSION}
     </As>
   );

@@ -91,7 +91,8 @@ export function ImportMenu(
       <DialogSubTitle>Import HTML to the page.</DialogSubTitle>
 
       <div>
-        <As as="label"
+        <As
+          as="label"
           css={css`
   color: #3b82f6;
   display: block;
@@ -102,10 +103,14 @@ export function ImportMenu(
         >
           HTML
         </As>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   margin-top: 2px;
-`}>
-          <As as="textarea"
+`}
+        >
+          <As
+            as="textarea"
             css={css`
   border-radius: 0.375rem;
   border-width: 0;
@@ -126,13 +131,19 @@ export function ImportMenu(
         </As>
       </div>
       <Show when={error()}>
-        <As as="div" css={css`
+        <As
+          as="div"
+          css={css`
   color: \${args.theme.var.color.error};
-`}>{error()}</As>
+`}
+        >
+          {error()}
+        </As>
       </Show>
 
       <DialogFooter>
-        <As as="button"
+        <As
+          as="button"
           css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
           disabled={!htmlContent()}
           onClick={onImport}
@@ -140,7 +151,8 @@ export function ImportMenu(
         >
           Import
         </As>
-        <As as="button"
+        <As
+          as="button"
           css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS]}
           onClick={onCancel}
           type="button"

@@ -6,9 +6,9 @@ import type {
   TextFieldOptionsField,
   ToggleField,
 } from "../FieldSchemaType";
+import { createGridOptions } from "../FieldSchemaType";
 
 import { sizeTypes } from "../csseditor_constants";
-import { createGridOptions } from "../FieldSchemaType";
 import { Icons } from "../Icons";
 import { extraPropertyValues } from "./CSSMetadata";
 

@@ -13,6 +13,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge";
 
 import type { CSSStore } from "../context/CssEditorContext";
+import { useCssEditor } from "../context/CssEditorContext";
 
 import {
   type FormStoreObject,
@@ -20,7 +21,6 @@ import {
 } from "../../../components/form/context/FormContext";
 import { DynamicComponent } from "../../../components/form/DynamicComponent";
 import { MultiSelectField } from "../../../components/styled/MultiSelect";
-import { useCssEditor } from "../context/CssEditorContext";
 import { useCssEditorProps } from "../context/CSSEditorPropsContext";
 import { useCssState } from "../context/CssStateContext";
 import { cssStateToString } from "../utils/cssStateToString";
@@ -118,9 +118,13 @@ export function CSSPropertiesEditor() {
         )}
       />
       Current State
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   display: flex;
-`} ref={buttonRef!}>
+`}
+        ref={buttonRef!}
+      >
         <MultiSelectField
           onRemove={() => setState("")}
           onSelect={(_, value) => setState(value as string)}
@@ -130,7 +134,8 @@ export function CSSPropertiesEditor() {
           selectionLimit={1}
         />
         <Show when={Object.keys(cssState[state()] || {}).length > 0}>
-          <As as="button"
+          <As
+            as="button"
             css={css`
   align-items: center;
   display: inline-flex;
@@ -141,7 +146,8 @@ export function CSSPropertiesEditor() {
             <Icon height={21} icon="ph:minus" noobserver width={21} />
           </As>
         </Show>
-        <As as="button"
+        <As
+          as="button"
           css={css`
   align-items: center;
   display: inline-flex;
@@ -164,13 +170,16 @@ export function CSSPropertiesEditor() {
             parentRef={addNewStateButtonRef!}
             placement="bottom-end"
           >
-            <As as="div"
+            <As
+              as="div"
               css={css`
-                ${Object.keys(cssState[state()] || {}).length > 0
-                ? `border-bottom: 1px solid secondary;
+                ${
+                  Object.keys(cssState[state()] || {}).length > 0
+                    ? `border-bottom: 1px solid secondary;
   margin: 1px;
   padding-bottom: 5px;`
-                : ""}
+                    : ""
+                }
   margin: 1px;
   padding-bottom: 5px;
   display: flex;

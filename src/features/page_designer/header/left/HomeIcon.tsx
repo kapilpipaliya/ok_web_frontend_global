@@ -26,9 +26,12 @@ export const HomeIcon = () => {
 
   return (
     <IconButton
-      css={[headerIconButtonCss, css`
+      css={[
+        headerIconButtonCss,
+        css`
   margin-left: 2px;
-`]}
+`,
+      ]}
       icon="ph:house"
       onClick={() => navigate(getHomeUrl(context()))}
       size={22}

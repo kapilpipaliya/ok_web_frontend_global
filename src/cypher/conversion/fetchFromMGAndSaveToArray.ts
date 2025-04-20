@@ -1,5 +1,4 @@
 import type { Session } from "neo4j-driver";
-
 import { types } from "neo4j-driver";
 
 import type { Edge, Vertex } from "~/lib/graph/graph";

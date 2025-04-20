@@ -182,7 +182,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
     return true;
   };
 
-  const handleSave = async (options: FunctionArgumentType) => {
+  const _handleSave = async (options: FunctionArgumentType) => {
     const formData = options.data;
     if (!validateForm(formData)) {
       return;

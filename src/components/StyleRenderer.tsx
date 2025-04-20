@@ -11,14 +11,19 @@ export function StyleRenderer(props: StyleRendererProps) {
     return css.replace(/\._id/g, `.${props.id}`);
   };
   const processedContent = () => {
-    if (!props.cssContent) return undefined;
-    
+    if (!props.cssContent) {
+      return undefined;
+    }
+
     if (Array.isArray(props.cssContent)) {
       return props.cssContent
-        .filter(css => typeof css === 'string' && css.trim() !== '') // Filter out empty strings and non-string values
+        .filter((css) => typeof css === "string" && css.trim() !== "") // Filter out empty strings and non-string values
         .map(processCss);
     }
-    return typeof props.cssContent === 'string' && props.cssContent.trim() !== '' ? processCss(props.cssContent) : undefined;
+    return typeof props.cssContent === "string" &&
+      props.cssContent.trim() !== ""
+      ? processCss(props.cssContent)
+      : undefined;
   };
 
   const content = createMemo(() => processedContent());
@@ -41,11 +46,8 @@ export function StyleRenderer(props: StyleRendererProps) {
     </>
   );
 }
-export function Style2(props: {cssContent: string}) {
+
+export function Style2(props: { cssContent: string }) {
   const cssContent = untrack(() => props.cssContent);
-  return (
-    <Style>
-      {cssContent}
-    </Style>
-  );
+  return <Style>{cssContent}</Style>;
 }

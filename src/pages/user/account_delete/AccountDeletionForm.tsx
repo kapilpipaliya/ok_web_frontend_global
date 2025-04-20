@@ -97,7 +97,7 @@ export function AccountDeletionForm() {
         type: "button",
       },
     ],
-      css: css`
+    css: css`
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -153,7 +153,7 @@ export function AccountDeletionForm() {
             }),
           },
         ],
-          css: css`
+        css: css`
   margin-bottom: 4px;
   padding: 12px;
   background-color: \${args.theme.var.color.error_10};
@@ -177,7 +177,7 @@ export function AccountDeletionForm() {
             }),
           },
         ],
-          css: css`
+        css: css`
   margin-bottom: 4px;
   padding: 12px;
   background-color: #3b82f6;
@@ -214,11 +214,11 @@ export function AccountDeletionForm() {
             type: "button",
           },
         ],
-          css: css`
+        css: css`
   display: flex;
   justify-content: flex-end;
 `,
-        componentName: "Html",  
+        componentName: "Html",
       },
       // Confirmation Dialog
       {

@@ -18,30 +18,47 @@ export function ProfileHeader(): JSX.Element {
   const displayEmail = () => member()?.P?.email ?? "guest@gmail.com";
 
   return (
-    <As as="li" css={css`
+    <As
+      as="li"
+      css={css`
   display: flex;
   margin-bottom: 5px;
   padding: 10px;
-`}>
-      <As as="div"
+`}
+    >
+      <As
+        as="div"
         css={css`
   height: 45px;
   width: 45px;
 `}
         style={`background-size:cover; background-image: url(${getProfileImageUrl(graph)})`}
       />
-      <As as="div" css={css`
+      <As
+        as="div"
+        css={css`
   margin-left: 10px;
   margin-right: 1rem;
-`}>
-        <As as="div" css={css`
+`}
+      >
+        <As
+          as="div"
+          css={css`
   font-weight: bold;
   text-align: start;
-`}>{displayName()}</As>
-        <As as="div" css={css`
+`}
+        >
+          {displayName()}
+        </As>
+        <As
+          as="div"
+          css={css`
   font-size: 14px;
   text-align: start;
-`}>{displayEmail()}</As>
+`}
+        >
+          {displayEmail()}
+        </As>
       </As>
     </As>
   );
