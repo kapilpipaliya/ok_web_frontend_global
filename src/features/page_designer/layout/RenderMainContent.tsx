@@ -75,6 +75,7 @@ const Panel: Component<PanelProps> = (props) => {
     return (
       <Show
         fallback={
+          // if overflow is not set, the resize handle will not work
           <As as="div" css={STYLES.overflowCss}>
             {props.children}
           </As>
@@ -262,7 +263,10 @@ export function RenderMainContent() {
         display: grid;
         grid-template-columns: ${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px ` : ""}${layoutStore()
           .mainPanel?.map(
-            (panel) => layoutStore()[`mainPanel${panel}Width`] ?? "1fr",
+            (panel) => {
+              const width = layoutStore()[`mainPanel${panel}Width`];
+              return typeof width === 'number' ? `${width}px` : (width ?? "1fr");
+            }
           )
           .join(
             " ",

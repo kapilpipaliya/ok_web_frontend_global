@@ -8,7 +8,7 @@ export function TabsContainer(props: ParentProps) {
       as="div"
       css={[
         css`
-  lh: 1rem;
+  line-height: 1rem;
   border-bottom-width: 1px;
   border-color: rgb(229,231,235);
   color: rgb(107,114,128);

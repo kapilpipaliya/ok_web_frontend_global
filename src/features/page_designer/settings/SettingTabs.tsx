@@ -22,7 +22,6 @@ import { NameKey } from "./keys/NameKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Permission } from "./permission/Permission";
-import { FormStatus } from "./status/FormStatus";
 import { TabButton } from "./TabButton";
 import { Variants } from "./variants/Variants";
 import { css } from "~/lib/styles";
@@ -64,11 +63,11 @@ export function SettingTabs() {
     graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const tabs = createMemo(() => {
-    const baseTabs = ["settings", "status", "layers"];
+    const baseTabs = ["settings", "layers"];
     if (!formStoreVertex()) {
       return baseTabs;
     }
-    const formType = graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0];
+    const formType = graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0];
     if (formType === "Form") {
       baseTabs.push("Keys");
     }
@@ -163,9 +162,6 @@ export function SettingTabs() {
         <Show keyed when={formStoreVertex()?.id}>
           <DesignerFormIdContext.Provider value={formStoreVertex().id}>
             <FormContext.Provider value={formStoreVertex().id}>
-              <Show when={layoutStore().selectedTab === "status"}>
-                <FormStatus />
-              </Show>
               {/* Keep Display:none to keep expanded state */}
               <As
                 as="div"
@@ -178,7 +174,7 @@ export function SettingTabs() {
 
               <Show
                 when={
-                  graph.vertexes[formStoreVertex()?.P.formDataId!]?.L[0] ===
+                  graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] ===
                   "Form"
                 }
               >

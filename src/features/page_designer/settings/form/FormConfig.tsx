@@ -67,7 +67,7 @@ export function FormConfig() {
             uuid={graph.vertexes[openedFormId].P.formId}
             // openedFormId={openedFormId}
           />
-          <PrintableTxnValue openedFormId={openedFormId} />
+          {/* <PrintableTxnValue openedFormId={openedFormId} /> */}
         </div>
       )}
     </For>

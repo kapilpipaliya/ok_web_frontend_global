@@ -20,23 +20,23 @@ export function TabButton(props: TabButtonProps) {
         as="button"
         css={[
           css`
-  border-bottom-width: 2.5px;
-  border-color: transparent;
+  border: none;
   display: inline-block;
   padding: 10px;
   white-space: nowrap;
+  background: transparent;
+  outline: none;
 `,
           props.isSelected
-            ? `
+            ? css`
               font-weight: 600;
-              color: \${args.theme.var.color.primary_40};
-              border-bottom-width: 2.5px;
-              border-color: \${args.theme.var.color.primary_40};
+              color: \${args.theme.var.color.primary};
+              border-bottom: 2.5px solid \${args.theme.var.color.primary_200};
             `
-            : `
+            : css`
               &:hover {
-                color: \${args.theme.var.color.base_16};
-                border-color: \${args.theme.var.color.base};
+                color: \${args.theme.var.color.base};
+                border-bottom: 2.5px solid \${args.theme.var.color.base};
               }
             `,
         ]}
