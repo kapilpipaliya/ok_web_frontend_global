@@ -273,6 +273,7 @@ export function DynamicComponent(
         return graph.vertexes[errorVertexId]?.P[key ?? props.meta.P.key];
       },
       evalExpression,
+      mergeVertexProperties,
       get fns() {
         return functionProxy;
       },

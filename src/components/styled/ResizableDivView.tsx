@@ -45,7 +45,7 @@ export const DIMENSIONS = {
 export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
-    class?: string;
+    css?: string;
     view: Id;
   }>,
 ) {
@@ -173,7 +173,7 @@ export function ResizableContainer(
     <As
       as="div"
       css={[
-        ...ensureArray(props.class),
+        ...ensureArray(props.css),
         STYLES.overflowCss,
         css`
   display: grid;

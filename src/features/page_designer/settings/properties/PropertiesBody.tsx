@@ -90,7 +90,7 @@ export function PropertiesBody() {
       <Show when={selectedAttr()?.P.componentName === "Data"}>
         <CollAndData />
       </Show>
-      <JsonEditorFieldComponent />
+
       <FunctionEditor
         keyName="fns"
         label="Function Definitions"
@@ -115,6 +115,7 @@ export function PropertiesBody() {
         selectedLayout={graph.vertexes[formStoreVertex()?.P.selectedId]}
         txnId={formStoreVertex()?.P.txnId}
       />
+      <JsonEditorFieldComponent />
     </Show>
   );
 }

@@ -1,4 +1,4 @@
-import { createMemo, For } from "solid-js";
+import { createMemo, For, Suspense } from "solid-js";
 
 import type { Id } from "~/lib/graph/graph";
 
@@ -44,9 +44,10 @@ export function FormConfig() {
   };
 
   return (
-    <For each={layoutStore().openedFormIds}>
-      {(openedFormId) => (
-        <div
+    <Suspense>
+      <For each={layoutStore().openedFormIds}>
+        {(openedFormId) => (
+          <div
           style={{
             display:
               layoutStore().formId === graph.vertexes[openedFormId].P.formId
@@ -67,9 +68,10 @@ export function FormConfig() {
             uuid={graph.vertexes[openedFormId].P.formId}
             // openedFormId={openedFormId}
           />
-          {/* <PrintableTxnValue openedFormId={openedFormId} /> */}
-        </div>
-      )}
-    </For>
+            {/* <PrintableTxnValue openedFormId={openedFormId} /> */}
+          </div>
+        )}
+      </For>
+    </Suspense>
   );
 }

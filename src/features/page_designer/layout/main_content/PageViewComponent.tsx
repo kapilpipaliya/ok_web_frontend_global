@@ -83,7 +83,13 @@ export function PageViewComponent(props: { mainPanel: Id }) {
             <Show when={formStoreVertex()?.id}>
               <For each={formStoreVertex()?.P.openedViews}>
                 {(openedViewId, index) => (
-                  <div>
+                  <As
+                    as="div"
+                    css={
+                      isActive()
+                        ? ""
+                        : css`display: none;`
+                  }>
                     <PageTabBar
                       formStoreId={graph.vertexes[openedFormId].P.formId}
                       handleRefresh={handleRefresh}
@@ -92,13 +98,6 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                       previewsLength={formStoreVertex()?.P.openedViews.length}
                     />
                     <ResizableContainer
-                      css={
-                        isActive()
-                          ? ""
-                          : css`
-  display: none;
-`
-                      }
                       view={openedViewId}
                     >
                       <Show when={isPreview()}>
@@ -112,7 +111,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                                   metaVertex={graph.vertexes[vertex()?.P.formDataId!]}
                                 /> */}
                     </ResizableContainer>
-                  </div>
+                  </As>
                 )}
               </For>
             </Show>

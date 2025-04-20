@@ -171,6 +171,15 @@ export function TabBar(props: { mainPanel: Id }) {
             </As>
             <IconButton
               icon="ph:plus"
+              css={css`
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: \${args.theme.var.color.primary};
+  &:hover {
+    color: \${args.theme.var.color.primary_200};
+  }
+`}
               onClick={() => {
                 const newView = createViewVertex(
                   { view: "Mobile" },
@@ -196,6 +205,15 @@ export function TabBar(props: { mainPanel: Id }) {
             />
             <Show when={index() !== 0}>
               <IconButton
+                css={css`
+  background-color: transparent;
+  color: \${args.theme.var.color.error};
+  cursor: pointer;
+  border: none;
+  &:hover {
+    color: \${args.theme.var.color.error_200};
+  }
+`}
                 icon="ph:x"
                 onClick={(e) => {
                   e.stopPropagation();

@@ -1,11 +1,7 @@
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
   FieldAttribute,
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
-
-import { evalExpression } from "~/lib/expression_eval";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 import {
@@ -18,7 +14,7 @@ import { css } from "~/lib/styles";
 export const wrapWithTitle = (
   title: string,
   required: boolean,
-  children: any,
+  children: FieldAttribute,
 ) => {
   return {
     as: "div",
@@ -233,20 +229,16 @@ string`,
           displayName: "Default Value",
           key: "defValue",
           // componentName: "::'P.type'",
-          css: (options: FunctionArgumentType) => {
-            const type =
-              options.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
+          css: `const type = 
+              args.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
             return type === "CheckBox"
               ? PROPERTIES.Css.CheckBoxCss
-              : PROPERTIES.Css.TextFieldCss;
-          },
-          props: (options: FunctionArgumentType) => {
-            const type =
-              options.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
+              : PROPERTIES.Css.TextFieldCss;`,
+          props: `const type =
+              args.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
             return {
               componentName: type,
-            };
-          },
+            };`,
         },
         {
           as: "button",
@@ -265,27 +257,25 @@ string`,
 `,
           componentName: "Html",
           key: "button",
-          props: (options: FunctionArgumentType) => {
-            return {
-              hide: (options: FunctionArgumentType) => {
+          props: `return {
+              hide: () => {
                 return (
-                  options.data?.P.defValue === undefined ||
-                  options.data?.P.defValue === null
+                  args.data?.P.defValue === undefined ||
+                  args.data?.P.defValue === null
                 );
               },
               onClick: () => {
-                mergeVertexProperties(
-                  options.txnId,
-                  options.data?.id,
-                  options.graph,
-                  options.setGraph,
+                args.mergeVertexProperties(
+                  args.txnId,
+                  args.data?.id,
+                  args.graph,
+                  args.setGraph,
                   {
                     defValue: null,
                   },
                 );
               },
-            };
-          },
+            };`,
           type: "button",
         },
       ],
@@ -317,16 +307,14 @@ string`,
         {
           displayName: "Value",
           key: "value",
-          props: (options: FunctionArgumentType) => {
-            const type = evalExpression("<-$0::'P.type'", {
-              graph: options.graph,
-              setGraph: options.setGraph,
-              vertexes: [options.data],
+          props: `const type = args.evalExpression("<-$0::'P.type'", {
+              graph: args.graph,
+              setGraph: args.setGraph,
+              vertexes: [args.data],
             });
             return {
               componentName: type === "boolean" ? "CheckBox" : "TextInput",
-            };
-          },
+            };`,
         },
       ],
       componentName: "DynamicTable",
