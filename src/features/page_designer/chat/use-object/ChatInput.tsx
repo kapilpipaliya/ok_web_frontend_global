@@ -41,7 +41,7 @@ export function ChatInput(props: ChatInputProps) {
     <As
       as="form"
       css={css`
-  background: \${args.theme.var.color.base_10};
+  background: \${args.theme.var.color.base_5};
   border-top: 1px solid \${args.theme.var.color.base_16};
   padding: 4px;
   margin-bottom: 4px;

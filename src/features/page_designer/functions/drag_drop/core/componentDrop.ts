@@ -18,6 +18,7 @@ import { getUniqueName } from "../../form/generateFormMetaAttributes";
 import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
 import { getCompPropsObj } from "../attributes/getCompPropsObj";
 import { getComponentFromLayoutRow } from "../ui/getComponentFromLayoutRow";
+import { css } from "~/lib/styles";
 
 // @Note:
 // From Component To Layout drag:
@@ -90,7 +91,7 @@ export function componentDrop(
     //   props = { ...props, text: "Sample Text" };
     // }
     if (fromVertex.P.key === "Html" && !props.as) {
-      props = { ...props, as: "div" };
+      props = { ...props, as: "div", css: css`` };
     }
   } else if (fromVertex.L[0] === "Attr") {
     const p = klona(fromVertex.P);

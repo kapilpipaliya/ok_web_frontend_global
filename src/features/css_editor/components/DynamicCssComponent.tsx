@@ -110,7 +110,7 @@ export function DynamicCSSComponent(
     parentRenderContext()?.projections;
 
   const projections = createMemo(getProjections);
-  const parentValue = () => path([...(projections() || [])], cssState);
+  const parentValue = () => path([...(projections() || [])])(cssState);
 
   const getFunctionArgument = (): Omit<FunctionArgumentType, "value"> => {
     const baseArguments = getFunctionArgumentBase();
@@ -126,10 +126,7 @@ export function DynamicCSSComponent(
   };
 
   const value = createMemo(() => {
-    return path(
-      [...(projections() || []), (props.meta as FormField).key || ""],
-      cssState,
-    );
+    return path([...(projections() || []), (props.meta as FormField).key || ""])(cssState)
   });
 
   const onChange = (data: any) => {

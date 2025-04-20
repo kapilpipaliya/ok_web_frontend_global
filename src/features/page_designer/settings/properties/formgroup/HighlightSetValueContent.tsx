@@ -193,6 +193,10 @@ export function HighlightSetValueContent(
         <IconButton
           data-testid="clearIcon"
           icon="ph:x"
+          css={css`
+            background-color: transparent;
+            border: none;
+          `}
           iconCss={css`color:#ff0000; cursor:pointer;`}
           onClick={() => props.onChange(props.meta, null)}
           size={24}

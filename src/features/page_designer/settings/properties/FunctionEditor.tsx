@@ -9,7 +9,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
+import { formatCSSCode, formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { validateFunction } from "~/lib/validation/validateFunction";
 import { css } from "~/lib/styles";
@@ -76,8 +76,19 @@ export function FunctionEditor(props: {
       const model = editorRef.getModel();
       if (model) {
         try {
-          const formatted = await formatJavaScriptCode(model.getValue());
-          model.setValue(formatted);
+          // Only format JavaScript content, not CSS
+          const language = props.language?.toLowerCase() || "javascript";
+          if (language === "javascript" || language === "typescript" || 
+              language === "js" || language === "ts" || 
+              language === "jsx" || language === "tsx") {
+            const formatted = await formatJavaScriptCode(model.getValue());
+            model.setValue(formatted);
+          } else if (language === "css") {
+            const formatted = await formatCSSCode(model.getValue());
+            model.setValue(formatted);
+          } else {
+            console.warn(`Formatting not supported for ${language} language`);
+          }
         } catch (err) {
           console.error("Formatting failed:", err);
         }
@@ -92,7 +103,7 @@ export function FunctionEditor(props: {
         height={p.height}
         language={props.language || "javascript"}
         onChange={(value) => setEditorValue(value)}
-        onMount={(editor) => (editorRef = editor)}
+        onMount={(_monaco, editor) => (editorRef = editor)}
         showMinimap={false}
         value={editorValue()}
       />
@@ -100,7 +111,7 @@ export function FunctionEditor(props: {
         as="div"
         css={css`
   display: flex;
-  gap: 2px;
+  gap: 3px;
   margin-top: 2px;
 `}
       >
@@ -111,9 +122,10 @@ export function FunctionEditor(props: {
   padding-right: 3px;
   padding-top: 1px;
   padding-bottom: 1px;
-  background-color: ${args.theme.var.color.primary_280};
+  background-color: ${args.theme.var.color.primary};
   color: ${args.theme.var.color.base_10};
   border-radius: 1px;
+  border: none;
 `}
           onClick={handleSave}
         >
@@ -126,9 +138,10 @@ export function FunctionEditor(props: {
   padding-right: 3px;
   padding-top: 1px;
   padding-bottom: 1px;
-  background-color: ${args.theme.var.color.primary_40};
+  background-color: ${args.theme.var.color.secondary_70};
   color: ${args.theme.var.color.base_10};
   border-radius: 1px;
+  border: none;
 `}
           onClick={formatCode}
           title="Format Code with Prettier"
@@ -168,6 +181,8 @@ export function FunctionEditor(props: {
           <IconButton
             css={css`
   margin-left: 6px;
+  background-color: transparent;
+  border: none;
 `}
             icon="ph:arrow-square-out"
             onClick={(e) => {

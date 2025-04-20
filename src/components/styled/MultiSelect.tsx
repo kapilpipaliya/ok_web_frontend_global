@@ -23,6 +23,7 @@ import { useToast } from "./modal/Toast";
 import { css } from "~/lib/styles";
 import { As } from "../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { CssType } from "../form/type/FieldSchemaType";
 
 export type Option =
   | string
@@ -38,6 +39,7 @@ export function MultiSelectField(
   props: Readonly<{
     childrenKey?: string;
     class?: string;
+    css?: CssType;
     disable?: boolean;
     displayValueKey?: string;
     error?: string;
@@ -83,12 +85,12 @@ export function MultiSelectField(
   const getOptionLabel = (option: Option) => {
     if (isObject(option) && props.displayValueKey) {
       if (props.displayValueKey.includes("::")) {
-        return evalExpression(props.displayValueKey, option);
+        return String(evalExpression(props.displayValueKey, option) || '');
       }
-      return option[props.displayValueKey as keyof Option];
+      return String(option[props.displayValueKey as keyof Option] || '');
     }
     // @ts-expect-error ignore
-    return isObject(option) ? option.label : option;
+    return isObject(option) ? String(option.label || '') : String(option);
   };
 
   // Remove tag from selected values

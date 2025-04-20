@@ -62,6 +62,8 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
   float: right;
   padding: 0 5px;
   border-radius: 5px;
+  background-color: transparent;
+  border: none;
   &:hover {
     background-color: lightgrey;
   }

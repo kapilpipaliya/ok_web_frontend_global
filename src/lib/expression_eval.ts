@@ -615,13 +615,13 @@ function getVertexUnOps(context: any): any {
 function projectedValueBinOps(vertexes1: any, projection: string): any {
   const resolvedProjection = resolveProjection(projection, vertexes1);
   const vertex = getVertexBinOps(vertexes1);
-  return getTextValue(path(resolvedProjection, vertex));
+  return getTextValue(path(resolvedProjection)(vertex));
 }
 
 function projectedValueUnOps(projection: any, context: any) {
   const resolvedProjection = resolveProjection(projection, context);
   const vertex = getVertexUnOps(context);
-  return getTextValue(path(resolvedProjection, vertex));
+  return getTextValue(path(resolvedProjection)(vertex));
 }
 
 function resolveProjection(projection: string, context: any): string {

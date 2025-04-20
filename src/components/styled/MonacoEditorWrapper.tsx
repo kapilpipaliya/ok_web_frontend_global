@@ -10,6 +10,7 @@ import { MonacoEditor } from "solid-monaco";
 import { PROPERTIES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "../As";
+import { configureCssLanguageExtensions } from "~/lib/editor/monaco/cssLanguageExtension";
 
 // Initialize Monaco workers if not already done
 if (!window.MonacoEnvironment) {
@@ -17,6 +18,7 @@ if (!window.MonacoEnvironment) {
     getWorker(_moduleId: unknown, label: string) {
       switch (label) {
         case "css":
+        case "customCss":
           return new cssWorker();
         case "javascript":
         case "typescript":
@@ -38,13 +40,35 @@ export interface MonacoEditorWrapperProps {
   onChange: (value: string) => void;
   onMount?: (
     monaco: typeof Monaco,
-    editor: typeof Monaco.editor.IStandaloneCodeEditor,
+    editor: Monaco.editor.IStandaloneCodeEditor,
   ) => void;
   showMinimap?: boolean;
   value: string;
 }
 
 export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
+  // Flag to track if we've initialized our extensions
+  let extensionsInitialized = false;
+  // Handle editor mount and setup custom language extensions if needed
+  const handleEditorMount = (monaco: typeof Monaco, editor: Monaco.editor.IStandaloneCodeEditor) => {
+    // Initialize extensions only once
+    if (!extensionsInitialized) {
+      configureCssLanguageExtensions();
+      extensionsInitialized = true;
+    }
+    
+    // Apply customCss language for CSS editors
+    if (props.language === "css") {
+      const model = editor.getModel();
+      if (model) {
+        monaco.editor.setModelLanguage(model, "customCss");
+      }
+    }
+    
+    // Call the original onMount handler
+    props.onMount?.(monaco, editor);
+  };
+  
   return (
     <As
       as={MonacoEditor}
@@ -56,8 +80,8 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
       ]}
       height={props.height ?? "200px"}
       language={props.language}
-      onChange={(value) => props.onChange(value)}
-      onMount={(monaco, editor) => props.onMount?.(monaco, editor)}
+      onChange={(value: string) => props.onChange(value)}
+      onMount={handleEditorMount}
       options={{
         autoIndent: "full",
         folding: false,

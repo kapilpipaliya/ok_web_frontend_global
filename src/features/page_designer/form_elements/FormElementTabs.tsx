@@ -58,7 +58,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const [rootVertexes, setRootVertexes] = createSignal<any[]>([]);
+  const [rootVertexes, setRootVertexes] = createSignal<Vertex[]>([]);
   const { showWarningToast } = useToast();
 
   createEffect(async () => {
@@ -92,6 +92,30 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
     }
   });
 
+  const handleAddComponentClick = () => {
+    if (!props.rootLevel && isNegative(formStoreVertex().P.formDataId)) {
+      showWarningToast("Please Save Current Page first.");
+      return;
+    }
+
+    return openInNewInternalTab(
+      layoutStoreId,
+      {
+        id: "new",
+        IN: {},
+        L: ["Component"],
+        OUT: {},
+        P: {
+          parentId: props.rootLevel
+            ? null
+            : formStoreVertex().P.formDataId,
+        },
+      } as Vertex,
+      graph,
+      setGraph,
+    );
+  };
+
   return (
     <div>
       <As
@@ -104,19 +128,17 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 `,
         ]}
       >
-        {props.rootLevel ? null : (
-          <As
-            as="div"
-            css={[
-              css`
+        <As
+          as="div"
+          css={[
+            css`
   padding: 12px;
   font-weight: 500;
 `,
-            ]}
-          >
-            Components
-          </As>
-        )}
+          ]}
+        >
+          {props.rootLevel ? "Global Components" : "Page Components"}
+        </As>
         <IconButton
           css={[
             headerIconButtonCss,
@@ -127,30 +149,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 `,
           ]}
           icon="ph:plus-circle"
-          onClick={() => {
-            if (!props.rootLevel) {
-              if (isNegative(formStoreVertex().P.formDataId)) {
-                showWarningToast("Please Save Current Page first.");
-                return;
-              }
-            }
-            return openInNewInternalTab(
-              layoutStoreId,
-              {
-                id: "new",
-                IN: {},
-                L: ["Component"],
-                OUT: {},
-                P: {
-                  parentId: props.rootLevel
-                    ? null
-                    : formStoreVertex().P.formDataId,
-                },
-              } as Vertex,
-              graph,
-              setGraph,
-            );
-          }}
+          onClick={handleAddComponentClick}
         />
       </As>
       <ComponentList
@@ -244,17 +243,6 @@ export function FormElementTabs() {
 `,
               ]}
             >
-              <As
-                as="div"
-                css={[
-                  css`
-  padding: 12px;
-  font-weight: 500;
-`,
-                ]}
-              >
-                Global Components
-              </As>
               <Show keyed when={formStoreVertex()?.id}>
                 <DesignerFormIdContext.Provider value={formStoreVertex().id}>
                   <PageLevelComponents rootLevel={true} />

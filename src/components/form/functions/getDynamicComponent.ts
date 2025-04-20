@@ -18,7 +18,7 @@ import { TextAreaField } from "~/features/css_editor/components/fields/TextArea"
 // import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
 import { HtmlField } from "../../fields/HtmlField";
-import { MetaLink, MetaMeta, MetaTitle } from "../../fields/MetaTitle";
+import { Head, MetaLink, MetaMeta, MetaTitle } from "../../fields/MetaTitle";
 import { FileUploader } from "../../styled/FileUploader";
 // const OtpField = clientOnly(() => import("~/components/ssr/otpfield/OtpField"));
 // OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
@@ -46,8 +46,9 @@ export const componentsMap: Record<string, any> = {
   Form: FormField,
   Html: HtmlField,
   Icon: IconField,
-  Link: MetaLink,
-  Meta: MetaMeta,
+  // Link: MetaLink,
+  // Meta: MetaMeta,
+  Head: Head,
   MultiSelect: SelectField,
   // Page: PageField,
   Portal,
@@ -56,7 +57,7 @@ export const componentsMap: Record<string, any> = {
   Table: TableInputField,
   TextArea: TextAreaField,
   TextInput: TextInputField,
-  Title: MetaTitle,
+  // Title: MetaTitle,
   Transition,
   TransitionGroup,
   ZIndex,
