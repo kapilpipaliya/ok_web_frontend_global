@@ -33,6 +33,7 @@ import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { Divider } from "../../../components/styled/Divider";
 
 export const UlContainer = (props: ParentProps) => (
   <As
@@ -229,11 +230,16 @@ export function FormElementTabs() {
               edgeName="ParentComp"
               rootExpression={`g:'Comp[Root]'`}
             />
+            
+            <Divider />
+            
             <Show keyed when={formStoreVertex()?.id}>
               <DesignerFormIdContext.Provider value={formStoreVertex().id}>
                 <PageLevelComponents rootLevel={false} />
               </DesignerFormIdContext.Provider>
             </Show>
+
+            <Divider />
 
             <As
               as="div"
@@ -249,6 +255,8 @@ export function FormElementTabs() {
                 </DesignerFormIdContext.Provider>
               </Show>
             </As>
+
+            <Divider />
 
             <As
               as="div"
