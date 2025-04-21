@@ -67,14 +67,16 @@ export const processStyle = (
     // Handle template string evaluation
     if (style.trim() !== "" && style.includes("args.")) {
       try {
-        const cssFunction = new Function("args", `return \`${style}\``);
+        const cssFunction = style.includes("return") 
+          ? new Function("args", style)
+          : new Function("args", `return \`${style}\``);
         const evaluatedStyle = cssFunction(functionArgs);
         return typeof evaluatedStyle === "string" &&
           evaluatedStyle.includes("._id")
           ? evaluatedStyle.replace(/\._id/g, `.${uniqueId}`)
           : evaluatedStyle || "";
       } catch (error) {
-        console.error("Error evaluating css template string:", error);
+        console.error("Error evaluating css template string:", error, style);
         return "";
       }
     }

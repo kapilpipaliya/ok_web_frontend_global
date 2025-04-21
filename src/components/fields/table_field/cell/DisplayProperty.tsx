@@ -33,13 +33,13 @@ import { As } from "~/components/As";
 export const getComponentClass = (componentName: string) => {
   switch (componentName) {
     case "CheckBox":
-      return "min-width:50px";
+      return "min-width:50px;";
     case "Select":
-      return "min-width:200px";
+      return "min-width:200px;";
     case "TextArea":
-      return "min-width:200px";
+      return "min-width:200px;";
     default:
-      return "min-width:150px";
+      return "min-width:150px;";
   }
 };
 

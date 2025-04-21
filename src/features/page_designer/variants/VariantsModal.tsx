@@ -180,7 +180,7 @@ export function VariantsModal(
                       isNoPermissionCheck={true}
                       isRealTime={false}
                       meta={graph.vertexes[metaVertexId]}
-                      txnId={formStoreVertex()?.P.txnId}
+                      // txnId={formStoreVertex()?.P.txnId}
                     />
                   </As>
                 </div>
@@ -188,12 +188,9 @@ export function VariantsModal(
               <As
                 as="div"
                 css={css`
-  display: grid;
+  display: flex;
   gap: 0.75rem;
-  grid-auto-flow: row dense;
-  grid-template-columns: repeat(2, 1fr);
   margin-top: 1.25rem;
-  margin-top: 1.5rem;
 `}
               >
                 {error() && (

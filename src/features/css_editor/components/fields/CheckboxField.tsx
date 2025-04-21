@@ -7,6 +7,8 @@ import {
 } from "solid-js";
 
 import type { TextFieldOptionsField } from "../../constants/FieldSchemaType";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 interface CheckboxFieldProps
   extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value">,
@@ -34,7 +36,8 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
     "viewModeClass",
     "onClick",
   ]);
-
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [reference, setReference] = createSignal<HTMLInputElement | null>(null);
 
   const handleChange = (event: Event) => {
@@ -42,8 +45,12 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
     if (others.disabled || others.readOnly) {
       return;
     }
-    const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-    local.onChange?.((target as HTMLInputElement).checked);
+    const target = event.target as HTMLInputElement;
+    if (local.onChange) {
+      local.onChange(target.checked);
+    } else {
+      parentRenderContext()?.context.onChange?.(target.checked);
+    }
   };
 
   const handleViewClick = () => {
@@ -84,7 +91,7 @@ export const CheckboxField: Component<CheckboxFieldProps> = (props) => {
       <input
         {...others}
         {...local.inputProps}
-        checked={local.value}
+        checked={local.value ?? parentRenderContext()?.context.value ?? false}
         class={`${others.class || ""} ${local.error && local.errorClass ? local.errorClass : ""}`}
         onChange={handleChange}
         onClick={onClick}

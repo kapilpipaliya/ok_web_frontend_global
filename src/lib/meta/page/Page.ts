@@ -232,8 +232,8 @@ string`,
           css: `const type = 
               args.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
             return type === "CheckBox"
-              ? PROPERTIES.Css.CheckBoxCss
-              : PROPERTIES.Css.TextFieldCss;`,
+              ? \`${PROPERTIES.Css.CheckBoxCss}\`
+              : \`${PROPERTIES.Css.TextFieldCss}\`;`,
           props: `const type =
               args.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
             return {
