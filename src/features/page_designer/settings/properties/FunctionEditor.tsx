@@ -1,6 +1,7 @@
 import type * as Monaco from "monaco-editor";
 
-import { createEffect, createSignal, on } from "solid-js";
+import { createEffect, createSignal, on, Show } from "solid-js";
+import type { JSX } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
@@ -18,6 +19,32 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
+// Shared button styles
+const buttonStyles = (args: FunctionArgumentType, color: string) => css`
+  padding: 1px 4px;
+  background-color: ${color};
+  color: ${args.theme.var.color.base_10};
+  border-radius: 1px;
+  border: none;
+`;
+
+// Button components
+const EditorButton = (props: { 
+  onClick: () => void; 
+  color: string; 
+  children: JSX.Element;
+  title?: string;
+}) => (
+  <As
+    as="button"
+    css={(args: FunctionArgumentType) => buttonStyles(args, props.color)}
+    onClick={props.onClick}
+    title={props.title}
+  >
+    {props.children}
+  </As>
+);
+
 export function FunctionEditor(props: {
   keyName?: string;
   label?: string;
@@ -29,14 +56,21 @@ export function FunctionEditor(props: {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  const [isFunctionValid, setIsFunctionValid] = createSignal(true);
+    
+  // Derived state
   const propertyKey = () => props.keyName || "props";
   const getPropertyValue = () =>
     graph.vertexes[formStoreVertex()?.P.selectedId].P[propertyKey()] ?? "";
-  const [editorValue, setEditorValue] = createSignal(getPropertyValue());
+    
+  // State
+  const [isFunctionValid, setIsFunctionValid] = createSignal(true);
   const [isModalOpen, setIsModalOpen] = createSignal(false);
+  const [editorValue, setEditorValue] = createSignal(getPropertyValue());
+  
+  // Editor reference
   let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
 
+  // Update editor value when selected element changes
   createEffect(
     on(
       () => formStoreVertex()?.P.selectedId,
@@ -50,6 +84,7 @@ export function FunctionEditor(props: {
     ),
   );
 
+  // Handlers
   const evaluateProperty = (value: string) => {
     const validation = validateFunction(value, props.returnType);
     setIsFunctionValid(validation.isValid);
@@ -72,37 +107,35 @@ export function FunctionEditor(props: {
   };
 
   const formatCode = async () => {
-    if (editorRef) {
-      const model = editorRef.getModel();
-      if (model) {
-        try {
-          // Only format JavaScript content, not CSS
-          const language = props.language?.toLowerCase() || "javascript";
-          if (language === "javascript" || language === "typescript" || 
-              language === "js" || language === "ts" || 
-              language === "jsx" || language === "tsx") {
-            const formatted = await formatJavaScriptCode(model.getValue());
-            model.setValue(formatted);
-          } else if (language === "css") {
-            const formatted = await formatCSSCode(model.getValue());
-            model.setValue(formatted);
-          } else {
-            console.warn(`Formatting not supported for ${language} language`);
-          }
-        } catch (err) {
-          console.error("Formatting failed:", err);
-        }
+    if (!editorRef) return;
+    
+    const model = editorRef.getModel();
+    if (!model) return;
+    
+    try {
+      const language = props.language?.toLowerCase() || "javascript";
+      const isJavaScript = ["javascript", "typescript", "js", "ts", "jsx", "tsx"].includes(language);
+      
+      if (isJavaScript) {
+        model.setValue(await formatJavaScriptCode(model.getValue()));
+      } else if (language === "css") {
+        model.setValue(await formatCSSCode(model.getValue()));
+      } else {
+        console.warn(`Formatting not supported for ${language} language`);
       }
+    } catch (err) {
+      console.error("Formatting failed:", err);
     }
   };
 
+  // UI Components
   const EditorContent = (p: { height?: string }) => (
     <>
       <MonacoEditorWrapper
         error={!isFunctionValid()}
         height={p.height}
         language={props.language || "javascript"}
-        onChange={(value) => setEditorValue(value)}
+        onChange={setEditorValue}
         onMount={(_monaco, editor) => (editorRef = editor)}
         showMinimap={false}
         value={editorValue()}
@@ -110,46 +143,39 @@ export function FunctionEditor(props: {
       <As
         as="div"
         css={css`
-  display: flex;
-  gap: 3px;
-  margin-top: 2px;
-`}
+          display: flex;
+          gap: 4px;
+          margin-top: 4px;
+        `}
       >
-        <As
-          as="button"
-          css={(args: FunctionArgumentType) => css`
-  padding-left: 3px;
-  padding-right: 3px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  background-color: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.base_10};
-  border-radius: 1px;
-  border: none;
-`}
+        <EditorButton 
+          color={"${args.theme.var.color.primary}"} 
           onClick={handleSave}
         >
           Submit
-        </As>
-        <As
-          as="button"
-          css={(args: FunctionArgumentType) => css`
-  padding-left: 3px;
-  padding-right: 3px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  background-color: ${args.theme.var.color.secondary_70};
-  color: ${args.theme.var.color.base_10};
-  border-radius: 1px;
-  border: none;
-`}
+        </EditorButton>
+        
+        <EditorButton 
+          color={"${args.theme.var.color.secondary_70}"} 
           onClick={formatCode}
           title="Format Code with Prettier"
         >
           Format
-        </As>
+        </EditorButton>
+        
+        <Show when={isModalOpen()}>
+          <As as="div" css={css`margin-left: auto;`}>
+            <EditorButton 
+              color={"${args.theme.var.color.error_200}"} 
+              onClick={() => setIsModalOpen(false)}
+            >
+              Cancel
+            </EditorButton>
+          </As>
+        </Show>
       </As>
-      {!isFunctionValid() && (
+      
+      <Show when={!isFunctionValid()}>
         <As
           as="span"
           css={css`
@@ -158,32 +184,21 @@ export function FunctionEditor(props: {
         >
           Invalid Function
         </As>
-      )}
+      </Show>
     </>
   );
 
   return (
     <>
-      <As
-        as="div"
-        css={css`
-  margin-top: 5px;
-`}
-      >
-        <As
-          as="span"
-          css={css`
-  display: flex;
-  align-items: center;
-`}
-        >
+      <As as="div" css={css`margin-top: 5px;`}>
+        <As as="span" css={css`display: flex; align-items: center;`}>
           {props.label}
           <IconButton
             css={css`
-  margin-left: 6px;
-  background-color: transparent;
-  border: none;
-`}
+              margin-left: 6px;
+              background-color: transparent;
+              border: none;
+            `}
             icon="ph:arrow-square-out"
             onClick={(e) => {
               e.stopPropagation();
@@ -194,6 +209,7 @@ export function FunctionEditor(props: {
         </As>
         <EditorContent height="200px" />
       </As>
+      
       <CustomModal
         open={isModalOpen}
         setOpen={setIsModalOpen}
@@ -202,10 +218,10 @@ export function FunctionEditor(props: {
         <As
           as="div"
           css={css`
-  padding: 3px;
-  width: 600px;
-  height: 600px;
-`}
+            padding: 3px;
+            width: 600px;
+            height: 600px;
+          `}
         >
           <EditorContent height="560px" />
         </As>

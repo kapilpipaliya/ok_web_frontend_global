@@ -128,7 +128,6 @@ export function PagesList(props: Readonly<{ coll: string }>) {
                   <As
                     as="div"
                     css={css`
-  font-weight: bold;
   margin: 20px 0px;
   padding: 3px;
   text-align: center;
