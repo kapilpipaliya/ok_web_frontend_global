@@ -133,7 +133,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   text-align: center;
 `}
                   >
-                    No {props.coll} Found!
+                    No {props.coll !== "Page" ? props.coll.replace(/Page$/, '') : props.coll} Found!
                   </As>
                 }
               >
