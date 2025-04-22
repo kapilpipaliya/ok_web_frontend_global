@@ -5,6 +5,8 @@ import {
   createSignal,
   For,
   Show,
+  untrack,
+  createEffect,
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -18,7 +20,8 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import {
   type PageLayoutObject,
@@ -33,6 +36,10 @@ import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { JsonEditorFieldComponent } from "../properties/JsonEditorField";
+import { Icon } from "@iconify-icon/solid";
+import { IconButton } from "~/components/styled/IconButton";
+import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 export function LayoutTreeItem(
   props: Readonly<{
@@ -79,7 +86,7 @@ export function LayoutTreeItem(
       children,
       graph,
       setGraph,
-      graph.vertexes[formStoreVertex()?.P.formDataId!],
+      graph.vertexes[formStoreVertex()?.P.formDataId] || null,
       (position) => {
         if (position === "center" && Date.now() - startTime > 1000) {
           if (props.collapsedKeys().includes(props.metaVertex.id)) {
@@ -165,6 +172,27 @@ export function LayoutTreeItem(
     return boxShadow;
   });
 
+  const [showJsonEditor, setShowJsonEditor] = createSignal(false);
+  
+  // Update local state when global setting changes
+  createEffect(() => {
+    const showAllJsonEditors = formStoreVertex()?.P.showAllJsonEditors ?? false;
+    setShowJsonEditor(showAllJsonEditors);
+  });
+
+  const replacePropertiesValue = (properties: { [key: string]: unknown }) => {
+    untrack(() => {
+      replaceVertexProperties(
+        formStoreVertex()?.P.txnId,
+        props.metaVertex.id,
+        graph,
+        setGraph,
+        properties
+      );
+    });
+    saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
+  };
+
   return (
     <>
       <TreeItemContainer
@@ -205,6 +233,23 @@ export function LayoutTreeItem(
           toggleExpand={props.toggleExpand}
         />
         <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
+        <IconButton
+      css={[
+        ICON_BUTTON_STYLES.baseCss,
+        ICON_BUTTON_STYLES.defaultCss,
+        ICON_BUTTON_STYLES.spacingCss,
+        css`
+    background-color: transparent;
+    border: none;
+  `,]}
+          icon="tabler:json"
+          size={16}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowJsonEditor(!showJsonEditor());
+          }}
+          title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
+        />
         <Show when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}>
           <AttrConfigIcons
             metaVertex={props.metaVertex}
@@ -212,6 +257,24 @@ export function LayoutTreeItem(
           />
         </Show>
       </TreeItemContainer>
+      <Show when={showJsonEditor()}>
+        <As
+          as="div"
+          css={css`
+            margin-left: 24px;
+            margin-bottom: 8px;
+            width: calc(100% - 24px);
+            height: auto;
+            overflow: visible;
+          `}
+        >
+          <JsonEditorFieldComponent 
+            vertexId={props.metaVertex.id} 
+            hideLabel={true} 
+            replaceProperties={replacePropertiesValue} 
+          />
+        </As>
+      </Show>
 
       <Show
         when={

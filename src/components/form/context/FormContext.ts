@@ -31,8 +31,8 @@ export function getInitialFormStore(
     mounted: false,
     multiHighlight: [] as Array<Id | number>,
     openedViews: [] as Id[],
-
     selectedId: -1 as Id | number,
+    showAllJsonEditors: false,
     // check if at least one form in the layout tree when deleting a layout item, it display a dialog
     shouldContainAtLeastOneForm: false,
     txnId: generateNewTxnId(graph, setGraph),

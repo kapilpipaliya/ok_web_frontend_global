@@ -6,35 +6,45 @@ import type { Vertex } from "~/lib/graph/graph";
 import { VanilaJsonEditor } from "~/components/styled/VanilaJsonEditor";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 
-export function JsonEditorFieldComponent() {
-  const [graph, setGraph] = useGraph();
+export function JsonEditorFieldComponent(props: { 
+  vertexId?: string;
+  hideLabel?: boolean;
+  height?: string;
+  replaceProperties: (properties: { [key: string]: unknown }) => void;
+}) {
+  const [graph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [isJsonValid, setIsJsonValid] = createSignal(true);
 
-  const replacePropertyValue = (value: any) => {
-    if (formStoreVertex()?.P.selectedId !== -1) {
-      try {
-        const parsedValue = JSON.parse(value);
-        replaceVertexProperties(
-          formStoreVertex()?.P.txnId,
-          graph.vertexes[formStoreVertex()?.P.selectedId].id,
-          graph,
-          setGraph,
-          parsedValue,
-        );
-        setIsJsonValid(true);
-      } catch (error) {
-        console.error("Error parsing value:", error);
-        setIsJsonValid(false);
-      }
+  // Get vertex to edit - either specified by props or use selected vertex
+  const getVertexToEdit = () => {
+    if (props?.vertexId) {
+      return graph.vertexes[props.vertexId];
+    }
+    return formStoreVertex()?.P.selectedId !== -1 
+      ? graph.vertexes[formStoreVertex()?.P.selectedId] 
+      : undefined;
+  };
+
+  const replacePropertyValue = (value: string) => {
+    const vertex = getVertexToEdit();
+    if (!vertex) return;
+    
+    try {
+      const parsedValue = JSON.parse(value);
+      props.replaceProperties(parsedValue);
+      setIsJsonValid(true);
+    } catch (error) {
+      console.error("Error parsing value:", error);
+      setIsJsonValid(false);
     }
   };
+
   createEffect(
     on(
       () => formStoreVertex()?.P.selectedId,
@@ -54,10 +64,11 @@ export function JsonEditorFieldComponent() {
   margin-top: 5px;
 `}
     >
-      JSON
+      {!props?.hideLabel && "JSON"}
       <VanilaJsonEditor
-        json={graph.vertexes[formStoreVertex()?.P.selectedId]?.P ?? {}}
+        json={getVertexToEdit()?.P ?? {}}
         onChange={replacePropertyValue}
+        height={props.height}
       />
       {!isJsonValid() && (
         <As

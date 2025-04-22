@@ -167,6 +167,7 @@ export function SettingTabs() {
                 as="div"
                 css={css`
   ${layoutStore().selectedTab !== "layers" ? "display: none;" : ""}
+  height: 100%;
 `}
               >
                 <LayoutTree />

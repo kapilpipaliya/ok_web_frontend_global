@@ -1,5 +1,6 @@
 import type { JSX } from "solid-js";
 import type { SetStoreFunction, Store } from "solid-js/store";
+import { untrack } from "solid-js";
 
 import * as Acorn from "acorn";
 import AcornJSX from "acorn-jsx";
@@ -8,8 +9,8 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { componentDrop } from "~/features/page_designer/functions/drag_drop/core/componentDrop";
-import { setPropertyValueGlobal } from "~/features/page_designer/functions/layout/setPropertyValueGlobal";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
 import {
   canHaveChildren,
@@ -238,14 +239,15 @@ export default class JsxParser {
     }
     const parentVertex = graph.vertexes[rowId];
     if (isText) {
-      setPropertyValueGlobal(
-        graph,
-        setGraph,
-        this.props.txnId,
-        { P: { key: "as" } } as any,
-        graph.vertexes[rowId],
-        comp,
-      );
+      untrack(() => {
+        mergeVertexProperties(
+          this.props.txnId,
+          graph.vertexes[rowId].id,
+          graph,
+          setGraph,
+          { as: comp }
+        );
+      });
     }
 
     // sort to parent's children
@@ -318,41 +320,42 @@ export default class JsxParser {
       }
     }
     if (Object.keys(uiKitProps).length) {
-      setPropertyValueGlobal(
-        graph,
-        setGraph,
-        this.props.txnId,
-        { P: { key: "attr" } } as any,
-        graph.vertexes[rowId],
-        JSON.stringify(uiKitProps),
-      );
+      untrack(() => {
+        mergeVertexProperties(
+          this.props.txnId,
+          graph.vertexes[rowId].id,
+          graph,
+          setGraph,
+          { attr: JSON.stringify(uiKitProps) }
+        );
+      });
     }
 
     for (const key in nonUiKitProps) {
       if (key === "key") {
         continue;
       }
-      setPropertyValueGlobal(
-        graph,
-        setGraph,
-        this.props.txnId,
-        {
-          P: { key: key === "className" || key === "class" ? "class" : key },
-        } as any,
-        graph.vertexes[rowId],
-        nonUiKitProps[key],
-      );
+      untrack(() => {
+        mergeVertexProperties(
+          this.props.txnId,
+          graph.vertexes[rowId].id,
+          graph,
+          setGraph,
+          { [key === "className" || key === "class" ? "class" : key]: nonUiKitProps[key] }
+        );
+      });
     }
 
     if (comp === "svg") {
-      setPropertyValueGlobal(
-        graph,
-        setGraph,
-        this.props.txnId,
-        { P: { key: "icon" } } as any,
-        graph.vertexes[rowId],
-        `'${"ph:hamburger".replaceAll("'", "\\'")}'`,
-      );
+      untrack(() => {
+        mergeVertexProperties(
+          this.props.txnId,
+          graph.vertexes[rowId].id,
+          graph,
+          setGraph,
+          { icon: `'${"ph:hamburger".replaceAll("'", "\\'")}'` }
+        );
+      });
       return;
     }
 
@@ -386,14 +389,15 @@ export default class JsxParser {
           if (rowId === -1) {
             return;
           }
-          setPropertyValueGlobal(
-            graph,
-            setGraph,
-            this.props.txnId,
-            { P: { key: "text" } } as any,
-            graph.vertexes[rowId],
-            `'${value.replaceAll("'", "\\'")}'`,
-          );
+          untrack(() => {
+            mergeVertexProperties(
+              this.props.txnId,
+              graph.vertexes[rowId].id,
+              graph,
+              setGraph,
+              { text: `'${value.replaceAll("'", "\\'")}'` }
+            );
+          });
         }
         return value;
       });
@@ -432,14 +436,15 @@ export default class JsxParser {
 
     if (typeof children === "string") {
       if (children) {
-        setPropertyValueGlobal(
-          graph,
-          setGraph,
-          this.props.txnId,
-          { P: { key: "text" } } as any,
-          graph.vertexes[rowId],
-          `'${children.replaceAll("'", "\\'")}'`,
-        );
+        untrack(() => {
+          mergeVertexProperties(
+            this.props.txnId,
+            graph.vertexes[rowId].id,
+            graph,
+            setGraph,
+            { text: `'${children.replaceAll("'", "\\'")}'` }
+          );
+        });
       }
     } else {
     }

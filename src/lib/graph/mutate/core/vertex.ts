@@ -274,6 +274,7 @@ export function replaceVertexProperties(
       return { error };
     }
     const shouldClone = options?.cloneProperties ?? true;
+    const originalVertex = klona(graph.vertexes[actualVertexId]);
     setGraph(
       "vertexes",
       actualVertexId,
@@ -281,7 +282,6 @@ export function replaceVertexProperties(
       reconcile(shouldClone ? klona(properties) : properties),
     );
     if (txnId && !options?.skipTransactionDetail) {
-      const originalVertex = klona(graph.vertexes[actualVertexId]);
       const data = updateVertexIdsToNew(
         klona(graph.vertexes[actualVertexId]),
         graph,

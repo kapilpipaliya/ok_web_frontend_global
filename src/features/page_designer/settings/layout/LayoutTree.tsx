@@ -1,15 +1,21 @@
+import { Icon } from "@iconify-icon/solid";
 import { createSignal, For, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { useGraph } from "~/lib/graph/GraphContext";
+import { css } from "~/lib/styles";
+import { As } from "~/components/As";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
-import { useDesignerFormIdContext } from "../../context/LayoutContext";
+import {
+  useDesignerFormIdContext,
+} from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 
 export function LayoutTree() {
-  const [graph, _setGraph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
 
   const formStoreId = useDesignerFormIdContext();
@@ -47,18 +53,86 @@ export function LayoutTree() {
         : []
       : [];
   };
+  
+  const toggleAllJsonEditors = () => {
+    mergeVertexProperties<FormStoreObject>(
+      0,
+      formStoreId!,
+      graph,
+      setGraph,
+      {
+        showAllJsonEditors: !(formStoreVertex()?.P.showAllJsonEditors ?? false)
+      }
+    );
+  };
+
+  const jsonOpacity = () => (formStoreVertex()?.P.showAllJsonEditors ?? false) ? "1" : "0.6";
+  const jsonTooltip = () => (formStoreVertex()?.P.showAllJsonEditors ?? false) 
+    ? "Hide all JSON editors" 
+    : "Show all JSON editors";
 
   return (
-    <Show when={formStoreVertex()}>
-      <For each={rootVertexes()}>
-        {(item) => (
-          <LayoutTreeItem
-            collapsedKeys={collapsedKeys}
-            metaVertex={item}
-            toggleExpand={toggleExpand}
+    <As
+      as="div"
+      css={css`
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+      `}
+    >
+      <As
+        as="div"
+        css={css`
+          display: flex;
+          align-items: center;
+          padding: 8px 8px;
+          border-bottom: 1px solid #e5e5e5;
+          gap: 8px;
+          background-color: white;
+        `}
+      >
+        <As
+          as="span"
+          title={jsonTooltip()}
+          css={css`
+            cursor: pointer;
+            margin-left: 4px;
+            opacity: ${jsonOpacity()};
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          `}
+          onClick={toggleAllJsonEditors}
+        >
+          <Icon 
+            icon="tabler:json" 
+            height={18} 
+            width={18} 
           />
-        )}
-      </For>
-    </Show>
+        </As>
+      </As>
+      <As
+        as="div"
+        css={css`
+          padding: 0;
+          margin: 0;
+          overflow-y: auto;
+          flex: 1;
+        `}
+      >
+        <Show when={formStoreVertex()}>
+          <For each={rootVertexes()}>
+            {(vertex) => (
+              <LayoutTreeItem
+                collapsedKeys={collapsedKeys}
+                metaVertex={vertex}
+                toggleExpand={toggleExpand}
+              />
+            )}
+          </For>
+        </Show>
+      </As>
+    </As>
   );
 }

@@ -14,6 +14,7 @@ import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 interface VanilaJsonEditorProps {
   json: unknown;
   onChange: (updatedContent: string) => void;
+  height?: string;
 }
 
 // https://github.com/josdejong/svelte-jsoneditor/issues/473
@@ -182,7 +183,7 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
     <div
       ref={containerRef}
       style={{
-        height: "400px",
+        height: props.height,
         overflow: "auto",
         width: "100%",
       }}

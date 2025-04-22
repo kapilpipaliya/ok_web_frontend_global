@@ -1,13 +1,14 @@
 import { Show } from "solid-js";
+import { untrack } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { setPropertyValueGlobal } from "~/features/page_designer/functions/layout/setPropertyValueGlobal";
 import { FunctionEditor } from "~/features/page_designer/settings/properties/FunctionEditor";
 import { JsonEditorFieldComponent } from "~/features/page_designer/settings/properties/JsonEditorField";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
+import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
@@ -44,19 +45,37 @@ export function PropertiesBody() {
     );
   };
 
-  const setPropertyValue = (meta: Vertex, value: any) => {
+  const setPropertyValue = (meta: Vertex, value: unknown) => {
     if (formStoreVertex()?.P.selectedId !== -1) {
-      setPropertyValueGlobal(
-        graph,
-        setGraph,
-        formStoreVertex()?.P.txnId,
-        meta,
-        graph.vertexes[formStoreVertex()?.P.selectedId],
-        value,
-      );
+      untrack(() => {
+        mergeVertexProperties(
+          formStoreVertex()?.P.txnId,
+          graph.vertexes[formStoreVertex()?.P.selectedId].id,
+          graph,
+          setGraph,
+          {
+            [meta.P.key]: value,
+          }
+        );
+      });
       if (value === null) {
         clearFileSelection(meta);
       }
+      saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
+    }
+  };
+
+  const replacePropertiesValue = (properties: { [key: string]: unknown }) => {
+    if (formStoreVertex()?.P.selectedId !== -1) {
+      untrack(() => {
+        replaceVertexProperties(
+          formStoreVertex()?.P.txnId,
+          graph.vertexes[formStoreVertex()?.P.selectedId].id,
+          graph,
+          setGraph,
+          properties
+        );
+      });
       saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
     }
   };
@@ -115,7 +134,10 @@ export function PropertiesBody() {
         selectedLayout={graph.vertexes[formStoreVertex()?.P.selectedId]}
         txnId={formStoreVertex()?.P.txnId}
       />
-      <JsonEditorFieldComponent />
+      <JsonEditorFieldComponent 
+        height="400px" 
+        replaceProperties={replacePropertiesValue}
+      />
     </Show>
   );
 }
