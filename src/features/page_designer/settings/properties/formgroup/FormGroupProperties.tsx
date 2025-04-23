@@ -91,6 +91,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
+  const isHtmlIcon = () => selectedAttr()?.P.componentName === "Html" && selectedAttr()?.P.as === "icon";
   const propAttributes = createMemo(
     () =>
       clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph) ??
@@ -112,7 +113,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         />
       </div>
       <For
-        each={moveClassToLast(
+        each={getMetaVertexes(
           propAttributes(),
           vertexIds,
           graph,
@@ -132,7 +133,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
       <Show
         when={
           selectedAttr()?.P.componentName === "Html" ||
-          selectedAttr()?.P.componentName === "Icon"
+          isHtmlIcon()
         }
       >
         <FunctionEditor
@@ -333,7 +334,7 @@ function createVertices(
   }
 }
 
-function moveClassToLast(
+function getMetaVertexes(
   vertices: Vertex[],
   vertexIds: ReturnType<typeof createVertexIds>,
   graph: GraphInterface,
@@ -350,9 +351,10 @@ function moveClassToLast(
     (isForm && selectedAttr()?.P.as === "input") ||
     selectedAttr()?.P.as === "textarea" ||
     ["CheckBox", "MultiSelect", "Select", "TextInput"].includes(componentName);
+  const isHtmlIcon = componentName === "Html" && selectedAttr()?.P.as === "icon";
 
   const nonCssVertices = otherVertices.filter(
-    (vertex) => !vertex.P.key.endsWith("Class"),
+    (vertex) => !vertex.P.key.endsWith("Css"),
   );
 
   const basicVertices = [
@@ -372,7 +374,7 @@ function moveClassToLast(
     graph.vertexes[vertexIds.hide],
     graph.vertexes[vertexIds.disabled],
     ...(selectedAttr()?.P.as === "img" ? [graph.vertexes[vertexIds.src]] : []),
-    ...(componentName === "Icon"
+    ...(isHtmlIcon
       ? [
           graph.vertexes[vertexIds.icon],
           graph.vertexes[vertexIds.width],
@@ -432,7 +434,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
           }
         >
           {/*Dont use expression builder for now*/}
-
+          <div>{/* Placeholder for future implementation */}</div>
           {/* <SelectRuleField
             meta={props.meta}
             selectedLayout={props.selectedLayout}

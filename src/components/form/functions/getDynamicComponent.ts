@@ -4,7 +4,6 @@ import { Transition, TransitionGroup } from "solid-transition-group";
 import { ComponentChildrenField } from "~/components/fields/component/ComponentChildrenField";
 import { ComponentField } from "~/components/fields/component/ComponentField";
 import { DataField } from "~/components/fields/data/DataField";
-import { IconField } from "~/components/fields/IconField";
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 // import { RadioGroupField } from "~/components/fields/RadioGroupField";
 import { SelectField } from "~/components/fields/select/SelectField";
@@ -18,7 +17,7 @@ import { TextAreaField } from "~/features/css_editor/components/fields/TextArea"
 // import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
 import { HtmlField } from "../../fields/HtmlField";
-import { Head, MetaLink, MetaMeta, MetaTitle } from "../../fields/MetaTitle";
+import { Head } from "../../fields/MetaTitle";
 import { FileUploader } from "../../styled/FileUploader";
 // const OtpField = clientOnly(() => import("~/components/ssr/otpfield/OtpField"));
 // OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
@@ -45,7 +44,6 @@ export const componentsMap: Record<string, any> = {
   FileUploader: FileUploader,
   Form: FormField,
   Html: HtmlField,
-  Icon: IconField,
   // Link: MetaLink,
   // Meta: MetaMeta,
   Head: Head,

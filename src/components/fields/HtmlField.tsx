@@ -1,6 +1,7 @@
 import { type JSX, Match, Show, splitProps, Switch } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { untrack } from "solid-js";
+import { Icon } from "@iconify-icon/solid";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -136,6 +137,10 @@ export function HtmlField(
             graph,
           )}
         />
+      </Match>
+      <Match when={local.as === "icon"}>
+        {/* @ts-expect-error - icon wiil be in others */}
+        <Icon class={`${local.class || ""}`} noobserver {...others} />
       </Match>
       <Match when={true}>
         <Dynamic

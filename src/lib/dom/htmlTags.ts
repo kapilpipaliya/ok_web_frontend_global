@@ -87,6 +87,11 @@ export const inlineTextElements = [
   "wbr",
 ];
 
+// Custom elements
+export const customElements = [
+  "icon"
+];
+
 // Image and multimedia elements
 export const multimediaElements = [
   "area",
@@ -261,6 +266,7 @@ export const htmlTags = [
   ...scriptingElements,
   ...editingElements,
   ...svgElements,
+  ...customElements,
 ];
 
 // HTML tags tree structure
@@ -366,6 +372,15 @@ export const htmlTagsTree = {
       })),
       id: "editing-elements",
       label: "Editing Elements",
+    },
+    {
+      children: customElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
+      id: "custom-elements",
+      label: "Custom Elements",
     },
     {
       children: [
