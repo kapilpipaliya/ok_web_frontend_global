@@ -93,7 +93,7 @@ export async function handleDropAtPosition(
   })?.[0];
   if (
     position !== "center" &&
-    fromParentVertex?.vertex?.id === toParentVertex?.id
+    fromParentVertex?.id === toParentVertex?.id
   ) {
     sortChildren(
       graph,
@@ -111,7 +111,7 @@ export async function handleDropAtPosition(
       setGraph,
       txnId,
       fromVertex,
-      fromParentVertex.vertex,
+      fromParentVertex,
       toParentVertex!,
       position,
       toVertex,
@@ -119,4 +119,5 @@ export async function handleDropAtPosition(
     saveUndoPoint(txnId, graph, setGraph);
     return;
   }
+  // we should clean draggedVertexIds on drop finished
 }

@@ -32,11 +32,11 @@ export function validateDragOver(
     if (!parentResult) {
       break;
     }
-    if (parentResult.vertex?.id === fromVertex.id) {
+    if (parentResult.id === fromVertex.id) {
       // Don't allow drag and drop
       return false;
     }
-    parentVertex = parentResult.vertex!;
+    parentVertex = parentResult;
   }
 
   if (position === "center") {

@@ -63,7 +63,7 @@ export function PageItem(
 
   const hoverStyle = css`
   background-color: #F2EDED;
-  box-shadow: 4px 4px 4px;
+  box-shadow: 1px 1px 1px;
   cursor: move;
 `;
 

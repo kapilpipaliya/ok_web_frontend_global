@@ -74,8 +74,9 @@ const SectionHeader = (props: SectionHeaderProps) => (
       as="div"
       css={[
         css`
-  padding: 12px;
+  padding: 6px;
   font-weight: 500;
+  font-size: 0.925rem;
 `,
       ]}
     >

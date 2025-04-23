@@ -22,7 +22,7 @@ export function handleDragStart(
     setGraph,
     {
       draggedVertexIds: [
-        ...(layoutStoreVertex?.P.draggedVertexIds || []),
+        // ...(layoutStoreVertex?.P.draggedVertexIds || []),
         layoutVertex.id,
       ],
     },
