@@ -28,32 +28,33 @@ type HeadProps = {
   props: {
     [key: string]: string | number | boolean | undefined;
   };
-  children?: JSX.Element;
+  text?: string;
 };
 
 export function Head(props: HeadProps) {
-  const [local, others] = splitProps(props, ["type", "children"]);
+  const [local, others] = splitProps(props, ["type", "text"]);
+  // instead of children, used text in style and title
   
   return (
     <>
       <Show when={local.type === "base"}>
-        <Base {...others.props} />
+        <Base {...others} />
       </Show>
       
       <Show when={local.type === "link"}>
-        <Link {...others.props} />
+        <Link {...others} />
       </Show>
       
       <Show when={local.type === "meta"}>
-        <Meta {...others.props} />
+        <Meta {...others} />
       </Show>
       
       <Show when={local.type === "style"}>
-        <Style>{local.children}</Style>
+        <Style>{local.text}</Style>
       </Show>
       
       <Show when={local.type === "title"}>
-        <Title>{local.children}</Title>
+        <Title>{local.text}</Title>
       </Show>
     </>
   );
