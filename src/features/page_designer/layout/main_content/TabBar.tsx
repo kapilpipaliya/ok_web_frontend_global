@@ -126,6 +126,14 @@ export function TabBar(props: { mainPanel: Id }) {
     >
       <IconButton
         icon="ph:plus-circle"
+        css={css`
+          background-color: transparent;
+          border: none;
+          color: \${args.theme.var.color.base_80};
+          &:hover {
+            color: \${args.theme.var.color.primary_200};
+          }
+        `}
         onClick={addMainPanel}
         size={22}
         title="Add New Panel"
@@ -144,7 +152,7 @@ export function TabBar(props: { mainPanel: Id }) {
   display: flex;
   gap: 5px;
   padding: 5px;
-  ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background-color: #e0e0e0;" : ""}
+  ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background-color: ${args.theme.var.color.primary_35};" : "background-color: ${args.theme.var.color.base_15};"}
   ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "border-bottom: 2px solid red;" : ""}
   cursor: move;
 `}
@@ -164,10 +172,24 @@ export function TabBar(props: { mainPanel: Id }) {
               as="span"
               css={css`
   user-select: none;
+  white-space: nowrap;
 `}
             >
               {getTabLabel(openedFormId, graph)}
-              {isUnsaved(graph.vertexes[openedFormId].P.formId) && "*"}
+              {isUnsaved(graph.vertexes[openedFormId].P.formId) && (
+                <As
+                  as="span"
+                  css={css`
+                    color:\${args.theme.var.color.error};
+                    font-weight: bold;
+                    margin-left: 3px;
+                    display: inline-block;
+                  `}
+                  title="Unsaved changes"
+                >
+                  *
+                </As>
+              )}
             </As>
             <IconButton
               icon="ph:plus"
@@ -230,6 +252,12 @@ export function TabBar(props: { mainPanel: Id }) {
         <IconButton
           css={css`
   margin-left: auto;
+  background-color: transparent;
+  border: none;
+  color: \${args.theme.var.color.base_80};
+  &:hover {
+    color: \${args.theme.var.color.error_200};
+  }
 `}
           icon="ph:x-circle"
           onClick={() => {
