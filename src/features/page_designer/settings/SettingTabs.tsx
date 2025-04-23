@@ -1,4 +1,4 @@
-import { createMemo, For, type JSX, Show } from "solid-js";
+import { createMemo, For, Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -27,7 +27,6 @@ import { Variants } from "./variants/Variants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type {
-  CssType,
   FunctionArgumentType,
 } from "~/components/form/type/FieldSchemaType";
 import { Divider } from "~/components/styled/Divider";
@@ -43,21 +42,7 @@ export function SettingTabs() {
     graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const tabs = createMemo(() => {
-    const baseTabs = ["settings"];
-    if (!formStoreVertex()) {
-      return baseTabs;
-    }
-    const formType = graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0];
-    if (formType === "Form") {
-      baseTabs.push("Keys");
-    }
-    if (formType === "Component") {
-      baseTabs.push("Variants");
-    }
-    if (formType === "Form" || formType === "Page") {
-      baseTabs.push("Permissions");
-    }
-    return baseTabs;
+    return ["settings"];
   });
 
   const TabList = () => (
@@ -66,7 +51,7 @@ export function SettingTabs() {
         {(data) => (
           <TabButton
             data={data}
-            isSelected={layoutStore().selectedTab === data}
+            isSelected={true}
             onClick={() =>
               mergeVertexProperties<PageLayoutObject>(
                 0,
@@ -84,20 +69,6 @@ export function SettingTabs() {
 
   const Tabs = () => (
     <>
-      {/* <Icon
-        css={css`
-  background-color: #1e293b;
-  color: #c1c1c1;
-  cursor: pointer;
-  position: absolute;
-  right: 0px;
-  top: 0px;
-`}
-        height={30}
-        icon={"ph:x-bold"}
-        onClick={() => mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, { isRightOpen: false })}
-        width={30}
-      /> */}
       <TabsContainer>
         <TabList />
       </TabsContainer>
@@ -114,7 +85,7 @@ export function SettingTabs() {
   height: 100%;
 `}
     >
-      <As
+      {/* <As
         as="div"
         css={(args: FunctionArgumentType) => css`
   background-color: ${args.theme.var.color.base_10};
@@ -122,7 +93,7 @@ export function SettingTabs() {
 `}
       >
         <Tabs />
-      </As>
+      </As> */}
       <As
         as="div"
         css={css`
@@ -134,7 +105,6 @@ export function SettingTabs() {
           css={css`
   padding: 5px;
   height: 100%;
-  ${layoutStore().selectedTab !== "settings" ? "display: none;" : ""}
 `}
         >
           <FormConfig />
@@ -143,43 +113,48 @@ export function SettingTabs() {
             <DesignerFormIdContext.Provider value={formStoreVertex().id}>
               <FormContext.Provider value={formStoreVertex().id}>
                 <Divider/>
-                <LayoutTree />
-              </FormContext.Provider>
-            </DesignerFormIdContext.Provider>
-          </Show>
-        </As>
 
-        <Show keyed when={formStoreVertex()?.id}>
-          <DesignerFormIdContext.Provider value={formStoreVertex().id}>
-            <FormContext.Provider value={formStoreVertex().id}>
-              {/* Keep Display:none to keep expanded state */}
-              <Show
-                when={
-                  graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] ===
-                  "Form"
-                }
-              >
-                <Show when={layoutStore().selectedTab === "Keys"}>
-                  {/* <PrimaryKey /> */}
+
+                <Show
+                  when={
+                    graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] ===
+                    "Form"
+                  }
+                >
+                  <Divider />
                   <NameKey />
-                  <Divider
-                  />
+                  <Divider />
                   <HeaderWithDescription
                     description="Add unique constrains to your form to ensure that no duplicate data is submitted."
                     title="Unique Constrains"
                   />
                   <UniqueConstrains />
                 </Show>
-              </Show>
-              <Show when={layoutStore().selectedTab === "Permission"}>
-                <Permission />
-              </Show>
-              <Show when={layoutStore().selectedTab === "Variants"}>
-                <Variants />
-              </Show>
-            </FormContext.Provider>
-          </DesignerFormIdContext.Provider>
-        </Show>
+
+                <Show
+                  when={
+                    graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] === "Form" ||
+                    graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] === "Page"
+                  }
+                >
+                  <Divider />
+                  <Permission />
+                </Show>
+
+                <Show
+                  when={
+                    graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] === "Component"
+                  }
+                >
+                  <Divider />
+                  Variants
+                  <Variants />
+                </Show>
+                <LayoutTree />
+              </FormContext.Provider>
+            </DesignerFormIdContext.Provider>
+          </Show>
+        </As>
       </As>
     </As>
   );

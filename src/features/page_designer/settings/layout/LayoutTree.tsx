@@ -93,7 +93,6 @@ export function LayoutTree() {
           position: sticky;
           top: 0;
           background-color: white;
-          z-index: 10;
         `}
       >
         <As
