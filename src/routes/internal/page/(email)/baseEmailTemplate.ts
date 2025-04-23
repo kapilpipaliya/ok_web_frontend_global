@@ -37,6 +37,7 @@ export function getLogoSchema(
     ],
     css: containerCss,
     componentName: "Html",
+    pos: 1,
   } as FieldAttribute;
 }
 
@@ -52,7 +53,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             as: "",
             attributes: content,
             componentName: "Html",
-            pos: 1,
+            pos: 2,
           },
           {
             as: "div",
@@ -73,7 +74,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
   text-align: center;
 `,
             componentName: "Html",
-            pos: 2,
+            pos: 3,
           },
         ],
         css: returnCSS`

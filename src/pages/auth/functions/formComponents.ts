@@ -25,6 +25,7 @@ export function createFormHeader(title: string) {
       as: "h1",
       css: SETTINGS_CONSTANTS.TITLE_CSS,
       componentName: "Html",
+      pos: 2,
       text: title,
     },
   ];
