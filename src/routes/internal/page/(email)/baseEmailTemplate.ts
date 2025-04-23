@@ -1,11 +1,11 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { API } from "~/lib/api/endpoints";
-import { css } from "~/lib/styles";
+import { returnCSS } from "~/lib/styles";
 
 export function getLogoSchema(
   containerCss = "",
-  imageCss = css`height:80px; margin-bottom:24px;`,
-  borderCss = css`color: \${args.theme.var.color.base_80}; margin-top:24px; margin-bottom:24px;`,
+  imageCss = returnCSS`height:80px; margin-bottom:24px;`,
+  borderCss = returnCSS`color: \${args.theme.var.color.base_80}; margin-top:24px; margin-bottom:24px;`,
 ) {
   return {
     as: "div",
@@ -59,7 +59,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             attributes: [
               {
                 as: "p",
-                css: css`
+                css: returnCSS`
   color: grey;
   font-size: 12px;
 `,
@@ -68,7 +68,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
                 text: "© 2024 Your Company. All rights reserved.",
               },
             ],
-            css: css`
+            css: returnCSS`
   margin-top: 32px;
   text-align: center;
 `,
@@ -76,7 +76,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             pos: 2,
           },
         ],
-        css: css`
+        css: returnCSS`
   max-width: 600px;
   margin: auto;
   padding: 32px;
@@ -86,7 +86,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
         pos: 1,
       },
     ],
-    css: css`
+    css: returnCSS`
   min-height: 100vh;
   background-color: \${args.theme.var.color.base_4};
   padding: 32px;

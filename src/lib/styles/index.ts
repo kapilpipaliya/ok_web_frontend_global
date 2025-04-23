@@ -20,6 +20,19 @@ export const css = (
   return rawCss;
 };
 
+// Helper function that returns a template string with CSS
+export const returnCSS = (strings: TemplateStringsArray, ...values: unknown[]): string => {
+  const rawCss = String.raw({ raw: strings }, ...values);
+  
+  // If CSS doesn't include ._id wrapper, add it
+  if (!rawCss.includes("._id")) {
+    return `return \`._id {\n  ${rawCss.replace(/\n/g, "\n  ")}\n}\`;`;
+  }
+  
+  return `return \`${rawCss}\`;`;
+};
+
+
 // ======================================
 // = THEME SYSTEM TYPE DEFINITIONS
 // ======================================

@@ -1,10 +1,10 @@
-import { css } from "~/lib/styles";
+import { returnCSS } from "~/lib/styles";
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 const content = [
   {
     as: "h1",
-    css: css`
+    css: returnCSS`
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
@@ -15,7 +15,7 @@ const content = [
   },
   {
     as: "p",
-    css: css`
+    css: returnCSS`
       margin-bottom: 16px;
     `,
     componentName: "Html",
@@ -27,7 +27,7 @@ const content = [
     attributes: [
       {
         as: "p",
-        css: css`
+        css: returnCSS`
           font-size: 32px;
           font-weight: bold;
           letter-spacing: 4px;
@@ -39,7 +39,7 @@ const content = [
           }`,
       },
     ],
-    css: css`
+    css: returnCSS`
       background-color: \${args.theme.var.color.base_10};
       border-radius: 4px;
       margin-bottom: 24px;
@@ -51,7 +51,7 @@ const content = [
   },
   {
     as: "p",
-    css: css`
+    css: returnCSS`
       color: \${args.theme.var.color.base};
     `,
     componentName: "Html",
