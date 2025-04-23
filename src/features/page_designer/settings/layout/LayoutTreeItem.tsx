@@ -37,7 +37,6 @@ import { TreeItemContent } from "./TreeItemContent";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { JsonEditorFieldComponent } from "../properties/JsonEditorField";
-import { Icon } from "@iconify-icon/solid";
 import { IconButton } from "~/components/styled/IconButton";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
@@ -215,6 +214,7 @@ export function LayoutTreeItem(
         isDragOver={isActiveTargetItem()}
         isHovered={isSelectedHoverId(props.metaVertex.id)}
         isSelected={isSelectedLayoutId(props.metaVertex.id)}
+        itemId={props.metaVertex.id}
         onClick={handleClick}
         onDragEnter={(e) => {
           startTime = Date.now();
@@ -254,6 +254,7 @@ export function LayoutTreeItem(
         css`
     background-color: transparent;
     border: none;
+    ${showJsonEditor() ? 'color: ${args.theme.var.color.primary};' : ''}
   `,]}
           icon="tabler:json"
           size={16}

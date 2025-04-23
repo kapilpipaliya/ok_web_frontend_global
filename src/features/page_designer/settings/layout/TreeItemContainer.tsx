@@ -4,15 +4,27 @@ import { As } from "~/components/As";
 import type { CssType } from "~/components/form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
-export interface TreeItemContainerProps
-  extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface TreeItemContainerProps {
   children: JSX.Element;
   class?: string;
   hasChildren: boolean;
   isDragOver?: boolean;
   isHovered?: boolean;
   isSelected?: boolean;
+  itemId?: string | number;
   css?: CssType;
+  // Include standard HTMLDivElement attributes
+  onClick?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
+  onDragEnter?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
+  onDragLeave?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
+  onDragOver?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
+  onDragStart?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
+  onDrop?: JSX.EventHandlerUnion<HTMLDivElement, DragEvent>;
+  onMouseEnter?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
+  onmouseleave?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
+  ref?: (element: HTMLDivElement) => void;
+  draggable?: boolean | "true" | "false";
+  tabIndex?: number;
 }
 
 export function TreeItemContainer(props: TreeItemContainerProps) {
@@ -22,6 +34,7 @@ export function TreeItemContainer(props: TreeItemContainerProps) {
     "isDragOver",
     "isHovered",
     "isSelected",
+    "itemId",
     "css",
   ]);
 
@@ -45,6 +58,8 @@ export function TreeItemContainer(props: TreeItemContainerProps) {
     <As
       as="div"
       css={[containerStyles(), ...ensureArray(props.css)]}
+      data-item-id={local.itemId ? String(local.itemId) : undefined}
+      tabIndex={local.isSelected ? 0 : -1}
       {...others}
     />
   );

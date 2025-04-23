@@ -134,10 +134,10 @@ export function PropertiesBody() {
         selectedLayout={graph.vertexes[formStoreVertex()?.P.selectedId]}
         txnId={formStoreVertex()?.P.txnId}
       />
-      <JsonEditorFieldComponent 
-        height="400px" 
+      {/* <JsonEditorFieldComponent 
+        // height="400px" 
         replaceProperties={replacePropertiesValue}
-      />
+      /> */}
     </Show>
   );
 }
