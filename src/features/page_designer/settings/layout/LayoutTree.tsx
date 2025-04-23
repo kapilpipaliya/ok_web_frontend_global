@@ -13,6 +13,8 @@ import {
   useDesignerFormIdContext,
 } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
+import { IconButton } from "~/components/styled/IconButton";
+import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 export function LayoutTree() {
   const [graph, setGraph] = useGraph();
@@ -66,7 +68,6 @@ export function LayoutTree() {
     );
   };
 
-  const jsonOpacity = () => (formStoreVertex()?.P.showAllJsonEditors ?? false) ? "1" : "0.6";
   const jsonTooltip = () => (formStoreVertex()?.P.showAllJsonEditors ?? false) 
     ? "Hide all JSON editors" 
     : "Show all JSON editors";
@@ -89,26 +90,36 @@ export function LayoutTree() {
           padding: 8px 8px;
           border-bottom: 1px solid #e5e5e5;
           gap: 8px;
+          position: sticky;
+          top: 0;
           background-color: white;
+          z-index: 10;
         `}
       >
         <As
-          as="span"
+          as="div"
           title={jsonTooltip()}
           css={css`
-            cursor: pointer;
             margin-left: 4px;
-            opacity: ${jsonOpacity()};
             display: flex;
             align-items: center;
             gap: 4px;
           `}
           onClick={toggleAllJsonEditors}
         >
-          <Icon 
+          Layers
+          <IconButton
+            css={[
+              ICON_BUTTON_STYLES.baseCss,
+              ICON_BUTTON_STYLES.defaultCss,
+              ICON_BUTTON_STYLES.spacingCss,
+              css`
+              ${formStoreVertex()?.P.showAllJsonEditors ? "color: ${args.theme.var.color.primary};" : ""}
+              background-color: transparent;
+              border: none;
+        `,]}
             icon="tabler:json" 
-            height={18} 
-            width={18} 
+            size={18} 
           />
         </As>
       </As>
@@ -119,6 +130,7 @@ export function LayoutTree() {
           margin: 0;
           overflow-y: auto;
           flex: 1;
+          scroll-behavior: smooth;
         `}
       >
         <Show when={formStoreVertex()}>

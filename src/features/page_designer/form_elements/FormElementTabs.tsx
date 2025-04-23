@@ -42,7 +42,7 @@ export const UlContainer = (props: ParentProps) => (
       STYLES.overflowCss,
       css`
   display: flex;
-  justify-content: space-around;
+  gap: 5px;
   margin-bottom: -1px;
   flex-wrap: nowrap;
   list-style: none;

@@ -20,7 +20,7 @@ export const INITIAL_WIDTHS = {
   left: 190,
   right0: 305,
   right1: 305,
-  right2: 300,
+  right2: 310,
 } as const;
 
 export function getInitialDesignerLayoutStore() {

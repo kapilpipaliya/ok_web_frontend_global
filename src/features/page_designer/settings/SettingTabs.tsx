@@ -30,27 +30,7 @@ import type {
   CssType,
   FunctionArgumentType,
 } from "~/components/form/type/FieldSchemaType";
-
-interface DividerProps {
-  borderColor?: string;
-  borderTopWidth?: string;
-  css?: CssType;
-  width?: string;
-}
-
-export function Divider(props: Readonly<DividerProps>): JSX.Element {
-  return (
-    <As
-      as="div"
-      css={(args: FunctionArgumentType) => css`
-        border-color:${props.borderColor || args.theme.var.color.base};
-        border-top-width:${props.borderTopWidth || "1px"};
-        width:${props.width || "100%"};
-      `}
-      {...props}
-    />
-  );
-}
+import { Divider } from "~/components/styled/Divider";
 
 export function SettingTabs() {
   const layoutStoreId = useDesignerLayoutStore();
@@ -63,7 +43,7 @@ export function SettingTabs() {
     graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
 
   const tabs = createMemo(() => {
-    const baseTabs = ["settings", "layers"];
+    const baseTabs = ["settings"];
     if (!formStoreVertex()) {
       return baseTabs;
     }
@@ -75,7 +55,7 @@ export function SettingTabs() {
       baseTabs.push("Variants");
     }
     if (formType === "Form" || formType === "Page") {
-      baseTabs.push("Permission");
+      baseTabs.push("Permissions");
     }
     return baseTabs;
   });
@@ -153,26 +133,26 @@ export function SettingTabs() {
           as="div"
           css={css`
   padding: 5px;
+  height: 100%;
   ${layoutStore().selectedTab !== "settings" ? "display: none;" : ""}
 `}
         >
           <FormConfig />
+          
+          <Show keyed when={formStoreVertex()?.id}>
+            <DesignerFormIdContext.Provider value={formStoreVertex().id}>
+              <FormContext.Provider value={formStoreVertex().id}>
+                <Divider/>
+                <LayoutTree />
+              </FormContext.Provider>
+            </DesignerFormIdContext.Provider>
+          </Show>
         </As>
 
         <Show keyed when={formStoreVertex()?.id}>
           <DesignerFormIdContext.Provider value={formStoreVertex().id}>
             <FormContext.Provider value={formStoreVertex().id}>
               {/* Keep Display:none to keep expanded state */}
-              <As
-                as="div"
-                css={css`
-  ${layoutStore().selectedTab !== "layers" ? "display: none;" : ""}
-  height: 100%;
-`}
-              >
-                <LayoutTree />
-              </As>
-
               <Show
                 when={
                   graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] ===
@@ -183,9 +163,6 @@ export function SettingTabs() {
                   {/* <PrimaryKey /> */}
                   <NameKey />
                   <Divider
-                    css={css`
-  margin-top: 10px;
-`}
                   />
                   <HeaderWithDescription
                     description="Add unique constrains to your form to ensure that no duplicate data is submitted."

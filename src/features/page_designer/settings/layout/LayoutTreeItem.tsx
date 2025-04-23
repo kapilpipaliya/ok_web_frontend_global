@@ -72,6 +72,19 @@ export function LayoutTreeItem(
   );
   const [parentRef, setParentRef] = createSignal<HTMLElement>();
 
+  // Add auto-scroll effect when item is selected
+  createEffect(() => {
+    if (isSelectedLayoutId(props.metaVertex.id) && parentRef()) {
+      // Use a small timeout to ensure the DOM is fully updated
+      setTimeout(() => {
+        parentRef()?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }, 50);
+    }
+  });
+
   let startTime = 0;
 
   // debounce is giving error, node not found
