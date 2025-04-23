@@ -20,7 +20,7 @@ import { As } from "~/components/As";
 export function HighlightSetValueContent(
   props: Readonly<{
     meta: Vertex;
-    onChange: (meta: Vertex, data: any) => void;
+    onChange: (meta: Vertex, data: unknown) => void;
     selectedLayout: Vertex;
     txnId: number;
   }>,
@@ -92,7 +92,18 @@ export function HighlightSetValueContent(
           <Match when={componentExample().length > 0}>
             <PageAttrRender
               data={props.selectedLayout}
+              isNoPermissionCheck={true}
               metaVertex={componentExample()[0]}
+            />
+          </Match>
+          <Match when={props.meta.P.key === "type" && selectedAttr()?.P.componentName === "Head"}>
+            <DynamicComponent
+              data={props.selectedLayout}
+              isNoPermissionCheck={true}
+              isRealTime={false}
+              meta={props.meta}
+              onChange={(data) => props.onChange(props.meta, data)}
+              txnId={props.txnId}
             />
           </Match>
           <Match

@@ -5,10 +5,9 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { FunctionEditor } from "~/features/page_designer/settings/properties/FunctionEditor";
-import { JsonEditorFieldComponent } from "~/features/page_designer/settings/properties/JsonEditorField";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
@@ -65,21 +64,6 @@ export function PropertiesBody() {
     }
   };
 
-  const replacePropertiesValue = (properties: { [key: string]: unknown }) => {
-    if (formStoreVertex()?.P.selectedId !== -1) {
-      untrack(() => {
-        replaceVertexProperties(
-          formStoreVertex()?.P.txnId,
-          graph.vertexes[formStoreVertex()?.P.selectedId].id,
-          graph,
-          setGraph,
-          properties
-        );
-      });
-      saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
-    }
-  };
-
   const selectedComponentProperties = () => {
     const compVertex = selectedComp();
     if (!compVertex) {
@@ -128,6 +112,7 @@ export function PropertiesBody() {
           setPropertyValue={setPropertyValue}
         />
       </Show>
+
       <FormGroupProperties
         metaAttributes={selectedComponentProperties() ?? []}
         onChange={setPropertyValue}

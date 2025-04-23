@@ -30,7 +30,6 @@ import {
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
-import { FormMetaData } from "~/lib/meta/formMetaData";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
@@ -67,6 +66,7 @@ export function createVertexIds() {
     defaultValue: `defaultValueVertex${createUniqueId()}`,
     disabled: `disabledVertex${createUniqueId()}`,
     errorClass: `errorClassVertex${createUniqueId()}`,
+    headType: `headTypeVertex${createUniqueId()}`,
     height: `heightVertex${createUniqueId()}`,
     hide: `hiddenVertex${createUniqueId()}`,
     icon: `iconVertex${createUniqueId()}`,
@@ -162,12 +162,6 @@ function clonePropAttributes(
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   return metaAttributes?.map((vertex) => {
-    const form = FormMetaData.Comp;
-    const _propAttribute = form.attributes.find((attr) => attr.key === "Prop")!;
-    // now we simplified this so user cant enter default value
-    // const valueAttribute = propAttribute.attributes!.find(
-    //   (attr) => attr.key === "value",
-    // )!;
     return cloneVertexWithEdges(
       txnId,
       vertex,
@@ -207,6 +201,22 @@ function createVertices(
         key: "as",
         // options: htmlTags.map((element) => ({ id: element, label: element })),
         options: htmlTagsTree.children,
+        saveValue: true,
+      },
+    },
+    {
+      id: vertexIds.headType,
+      P: {
+        componentName: "Select",
+        displayName: "Type",
+        key: "type",
+        options: [
+          { id: "base", label: "base" },
+          { id: "link", label: "link" },
+          { id: "style", label: "style" },
+          { id: "title", label: "title" },
+          { id: "meta", label: "meta" },
+        ],
         saveValue: true,
       },
     },
@@ -323,17 +333,6 @@ function createVertices(
   }
 }
 
-function modifyMetaVertexExpr(meta: Vertex) {
-  return {
-    ...meta,
-    P: {
-      ...meta.P,
-      displayName: `${meta.P.displayName ?? meta.P.key} Expr`,
-      key: `${meta.P.key}`,
-    },
-  };
-}
-
 function moveClassToLast(
   vertices: Vertex[],
   vertexIds: ReturnType<typeof createVertexIds>,
@@ -356,8 +355,9 @@ function moveClassToLast(
     (vertex) => !vertex.P.key.endsWith("Class"),
   );
 
-  return [
+  const basicVertices = [
     graph.vertexes[vertexIds.key],
+    ...(componentName === "Head" ? [graph.vertexes[vertexIds.headType]] : []),
     graph.vertexes[vertexIds.attrLabel],
     ...(isForm && componentName === "Form"
       ? [graph.vertexes[vertexIds.thankYouPage]]
@@ -367,7 +367,7 @@ function moveClassToLast(
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
     // always displayed properties
     graph.vertexes[vertexIds.calculatedValue],
-    graph.vertexes[vertexIds.as],
+    ...(componentName === "Html" ? [graph.vertexes[vertexIds.as]] : []),
     graph.vertexes[vertexIds.required],
     graph.vertexes[vertexIds.hide],
     graph.vertexes[vertexIds.disabled],
@@ -382,6 +382,8 @@ function moveClassToLast(
     ...(componentName === "Html" ? [graph.vertexes[vertexIds.text]] : []),
     ...nonCssVertices,
   ];
+
+  return basicVertices;
 }
 
 function PropertyField(props: Readonly<PropertyFieldProps>) {
@@ -401,6 +403,7 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
       metaProps,
     );
   }
+
   return (
     <div>
       <Switch>
