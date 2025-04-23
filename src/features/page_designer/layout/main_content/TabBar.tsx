@@ -138,15 +138,25 @@ export function TabBar(props: { mainPanel: Id }) {
         size={22}
         title="Add New Panel"
       />
-      <For
-        each={layoutStore().openedFormIds.filter(
-          (id) => graph.vertexes[id].P.mainPanel === props.mainPanel,
-        )}
+      <As
+        as="div"
+        css={css`
+          display: flex;
+          gap: 5px;
+          overflow-x: auto;
+          flex-grow: 1;
+          scrollbar-width: thin;
+        `}
       >
-        {(openedFormId, index) => (
-          <As
-            as="div"
-            css={css`
+        <For
+          each={layoutStore().openedFormIds.filter(
+            (id) => graph.vertexes[id].P.mainPanel === props.mainPanel,
+          )}
+        >
+          {(openedFormId, index) => (
+            <As
+              as="div"
+              css={css`
   align-items: center;
   border-radius: 4px;
   display: flex;
@@ -155,45 +165,46 @@ export function TabBar(props: { mainPanel: Id }) {
   ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background-color: ${args.theme.var.color.primary_35};" : "background-color: ${args.theme.var.color.base_15};"}
   ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "border-bottom: 2px solid red;" : ""}
   cursor: move;
+  flex-shrink: 0;
 `}
-            draggable={"true"}
-            onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
-            onDragOver={(e) => e.preventDefault()}
-            onDragStart={(e) => {
-              // Set required data for drag operation
-              e.dataTransfer?.setData("text/plain", openedFormId);
-              mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-                draggedTab: openedFormId,
-              });
-            }}
-            onDrop={() => moveTab(props.mainPanel)}
-          >
-            <As
-              as="span"
-              css={css`
+              draggable={"true"}
+              onClick={[handleTabClick, graph.vertexes[openedFormId].P.formId]}
+              onDragOver={(e) => e.preventDefault()}
+              onDragStart={(e) => {
+                // Set required data for drag operation
+                e.dataTransfer?.setData("text/plain", openedFormId);
+                mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+                  draggedTab: openedFormId,
+                });
+              }}
+              onDrop={() => moveTab(props.mainPanel)}
+            >
+              <As
+                as="span"
+                css={css`
   user-select: none;
   white-space: nowrap;
 `}
-            >
-              {getTabLabel(openedFormId, graph)}
-              {isUnsaved(graph.vertexes[openedFormId].P.formId) && (
-                <As
-                  as="span"
-                  css={css`
-                    color:\${args.theme.var.color.error};
-                    font-weight: bold;
-                    margin-left: 3px;
-                    display: inline-block;
-                  `}
-                  title="Unsaved changes"
-                >
-                  *
-                </As>
-              )}
-            </As>
-            <IconButton
-              icon="ph:plus"
-              css={css`
+              >
+                {getTabLabel(openedFormId, graph)}
+                {isUnsaved(graph.vertexes[openedFormId].P.formId) && (
+                  <As
+                    as="span"
+                    css={css`
+                      color:\${args.theme.var.color.error};
+                      font-weight: bold;
+                      margin-left: 3px;
+                      display: inline-block;
+                    `}
+                    title="Unsaved changes"
+                  >
+                    *
+                  </As>
+                )}
+              </As>
+              <IconButton
+                icon="ph:plus"
+                css={css`
   background-color: transparent;
   border: none;
   cursor: pointer;
@@ -202,32 +213,32 @@ export function TabBar(props: { mainPanel: Id }) {
     color: \${args.theme.var.color.primary_200};
   }
 `}
-              onClick={() => {
-                const newView = createViewVertex(
-                  { view: "Mobile" },
-                  graph,
-                  setGraph,
-                );
-                mergeVertexProperties<FormStoreObject>(
-                  0,
-                  graph.vertexes[openedFormId].P.formId,
-                  graph,
-                  setGraph,
-                  {
-                    openedViews: [
-                      ...graph.vertexes[graph.vertexes[openedFormId].P.formId]
-                        ?.P.openedViews,
-                      newView.id,
-                    ],
-                  },
-                );
-              }}
-              size={16}
-              title="Add View"
-            />
-            <Show when={index() !== 0}>
-              <IconButton
-                css={css`
+                onClick={() => {
+                  const newView = createViewVertex(
+                    { view: "Mobile" },
+                    graph,
+                    setGraph,
+                  );
+                  mergeVertexProperties<FormStoreObject>(
+                    0,
+                    graph.vertexes[openedFormId].P.formId,
+                    graph,
+                    setGraph,
+                    {
+                      openedViews: [
+                        ...graph.vertexes[graph.vertexes[openedFormId].P.formId]
+                          ?.P.openedViews,
+                        newView.id,
+                      ],
+                    },
+                  );
+                }}
+                size={16}
+                title="Add View"
+              />
+              <Show when={index() !== 0}>
+                <IconButton
+                  css={css`
   background-color: transparent;
   color: \${args.theme.var.color.error};
   cursor: pointer;
@@ -236,18 +247,19 @@ export function TabBar(props: { mainPanel: Id }) {
     color: \${args.theme.var.color.error_200};
   }
 `}
-                icon="ph:x"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleClose(openedFormId);
-                }}
-                size={16}
-                title="Close Tab"
-              />
-            </Show>
-          </As>
-        )}
-      </For>
+                  icon="ph:x"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClose(openedFormId);
+                  }}
+                  size={16}
+                  title="Close Tab"
+                />
+              </Show>
+            </As>
+          )}
+        </For>
+      </As>
       <Show when={layoutStore().mainPanel.length > 1}>
         <IconButton
           css={css`
