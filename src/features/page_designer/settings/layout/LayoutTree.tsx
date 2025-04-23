@@ -240,15 +240,6 @@ export function LayoutTree() {
       }
     }
   };
-  
-  // Add keyboard event listener
-  onMount(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  });
 
   return (
     <As
@@ -310,6 +301,7 @@ export function LayoutTree() {
           flex: 1;
           scroll-behavior: smooth;
         `}
+        onKeyDown={handleKeyDown}
         ref={setTreeRef}
       >
         <Show when={formStoreVertex()}>

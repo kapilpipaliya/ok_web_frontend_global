@@ -78,12 +78,14 @@ export function HtmlField(
       saveUndoPoint(txnId, graph, setGraph);
     }
   };
-
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) {
       e.preventDefault();
-      (e.target as HTMLElement).blur();
       handleTextChange(e);
+      // manually update the text, if changed
+      if (local.text !== (e.target as HTMLElement).textContent) {
+        (e.target as HTMLElement).textContent = local.text ?? "";
+      }
     }
   };
 
