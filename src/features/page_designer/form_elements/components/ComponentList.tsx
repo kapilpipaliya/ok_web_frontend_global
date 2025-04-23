@@ -136,14 +136,16 @@ export function ComponentList(props: {
 
   return (
     <div>
-      <SearchBar
-        handleChange={(value) => {
-          setSearchQuery(value);
-        }}
-        placeholder="Search Component..."
-        ref={(el) => props.onDoubleClick && setTimeout(() => el?.focus(), 0)}
-        value={searchQuery()}
-      />
+      <Show when={filteredChildren().length >= 5}>
+        <SearchBar
+          handleChange={(value) => {
+            setSearchQuery(value);
+          }}
+          placeholder="Search Component..."
+          ref={(el) => props.onDoubleClick && setTimeout(() => el?.focus(), 0)}
+          value={searchQuery()}
+        />
+      </Show>
       <As as="div" css={STYLES.overflowCss}>
         <Show
           fallback={<LoaderNew loaderHeight="55vh" />}

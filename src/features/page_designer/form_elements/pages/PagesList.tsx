@@ -6,6 +6,7 @@ import {
   Match,
   Suspense,
   Switch,
+  Show,
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -105,14 +106,16 @@ export function PagesList(props: Readonly<{ coll: string }>) {
               <GetInitialData />
             </GraphContext.Provider>
 
-            <SearchBar
-              handleChange={(value) => {
-                setSearchQuery(value);
-                updateFilteredData();
-              }}
-              placeholder={`Search ${props.coll}...`}
-              value={searchQuery()}
-            />
+            <Show when={filteredData().length >= 5}>
+              <SearchBar
+                handleChange={(value) => {
+                  setSearchQuery(value);
+                  updateFilteredData();
+                }}
+                placeholder={`Search ${props.coll}...`}
+                value={searchQuery()}
+              />
+            </Show>
             <As
               as="div"
               css={[
