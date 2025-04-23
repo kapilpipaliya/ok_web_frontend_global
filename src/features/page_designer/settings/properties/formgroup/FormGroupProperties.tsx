@@ -138,7 +138,8 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
         <FunctionEditor
           keyName="css"
           label="CSS"
-          language="css"
+          // language="css"
+          language="javascript"
           returnType="string"
           setPropertyValue={props.onChange}
         />

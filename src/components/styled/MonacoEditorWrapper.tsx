@@ -84,6 +84,7 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
       onMount={handleEditorMount}
       options={{
         autoIndent: "full",
+        // theme: 'vs-dark',
         folding: false,
         fontSize: 14,
         formatOnPaste: true,
