@@ -7,7 +7,7 @@ export const rootElements = ["html"];
 // Document metadata
 export const metadataElements = [
   "base",
-  "head",
+  // "head",
   "link",
   "meta",
   "style",
@@ -89,7 +89,8 @@ export const inlineTextElements = [
 
 // Custom elements
 export const customElements = [
-  "icon"
+  "icon",
+  "portal",
 ];
 
 // Image and multimedia elements
@@ -253,7 +254,7 @@ export const svgElements = [
 // All HTML tags combined
 export const htmlTags = [
   // ...rootElements,
-  // ...metadataElements,
+  ...metadataElements,
   ...sectioningElements,
   ...textContentElements,
   ...inlineTextElements,
@@ -277,11 +278,11 @@ export const htmlTagsTree = {
     //   id: "root-elements",
     //   label: "Root Elements"
     // },
-    // {
-    //   children: metadataElements.map(tag => ({ children: [], id: tag, label: tag })),
-    //   id: "metadata-elements",
-    //   label: "Metadata Elements"
-    // },
+    {
+      children: metadataElements.map(tag => ({ children: [], id: tag, label: tag })),
+      id: "metadata-elements",
+      label: "Metadata Elements"
+    },
     {
       children: sectioningElements.map((tag) => ({
         children: [],

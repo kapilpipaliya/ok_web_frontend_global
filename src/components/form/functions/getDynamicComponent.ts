@@ -1,4 +1,4 @@
-import { Portal, Show } from "solid-js/web";
+import { Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
 import { ComponentChildrenField } from "~/components/fields/component/ComponentChildrenField";
@@ -17,10 +17,7 @@ import { TextAreaField } from "~/features/css_editor/components/fields/TextArea"
 // import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
 import { HtmlField } from "../../fields/HtmlField";
-import { Head } from "../../fields/MetaTitle";
 import { FileUploader } from "../../styled/FileUploader";
-// const OtpField = clientOnly(() => import("~/components/ssr/otpfield/OtpField"));
-// OtpField.Input = clientOnly(() => import("~/components/ssr/otpfield/OtpFieldInput"));
 
 export const corvuComponents = {
   // Accordion,
@@ -44,12 +41,8 @@ export const componentsMap: Record<string, any> = {
   FileUploader: FileUploader,
   Form: FormField,
   Html: HtmlField,
-  // Link: MetaLink,
-  // Meta: MetaMeta,
-  Head: Head,
   MultiSelect: SelectField,
   // Page: PageField,
-  Portal,
   Select: SelectField,
   Show,
   Table: TableInputField,
@@ -83,11 +76,3 @@ export function getDynamicComponent(component: string) {
 
   return componentsMap[componentKey];
 }
-
-/*
-Calendar...,
-Dialog...,
-Disclosure...,
-Select,...
-Tooltip,...
-*/

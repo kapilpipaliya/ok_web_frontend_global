@@ -96,16 +96,6 @@ export function HighlightSetValueContent(
               metaVertex={componentExample()[0]}
             />
           </Match>
-          <Match when={props.meta.P.key === "type" && selectedAttr()?.P.componentName === "Head"}>
-            <DynamicComponent
-              data={props.selectedLayout}
-              isNoPermissionCheck={true}
-              isRealTime={false}
-              meta={props.meta}
-              onChange={(data) => props.onChange(props.meta, data)}
-              txnId={props.txnId}
-            />
-          </Match>
           <Match
             when={
               // selectedAttr()?.P.componentName === "Image" &&

@@ -1,7 +1,8 @@
 import { type JSX, Match, Show, splitProps, Switch } from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { Dynamic, Portal } from "solid-js/web";
 import { untrack } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
+import { Link, Meta, Title, Base, Style } from "@solidjs/meta";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -141,6 +142,30 @@ export function HtmlField(
       <Match when={local.as === "icon"}>
         {/* @ts-expect-error - icon wiil be in others */}
         <Icon class={`${local.class || ""}`} noobserver {...others} />
+      </Match>
+      <Match when={local.as === "base"}>
+        <Base {...others} />
+      </Match>
+      
+      <Match when={local.as === "link"}>
+        <Link {...others} />
+      </Match>
+      
+      <Match when={local.as === "meta"}>
+        <Meta {...others} />
+      </Match>
+      
+      <Match when={local.as === "style"}>
+        <Style>{local.text}</Style>
+      </Match>
+      
+      <Match when={local.as === "title"}>
+        <Title>{local.text}</Title>
+      </Match>
+      <Match when={local.as === "portal"}>
+        <Portal {...others}>
+          <Content />
+        </Portal>
       </Match>
       <Match when={true}>
         <Dynamic

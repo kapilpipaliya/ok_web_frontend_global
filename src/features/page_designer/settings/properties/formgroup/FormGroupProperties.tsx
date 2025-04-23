@@ -66,7 +66,6 @@ export function createVertexIds() {
     defaultValue: `defaultValueVertex${createUniqueId()}`,
     disabled: `disabledVertex${createUniqueId()}`,
     errorClass: `errorClassVertex${createUniqueId()}`,
-    headType: `headTypeVertex${createUniqueId()}`,
     height: `heightVertex${createUniqueId()}`,
     hide: `hiddenVertex${createUniqueId()}`,
     icon: `iconVertex${createUniqueId()}`,
@@ -202,22 +201,6 @@ function createVertices(
         key: "as",
         // options: htmlTags.map((element) => ({ id: element, label: element })),
         options: htmlTagsTree.children,
-        saveValue: true,
-      },
-    },
-    {
-      id: vertexIds.headType,
-      P: {
-        componentName: "Select",
-        displayName: "Type",
-        key: "type",
-        options: [
-          { id: "base", label: "base" },
-          { id: "link", label: "link" },
-          { id: "style", label: "style" },
-          { id: "title", label: "title" },
-          { id: "meta", label: "meta" },
-        ],
         saveValue: true,
       },
     },
@@ -359,7 +342,6 @@ function getMetaVertexes(
 
   const basicVertices = [
     graph.vertexes[vertexIds.key],
-    ...(componentName === "Head" ? [graph.vertexes[vertexIds.headType]] : []),
     graph.vertexes[vertexIds.attrLabel],
     ...(isForm && componentName === "Form"
       ? [graph.vertexes[vertexIds.thankYouPage]]
