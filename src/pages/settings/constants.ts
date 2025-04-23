@@ -192,24 +192,15 @@ export const headerIconButtonCss = `
     background-color: \${args.theme.var.color.base_6};
     color: \${args.theme.var.color.base};
     justify-content: center;
-    padding: 6px;
-    border-radius: 7px;
+    padding: 0.25rem;
+    border-radius: 5px;
     &:hover {
       color: \${args.theme.var.color.primary};
     }
     &:disabled {
-      color: \${args.theme.var.color.gray_40};
+      color: \${args.theme.var.color.gray_50};
       cursor: not-allowed;
     }
-  }
-  
-  ._id:disabled {
-    color: \${args.theme.var.color.gray_40};
-    cursor: not-allowed;
-  }
-  
-  ._id:hover:not(:disabled) {
-    color: \${args.theme.var.color.primary};
   }
 `;
 
@@ -217,8 +208,8 @@ export const toolBarCss = `
   ._id {
     display: flex;
     background-color: \${args.theme.var.color.base_10};
-    gap: 0.5rem;
-    border-radius: 7px;
+    gap: 2px;
+    border-radius: 5px;
   }
 `;
 

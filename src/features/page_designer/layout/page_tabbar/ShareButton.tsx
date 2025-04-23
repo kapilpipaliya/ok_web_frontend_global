@@ -59,6 +59,7 @@ export function ShareButton(props: { formStoreId: string }) {
         css={headerIconButtonCss}
         href={getLink()}
         icon="ph:arrow-square-out"
+        size={18}
         target="_blank"
         title={<>Open in new tab</>}
         tooltipGroup="page-buttons"

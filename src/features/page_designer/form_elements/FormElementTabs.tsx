@@ -53,6 +53,49 @@ export const UlContainer = (props: ParentProps) => (
     {props.children}
   </As>
 );
+
+type SectionHeaderProps = {
+  title: string;
+  onAddClick: () => void;
+};
+
+const SectionHeader = (props: SectionHeaderProps) => (
+  <As
+    as="div"
+    css={[
+      css`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+`,
+    ]}
+  >
+    <As
+      as="div"
+      css={[
+        css`
+  padding: 12px;
+  font-weight: 500;
+`,
+      ]}
+    >
+      {props.title}
+    </As>
+    <IconButton
+      css={[
+        headerIconButtonCss,
+        css`
+  margin-left: 1px;
+  background-color: transparent;
+  border: none;
+`,
+      ]}
+      icon="ph:plus-circle"
+      onClick={props.onAddClick}
+    />
+  </As>
+);
+
 const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
@@ -83,7 +126,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
         setRootVertexes(
           evalExpression("<-ParentComponent", {
             graph,
-            setGraph: () => {},
+            setGraph,
             vertexes: [graph.vertexes[formStoreVertex().P.formDataId]],
           }) || [],
         );
@@ -119,40 +162,10 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 
   return (
     <div>
-      <As
-        as="div"
-        css={[
-          css`
-  display: flex;
-  align-items: center;
-  gap: 2px;
-`,
-        ]}
-      >
-        <As
-          as="div"
-          css={[
-            css`
-  padding: 12px;
-  font-weight: 500;
-`,
-          ]}
-        >
-          {props.rootLevel ? "Global Components" : "Page Components"}
-        </As>
-        <IconButton
-          css={[
-            headerIconButtonCss,
-            css`
-  margin-left: 1px;
-  background-color: transparent;
-  border: none;
-`,
-          ]}
-          icon="ph:plus-circle"
-          onClick={handleAddComponentClick}
-        />
-      </As>
+      <SectionHeader 
+        title={props.rootLevel ? "Global Components" : "Page Components"} 
+        onAddClick={handleAddComponentClick} 
+      />
       <ComponentList
         edgeName="ParentComponent"
         isFetchData={false}
@@ -162,8 +175,63 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   );
 };
 
+const TemplatesSection = () => {
+  const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const handleAddTemplateClick = () => {
+    return openInNewInternalTab(
+      layoutStoreId,
+      {
+        id: "new",
+        IN: {},
+        L: ["TemplatePage"],
+        OUT: {},
+        P: {},
+      } as Vertex,
+      graph,
+      setGraph,
+    );
+  };
+
+  return (
+    <As
+      as="div"
+      css={[
+        css`
+  margin-top: 4px;
+`,
+      ]}
+    >
+      <SectionHeader 
+        title="Templates" 
+        onAddClick={handleAddTemplateClick} 
+      />
+      <PagesList coll="TemplatePage" />
+    </As>
+  );
+};
+
+const TabList = (props: { 
+  tabs: Array<{ collection: string; title: string }>,
+  selectedTab: { collection: string; title: string },
+  onSelect: (tab: { collection: string; title: string }) => void
+}) => (
+  <UlContainer>
+    <For each={props.tabs}>
+      {(data) => (
+        <TabButton
+          data={data.title}
+          isSelected={props.selectedTab === data}
+          onClick={() => props.onSelect(data)}
+        />
+      )}
+    </For>
+  </UlContainer>
+);
+
 export function FormElementTabs() {
-  const [graph] = useGraph();
+  const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
@@ -177,20 +245,6 @@ export function FormElementTabs() {
     // { collection: "EmailTemplate", title: "Email Template" },
   ];
   const [selectedTab, setSelectedTab] = createSignal(leftMenuTabs[0]);
-
-  const TabList = () => (
-    <UlContainer>
-      <For each={leftMenuTabs}>
-        {(data) => (
-          <TabButton
-            data={data.title}
-            isSelected={selectedTab() === data}
-            onClick={() => setSelectedTab(data)}
-          />
-        )}
-      </For>
-    </UlContainer>
-  );
 
   return (
     <As
@@ -212,7 +266,11 @@ export function FormElementTabs() {
 `}
       >
         <TabsContainer>
-          <TabList />
+          <TabList 
+            tabs={leftMenuTabs}
+            selectedTab={selectedTab()}
+            onSelect={setSelectedTab}
+          />
         </TabsContainer>
       </As>
 
@@ -258,27 +316,7 @@ export function FormElementTabs() {
 
             <Divider />
 
-            <As
-              as="div"
-              css={[
-                css`
-  margin-top: 4px;
-`,
-              ]}
-            >
-              <As
-                as="div"
-                css={[
-                  css`
-  padding: 12px;
-  font-weight: 500;
-  `,
-                ]}
-              >
-                Templates
-              </As>
-              <PagesList coll="TemplatePage" />
-            </As>
+            <TemplatesSection />
           </Match>
           <Match
             keyed

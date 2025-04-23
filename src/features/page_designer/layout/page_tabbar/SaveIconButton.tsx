@@ -48,7 +48,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
       disabled={isDisabled()}
       icon="ph:floppy-disk"
       onClick={isDisabled() ? undefined : saveAndCaptureForm}
-      size={22}
+      size={18}
       title="Save"
       tooltipGroup="page-buttons"
     />

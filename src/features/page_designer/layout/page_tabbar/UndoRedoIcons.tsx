@@ -49,7 +49,7 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
             disabled={item.disabled()}
             icon={item.icon}
             onClick={item.onClick}
-            size={22}
+            size={18}
             title={item.tooltip}
             tooltipGroup="page-buttons"
           />

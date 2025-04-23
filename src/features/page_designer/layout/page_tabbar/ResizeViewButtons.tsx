@@ -11,6 +11,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { headerIconButtonCss } from "~/pages/settings/constants";
 
 type DimensionType = {
   height: string;
@@ -133,10 +134,11 @@ export const ResizeViewButtons = (props: {
   };
 
   const commonInputCss = (args: FunctionArgumentType) => css`
-    border: 1px solid ${args.theme.var.color.primary_20};
+    border: 1px solid ${args.theme.var.color.base_40};
     border-radius: 5px;
     padding: 0.15rem;
     width: 4.5rem;
+    height: 28px;
     background-color: ${args.theme.var.color.base_2};
   `;
 
@@ -145,7 +147,7 @@ export const ResizeViewButtons = (props: {
       as="div"
       css={css`
   display: flex;
-  gap: 0.5rem;
+  gap: 2px;
   align-items: center;
   font-size: 0.8rem;
 `}
@@ -153,9 +155,10 @@ export const ResizeViewButtons = (props: {
       <As
         as="select"
         css={(args: FunctionArgumentType) => css`
-  border: 1px solid ${args.theme.var.color.primary_40};
+  border: 1px solid ${args.theme.var.color.base_40};
   border-radius: 5px;
-  padding: 0.25rem;
+  padding: 0.15rem;
+  height: 28px;
   background-color: ${args.theme.var.color.base_2};
   color: ${args.theme.var.color.base};
 `}
@@ -211,12 +214,7 @@ export const ResizeViewButtons = (props: {
       </As>
 
       <IconButton
-        css={(args: FunctionArgumentType) => css`
-  border: 1px solid ${args.theme.var.color.primary_40};
-  border-radius: 5px;
-  padding: 0.25rem;
-  background-color: ${args.theme.var.color.base_2};
-`}
+        css={headerIconButtonCss}
         icon="ph:device-mobile-speaker"
         iconCss={css`transition:transform 0.2s; ${isLandscape() ? "transform: rotate(90deg);" : ""}`}
         onClick={toggleOrientation}
