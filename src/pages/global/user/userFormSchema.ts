@@ -314,7 +314,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                     }),
                   },
                 ],
-                componentName: "Portal",
+                componentName: "Html", as: "portal",
                 props: (options: FunctionArgumentType) => ({
                   hide: !options.dataContext.modalState[0]?.showModal,
                 }),

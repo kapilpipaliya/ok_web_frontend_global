@@ -169,7 +169,7 @@ export function createPasswordField(
           as: "div",
           attributes: [
             {
-              componentName: "Icon",
+              componentName: "Html", as: "icon",
               props: () => ({
                 icon: showPassword[key] ? "ph:eye" : "ph:eye-slash",
                 onClick: () => toggleVisibility(key),

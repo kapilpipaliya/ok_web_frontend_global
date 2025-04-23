@@ -202,13 +202,6 @@ export default class JsxParser {
         "key",
         "Data",
       )!;
-    } else if (comp === "svg") {
-      componentVertex = findVertexByLabelAndUniqueId(
-        graph,
-        "Comp",
-        "key",
-        "Icon",
-      )!;
     } else if (findVertexByLabelAndUniqueId(graph, "Comp", "key", comp)) {
       componentVertex = findVertexByLabelAndUniqueId(
         graph,

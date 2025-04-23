@@ -7,14 +7,10 @@ type ParsedYamlNode = string | { [key: string]: ParsedYamlNode[] };
 export function getComponentTree(): ComponentNode[] {
   const yamlContent = `- Root:
   - Html
-  - Portal
   - Data
   - Form
-  - Head
   - ComponentChildren
 `;
-  //   - Link
-  //   - Meta
   // - Table
   // - Transition
   // - TransitionGroup
@@ -45,54 +41,3 @@ function convertToRequiredFormat(data: ParsedYamlNode[]): ComponentNode[] {
     };
   });
 }
-
-/*
-  - FileUploader
-  - Popover:
-    - Popover.Anchor:
-      - Popover.Trigger
-    - Popover.Portal:
-        - Popover.Overlay
-        - Popover.Content:
-            - Popover.Arrow
-            - Popover.Close
-            - Popover.Label
-            - Popover.Description
-  - Tooltip:
-    - Tooltip.Anchor:
-      - Tooltip.Trigger
-    - Tooltip.Portal:
-      - Tooltip.Content:
-        - Tooltip.Arrow
-      - Tooltip.Overlay
-*/
-/*
-  - Accordion:
-    - Accordion.Item:
-      - Accordion.Trigger
-      - Accordion.Content
-  - Dialog:
-      - Dialog.Trigger
-      - Dialog.Portal:
-          - Dialog.Overlay
-          - Dialog.Content:
-              - Dialog.Close
-              - Dialog.Label
-              - Dialog.Description
-  - Disclosure:
-    - Disclosure.Trigger
-    - Disclosure.Content
-  - Drawer:
-    - Drawer.Trigger
-    - Drawer.Portal:
-        - Drawer.Overlay
-        - Drawer.Content:
-            - Drawer.Close
-            - Drawer.Label
-            - Drawer.Description
-  - Resizable:
-    - Resizable.Handle
-    - Resizable.Panel
-  - OtpField:
-    - OtpField.Input
-*/

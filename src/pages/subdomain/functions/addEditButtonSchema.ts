@@ -34,7 +34,7 @@ export function addEditButtonSchema(label: string) {
             as: "button",
             attributes: [
               {
-                componentName: "Icon",
+                componentName: "Html", as: "icon",
                 height: 20,
                 icon: "ph:pencil",
                 width: 20,

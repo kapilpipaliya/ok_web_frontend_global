@@ -338,7 +338,7 @@ export function ForgotPasswordForm() {
                 as: "div",
                 attributes: [
                   {
-                    componentName: "Icon",
+                    componentName: "Html", as: "icon",
                     props: () => ({
                       icon: showPassword.newPassword
                         ? "ph:eye"
@@ -405,7 +405,7 @@ export function ForgotPasswordForm() {
                 as: "div",
                 attributes: [
                   {
-                    componentName: "Icon",
+                    componentName: "Html", as: "icon",
                     props: () => ({
                       icon: showPassword.confirmPassword
                         ? "ph:eye"

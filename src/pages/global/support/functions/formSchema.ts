@@ -471,7 +471,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         as: "button",
         attributes: [
           {
-            componentName: "Icon",
+            componentName: "Html", as: "icon",
             icon: "ph:x",
           },
         ],
@@ -548,7 +548,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     }),
                   },
                 ],
-                componentName: "Portal",
+                componentName: "Html", as: "portal",
                 props: (options: FunctionArgumentType) => ({
                   hide: !options.dataContext.modalState[0]?.showModal,
                 }),

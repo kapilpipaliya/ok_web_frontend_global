@@ -41,7 +41,7 @@ export function createPasswordHintPopoverContent(
           as: "li",
           attributes: [
             {
-              componentName: "Icon",
+              componentName: "Html", as: "icon",
               css: (options: FunctionArgumentType) => {
                 const validationState = options.dataContext.validationState;
                 const isValid =
@@ -162,7 +162,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
             text: label,
           },
           {
-            componentName: "Icon",
+            componentName: "Html", as: "icon",
             css: (options: FunctionArgumentType) => {
               const helpIconState = options.dataContext.helpIconState;
               const iconColor = helpIconState?.[0]?.isValid

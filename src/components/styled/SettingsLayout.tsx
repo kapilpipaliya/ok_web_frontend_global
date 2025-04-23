@@ -66,7 +66,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
         as: "div",
         attributes: [
           {
-            componentName: "Title",
+            componentName: "Html", as: "title",
             props: () => ({
               text: `${props.title} - ${props.menuItems.find((item) => item.id === selectedMenu())?.label}`,
             }),

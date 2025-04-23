@@ -163,7 +163,7 @@ export function SignupForm() {
                     as: "div",
                     attributes: [
                       {
-                        componentName: "Icon",
+                        componentName: "Html", as: "icon",
                         props: () => ({
                           icon: showPassword.password
                             ? "ph:eye"

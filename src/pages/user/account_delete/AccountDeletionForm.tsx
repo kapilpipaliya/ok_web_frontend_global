@@ -274,7 +274,7 @@ export function AccountDeletionForm() {
                     }),
                   },
                 ],
-                componentName: "Portal",
+                componentName: "Html", as: "portal",
               },
             ],
             componentName: "ZIndex",
