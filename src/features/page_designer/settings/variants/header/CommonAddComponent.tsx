@@ -32,7 +32,8 @@ export function CommonAddComponent(
     <As
       as="div"
       css={css`
-  /* radius-b: 5; */
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
   display: flex;
   flex-direction: column;
   padding-left: 2px;

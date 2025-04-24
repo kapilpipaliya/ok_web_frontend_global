@@ -324,6 +324,7 @@ string`,
   ],
   componentName: "DynamicTable",
   key: "Variant",
+  hide: true,
   // label: "Variant",
   // type: "Variant",
 } as FieldAttribute;

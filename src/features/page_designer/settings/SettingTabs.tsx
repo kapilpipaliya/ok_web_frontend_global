@@ -26,9 +26,6 @@ import { TabButton } from "./TabButton";
 import { Variants } from "./variants/Variants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import type {
-  FunctionArgumentType,
-} from "~/components/form/type/FieldSchemaType";
 import { Divider } from "~/components/styled/Divider";
 
 export function SettingTabs() {
@@ -145,7 +142,6 @@ export function SettingTabs() {
                   }
                 >
                   <Divider />
-                  Variants
                   <Variants />
                 </Show>
                 <LayoutTree />
