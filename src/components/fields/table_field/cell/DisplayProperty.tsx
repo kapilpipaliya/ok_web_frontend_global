@@ -48,7 +48,7 @@ export function DisplayProperty(
   props: Readonly<{
     column: Vertex;
     disabled: Accessor<boolean>;
-    isNoPermissionCheck?: boolean;
+    isNoPermissionCheck?: boolean | null;
     isRealTime: boolean;
     joinVertex: Vertex;
     // onChange?: (data: any) => void;

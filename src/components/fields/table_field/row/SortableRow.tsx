@@ -23,7 +23,7 @@ export const SortableRow = (
       dragFromIndex: Accessor<null | number>;
       dragToIndex: Accessor<null | number>;
       handleDrop: (event: DragEvent) => void;
-      isNoPermissionCheck?: boolean;
+      isNoPermissionCheck?: boolean | null;
       isRealTime: boolean;
       joinVertex: Vertex;
       meta: Vertex;

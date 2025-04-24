@@ -74,7 +74,7 @@ export function DynamicComponent(
     data?: Vertex;
     disabled?: boolean;
     isLabelWrap?: boolean;
-    isNoPermissionCheck?: boolean;
+    isNoPermissionCheck?: boolean | null;
     isRealTime?: boolean;
     isTableInside?: boolean;
     meta: Vertex;

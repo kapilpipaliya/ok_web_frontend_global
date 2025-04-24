@@ -112,8 +112,6 @@ export function SettingTabs() {
           <Show keyed when={formStoreVertex()?.id}>
             <DesignerFormIdContext.Provider value={formStoreVertex().id}>
               <FormContext.Provider value={formStoreVertex().id}>
-                <Divider/>
-
 
                 <Show
                   when={

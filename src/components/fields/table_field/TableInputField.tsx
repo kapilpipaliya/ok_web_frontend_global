@@ -44,10 +44,12 @@ export function TableInputField(
     GenericComponentProps & {
       addNewButtonText?: string;
       data?: Vertex;
+      hideAddButton?: boolean;
       isNoPermissionCheck?: boolean;
       isRealTime?: boolean;
       isTableInside?: boolean;
       meta?: Vertex;
+      onAddRef?: (addRowFn: () => void) => void;
     }
   >,
 ) {
@@ -127,6 +129,24 @@ export function TableInputField(
   };
   const owner = getOwner();
 
+  const addNewRow = () => {
+    runWithOwner(owner, () =>
+      insertNewRow(
+        formVertex().P.txnId || 0,
+        meta()!,
+        data()!,
+        props.isRealTime ?? false,
+        graph,
+        setGraph,
+      )
+    );
+  };
+
+  // Expose add row function if onAddRef is provided
+  if (props.onAddRef) {
+    props.onAddRef(() => addNewRow);
+  }
+
   return (
     <Switch>
       <Match when={tableColumnsTemplate().length === 0}>
@@ -137,21 +157,12 @@ export function TableInputField(
         {/*  <FormGroup form={{title: '', label: meta().P.title || meta().P[IdAttr], attributes: meta().P.attributes}} vertex={vertex}/>*/}
         {/*</Show>*/}
         {/* <Show when={props.isTableInside}> */}
-        <AddNewButton
-          buttonText={props.addNewButtonText}
-          onClick={() =>
-            runWithOwner(owner, () =>
-              insertNewRow(
-                formVertex().P.txnId || 0,
-                meta()!,
-                data()!,
-                props.isRealTime ?? false,
-                graph,
-                setGraph,
-              ),
-            )
-          }
-        />
+        <Show when={!props.hideAddButton}>
+          <AddNewButton
+            buttonText={props.addNewButtonText}
+            onClick={addNewRow}
+          />
+        </Show>
         {/* </Show> */}
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
         <As
