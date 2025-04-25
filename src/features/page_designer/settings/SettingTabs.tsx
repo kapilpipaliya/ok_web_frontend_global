@@ -1,4 +1,4 @@
-import { createMemo, For, Show } from "solid-js";
+import { Show } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -8,69 +8,32 @@ import {
 } from "~/components/form/context/FormContext";
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {
   DesignerFormIdContext,
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../context/LayoutContext";
-import { UlContainer } from "../form_elements/FormElementTabs";
-import { TabsContainer } from "../form_elements/TabsContainer";
 import { FormConfig } from "./form/FormConfig";
 import { NameKey } from "./keys/NameKey";
 import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Permission } from "./permission/Permission";
-import { TabButton } from "./TabButton";
 import { Variants } from "./variants/Variants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { Divider } from "~/components/styled/Divider";
+import { isPermissionsConfigurable } from "./utils/permissionUtils";
 
 export function SettingTabs() {
   const layoutStoreId = useDesignerLayoutStore();
-  const [graph, setGraph] = useGraph();
+  const [graph] = useGraph();
 
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId].P as PageLayoutObject) ?? {};
 
   const formStoreVertex = () =>
     graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
-  const tabs = createMemo(() => {
-    return ["settings"];
-  });
-
-  const TabList = () => (
-    <UlContainer>
-      <For each={tabs()}>
-        {(data) => (
-          <TabButton
-            data={data}
-            isSelected={true}
-            onClick={() =>
-              mergeVertexProperties<PageLayoutObject>(
-                0,
-                layoutStoreId,
-                graph,
-                setGraph,
-                { selectedTab: data },
-              )
-            }
-          />
-        )}
-      </For>
-    </UlContainer>
-  );
-
-  const Tabs = () => (
-    <>
-      <TabsContainer>
-        <TabList />
-      </TabsContainer>
-    </>
-  );
 
   return (
     <As
@@ -82,15 +45,6 @@ export function SettingTabs() {
   height: 100%;
 `}
     >
-      {/* <As
-        as="div"
-        css={(args: FunctionArgumentType) => css`
-  background-color: ${args.theme.var.color.base_10};
-  overflow-x: auto;
-`}
-      >
-        <Tabs />
-      </As> */}
       <As
         as="div"
         css={css`
@@ -127,10 +81,7 @@ export function SettingTabs() {
                 </Show>
 
                 <Show
-                  when={
-                    graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] === "Form" ||
-                    graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] === "Page"
-                  }
+                  when={isPermissionsConfigurable(graph, formStoreVertex()?.P.formDataId)}
                 >
                   <Divider />
                   <Permission />
@@ -144,6 +95,7 @@ export function SettingTabs() {
                   <Divider />
                   <Variants />
                 </Show>
+                <Divider />
                 <LayoutTree />
               </FormContext.Provider>
             </DesignerFormIdContext.Provider>

@@ -1,4 +1,5 @@
-import { createSignal, For, Show, onMount } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
+import { Icon } from "@iconify-icon/solid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
@@ -257,7 +258,7 @@ export function LayoutTree() {
         css={css`
           display: flex;
           align-items: center;
-          padding: 8px 8px;
+          padding-bottom: 8px;
           border-bottom: 1px solid #e5e5e5;
           gap: 8px;
           position: sticky;
@@ -265,19 +266,25 @@ export function LayoutTree() {
           background-color: white;
         `}
       >
-        <As
-          as="div"
-          title={jsonTooltip()}
+              <As
+          as="h3"
           css={css`
-            margin-left: 4px;
+            color: rgb(17,24,39);
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 0.5rem;
           `}
-          onClick={toggleAllJsonEditors}
         >
+          <Icon icon="tabler:layout-2" />
           Layers
+        </As>
+
+
           <IconButton
+          onClick={toggleAllJsonEditors}
             css={[
               ICON_BUTTON_STYLES.baseCss,
               ICON_BUTTON_STYLES.defaultCss,
@@ -290,7 +297,7 @@ export function LayoutTree() {
             icon="tabler:json" 
             size={18} 
           />
-        </As>
+
       </As>
       <As
         as="div"

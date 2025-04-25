@@ -32,7 +32,7 @@ import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId"
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PROPERTIES } from "~/pages/settings/constants";
 
-import { useDesignerFormIdContext } from "../../../context/LayoutContext";
+import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
@@ -40,6 +40,7 @@ import { SelectPermissionField } from "./permission_field/SelectPermissionField"
 import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
 import { FunctionEditor } from "../FunctionEditor";
+import { isPermissionsConfigurable } from "../../utils/permissionUtils";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
@@ -372,6 +373,15 @@ function getMetaVertexes(
 
 function PropertyField(props: Readonly<PropertyFieldProps>) {
   const [graph, setGraph] = useGraph();
+  const layoutStoreId = useDesignerLayoutStore();
+
+  const layoutStore = () =>
+    (graph.vertexes[layoutStoreId].P as PageLayoutObject) ?? {};
+
+  const formStoreVertex = () =>
+    graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
+
+
   const metaProps = getPropsFromMetaExpression(
     graph,
     setGraph,
@@ -424,11 +434,15 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
           /> */}
         </Match>
         <Match when={props.meta.P.key === "perm"}>
-          <SelectPermissionField
-            meta={props.meta}
-            selectedLayout={props.selectedLayout}
-            txnId={props.txnId}
-          />
+          <Show
+            when={isPermissionsConfigurable(graph, formStoreVertex()?.P.formDataId)}
+          >
+            <SelectPermissionField
+              meta={props.meta}
+              selectedLayout={props.selectedLayout}
+              txnId={props.txnId}
+            />
+          </Show>
         </Match>
         <Match when={props.meta.P.componentName === "Table"}>
           <h3>

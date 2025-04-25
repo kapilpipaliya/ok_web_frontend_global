@@ -133,11 +133,11 @@ export const Page: IFormMetaData = {
         //   key: "dashboard",
         //   parentLabel: "Dashboard",
         // },
-        wrapWithTitle("Public", false, {
-          componentName: "CheckBox",
-          hideInGrid: true,
-          key: "public",
-        }),
+        // wrapWithTitle("Public", false, {
+        //   componentName: "CheckBox",
+        //   hideInGrid: true,
+        //   key: "public",
+        // }),
         /*{ componentName: "CheckBox", key: "isRealTime" },
         {
           collection: "g:'Form'",
