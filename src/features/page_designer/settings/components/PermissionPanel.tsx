@@ -3,10 +3,9 @@ import { createSignal } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { IconButton } from "~/components/styled/IconButton";
+import { PlusIconButton } from "~/components/styled/PlusIconButton";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
-import { useTheme } from "~/lib/context/ThemeContext";
 
 interface PermissionPanelProps {
   title?: string;
@@ -57,21 +56,9 @@ export function PermissionPanel(props: PermissionPanelProps) {
           <Icon icon="ph:lock" />
           {props.title || "Permissions"}
         </As>
-        <IconButton
-          icon="ph:plus"
-          css={css`
-            background-color: \${args.theme.var.color.primary_15};
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            &:hover {
-              background-color: \${args.theme.var.color.primary_50};
-            }
-          `}
-          size="18"
-          aria-label="Add new permission"
+        <PlusIconButton
           onClick={handleAddNewRow}
+          ariaLabel="Add new permission"
         />
       </As>
 

@@ -11,14 +11,14 @@ import {
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
-import { IconButton } from "~/components/styled/IconButton";
+import { PlusIconButton } from "~/components/styled/PlusIconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
-import { headerIconButtonCss, STYLES } from "~/pages/settings/constants";
+import { STYLES } from "~/pages/settings/constants";
 
 import {
   DesignerFormIdContext,
@@ -82,17 +82,9 @@ const SectionHeader = (props: SectionHeaderProps) => (
     >
       {props.title}
     </As>
-    <IconButton
-      css={[
-        headerIconButtonCss,
-        css`
-  margin-left: 1px;
-  background-color: transparent;
-  border: none;
-`,
-      ]}
-      icon="ph:plus-circle"
+    <PlusIconButton 
       onClick={props.onAddClick}
+      ariaLabel={`Add new ${props.title}`}
     />
   </As>
 );
@@ -232,7 +224,7 @@ const TabList = (props: {
 );
 
 export function FormElementTabs() {
-  const [graph, setGraph] = useGraph();
+  const [graph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
