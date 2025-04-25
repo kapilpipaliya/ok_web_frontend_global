@@ -7,6 +7,7 @@ import {
   Show,
   Switch,
 } from "solid-js";
+import { Icon } from "@iconify-icon/solid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
@@ -57,6 +58,7 @@ export const UlContainer = (props: ParentProps) => (
 type SectionHeaderProps = {
   title: string;
   onAddClick: () => void;
+  icon?: string;
 };
 
 const SectionHeader = (props: SectionHeaderProps) => (
@@ -76,10 +78,14 @@ const SectionHeader = (props: SectionHeaderProps) => (
         css`
   padding: 6px;
   font-weight: 500;
-  font-size: 0.925rem;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 `,
       ]}
     >
+      {props.icon && <Icon icon={props.icon} width="18" height="18" />}
       {props.title}
     </As>
     <PlusIconButton 
@@ -158,6 +164,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
       <SectionHeader 
         title={props.rootLevel ? "Global Components" : "Page Components"} 
         onAddClick={handleAddComponentClick} 
+        icon={props.rootLevel ? "ph:puzzle-piece" : "ph:layout"}
       />
       <ComponentList
         edgeName="ParentComponent"
@@ -199,6 +206,7 @@ const TemplatesSection = () => {
       <SectionHeader 
         title="Templates" 
         onAddClick={handleAddTemplateClick} 
+        icon="ph:files"
       />
       <PagesList coll="TemplatePage" />
     </As>

@@ -127,18 +127,18 @@ export function PagesList(props: Readonly<{ coll: string }>) {
             >
               <For
                 each={filteredData()}
-                fallback={
-                  <As
-                    as="div"
-                    css={css`
-  margin: 20px 0px;
-  padding: 3px;
-  text-align: center;
-`}
-                  >
-                    No {props.coll !== "Page" ? props.coll.replace(/Page$/, '') : props.coll} Found!
-                  </As>
-                }
+//                 fallback={
+//                   <As
+//                     as="div"
+//                     css={css`
+//   margin: 20px 0px;
+//   padding: 3px;
+//   text-align: center;
+// `}
+//                   >
+//                     No {props.coll !== "Page" ? props.coll.replace(/Page$/, '') : props.coll} Found!
+//                   </As>
+//                 }
               >
                 {(item) => (
                   <PageItem
