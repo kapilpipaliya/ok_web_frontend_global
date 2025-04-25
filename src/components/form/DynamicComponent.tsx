@@ -45,16 +45,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
-import {
-  addNewVertex,
-  deleteVertex,
-  mergeVertexProperties,
-  replaceVertexProperties,
-} from "~/lib/graph/mutate/core/vertex";
-import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
-import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
@@ -67,6 +58,12 @@ import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 import { useTheme } from "~/lib/context/ThemeContext";
 import { processCssContent } from "~/lib/styles/processCss";
+import { 
+  deleteTxnIdAndCreateNew, 
+  ensureData, 
+  removeTxnIdAndCreateNew, 
+  setError} from "./functions/formFunctions";
+import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -79,7 +76,7 @@ export function DynamicComponent(
     isTableInside?: boolean;
     meta: Vertex;
     noLabel?: boolean;
-    onChange?: (data: any) => void;
+    onChange?: (data: unknown) => void;
     title?: string;
     txnId?: number;
   }>,
@@ -222,51 +219,11 @@ export function DynamicComponent(
         return runWithOwner(owner, () => useDataContext() || {});
       },
       deleteTxnIdAndCreateNew: (txnId: number) => {
-        // Delete existing transaction
-        revertTransaction(txnId, graph, setGraph);
-        // Generate and return a new transaction ID
-        const newTxnId = generateNewTxnId(graph, setGraph);
-        mergeVertexProperties<FormStoreObject>(0, formId!, graph, setGraph, {
-          txnId: newTxnId,
-        });
-        return newTxnId;
+        return deleteTxnIdAndCreateNew(txnId, formId!, graph, setGraph);
       },
       // on create save dataVertex is is changed, so its not available. so this will create new dataVertex again.
       ensureData: () => {
-        // Delete the existing data vertex if it exists
-        if (props.data?.id) {
-          return props.data.id;
-        }
-
-        // Create a new form vertex
-        const metaVertex = () => graph.vertexes[formVertex()?.P.formMetaId!];
-        const metaKey = metaVertex()!.P.key;
-        if (!metaKey) {
-          console.error("Cannot recreate data ID: No meta key found");
-          return null;
-        }
-
-        const createResult = createFormVertex(
-          graph,
-          setGraph,
-          formVertex()?.P.txnId!,
-          metaKey,
-          {}, // Empty initial properties
-        );
-
-        if (createResult.error) {
-          console.error("Error creating new data vertex:", createResult.error);
-          return null;
-        }
-
-        if (createResult.vertex) {
-          mergeVertexProperties(0, formId!, graph, setGraph, {
-            formDataId: createResult.vertex.id,
-          });
-        }
-
-        // Return the new vertex ID
-        return createResult.vertex?.id;
+        return ensureData(props.data?.id, formId!, formVertex, graph, setGraph);
       },
       error: (key?: string) => {
         const errorVertexId = `${props.data?.id}-error`;
@@ -319,12 +276,7 @@ export function DynamicComponent(
       theme,
       ref,
       removeTxnIdAndCreateNew: (txnId: number) => {
-        deleteVertex(0, `txn${txnId}`, graph, setGraph);
-        const newTxnId = generateNewTxnId(graph, setGraph);
-        mergeVertexProperties<FormStoreObject>(0, formId!, graph, setGraph, {
-          txnId: newTxnId,
-        });
-        return newTxnId;
+        return removeTxnIdAndCreateNew(txnId, formId!, graph, setGraph);
       },
       revertTransaction: (txnId: number) =>
         revertTransaction(txnId, graph, setGraph),
@@ -335,26 +287,7 @@ export function DynamicComponent(
       searchParams,
       setError: (error: string | undefined, key?: string) => {
         const errorVertexId = `${props.data?.id}-error`;
-        if (graph.vertexes[errorVertexId]) {
-          mergeVertexProperties(0, errorVertexId, graph, setGraph, {
-            [key ?? props.meta.P.key]: error || "",
-          });
-        } else {
-          addNewVertex(
-            0,
-            {
-              id: errorVertexId,
-              IN: {},
-              L: ["Error"],
-              OUT: {},
-              P: {
-                [key ?? props.meta.P.key]: error || "",
-              },
-            },
-            graph,
-            setGraph,
-          );
-        }
+        setError(errorVertexId, key ?? props.meta.P.key, error, graph, setGraph);
       },
       get setGraph() {
         return setGraph;

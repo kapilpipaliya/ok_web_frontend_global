@@ -316,11 +316,11 @@ ${Object.keys(binopsInitial).join("\n")}`,
       },
       {
         attributes: [
-          {
-            componentName: "TextInput",
-            key: "key",
-            validation: { required: true },
-          },
+          // {
+          //   componentName: "TextInput",
+          //   key: "key",
+          //   validation: { required: true },
+          // },
           {
             childLabel: key,
             collection: "g:'Role'",
