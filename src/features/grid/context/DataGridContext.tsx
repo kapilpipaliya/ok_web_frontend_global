@@ -39,6 +39,7 @@ export function getInitialGridState(graph: GraphInterface) {
     hasInsertPermission: (() => false) as Accessor<boolean | null | undefined>,
     hasViewPermission: (() => false) as Accessor<boolean | null | undefined>,
     isLoading: false,
+    isLoadingMore: false,
     isNoPermissionCheck: false,
     isSearching: false,
     isShowLoadMore: true,

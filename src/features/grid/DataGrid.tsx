@@ -1,6 +1,9 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
-import { useNavigate } from "@solidjs/router";
+import {
+  createAsync,
+  useNavigate
+} from "@solidjs/router";
 import {
   type Accessor,
   createEffect,
@@ -67,31 +70,72 @@ interface DataGridProps {
   tableId: string;
 }
 
+// Define types for metadata results
+type SuccessResult = {
+  success: true;
+  error?: undefined;
+  form?: IFormMetaData;
+  formSchema?: IFormMetaData;
+  formFiltered?: IFormMetaData;
+  data?: ServerResult;
+  isDynamicForm?: boolean;
+  isNoPermissionCheck?: boolean;
+};
+
+type ErrorResult = {
+  error: string;
+  success?: undefined;
+};
+
+type MetaDataResult = SuccessResult | ErrorResult;
+
+// Define types for the Grid Data
+type GridData = {
+  metaData?: SuccessResult;
+  tableData?: ServerResult;
+  error?: string;
+  isLoading?: boolean;
+  isLoadMore?: boolean;
+};
+
 // TODO: make it ssr compatible
 export function DataGrid(props: Readonly<DataGridProps>) {
   const [graph, setGraph] = useGraph();
   const navigate = useNavigate();
 
+  const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(
+    null,
+  );
+
   const gridStore = createStore<DataGridState>({
     ...getInitialGridState(graph),
     editSchema: props.editSchema,
-    fetchTableData,
+    fetchTableData: async (skip, limit, isLoadMore) => {
+      setGridState("isLoading", true);
+      const tableResult = await fetchTableData(formMetaData(), skip, limit, isLoadMore);
+      if ('error' in tableResult) {
+        return { 
+          error: tableResult.error 
+        } as GridData;
+      }
+      if (isValidResponse(tableResult)) {
+        processTableData(tableResult);
+      }
+      setGridState("isLoading", false);
+      return tableResult;
+    },
     get tableId() {
       return props.tableId;
     },
   });
   props.initializeGridStoreParent?.(gridStore);
   const [gridState, setGridState] = gridStore;
-  const [formMetaData, setFormMetaData] = createSignal<IFormMetaData | null>(
-    null,
-  );
 
   const allConfiguredPermission = createMemo(() =>
     getConfiguredPermissions(
       getGlobalStore(graph).P.userRoles,
       gridState.metaVertex,
       graph,
-      setGraph,
     ),
   );
 
@@ -99,22 +143,22 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     hasDeletePermission: createMemo(
       () =>
         formMetaData() &&
-        hasPermissions(allConfiguredPermission(), "delete", graph, setGraph),
+        hasPermissions(allConfiguredPermission(), "delete", graph),
     ),
     hasEditPermission: createMemo(
       () =>
         formMetaData() &&
-        hasPermissions(allConfiguredPermission(), "edit", graph, setGraph),
+        hasPermissions(allConfiguredPermission(), "edit", graph),
     ),
     hasInsertPermission: createMemo(
       () =>
         formMetaData() &&
-        hasPermissions(allConfiguredPermission(), "insert", graph, setGraph),
+        hasPermissions(allConfiguredPermission(), "insert", graph),
     ),
     hasViewPermission: createMemo(
       () =>
         formMetaData() &&
-        hasPermissions(allConfiguredPermission(), "view", graph, setGraph),
+        hasPermissions(allConfiguredPermission(), "view", graph),
     ),
   };
 
@@ -141,36 +185,27 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     ),
   );
 
-  const initializeDataGrid = async () => {
-    setGridState("isLoading", true);
-    await loadMetaData();
-    if (gridState.error) {
-      setGridState("isLoading", false);
-      return;
-    }
-    await fetchTableData();
-  };
-
-  createEffect(() => {
-    if (props.tableId) {
-      setGridState("error", undefined);
-      initializeDataGrid();
-    } else {
-      setGridState("error", "No tableId provided");
-    }
-  });
-
-  const loadMetaData = async () => {
+  const loadMetaData = async (): Promise<MetaDataResult> => {
     if (props.formSchema) {
-      setFormMetaData(props.formSchema);
-      setGridState("isNoPermissionCheck", true);
-      return;
+      return { 
+        success: true, 
+        formSchema: props.formSchema,
+        isNoPermissionCheck: true 
+      };
     }
 
     const form = FormMetaData[props.tableId] || FormMetaData.Form;
+    if (!form) {
+      return { error: `Form metadata for ${props.tableId} not found` };
+    }
+    
     const isDynamicForm =
       props.tableId !== "Form" && form === FormMetaData.Form;
     if (isDynamicForm) {
+      if (!form.attributes) {
+        return { error: `No attributes defined for form ${props.tableId}` };
+      }
+      
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
       const data = await fetchDataFromDB({
         expression: `g:'Form[${props.tableId}]'`,
@@ -180,36 +215,35 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       });
 
       if (!isValidResponse(data) || data.result.length === 0) {
-        setGridState("error", `No ${props.tableId} configured`);
-        return;
+        return { error: `No ${props.tableId} configured` };
       }
-      initializeMetaData(data);
+      
+      // Return the data without setting state
+      return { 
+        success: true,
+        data,
+        isDynamicForm: true,
+        form,
+        isNoPermissionCheck: false
+      };
     }
 
-    const updatedForm = gridState.metaVertex
-      ? generateFormMetaAttributes(graph, setGraph, gridState.metaVertex)
-      : createInputFilteredFormMetaData(FormMetaData[props.tableId]);
-    setFormMetaData(updatedForm);
-    // when hardcoded form is used, no permission check is used currently, but this is a temporary solution
-    setGridState("isNoPermissionCheck", !isDynamicForm);
+    // For non-dynamic forms, just use createInputFilteredFormMetaData
+    return { 
+      success: true,
+      form,
+      formFiltered: createInputFilteredFormMetaData(FormMetaData[props.tableId]),
+      isNoPermissionCheck: true
+    };
   };
 
-  const initializeMetaData = (data: ServerResult) => {
-    setGraphData(graph, setGraph, data.graph!);
-    const metaVertex = getMetaVertex(data.result);
-    if (metaVertex) {
-      setGridState("metaVertex", metaVertex);
-    }
-  };
-
-  function getMetaVertex(result: any) {
+  function getMetaVertex(result: unknown) {
     if (Array.isArray(result) && result.length > 0) {
       return graph.vertexes[result[0].id];
     }
     if (isObject(result)) {
-      return graph.vertexes[result.id];
+      return graph.vertexes[(result as { id: string }).id];
     }
-
     return undefined;
   }
 
@@ -230,44 +264,117 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   };
 
   async function fetchTableData(
+    formMeta: IFormMetaData | null,
     skip?: number,
     limit?: number,
-    isLoadMore?: boolean,
-  ) {
-    setGridState("isLoading", true);
+    loadMore?: boolean,
+  ): Promise<ServerResult | { error: string; isLoadMore?: boolean }> {
+    // Don't set state here, just return the loadMore flag with the result
+    
+    // Make sure we have the form metadata before fetching
+    // Allow proceeding even without metadata if we're handling an error
+    if (!formMeta && !loadMore) {
+      return { error: "Form metadata not loaded. Please try again." };
+    }
+    
     try {
       const data = await (props.getTableData || defaultGetTableData)(
         graph,
-        formMetaData()!,
+        formMeta!,
         props.tableId,
         skip,
         limit,
       );
 
       if (isValidResponse(data)) {
-        onTableDataGet(data, isLoadMore);
+        // Return data with the loadMore flag if needed
+        if (loadMore) {
+          // We can't just spread ServerResult because it might have properties that clash with isLoadMore
+          // Need to create a new object type that includes isLoadMore
+          return {
+            ...data,
+            isLoadMore: true
+          };
+        }
+        return data;
       } else {
-        setGridState("error", getErrorMessage(data));
+        return { error: getErrorMessage(data), isLoadMore: loadMore };
       }
-      return data;
     } catch (error) {
-      setGridState(
-        "error",
-        error instanceof Error ? error.message : "An unknown error occurred",
-      );
-    } finally {
-      setGridState("isLoading", false);
+      return { 
+        error: error instanceof Error ? error.message : "An unknown error occurred",
+        isLoadMore: loadMore
+      };
     }
-  }
+  };
 
-  function onTableDataGet(data: ServerResult, isLoadMore?: boolean) {
-    const vertexCount = data.result.length;
+  // Common function to process metadata
+  const processMetadata = (metaResult: SuccessResult): IFormMetaData | null => {
+    let formMeta: IFormMetaData | null = null;
+    
+    if (metaResult.formSchema) {
+      formMeta = metaResult.formSchema;
+      setFormMetaData(metaResult.formSchema);
+    } else if (metaResult.formFiltered) {
+      formMeta = metaResult.formFiltered;
+      setFormMetaData(metaResult.formFiltered);
+    } else if (metaResult.data) {
+      // Process graph data
+      setGraphData(graph, setGraph, metaResult.data.graph!);
+      const metaVertex = getMetaVertex(metaResult.data.result);
+      
+      if (metaVertex) {
+        setGridState("metaVertex", metaVertex);
+        try {
+          // Generate form meta attributes
+          const updatedForm = generateFormMetaAttributes(graph, setGraph, metaVertex);
+          if (updatedForm) {
+            formMeta = updatedForm;
+            setFormMetaData(updatedForm);
+          } else if (metaResult.form) {
+            // Fall back to filtered form if generation fails
+            const filteredForm = createInputFilteredFormMetaData(metaResult.form);
+            formMeta = filteredForm;
+            setFormMetaData(filteredForm);
+          }
+        } catch (error) {
+          console.error("Error generating form meta attributes:", error);
+          // Fall back to filtered form on error
+          if (metaResult.form) {
+            const filteredForm = createInputFilteredFormMetaData(metaResult.form);
+            formMeta = filteredForm;
+            setFormMetaData(filteredForm);
+          }
+        }
+      } else if (metaResult.form) {
+        // No metaVertex, use filtered form
+        const filteredForm = createInputFilteredFormMetaData(metaResult.form);
+        formMeta = filteredForm;
+        setFormMetaData(filteredForm);
+      }
+    } else if (metaResult.form) {
+      const filteredForm = createInputFilteredFormMetaData(metaResult.form);
+      formMeta = filteredForm;
+      setFormMetaData(filteredForm);
+    }
+    
+    // Set permission check flag
+    if (metaResult.isNoPermissionCheck !== undefined) {
+      setGridState("isNoPermissionCheck", metaResult.isNoPermissionCheck);
+    }
+    
+    return formMeta;
+  };
+
+  // Common function to process table data
+  const processTableData = (tableData: ServerResult, isLoadMore = false) => {
+    const vertexCount = tableData.result.length;
     setGridState("isShowLoadMore", vertexCount >= 10);
-    setGraphData(graph, setGraph, data.graph!);
+    setGraphData(graph, setGraph, tableData.graph!);
     const nodes: Vertex[] =
       isLoadMore && gridState.tableStore.data
-        ? [...gridState.tableStore.data, ...data.result]
-        : data.result;
+        ? [...gridState.tableStore.data, ...tableData.result]
+        : tableData.result;
 
     const tableColumns = CreateGridHeaders(
       gridState,
@@ -283,60 +390,165 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     );
 
     setGridState("tableStore", {
-      data: nodes.map((node) => graph.vertexes[node.id]),
+      data: nodes.map((node: Vertex) => graph.vertexes[node.id]),
       tableColumns,
     });
     setGridState("search", "");
     // Track data from the graph store
     setGridState(
       "filteredData",
-      nodes.map((node) => graph.vertexes[node.id]),
+      nodes.map((node: Vertex) => graph.vertexes[node.id]),
     );
-  }
+    
+    // Reset the loading more flag after processing
+    setGridState("isLoadingMore", false);
+  };
+
+  // Combined data resource for both metadata and table data
+  const dataResource = createAsync(async () => {
+    if (!props.tableId) {
+      return { error: "No tableId provided" } as GridData;
+    }
+    
+    // First load metadata
+    const metaResult = await loadMetaData();
+    if ('error' in metaResult) {
+      return { error: metaResult.error } as GridData;
+    }
+
+    // Process metadata for SSR
+    const formMeta = processMetadata(metaResult);
+    
+    // Then load table data
+    // setGridState("isLoading", true);
+    const tableResult = await fetchTableData(formMeta, undefined, undefined, false);
+    if ('error' in tableResult) {
+      return { 
+        metaData: metaResult,
+        error: tableResult.error 
+      } as GridData;
+    }
+
+    // Process table data for SSR
+    if (isValidResponse(tableResult)) {
+      processTableData(tableResult);
+    }
+    // setGridState("isLoading", false);
+
+    // Return both results
+    return {
+      metaData: metaResult,
+      tableData: tableResult,
+    } as GridData;
+  }, {deferStream: true});
+
+  // Process data both on the client-side as well (for hydration)
+  createEffect(() => {
+    const result = dataResource();
+    if (!result) return;
+    
+    try {
+      // Handle errors
+      if (result.error) {
+        setGridState("error", result.error || "");
+      } else {
+        setGridState("error", "");
+      }
+      
+      // Process metadata again for client-side hydration
+      if (result.metaData) {
+        processMetadata(result.metaData);
+      }
+      
+      // Process table data if available
+      if (result.tableData && isValidResponse(result.tableData)) {
+        try {
+          // Check if isLoadMore exists in tableData
+          const isLoadMoreValue = 'isLoadMore' in result.tableData && result.tableData.isLoadMore === true;
+          processTableData(result.tableData, isLoadMoreValue);
+        } catch (error) {
+          console.error("Error processing table data:", error);
+          setGridState("error", error instanceof Error ? error.message : "An error occurred processing table data");
+        }
+      }
+    } catch (e) {
+      console.error("Error processing data resource:", e);
+    }
+  });
+
+  // Handle loading more data separately - this function will be called from the UI
+  const loadMoreData = async (skip?: number, limit?: number) => {
+    try {
+      // Get current form metadata value
+      const currentFormMeta = formMetaData();
+      // Set the loading more flag
+      setGridState("isLoading", true);
+      setGridState("isLoadingMore", true);
+      
+      // Fetch the data with loadMore=true
+      const data = await fetchTableData(currentFormMeta, skip, limit, true);
+      
+      // Process the results directly if there's an error
+      if ('error' in data) {
+        setGridState("error", data.error || "");
+        setGridState("isLoadingMore", false);
+        setGridState("isLoading", false);
+        return;
+      }
+      
+      // Process successful data
+      if (isValidResponse(data)) {
+        processTableData(data, true);
+      }
+    } catch (error) {
+      console.error("Error loading more data:", error);
+      setGridState("error", error instanceof Error ? error.message : "An error occurred loading more data");
+      setGridState("isLoadingMore", false);
+    }
+  };
 
   const onDelete = useDeleteRowConfirm(gridState, setGridState);
 
   return (
+    <Show when={dataResource()}>
     <DataGridProvider value={gridStore}>
       <Switch>
-        {/* <Match when={gridState.isLoading}>
-          <LoaderNew loaderHeight="55vh" />
-        </Match> */}
-        <Match when={gridState.error}>
-          {/* TODO: CSS */}
-          <div>Error: {gridState.error}</div>
+        <Match when={dataResource()?.error}>
+          <div>Error: {dataResource()?.error}</div>
         </Match>
-        <Match when={formMetaData()}>
+        <Match when={dataResource() && formMetaData()}>
           <GridHeader
             CustomAddNewButton={props.CustomAddNewButton}
-            formMetaData={formMetaData()}
+            formMetaData={formMetaData()!}
             onSearch={handleSearch}
           />
           <Show when={gridState.isLoading}>
             <LoaderNew loaderHeight="55vh" />
           </Show>
           {/* IF we not reload table Inline schmea renderer form gives error, because its not properly reloaded */}
-          <Show when={!gridState.isLoading}>
-            <CommonTable
-              allConfiguredPermission={allConfiguredPermission()}
-              cardSize={gridState.cardSize}
-              data={gridState.filteredData}
-              defaultRowsPerPage={10}
-              enableMultiRowSelection={props.enableMultiRowSelection}
-              enableRowSelection={props.enableRowSelection}
-              headers={gridState.tableStore.tableColumns}
-              isSearching={gridState.isSearching}
-              isShowLoadMore={gridState.isShowLoadMore}
-              isShowPagination={props.isShowPagination}
-              layout={gridState.layout}
-              onLoadMore={(skip, limit) => fetchTableData(skip, limit, true)}
-              rowsPerPageOptions={[5, 10, 15]}
-              selectedRows={gridState.selectedRows}
-              setSelectedRows={(rows: Vertex[]) =>
-                setGridState("selectedRows", rows)
-              }
-              totalItems={gridState.filteredData.length}
-            />
+          <Show when={!gridState.isLoading && !gridState.isLoadingMore}>
+          <CommonTable
+            allConfiguredPermission={allConfiguredPermission()}
+            cardSize={gridState.cardSize}
+            data={gridState.filteredData}
+            defaultRowsPerPage={10}
+            enableMultiRowSelection={props.enableMultiRowSelection}
+            enableRowSelection={props.enableRowSelection}
+            headers={gridState.tableStore.tableColumns}
+            isSearching={gridState.isSearching}
+            isShowLoadMore={gridState.isShowLoadMore}
+            isShowPagination={props.isShowPagination}
+            layout={gridState.layout}
+            onLoadMore={(skip, limit) => {
+              void loadMoreData(skip, limit);
+            }}
+            rowsPerPageOptions={[5, 10, 15]}
+            selectedRows={gridState.selectedRows}
+            setSelectedRows={(rows: Vertex[]) =>
+              setGridState("selectedRows", rows)
+            }
+            totalItems={gridState.filteredData.length}
+          />
           </Show>
           <Show when={gridState.deleteRowId}>
             <DialogWithButtons
@@ -353,5 +565,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
         </Match>
       </Switch>
     </DataGridProvider>
+    </Show>
   );
 }
