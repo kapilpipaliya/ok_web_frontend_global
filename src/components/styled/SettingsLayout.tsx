@@ -15,6 +15,7 @@ export interface MenuItem {
   adminOnly?: boolean;
   component: Component;
   group?: string;
+  icon?: string;
   id: string;
   label: string;
 }
@@ -129,6 +130,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                 cursor: pointer;
                                 border-radius: 4px;
                                 margin-bottom: 8px;
+                                display: flex;
+                                align-items: center;
+                                gap: 8px;
                                 ${
                                   selectedMenu() ===
                                   (args.dataContext.menuItems as MenuItem).id
@@ -153,9 +157,23 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                       (args.dataContext.menuItems as MenuItem)
                                         .id,
                                     ),
-                                  text: (args.dataContext.menuItems as MenuItem)
-                                    .label,
                                 }),
+                                attributes: [
+                                  {
+                                    componentName: "Html",
+                                    as: "icon",
+                                    props: (args: FunctionArgumentType) => ({
+                                      icon: (args.dataContext.menuItems as MenuItem).icon,
+                                      hide: !(args.dataContext.menuItems as MenuItem).icon,
+                                    }),
+                                  },
+                                  {
+                                    componentName: "Html",
+                                    props: (args: FunctionArgumentType) => ({
+                                      text: (args.dataContext.menuItems as MenuItem).label,
+                                    }),
+                                  },
+                                ],
                               },
                             ],
                             componentName: "Data",

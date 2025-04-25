@@ -6,11 +6,13 @@ export default function AdminUserSettings() {
   const menuItems = [
     {
       component: ProfileSettings,
+      icon: "ph:user",
       id: "profile",
       label: "Profile",
     },
     {
       component: PasswordChangeForm,
+      icon: "ph:key",
       id: "password",
       label: "Change Password",
     },

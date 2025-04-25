@@ -5,6 +5,7 @@ export default function SystemGlobalSettings() {
   const menuItems = [
     {
       component: EmailSettings,
+      icon: "ph:envelope",
       id: "email",
       label: "Email Settings",
     },

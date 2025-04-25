@@ -7,16 +7,19 @@ export default function SystemUserSettings() {
   const menuItems = [
     {
       component: ProfileSettings,
+      icon: "ph:user",
       id: "profile",
       label: "Profile",
     },
     {
       component: PasswordChangeForm,
+      icon: "ph:key",
       id: "password",
       label: "Change Password",
     },
     {
       component: AccountDeletionForm,
+      icon: "ph:trash",
       id: "delete-account",
       label: "Delete Account",
     },
