@@ -6,7 +6,6 @@ import {
   $PROXY,
   createMemo,
   createSignal,
-  createUniqueId,
   ErrorBoundary,
   getOwner,
   Match,
@@ -64,6 +63,8 @@ import {
   removeTxnIdAndCreateNew, 
   setError} from "./functions/formFunctions";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import {createUniqueId} from "~/lib/solid/createUniqueId";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -457,7 +458,7 @@ export function DynamicComponent(
     }
   });
 
-  const styleId = `cssUId-${createUniqueId()}`;
+  const styleId = createUniqueId();
   const cssStyle = createMemo(() => {
     try {
       const functionArgs = getFunctionArgumentWithValue();

@@ -1,6 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { createSignal, createUniqueId, For, onCleanup, Show } from "solid-js";
+import { createSignal, For, onCleanup, Show } from "solid-js";
+import {createUniqueId} from "~/lib/solid/createUniqueId";
 
 import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";

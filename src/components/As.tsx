@@ -1,19 +1,11 @@
-import {
-  type Component,
-  createMemo,
-  createUniqueId,
-  type JSX,
-  splitProps,
-} from "solid-js";
-import { Dynamic } from "solid-js/web";
-import { StyleRenderer } from "./StyleRenderer";
+import {type Component, createMemo, type JSX, splitProps,} from "solid-js";
+import {Dynamic} from "solid-js/web";
+import {StyleRenderer} from "./StyleRenderer";
 
-import type {
-  CssType,
-  FunctionArgumentType,
-} from "./form/type/FieldSchemaType";
-import { useTheme } from "~/lib/context/ThemeContext";
-import { processCssContent } from "~/lib/styles/processCss";
+import type {CssType, FunctionArgumentType,} from "./form/type/FieldSchemaType";
+import {useTheme} from "~/lib/context/ThemeContext";
+import {processCssContent} from "~/lib/styles/processCss";
+import {createUniqueId} from "~/lib/solid/createUniqueId";
 
 type ElementProps<T extends keyof JSX.IntrinsicElements> = {
   as: T;
@@ -35,12 +27,13 @@ type AsProps<T extends keyof JSX.IntrinsicElements | Component<any>> =
     ? ElementProps<T>
     : CustomComponentProps;
 
+// Function used internally
 export function As<T extends keyof JSX.IntrinsicElements | Component<any>>(
   props: AsProps<T>,
 ): JSX.Element {
   const theme = useTheme();
   const [local, rest] = splitProps(props, ["as", "css", "class", "asProp"]);
-  const uniqueId = `cssUId-${createUniqueId()}`;
+  const uniqueId = createUniqueId();
 
   const getCssContent = createMemo(() => {
     if (!local.css) {

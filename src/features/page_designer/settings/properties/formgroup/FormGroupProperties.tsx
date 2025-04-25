@@ -3,13 +3,13 @@ import type { SetStoreFunction } from "solid-js/store";
 import {
   type Accessor,
   createMemo,
-  createUniqueId,
   For,
   Match,
   onCleanup,
   Show,
   Switch,
 } from "solid-js";
+import {createUniqueId} from "~/lib/solid/createUniqueId";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";

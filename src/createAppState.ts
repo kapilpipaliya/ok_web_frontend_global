@@ -27,7 +27,6 @@ export function createAppState() {
         url: "",
         userRoles: [],
         userSettingId: "",
-        cssUId: 0,
         tooltipRegistry: {},
         activeTooltips: {},
       } as GlobalProperties,

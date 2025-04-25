@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { Style } from "@solidjs/meta";
-import { createUniqueId } from "solid-js";
+import {createUniqueId} from "~/lib/solid/createUniqueId";
 
 import type { Id } from "~/lib/graph/graph";
 import { css } from "~/lib/styles";

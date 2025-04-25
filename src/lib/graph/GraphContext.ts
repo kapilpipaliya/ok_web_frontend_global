@@ -18,7 +18,6 @@ export interface GlobalProperties {
   url: string;
   userRoles: Id[];
   userSettingId: Id;
-  cssUId: number;
   tooltipRegistry?: { [key: string]: string[] }; // which tooltips belong to which group
   activeTooltips?: { [key: string]: boolean };
   // isAuthenticated: false,
