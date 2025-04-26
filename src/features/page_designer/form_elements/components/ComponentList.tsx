@@ -102,7 +102,7 @@ export function ComponentList(props: {
     setIsFetchingData(false);
   });
 
-  const showComponentChildren = () => {
+  const showComponentSlot = () => {
     return formStoreVertex()?.P.formId === "Component";
   };
 
@@ -115,11 +115,11 @@ export function ComponentList(props: {
         : []);
     const query = searchQuery().toLowerCase();
 
-    // First filter by component type if showComponentChildren is true
-    const typeFiltered = showComponentChildren()
+    // First filter by component type if showComponentSlot is true
+    const typeFiltered = showComponentSlot()
       ? children
       : children.filter(
-          (child) => (child.P.key as string) !== "ComponentChildren",
+          (child) => (child.P.key as string) !== "Slot",
         );
 
     // Then filter by search query

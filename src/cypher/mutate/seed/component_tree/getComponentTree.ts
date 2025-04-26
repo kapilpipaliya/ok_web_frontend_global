@@ -9,7 +9,7 @@ export function getComponentTree(): ComponentNode[] {
   - Html
   - Data
   - Form
-  - ComponentChildren
+  - Slot
 `;
   // - Table
   // - Transition

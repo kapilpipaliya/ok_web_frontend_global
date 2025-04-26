@@ -30,7 +30,7 @@ Attr Vertex:
 - Required Properties:
   - pos: number - Determines Item order among siblings
 - Optional Properties:
-  - componentName: string - name of the component any of: 'Html', 'Icon', 'Data', 'Switch', 'Match', 'ComponentChildren'
+  - componentName: string - name of the component any of: 'Html', 'Data', 'Slot'
   - props: Function Body string - dynamic properties for the Item e.g. 'props: "return {}"'. Its the place where you add javascript code to generate dynamic properties for the Item.
     - Use 'props' for dynamic values. It is a Function Body string that should return an object with key-value pairs. in the function body you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
     - export interface FunctionArgumentBaseType {
@@ -70,9 +70,7 @@ Attr Vertex:
     - 'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'props' function body pass data key the array of values it should iterate over.
     - Requires 'name' property in Attr vertex, In the 'Data' Item children to read the value of the context, in 'props' function body use 'args.dataContext["name"]' property.
     - use 'Data' Item whenever possible.
-  * 'Switch' - Conditional rendering
-  * 'Match' - Pattern matching
-  * 'ComponentChildren' - Component slots
+  * 'Slot' - Component slots
 - Text Content:
   Add text via 'text' property either:
   - Directly on vertex
@@ -200,7 +198,7 @@ Reusable Component:
   2. Attr Vertex:
     1. "Attr" vertex join with Component using "Attr" edge.
     2. read Component variant value from the Item tree using 'props' property in the function body with 'args.dataContext.props["key"]' property.
-    3. to use Children or slot for the component use 'Attr' vertex with 'componentName' property set to 'ComponentChildren'.
+    3. to use Children or slot for the component use 'Attr' vertex with 'componentName' property set to 'Slot'.
 
 Important Guidelines:
 - Create visually balanced layouts

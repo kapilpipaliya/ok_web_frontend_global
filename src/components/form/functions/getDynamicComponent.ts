@@ -1,7 +1,7 @@
 import { Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
 
-import { ComponentChildrenField } from "~/components/fields/component/ComponentChildrenField";
+import { SlotField } from "~/components/fields/component/SlotField";
 import { ComponentField } from "~/components/fields/component/ComponentField";
 import { DataField } from "~/components/fields/data/DataField";
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
@@ -34,7 +34,7 @@ export const componentsMap: Record<string, any> = {
   // Button: ButtonField,
   CheckBox: CheckboxField,
   Component: ComponentField,
-  ComponentChildren: ComponentChildrenField,
+  Slot: SlotField,
   Data: DataField,
   // https://ark-ui.com/solid/docs/components/color-picker
   DynamicTable: TableInputField,

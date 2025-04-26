@@ -2,7 +2,7 @@ import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
-import { ComponentChildrenContext } from "~/components/fields/component/contexts/ComponentChildrenContext";
+import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
 import {
   PageContext,
@@ -107,7 +107,7 @@ export function ComponentField(
   return (
     <>
       <Show when={getCopmVertex().length}>
-        <ComponentChildrenContext.Provider
+        <SlotContext.Provider
           value={() => {
             return (
               <PreviewContext.Provider
@@ -119,7 +119,7 @@ export function ComponentField(
           }}
         >
           <ComponentWrapper />
-        </ComponentChildrenContext.Provider>
+        </SlotContext.Provider>
       </Show>
       <Show when={!getCopmVertex().length}>Error</Show>
     </>
