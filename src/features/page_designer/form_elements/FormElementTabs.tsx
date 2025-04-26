@@ -3,6 +3,7 @@ import {
   createSignal,
   For,
   Match,
+  onMount,
   type ParentProps,
   Show,
   Switch,
@@ -104,19 +105,28 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   const [rootVertexes, setRootVertexes] = createSignal<Vertex[]>([]);
   const { showWarningToast } = useToast();
 
-  createEffect(async () => {
+  onMount(() => {
     if (props.rootLevel) {
-      // Fetch children level Components
-      const result = await fetchAndSetGraphData(
+      fetchAndSetGraphData(
         graph,
         setGraph,
         "g:'ALL_ROOT_LEVEL_COMPONENTS'<-'ParentComponent*'",
         undefined,
         { skipExisting: true },
       );
+    }
+  });
+  createEffect(() => {
+    if (props.rootLevel) {
+      // Fetch children level Components
+      const vertexes: Vertex[] = evalExpression("g:'Component'", {
+        graph,
+        setGraph,
+        vertexes: [],
+      }) || [];
       setRootVertexes(
-        Object.values(result?.graph?.vertexes ?? {}).filter(
-          (vertex) => !vertex.OUT || Object.keys(vertex.OUT).length === 0,
+        vertexes.filter(
+          (vertex) => !vertex.OUT?.ParentComponent || Object.keys(vertex.OUT.ParentComponent).length === 0,
         ) || [],
       );
     } else {

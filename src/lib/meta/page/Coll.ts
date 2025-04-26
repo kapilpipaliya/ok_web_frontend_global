@@ -73,7 +73,7 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
         componentName: "TextArea",
         key: "description",
       },
-      { componentName: "CheckBox", key: "public" },
+      // { componentName: "CheckBox", key: "public" },
       { componentName: "CheckBox", key: "isInlineEditable" },
       // { key: "supportCustomFields", componentName: "CheckBox" },
       // { key: "searchOnly", componentName: "CheckBox" },
