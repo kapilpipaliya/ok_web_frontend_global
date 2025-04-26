@@ -25,6 +25,96 @@ import {
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
+
+function TemplateNameInput(props: {
+  label: string;
+  value: string;
+  onInput: (value: string) => void;
+  ref: (el: HTMLInputElement) => void;
+}) {
+  return (
+    <div>
+      <As
+        as="label"
+        css={css`
+  color: #3b82f6;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+`}
+        for="templateName"
+      >
+        {props.label} Name
+      </As>
+      <As
+        as="div"
+        css={css`
+  margin-top: 2px;
+`}
+      >
+        <As
+          as="input"
+          css={css`
+  border-radius: 0.375rem;
+  border-width: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+  color: #3b82f6;
+  display: block;
+  font-size: 0.875rem;
+  padding-left: 0.75rem; padding-right: 0.75rem;
+  padding-top: 0.375rem; padding-bottom: 0.375rem;
+  width: 100%;
+`}
+          id="templateName"
+          onChange={(e) => props.onInput(e.target.value)}
+          placeholder={`New ${props.label} Name`}
+          ref={props.ref}
+          type="text"
+          value={props.value}
+        />
+      </As>
+    </div>
+  );
+}
+
+function SaveInCurrentPageCheckbox(props: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <As
+      as="div"
+      css={css`
+  margin-top: 2px;
+`}
+    >
+      <As
+        as="label"
+        css={css`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+`}
+      >
+        <As
+          as="input"
+          checked={props.checked}
+          onChange={(e) => props.onChange(e.target.checked)}
+          type="checkbox"
+        />
+        <As
+          as="span"
+          css={css`
+  font-size: 0.875rem;
+`}
+        >
+          Save in current page
+        </As>
+      </As>
+    </As>
+  );
+}
 
 export function SaveAsTemplateMenu(
   props: Readonly<{
@@ -36,7 +126,7 @@ export function SaveAsTemplateMenu(
     saveAsLabel: "Component" | "Template";
   }>,
 ) {
-  let nameInputRef: HTMLInputElement;
+  let nameInputRef!: HTMLInputElement;
   const [graph, setGraph] = useGraph();
   const [templateName, setTemplateName] = createSignal("");
   const [error, setError] = createSignal("");
@@ -65,7 +155,7 @@ export function SaveAsTemplateMenu(
       formStoreVertex()?.P.txnId,
       graph,
       setGraph,
-      graph.vertexes[formStoreVertex()?.P.formDataId!],
+      graph.vertexes[formStoreVertex()?.P.formDataId || ""],
     );
     const parentComponentMetaVertex = {
       id: "",
@@ -102,7 +192,8 @@ export function SaveAsTemplateMenu(
       await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
       showSuccessToast(`${label()} Saved Successfully`);
       props.onClose();
-    } catch (_error) {
+    } catch (error) {
+      console.error(error);
       setError("An unexpected error occurred");
     }
   };
@@ -113,7 +204,7 @@ export function SaveAsTemplateMenu(
       P: { key },
     } as unknown as Vertex);
     if (res.error) {
-      setError(res.message || "An error occurred");
+      setError(getErrorMessage(res));
       return;
     }
     saveTemplate();
@@ -139,77 +230,20 @@ export function SaveAsTemplateMenu(
         prompted to change it.
       </DialogSubTitle>
 
-      <div>
-        <As
-          as="label"
-          css={css`
-  color: #3b82f6;
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-`}
-          for="templateName"
-        >
-          {label()} Name
-        </As>
-        <As
-          as="div"
-          css={css`
-  margin-top: 2px;
-`}
-        >
-          <As
-            as="input"
-            css={css`
-  border-radius: 0.375rem;
-  border-width: 0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  color: #3b82f6;
-  display: block;
-  font-size: 0.875rem;
-  padding-left: 0.75rem; padding-right: 0.75rem;
-  padding-top: 0.375rem; padding-bottom: 0.375rem;
-  width: 100%;
-`}
-            id="templateName"
-            onChange={(e) => setTemplateName(e.target.value)}
-            placeholder={`New ${label()} Name`}
-            ref={nameInputRef!}
-            type="text"
-            value={templateName()}
-          />
-        </As>
-        <As
-          as="div"
-          css={css`
-  margin-top: 2px;
-`}
-        >
-          <As
-            as="label"
-            css={css`
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-`}
-          >
-            <As
-              as="input"
-              checked={saveInCurrentPage()}
-              onChange={(e) => setSaveInCurrentPage(e.target.checked)}
-              type="checkbox"
-            />
-            <As
-              as="span"
-              css={css`
-  font-size: 0.875rem;
-`}
-            >
-              Save in current page
-            </As>
-          </As>
-        </As>
-      </div>
+      <TemplateNameInput
+        label={label()}
+        value={templateName()}
+        onInput={setTemplateName}
+        ref={(el) => (nameInputRef = el)}
+      />
+      
+      <Show when={props.saveAsLabel !== "Template"}>
+        <SaveInCurrentPageCheckbox 
+          checked={saveInCurrentPage()} 
+          onChange={setSaveInCurrentPage} 
+        />
+      </Show>
+      
       <Show when={error()}>
         <As
           as="div"
