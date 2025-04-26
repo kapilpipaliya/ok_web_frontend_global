@@ -5,10 +5,10 @@ import { getDriver } from "~/cypher/core/driver";
 
 export async function getSubDomain(host: string) {
   const result = parse(host);
-  const { domain, subdomain } = result;
+  const { domain, subdomain, hostname } = result;
 
   // If domain is null, set it to "super"
-  const effectiveDomain = domain || "localhost";
+  const effectiveDomain = domain || hostname;
 
   // If it matches the current domain from env, use system subdomain
   if (effectiveDomain === process.env.DOMAIN) {
@@ -33,7 +33,7 @@ export async function getSubDomain(host: string) {
         return { domain, subdomain: result.records[0].get("subdomain") };
       }
     } catch (error) {
-      console.error("Error looking up domain:", error);
+      console.error("Error looking up domain:", error, effectiveDomain);
       throw error;
     }
   }
