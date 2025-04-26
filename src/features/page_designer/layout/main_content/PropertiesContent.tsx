@@ -27,10 +27,7 @@ export function PropertiesContent() {
       <Show
         when={
           formStoreVertex()?.P &&
-          graph.vertexes[formStoreVertex()?.P.selectedId] &&
-          graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith(
-            "Attr",
-          )
+          graph.vertexes[formStoreVertex()?.P.selectedId]
         }
       >
         <DesignerFormIdContext.Provider value={formStoreVertex().id}>

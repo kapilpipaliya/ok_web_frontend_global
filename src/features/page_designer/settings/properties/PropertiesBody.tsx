@@ -113,12 +113,19 @@ export function PropertiesBody() {
         />
       </Show>
 
-      <FormGroupProperties
-        metaAttributes={selectedComponentProperties() ?? []}
-        onChange={setPropertyValue}
-        selectedLayout={graph.vertexes[formStoreVertex()?.P.selectedId]}
-        txnId={formStoreVertex()?.P.txnId}
-      />
+      <Show when={
+        graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith(
+          "Attr",
+        )
+      }
+      >
+        <FormGroupProperties
+          metaAttributes={selectedComponentProperties() ?? []}
+          onChange={setPropertyValue}
+          selectedLayout={graph.vertexes[formStoreVertex()?.P.selectedId]}
+          txnId={formStoreVertex()?.P.txnId}
+        />
+      </Show>
       {/* <JsonEditorFieldComponent 
         // height="400px" 
         replaceProperties={replacePropertiesValue}
