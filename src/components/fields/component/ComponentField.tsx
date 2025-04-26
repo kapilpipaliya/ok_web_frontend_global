@@ -24,7 +24,7 @@ import {DataContext, useDataContext} from "~/features/page_attr_render/context/D
 export function ComponentField(
   props: Readonly<GenericComponentProps & { componentId?: string }>,
 ) {
-  const [, otherProps] = splitProps(props, ["componentId"]);
+  const [, otherProps] = splitProps(props, []);
 
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();

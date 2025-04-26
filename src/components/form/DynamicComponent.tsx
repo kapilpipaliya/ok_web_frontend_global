@@ -3,7 +3,6 @@ import { Style } from "@solidjs/meta";
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
 import {
-  $PROXY,
   createMemo,
   createSignal,
   ErrorBoundary,
@@ -65,6 +64,7 @@ import {
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import {createUniqueId} from "~/lib/solid/createUniqueId";
+import { createFunctionProxy } from "./createFunctionProxy";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -137,26 +137,26 @@ export function DynamicComponent(
   const hasInsertPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "insert", graph) ??
-      parentRenderContext()?.context.hasInsertPermission
+      parentRenderContext()?.context?.hasInsertPermission
     );
   });
 
   const hasEditPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "edit", graph) ??
-      parentRenderContext()?.context.hasEditPermission
+      parentRenderContext()?.context?.hasEditPermission
     );
   });
   const hasViewPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "view", graph) ??
-      parentRenderContext()?.context.hasViewPermission
+      parentRenderContext()?.context?.hasViewPermission
     );
   });
   const hasDeletePermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), "delete", graph) ??
-      parentRenderContext()?.context.hasDeletePermission
+      parentRenderContext()?.context?.hasDeletePermission
     );
   });
 
@@ -394,45 +394,51 @@ export function DynamicComponent(
   };
   const dynamicFns = createMemo(() => {
     try {
-      if (typeof props.meta.P.fns === "function") {
-        return props.meta.P.fns(getFunctionArgumentWithValue()) || {};
-      }
-      if (typeof props.meta.P.fns === "string") {
-        try {
-          const fnsFunction = new Function("args", props.meta.P.fns);
-          return fnsFunction(getFunctionArgumentWithValue()) || {};
-        } catch (error) {
-          console.error("Error evaluating fns function:", error);
-          return {};
+      // Helper to evaluate fns from a vertex
+      const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
+        if (typeof fns === "function") {
+          return fns(getFunctionArgumentWithValue());
         }
+        if (typeof fns === "string") {
+          try {
+            return new Function("args", fns)(getFunctionArgumentWithValue());
+          } catch (error) {
+            console.error("Error evaluating fns:", error);
+            return undefined;
+          }
+        }
+        return undefined;
+      };
+
+      // For Component type, merge fns from component vertex and meta
+      if (props.meta.P.componentName === "Component") {
+        const componentVertex = (evalExpression("->$0Comp", {
+          graph,
+          setGraph,
+          vertexes: [props.meta],
+        }) as Vertex[])?.[0];
+        
+        
+        return new Proxy({}, {
+          get(_, key: string) {
+            const metaFns = evaluateFns(props.meta.P.fns);
+            if (metaFns && key in metaFns) return metaFns[key];
+            const componentFns = evaluateFns(componentVertex.P.fns);
+            if (componentFns && key in componentFns) return componentFns[key];
+            return parentRenderContext()?.context?.fns?.[key];
+          }
+        });
       }
-      return {};
+      
+      // For other components, just use meta fns
+      return evaluateFns(props.meta.P.fns) ?? parentRenderContext()?.context?.fns;
     } catch (error) {
       console.error("Error in dynamicFns:", error);
-      return {};
+      return parentRenderContext()?.context?.fns;
     }
   });
 
-  const functionProxy = new Proxy(
-    {},
-    {
-      get(_, key: string) {
-        try {
-          // @ts-expect-error key is proxy after first use.
-          if (key === $PROXY) {
-            return dynamicFns();
-          }
-          if (dynamicFns()[key]) {
-            return dynamicFns()[key];
-          }
-          return parentRenderContext()?.context.fns?.[key];
-        } catch (error) {
-          console.error("Error in functionProxy:", error);
-          return undefined;
-        }
-      },
-    },
-  );
+  const functionProxy = createFunctionProxy(dynamicFns, parentRenderContext);
   const dynamicProps = createMemo(() => {
     try {
       if (typeof props.meta.P.props === "function") {
@@ -539,14 +545,14 @@ export function DynamicComponent(
     // @ts-ignore
     props.isViewMode ??
     props.meta.P.isViewMode ??
-    parentRenderContext()?.context.isViewMode;
+    parentRenderContext()?.context?.isViewMode;
 
   const isReadOnly = () =>
     // @ts-ignore
     props.isReadOnly ??
     dynamicProps().readOnly ??
     props.meta.P.readOnly ??
-    parentRenderContext()?.context.readOnly;
+    parentRenderContext()?.context?.readOnly;
 
   const repeterStore = createStore({
     get context() {

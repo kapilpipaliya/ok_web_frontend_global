@@ -5,7 +5,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { getComponentDefaultValues } from "~/components/fields/component/functions/getComponentDefaultValues";
-import { getDataVertex } from "~/features/page_attr_render/functions/getDataVertex";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import {
@@ -15,10 +14,14 @@ import {
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { useGraph } from "~/lib/graph/GraphContext";
 import {DataContext, useDataContext} from "~/features/page_attr_render/context/DataContext";
+import { PageRenderContextProvider, PageRenderObject } from "./context/PageRenderContext";
+import { createFunctionProxy } from "~/components/form/createFunctionProxy";
+import { getDataVertex } from "./functions/getDataVertex";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export function PageView(
   props: Readonly<{
-    context?: any;
+    context?: Record<string, unknown>;
     data?: Vertex;
     hasDeletePermission?: boolean | null;
     hasEditPermission?: boolean | null;
@@ -112,27 +115,68 @@ export function PageView(
       </DataContext.Provider>
     );
   };
+  const dynamicFns = createMemo(() => {
+    try {
+       // Helper to evaluate fns from a vertex
+       // need to pass object because getting error:
+       // get' on proxy: property 'Symbol(solid-proxy)' is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value
+       // (expected '#<Object>' but got 'undefined')
+       // because in createFunctionProxy we return dynamicFns() in case of $PROXY
+       const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
+        if (typeof fns === "function") {
+          return fns(previewStore[0].context) || {};
+        }
+        if (typeof fns === "string") {
+          try {
+            return new Function("args", fns)(previewStore[0].context) || {};
+          } catch (error) {
+            console.error("Error evaluating fns:", error);
+            return {};
+          }
+        }
+        return {};
+      };
+      
+      return evaluateFns(props.metaVertex?.P.fns);
+    } catch (error) {
+      console.error("Error in dynamicFns:", error);
+      return {};
+    }
+  });
+
+  const functionProxy = createFunctionProxy(dynamicFns, () => undefined);
+  const repeterStore = createStore({
+    get context() {
+      return {
+        get fns() {
+          return functionProxy;
+        }
+      }
+    }
+  } as PageRenderObject) ;
 
   return (
     <Show keyed when={props.metaVertex}>
-      <Switch>
-        <Match when={true}>
-          <PreviewContext.Provider value={previewStore}>
-            <Switch>
-              <Match when={props.metaVertex?.L[0] === "Component"}>
-                <ComponentWrapper />
-              </Match>
-              <Match when={true}>
-                <PageAttrRender
-                  data={props.data}
-                  isNoPermissionCheck={props.isNoPermissionCheck!}
-                  metaVertex={props.metaVertex!}
-                />
-              </Match>
-            </Switch>
-          </PreviewContext.Provider>
-        </Match>
-      </Switch>
+      <PageRenderContextProvider store={repeterStore}>
+        <Switch>
+          <Match when={true}>
+            <PreviewContext.Provider value={previewStore}>
+              <Switch>
+                <Match when={props.metaVertex?.L[0] === "Component"}>
+                  <ComponentWrapper />
+                </Match>
+                <Match when={true}>
+                  <PageAttrRender
+                    data={props.data}
+                    isNoPermissionCheck={props.isNoPermissionCheck!}
+                    metaVertex={props.metaVertex!}
+                  />
+                </Match>
+              </Switch>
+            </PreviewContext.Provider>
+          </Match>
+        </Switch>
+      </PageRenderContextProvider>
     </Show>
   );
 }
