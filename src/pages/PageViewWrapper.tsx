@@ -70,6 +70,7 @@ import {
   type FetchFormMetaDataResult,
 } from "./functions/fetchPageData";
 import { fetchFormMetaData } from "./functions/fetchFormMetaData";
+import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export function PageViewWrapper(
   props: Readonly<{
@@ -179,6 +180,31 @@ export function PageViewWrapper(
   const dataVertex = () => graph.vertexes[formStore().P.formDataId!];
 
   const [previewStore] = usePreviewContext();
+
+  const dynamicFns = createMemo(() => {
+    try {
+       // Helper to evaluate fns from a vertex
+       const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
+        if (typeof fns === "function") {
+          return fns({} as FunctionArgumentType) || {};
+        }
+        if (typeof fns === "string") {
+          try {
+            return new Function("args", fns)({} as FunctionArgumentType) || {};
+          } catch (error) {
+            console.error("Error evaluating fns:", error);
+            return {};
+          }
+        }
+        return {};
+      };
+      
+      return evaluateFns(metaVertex()?.P.fns);
+    } catch (error) {
+      console.error("Error in dynamicFns:", error);
+      return {};
+    }
+  });
 
   const isNoPermissionCheck = createMemo(
     () =>
@@ -385,7 +411,7 @@ export function PageViewWrapper(
     if (
       formStore().P.formMetaId &&
       !isNoPermissionCheck() &&
-      !metaVertex()!.P.public
+      ((["Form", "Page"].includes(metaVertex()?.L[0]) && !dynamicFns().enabled?.()))
     ) {
       setFormStore("error", `${props.pageVertexName} is not authorized`);
       return false;
