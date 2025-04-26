@@ -70,6 +70,11 @@ const SectionHeader = (props: SectionHeaderProps) => (
   display: flex;
   align-items: center;
   gap: 2px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: \${args.theme.var.color.base_3};
+  padding: 4px 0;
 `,
     ]}
   >
@@ -172,7 +177,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   return (
     <div>
       <SectionHeader 
-        title={props.rootLevel ? "Global Components" : "Page Components"} 
+        title={props.rootLevel ? "Components" : "Page Components"} 
         onAddClick={handleAddComponentClick} 
         icon={props.rootLevel ? "ph:puzzle-piece" : "ph:layout"}
       />
@@ -302,13 +307,13 @@ export function FormElementTabs() {
             
             <Divider />
             
-            <Show keyed when={formStoreVertex()?.id}>
+            {/* <Show keyed when={formStoreVertex()?.id}>
               <DesignerFormIdContext.Provider value={formStoreVertex().id}>
                 <PageLevelComponents rootLevel={false} />
               </DesignerFormIdContext.Provider>
             </Show>
 
-            <Divider />
+            <Divider /> */}
 
             <As
               as="div"
