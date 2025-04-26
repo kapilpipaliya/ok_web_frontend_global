@@ -264,12 +264,12 @@ export function LayoutTreeItem(
           }}
           title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
         />
-        <Show when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}>
+        {/* <Show when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}> */}
           <AttrConfigIcons
             metaVertex={props.metaVertex}
             parentRef={parentRef()!}
           />
-        </Show>
+        {/* </Show> */}
       </TreeItemContainer>
       <Show when={showJsonEditor()}>
         <As

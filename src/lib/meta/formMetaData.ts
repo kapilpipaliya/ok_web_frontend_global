@@ -110,9 +110,9 @@ FormMetaData.CompExample = {
 //   key: "ErrorPage",
 //   title: "Error Page",
 // };
-FormMetaData.TemplatePage = {
+FormMetaData.Template = {
   attributes: [...FormMetaData.Page.attributes],
-  key: "TemplatePage",
+  key: "Template",
   title: "Templates",
 };
 FormMetaData.EmailTemplate = {

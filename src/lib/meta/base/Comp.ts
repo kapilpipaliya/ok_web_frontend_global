@@ -18,7 +18,7 @@ export const parentComponentAttribute = {
   // validation: { required: true },
 };
 export const parentTemplateAttribute = {
-  collection: "g:'TemplatePage'",
+  collection: "g:'Template'",
   componentName: "MultiSelect",
   displayName: "Parent Template",
   key: "ParentTemplate",

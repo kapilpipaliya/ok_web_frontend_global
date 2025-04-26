@@ -185,7 +185,7 @@ const TemplatesSection = () => {
       {
         id: "new",
         IN: {},
-        L: ["TemplatePage"],
+        L: ["Template"],
         OUT: {},
         P: {},
       } as Vertex,
@@ -208,7 +208,7 @@ const TemplatesSection = () => {
         onAddClick={handleAddTemplateClick} 
         icon="ph:files"
       />
-      <PagesList coll="TemplatePage" />
+      <PagesList coll="Template" />
     </As>
   );
 };

@@ -31,7 +31,7 @@ export default function AdminDashboard() {
       { id: "Page", label: "Pages" },
       { id: "Form", label: "Forms" },
       { id: "Component", label: "Components" },
-      { id: "TemplatePage", label: "Templates" },
+      { id: "Template", label: "Templates" },
     ];
 
     // Only add the EmailTemplate tab if the user has admin role

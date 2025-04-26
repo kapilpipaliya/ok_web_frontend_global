@@ -14,9 +14,9 @@ import { css } from "~/lib/styles";
 
 export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const [graph, setGraph] = useGraph();
-  let insertBeforeButtonsRef: HTMLElement;
-  let insertAfterButtonsRef: HTMLElement;
-  let insertInsideButtonsRef: HTMLElement;
+  const [insertBeforeButtonsRef, setInsertBeforeButtonsRef] = createSignal<HTMLElement | undefined>();
+  const [insertAfterButtonsRef, setInsertAfterButtonsRef] = createSignal<HTMLElement | undefined>();
+  const [insertInsideButtonsRef, setInsertInsideButtonsRef] = createSignal<HTMLElement | undefined>();
   const [showBeforeMenu, setShowBeforeMenu] = createSignal(false);
   const [showAfterMenu, setShowAfterMenu] = createSignal(false);
   const [showInsideMenu, setShowInsideMenu] = createSignal(false);
@@ -24,87 +24,95 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+    
+  // Check if this is a root-level component
+  const isRootLevel = () => formStoreVertex()?.P.formDataId === props.item.id;
+  
+  // Safe reference to form data for drag and drop operations
+  const getFormData = () => graph.vertexes[formStoreVertex()?.P.formDataId || ""] || undefined;
 
   return (
     <>
-      <IconButton
-        css={[
-          ICON_BUTTON_STYLES.baseCss,
-          ICON_BUTTON_STYLES.defaultCss,
-          ICON_BUTTON_STYLES.spacingCss,
-          css`
-            background-color: transparent;
-            border: none;
-          `,
-        ]}
-        icon="ph:arrow-line-up"
-        iconCss={css`transition:transform 0.2s;`}
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowBeforeMenu(true);
-        }}
-        ref={(el) => (insertBeforeButtonsRef = el)}
-        size={props.size}
-        title="Add Before"
-      />
-      <Show when={showBeforeMenu()}>
-        <InsertButtonsMenu
-          item={props.item}
-          onClose={() => setShowBeforeMenu(false)}
-          onDoubleClick={async (fromVertex) => {
-            await handleDropAtPosition(
-              graph,
-              setGraph,
-              formStoreVertex()?.P.txnId,
-              graph.vertexes[formStoreVertex()?.P.formDataId!],
-              fromVertex,
-              props.item,
-              "before",
-            );
+      <Show when={!isRootLevel()}>
+        <IconButton
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            ICON_BUTTON_STYLES.spacingCss,
+            css`
+              background-color: transparent;
+              border: none;
+            `,
+          ]}
+          icon="ph:arrow-line-up"
+          iconCss={css`transition:transform 0.2s;`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowBeforeMenu(true);
           }}
-          onMouseLeave={() => setShowBeforeMenu(false)}
-          parentRef={insertBeforeButtonsRef!}
+          ref={(el) => setInsertBeforeButtonsRef(el)}
+          size={props.size}
+          title="Add Before"
         />
-      </Show>
+        <Show when={showBeforeMenu() && insertBeforeButtonsRef()}>
+          <InsertButtonsMenu
+            item={props.item}
+            onClose={() => setShowBeforeMenu(false)}
+            onDoubleClick={async (fromVertex) => {
+              await handleDropAtPosition(
+                graph,
+                setGraph,
+                formStoreVertex()?.P.txnId,
+                getFormData(),
+                fromVertex,
+                props.item,
+                "before",
+              );
+            }}
+            onMouseLeave={() => setShowBeforeMenu(false)}
+            parentRef={insertBeforeButtonsRef()!}
+          />
+        </Show>
 
-      <IconButton
-        css={[
-          ICON_BUTTON_STYLES.baseCss,
-          ICON_BUTTON_STYLES.defaultCss,
-          ICON_BUTTON_STYLES.spacingCss,
-          css`
-            background-color: transparent;
-            border: none;
-          `,
-        ]}
-        icon="ph:arrow-line-down"
-        iconCss={css`transition:transform 0.2s;`}
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowAfterMenu(true);
-        }}
-        ref={(el) => (insertAfterButtonsRef = el)}
-        size={props.size}
-        title="Add After"
-      />
-      <Show when={showAfterMenu()}>
-        <InsertButtonsMenu
-          item={props.item}
-          onClose={() => setShowAfterMenu(false)}
-          onDoubleClick={async (fromVertex) => {
-            await handleDropAtPosition(
-              graph,
-              setGraph,
-              formStoreVertex()?.P.txnId,
-              graph.vertexes[formStoreVertex()?.P.formDataId!],
-              fromVertex,
-              props.item,
-              "after",
-            );
+        <IconButton
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            ICON_BUTTON_STYLES.spacingCss,
+            css`
+              background-color: transparent;
+              border: none;
+            `,
+          ]}
+          icon="ph:arrow-line-down"
+          iconCss={css`transition:transform 0.2s;`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowAfterMenu(true);
           }}
-          onMouseLeave={() => setShowAfterMenu(false)}
-          parentRef={insertAfterButtonsRef!}
+          ref={(el) => setInsertAfterButtonsRef(el)}
+          size={props.size}
+          title="Add After"
         />
+        <Show when={showAfterMenu() && insertAfterButtonsRef()}>
+          <InsertButtonsMenu
+            item={props.item}
+            onClose={() => setShowAfterMenu(false)}
+            onDoubleClick={async (fromVertex) => {
+              await handleDropAtPosition(
+                graph,
+                setGraph,
+                formStoreVertex()?.P.txnId,
+                getFormData(),
+                fromVertex,
+                props.item,
+                "after",
+              );
+            }}
+            onMouseLeave={() => setShowAfterMenu(false)}
+            parentRef={insertAfterButtonsRef()!}
+          />
+        </Show>
       </Show>
 
       <IconButton
@@ -123,11 +131,11 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
           e.stopPropagation();
           setShowInsideMenu(true);
         }}
-        ref={(el) => (insertInsideButtonsRef = el)}
+        ref={(el) => setInsertInsideButtonsRef(el)}
         size={props.size}
         title="Add Inside"
       />
-      <Show when={showInsideMenu()}>
+      <Show when={showInsideMenu() && insertInsideButtonsRef()}>
         <InsertButtonsMenu
           item={props.item}
           onClose={() => setShowInsideMenu(false)}
@@ -136,14 +144,14 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
               graph,
               setGraph,
               formStoreVertex()?.P.txnId,
-              graph.vertexes[formStoreVertex()?.P.formDataId!],
+              getFormData(),
               fromVertex,
               props.item,
               "center",
             );
           }}
           onMouseLeave={() => setShowInsideMenu(false)}
-          parentRef={insertInsideButtonsRef!}
+          parentRef={insertInsideButtonsRef()!}
         />
       </Show>
     </>
