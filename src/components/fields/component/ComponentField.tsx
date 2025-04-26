@@ -4,10 +4,6 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
-import {
-  PageContext,
-  usePageContext,
-} from "~/features/page_attr_render/context/PageContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
@@ -23,6 +19,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import type { GenericComponentProps } from "../type/FieldType";
 
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
+import {DataContext, useDataContext} from "~/features/page_attr_render/context/DataContext";
 
 export function ComponentField(
   props: Readonly<GenericComponentProps & { componentId?: string }>,
@@ -81,7 +78,7 @@ export function ComponentField(
   });
 
   const ComponentWrapper = () => {
-    const context = usePageContext() || {};
+    const dataContext = useDataContext() || {};
     const values = createMemo(() => {
       return {
         ...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph),
@@ -89,7 +86,7 @@ export function ComponentField(
       };
     });
 
-    const repeaterStore = new Proxy(context, {
+    const newDataContext = new Proxy(dataContext, {
       get(target, key) {
         if (key === "props") {
           return values();
@@ -98,9 +95,9 @@ export function ComponentField(
       },
     });
     return (
-      <PageContext.Provider value={repeaterStore}>
+      <DataContext.Provider value={newDataContext}>
         <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
-      </PageContext.Provider>
+      </DataContext.Provider>
     );
   };
 

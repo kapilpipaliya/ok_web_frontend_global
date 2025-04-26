@@ -14,8 +14,7 @@ import {
 } from "~/features/page_designer/context/PreviewContext";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { useGraph } from "~/lib/graph/GraphContext";
-
-import { PageContext, usePageContext } from "./context/PageContext";
+import {DataContext, useDataContext} from "~/features/page_attr_render/context/DataContext";
 
 export function PageView(
   props: Readonly<{
@@ -81,7 +80,7 @@ export function PageView(
   });
 
   const ComponentWrapper = () => {
-    const context = usePageContext() || {};
+    const dataContext = useDataContext() || {};
     const formStoreId = useDesignerFormIdContext();
 
     const values = createMemo(() => {
@@ -95,7 +94,7 @@ export function PageView(
       };
     });
 
-    const repeaterStore = new Proxy(context, {
+    const newDataContext = new Proxy(dataContext, {
       get(target, key) {
         if (key === "props") {
           return values();
@@ -104,13 +103,13 @@ export function PageView(
       },
     });
     return (
-      <PageContext.Provider value={repeaterStore}>
+      <DataContext.Provider value={newDataContext}>
         <PageAttrRender
           data={props.data}
           isNoPermissionCheck={props.isNoPermissionCheck!}
           metaVertex={props.metaVertex!}
         />
-      </PageContext.Provider>
+      </DataContext.Provider>
     );
   };
 
