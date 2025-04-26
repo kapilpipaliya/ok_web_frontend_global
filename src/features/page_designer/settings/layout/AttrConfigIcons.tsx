@@ -5,10 +5,11 @@ import type { Vertex } from "~/lib/graph/graph";
 
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { DeleteButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/DeleteButton";
-import { DuplicateButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/DuplicateButton";
 import { ImportHtmlButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/ImportHtmlButton";
 import { ParentButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/ParentButton";
 import { SaveAsTemplateButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/SaveAsTemplateButton";
+import { CopyButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/CopyButton";
+import { PasteButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/PasteButton";
 import { InsertButtons } from "~/features/page_attr_render/page_attr_dnd_wrapper/menus/InsertButtons";
 import { useGraph } from "~/lib/graph/GraphContext";
 
@@ -22,7 +23,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 export function AttrConfigIcons(
   props: Readonly<{ metaVertex: Vertex; parentRef: HTMLElement }>,
 ) {
-  const [graph, _setGraph] = useGraph();
+  const [graph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
@@ -59,7 +60,8 @@ export function AttrConfigIcons(
 
         <Show when={isSelectedLayoutId(props.metaVertex.id)}>
           <ParentButton item={props.metaVertex} size={iconSize} />
-          <DuplicateButton item={props.metaVertex} size={iconSize} />
+          <CopyButton item={props.metaVertex} size={iconSize} />
+          <PasteButton item={props.metaVertex} size={iconSize} />
           <SaveAsTemplateButton item={props.metaVertex} size={iconSize} />
           <ImportHtmlButton item={props.metaVertex} size={iconSize} />
           <HideShowIcon iconSize={iconSize} metaVertex={props.metaVertex} />

@@ -16,6 +16,7 @@ interface DuplicateButtonProps {
   size: number;
 }
 
+// unused
 export function DuplicateButton(props: Readonly<DuplicateButtonProps>) {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();

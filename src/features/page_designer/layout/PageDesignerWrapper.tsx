@@ -90,19 +90,22 @@ export function PageDesignerWrapper(): JSX.Element {
       return;
     }
 
-    // Get stored layout properties
-    const storedLayout = await (await dbPromise).get(
-      "keyval",
-      "page_designer_layout",
-    );
-    if (storedLayout) {
-      mergeVertexProperties<PageLayoutObject>(
-        0,
-        initialStore.id,
-        graph,
-        setGraph,
-        storedLayout,
+    if (dbPromise) {
+      // Get stored layout properties
+      const db = await dbPromise;
+      const storedLayout = await db.get(
+        "keyval",
+        "page_designer_layout",
       );
+      if (storedLayout) {
+        mergeVertexProperties<PageLayoutObject>(
+          0,
+          initialStore.id,
+          graph,
+          setGraph,
+          storedLayout,
+        );
+      }
     }
 
     handleResize(); // Initial check
@@ -119,7 +122,7 @@ export function PageDesignerWrapper(): JSX.Element {
     const layoutVertex = graph.vertexes[
       initialStore.id
     ] as Vertex<PageLayoutObject>;
-    if (!layoutVertex) {
+    if (!layoutVertex || !dbPromise) {
       return;
     }
 
@@ -143,8 +146,9 @@ export function PageDesignerWrapper(): JSX.Element {
     };
 
     (async () => {
-      if (!isServer) {
-        await (await dbPromise)?.put(
+      if (!isServer && dbPromise) {
+        const db = await dbPromise;
+        await db.put(
           "keyval",
           widthProps,
           "page_designer_layout",

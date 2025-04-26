@@ -12,11 +12,12 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { DeleteButton } from "../buttons/DeleteButton";
-import { DuplicateButton } from "../buttons/DuplicateButton";
 import { ImportHtmlButton } from "../buttons/ImportHtmlButton";
 import { ParentButton } from "../buttons/ParentButton";
 import { PreviewCSSButton } from "../buttons/PreviewCSSButton";
 import { SaveAsTemplateButton } from "../buttons/SaveAsTemplateButton";
+import { CopyButton } from "../buttons/CopyButton";
+import { PasteButton } from "../buttons/PasteButton";
 import { ComponentName } from "../components/ComponentName";
 import { InsertButtons } from "../menus/InsertButtons";
 import { css } from "~/lib/styles";
@@ -87,7 +88,8 @@ export function SelectedAttrConfigPopOver(
         <InsertButtons item={props.item} size={iconSize} />
         <ComponentName componentName={getComponentName()!} />
         <ParentButton item={props.item} size={iconSize} />
-        <DuplicateButton item={props.item} size={iconSize} />
+        <CopyButton item={props.item} size={iconSize} />
+        <PasteButton item={props.item} size={iconSize} />
         <SaveAsTemplateButton item={props.item} size={iconSize} />
         <PreviewCSSButton item={props.item} size={iconSize} />
         <ImportHtmlButton item={props.item} size={iconSize} />

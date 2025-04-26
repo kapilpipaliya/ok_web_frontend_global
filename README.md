@@ -731,3 +731,7 @@ function ConvertedComponent() {
 
 Low-code programming for event-driven applications
 https://nodered.org
+
+
+Copy: Saves for pasting elsewhere
+Duplicate: Creates an immediate copy in the same location

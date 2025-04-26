@@ -1,7 +1,7 @@
 import { createContext, useContext } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
-import type { Id } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 export interface OpenFormInfo {
   dataId: Id;
@@ -30,6 +30,7 @@ export function getInitialDesignerLayoutStore() {
     [`mainPanel${mainPanel}Width` as `mainPanel${string}Width`]: "1fr",
     activeItem: null as Id | null | number,
     bottomHeight: INITIAL_WIDTHS.bottom,
+    copiedItem: null as Vertex | null,
     draggedTab: null as Id | null,
     draggedVertexIds: [] as Id[],
     formId: null as Id | null,
