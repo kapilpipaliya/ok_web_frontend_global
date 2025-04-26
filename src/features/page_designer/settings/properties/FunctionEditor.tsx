@@ -50,6 +50,7 @@ export function FunctionEditor(props: {
   label?: string;
   language?: string;
   returnType?: "object" | "string";
+  defaultValue?: string;
   setPropertyValue: (meta: Vertex, value: unknown) => void;
 }) {
   const [graph] = useGraph();
@@ -59,8 +60,29 @@ export function FunctionEditor(props: {
     
   // Derived state
   const propertyKey = () => props.keyName || "props";
-  const getPropertyValue = () =>
-    graph.vertexes[formStoreVertex()?.P.selectedId].P[propertyKey()] ?? "";
+  const getPropertyValue = () => {
+    const currentValue = graph.vertexes[formStoreVertex()?.P.selectedId]?.P[propertyKey()];
+    
+    // If value exists, return it
+    if (currentValue !== undefined && currentValue !== null) {
+      return currentValue;
+    }
+    
+    // Use prop defaultValue if provided
+    if (props.defaultValue !== undefined) {
+      return props.defaultValue;
+    }
+    
+    // Default values based on keyName
+    if (propertyKey() === "css") {
+      return `return \`._id {}\`;`;
+    } else if (propertyKey() === "fns" || propertyKey() === "props") {
+      return "return {}";
+    }
+    
+    // Fallback to empty string for other cases
+    return "";
+  };
     
   // State
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);

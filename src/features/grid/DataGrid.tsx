@@ -13,6 +13,7 @@ import {
   Match,
   on,
   Show,
+  Suspense,
   Switch,
 } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -510,6 +511,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   const onDelete = useDeleteRowConfirm(gridState, setGridState);
 
   return (
+    <Suspense>
     <Show when={dataResource()}>
     <DataGridProvider value={gridStore}>
       <Switch>
@@ -566,5 +568,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       </Switch>
     </DataGridProvider>
     </Show>
+    </Suspense>
   );
 }

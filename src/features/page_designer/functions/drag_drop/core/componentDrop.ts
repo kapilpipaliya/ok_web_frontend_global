@@ -91,7 +91,7 @@ export function componentDrop(
     //   props = { ...props, text: "Sample Text" };
     // }
     if (fromVertex.P.key === "Html" && !props.as) {
-      props = { ...props, as: "div", css: `return \`._id {}\`;` };
+      props = { ...props, as: "div" };
     }
   } else if (fromVertex.L[0] === "Attr") {
     const p = klona(fromVertex.P);
