@@ -10,6 +10,7 @@ import {
   batch,
   createEffect,
   createMemo,
+  createSignal,
   Match,
   on,
   onCleanup,
@@ -216,26 +217,26 @@ export function PageViewWrapper(
   }
   // const dynamicFns = createMemo(getDynamicFns);
 
-  const isNoPermissionCheck = createMemo(
-    () =>
+  const isNoPermissionCheck = () =>
       props.isNoPermissionCheck ||
       metaVertex()?.P.isNoPermissionCheck ||
-      previewStore.isNoPermissionCheck,
-  );
-  const allConfiguredPermission = createMemo(() =>
+      previewStore.isNoPermissionCheck;
+
+
+  const allConfiguredPermission = (() =>
     getConfiguredPermissions(
       getGlobalStore(graph).P.userRoles,
       metaVertex()!,
       graph,
-    ),
+    )
   );
 
   const permissions = {
-    full: createMemo(() => checkPermission(PermissionLevel.FULL)),
-    edit: createMemo(() => checkPermission(PermissionLevel.EDIT)),
-    create: createMemo(() => checkPermission(PermissionLevel.CREATE)),
-    view: createMemo(() => checkPermission(PermissionLevel.VIEW)),
-    none: createMemo(() => checkPermission(PermissionLevel.NONE)),
+    full: (() => checkPermission(PermissionLevel.FULL)),
+    edit: (() => checkPermission(PermissionLevel.EDIT)),
+    create: (() => checkPermission(PermissionLevel.CREATE)),
+    view: (() => checkPermission(PermissionLevel.VIEW)),
+    none: (() => checkPermission(PermissionLevel.NONE)),
   };
 
   function checkPermission(level: PermissionLevel) {
@@ -261,7 +262,7 @@ export function PageViewWrapper(
   setFormStore("hasViewPermission", permissions.view());
   setFormStore("isNoPermissionCheck", isNoPermissionCheck());
 
-  const authError = createMemo(() => {
+  const checkAuthError = () => {
     if (id() && !(permissions.edit() || permissions.view())) {
       return `You are not authorized to edit or view ${props.pageVertexName}`;
     }
@@ -269,7 +270,7 @@ export function PageViewWrapper(
       return `You are not authorized to create ${props.pageVertexName}`;
     }
     return "";
-  });
+  };
 
   const constants = {
     dataId: props.dataId,
@@ -481,6 +482,11 @@ export function PageViewWrapper(
 
     if (!metaVertex()?.P.key) {
       setFormStore("error", `No key for the ${props.pageVertexName}`);
+      return false;
+    }
+
+    if (checkAuthError()) {
+      setFormStore("error", checkAuthError());
       return false;
     }
     
@@ -723,9 +729,6 @@ export function PageViewWrapper(
         <Match when={formStore().P.error}>
           <SimpleWarningAlert message={formStore().P.error} />
         </Match>
-        <Match when={authError()}>
-          <SimpleWarningAlert message={authError()} />
-        </Match>
       </Switch>
 
       {/* <Show when={getGlobalStore(graph).P.isDevelopment}>
@@ -754,7 +757,7 @@ export function PageViewWrapper(
           <Switch>
             <Match
               when={
-                !authError() &&
+                !formStore().P.error &&
                 // formStore().P.mounted &&
                 metaVertex() &&
                 (props.dataId && props.dataId !== "new"
