@@ -44,7 +44,7 @@ export function ComponentItem(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [, setIsHovered] = createSignal(false);
+  const [isHovered, setIsHovered] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const layoutStoreId = useDesignerLayoutStore();
@@ -192,7 +192,7 @@ export function ComponentItem(
           />
         </Show> */}
         
-        <Show when={props.child.L[0] !== "Comp"}>
+        <Show when={props.child.L[0] !== "Comp" && isHovered()}>
           <As
             as="div"
             css={css`margin-left: auto;`}
@@ -202,6 +202,7 @@ export function ComponentItem(
               icon="ph:arrow-square-out"
               onClick={openInNewTab}
               size={18}
+              title="Open in new tab"
             />
           </As>
         </Show>

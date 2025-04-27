@@ -1,6 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { Icon } from "@iconify-icon/solid";
 import { toTitle } from "case-switcher-js";
 import { createSignal, onCleanup, Show } from "solid-js";
 
@@ -44,6 +43,7 @@ export function PageItem(
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
+  const [isHovered, setIsHovered] = createSignal(false);
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
   );
@@ -63,7 +63,8 @@ export function PageItem(
       itemId: props.child.id
     }),
     {
-      setHoverPageId
+      setHoverPageId,
+      setIsHovered
     },
   );
 
@@ -182,17 +183,20 @@ export function PageItem(
         >
           {toTitle(props.child.key)}
         </As>
-        <As
-          as="div"
-          css={css`margin-left: auto;`}
-        >
-          <IconButton
-            css={buttonStyle}
-            icon="ph:arrow-square-out"
-            onClick={openInNewInternalTabClick}
-            size={18}
-          />
-        </As>
+        <Show when={isHovered()}>
+          <As
+            as="div"
+            css={css`margin-left: auto;`}
+          >
+            <IconButton
+              css={buttonStyle}
+              icon="ph:arrow-square-out"
+              onClick={openInNewInternalTabClick}
+              size={18}
+              title="Open in new tab"
+            />
+          </As>
+        </Show>
         <Show when={props.previewPageId === props.child.id && menuRef}>
           <DropdownMenu
             onClickOutside={() => props.setPreviewPageId(null)}

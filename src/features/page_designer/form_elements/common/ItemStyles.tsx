@@ -29,6 +29,7 @@ export const hoverItemStyle = css`
 export const buttonStyle = css`
   background-color: transparent;
   border: none;
+  cursor: pointer;
 `;
 
 // Helper for preview behavior
