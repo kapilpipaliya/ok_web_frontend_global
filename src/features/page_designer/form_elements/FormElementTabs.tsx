@@ -130,9 +130,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
         vertexes: [],
       }) || [];
       setRootVertexes(
-        vertexes.filter(
-          (vertex) => !vertex.OUT?.ParentComponent || Object.keys(vertex.OUT.ParentComponent).length === 0,
-        ) || [],
+        vertexes //.filter((vertex) => !vertex.OUT?.ParentComponent || Object.keys(vertex.OUT.ParentComponent).length === 0) || [],
       );
     } else {
       // children level Components are already fetched when page is loaded.

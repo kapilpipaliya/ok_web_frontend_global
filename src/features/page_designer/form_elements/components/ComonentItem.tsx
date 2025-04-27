@@ -2,6 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
+import { toTitle } from "case-switcher-js";
 
 import type { Id, Vertex } from "~/lib/graph/graph";
 
@@ -111,6 +112,12 @@ export function ComponentItem(
     return props.child.L[0] !== "Component" && props.child.L[0] !== "TemplatePage";
   };
 
+  // Get display name for the component
+  const getDisplayName = () => {
+    const rawName = props.child?.P.label || props.child?.P.key;
+    return rawName ? toTitle(rawName) : '';
+  };
+
   return (
     <>
       <As
@@ -157,13 +164,14 @@ export function ComponentItem(
         </Show>
         
         <As
-          as="span"
+          as="div"
           css={css`
             font-size: 14px;
+            font-weight: normal;
             ${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? `color: var(--color-error);` : ""}
           `}
         >
-          {props.child?.P.label || props.child?.P.key}
+          {getDisplayName()}
         </As>
         
         {/* <Show when={isHovered()}>
