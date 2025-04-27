@@ -83,16 +83,17 @@ export function PropertiesBody() {
         graph.vertexes[formStoreVertex()?.P.selectedId]
       }
     >
-      {/* <div css={css`
+      {/* <As as="div" css={css`
   display: flex;
   gap: 2px;
   justify-content: start;
-`}> */}
-      {/* <button onClick={toggleImportsModal}>Import HTML</As> */}
-      {/* </As> */}
-      <Show when={selectedAttr()?.P.componentName === "Data"}>
+`}>
+      <button onClick={toggleImportsModal}>Import HTML</As>
+      </As> */}
+
+      {/* <Show when={selectedAttr()?.P.componentName === "Data"}>
         <CollAndData />
-      </Show>
+      </Show> */}
 
       <FunctionEditor
         keyName="fns"

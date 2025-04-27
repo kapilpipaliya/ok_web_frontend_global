@@ -81,6 +81,7 @@ export function createVertexIds() {
     width: `widthVertex${createUniqueId()}`,
     name: `nameInputVertex${createUniqueId()}`,
     loop: `loopCheckboxVertex${createUniqueId()}`,
+    expression: `expressionInputVertex${createUniqueId()}`,
   };
 }
 
@@ -332,6 +333,15 @@ function createVertices(
         key: "loop",
       },
     },
+    {
+      id: vertexIds.expression,
+      P: {
+        css: PROPERTIES.Css.TextFieldCss,
+        componentName: "TextInput",
+        displayName: "Expression",
+        key: "expression",
+      },
+    },
   ];
   for (const vertex of vertices) {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
@@ -397,6 +407,7 @@ function getMetaVertexes(
     ...(isDataComponent ? [
       graph.vertexes[vertexIds.name],
       graph.vertexes[vertexIds.loop],
+      graph.vertexes[vertexIds.expression],
     ] : []),
     graph.vertexes[vertexIds.required],
     graph.vertexes[vertexIds.hide],

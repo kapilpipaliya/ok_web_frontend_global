@@ -22,6 +22,7 @@ import { PROPERTIES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 
+// Deprecated
 export function CollAndData() {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();
