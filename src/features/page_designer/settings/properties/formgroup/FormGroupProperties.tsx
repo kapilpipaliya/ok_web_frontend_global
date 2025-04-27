@@ -31,6 +31,7 @@ import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PROPERTIES } from "~/pages/settings/constants";
+import { evalExpression } from "~/lib/expression_eval";
 
 import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
@@ -73,6 +74,7 @@ export function createVertexIds() {
     key: `nameVertex${createUniqueId()}`,
     perm: `permissionVertex${createUniqueId()}`,
     required: `requiredVertex${createUniqueId()}`,
+    slot: `slotVertex${createUniqueId()}`,
     src: `srcVertex${createUniqueId()}`,
     text: `textVertex${createUniqueId()}`,
     thankYouPage: `thankYouPageVertex${createUniqueId()}`,
@@ -302,6 +304,15 @@ function createVertices(
         key: "text",
       },
     },
+    {
+      id: vertexIds.slot,
+      P: {
+        css: PROPERTIES.Css.TextFieldCss,
+        componentName: "TextInput",
+        displayName: "Slot Name",
+        key: "slot",
+      },
+    },
   ];
   for (const vertex of vertices) {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
@@ -337,6 +348,16 @@ function getMetaVertexes(
     ["CheckBox", "MultiSelect", "Select", "TextInput"].includes(componentName);
   const isHtmlIcon = componentName === "Html" && selectedAttr()?.P.as === "icon";
 
+  // Check if parent component is a Slot
+  const parentVertex = evalExpression("<-Attr", {
+    graph,
+    vertexes: [selectedAttr()],
+  })?.[0];
+  const isParentSlot = parentVertex?.P.componentName === "Component";
+  
+  // Check if the current component is a Slot
+  const isCurrentComponentSlot = selectedAttr()?.P.componentName === "Slot";
+
   const nonCssVertices = otherVertices.filter(
     (vertex) => !vertex.P.key.endsWith("Css"),
   );
@@ -365,6 +386,8 @@ function getMetaVertexes(
         ]
       : []),
     ...(componentName === "Html" ? [graph.vertexes[vertexIds.text]] : []),
+    ...(isParentSlot ? [graph.vertexes[vertexIds.slot]] : []),
+    ...(isCurrentComponentSlot ? [graph.vertexes[vertexIds.slot]] : []),
     ...nonCssVertices,
   ];
 

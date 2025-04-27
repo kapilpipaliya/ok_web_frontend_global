@@ -31,8 +31,8 @@ export function ComponentField(
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [previewStore, setPreviewStore] = usePreviewContext();
 
-  const meta = () => parentRenderContext()?.context.meta!;
-  const data = () => parentRenderContext()?.context.data!;
+  const meta = () => parentRenderContext()?.context.meta;
+  const data = () => parentRenderContext()?.context.data;
 
   const fetchMetaData = async () => {
     if (!getCopmVertex().length) {
@@ -96,23 +96,44 @@ export function ComponentField(
     });
     return (
       <DataContext.Provider value={newDataContext}>
-        <PageAttrRender data={data()} metaVertex={getCopmVertex()[0]} />
+        <PageAttrRender 
+          data={data()} 
+          metaVertex={getCopmVertex()[0]} 
+          isNoPermissionCheck={parentRenderContext()?.context.isNoPermissionCheck} 
+        />
       </DataContext.Provider>
     );
   };
+
+  const Children = (props: { slot: string }) => {
+  const slotFilter = (vertex: Vertex) => {
+    if (props.slot) {
+      return vertex.P.slot === props.slot;
+    } else {
+      return !vertex.P.slot;
+    }
+  };
+    return (
+      <PreviewContext.Provider
+        value={[previewStoreProxy, setPreviewStore]}
+      >
+        <Show when={meta()}>
+          <PageAttrRender
+            data={data()}
+            isNoPermissionCheck={parentRenderContext()?.context.isNoPermissionCheck}
+            metaVertex={meta() as Vertex}
+            filter={slotFilter}
+          />
+        </Show>
+      </PreviewContext.Provider>
+    );
+  }
 
   return (
     <>
       <Show when={getCopmVertex().length}>
         <SlotContext.Provider
-          value={
-              <PreviewContext.Provider
-                value={[previewStoreProxy, setPreviewStore]}
-              >
-                {props.children}
-              </PreviewContext.Provider>
-            
-          }
+          value={Children}
         >
           <ComponentWrapper />
         </SlotContext.Provider>
