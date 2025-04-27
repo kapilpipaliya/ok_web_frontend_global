@@ -22,6 +22,7 @@ import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_dro
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
+import { createOpenInNewTab, buttonStyle } from "../../form_elements/common/ItemStyles";
 
 import {
   type PageLayoutObject,
@@ -39,6 +40,7 @@ import { As } from "~/components/As";
 import { JsonEditorFieldComponent } from "../properties/JsonEditorField";
 import { IconButton } from "~/components/styled/IconButton";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
+import { evalExpression } from "~/lib/expression_eval";
 
 export function LayoutTreeItem(
   props: Readonly<{
@@ -205,6 +207,22 @@ export function LayoutTreeItem(
     saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
   };
 
+    const getCopmVertex = (() =>
+    (evalExpression("->$0Comp", {
+          graph,
+          setGraph,
+          vertexes: [props.metaVertex],
+        }) as Vertex[]) || ([] as Vertex[])
+  );
+
+  // Create open in new tab handler
+  const openInNewTab = createOpenInNewTab(
+    layoutStoreId,
+    getCopmVertex()[0],
+    graph,
+    setGraph
+  );
+
   return (
     <>
       <TreeItemContainer
@@ -247,11 +265,11 @@ export function LayoutTreeItem(
         />
         <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
         <IconButton
-      css={[
-        ICON_BUTTON_STYLES.baseCss,
-        ICON_BUTTON_STYLES.defaultCss,
-        ICON_BUTTON_STYLES.spacingCss,
-        css`
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            ICON_BUTTON_STYLES.spacingCss,
+            css`
     background-color: transparent;
     border: none;
     ${showJsonEditor() ? 'color: ${args.theme.var.color.primary};' : ''}
@@ -264,6 +282,18 @@ export function LayoutTreeItem(
           }}
           title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
         />
+        <Show when={isSelectedHoverId(props.metaVertex.id) && props.metaVertex.L && props.metaVertex.P.componentName === "Component"}>
+          <IconButton
+            css={buttonStyle}
+            icon="ph:arrow-square-out"
+            onClick={(e) => {
+              e.stopPropagation();
+              openInNewTab();
+            }}
+            size={18}
+            title="Open in new tab"
+          />
+        </Show>
         {/* <Show when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}> */}
           <AttrConfigIcons
             metaVertex={props.metaVertex}
