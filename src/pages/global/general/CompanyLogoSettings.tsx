@@ -243,7 +243,7 @@ export function CompanyLogoSettings() {
                 css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
                     const rectangularLogo = rectangularCompanyLogoVertex()[0];
                     const squareLogo = squareCompanyLogoVertex()[0];
@@ -254,7 +254,7 @@ export function CompanyLogoSettings() {
                     }
 
                     try {
-                      options.dataContext.saveState[1]("isLoading", true);
+                      options.contextData.saveState[1]("isLoading", true);
                       const response = await postAPI(
                         API.settings.company.updateLogoUrl,
                         {
@@ -271,10 +271,10 @@ export function CompanyLogoSettings() {
                     } catch (error) {
                       showErrorToast((error as Error).message);
                     } finally {
-                      options.dataContext.saveState[1]("isLoading", false);
+                      options.contextData.saveState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading
+                  text: options.contextData.saveState[0]?.isLoading
                     ? "Saving..."
                     : "Save Changes",
                 }),

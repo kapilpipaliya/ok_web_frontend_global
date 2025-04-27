@@ -83,7 +83,7 @@ export function PageView(
   });
 
   const ComponentWrapper = () => {
-    const dataContext = useDataContext() || {};
+    const contextData = useDataContext() || {};
     const formStoreId = useDesignerFormIdContext();
 
     const values = createMemo(() => {
@@ -97,7 +97,7 @@ export function PageView(
       };
     });
 
-    const newDataContext = new Proxy(dataContext, {
+    const newDataContext = new Proxy(contextData, {
       get(target, key) {
         if (key === "props") {
           return values();

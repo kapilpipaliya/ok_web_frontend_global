@@ -12,16 +12,16 @@ import { css } from "~/lib/styles";
 
 export function AccountDeletionForm() {
   const handleDeleteAccount = async (options: FunctionArgumentType) => {
-    options.dataContext.deleteState[1]("isLoading", true);
-    options.dataContext.deleteState[1]("errorMessage", "");
-    options.dataContext.deleteState[1]("successMessage", "");
-    options.dataContext.deleteState[1]("showConfirmDialog", false);
+    options.contextData.deleteState[1]("isLoading", true);
+    options.contextData.deleteState[1]("errorMessage", "");
+    options.contextData.deleteState[1]("successMessage", "");
+    options.contextData.deleteState[1]("showConfirmDialog", false);
 
     try {
       const response = await postAPI(API.user.selfDeleteUrl, {});
 
       if (response.success) {
-        options.dataContext.deleteState[1](
+        options.contextData.deleteState[1](
           "successMessage",
           response.message ||
             "Account scheduled for deletion. It will be permanently removed after 48 hours.",
@@ -31,20 +31,20 @@ export function AccountDeletionForm() {
           options.navigate(API.urls.user.logout);
         }, 3000);
       } else {
-        options.dataContext.deleteState[1](
+        options.contextData.deleteState[1](
           "errorMessage",
           response.error ||
             "Failed to schedule account for deletion. Please try again.",
         );
       }
     } catch (error) {
-      options.dataContext.deleteState[1](
+      options.contextData.deleteState[1](
         "errorMessage",
         "An unexpected error occurred. Please try again.",
       );
       console.error("Error scheduling account deletion:", error);
     } finally {
-      options.dataContext.deleteState[1]("isLoading", false);
+      options.contextData.deleteState[1]("isLoading", false);
     }
   };
 
@@ -70,7 +70,7 @@ export function AccountDeletionForm() {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            options.dataContext.deleteState[1]("showConfirmDialog", false);
+            options.contextData.deleteState[1]("showConfirmDialog", false);
           },
           text: "Cancel",
         }),
@@ -88,9 +88,9 @@ export function AccountDeletionForm() {
 `,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          disabled: options.dataContext.deleteState[0]?.isLoading,
+          disabled: options.contextData.deleteState[0]?.isLoading,
           onClick: () => handleDeleteAccount(options),
-          text: options.dataContext.deleteState[0]?.isLoading
+          text: options.contextData.deleteState[0]?.isLoading
             ? "Deleting..."
             : "Yes, Delete My Account",
         }),
@@ -149,7 +149,7 @@ export function AccountDeletionForm() {
             as: "span",
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              text: options.dataContext.deleteState[0]?.errorMessage,
+              text: options.contextData.deleteState[0]?.errorMessage,
             }),
           },
         ],
@@ -163,7 +163,7 @@ export function AccountDeletionForm() {
 `,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          hide: !options.dataContext.deleteState[0]?.errorMessage,
+          hide: !options.contextData.deleteState[0]?.errorMessage,
         }),
       },
       {
@@ -173,7 +173,7 @@ export function AccountDeletionForm() {
             as: "span",
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              text: options.dataContext.deleteState[0]?.successMessage,
+              text: options.contextData.deleteState[0]?.successMessage,
             }),
           },
         ],
@@ -187,7 +187,7 @@ export function AccountDeletionForm() {
 `,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          hide: !options.dataContext.deleteState[0]?.successMessage,
+          hide: !options.contextData.deleteState[0]?.successMessage,
         }),
       },
       {
@@ -205,9 +205,9 @@ export function AccountDeletionForm() {
 `,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              disabled: options.dataContext.deleteState[0]?.isLoading,
+              disabled: options.contextData.deleteState[0]?.isLoading,
               onClick: () => {
-                options.dataContext.deleteState[1]("showConfirmDialog", true);
+                options.contextData.deleteState[1]("showConfirmDialog", true);
               },
               text: "Delete Account",
             }),
@@ -282,7 +282,7 @@ export function AccountDeletionForm() {
         ],
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          hide: !options.dataContext.deleteState[0]?.showConfirmDialog,
+          hide: !options.contextData.deleteState[0]?.showConfirmDialog,
         }),
       },
     ],

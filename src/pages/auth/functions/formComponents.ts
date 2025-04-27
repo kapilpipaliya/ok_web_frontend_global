@@ -47,13 +47,13 @@ export function createFormSubmitButton(
     css: [STYLES.button2Css, css`width:100%; margin-top:16px;`],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      disabled: options.dataContext.submitState[0]?.isLoading,
+      disabled: options.contextData.submitState[0]?.isLoading,
       onClick: async () => {
         try {
-          options.dataContext.submitState[1]("isLoading", true);
+          options.contextData.submitState[1]("isLoading", true);
           await onClick(options);
         } finally {
-          options.dataContext.submitState[1]("isLoading", false);
+          options.contextData.submitState[1]("isLoading", false);
         }
       },
       text: text(options),
@@ -143,7 +143,7 @@ export function createPasswordField(
                   options.updateValue(e.target.value);
                 }
 
-                if (options.dataContext.submitState[0]?.isLoading) {
+                if (options.contextData.submitState[0]?.isLoading) {
                   return;
                 }
 
@@ -306,7 +306,7 @@ export function createTextField(
                   options.updateValue(e.target.value);
                 }
 
-                if (options.dataContext.submitState[0]?.isLoading) {
+                if (options.contextData.submitState[0]?.isLoading) {
                   return;
                 }
 

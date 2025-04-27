@@ -216,7 +216,7 @@ export function DynamicComponent(
       get data() {
         return props.data;
       },
-      get dataContext() {
+      get contextData() {
         return runWithOwner(owner, () => useDataContext() || {});
       },
       deleteTxnIdAndCreateNew: (txnId: number) => {

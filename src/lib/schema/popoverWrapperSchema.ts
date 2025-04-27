@@ -29,7 +29,7 @@ export const popoverWrapperSchema = (
             props: (options: FunctionArgumentType) => {
               return {
                 onMount: () => {
-                  const popoverState = options.dataContext
+                  const popoverState = options.contextData
                     .popoverState as ReturnType<
                     typeof createStore<{
                       action: HTMLElement | null;
@@ -70,7 +70,7 @@ export const popoverWrapperSchema = (
             attributes: [popoverSchema],
             componentName: "Html",
             css: (options: FunctionArgumentType) => {
-              const popoverState = options.dataContext
+              const popoverState = options.contextData
                 .popoverState as ReturnType<
                 typeof createStore<{
                   action: HTMLElement | null;
@@ -89,7 +89,7 @@ export const popoverWrapperSchema = (
             `;
             },
             props: (options: FunctionArgumentType) => {
-              const popoverState = options.dataContext
+              const popoverState = options.contextData
                 .popoverState as ReturnType<
                 typeof createStore<{
                   action: HTMLElement | null;

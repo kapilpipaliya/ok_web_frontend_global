@@ -68,11 +68,11 @@ export function LoginForm() {
   // Password field enter key handler
   const handlePasswordEnter = async (options: FunctionArgumentType) => {
     try {
-      options.dataContext.submitState[1]("isLoading", true);
+      options.contextData.submitState[1]("isLoading", true);
       const formData = options.data;
       await handleSubmit(formData);
     } finally {
-      options.dataContext.submitState[1]("isLoading", false);
+      options.contextData.submitState[1]("isLoading", false);
     }
   };
 
@@ -141,16 +141,16 @@ export function LoginForm() {
                 css: [STYLES.button2Css, css`width:100%`],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  disabled: options.dataContext.submitState[0]?.isLoading,
+                  disabled: options.contextData.submitState[0]?.isLoading,
                   onClick: async () => {
                     try {
-                      options.dataContext.submitState[1]("isLoading", true);
+                      options.contextData.submitState[1]("isLoading", true);
                       await handleSubmit(options.data);
                     } finally {
-                      options.dataContext.submitState[1]("isLoading", false);
+                      options.contextData.submitState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.submitState[0]?.isLoading
+                  text: options.contextData.submitState[0]?.isLoading
                     ? "Logging in..."
                     : "Log In",
                 }),

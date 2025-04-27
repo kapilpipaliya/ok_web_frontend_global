@@ -28,9 +28,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          disabled: options.dataContext.modalState[0]?.isLoading,
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: options.dataContext.modalState[0]?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -42,7 +42,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            options.dataContext.modalState[1]("showModal", false);
+            options.contextData.modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
@@ -104,7 +104,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text:
-                                        options.dataContext.history?.P.email ||
+                                        options.contextData.history?.P.email ||
                                         "Anonymous",
                                     }),
                                   },
@@ -112,7 +112,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     as: "div",
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
-                                      text: options.dataContext.history?.P
+                                      text: options.contextData.history?.P
                                         .message,
                                     }),
                                   },
@@ -125,7 +125,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text: new Date(
-                                        options.dataContext.history?.P
+                                        options.contextData.history?.P
                                           .createdAt,
                                       ).toLocaleString(),
                                     }),
@@ -213,13 +213,13 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         placeholder: "Type your reply here...",
                         props: (options: FunctionArgumentType) => ({
                           onInput: (e: { target: HTMLTextAreaElement }) => {
-                            options.dataContext.replyState[1](
+                            options.contextData.replyState[1](
                               "replyText",
                               e.target.value,
                             );
                           },
                           value:
-                            options.dataContext.replyState[0]?.replyText || "",
+                            options.contextData.replyState[0]?.replyText || "",
                         }),
                       },
                       {
@@ -233,16 +233,16 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
                           disabled:
-                            !options.dataContext.replyState[0]?.replyText?.trim(),
+                            !options.contextData.replyState[0]?.replyText?.trim(),
                           onClick: async () => {
                             const replyText =
-                              options.dataContext.replyState[0]?.replyText;
+                              options.contextData.replyState[0]?.replyText;
                             if (!replyText?.trim()) {
                               return;
                             }
 
                             try {
-                              options.dataContext.modalState[1](
+                              options.contextData.modalState[1](
                                 "isLoading",
                                 true,
                               );
@@ -269,7 +269,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                               );
 
                               // Clear the input field
-                              options.dataContext.replyState[1](
+                              options.contextData.replyState[1](
                                 "replyText",
                                 "",
                               );
@@ -293,7 +293,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                             } catch (error) {
                               options.showErrorToast((error as Error).message);
                             } finally {
-                              options.dataContext.modalState[1](
+                              options.contextData.modalState[1](
                                 "isLoading",
                                 false,
                               );
@@ -393,7 +393,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       return {
         onMount: async () => {
           try {
-            options.dataContext.modalState[1]("isLoading", true);
+            options.contextData.modalState[1]("isLoading", true);
             const response = await postAPI(API.support.getTicketUrl, {
               id: options.data?.id,
             });
@@ -404,7 +404,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
           } catch (error) {
             options.showErrorToast((error as Error).message);
           } finally {
-            options.dataContext.modalState[1]("isLoading", false);
+            options.contextData.modalState[1]("isLoading", false);
             // Scroll chat history to the bottom on mount
             setTimeout(() => {
               const chatHistory = document.querySelector(
@@ -427,7 +427,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
 
   const handleSave = async (options: FunctionArgumentType) => {
     try {
-      options.dataContext.modalState[1]("isLoading", true);
+      options.contextData.modalState[1]("isLoading", true);
       const data = commitTxn(options.txnId, options.graph);
       if (!data) {
         return;
@@ -448,13 +448,13 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
           response as MutationResult,
         );
         options.showSuccessToast("Support ticket updated successfully");
-        options.dataContext.modalState[1]("showModal", false);
+        options.contextData.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       options.showErrorToast((error as Error).message);
     } finally {
-      options.dataContext.modalState[1]("isLoading", false);
+      options.contextData.modalState[1]("isLoading", false);
     }
   };
 
@@ -488,7 +488,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            options.dataContext.modalState[1]("showModal", false);
+            options.contextData.modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
         }),
@@ -517,7 +517,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: !options.dataContext.modalState[0]?.showModal,
+              hide: !options.contextData.modalState[0]?.showModal,
             }),
           },
           {
@@ -550,7 +550,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Html", as: "portal",
                 props: (options: FunctionArgumentType) => ({
-                  hide: !options.dataContext.modalState[0]?.showModal,
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],

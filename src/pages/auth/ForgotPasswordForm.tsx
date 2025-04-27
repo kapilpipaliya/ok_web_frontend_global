@@ -79,7 +79,7 @@ export function ForgotPasswordForm() {
       }
 
       showSuccessToast("Reset instructions sent to your email");
-      options.dataContext.stageData[1]("name", 1);
+      options.contextData.stageData[1]("name", 1);
     } catch (error) {
       showErrorToast(
         error instanceof Error ? error.message : "An unexpected error occurred",
@@ -122,7 +122,7 @@ export function ForgotPasswordForm() {
       }
 
       showSuccessToast("OTP verified successfully");
-      options.dataContext.stageData[1]("name", 2);
+      options.contextData.stageData[1]("name", 2);
     } catch (error) {
       showErrorToast(
         error instanceof Error ? error.message : "An unexpected error occurred",
@@ -203,16 +203,16 @@ export function ForgotPasswordForm() {
             "Email or Username",
             async (options: FunctionArgumentType) => {
               try {
-                options.dataContext.submitState[1]("isLoading", true);
+                options.contextData.submitState[1]("isLoading", true);
                 await handleIdentifierSubmit(options);
               } finally {
-                options.dataContext.submitState[1]("isLoading", false);
+                options.contextData.submitState[1]("isLoading", false);
               }
             },
           ),
           createFormSubmitButton(
             (options) =>
-              options.dataContext.submitState[0]?.isLoading
+              options.contextData.submitState[0]?.isLoading
                 ? "Sending..."
                 : "Confirm",
             async (options) => {
@@ -253,10 +253,10 @@ export function ForgotPasswordForm() {
             "One Time Password (OTP)",
             async (options: FunctionArgumentType) => {
               try {
-                options.dataContext.submitState[1]("isLoading", true);
+                options.contextData.submitState[1]("isLoading", true);
                 await handleOtpSubmit(options);
               } finally {
-                options.dataContext.submitState[1]("isLoading", false);
+                options.contextData.submitState[1]("isLoading", false);
               }
             },
             undefined,
@@ -268,7 +268,7 @@ export function ForgotPasswordForm() {
           ),
           createFormSubmitButton(
             (options) =>
-              options.dataContext.submitState[0]?.isLoading
+              options.contextData.submitState[0]?.isLoading
                 ? "Verifying..."
                 : "Submit",
             async (options) => {
@@ -278,7 +278,7 @@ export function ForgotPasswordForm() {
           createLinkButton(
             () => "Back to Previous Step",
             () => {
-              options.dataContext.stageData[1]("name", 0);
+              options.contextData.stageData[1]("name", 0);
             },
           ),
         ],
@@ -317,14 +317,14 @@ export function ForgotPasswordForm() {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
                       }
-                      if (options.dataContext.submitState[0]?.isLoading) {
+                      if (options.contextData.submitState[0]?.isLoading) {
                         return;
                       }
                       try {
-                        options.dataContext.submitState[1]("isLoading", true);
+                        options.contextData.submitState[1]("isLoading", true);
                         await handlePasswordResetSubmit(options);
                       } finally {
-                        options.dataContext.submitState[1]("isLoading", false);
+                        options.contextData.submitState[1]("isLoading", false);
                       }
                     }
                   },
@@ -384,14 +384,14 @@ export function ForgotPasswordForm() {
                       if (e.target instanceof HTMLInputElement) {
                         options.updateValue(e.target.value);
                       }
-                      if (options.dataContext.submitState[0]?.isLoading) {
+                      if (options.contextData.submitState[0]?.isLoading) {
                         return;
                       }
                       try {
-                        options.dataContext.submitState[1]("isLoading", true);
+                        options.contextData.submitState[1]("isLoading", true);
                         await handlePasswordResetSubmit(options);
                       } finally {
-                        options.dataContext.submitState[1]("isLoading", false);
+                        options.contextData.submitState[1]("isLoading", false);
                       }
                     }
                   },
@@ -433,7 +433,7 @@ export function ForgotPasswordForm() {
 
           createFormSubmitButton(
             (options) =>
-              options.dataContext.submitState[0]?.isLoading
+              options.contextData.submitState[0]?.isLoading
                 ? "Resetting..."
                 : "Reset Password",
             async (options) => {
@@ -443,7 +443,7 @@ export function ForgotPasswordForm() {
           createLinkButton(
             () => "Back to Previous Step",
             (options) => {
-              options.dataContext.stageData[1]("name", 1);
+              options.contextData.stageData[1]("name", 1);
             },
           ),
         ],
@@ -466,7 +466,7 @@ export function ForgotPasswordForm() {
                 attributes: [stepUserNameSchema],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  hide: options.dataContext.stageData?.[0]?.name !== 0,
+                  hide: options.contextData.stageData?.[0]?.name !== 0,
                 }),
               },
               {
@@ -474,7 +474,7 @@ export function ForgotPasswordForm() {
                 attributes: [stepOTPSchema],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  hide: options.dataContext.stageData?.[0]?.name !== 1,
+                  hide: options.contextData.stageData?.[0]?.name !== 1,
                 }),
               },
               {
@@ -482,7 +482,7 @@ export function ForgotPasswordForm() {
                 attributes: [stepNewPasswordSchema],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  hide: options.dataContext.stageData?.[0]?.name !== 2,
+                  hide: options.contextData.stageData?.[0]?.name !== 2,
                 }),
               },
             ],

@@ -176,7 +176,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     const formData = options.data;
 
     try {
-      options.dataContext.modalState[1]("isLoading", true);
+      options.contextData.modalState[1]("isLoading", true);
 
       const roles =
         (evalExpression("->$0Role", {
@@ -208,13 +208,13 @@ export const getUserFormSchema = (onSuccess: () => void) => {
             ? "User invited successfully"
             : "User updated successfully",
         );
-        options.dataContext.modalState[1]("showModal", false);
+        options.contextData.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      options.dataContext.modalState[1]("isLoading", false);
+      options.contextData.modalState[1]("isLoading", false);
     }
   };
 
@@ -241,9 +241,9 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          disabled: options.dataContext.modalState[0]?.isLoading,
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: options.dataContext.modalState[0]?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -255,7 +255,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            options.dataContext.modalState[1]("showModal", false);
+            options.contextData.modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
@@ -283,7 +283,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                     css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
-                      hide: !options.dataContext.modalState[0]?.showModal,
+                      hide: !options.contextData.modalState[0]?.showModal,
                       style: {
                         "z-index": options.zIndex,
                       },
@@ -316,7 +316,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Html", as: "portal",
                 props: (options: FunctionArgumentType) => ({
-                  hide: !options.dataContext.modalState[0]?.showModal,
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],

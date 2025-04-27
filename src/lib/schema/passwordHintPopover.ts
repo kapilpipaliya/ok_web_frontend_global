@@ -43,7 +43,7 @@ export function createPasswordHintPopoverContent(
             {
               componentName: "Html", as: "icon",
               css: (options: FunctionArgumentType) => {
-                const validationState = options.dataContext.validationState;
+                const validationState = options.contextData.validationState;
                 const isValid =
                   validationState?.[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
@@ -57,7 +57,7 @@ export function createPasswordHintPopoverContent(
 `;
               },
               props: (options: FunctionArgumentType) => {
-                const validationState = options.dataContext.validationState;
+                const validationState = options.contextData.validationState;
                 const isValid =
                   validationState?.[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
@@ -76,7 +76,7 @@ export function createPasswordHintPopoverContent(
               as: "span",
               componentName: "Html",
               css: (options: FunctionArgumentType) => {
-                const validationState = options.dataContext.validationState;
+                const validationState = options.contextData.validationState;
                 const isValid =
                   validationState?.[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
@@ -120,13 +120,13 @@ export function createPasswordHintPopoverContent(
             const hasContent = password.length > 0;
 
             // Update validation state
-            options.dataContext.validationState[1]("conditions", conditions);
-            options.dataContext.validationState[1]("isValid", isValid);
+            options.contextData.validationState[1]("conditions", conditions);
+            options.contextData.validationState[1]("isValid", isValid);
 
             // Update help icon state
-            if (options.dataContext.helpIconState) {
-              options.dataContext.helpIconState[1]("isValid", isValid);
-              options.dataContext.helpIconState[1]("hasContent", hasContent);
+            if (options.contextData.helpIconState) {
+              options.contextData.helpIconState[1]("isValid", isValid);
+              options.contextData.helpIconState[1]("hasContent", hasContent);
             }
           });
 
@@ -164,7 +164,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
           {
             componentName: "Html", as: "icon",
             css: (options: FunctionArgumentType) => {
-              const helpIconState = options.dataContext.helpIconState;
+              const helpIconState = options.contextData.helpIconState;
               const iconColor = helpIconState?.[0]?.isValid
                 ? "success"
                 : helpIconState?.[0]?.hasContent
@@ -175,7 +175,7 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
 `;
             },
             props: (options: FunctionArgumentType) => {
-              const helpIconState = options.dataContext.helpIconState;
+              const helpIconState = options.contextData.helpIconState;
               const iconName = helpIconState?.[0]?.isValid
                 ? "ph:check-circle"
                 : helpIconState?.[0]?.hasContent

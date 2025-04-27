@@ -123,7 +123,7 @@ export const roleFormSchema = {
                 border-right: none;
                 border-top: none;
                 `,
-                  args.dataContext.tabState[0]?.activeTab === "Perm"
+                  args.contextData.tabState[0]?.activeTab === "Perm"
                     ? css`border-bottom: 2px solid ${args.theme.var.color.primary};`
                     : css`border-bottom: 2px solid transparent;`,
                 ];
@@ -136,8 +136,8 @@ export const roleFormSchema = {
                 });
                 return {
                   onClick: () =>
-                    options.dataContext.tabState[1]("activeTab", "Perm"),
-                  text: `Permissions ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
+                    options.contextData.tabState[1]("activeTab", "Perm"),
+                  text: `Permissions ${options.contextData.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
                 };
               },
               type: "button",
@@ -154,7 +154,7 @@ export const roleFormSchema = {
                 border-right: none;
                 border-top: none;
               `,
-                options.dataContext.tabState[0]?.activeTab === "Page"
+                options.contextData.tabState[0]?.activeTab === "Page"
                   ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
                   : css`border-bottom: 2px solid transparent;`,
               ],
@@ -166,8 +166,8 @@ export const roleFormSchema = {
                 });
                 return {
                   onClick: () =>
-                    options.dataContext.tabState[1]("activeTab", "Page"),
-                  text: `Pages ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
+                    options.contextData.tabState[1]("activeTab", "Page"),
+                  text: `Pages ${options.contextData.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
                 };
               },
               type: "button",
@@ -184,7 +184,7 @@ export const roleFormSchema = {
                 border-right: none;
                 border-top: none;
               `,
-                options.dataContext.tabState[0]?.activeTab === "Form"
+                options.contextData.tabState[0]?.activeTab === "Form"
                   ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
                   : css`border-bottom: 2px solid transparent;`,
               ],
@@ -196,8 +196,8 @@ export const roleFormSchema = {
                 });
                 return {
                   onClick: () =>
-                    options.dataContext.tabState[1]("activeTab", "Form"),
-                  text: `Forms ${options.dataContext.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
+                    options.contextData.tabState[1]("activeTab", "Form"),
+                  text: `Forms ${options.contextData.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
                 };
               },
               type: "button",
@@ -217,7 +217,7 @@ export const roleFormSchema = {
               attributes: [permissionsTableSchema("Perm")],
               componentName: "Html",
               css: (options: FunctionArgumentType) =>
-                options.dataContext.tabState[0]?.activeTab === "Perm"
+                options.contextData.tabState[0]?.activeTab === "Perm"
                   ? ""
                   : css`display:none`,
             },
@@ -226,7 +226,7 @@ export const roleFormSchema = {
               attributes: [permissionsTableSchema("Page")],
               componentName: "Html",
               css: (options: FunctionArgumentType) =>
-                options.dataContext.tabState[0]?.activeTab === "Page"
+                options.contextData.tabState[0]?.activeTab === "Page"
                   ? ""
                   : css`display:none`,
             },
@@ -236,7 +236,7 @@ export const roleFormSchema = {
               attributes: [permissionsTableSchema("Form")],
               componentName: "Html",
               css: (options: FunctionArgumentType) =>
-                options.dataContext.tabState[0]?.activeTab === "Form"
+                options.contextData.tabState[0]?.activeTab === "Form"
                   ? ""
                   : css`display:none`,
             },
@@ -264,7 +264,7 @@ export const roleFormSchema = {
       onMount: async () => {
         if (!options.data?.id.startsWith("-")) {
           try {
-            options.dataContext.modalState[1]("isLoading", true);
+            options.contextData.modalState[1]("isLoading", true);
             const response = await postAPI(API.role.getRoleUrl, {
               id: options.data?.id,
             });
@@ -275,7 +275,7 @@ export const roleFormSchema = {
           } catch (error) {
             options.showErrorToast((error as Error).message);
           } finally {
-            options.dataContext.modalState[1]("isLoading", false);
+            options.contextData.modalState[1]("isLoading", false);
           }
         }
       },
@@ -301,7 +301,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
     }
 
     try {
-      options.dataContext.modalState[1]("isLoading", true);
+      options.contextData.modalState[1]("isLoading", true);
       const data = commitTxn(options.txnId, options.graph);
       if (!data) {
         return;
@@ -322,13 +322,13 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
         options.removeTxnIdAndCreateNew(options.txnId);
         options.ensureData();
         showSuccessToast("Role created successfully");
-        options.dataContext.modalState[1]("showModal", false);
+        options.contextData.modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      options.dataContext.modalState[1]("isLoading", false);
+      options.contextData.modalState[1]("isLoading", false);
     }
   };
 
@@ -355,9 +355,9 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          disabled: options.dataContext.modalState[0]?.isLoading,
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: options.dataContext.modalState[0]?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -369,7 +369,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            options.dataContext.modalState[1]("showModal", false);
+            options.contextData.modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
             options.ensureData();
           },
@@ -394,7 +394,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
             css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: !options.dataContext.modalState[0]?.showModal,
+              hide: !options.contextData.modalState[0]?.showModal,
             }),
           },
           {
@@ -428,7 +428,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Html", as: "portal",
                 props: (options: FunctionArgumentType) => ({
-                  hide: !options.dataContext.modalState[0]?.showModal,
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],

@@ -28,7 +28,7 @@ export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
   componentName: string;
   data: Vertex;
-  dataContext: Record<string | symbol, unknown>;
+  contextData: Record<string | symbol, unknown>;
   deleteTxnIdAndCreateNew: (txnId: number) => number;
   ensureData: () => null | string;
   error: (key?: string) => string | undefined;

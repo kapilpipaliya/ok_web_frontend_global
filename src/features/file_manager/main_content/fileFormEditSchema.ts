@@ -90,7 +90,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
     const formData = options.data;
 
     try {
-      options.dataContext.modalState[1]("isLoading", true);
+      options.contextData.modalState[1]("isLoading", true);
 
       //   const currentItem = fileManagerStore.selectedItem;
       //   if (!currentItem) {
@@ -132,7 +132,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
         options.revertTransactionUpToIndex(options.txnId, -1);
         options.ensureData;
         showSuccessToast("Item updated successfully");
-        options.dataContext.modalState[1]("showModal", false);
+        options.contextData.modalState[1]("showModal", false);
         fileManagerStore.gridStore?.[0].fetchTableData();
         onSuccess();
       } else {
@@ -142,7 +142,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
       console.error("Error updating item:", error);
       showErrorToast("Failed to update item");
     } finally {
-      options.dataContext.modalState[1]("isLoading", false);
+      options.contextData.modalState[1]("isLoading", false);
     }
   };
 
@@ -168,9 +168,9 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          disabled: options.dataContext.modalState[0]?.isLoading,
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: options.dataContext.modalState[0]?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -182,7 +182,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            options.dataContext.modalState[1]("showModal", false);
+            options.contextData.modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
           text: "Cancel",
@@ -210,7 +210,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
                     css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
-                      hide: !options.dataContext.modalState[0]?.showModal,
+                      hide: !options.contextData.modalState[0]?.showModal,
                       style: {
                         "z-index": options.zIndex,
                       },
@@ -235,7 +235,7 @@ export const getEditFileOrFolderSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Html", as: "portal",
                 props: (options: FunctionArgumentType) => ({
-                  hide: !options.dataContext.modalState[0]?.showModal,
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],

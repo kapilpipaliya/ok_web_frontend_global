@@ -46,7 +46,7 @@ Attr Vertex:
       parentRenderContext: PageRenderObject;
       readOnly: boolean | null | undefined;
       ref: Accessor<HTMLDivElement | null>;
-      dataContext: Record<string | symbol, any>; // Data sharing between Items
+      contextData: Record<string | symbol, any>; // Data sharing between Items
       fns?: (name: string) => Function | undefined;
       runWithOwner: <T>(fn: () => T) => T | undefined;
       runWithParentOwner: <T>(fn: () => T) => T | undefined;
@@ -68,7 +68,7 @@ Attr Vertex:
       - expression: string - expression to evaluate the data
       - loop: boolean - whether to loop over the data
     - 'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'props' function body pass data key the array of values it should iterate over.
-    - Requires 'name' property in Attr vertex, In the 'Data' Item children to read the value of the context, in 'props' function body use 'args.dataContext["name"]' property.
+    - Requires 'name' property in Attr vertex, In the 'Data' Item children to read the value of the context, in 'props' function body use 'args.contextData["name"]' property.
     - use 'Data' Item whenever possible.
   * 'Slot' - Component slots
 - Text Content:
@@ -197,7 +197,7 @@ Reusable Component:
 
   2. Attr Vertex:
     1. "Attr" vertex join with Component using "Attr" edge.
-    2. read Component variant value from the Item tree using 'props' property in the function body with 'args.dataContext.props["key"]' property.
+    2. read Component variant value from the Item tree using 'props' property in the function body with 'args.contextData.props["key"]' property.
     3. to use Children or slot for the component use 'Attr' vertex with 'componentName' property set to 'Slot'.
 
 Important Guidelines:

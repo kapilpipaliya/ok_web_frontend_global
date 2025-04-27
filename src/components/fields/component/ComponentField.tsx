@@ -78,7 +78,7 @@ export function ComponentField(
   });
 
   const ComponentWrapper = () => {
-    const dataContext = useDataContext() || {};
+    const contextData = useDataContext() || {};
     const values = createMemo(() => {
       return {
         ...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph),
@@ -86,7 +86,7 @@ export function ComponentField(
       };
     });
 
-    const newDataContext = new Proxy(dataContext, {
+    const newDataContext = new Proxy(contextData, {
       get(target, key) {
         if (key === "props") {
           return values();

@@ -32,7 +32,7 @@ export const DataField = (props: {
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
   const [errorMessage, setErrorMessage] = createSignal("");
-  const dataContext = useDataContext() || {};
+  const contextData = useDataContext() || {};
 
   const selectionOptionsData = createAsync<null | ServerResult>(
     async () => {
@@ -74,7 +74,7 @@ export const DataField = (props: {
         evalExpression(props.expression, {
           graph,
           setGraph,
-          vertexes: dataContext || [],
+          vertexes: contextData || [],
         }) || [],
       );
     } else {

@@ -141,7 +141,7 @@ export function ContactForm() {
           // Submit button
           createFormSubmitButton(
             (options) =>
-              options.dataContext.submitState[0]?.isLoading
+              options.contextData.submitState[0]?.isLoading
                 ? "Sending..."
                 : "Send Message",
             async (options) => {

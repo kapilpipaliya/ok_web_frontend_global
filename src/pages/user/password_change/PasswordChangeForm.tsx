@@ -69,12 +69,12 @@ export function PasswordChangeForm() {
 `,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
                     const formData = options.data;
                     if (validateFormData(formData, showErrorToast)) {
                       try {
-                        options.dataContext.saveState[1]("isLoading", true);
+                        options.contextData.saveState[1]("isLoading", true);
                         await handlePasswordChange(
                           formData,
                           graph,
@@ -84,11 +84,11 @@ export function PasswordChangeForm() {
                         // Redirect to login page as session is expired
                         navigate?.("/auth/login");
                       } finally {
-                        options.dataContext.saveState[1]("isLoading", false);
+                        options.contextData.saveState[1]("isLoading", false);
                       }
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading
+                  text: options.contextData.saveState[0]?.isLoading
                     ? "Saving..."
                     : "Change Password",
                 }),

@@ -59,11 +59,11 @@ export function SignupForm() {
   // Password field enter key handler
   const handlePasswordEnter = async (options: FunctionArgumentType) => {
     try {
-      options.dataContext.submitState[1]("isLoading", true);
+      options.contextData.submitState[1]("isLoading", true);
       const formData = options.data;
       await handleSubmit(formData);
     } finally {
-      options.dataContext.submitState[1]("isLoading", false);
+      options.contextData.submitState[1]("isLoading", false);
     }
   };
 
@@ -133,7 +133,7 @@ export function SignupForm() {
                           if (e.target instanceof HTMLInputElement) {
                             options.updateValue(e.target.value);
                           }
-                          if (options.dataContext.submitState[0]?.isLoading) {
+                          if (options.contextData.submitState[0]?.isLoading) {
                             return;
                           }
                           handlePasswordEnter(options);
@@ -193,16 +193,16 @@ export function SignupForm() {
                 css: [STYLES.button2Css, css`width:100%; margin-top:16px;`],
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  disabled: options.dataContext.submitState[0]?.isLoading,
+                  disabled: options.contextData.submitState[0]?.isLoading,
                   onClick: async () => {
                     try {
-                      options.dataContext.submitState[1]("isLoading", true);
+                      options.contextData.submitState[1]("isLoading", true);
                       await handleSubmit(options.data);
                     } finally {
-                      options.dataContext.submitState[1]("isLoading", false);
+                      options.contextData.submitState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.submitState[0]?.isLoading
+                  text: options.contextData.submitState[0]?.isLoading
                     ? "Signing up..."
                     : "Sign Up",
                 }),

@@ -10,14 +10,14 @@ export function getText(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   projection: string,
-  dataContext: Vertex[],
+  contextData: Vertex[],
 ) {
   try {
     return (
       (evalExpression(projection, {
         graph,
         setGraph,
-        vertexes: dataContext,
+        vertexes: contextData,
       }) as string) || projection
     );
   } catch (error) {
@@ -31,13 +31,13 @@ export function getUrl(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   projection: string,
-  dataContext: Vertex[],
+  contextData: Vertex[],
 ) {
   try {
     const url = evalExpression(projection, {
       graph,
       setGraph,
-      vertexes: dataContext,
+      vertexes: contextData,
     }) as string | undefined;
     return typeof url === "string" && url.startsWith("/") ? url : undefined;
   } catch (error) {

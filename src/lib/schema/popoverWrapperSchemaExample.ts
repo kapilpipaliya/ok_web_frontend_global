@@ -102,7 +102,7 @@ export const dynamicPopoverExample = () => {
 `,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          text: `This popover uses data from context: ${options.dataContext.popoverState[0]?.isVisible ? "Visible" : "Hidden"}`,
+          text: `This popover uses data from context: ${options.contextData.popoverState[0]?.isVisible ? "Visible" : "Hidden"}`,
         }),
       },
     ],

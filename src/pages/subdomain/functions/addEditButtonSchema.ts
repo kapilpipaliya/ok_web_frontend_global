@@ -16,7 +16,7 @@ export function addEditButtonSchema(label: string) {
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {
-                options.dataContext.modalState[1]("showModal", true);
+                options.contextData.modalState[1]("showModal", true);
               },
               text: `Add New ${label}`,
             }),
@@ -53,7 +53,7 @@ export function addEditButtonSchema(label: string) {
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {
-                options.dataContext.modalState[1]("showModal", true);
+                options.contextData.modalState[1]("showModal", true);
               },
             }),
             type: "button",

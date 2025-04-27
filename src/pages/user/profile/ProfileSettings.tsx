@@ -174,9 +174,9 @@ export function ProfileSettings() {
                 css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
                 props: (options: FunctionArgumentType) => ({
-                  disabled: options.dataContext.saveState[0]?.isLoading,
+                  disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
-                    options.dataContext.saveState[1]("isLoading", true);
+                    options.contextData.saveState[1]("isLoading", true);
 
                     // TODO: Run Form Validation
                     const user = graph.vertexes[formDataId];
@@ -212,10 +212,10 @@ export function ProfileSettings() {
                         showSuccessToast("Profile updated successfully");
                       }
                     } finally {
-                      options.dataContext.saveState[1]("isLoading", false);
+                      options.contextData.saveState[1]("isLoading", false);
                     }
                   },
-                  text: options.dataContext.saveState[0]?.isLoading
+                  text: options.contextData.saveState[0]?.isLoading
                     ? "Saving..."
                     : "Save Changes",
                 }),

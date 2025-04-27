@@ -318,7 +318,7 @@ export function EmailSettings() {
                     css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
-                      disabled: options.dataContext.saveState[0]?.isLoading,
+                      disabled: options.contextData.saveState[0]?.isLoading,
                       onClick: async () => {
                         // Validate form data
                         const settings = options.data;
@@ -341,7 +341,7 @@ export function EmailSettings() {
                           settings.P,
                           "Email settings updated successfully",
                           (isLoading) =>
-                            options.dataContext.saveState[1](
+                            options.contextData.saveState[1](
                               "isLoading",
                               isLoading,
                             ),
@@ -349,7 +349,7 @@ export function EmailSettings() {
                           showErrorToast,
                         );
                       },
-                      text: options.dataContext.saveState[0]?.isLoading
+                      text: options.contextData.saveState[0]?.isLoading
                         ? "Saving..."
                         : "Save Changes",
                     }),
@@ -371,7 +371,7 @@ export function EmailSettings() {
                     css: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
-                      disabled: options.dataContext.testState[0]?.isLoading,
+                      disabled: options.contextData.testState[0]?.isLoading,
                       onClick: async () => {
                         // Validate form data first
                         const settings = options.data;
@@ -391,7 +391,7 @@ export function EmailSettings() {
                         options.clearAllErrors();
 
                         // Set loading state
-                        options.dataContext.testState[1]("isLoading", true);
+                        options.contextData.testState[1]("isLoading", true);
 
                         try {
                           // First save the settings using handleApiRequest
@@ -405,7 +405,7 @@ export function EmailSettings() {
                           );
 
                           if (!saveResult.success) {
-                            options.dataContext.testState[1](
+                            options.contextData.testState[1](
                               "isLoading",
                               false,
                             );
@@ -424,10 +424,10 @@ export function EmailSettings() {
                         } catch (error) {
                           showErrorToast((error as Error).message);
                         } finally {
-                          options.dataContext.testState[1]("isLoading", false);
+                          options.contextData.testState[1]("isLoading", false);
                         }
                       },
-                      text: options.dataContext.testState[0]?.isLoading
+                      text: options.contextData.testState[0]?.isLoading
                         ? "Testing..."
                         : "Test Connection",
                       title:

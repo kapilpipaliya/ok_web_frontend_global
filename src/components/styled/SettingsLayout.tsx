@@ -108,7 +108,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                 componentName: "Html",
                                 props: (args: FunctionArgumentType) => ({
                                   text: (
-                                    args.dataContext.menuGroups as DataType
+                                    args.contextData.menuGroups as DataType
                                   )[0],
                                 }),
                               },
@@ -116,7 +116,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             componentName: "Html",
                             props: (args: FunctionArgumentType) => ({
                               hide:
-                                (args.dataContext.menuGroups as DataType)[0] ===
+                                (args.contextData.menuGroups as DataType)[0] ===
                                 "default",
                             }),
                           },
@@ -135,7 +135,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                 gap: 8px;
                                 ${
                                   selectedMenu() ===
-                                  (args.dataContext.menuItems as MenuItem).id
+                                  (args.contextData.menuItems as MenuItem).id
                                     ? `
                                       background-color: ${args.theme.var.color.primary};
                                       color: ${args.theme.var.color.base_10};
@@ -150,11 +150,11 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                               `,
                                 props: (args: FunctionArgumentType) => ({
                                   hide:
-                                    (args.dataContext.menuItems as MenuItem)
+                                    (args.contextData.menuItems as MenuItem)
                                       .adminOnly && !isAdminRole(graph),
                                   onClick: () =>
                                     handleMenuSelect(
-                                      (args.dataContext.menuItems as MenuItem)
+                                      (args.contextData.menuItems as MenuItem)
                                         .id,
                                     ),
                                 }),
@@ -163,14 +163,14 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                     componentName: "Html",
                                     as: "icon",
                                     props: (args: FunctionArgumentType) => ({
-                                      icon: (args.dataContext.menuItems as MenuItem).icon,
-                                      hide: !(args.dataContext.menuItems as MenuItem).icon,
+                                      icon: (args.contextData.menuItems as MenuItem).icon,
+                                      hide: !(args.contextData.menuItems as MenuItem).icon,
                                     }),
                                   },
                                   {
                                     componentName: "Html",
                                     props: (args: FunctionArgumentType) => ({
-                                      text: (args.dataContext.menuItems as MenuItem).label,
+                                      text: (args.contextData.menuItems as MenuItem).label,
                                     }),
                                   },
                                 ],
@@ -181,7 +181,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             name: "menuItems",
                             props: (args: FunctionArgumentType) => ({
                               data: (
-                                args.dataContext.menuGroups as DataType
+                                args.contextData.menuGroups as DataType
                               )[1],
                             }),
                           },
@@ -192,7 +192,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                         componentName: "Html",
                         props: (args: FunctionArgumentType) => ({
                           show: (
-                            args.dataContext.menuGroups as DataType
+                            args.contextData.menuGroups as DataType
                           )[1].some(
                             (item: MenuItem) =>
                               !item.adminOnly || isAdminRole(graph),

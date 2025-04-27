@@ -16,7 +16,7 @@ export function loadingIconSchema() {
     ],
     componentName: "Show",
     props: (options: FunctionArgumentType) => ({
-      when: options.dataContext.modalState[0]?.isLoading,
+      when: options.contextData.modalState[0]?.isLoading,
     }),
   };
 }
