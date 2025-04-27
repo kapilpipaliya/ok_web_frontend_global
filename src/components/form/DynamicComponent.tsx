@@ -431,10 +431,10 @@ export function DynamicComponent(
       }
       
       // For other components, just use meta fns
-      return evaluateFns(props.meta.P.fns) ?? parentRenderContext()?.context?.fns;
+      return evaluateFns(props.meta.P.fns) ?? parentRenderContext()?.context?.fns ?? {};
     } catch (error) {
       console.error("Error in dynamicFns:", error);
-      return parentRenderContext()?.context?.fns;
+      return parentRenderContext()?.context?.fns ?? {};
     }
   });
 
