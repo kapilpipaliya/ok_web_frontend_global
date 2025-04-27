@@ -170,12 +170,12 @@ export function PageItem(
         onMouseLeave={(e) => handleMouseLeave(e)}
         ref={(el) => (menuRef = el)}
       >
-        <Icon
+        {/* <Icon
           height={22}
           icon={"iconoir:multiple-pages"}
           noobserver
           width={22}
-        />
+        /> */}
         <As
           as="div"
           css={css`font-size: 14px;`}

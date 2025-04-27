@@ -15,7 +15,7 @@ import { iconMap } from "~/lib/ui/iconMap";
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { resetDragDropState } from "../../event_handler/resetDragDropState";
-import { OpenComponentSettings } from "../../OpenComponentSettings";
+// import { OpenComponentSettings } from "../../OpenComponentSettings";
 import { TreeItemExpandButton } from "../../settings/layout/TreeItemExpandButton";
 import { PreviewIsolated } from "../pages/PreviewIsolated";
 import { getCompChildren } from "./functions/getCompChildren";
@@ -44,7 +44,7 @@ export function ComponentItem(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const [isHovered, setIsHovered] = createSignal(false);
+  const [, setIsHovered] = createSignal(false);
   const [floating, setFloating] = createSignal<HTMLElement | null>(null);
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const layoutStoreId = useDesignerLayoutStore();
@@ -77,18 +77,18 @@ export function ComponentItem(
     return hoverPageId() === props.child.id ? `${baseStyle} ${hoverItemStyle}` : baseStyle;
   };
 
-  const handleCheckboxChange = (event: Event, id: Id) => {
-    const isChecked = (event.target as HTMLInputElement).checked;
-    if (isChecked) {
-      setSelectedComponents((prev) => new Set(prev).add(graph.vertexes[id]));
-    } else {
-      setSelectedComponents((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(graph.vertexes[id]);
-        return newSet;
-      });
-    }
-  };
+  // const handleCheckboxChange = (event: Event, id: Id) => {
+  //   const isChecked = (event.target as HTMLInputElement).checked;
+  //   if (isChecked) {
+  //     setSelectedComponents((prev) => new Set(prev).add(graph.vertexes[id]));
+  //   } else {
+  //     setSelectedComponents((prev) => {
+  //       const newSet = new Set(prev);
+  //       newSet.delete(graph.vertexes[id]);
+  //       return newSet;
+  //     });
+  //   }
+  // };
 
   const onDragEnd = () => {
     resetDragDropState(layoutStoreVertex(), graph, setGraph);
@@ -105,6 +105,11 @@ export function ComponentItem(
     graph,
     setGraph
   );
+
+  // Check if component should show an icon (not from Component or Templates)
+  const shouldShowIcon = () => {
+    return props.child.L[0] !== "Component" && props.child.L[0] !== "TemplatePage";
+  };
 
   return (
     <>
@@ -139,15 +144,17 @@ export function ComponentItem(
           />
         </Show>
         
-        <Icon
-          height={22}
-          icon={
-            iconMap[props.child?.P.key as keyof typeof iconMap] ??
-            "material-symbols:widgets-outline-rounded"
-          }
-          noobserver
-          width={22}
-        />
+        <Show when={shouldShowIcon()}>
+          <Icon
+            height={22}
+            icon={
+              iconMap[props.child?.P.key as keyof typeof iconMap] ??
+              "ph:cube-duotone"
+            }
+            noobserver
+            width={22}
+          />
+        </Show>
         
         <As
           as="span"
@@ -159,7 +166,7 @@ export function ComponentItem(
           {props.child?.P.label || props.child?.P.key}
         </As>
         
-        <Show when={isHovered()}>
+        {/* <Show when={isHovered()}>
           <OpenComponentSettings
             css={css`
               cursor: pointer;
@@ -169,9 +176,9 @@ export function ComponentItem(
             `}
             id={props.child.id}
           />
-        </Show>
+        </Show> */}
 
-        <Show when={isHovered() || selectedComponents().has(graph.vertexes[props.child.id])}>
+        {/* <Show when={isHovered() || selectedComponents().has(graph.vertexes[props.child.id])}>
           <As
             as="input"
             checked={selectedComponents().has(graph.vertexes[props.child.id])}
@@ -183,7 +190,7 @@ export function ComponentItem(
             onChange={(e) => handleCheckboxChange(e, props.child.id)}
             type="checkbox"
           />
-        </Show>
+        </Show> */}
         
         <Show when={props.child.L[0] !== "Comp"}>
           <As
@@ -223,7 +230,7 @@ export function ComponentItem(
       </Show>
       
       {/* Render children */}
-      <Show when={props.expandedKeys.includes(props.child.id)}>
+      <Show when={children().length > 0 && props.expandedKeys.includes(props.child.id)}>
         <As
           as="ul"
           css={css`
