@@ -1,4 +1,4 @@
-import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
+import { createEffect, createMemo, on, Show, splitProps, getOwner, runWithOwner } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -105,15 +105,14 @@ export function ComponentField(
     <>
       <Show when={getCopmVertex().length}>
         <SlotContext.Provider
-          value={() => {
-            return (
+          value={
               <PreviewContext.Provider
                 value={[previewStoreProxy, setPreviewStore]}
               >
                 {props.children}
               </PreviewContext.Provider>
-            );
-          }}
+            
+          }
         >
           <ComponentWrapper />
         </SlotContext.Provider>
