@@ -79,6 +79,8 @@ export function createVertexIds() {
     text: `textVertex${createUniqueId()}`,
     thankYouPage: `thankYouPageVertex${createUniqueId()}`,
     width: `widthVertex${createUniqueId()}`,
+    name: `nameInputVertex${createUniqueId()}`,
+    loop: `loopCheckboxVertex${createUniqueId()}`,
   };
 }
 
@@ -313,6 +315,23 @@ function createVertices(
         key: "slot",
       },
     },
+    {
+      id: vertexIds.name,
+      P: {
+        css: PROPERTIES.Css.TextFieldCss,
+        componentName: "TextInput",
+        displayName: "Name",
+        key: "name",
+      },
+    },
+    {
+      id: vertexIds.loop,
+      P: {
+        componentName: "CheckBox",
+        displayName: "Loop",
+        key: "loop",
+      },
+    },
   ];
   for (const vertex of vertices) {
     const newVertexInstance = newVertex(vertex.id, ["MetaTemp"], vertex.P);
@@ -347,6 +366,7 @@ function getMetaVertexes(
     selectedAttr()?.P.as === "textarea" ||
     ["CheckBox", "MultiSelect", "Select", "TextInput"].includes(componentName);
   const isHtmlIcon = componentName === "Html" && selectedAttr()?.P.as === "icon";
+  const isDataComponent = componentName === "Data";
 
   // Check if parent component is a Slot
   const parentVertex = evalExpression("<-Attr", {
@@ -374,6 +394,10 @@ function getMetaVertexes(
     // always displayed properties
     graph.vertexes[vertexIds.calculatedValue],
     ...(componentName === "Html" ? [graph.vertexes[vertexIds.as]] : []),
+    ...(isDataComponent ? [
+      graph.vertexes[vertexIds.name],
+      graph.vertexes[vertexIds.loop],
+    ] : []),
     graph.vertexes[vertexIds.required],
     graph.vertexes[vertexIds.hide],
     graph.vertexes[vertexIds.disabled],
