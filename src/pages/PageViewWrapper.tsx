@@ -491,7 +491,9 @@ export function PageViewWrapper(
         setGraph,
         formStore().P.txnId,
         metaVertex()!.P.key,
-        {},
+        metaVertex()!.P.key === "Form" || metaVertex()!.P.key === "Page" 
+          ? { fns: `return { enabled: () => true }` }
+          : {},
       );
 
       if (createResult.error) {
