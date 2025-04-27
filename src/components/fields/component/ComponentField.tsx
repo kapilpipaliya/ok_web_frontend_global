@@ -1,4 +1,4 @@
-import { createEffect, createMemo, on, Show, splitProps, getOwner, runWithOwner } from "solid-js";
+import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
 
 import type { Vertex } from "~/lib/graph/graph";
 

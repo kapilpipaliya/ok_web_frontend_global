@@ -190,7 +190,7 @@ export function PageViewWrapper(
 
   const [previewStore] = usePreviewContext();
 
-  const dynamicFns = createMemo(() => {
+  const getDynamicFns = () => {
     try {
        // Helper to evaluate fns from a vertex
        const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
@@ -213,7 +213,8 @@ export function PageViewWrapper(
       console.error("Error in dynamicFns:", error);
       return {};
     }
-  });
+  }
+  // const dynamicFns = createMemo(getDynamicFns);
 
   const isNoPermissionCheck = createMemo(
     () =>
@@ -285,6 +286,9 @@ export function PageViewWrapper(
 
   const metaData = createAsync(
     async () => {
+      if (constants.pageKeyName === "favicon.ico") {
+        return { error: "No meta data found" };
+      }
       if (constants.formMetaId) {
         return {};
       }
@@ -366,12 +370,46 @@ export function PageViewWrapper(
         return { dataResult, formMetaId, metaResult };
       }
 
-      return { formMetaId, metaResult };
+      let result: { formMetaId?: string, metaResult?: FetchFormMetaDataResult, dataResult?: FetchFormDataResult, error?: string } = { formMetaId, metaResult };
+
+      if (props.getFormData) {
+        try {
+          // Set fetching state to true before making the API call
+          setFormStore("isFetching", true);
+  
+          const data = await props.getFormData();
+  
+          // Set fetching state to false after the API call completes
+          setFormStore("isFetching", false);
+  
+          if (!data || data.error) {
+            result = { ...result, error: data.error || "Error fetching form data" };
+          } else {
+            result = { ...result, dataResult: {data} };
+          }
+        } catch (error) {
+          // Make sure to set fetching state to false in case of error
+          setFormStore("isFetching", false);
+          result = { ...result, error: (error as Error).message };
+        }
+      }
+      // as we are using deferStream, we need to process the result here
+      if (!props.formMetaId && result) {
+        // untrack(() => {
+          // batch(() => {
+            setFormMetaData(result?.metaResult, result?.formMetaId);
+            validateMetaVertex();
+            handleFormData(result?.dataResult);
+          // });
+        // });
+      }
+      console.log("Result:", result);
+      return result;
     },
     { deferStream: true },
   );
 
-  async function handleFormMetaData(
+  function setFormMetaData(
     metaResult?: FetchFormMetaDataResult,
     formMetaId?: string,
   ) {
@@ -423,11 +461,14 @@ export function PageViewWrapper(
       }
       setFormStore("formMetaId", metaVertexResult.vertex!.id);
     }
+    return true;
+  }
 
+  function validateMetaVertex() {
     if (
       formStore().P.formMetaId &&
       !isNoPermissionCheck() &&
-      ((["Form", "Page"].includes(metaVertex()?.L[0]) && !dynamicFns().enabled?.()))
+      ((["Form", "Page"].includes(metaVertex()?.L[0]) && !getDynamicFns().enabled?.()))
     ) {
       setFormStore("error", `${props.pageVertexName} is not enabled. Please contact your administrator.`);
       return false;
@@ -442,64 +483,51 @@ export function PageViewWrapper(
       setFormStore("error", `No key for the ${props.pageVertexName}`);
       return false;
     }
+    
+    return true;
   }
 
   props.initializeFormStoreParent?.(pageFormVertexObject.id);
 
-  createEffect(() => {
-    const result = metaData();
+  const processAsyncResult = (result?: { formMetaId?: string, metaResult?: FetchFormMetaDataResult, dataResult?: FetchFormDataResult }) => {
     if (!props.formMetaId && result) {
       untrack(() => {
         batch(() => {
-          handleFormMetaData(result?.metaResult, result?.formMetaId);
+          setFormMetaData(result?.metaResult, result?.formMetaId);
+          validateMetaVertex();
           handleFormData(result?.dataResult);
         });
       });
     }
+  }
+  createEffect(() => {
+    const result = metaData();
+    processAsyncResult(result);
   });
   // Make SSR work when props.formMetaId is set
   untrack(() => {
     batch(() => {
       if (props.formMetaId) {
-        handleFormMetaData();
+        setFormMetaData();
+        validateMetaVertex();
         handleFormData();
       }
     });
   });
 
-  function hasRequiredPermissions() {
-    return (
-      metaVertex() &&
-      (permissions.create() || permissions.edit() || permissions.view())
-    );
-  }
+  // function hasRequiredPermissions() {
+  //   return (
+  //     metaVertex() &&
+  //     (permissions.create() || permissions.edit() || permissions.view())
+  //   );
+  // }
 
-  async function handleFormData(result?: FetchFormDataResult) {
+  function handleFormData(result?: FetchFormDataResult) {
     if (props.formDataId) {
       setFormStore("formDataId", props.formDataId);
       return;
     }
-    if (props.getFormData) {
-      try {
-        // Set fetching state to true before making the API call
-        setFormStore("isFetching", true);
 
-        const data = await props.getFormData();
-
-        // Set fetching state to false after the API call completes
-        setFormStore("isFetching", false);
-
-        if (!data || data.error) {
-          result = { error: data.error || "Error fetching form data" };
-        } else {
-          result = { data };
-        }
-      } catch (error) {
-        // Make sure to set fetching state to false in case of error
-        setFormStore("isFetching", false);
-        return { error: (error as Error).message };
-      }
-    }
     const formDataId = result?.data?.result?.[0]?.id;
     if (!(id() || formDataId)) {
       const createResult = createFormVertex(
