@@ -72,7 +72,7 @@ const SectionHeader = (props: SectionHeaderProps) => (
   gap: 2px;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1;
   background-color: \${args.theme.var.color.base_3};
   padding: 4px 0;
 `,
@@ -175,7 +175,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   };
 
   return (
-    <div>
+    <>
       <SectionHeader 
         title={props.rootLevel ? "Components" : "Page Components"} 
         onAddClick={handleAddComponentClick} 
@@ -186,7 +186,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
         isFetchData={false}
         rootVertexes={rootVertexes()}
       />
-    </div>
+    </>
   );
 };
 

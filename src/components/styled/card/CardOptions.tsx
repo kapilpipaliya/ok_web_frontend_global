@@ -61,7 +61,7 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
   right: 0px;
   transform-origin: top right;
   width: 8rem;
-  z-index: 10;
+  z-index: 1;
 `}
           role="menu"
           tabindex="-1"

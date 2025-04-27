@@ -1,4 +1,4 @@
-import { createMemo, createSignal, For, onMount, Show } from "solid-js";
+import { createMemo, createSignal, For, onMount, Show, Suspense } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -135,7 +135,7 @@ export function ComponentList(props: {
   });
 
   return (
-    <div>
+    <>
       <Show when={filteredChildren().length >= 5}>
         <SearchBar
           handleChange={(value) => {
@@ -190,6 +190,6 @@ export function ComponentList(props: {
           </For>
         </Show>
       </As>
-    </div>
+    </>
   );
 }
