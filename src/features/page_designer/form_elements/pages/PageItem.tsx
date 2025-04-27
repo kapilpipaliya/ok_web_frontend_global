@@ -9,12 +9,18 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
-import { openInNewInternalTab } from "~/features/page_designer/form_elements/pages/functions/openInNewInternalTab";
 import { onClickAddComponent } from "~/features/page_designer/functions/component/onClickAddComponent";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import type { NavItem } from "../functions/getTreeData";
+import { 
+  baseItemStyle, 
+  hoverItemStyle, 
+  buttonStyle,
+  setupPreview,
+  createOpenInNewTab
+} from "../common/ItemStyles";
 
 import {
   type PageLayoutObject,
@@ -42,74 +48,60 @@ export function PageItem(
     new Set<Vertex>(),
   );
 
-  const formStoreVertex = () =>
-    graph.vertexes[layoutStoreVertex()?.P.formId!] as Vertex<FormStoreObject>;
-
-  let menuRef: HTMLDivElement;
-
-  const baseStyle = css`
-  align-items: center;
-  background-color: white;
-  border-radius: 0.2rem;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 5px 0px;
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  height: 35px;
-  margin: 5px;
-  padding: 10px;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-`;
-
-  const hoverStyle = css`
-  background-color: #F2EDED;
-  box-shadow: 1px 1px 1px;
-  cursor: move;
-`;
-
-  const itemStyle = () =>
-    hoverPageId() === props.child.id ? `${baseStyle} ${hoverStyle}` : baseStyle;
-
-  let timeoutId: NodeJS.Timeout;
-
-  const handleMouseEnter = () => {
-    if (props.previewPageId !== props.child.id) {
-      props.setPreviewPageId(null);
-    }
-    setHoverPageId(props.child.id);
-    timeoutId = setTimeout(() => {
-      props.setPreviewPageId(props.child.id);
-    }, 1000);
+  const formStoreVertex = () => {
+    const formId = layoutStoreVertex()?.P.formId;
+    return formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
   };
 
-  const handleMouseLeave = () => {
-    clearTimeout(timeoutId);
-    setHoverPageId(null);
+  let menuRef: HTMLDivElement | undefined;
+
+  // Use shared preview setup with function for props
+  const { handleMouseEnter, handleMouseLeave, previewTimer } = setupPreview(
+    () => ({
+      previewPageId: props.previewPageId,
+      setPreviewPageId: props.setPreviewPageId,
+      itemId: props.child.id
+    }),
+    {
+      setHoverPageId
+    },
+  );
+
+  // Get combined item style
+  const getItemStyle = () => {
+    const baseStyle = baseItemStyle;
+    return hoverPageId() === props.child.id ? `${baseStyle} ${hoverItemStyle}` : baseStyle;
   };
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
     mergeVertexProperties<PageLayoutObject>(
       0,
-      layoutStoreId!,
+      layoutStoreId,
       graph,
       setGraph,
       { draggedVertexIds: [] },
     );
-    clearTimeout(timeoutId);
+    if (previewTimer) {
+      clearTimeout(previewTimer);
+    }
     props.setPreviewPageId(null);
     const dataTransfer =
       selectedComponents().size > 0
         ? Array.from(selectedComponents())
         : [graph.vertexes[props.child.id]];
+    
+    // Safely access draggedVertexIds
+    const currentDraggedIds = layoutStoreVertex()?.P.draggedVertexIds || [];
+    
     mergeVertexProperties<PageLayoutObject>(
       0,
-      layoutStoreId!,
+      layoutStoreId,
       graph,
       setGraph,
       {
         draggedVertexIds: [
-          ...layoutStoreVertex()?.P.draggedVertexIds,
+          ...currentDraggedIds,
           ...dataTransfer.map((v) => v.id),
         ],
       },
@@ -120,59 +112,63 @@ export function PageItem(
   const handleDoubleClick = () => {
     mergeVertexProperties<PageLayoutObject>(
       0,
-      layoutStoreId!,
+      layoutStoreId,
       graph,
       setGraph,
       { draggedVertexIds: [props.child.id] },
     );
+    
+    const formStore = formStoreVertex();
+    if (!formStore) return;
+    
+    // Safe access to properties
+    const draggedVertex = layoutStoreVertex()?.P.draggedVertexIds?.[0];
+    if (!draggedVertex) return;
+    
     onClickAddComponent(
       graph,
       setGraph,
-      formStoreVertex()?.P.txnId,
-      graph.vertexes[layoutStoreVertex()?.P.draggedVertexIds[0]],
-      graph.vertexes[formStoreVertex()?.P.formDataId],
-      formStoreVertex()?.P.selectedId !== -1
-        ? formStoreVertex()?.P.selectedId
-        : formStoreVertex()?.P.formDataId,
+      formStore.P.txnId,
+      graph.vertexes[draggedVertex],
+      graph.vertexes[formStore.P.formDataId],
+      formStore.P.selectedId !== -1
+        ? formStore.P.selectedId
+        : formStore.P.formDataId,
     );
     mergeVertexProperties<PageLayoutObject>(
       0,
-      layoutStoreId!,
+      layoutStoreId,
       graph,
       setGraph,
       { draggedVertexIds: [] },
     );
   };
 
-  const openInNewInternalTabClick = () => {
-    openInNewInternalTab(
-      layoutStoreId,
-      graph.vertexes[props.child.id],
-      graph,
-      setGraph,
-    );
-  };
+  // Use shared function to create open in new tab handler
+  const openInNewInternalTabClick = createOpenInNewTab(
+    layoutStoreId,
+    graph.vertexes[props.child.id],
+    graph,
+    setGraph
+  );
 
   onCleanup(() => {
-    clearTimeout(timeoutId);
+    if (previewTimer) {
+      clearTimeout(previewTimer);
+    }
   });
 
   return (
     <Show when={props.child.key}>
       <As
-        as="div" // NOSONAR
-        css={[
-          itemStyle(),
-          css`
-  position: relative
-`,
-        ]}
+        as="div"
+        css={getItemStyle()}
         draggable={"true"}
         ondblclick={handleDoubleClick}
         onDragStart={handleDragStart}
         onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        ref={menuRef!}
+        onMouseLeave={(e) => handleMouseLeave(e)}
+        ref={(el) => (menuRef = el)}
       >
         <Icon
           height={22}
@@ -182,33 +178,26 @@ export function PageItem(
         />
         <As
           as="div"
-          css={css`
-  font-size: 14px;
-`}
+          css={css`font-size: 14px;`}
         >
           {toTitle(props.child.key)}
         </As>
         <As
           as="div"
-          css={css`
-  margin-left: auto;
-`}
+          css={css`margin-left: auto;`}
         >
           <IconButton
-            css={css`
-              background-color: transparent;
-              border: none;
-            `}
+            css={buttonStyle}
             icon="ph:arrow-square-out"
             onClick={openInNewInternalTabClick}
             size={18}
           />
         </As>
-        <Show when={props.previewPageId === props.child.id}>
+        <Show when={props.previewPageId === props.child.id && menuRef}>
           <DropdownMenu
             onClickOutside={() => props.setPreviewPageId(null)}
             onMouseLeave={() => props.setPreviewPageId(null)}
-            parentRef={menuRef!}
+            parentRef={menuRef as HTMLElement}
           >
             {toTitle(props.child.key)} Preview
             <PreviewIsolated
