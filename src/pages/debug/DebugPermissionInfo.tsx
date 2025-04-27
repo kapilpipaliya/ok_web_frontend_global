@@ -4,9 +4,9 @@ export function DebugPermissionInfo(
   props: Readonly<{
     allConfiguredPermission: Vertex[];
     authError: string;
-    hasDeletePermission: boolean;
+    hasFullPermission: boolean;
     hasEditPermission: boolean;
-    hasInsertPermission: boolean;
+    hasCreatePermission: boolean;
     hasViewPermission: boolean;
     isNoPermissionCheck: boolean;
     metaVertexId?: string;
@@ -20,10 +20,10 @@ export function DebugPermissionInfo(
       <p>
         allConfiguredPermission: {JSON.stringify(props.allConfiguredPermission)}
       </p>
-      <p>hasInsertPermission: {props.hasInsertPermission.toString()}</p>
+      <p>hasCreatePermission: {props.hasCreatePermission.toString()}</p>
       <p>hasEditPermission: {props.hasEditPermission.toString()}</p>
       <p>hasViewPermission: {props.hasViewPermission.toString()}</p>
-      <p>hasDeletePermission: {props.hasDeletePermission.toString()}</p>
+      <p>hasFullPermission: {props.hasFullPermission.toString()}</p>
       <p>mounted: {props.mounted.toString()}</p>
       <p>authError: {props.authError}</p>
       <p>metaVertex: {props.metaVertexId}</p>

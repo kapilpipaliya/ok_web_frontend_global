@@ -2,6 +2,7 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { evalExpression } from "~/lib/expression_eval";
+import { PermissionLevel } from "~/pages/PageViewWrapper";
 
 export function getConfiguredPermissions(
   currentUserRoleId: Id[],
@@ -12,16 +13,18 @@ export function getConfiguredPermissions(
     return [];
   }
   const configuredPermissions: Vertex[] = [];
-
+  const label = vertex.L[0];
+   // RolePagePage
   const allRolePermissions: Vertex[] =
-    evalExpression(`->$0${vertex.L?.[0] !== "Attr" ? "" : ""}Perm`, {
+    evalExpression(`<-Role$0$0`, {
       graph,
       setGraph: () => {},
       vertexes: [vertex],
     }) || [];
   for (const rp of allRolePermissions) {
+    // RolePage
     const roles: Vertex[] =
-      evalExpression("->$0Role", {
+      evalExpression(`<-Role${label}`, {
         graph,
         setGraph: () => {},
         vertexes: [rp],
@@ -30,26 +33,33 @@ export function getConfiguredPermissions(
       configuredPermissions.push(rp);
     }
   }
-
   return configuredPermissions;
 }
 
 export function hasPermissions(
   configuredPermissions: Vertex[],
-  permission: string,
-  graph: GraphInterface,
+  permission: PermissionLevel,
 ) {
   for (const r of configuredPermissions) {
-    const allRolePermissions: Vertex[] =
-      evalExpression("->$0Perm", {
-        graph,
-        setGraph: () => {},
-        vertexes: [r],
-      }) || [];
-    if (allRolePermissions.some((p) => p.P.key === permission)) {
+    // Check if the configured permission matches or is higher level than requested
+    if (r.P.access === permission) {
+      return true;
+    }
+    // Higher level permissions implicitly grant lower level permissions
+    if (permission === PermissionLevel.VIEW && 
+        [PermissionLevel.EDIT, PermissionLevel.FULL, PermissionLevel.CREATE].includes(r.P.access)) {
+      return true;
+    }
+    if (permission === PermissionLevel.CREATE && 
+        [PermissionLevel.EDIT, PermissionLevel.FULL].includes(r.P.access)) {
+      return true;
+    }
+    if (permission === PermissionLevel.EDIT && 
+        PermissionLevel.FULL === r.P.access) {
       return true;
     }
   }
+  return false;
 }
 
 /*

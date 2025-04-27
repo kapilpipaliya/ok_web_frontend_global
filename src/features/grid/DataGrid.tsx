@@ -52,6 +52,7 @@ import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./header/GridHeader";
 import { CreateGridHeaders } from "./schema/CreateGridHeaders";
+import { PermissionLevel } from "~/pages/PageViewWrapper";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {
@@ -141,25 +142,25 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   );
 
   const permissionChecks = {
-    hasDeletePermission: createMemo(
+    hasFullPermission: createMemo(
       () =>
         formMetaData() &&
-        hasPermissions(allConfiguredPermission(), "delete", graph),
+        hasPermissions(allConfiguredPermission(), PermissionLevel.FULL),
     ),
     hasEditPermission: createMemo(
       () =>
         formMetaData() &&
-        hasPermissions(allConfiguredPermission(), "edit", graph),
+        hasPermissions(allConfiguredPermission(), PermissionLevel.EDIT),
     ),
-    hasInsertPermission: createMemo(
+    hasCreatePermission: createMemo(
       () =>
         formMetaData() &&
-        hasPermissions(allConfiguredPermission(), "insert", graph),
+        hasPermissions(allConfiguredPermission(), PermissionLevel.CREATE),
     ),
     hasViewPermission: createMemo(
       () =>
         formMetaData() &&
-        hasPermissions(allConfiguredPermission(), "view", graph),
+        hasPermissions(allConfiguredPermission(), PermissionLevel.VIEW),
     ),
   };
 

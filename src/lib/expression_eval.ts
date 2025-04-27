@@ -390,7 +390,7 @@ addBinaryOp(
       if (!currentVertex) {
         continue;
       }
-      const type = edgeType.replace("$0", currentVertex.L[0]);
+      const type = edgeType.replaceAll("$0", currentVertex.L[0]);
 
       const edgeIds = currentVertex.OUT[type] || [];
       if (edgeIds.length === 0) {
@@ -471,7 +471,7 @@ addBinaryOp(
       if (!currentVertex) {
         continue;
       }
-      const type = edgeType.replace("$0", currentVertex.L[0]);
+      const type = edgeType.replaceAll("$0", currentVertex.L[0]);
 
       const edgeIds = currentVertex.IN[type];
       if (!edgeIds) {

@@ -55,7 +55,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
         disabled={
           gridState.isNoPermissionCheck
             ? false
-            : !!props.formMetaData && !gridState.hasInsertPermission()
+            : !!props.formMetaData && !gridState.hasCreatePermission()
         }
         onClick={onAddNew}
       />

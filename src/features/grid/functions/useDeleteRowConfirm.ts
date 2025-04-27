@@ -26,7 +26,7 @@ export function useDeleteRowConfirm(
     if (!gridState.deleteRowId) {
       return;
     }
-    if (!(gridState.hasDeletePermission() ?? gridState.isNoPermissionCheck)) {
+    if (!(gridState.hasFullPermission() ?? gridState.isNoPermissionCheck)) {
       showErrorToast("You do not have permission to delete this row.");
       return;
     }

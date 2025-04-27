@@ -42,7 +42,9 @@ for (const key in FormMetaData) {
   // @ts-expect-error ignore
   FormMetaData[key].addActionButtons = true;
 }
-
+FormMetaData.Page.attributes.push({
+  ...Coll("Page").attributes.find((x) => x.key === "PermGlobal")!,
+});
 FormMetaData.Form = {
   attributes: [
     ...FormMetaData.Page.attributes,
@@ -72,10 +74,6 @@ FormMetaData.Form = {
   key: "Form",
   title: "Form",
 };
-
-FormMetaData.Page.attributes.push({
-  ...Coll("Page").attributes.find((x) => x.key === "PermGlobal")!,
-});
 
 export const ComponentLabel = "Component";
 FormMetaData.Component = {

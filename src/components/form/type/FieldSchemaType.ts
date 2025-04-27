@@ -35,9 +35,9 @@ export interface FunctionArgumentBaseType {
   evalExpression: (expression: string, options: object) => unknown;
   fns: Record<string, ((...args: unknown[]) => unknown) | undefined>;
   graph: GraphInterface;
-  hasDeletePermission: boolean | null | undefined;
+  hasFullPermission: boolean | null | undefined;
   hasEditPermission: boolean | null | undefined;
-  hasInsertPermission: boolean | null | undefined;
+  hasCreatePermission: boolean | null | undefined;
   hasViewPermission: boolean | null | undefined;
   isNoPermissionCheck: boolean | null | undefined;
   isViewMode: boolean | null | undefined;

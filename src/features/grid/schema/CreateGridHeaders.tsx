@@ -248,7 +248,7 @@ export function CreateGridHeaders(
   const hasDeleteAction =
     !hideDeleteAction &&
     (gridState.isNoPermissionCheck ||
-      (gridState.formMetaData() && gridState.hasDeletePermission()));
+      (gridState.formMetaData() && gridState.hasFullPermission()));
 
   const hasFormAction = tableId === "Form";
 
@@ -326,14 +326,14 @@ export function CreateGridHeaders(
                 !hideDeleteAction &&
                 (gridState.isNoPermissionCheck ||
                   (!!gridState.formMetaData() &&
-                    gridState.hasDeletePermission()))
+                    gridState.hasFullPermission()))
               }
             >
               <IconButton
                 disabled={
                   !gridState.isNoPermissionCheck &&
                   !!gridState.formMetaData() &&
-                  !gridState.hasDeletePermission()
+                  !gridState.hasFullPermission()
                 }
                 icon="ph:trash"
                 css={css`color: \${args.theme.var.color.error};

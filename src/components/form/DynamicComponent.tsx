@@ -65,6 +65,8 @@ import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDat
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import {createUniqueId} from "~/lib/solid/createUniqueId";
 import { createFunctionProxy } from "./createFunctionProxy";
+import { PermissionLevel } from "~/pages/PageViewWrapper";
+import { PageView } from "~/pages/PageViewWrapper";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -134,29 +136,29 @@ export function DynamicComponent(
       graph,
     ),
   );
-  const hasInsertPermission = createLazyMemo(() => {
+  const hasCreatePermission = createLazyMemo(() => {
     return (
-      hasPermissions(allConfiguredPermission(), "insert", graph) ??
-      parentRenderContext()?.context?.hasInsertPermission
+      hasPermissions(allConfiguredPermission(), PermissionLevel.CREATE) ??
+      parentRenderContext()?.context?.hasCreatePermission
     );
   });
 
   const hasEditPermission = createLazyMemo(() => {
     return (
-      hasPermissions(allConfiguredPermission(), "edit", graph) ??
+      hasPermissions(allConfiguredPermission(), PermissionLevel.EDIT) ??
       parentRenderContext()?.context?.hasEditPermission
     );
   });
   const hasViewPermission = createLazyMemo(() => {
     return (
-      hasPermissions(allConfiguredPermission(), "view", graph) ??
+      hasPermissions(allConfiguredPermission(), PermissionLevel.VIEW) ??
       parentRenderContext()?.context?.hasViewPermission
     );
   });
-  const hasDeletePermission = createLazyMemo(() => {
+  const hasFullPermission = createLazyMemo(() => {
     return (
-      hasPermissions(allConfiguredPermission(), "delete", graph) ??
-      parentRenderContext()?.context?.hasDeletePermission
+      hasPermissions(allConfiguredPermission(), PermissionLevel.FULL) ??
+      parentRenderContext()?.context?.hasFullPermission
     );
   });
 
@@ -167,9 +169,9 @@ export function DynamicComponent(
     previewStore.isDesignMode ||
     previewStore.isNoPermissionCheck;
   const _hasPermission = () =>
-    hasInsertPermission() || hasViewPermission() || hasEditPermission();
+    hasCreatePermission() || hasViewPermission() || hasEditPermission();
   const hasNoPermission = () =>
-    !(hasInsertPermission() || hasViewPermission() || hasEditPermission());
+    !(hasCreatePermission() || hasViewPermission() || hasEditPermission());
   const isDisabledByPermissions = () => {
     if (isNoPermissionCheck()) {
       return undefined;
@@ -181,19 +183,19 @@ export function DynamicComponent(
       // } else if (props.isInsertMode) {
       //     return hasInsertPermission();
     }
-    const permission = hasInsertPermission() || hasEditPermission();
+    const permission = hasCreatePermission() || hasEditPermission();
     return permission ? undefined : true;
   };
   const permissions = createMemo(() => {
     return {
-      get hasDeletePermission() {
-        return hasDeletePermission();
+      get hasFullPermission() {
+        return hasFullPermission();
       },
       get hasEditPermission() {
         return hasEditPermission();
       },
-      get hasInsertPermission() {
-        return hasInsertPermission();
+      get hasCreatePermission() {
+        return hasCreatePermission();
       },
       get hasViewPermission() {
         return hasViewPermission();
@@ -241,14 +243,14 @@ export function DynamicComponent(
       get graph() {
         return graph;
       },
-      get hasDeletePermission() {
-        return hasDeletePermission();
+      get hasFullPermission() {
+        return hasFullPermission();
       },
       get hasEditPermission() {
         return hasEditPermission();
       },
-      get hasInsertPermission() {
-        return hasInsertPermission();
+      get hasCreatePermission() {
+        return hasCreatePermission();
       },
       get hasViewPermission() {
         return hasViewPermission();
@@ -330,13 +332,13 @@ export function DynamicComponent(
         return;
       }
 
-      if (!(hasInsertPermission() || hasEditPermission())) {
+      if (!(hasCreatePermission() || hasEditPermission())) {
         showErrorToast("You do not have permission to set this value.");
         return;
       }
       const existingValue = props.data?.P[props.meta.P.key];
-      if (existingValue === undefined && !hasInsertPermission()) {
-        showErrorToast("You do not have insert permission to set this value.");
+      if (existingValue === undefined && !hasCreatePermission()) {
+        showErrorToast("You do not have create permission to set this value.");
         return;
       }
 
@@ -350,7 +352,7 @@ export function DynamicComponent(
     // Log the action for auditing purposes
     // logAction('modify', props.meta.P.key, value, currentUser);
 
-    // TODO: if only insert permission, and value is set dont display it.
+    // TODO: if only create permission, and value is set dont display it.
     setValueGlobal(
       graph,
       setGraph,
@@ -749,9 +751,9 @@ export function DynamicComponent(
         <DebugPermissionInfo
           allConfiguredPermission={allConfiguredPermission()}
           authError={""}
-          hasDeletePermission={hasDeletePermission() ?? false}
+          hasFullPermission={hasFullPermission() ?? false}
           hasEditPermission={hasEditPermission() ?? false}
-          hasInsertPermission={hasInsertPermission() ?? false}
+          hasCreatePermission={hasCreatePermission() ?? false}
           hasViewPermission={hasViewPermission() ?? false}
           isNoPermissionCheck={isNoPermissionCheck()}
           metaVertexId={props.meta.id}

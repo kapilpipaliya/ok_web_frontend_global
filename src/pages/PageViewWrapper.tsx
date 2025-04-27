@@ -72,6 +72,15 @@ import {
 import { fetchFormMetaData } from "./functions/fetchFormMetaData";
 import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
+// Permission levels
+export enum PermissionLevel {
+  NONE = "NONE",
+  VIEW = "VIEW",
+  CREATE = "CREATE",
+  EDIT = "EDIT",
+  FULL = "FULL",
+}
+
 export function PageViewWrapper(
   props: Readonly<{
     closePopUp?: () => void;
@@ -123,7 +132,7 @@ export function PageViewWrapper(
 
   const formStore = () =>
     graph.vertexes[pageFormVertexObject.id] as Vertex<FormStoreObject>;
-  const setFormStore = (key: string, value: any) => {
+  const setFormStore = (key: string, value: unknown) => {
     mergeVertexProperties<FormStoreObject>(
       0,
       pageFormVertexObject.id,
@@ -221,26 +230,33 @@ export function PageViewWrapper(
   );
 
   const permissions = {
-    delete: createMemo(() => checkPermission("delete")),
-    edit: createMemo(() => checkPermission("edit")),
-    insert: createMemo(() => checkPermission("insert")),
-    view: createMemo(() => checkPermission("view")),
+    full: createMemo(() => checkPermission(PermissionLevel.FULL)),
+    edit: createMemo(() => checkPermission(PermissionLevel.EDIT)),
+    create: createMemo(() => checkPermission(PermissionLevel.CREATE)),
+    view: createMemo(() => checkPermission(PermissionLevel.VIEW)),
+    none: createMemo(() => checkPermission(PermissionLevel.NONE)),
   };
 
-  function checkPermission(action: string) {
-    return (
-      isNoPermissionCheck() ||
-      (action === "insert" &&
-        !id() &&
-        hasPermissions(allConfiguredPermission(), action, graph)) ||
-      (!!id() && hasPermissions(allConfiguredPermission(), action, graph))
-    );
+  function checkPermission(level: PermissionLevel) {
+    if (isNoPermissionCheck()) {
+      return true;
+    }
+    
+    if (level === PermissionLevel.CREATE && !id()) {
+      return hasPermissions(allConfiguredPermission(), level);
+    }
+    
+    if (id()) {
+      return hasPermissions(allConfiguredPermission(), level);
+    }
+    
+    return false;
   }
 
-  // TODO: Dont set on store:
-  setFormStore("hasDeletePermission", permissions.delete());
+  // Set permission flags on store
+  setFormStore("hasFullPermission", permissions.full());
   setFormStore("hasEditPermission", permissions.edit());
-  setFormStore("hasInsertPermission", permissions.insert());
+  setFormStore("hasCreatePermission", permissions.create());
   setFormStore("hasViewPermission", permissions.view());
   setFormStore("isNoPermissionCheck", isNoPermissionCheck());
 
@@ -248,8 +264,8 @@ export function PageViewWrapper(
     if (id() && !(permissions.edit() || permissions.view())) {
       return `You are not authorized to edit or view ${props.pageVertexName}`;
     }
-    if (!(id() || permissions.insert())) {
-      return `You are not authorized to insert ${props.pageVertexName}`;
+    if (!(id() || permissions.create())) {
+      return `You are not authorized to create ${props.pageVertexName}`;
     }
     return "";
   });
@@ -413,7 +429,7 @@ export function PageViewWrapper(
       !isNoPermissionCheck() &&
       ((["Form", "Page"].includes(metaVertex()?.L[0]) && !dynamicFns().enabled?.()))
     ) {
-      setFormStore("error", `${props.pageVertexName} is not authorized`);
+      setFormStore("error", `${props.pageVertexName} is not enabled. Please contact your administrator.`);
       return false;
     }
 
@@ -454,7 +470,7 @@ export function PageViewWrapper(
   function hasRequiredPermissions() {
     return (
       metaVertex() &&
-      (permissions.insert() || permissions.edit() || permissions.view())
+      (permissions.create() || permissions.edit() || permissions.view())
     );
   }
 
@@ -645,9 +661,9 @@ export function PageViewWrapper(
     <PageView
       context={props.context}
       data={dataVertex()}
-      hasDeletePermission={permissions.delete()}
+      hasFullPermission={permissions.full()}
       hasEditPermission={permissions.edit()}
-      hasInsertPermission={permissions.insert()}
+      hasCreatePermission={permissions.create()}
       hasViewPermission={permissions.view()}
       id={id()}
       isNoPermissionCheck={isNoPermissionCheck()}
@@ -656,7 +672,7 @@ export function PageViewWrapper(
   );
 
   return (
-    <Show keyed when={metaData() && formStore().P.count}>
+    <Show keyed when={metaData() && formStore().P.count && (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)}>
       {/* <Show when={props.enableSEO}>
         <Show when={metaVertex()?.P.seoTitle}>
           <SiteTitle>
@@ -688,10 +704,10 @@ export function PageViewWrapper(
         <DebugPermissionInfo
           allConfiguredPermission={allConfiguredPermission()}
           authError={authError()}
-          hasDeletePermission={hasDeletePermission() ?? false}
-          hasEditPermission={hasEditPermission() ?? false}
-          hasInsertPermission={hasInsertPermission() ?? false}
-          hasViewPermission={hasViewPermission() ?? false}
+          hasFullPermission={permissions.full() ?? false}
+          hasEditPermission={permissions.edit() ?? false}
+          hasCreatePermission={permissions.create() ?? false}
+          hasViewPermission={permissions.view() ?? false}
           isNoPermissionCheck={isNoPermissionCheck()}
           metaVertexId={formStore().P.formMeta?.id}
           mounted={formStore().P.mounted}
@@ -703,7 +719,7 @@ export function PageViewWrapper(
         // when={dataVertex()}
         when={
           metaData() &&
-          (props.getFormData ? dataVertex() || formStore().P.isFetching : true)
+          (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)
         }
       >
         <FormContext.Provider value={formStore().id}>

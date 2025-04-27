@@ -16,16 +16,15 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import {DataContext, useDataContext} from "~/features/page_attr_render/context/DataContext";
 import { PageRenderContextProvider, PageRenderObject } from "./context/PageRenderContext";
 import { createFunctionProxy } from "~/components/form/createFunctionProxy";
-import { getDataVertex } from "./functions/getDataVertex";
 import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export function PageView(
   props: Readonly<{
     context?: Record<string, unknown>;
     data?: Vertex;
-    hasDeletePermission?: boolean | null;
+    hasFullPermission?: boolean | null;
     hasEditPermission?: boolean | null;
-    hasInsertPermission?: boolean | null;
+    hasCreatePermission?: boolean | null;
     hasViewPermission?: boolean | null;
     id?: Id;
     isDesignMode?: boolean;
@@ -35,10 +34,8 @@ export function PageView(
 ) {
   const [graph, setGraph] = useGraph();
 
-  const _dataVertex = createMemo(() => getDataVertex(graph, props.metaVertex));
-
   const isViewOnlyForm = createMemo(() => {
-    if (!(props.id || props.hasInsertPermission)) {
+    if (!(props.id || props.hasCreatePermission)) {
       return true;
     }
     if (props.id && !props.hasEditPermission) {
@@ -50,14 +47,14 @@ export function PageView(
     get context() {
       return props.context;
     },
-    get hasDeletePermission() {
-      return props.hasDeletePermission;
+    get hasFullPermission() {
+      return props.hasFullPermission;
     },
     get hasEditPermission() {
       return props.hasEditPermission;
     },
-    get hasInsertPermission() {
-      return props.hasInsertPermission;
+    get hasCreatePermission() {
+      return props.hasCreatePermission;
     },
     get hasViewPermission() {
       return props.hasViewPermission;
