@@ -18,12 +18,11 @@ export async function getUserRPC() {
       user?.P?.uuid,
     );
 
-    if (!data.user) {
-      throw new APIError("User not authorized", 401);
+    if (data.user) {
+      data.user.P.subDomain = subDomain;
+      delete data.user.P.password;
     }
-    data.user.P.subDomain = subDomain;
 
-    delete data.user.P.password;
     return data;
   } catch (error) {
     return handleAPIError(error);
