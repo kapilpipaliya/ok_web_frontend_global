@@ -25,11 +25,11 @@ const fetchData = query(async (authenticate?: boolean) => {
   "use server";
   const [initialData, userData] = await Promise.all([
     getInitialData(),
-    authenticate
-      ? getUserRPC().catch(() => {
+    // authenticate ?
+      getUserRPC().catch(() => {
           return null; // Return null to avoid further processing
         })
-      : Promise.resolve(null),
+      // : Promise.resolve(null),
   ]);
   return { initialData, userData };
 }, "initialData");

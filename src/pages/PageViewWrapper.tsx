@@ -399,12 +399,13 @@ export function PageViewWrapper(
         // untrack(() => {
           // batch(() => {
             setFormMetaData(result?.metaResult, result?.formMetaId);
-            validateMetaVertex();
-            handleFormData(result?.dataResult);
+            const validationError = validateMetaVertex();
+            if (!validationError) {
+              handleFormData(result?.dataResult);
+            }
           // });
         // });
       }
-      console.log("Result:", result);
       return result;
     },
     { deferStream: true },
@@ -465,58 +466,66 @@ export function PageViewWrapper(
     return true;
   }
 
-  function validateMetaVertex() {
+  function validateMetaVertex(): string {
     if (
       formStore().P.formMetaId &&
       !isNoPermissionCheck() &&
       ((["Form", "Page"].includes(metaVertex()?.L[0]) && !getDynamicFns().enabled?.()))
     ) {
-      setFormStore("error", `${props.pageVertexName} is not enabled. Please contact your administrator.`);
-      return false;
+      const errorMsg = `${props.pageVertexName} is not enabled. Please contact your administrator.`;
+      setFormStore("error", errorMsg);
+      return errorMsg;
     }
 
     if (!metaVertex()) {
-      setFormStore("error", "No form meta data found");
-      return false;
+      const errorMsg = "No form meta data found";
+      setFormStore("error", errorMsg);
+      return errorMsg;
     }
 
     if (!metaVertex()?.P.key) {
-      setFormStore("error", `No key for the ${props.pageVertexName}`);
-      return false;
+      const errorMsg = `No key for the ${props.pageVertexName}`;
+      setFormStore("error", errorMsg);
+      return errorMsg;
     }
 
-    if (checkAuthError()) {
-      setFormStore("error", checkAuthError());
-      return false;
+    const authError = checkAuthError();
+    if (authError) {
+      setFormStore("error", authError);
+      return authError;
     }
     
-    return true;
+    return "";
   }
 
   props.initializeFormStoreParent?.(pageFormVertexObject.id);
 
-  const processAsyncResult = (result?: { formMetaId?: string, metaResult?: FetchFormMetaDataResult, dataResult?: FetchFormDataResult }) => {
+  const processResult = (result?: { formMetaId?: string, metaResult?: FetchFormMetaDataResult, dataResult?: FetchFormDataResult }) => {
     if (!props.formMetaId && result) {
       untrack(() => {
         batch(() => {
           setFormMetaData(result?.metaResult, result?.formMetaId);
-          validateMetaVertex();
-          handleFormData(result?.dataResult);
+          const validationError = validateMetaVertex();
+          if (!validationError) {
+            handleFormData(result?.dataResult);
+          }
         });
       });
     }
   }
   createEffect(() => {
     const result = metaData();
-    processAsyncResult(result);
+    processResult(result);
   });
   // Make SSR work when props.formMetaId is set
   untrack(() => {
     batch(() => {
       if (props.formMetaId) {
         setFormMetaData();
-        validateMetaVertex();
-        handleFormData();
+        const validationError = validateMetaVertex();
+        if (!validationError) {
+          handleFormData();
+        }
       }
     });
   });
@@ -725,11 +734,11 @@ export function PageViewWrapper(
         </Show>
       </Show> */}
 
-      <Switch>
-        <Match when={formStore().P.error}>
+      
+        <Show when={formStore().P.error}>
           <SimpleWarningAlert message={formStore().P.error} />
-        </Match>
-      </Switch>
+        </Show>
+
 
       {/* <Show when={getGlobalStore(graph).P.isDevelopment}>
         <DebugPermissionInfo

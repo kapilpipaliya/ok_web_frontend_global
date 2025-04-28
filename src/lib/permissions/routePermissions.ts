@@ -39,6 +39,7 @@ export const routePermissions: RoutePermission[] = [
     path: "/api/setup/superUserSetup",
     requiredPermission: PermissionLevel.PUBLIC,
   }, // Special case
+  { path: "/*", requiredPermission: PermissionLevel.PUBLIC },
 
   // Example of custom permission check
   {
