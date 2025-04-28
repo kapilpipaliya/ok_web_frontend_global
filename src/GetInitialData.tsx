@@ -64,17 +64,15 @@ export function GetInitialData(props: GetInitialDataProps) {
   };
   const data = createAsync(
     async () => {
-      const result = await fetchData(props.authenticate);
-      setData(result.initialData, result.userData as UserData);
-      return result;
+      return await fetchData(props.authenticate);
     },
     { deferStream: true },
   );
-  createEffect(() => {
-    if (data()) {
-      setData(data()!.initialData, data()!.userData as UserData);
-    }
-  });
+
+  const Content = () => {
+    setData(data()!.initialData, data()!.userData as UserData);
+    return props.children;
+  }
 
   return (
     <Show when={data()}>
@@ -107,7 +105,7 @@ export function GetInitialData(props: GetInitialDataProps) {
           </As>
         </Match>
         <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
-          {props.children}
+          <Content />
         </Match>
       </Switch>
     </Show>

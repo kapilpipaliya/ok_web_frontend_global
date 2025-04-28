@@ -193,8 +193,8 @@ export function PageViewWrapper(
 
   const getDynamicFns = () => {
     try {
-       // Helper to evaluate fns from a vertex
-       const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
+      // Helper to evaluate fns from a vertex
+      const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
         if (typeof fns === "function") {
           return fns({} as FunctionArgumentType) || {};
         }
@@ -208,7 +208,7 @@ export function PageViewWrapper(
         }
         return {};
       };
-      
+
       return evaluateFns(metaVertex()?.P.fns);
     } catch (error) {
       console.error("Error in dynamicFns:", error);
@@ -218,9 +218,9 @@ export function PageViewWrapper(
   // const dynamicFns = createMemo(getDynamicFns);
 
   const isNoPermissionCheck = () =>
-      props.isNoPermissionCheck ||
-      metaVertex()?.P.isNoPermissionCheck ||
-      previewStore.isNoPermissionCheck;
+    props.isNoPermissionCheck ||
+    metaVertex()?.P.isNoPermissionCheck ||
+    previewStore.isNoPermissionCheck;
 
 
   const allConfiguredPermission = (() =>
@@ -243,15 +243,15 @@ export function PageViewWrapper(
     if (isNoPermissionCheck()) {
       return true;
     }
-    
+
     if (level === PermissionLevel.CREATE && !id()) {
       return hasPermissions(allConfiguredPermission(), level);
     }
-    
+
     if (id()) {
       return hasPermissions(allConfiguredPermission(), level);
     }
-    
+
     return false;
   }
 
@@ -376,35 +376,23 @@ export function PageViewWrapper(
       if (props.getFormData) {
         try {
           // Set fetching state to true before making the API call
-          setFormStore("isFetching", true);
-  
+          // setFormStore("isFetching", true);
+
           const data = await props.getFormData();
-  
+
           // Set fetching state to false after the API call completes
-          setFormStore("isFetching", false);
-  
+          // setFormStore("isFetching", false);
+
           if (!data || data.error) {
             result = { ...result, error: data.error || "Error fetching form data" };
           } else {
-            result = { ...result, dataResult: {data} };
+            result = { ...result, dataResult: { data } };
           }
         } catch (error) {
           // Make sure to set fetching state to false in case of error
-          setFormStore("isFetching", false);
+          // setFormStore("isFetching", false);
           result = { ...result, error: (error as Error).message };
         }
-      }
-      // as we are using deferStream, we need to process the result here
-      if (!props.formMetaId && result) {
-        // untrack(() => {
-          // batch(() => {
-            setFormMetaData(result?.metaResult, result?.formMetaId);
-            const validationError = validateMetaVertex();
-            if (!validationError) {
-              handleFormData(result?.dataResult);
-            }
-          // });
-        // });
       }
       return result;
     },
@@ -494,7 +482,7 @@ export function PageViewWrapper(
       setFormStore("error", authError);
       return authError;
     }
-    
+
     return "";
   }
 
@@ -513,10 +501,7 @@ export function PageViewWrapper(
       });
     }
   }
-  createEffect(() => {
-    const result = metaData();
-    processResult(result);
-  });
+
   // Make SSR work when props.formMetaId is set
   untrack(() => {
     batch(() => {
@@ -550,7 +535,7 @@ export function PageViewWrapper(
         setGraph,
         formStore().P.txnId,
         metaVertex()!.P.key,
-        metaVertex()!.P.key === "Form" || metaVertex()!.P.key === "Page" 
+        metaVertex()!.P.key === "Form" || metaVertex()!.P.key === "Page"
           ? { fns: `return { enabled: () => true }` }
           : {},
       );
@@ -713,9 +698,10 @@ export function PageViewWrapper(
       metaVertex={metaVertex()!}
     />
   );
+  const ContentSSR = () => {
+    processResult(metaData());
 
-  return (
-    <Show keyed when={metaData() && formStore().P.count && (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)}>
+    return <>
       {/* <Show when={props.enableSEO}>
         <Show when={metaVertex()?.P.seoTitle}>
           <SiteTitle>
@@ -734,10 +720,9 @@ export function PageViewWrapper(
         </Show>
       </Show> */}
 
-      
-        <Show when={formStore().P.error}>
-          <SimpleWarningAlert message={formStore().P.error} />
-        </Show>
+      <Show when={formStore().P.error}>
+        <SimpleWarningAlert message={formStore().P.error} />
+      </Show>
 
 
       {/* <Show when={getGlobalStore(graph).P.isDevelopment}>
@@ -799,6 +784,12 @@ export function PageViewWrapper(
           title="Discard changes"
         />
       </Show>
+    </>
+  }
+
+  return (
+    <Show keyed when={metaData() && formStore().P.count && (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)}>
+      <ContentSSR />
     </Show>
   );
 }
