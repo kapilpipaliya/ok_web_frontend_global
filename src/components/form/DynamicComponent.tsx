@@ -139,26 +139,30 @@ export function DynamicComponent(
   const hasCreatePermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), PermissionLevel.CREATE) ??
-      parentRenderContext()?.context?.hasCreatePermission
+      parentRenderContext()?.context?.hasCreatePermission ?? 
+      (previewStore.hasEditPermission || previewStore.hasFullPermission)
     );
   });
 
   const hasEditPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), PermissionLevel.EDIT) ??
-      parentRenderContext()?.context?.hasEditPermission
+      parentRenderContext()?.context?.hasEditPermission ?? 
+      previewStore.hasFullPermission
     );
   });
   const hasViewPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), PermissionLevel.VIEW) ??
-      parentRenderContext()?.context?.hasViewPermission
+      parentRenderContext()?.context?.hasViewPermission ?? 
+      (previewStore.hasCreatePermission || previewStore.hasEditPermission || previewStore.hasFullPermission)
     );
   });
   const hasFullPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), PermissionLevel.FULL) ??
-      parentRenderContext()?.context?.hasFullPermission
+      parentRenderContext()?.context?.hasFullPermission ?? 
+      previewStore.hasFullPermission
     );
   });
 
@@ -168,20 +172,22 @@ export function DynamicComponent(
     graph.vertexes[formVertex()?.P.formMetaId!]?.P.isNoPermissionCheck ||
     previewStore.isDesignMode ||
     previewStore.isNoPermissionCheck;
-  const _hasPermission = () =>
-    hasCreatePermission() || hasViewPermission() || hasEditPermission();
-  const hasNoPermission = () =>
-    !(hasCreatePermission() || hasViewPermission() || hasEditPermission());
+
+  const hasPermission = () => {
+    // If no permission check is needed, user has permissions
+    if (isNoPermissionCheck()) {
+      return true;
+    }
+
+    // Check if user has any valid permission level
+    // Following the hierarchy: FULL > EDIT > CREATE > VIEW
+    // Having a higher permission implicitly grants lower permissions
+    return hasFullPermission() || hasEditPermission() || hasCreatePermission() || hasViewPermission();
+  };
+
   const isDisabledByPermissions = () => {
     if (isNoPermissionCheck()) {
       return undefined;
-      // TODO: use correct permission for view, edit and insert, currently if any permission is true, it will return true
-      // } else if (props.isViewMode) {
-      //     return true;
-      // } else if (props.isEditMode) {
-      //     return hasEditPermission();
-      // } else if (props.isInsertMode) {
-      //     return hasInsertPermission();
     }
     const permission = hasCreatePermission() || hasEditPermission();
     return permission ? undefined : true;
@@ -797,7 +803,7 @@ export function DynamicComponent(
           </Match>
           <Match
             keyed
-            when={component() && (isNoPermissionCheck() || !hasNoPermission())}
+            when={component() && (isNoPermissionCheck() || hasPermission())}
           >
             <ContentWrapper />
           </Match>

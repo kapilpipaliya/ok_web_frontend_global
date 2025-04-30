@@ -59,7 +59,7 @@ export function hasPermissions(
       return true;
     }
   }
-  return false;
+  return;
 }
 
 /*

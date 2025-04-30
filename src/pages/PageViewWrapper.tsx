@@ -256,11 +256,11 @@ export function PageViewWrapper(
   }
 
   // Set permission flags on store
-  setFormStore("hasFullPermission", permissions.full());
-  setFormStore("hasEditPermission", permissions.edit());
-  setFormStore("hasCreatePermission", permissions.create());
-  setFormStore("hasViewPermission", permissions.view());
-  setFormStore("isNoPermissionCheck", isNoPermissionCheck());
+  // setFormStore("hasFullPermission", permissions.full());
+  // setFormStore("hasEditPermission", permissions.edit());
+  // setFormStore("hasCreatePermission", permissions.create());
+  // setFormStore("hasViewPermission", permissions.view());
+  // setFormStore("isNoPermissionCheck", isNoPermissionCheck());
 
   const checkAuthError = () => {
     if (id() && !(permissions.edit() || permissions.view())) {
