@@ -1,4 +1,5 @@
-import { createEffect, createMemo, on, Show, splitProps } from "solid-js";
+import { createEffect, createMemo, on, Show } from "solid-js";
+import { createAsync } from "@solidjs/router";
 
 import type { Vertex } from "~/lib/graph/graph";
 
@@ -19,53 +20,53 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import type { GenericComponentProps } from "../type/FieldType";
 
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
-import {DataContext, useDataContext} from "~/features/page_attr_render/context/DataContext";
+import { DataContext, useDataContext } from "~/features/page_attr_render/context/DataContext";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 export function ComponentField(
   props: Readonly<GenericComponentProps & { componentId?: string }>,
 ) {
-  const [, otherProps] = splitProps(props, []);
-
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [previewStore, setPreviewStore] = usePreviewContext();
 
   const meta = () => parentRenderContext()?.context.meta;
-  const data = () => parentRenderContext()?.context.data;
+  const data = () => parentRenderContext()?.context.data as Vertex | undefined;
 
-  const fetchMetaData = async () => {
-    if (!getCopmVertex().length) {
-      return;
-    }
-    fetchComponentData([getCopmVertex()[0]], graph, setGraph);
-  };
-
-  const getCopmVertex = createMemo(() =>
+  const getCompVertex = createMemo(() =>
     meta()
       ? (evalExpression("->$0Comp", {
-          graph,
-          setGraph,
-          vertexes: [meta()],
-        }) as Vertex[]) || ([] as Vertex[])
+        graph,
+        setGraph,
+        vertexes: [meta()],
+      }) as Vertex[]) || ([] as Vertex[])
       : [],
   );
 
-  createEffect(
-    on(getCopmVertex, (component, prevComponent) => {
-      if (
-        component &&
-        JSON.parse(JSON.stringify(component)) !==
-          JSON.parse(JSON.stringify(prevComponent || [])) &&
-        (component.length === 0 ||
-          getChildrenAttrs(graph, setGraph, component[0]).length === 0)
-      ) {
-        // Fetch attrs when no children found
-        // setGraph("url", "fetchAttrs", { id: meta.id });
-        fetchMetaData();
-      }
-    }),
-  );
+  const componentData = createAsync(async () => {
+    const vertices = getCompVertex();
+    if (!vertices.length) {
+      return null;
+    }
+    return await fetchComponentData([vertices[0]], graph, setGraph);
+  }, { deferStream: true });
+
+  // createEffect(
+  //   on(getCompVertex, (component, prevComponent) => {
+  //     if (
+  //       component &&
+  //       JSON.parse(JSON.stringify(component)) !==
+  //       JSON.parse(JSON.stringify(prevComponent || [])) &&
+  //       (component.length === 0 ||
+  //         getChildrenAttrs(graph, setGraph, component[0]).length === 0)
+  //     ) {
+  //       // Fetch attrs when no children found
+  //       // Trigger refetch by accessing the async resource
+  //       componentData();
+  //     }
+  //   }),
+  // );
 
   const previewStoreProxy = new Proxy(previewStore, {
     get(target, prop) {
@@ -79,40 +80,46 @@ export function ComponentField(
 
   const ComponentWrapper = () => {
     const contextData = useDataContext() || {};
-    const values = createMemo(() => {
-      return {
-        ...getComponentDefaultValues(getCopmVertex()[0], graph, setGraph),
-        ...deNullify(otherProps),
-      };
+    
+    const valuesProxy = new Proxy({}, {
+      get(_, key) {
+        const propValue = props[key as keyof typeof props];
+        if (propValue !== undefined && propValue !== null) {
+          return propValue;
+        }
+        const defaultValues = getComponentDefaultValues(getCompVertex()[0], graph, setGraph);
+        return defaultValues[key as keyof typeof defaultValues];
+      }
     });
-
+  
     const newDataContext = new Proxy(contextData, {
       get(target, key) {
         if (key === "props") {
-          return values();
+          return valuesProxy;
         }
         return target[key];
       },
     });
+  
     return (
       <DataContext.Provider value={newDataContext}>
-        <PageAttrRender 
-          data={data()} 
-          metaVertex={getCopmVertex()[0]} 
-          isNoPermissionCheck={parentRenderContext()?.context.isNoPermissionCheck} 
+        <PageAttrRender
+          data={data()}
+          metaVertex={getCompVertex()[0] as Vertex}
+          isNoPermissionCheck={parentRenderContext()?.context.isNoPermissionCheck}
         />
       </DataContext.Provider>
     );
   };
 
   const Children = (props: { slot: string }) => {
-  const slotFilter = (vertex: Vertex) => {
-    if (props.slot) {
-      return vertex.P.slot === props.slot;
-    } else {
-      return !vertex.P.slot;
-    }
-  };
+    const slotFilter = (vertex: Vertex) => {
+      if (props.slot) {
+        return vertex.P.slot === props.slot;
+      } else {
+        return !vertex.P.slot;
+      }
+    };
     return (
       <PreviewContext.Provider
         value={[previewStoreProxy, setPreviewStore]}
@@ -129,16 +136,24 @@ export function ComponentField(
     );
   }
 
-  return (
-    <>
-      <Show when={getCopmVertex().length}>
-        <SlotContext.Provider
-          value={Children}
-        >
-          <ComponentWrapper />
+  const Content = () => {
+    if (componentData()) {
+      setGraphData(graph, setGraph, componentData()!.graph!, { skipExisting: true });
+    }
+    return (
+      <Show when={getCompVertex().length} fallback={<div>Error</div>}>
+        <SlotContext.Provider value={Children}>
+          <ComponentWrapper/>
         </SlotContext.Provider>
       </Show>
-      <Show when={!getCopmVertex().length}>Error</Show>
+    );
+  };
+
+  return (
+    <>
+      <Show when={componentData()}>
+        <Content />
+      </Show>
     </>
   );
 }

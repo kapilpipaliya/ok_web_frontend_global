@@ -16,8 +16,9 @@ export async function fetchComponentData(
   const componentData = await fetchComponentDataPure(vertexes);
   if (componentData?.graph) {
     // skip existing because we not want to modify existing component data
-    setGraphData(graph, setGraph, componentData.graph, { skipExisting: true });
+    // setGraphData(graph, setGraph, componentData.graph, { skipExisting: true });
   }
+  return componentData;
 }
 
 export async function fetchComponentDataPure(
