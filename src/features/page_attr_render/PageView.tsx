@@ -13,7 +13,7 @@ import {
 } from "~/features/page_designer/context/PreviewContext";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { useGraph } from "~/lib/graph/GraphContext";
-import {DataContext, useDataContext} from "~/features/page_attr_render/context/DataContext";
+import { DataContext, useDataContext } from "~/features/page_attr_render/context/DataContext";
 import { PageRenderContextProvider, PageRenderObject } from "./context/PageRenderContext";
 import { createFunctionProxy } from "~/components/form/createFunctionProxy";
 import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -114,12 +114,12 @@ export function PageView(
   };
   const dynamicFns = createMemo(() => {
     try {
-       // Helper to evaluate fns from a vertex
-       // need to pass object because getting error:
-       // get' on proxy: property 'Symbol(solid-proxy)' is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value
-       // (expected '#<Object>' but got 'undefined')
-       // because in createFunctionProxy we return dynamicFns() in case of $PROXY
-       const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
+      // Helper to evaluate fns from a vertex
+      // need to pass object because getting error:
+      // get' on proxy: property 'Symbol(solid-proxy)' is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value
+      // (expected '#<Object>' but got 'undefined')
+      // because in createFunctionProxy we return dynamicFns() in case of $PROXY
+      const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
         if (typeof fns === "function") {
           return fns(previewStore[0].context) || {};
         }
@@ -133,7 +133,7 @@ export function PageView(
         }
         return {};
       };
-      
+
       return evaluateFns(props.metaVertex?.P.fns);
     } catch (error) {
       console.error("Error in dynamicFns:", error);
@@ -150,14 +150,14 @@ export function PageView(
         }
       }
     }
-  } as PageRenderObject) ;
+  } as PageRenderObject);
 
   return (
     <Show keyed when={props.metaVertex}>
-      <PageRenderContextProvider store={repeterStore}>
-        <Switch>
-          <Match when={true}>
-            <PreviewContext.Provider value={previewStore}>
+      <PreviewContext.Provider value={previewStore}>
+        <PageRenderContextProvider store={repeterStore}>
+          <Switch>
+            <Match when={true}>
               <Switch>
                 <Match when={props.metaVertex?.L[0] === "Component"}>
                   <ComponentWrapper />
@@ -170,10 +170,10 @@ export function PageView(
                   />
                 </Match>
               </Switch>
-            </PreviewContext.Provider>
-          </Match>
-        </Switch>
-      </PageRenderContextProvider>
+            </Match>
+          </Switch>
+        </PageRenderContextProvider>
+      </PreviewContext.Provider>
     </Show>
   );
 }

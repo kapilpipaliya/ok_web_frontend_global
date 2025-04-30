@@ -1,4 +1,4 @@
-import { useContext } from "solid-js";
+import { Show, useContext } from "solid-js";
 import { Dynamic } from "solid-js/web";
 
 import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
@@ -14,5 +14,5 @@ export const SlotField = () => {
 
   const SlotComponent = useContext(SlotContext);
 
-  return <Dynamic component={SlotComponent} slot={meta()?.P.slot} />;
+  return <Show when={SlotComponent}><SlotComponent slot={meta()?.P.slot} /></Show>;
 };
