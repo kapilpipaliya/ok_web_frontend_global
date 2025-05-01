@@ -69,6 +69,6 @@ export async function fetchFormData(
 
     return { componentData, data: formDataResult.data };
   } catch (e) {
-    return { error: `Error When Loading Form: ${(e as Error).message}` };
+    return { error: `Error When Loading Page: ${(e as Error).message}` };
   }
 }

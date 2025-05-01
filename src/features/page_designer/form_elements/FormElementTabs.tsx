@@ -254,7 +254,6 @@ export function FormElementTabs() {
 
   const leftMenuTabs = [
     { collection: "Comp", title: "Components" },
-    { collection: "Form", title: "Forms" },
     { collection: "Page", title: "Pages" },
     // { collection: "EmailTemplate", title: "Email Template" },
   ];

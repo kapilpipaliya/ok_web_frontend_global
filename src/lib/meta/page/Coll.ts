@@ -38,7 +38,7 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
                 return false;
               }
               return !findVertexByLabelAndUniqueIdWithSkip(
-                "Form",
+                "Page",
                 "id",
                 val,
                 formData.id,

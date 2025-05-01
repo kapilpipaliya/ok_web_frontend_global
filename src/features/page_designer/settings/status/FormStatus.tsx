@@ -30,7 +30,7 @@ export function FormStatus() {
   const [expirationTime, setExpirationTime] = createSignal("");
   const [submissionLimit, setSubmissionLimit] = createSignal("");
   const [warningMessage, setWarningMessage] = createSignal(
-    "This form is currently unavailable!",
+    "This page is currently unavailable!",
   );
 
   function metaAttributes() {
@@ -52,14 +52,14 @@ export function FormStatus() {
       <As
         as="div"
         css={css`
-            /* space-y: 3rem; */
+          margin-bottom: 3rem;
         `}
       >
         <As
           as="div"
           css={css`
-              /* border-bottom-width: 1px; */
-              /* border-color: rgb(17,24,39,0.1); */
+              border-bottom-width: 1px;
+              border-color: rgb(17,24,39,0.1);
               padding-bottom: 3rem;
           `}
         >
@@ -71,7 +71,7 @@ export function FormStatus() {
                 font-weight: 600;
             `}
           >
-            Form Properties
+            Page Properties
           </As>
           <As
             as="div"
@@ -106,7 +106,7 @@ export function FormStatus() {
                           `}
                           for="form-status"
                         >
-                          Form Status
+                          Page Status
                         </As>
                         <As
                           as="select"
@@ -400,7 +400,7 @@ function createVertices(
       P: {
         css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
-        displayName: "Form Status",
+        displayName: "Page Status",
         key: "formStatus",
       },
     },

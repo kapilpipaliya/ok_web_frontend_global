@@ -20,7 +20,7 @@ export async function fetchFormMetaData(
     // can't return form, if it contins functions
     return { form };
   }
-  form = FormMetaData.Form;
+  form = FormMetaData.Page;
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
   const data = await fetchDataFromDB({
@@ -28,7 +28,7 @@ export async function fetchFormMetaData(
       expression ??
       (formId
         ? `id:'${formId}'`
-        : `g:'${pageVertexName ?? "Form"}[${pageKeyName}]'`),
+        : `g:'${pageVertexName ?? "Page"}[${pageKeyName}]'`),
     // [getGlobalStore(graph).P.url]: true,
     incoming,
     outgoing,

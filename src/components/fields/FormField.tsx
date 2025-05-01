@@ -142,7 +142,7 @@ export function FormField(
       setGraphData(graph, setGraph, data!.graph!);
       setFormStore("formDataId", data!.result[0].id);
     } catch (e: any) {
-      setFormStore("error", `Error When Loading Form: ${e.message}`);
+      setFormStore("error", `Error When Loading Page: ${e.message}`);
     }
   }
 

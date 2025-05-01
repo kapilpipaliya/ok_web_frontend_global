@@ -17,7 +17,7 @@ export async function loadPageData(
 ) {
   const form = FormMetaData[fromVertex.L[0]];
   if (!form) {
-    showErrorToast("Form not found");
+    showErrorToast("Page not found");
     return;
   }
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);

@@ -458,7 +458,7 @@ export function PageViewWrapper(
     if (
       formStore().P.formMetaId &&
       !isNoPermissionCheck() &&
-      ((["Form", "Page"].includes(metaVertex()?.L[0]) && !getDynamicFns().enabled?.()))
+      ((["Page"].includes(metaVertex()?.L[0]) && !getDynamicFns().enabled?.()))
     ) {
       const errorMsg = `${props.pageVertexName} is not enabled. Please contact your administrator.`;
       setFormStore("error", errorMsg);
@@ -535,7 +535,7 @@ export function PageViewWrapper(
         setGraph,
         formStore().P.txnId,
         metaVertex()!.P.key,
-        metaVertex()!.P.key === "Form" || metaVertex()!.P.key === "Page"
+        metaVertex()!.P.key === "Page"
           ? { fns: `return { enabled: () => true }` }
           : {},
       );
@@ -578,19 +578,6 @@ export function PageViewWrapper(
       }
 
       setFormStore("formDataId", createResult.vertex!.id);
-
-      if (!id() && dataVertex()?.L[0] === "Form") {
-        /*const layoutId = addFormInitialComponent(
-          dataVertex(),
-          graph,
-          formStore().P.txnId,
-          setGraph,
-        );
-        if (layoutId === -1) {
-          setFormStore("error", "Adding component to layout failed");
-          return;
-        }*/
-      }
     }
     if (formDataId) {
       setFormStore("formDataId", formDataId);

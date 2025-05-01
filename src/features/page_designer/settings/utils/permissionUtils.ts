@@ -5,5 +5,5 @@ export function isPermissionsConfigurable(graph: GraphInterface, formDataId?: Id
   if (!formDataId) return false;
   
   const formDataType = graph.vertexes[formDataId]?.L?.[0];
-  return formDataType === "Form" || formDataType === "Page";
+  return formDataType === "Page";
 } 

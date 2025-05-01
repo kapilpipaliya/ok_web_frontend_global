@@ -140,13 +140,13 @@ export const Page: IFormMetaData = {
         // }),
         /*{ componentName: "CheckBox", key: "isRealTime" },
         {
-          collection: "g:'Form'",
+          collection: "g:'Page'",
           componentName: "Select",
           displayName: "Collection",
           
             key: "coll",
             // inward: true,
-            parentLabel: "Form",
+            parentLabel: "Page",
           
         },
         {

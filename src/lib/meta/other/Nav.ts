@@ -63,16 +63,16 @@ export const Nav = {
         {
           componentName: "Select",
           items: `Table
-Form
+Page
 Url`,
 
           key: "func",
         },
         {
-          collection: "g:'Form'",
+          collection: "g:'Page'",
           componentName: "Select",
 
-          key: "Form",
+          key: "Page",
         },
         {
           componentName: "TextInput",
@@ -122,16 +122,16 @@ Url`,
             {
               componentName: "Select",
               items: `Table
-Form
+Page
 Url`,
 
               key: "func",
             },
             {
-              collection: "g:'Form'",
+              collection: "g:'Page'",
               componentName: "Select",
 
-              key: "Form",
+              key: "Page",
             },
             {
               componentName: "TextInput",
@@ -181,16 +181,16 @@ Url`,
                 {
                   componentName: "Select",
                   items: `Table
-Form
+Page
 Url`,
 
                   key: "func",
                 },
                 {
-                  collection: "g:'Form'",
+                  collection: "g:'Page'",
                   componentName: "Select",
 
-                  key: "Form",
+                  key: "Page",
                 },
                 {
                   componentName: "TextInput",
@@ -240,16 +240,16 @@ Url`,
                     {
                       componentName: "Select",
                       items: `Table
-Form
+Page
 Url`,
 
                       key: "func",
                     },
                     {
-                      collection: "g:'Form'",
+                      collection: "g:'Page'",
                       componentName: "Select",
 
-                      key: "Form",
+                      key: "Page",
                     },
                     {
                       componentName: "TextInput",

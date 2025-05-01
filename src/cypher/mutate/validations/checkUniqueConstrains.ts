@@ -4,6 +4,7 @@ import { evalExpressionAsync } from "~/lib/expression_eval";
 
 import { isReservedKeyword } from "../../constants/reservedKeywords";
 import { getDBSessionForSubdomain } from "../../session/getSessionForSubdomain";
+import { Session } from "neo4j-driver";
 
 export async function checkUniqueConstrains(vertex: Vertex) {
   "use server";
@@ -17,7 +18,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
     return { error: "Please configure the key first" };
   }
 
-  if (label === "Form" && isReservedKeyword(key)) {
+  if (isReservedKeyword(key)) {
     return {
       error: `The key "${key}" is a reserved word and cannot be used`,
     };
@@ -29,7 +30,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
     }
 
     const uniqueConstrains = await evalExpressionAsync(
-      `g:'Form[${label}]'->$0Unique`,
+      `g:'Page[${label}]'->$0Unique`,
       {},
     );
     if (!Array.isArray(uniqueConstrains)) {
@@ -64,7 +65,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
 }
 
 async function doesNameExist(
-  dbSession: any,
+  dbSession: Session,
   label: string,
   key: string,
   id?: string,
@@ -76,7 +77,7 @@ async function doesNameExist(
 }
 
 async function doesUniqueConstraintExist(
-  dbSession: any,
+  dbSession: Session,
   label: string,
   id: string | undefined,
   keys: Vertex[],

@@ -370,10 +370,11 @@ function getMetaVertexes(
     ) ?? [];
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
   const componentName = selectedAttr()?.P.componentName;
-  const isForm = formStoreVertex()?.L[0] === "Form";
+  const isPage = formStoreVertex()?.L[0] === "Page";
   const isFormField =
-    (isForm && selectedAttr()?.P.as === "input") ||
+    (isPage && selectedAttr()?.P.as === "input") ||
     selectedAttr()?.P.as === "textarea" ||
+    selectedAttr()?.P.as === "select" ||
     ["CheckBox", "MultiSelect", "Select", "TextInput"].includes(componentName);
   const isHtmlIcon = componentName === "Html" && selectedAttr()?.P.as === "icon";
   const isDataComponent = componentName === "Data";
@@ -395,11 +396,10 @@ function getMetaVertexes(
   const basicVertices = [
     graph.vertexes[vertexIds.key],
     graph.vertexes[vertexIds.attrLabel],
-    ...(isForm && componentName === "Form"
+    ...(isPage && componentName === "Page"
       ? [graph.vertexes[vertexIds.thankYouPage]]
       : []),
     graph.vertexes[vertexIds.perm],
-    // Default value can be only entered when it is in Form Builder
     ...(isFormField ? [graph.vertexes[vertexIds.defaultValue]] : []),
     // always displayed properties
     graph.vertexes[vertexIds.calculatedValue],

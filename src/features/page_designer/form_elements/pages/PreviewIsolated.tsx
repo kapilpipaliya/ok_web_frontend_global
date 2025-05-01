@@ -14,7 +14,7 @@ export function PreviewIsolated(props: {
   return (
     <Suspense>
       <GraphContext.Provider value={[props.graph, props.setGraph]}>
-        {/* Note: Its assuming the "Form" component type */}
+        {/* Note: Its assuming the "Page" component type */}
         <PageViewWrapper
         formId={props.formId}
         hideSaveCancelButton

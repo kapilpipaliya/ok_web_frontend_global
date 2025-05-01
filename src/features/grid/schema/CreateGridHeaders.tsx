@@ -250,7 +250,7 @@ export function CreateGridHeaders(
     (gridState.isNoPermissionCheck ||
       (gridState.formMetaData() && gridState.hasFullPermission()));
 
-  const hasFormAction = tableId === "Form";
+  const hasFormAction = tableId === "Page";
 
   const hasJsonAction = !(hideEditJsonAction || FormMetaData[tableId]);
 
@@ -350,7 +350,7 @@ export function CreateGridHeaders(
               />
             </Show>
 
-            <Show when={tableId === "Form"}>
+            <Show when={tableId === "Page"}>
               <IconButton
                 icon="ph:database"
                 css={css`color: \${args.theme.var.color.primary};

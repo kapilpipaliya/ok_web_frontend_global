@@ -9,7 +9,6 @@ import { File, FileTag, Folder } from "./file/File";
 import { Import } from "./other/Import";
 import { Nav } from "./other/Nav";
 import { Coll } from "./page/Coll";
-import { FormCategory } from "./page/FormCategory";
 import { Page, variantAttributes } from "./page/Page";
 
 const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
@@ -32,7 +31,6 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
   File: File,
   FileTag: FileTag,
   Folder: Folder,
-  FormCategory: FormCategory,
   GlobalSetting: GlobalSetting,
   Page: Page,
 };
@@ -45,35 +43,18 @@ for (const key in FormMetaData) {
 FormMetaData.Page.attributes.push({
   ...Coll("Page").attributes.find((x) => x.key === "PermGlobal")!,
 });
-FormMetaData.Form = {
+
+FormMetaData.Page.attributes.push({
   attributes: [
-    ...FormMetaData.Page.attributes,
-    Coll("Form").attributes.find((x) => x.key === "PermGlobal")!,
-    // {
-    //   collection: "g:'FormCategory'",
-    //   componentName: "Select",
-    //   displayName: "Form Category",
-    //   hideInGrid: true,
-    //   inward: true,
-    //   key: "form",
-    //   parentLabel: "FormCategory",
-    // },
     {
-      attributes: [
-        {
-          componentName: "MultiSelect",
-          key: "key",
-        },
-      ],
-      componentName: "DynamicTable",
-      hide: true,
-      key: "Unique",
+      componentName: "MultiSelect",
+      key: "key",
     },
-    // rulesMetaAttribute!,
   ],
-  key: "Form",
-  title: "Form",
-};
+  componentName: "DynamicTable",
+  hide: true,
+  key: "Unique",
+});
 
 export const ComponentLabel = "Component";
 FormMetaData.Component = {

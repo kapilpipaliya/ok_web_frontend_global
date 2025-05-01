@@ -172,36 +172,6 @@ export const roleFormSchema = {
               },
               type: "button",
             },
-            {
-              as: "button",
-              componentName: "Html",
-              css: (options: FunctionArgumentType) => [
-                css`
-                cursor: pointer;
-                padding: 8px 16px;
-                background-color: transparent;
-                border-left: none;
-                border-right: none;
-                border-top: none;
-              `,
-                options.contextData.tabState[0]?.activeTab === "Form"
-                  ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
-                  : css`border-bottom: 2px solid transparent;`,
-              ],
-              props: (options: FunctionArgumentType) => {
-                const permissions = evalExpression("->RoleForm", {
-                  graph: options.graph,
-                  setGraph: options.setGraph,
-                  vertexes: [options.data],
-                });
-                return {
-                  onClick: () =>
-                    options.contextData.tabState[1]("activeTab", "Form"),
-                  text: `Forms ${options.contextData.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
-                };
-              },
-              type: "button",
-            },
           ],
           css: css`
   display: flex;
@@ -227,16 +197,6 @@ export const roleFormSchema = {
               componentName: "Html",
               css: (options: FunctionArgumentType) =>
                 options.contextData.tabState[0]?.activeTab === "Page"
-                  ? ""
-                  : css`display:none`,
-            },
-
-            {
-              as: "div",
-              attributes: [permissionsTableSchema("Form")],
-              componentName: "Html",
-              css: (options: FunctionArgumentType) =>
-                options.contextData.tabState[0]?.activeTab === "Form"
                   ? ""
                   : css`display:none`,
             },

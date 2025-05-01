@@ -120,7 +120,7 @@ export function SelectPageField(
   flex: 0.5;
 `}
       >
-        {/* Show Page After Submission Form */}
+        {/* Show Page After Submission */}
         <Label meta={props.meta} />
       </As>
       <As

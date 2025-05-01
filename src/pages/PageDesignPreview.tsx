@@ -26,7 +26,7 @@ export default function PageShareView() {
   const formStoreId = queryParams.get("formStoreId");
   const layoutStoreId = queryParams.get("layoutStoreId");
   if (!formStoreId) {
-    return <div>No Form ID</div>;
+    return <div>No Form Store ID</div>;
   }
   if (!layoutStoreId) {
     return <div>No Layout Store ID</div>;

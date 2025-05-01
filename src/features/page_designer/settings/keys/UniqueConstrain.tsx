@@ -20,7 +20,7 @@ export function UniqueConstrains() {
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
 
   const uniqueConstrainsMetaAttribute = klona(
-    FormMetaData.Form.attributes,
+    FormMetaData.Page.attributes,
   ).find((meta) => meta.key === "Unique")!;
   modifyFieldMetaAllFields(
     uniqueConstrainsMetaAttribute.attributes!.find(

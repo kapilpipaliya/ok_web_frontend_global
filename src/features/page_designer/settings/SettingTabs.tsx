@@ -67,7 +67,7 @@ export function SettingTabs() {
                 <Show
                   when={
                     graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] ===
-                    "Form"
+                    "Page"
                   }
                 >
                   <Divider />

@@ -29,7 +29,6 @@ export default function AdminDashboard() {
   const tabs = () => {
     const baseTabs = [
       { id: "Page", label: "Pages" },
-      { id: "Form", label: "Forms" },
       { id: "Component", label: "Components" },
       { id: "Template", label: "Templates" },
     ];

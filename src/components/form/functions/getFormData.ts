@@ -42,12 +42,12 @@ export const getFormData = async (
     });
 
     if (!(isValidResponse(result) && result.graph)) {
-      return { error: getErrorMessage(result) || "Error When Loading Form" };
+      return { error: getErrorMessage(result) || "Error When Loading Page" };
     }
 
     return { data: result, error: "" };
   } catch (e: any) {
     console.error("error", e);
-    return { error: `Error When Loading Form: ${e.message}` };
+    return { error: `Error When Loading Page: ${e.message}` };
   }
 };

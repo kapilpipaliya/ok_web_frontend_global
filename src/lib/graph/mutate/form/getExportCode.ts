@@ -63,7 +63,7 @@ export function getExportCode(
           } else {
             const collVertex = findVertexByLabelAndUniqueId(
               graph,
-              "Form",
+              "Page",
               "key",
               label,
             );

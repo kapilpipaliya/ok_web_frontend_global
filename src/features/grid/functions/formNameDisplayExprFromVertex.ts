@@ -16,7 +16,7 @@ export function formNameDisplayExprFromVertex(
   }
   const collectionVertex = findVertexByLabelAndUniqueId(
     graph,
-    "Form",
+    "Page",
     "key",
     collection,
   );

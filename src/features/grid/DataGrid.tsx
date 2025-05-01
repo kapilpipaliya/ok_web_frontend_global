@@ -196,13 +196,13 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       };
     }
 
-    const form = FormMetaData[props.tableId] || FormMetaData.Form;
+    const form = FormMetaData[props.tableId] || FormMetaData.Page;
     if (!form) {
-      return { error: `Form metadata for ${props.tableId} not found` };
+      return { error: `Page metadata for ${props.tableId} not found` };
     }
     
     const isDynamicForm =
-      props.tableId !== "Form" && form === FormMetaData.Form;
+      props.tableId !== "Page" && form === FormMetaData.Page;
     if (isDynamicForm) {
       if (!form.attributes) {
         return { error: `No attributes defined for form ${props.tableId}` };
@@ -210,7 +210,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       
       const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
       const data = await fetchDataFromDB({
-        expression: `g:'Form[${props.tableId}]'`,
+        expression: `g:'Page[${props.tableId}]'`,
         [getGlobalStore(graph).P.url]: true,
         incoming,
         outgoing,
@@ -276,7 +276,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     // Make sure we have the form metadata before fetching
     // Allow proceeding even without metadata if we're handling an error
     if (!formMeta && !loadMore) {
-      return { error: "Form metadata not loaded. Please try again." };
+      return { error: "Page metadata not loaded. Please try again." };
     }
     
     try {

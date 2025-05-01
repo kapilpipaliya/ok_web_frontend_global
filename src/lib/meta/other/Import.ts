@@ -46,7 +46,7 @@ export const Import = {
           key: "attrId",
         },
         {
-          collection: "g:'Form'",
+          collection: "g:'Page'",
           componentName: "Select",
           displayExpr: "key",
 

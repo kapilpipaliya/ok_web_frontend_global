@@ -120,18 +120,18 @@ function validateLayoutDeletion(
     return true;
   }
 
-  if (graph.vertexes[formStoreVertex?.P.formDataId!]?.L[0] === "Form") {
+  if (graph.vertexes[formStoreVertex?.P.formDataId!]?.L[0] === "Page") {
     const childContainsFormAttr = allFormAttrsInPageFromLevel(
       graph,
       layoutVertex,
-      "Form",
+      "Page",
     );
 
     if (childContainsFormAttr.length > 0) {
       const rootContainsFormAttrExcludingChild = allFormAttrsInPageFromLevel(
         graph,
         graph.vertexes[formStoreVertex?.P.formDataId!],
-        "Form",
+        "Page",
         childContainsFormAttr,
       );
 
