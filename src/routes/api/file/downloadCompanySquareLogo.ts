@@ -1,26 +1,14 @@
-import type { APIEvent } from "@solidjs/start/server";
+import type {APIEvent} from "@solidjs/start/server";
 
-import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
-
-import { downloadFile } from "./functions/downloadFile";
+import {getDBSessionForSubdomain} from "~/cypher/session/getSessionForSubdomain";
+import {handleAPIError} from "~/lib/api/server/apiErrorHandler";
+import {downloadCompanySquareLogo} from "~/routes/api/file/downloadCompanySquareLogoFn";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    // Query to get the company logo file ID
-    const result = await dbSession.run(`
-      MATCH (g:GlobalSetting)-[:CompanySquareLogo]->(f:File)
-      RETURN elementId(f) as fileId
-    `);
-
-    if (result.records.length === 0) {
-      throw new APIError("Company logo not found", 404);
-    }
-
-    const fileId = result.records[0].get("fileId");
-    return await downloadFile(fileId, dbSession);
+    return await downloadCompanySquareLogo(dbSession);
   } catch (error) {
     return handleAPIError(error);
   } finally {

@@ -1,42 +1,46 @@
 import type { Session } from "neo4j-driver";
-
 import fs from "node:fs/promises";
-
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
+import { APIError } from "~/lib/api/server/apiErrorHandler";
+import {Vertex} from "~/lib/graph/graph";
 
-export async function downloadFile(fileId: string, dbSession: Session) {
+interface FileMetadata {
+    filePath: string;
+    originalFilename: string;
+    mimeType: string;
+}
+
+/**
+ * Downloads a file from the server's file system and returns it as a Response
+ * @param fileId - The ID of the file to download
+ * @param dbSession - Neo4j database session
+ * @returns Response object containing the file data or an error message
+ * @throws APIError if the file is not found or cannot be read
+ */
+export async function downloadFile(fileId: string, dbSession: Session): Promise<Response> {
   const fileMetadata = await getFileMetadata(dbSession, fileId);
 
   if (!fileMetadata) {
-    return new Response(JSON.stringify({ error: "File not found" }), {
-      headers: { "Content-Type": "application/json" },
-      status: 404,
-    });
+    throw new APIError("File not found", 404);
   }
 
   try {
-    const filePath = fileMetadata.P.filePath;
+    const metadata = fileMetadata as Vertex<FileMetadata>;
+    const { filePath, originalFilename, mimeType } = metadata.P;
     const fileData = await fs.readFile(filePath);
 
     // Ensure the filename is safe for headers
-    const fileName = encodeURIComponent(fileMetadata.P.originalFilename);
+    const fileName = encodeURIComponent(originalFilename);
 
     return new Response(fileData, {
       headers: {
         "Content-Disposition": `attachment; filename="${fileName}"`,
-        "Content-Type": fileMetadata.P.mimeType,
+        "Content-Type": mimeType,
       },
       status: 200,
     });
-  } catch (error: any) {
-    return new Response(
-      JSON.stringify({
-        error: `Error reading file from disk ${error.message}`,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 500,
-      },
-    );
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    throw new APIError(`Error reading file from disk: ${errorMessage}`, 500);
   }
 }
