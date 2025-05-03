@@ -10,7 +10,6 @@ import type {
   Breakpoint,
   ColorAdjustments,
   ColorMode,
-  ColorPalette,
   ColorScheme,
   RadiusSize,
   ShadeNumber,
@@ -44,12 +43,10 @@ import {
   SPACING_SCALES,
 } from "~/lib/styles/constants";
 
-// Import from our unified OKLCH module
 import {
   createColorScheme,
   createGradient,
   findAccessibleColor,
-  generateColorPalette,
   getColorShade,
   getContrastColor,
   getContrastRatio,
@@ -57,7 +54,7 @@ import {
   meetsAccessibilityStandards,
   mixColors,
   parseColorName,
-} from "~/lib/styles/oklch";
+} from "~/lib/styles/colorUtils";
 
 import {
   getAnimationDefinition,
@@ -96,17 +93,8 @@ const handleColorShadeAccess = (target: ColorTarget, prop: string) => {
 
     // If base color doesn't exist in the target, try these approaches
     if (baseColor === undefined) {
-      // 1. Check if it's a color with "Color" suffix (e.g., "primaryColor")
-      const colorWithSuffix = baseProp.endsWith("Color")
-        ? baseProp
-        : `${baseProp}Color`;
-
-      baseColor = target[colorWithSuffix];
-
-      // 2. If still not found, check if it's a color name that culori can parse
-      if (baseColor === undefined) {
-        baseColor = parseColorName(baseProp);
-      }
+      // check if it's a color name that culori can parse
+      baseColor = parseColorName(baseProp);
     }
 
     // Additional handling for color strings
@@ -114,6 +102,8 @@ const handleColorShadeAccess = (target: ColorTarget, prop: string) => {
       // Handle direct color values or attempt to parse as a color name
       return getColorShade(baseColor, shade as ShadeNumber);
     }
+  } else if (parseColorName(prop)) {
+    return prop;
   }
   return undefined;
 };
@@ -142,25 +132,6 @@ const handleColorComponentAccess = (target: ColorTarget, prop: string) => {
         case "A":
           return hsl.a;
       }
-    }
-  }
-  return undefined;
-};
-
-/**
- * Handles color palette access in the theme proxy.
- * Pattern: primaryPalette, accentPalette, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The color palette or undefined
- */
-const handleColorPaletteAccess = (target: ColorTarget, prop: string) => {
-  const paletteMatch = prop.match(/(.+?)Palette$/);
-  if (paletteMatch) {
-    const [, baseProp] = paletteMatch;
-    const baseColor = target[`${baseProp}Color`];
-    if (typeof baseColor === "string" && baseColor.match(/^#|rgb|hsl|oklch/)) {
-      return generateColorPalette(baseColor);
     }
   }
   return undefined;
@@ -348,7 +319,6 @@ const createSafeThemeProxy = (
           const colorHandlers = [
             handleColorShadeAccess,
             handleColorComponentAccess,
-            handleColorPaletteAccess,
             handleColorSchemeAccess,
             handleContrastRatioAccess,
           ];
@@ -699,9 +669,6 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
       return c ? formatHex(c) : color;
     },
 
-    getColorPalette: (color: string): ColorPalette =>
-      generateColorPalette(color),
-
     getColorScheme: (color: string): ColorScheme => createColorScheme(color),
 
     getContrastColor: (
@@ -850,20 +817,3 @@ export function useTheme(): ThemeContextType {
   }
   return context;
 }
-
-// Export additional utilities to simplify imports
-export {
-  getColorShade,
-  generateColorPalette,
-  createColorScheme,
-  createGradient,
-  getHslComponents,
-  mixColors,
-  getContrastRatio,
-  meetsAccessibilityStandards,
-  getContrastColor,
-  getMediaQuery,
-  getPrefersColorSchemeQuery,
-  getAnimationDefinition,
-  findAccessibleColor,
-};

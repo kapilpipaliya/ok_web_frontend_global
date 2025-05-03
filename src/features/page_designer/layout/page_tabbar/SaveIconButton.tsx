@@ -1,4 +1,4 @@
-import { createMemo } from "solid-js";
+import { createMemo, onCleanup, onMount } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
@@ -10,6 +10,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { capturePreview } from "~/lib/playwright/capturePreview";
 import { headerIconButtonCss } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
 
 export function SaveIconButton(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();
@@ -18,10 +19,18 @@ export function SaveIconButton(props: { formStoreId: string }) {
     graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
   const txnId = () => formStoreVertex()?.P.txnId;
 
+  // Check if save is disabled
   const isDisabled = createMemo(
-    () => !!txnId() && isDisabledTxn(txnId()!, graph),
+    () => !!txnId() && isDisabledTxn(txnId()!, graph)
   );
 
+  // Get transaction status for UI enhancement
+  const txnStatus = createMemo(() => {
+    const txnVertex = graph.vertexes[`txn${txnId()}`];
+    return txnVertex?.P?.status;
+  });
+
+  // Save handler with appropriate feedback
   const saveAndCaptureForm = async () => {
     // Call form submit
     const formSubmitError = await formSubmit(
@@ -42,14 +51,91 @@ export function SaveIconButton(props: { formStoreId: string }) {
     return !formSubmitError;
   };
 
+  // Handle keyboard shortcut for Save (Ctrl+S)
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault(); // Prevent browser's save dialog
+      if (!isDisabled()) {
+        saveAndCaptureForm();
+      }
+    }
+  };
+
+  // Register and clean up event listeners
+  onMount(() => {
+    document.addEventListener('keydown', handleKeyDown);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener('keydown', handleKeyDown);
+  });
+
+  // Get icon and tooltip based on transaction status
+  const buttonProps = createMemo(() => {
+    const status = txnStatus();
+    
+    if (status === 'modified') {
+      return {
+        icon: "ph:floppy-disk",
+        title: "Save changes (Ctrl+S)",
+        css: [
+          headerIconButtonCss,
+          css`
+            color: \${args.theme.var.color.orange_600};
+            &:hover {
+              color: \${args.theme.var.color.orange_500};
+            }
+          `
+        ]
+      };
+    } else if (status === 'reverted') {
+      return {
+        // icon: "ph:arrow-clockwise-bold",
+        // title: "Restore changes (Ctrl+S)",
+        icon: "ph:floppy-disk",
+        title: "Save changes (Ctrl+S)",
+        css: [
+          headerIconButtonCss,
+          css`
+            color: \${args.theme.var.color.blue_600};
+            &:hover {
+              color: \${args.theme.var.color.blue_500};
+            }
+          `
+        ]
+      };
+    } else if (status === 'error') {
+      return {
+        icon: "ph:warning-circle",
+        title: "Error occurred",
+        css: [
+          headerIconButtonCss,
+          css`
+            color: \${args.theme.var.color.red_600};
+            &:hover {
+              color: \${args.theme.var.color.red_500};
+            }
+          `
+        ]
+      };
+    } else {
+      // Default for committed/idle states
+      return {
+        icon: "ph:floppy-disk",
+        title: "Save (Ctrl+S)",
+        css: headerIconButtonCss
+      };
+    }
+  });
+
   return (
     <IconButton
-      css={headerIconButtonCss}
+      css={buttonProps().css}
       disabled={isDisabled()}
-      icon="ph:floppy-disk"
+      icon={buttonProps().icon}
       onClick={isDisabled() ? undefined : saveAndCaptureForm}
       size={18}
-      title="Save"
+      title={buttonProps().title}
       tooltipGroup="page-buttons"
     />
   );

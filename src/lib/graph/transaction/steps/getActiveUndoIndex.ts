@@ -14,11 +14,4 @@ export function getActiveUndoIndex(
     return -1;
   }
   return txnVertex.P.activeUndoIndex ?? -1;
-  const lastTxnIndex = getLastTxnIndex(txnId, graph);
-
-  if (txnVertex.P.activeUndoIndex === -1) {
-    return lastTxnIndex;
-  }
-
-  return txnVertex.P.activeUndoIndex ?? lastTxnIndex;
 }

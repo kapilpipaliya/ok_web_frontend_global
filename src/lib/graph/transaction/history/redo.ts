@@ -6,6 +6,7 @@ import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
+import { determineTransactionStatus } from "../types/TransactionDetail";
 import { redoTxn } from "./redoTxn";
 
 /**
@@ -51,34 +52,62 @@ export function redo(
     }
   }
 
-  // Update undo position and apply steps
-  txnValue.activeUndoIndex = nextUndoIndex;
-  for (const step of txnValue.steps.slice(
-    activeUndoIndex + 1,
-    nextUndoIndex + 1,
-  )) {
-    redoTxn(step, graph, setGraph);
-  }
+  try {
+    // Update undo position and apply steps
+    txnValue.activeUndoIndex = nextUndoIndex;
+    for (const step of txnValue.steps.slice(
+      activeUndoIndex + 1,
+      nextUndoIndex + 1,
+    )) {
+      redoTxn(step, graph, setGraph);
+    }
 
-  // When redoing steps, we need to restore the original submittedIndex if appropriate
-  // If we're redoing back into previously committed steps
-  if (nextUndoIndex <= originalSubmittedIndex) {
-    // If we redo to an index that was previously committed, restore the submittedIndex
-    // but only up to our current position
-    txnValue.submittedIndex = Math.min(nextUndoIndex, originalSubmittedIndex);
-  }
+    // When redoing steps, we need to restore the original submittedIndex if appropriate
+    // If we're redoing back into previously committed steps
+    if (nextUndoIndex <= originalSubmittedIndex) {
+      // If we redo to an index that was previously committed, restore the submittedIndex
+      // but only up to our current position
+      txnValue.submittedIndex = Math.min(nextUndoIndex, originalSubmittedIndex);
+    }
+    
+    // Update transaction status using the helper function
+    // This will handle all the different state permutations consistently
+    txnValue.status = determineTransactionStatus(txnValue);
+    txnValue.lastModified = Date.now();
 
-  // Update transaction state in the graph
-  replaceVertexProperties(
-    0,
-    `txn${txnId}`,
-    graph,
-    setGraph,
-    txnValue as unknown as { [key: string]: unknown },
-    {
-      cloneProperties: false,
-    },
-  );
+    // Update transaction state in the graph
+    replaceVertexProperties(
+      0,
+      `txn${txnId}`,
+      graph,
+      setGraph,
+      txnValue as unknown as { [key: string]: unknown },
+      {
+        cloneProperties: false,
+      },
+    );
+  } catch (error) {
+    console.error("Error during redo operation:", error);
+    // Update error status
+    txnValue.status = 'error';
+    txnValue.error = {
+      code: 'REDO_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error during redo',
+      details: error
+    };
+    
+    // Still try to update the transaction state
+    replaceVertexProperties(
+      0,
+      `txn${txnId}`,
+      graph,
+      setGraph,
+      txnValue as unknown as { [key: string]: unknown },
+      {
+        cloneProperties: false,
+      },
+    );
+  }
 }
 
 /**

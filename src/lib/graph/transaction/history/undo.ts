@@ -9,6 +9,7 @@ import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 import { saveUndoPoint } from "../steps/saveUndoPoint";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
+import { determineTransactionStatus } from "../types/TransactionDetail";
 import { undoTxn } from "./undoTxn";
 
 /**
@@ -52,54 +53,85 @@ export function undo(
     return;
   }
 
-  // Revert steps in reverse order up to the target index
-  const stepsToUndo = txnValue.steps
-    .slice(newUndoIndex + 1, activeUndoIndex + 1)
-    .reverse();
-  for (const txn of stepsToUndo) {
-    undoTxn(txn, graph, setGraph);
-  }
-  txnValue.activeUndoIndex = newUndoIndex;
+  try {
+    // Revert steps in reverse order up to the target index
+    const stepsToUndo = txnValue.steps
+      .slice(newUndoIndex + 1, activeUndoIndex + 1)
+      .reverse();
+    for (const txn of stepsToUndo) {
+      undoTxn(txn, graph, setGraph);
+    }
+    txnValue.activeUndoIndex = newUndoIndex;
 
-  // Update submittedIndex if we're undoing past it
-  // This prevents submittedIndex from being ahead of activeUndoIndex
-  if (submittedIndex > newUndoIndex) {
-    // If we're undoing committed steps, adjust submittedIndex to match our new position
-    txnValue.submittedIndex = newUndoIndex;
-    // But we keep the original value in originalSubmittedIndex for future redo operations
-  }
-
-  // Optionally remove steps after the undo point
-  if (removeAfterSteps) {
-    txnValue.steps = txnValue.steps.slice(0, newUndoIndex + 1);
-    txnValue.activeUndoIndex = txnValue.steps.length - 1;
-    txnValue.undoStepIndexes = txnValue.undoStepIndexes.filter(
-      (index) => index <= txnValue.activeUndoIndex,
-    );
-
-    // If we're removing steps and some were committed, adjust submittedIndex
+    // Update submittedIndex if we're undoing past it
+    // This prevents submittedIndex from being ahead of activeUndoIndex
     if (submittedIndex > newUndoIndex) {
+      // If we're undoing committed steps, adjust submittedIndex to match our new position
       txnValue.submittedIndex = newUndoIndex;
+      // But we keep the original value in originalSubmittedIndex for future redo operations
+    }
 
-      // If we're permanently removing steps, we should also update originalSubmittedIndex
-      // to not exceed the new maximum length
-      if (txnValue.originalSubmittedIndex > newUndoIndex) {
-        txnValue.originalSubmittedIndex = newUndoIndex;
+    // Optionally remove steps after the undo point
+    if (removeAfterSteps) {
+      txnValue.steps = txnValue.steps.slice(0, newUndoIndex + 1);
+      txnValue.activeUndoIndex = txnValue.steps.length - 1;
+      txnValue.undoStepIndexes = txnValue.undoStepIndexes.filter(
+        (index) => index <= txnValue.activeUndoIndex,
+      );
+
+      // If we're removing steps and some were committed, adjust submittedIndex
+      if (submittedIndex > newUndoIndex) {
+        txnValue.submittedIndex = newUndoIndex;
+
+        // If we're permanently removing steps, we should also update originalSubmittedIndex
+        // to not exceed the new maximum length
+        if (txnValue.originalSubmittedIndex > newUndoIndex) {
+          txnValue.originalSubmittedIndex = newUndoIndex;
+        }
       }
     }
-  }
+    
+    // Note: We don't need to calculate revertSteps here as that's handled in:
+    // 1. transactionDetailAdd - when adding new steps after an undo
+    // 2. commitTxn - when preparing the steps to be submitted
+    
+    // Update status using the helper function for consistency
+    txnValue.status = determineTransactionStatus(txnValue);
+    txnValue.lastModified = Date.now();
 
-  // Update transaction state in the graph
-  replaceVertexProperties(
-    0,
-    `txn${txnId}`,
-    graph,
-    setGraph,
-    txnValue as unknown as { [key: string]: unknown },
-    {
-      cloneProperties: false,
-    },
-  );
+    // Update transaction state in the graph
+    replaceVertexProperties(
+      0,
+      `txn${txnId}`,
+      graph,
+      setGraph,
+      txnValue as unknown as { [key: string]: unknown },
+      {
+        cloneProperties: false,
+      },
+    );
+  } catch (error) {
+    console.error("Error during undo operation:", error);
+    // Update error status
+    txnValue.status = 'error';
+    txnValue.error = {
+      code: 'UNDO_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error during undo',
+      details: error
+    };
+    
+    // Still try to update the transaction state
+    replaceVertexProperties(
+      0,
+      `txn${txnId}`,
+      graph,
+      setGraph,
+      txnValue as unknown as { [key: string]: unknown },
+      {
+        cloneProperties: false,
+      },
+    );
+  }
 }
 
 /**

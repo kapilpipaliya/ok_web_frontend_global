@@ -1,6 +1,5 @@
 import {
   formatCss,
-  formatHex,
   interpolate,
   oklch,
   parse,
@@ -9,7 +8,6 @@ import {
 } from "culori";
 import type {
   ColorAdjustments,
-  ColorPalette,
   ColorScheme,
   ShadeNumber,
 } from "~/lib/styles";
@@ -128,25 +126,6 @@ export function getColorShade(
 }
 
 /**
- * Generate a full color palette from a base color with various shades
- */
-export function generateColorPalette(baseColor: string): ColorPalette {
-  const palette = {} as ColorPalette;
-
-  // Define shade steps
-  const shades = [
-    0, 25, 50, 75, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
-  ] as const;
-
-  // Generate each shade using the getColorShade function
-  shades.forEach((shade) => {
-    palette[shade] = getColorShade(baseColor, shade);
-  });
-
-  return palette;
-}
-
-/**
  * Create a color scheme from a base color with harmonious variations
  */
 export function createColorScheme(baseColor: string): ColorScheme {
@@ -170,20 +149,20 @@ export function createColorScheme(baseColor: string): ColorScheme {
 
   // Create variants with different hues
   return {
-    base: formatHex(colorObj) || baseColor,
+    base: formatOklchString(colorObj) || baseColor,
     analogous1:
-      formatHex(oklch({ ...colorObj, h: (h + 30) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h + 30) % 360 })) || baseColor,
     analogous2:
-      formatHex(oklch({ ...colorObj, h: (h - 30 + 360) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h - 30 + 360) % 360 })) || baseColor,
     triadic1:
-      formatHex(oklch({ ...colorObj, h: (h + 120) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h + 120) % 360 })) || baseColor,
     triadic2:
-      formatHex(oklch({ ...colorObj, h: (h - 120 + 360) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h - 120 + 360) % 360 })) || baseColor,
     complementary:
-      formatHex(oklch({ ...colorObj, h: (h + 180) % 360 })) || baseColor,
-    split1: formatHex(oklch({ ...colorObj, h: (h + 150) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h + 180) % 360 })) || baseColor,
+    split1: formatOklchString(oklch({ ...colorObj, h: (h + 150) % 360 })) || baseColor,
     split2:
-      formatHex(oklch({ ...colorObj, h: (h - 150 + 360) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h - 150 + 360) % 360 })) || baseColor,
   };
 }
 
@@ -252,8 +231,8 @@ export function mixColors(color1: string, color2: string, amount = 50): string {
   const ratio = amount / 100;
 
   // Mix colors using interpolation
-  const mixed = interpolate([c1, c2])(ratio);
-  return formatHex(mixed) || color1;
+  const mixed = interpolate([c1, c2], "oklch")(ratio);
+  return formatOklchString(mixed) || color1;
 }
 
 /**
@@ -343,7 +322,7 @@ export function adjustColor(
     c.alpha = adjustments.alpha;
   }
 
-  return formatHex(c) || color;
+  return formatOklchString(c) || color;
 }
 
 /**
@@ -365,7 +344,7 @@ export function findAccessibleColor(
   const maxAttempts = 20;
 
   // If the original color meets standards, return it
-  const initialColor = formatHex(c) || baseColor;
+  const initialColor = formatOklchString(c) || baseColor;
   if (meetsAccessibilityStandards(initialColor, backgroundColor, level, size)) {
     return initialColor;
   }
@@ -389,7 +368,7 @@ export function findAccessibleColor(
       oklchCopy.l = Math.min(1, (oklchCopy.l || 0) + step);
     }
 
-    const newColor = formatHex(oklchCopy) || baseColor;
+    const newColor = formatOklchString(oklchCopy) || baseColor;
     if (meetsAccessibilityStandards(newColor, backgroundColor, level, size)) {
       return newColor;
     }

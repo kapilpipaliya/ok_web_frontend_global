@@ -9,6 +9,8 @@ import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedP
 
 import type { Edge, Vertex } from "../../graph";
 import type { InsertFnKey, TransactionValue } from "../types/TransactionType";
+import type { TransactionDetail } from "../types/TransactionDetail";
+import { hasChangesToCommit, hasRevertedCommittedChanges } from "../types/TransactionDetail";
 
 import {
   getEdgeOldIdToNewIdMap,
@@ -34,31 +36,66 @@ export function commitTxn(
   }
 
   const txnVertex = graph.vertexes[`txn${txnId}`];
-  const submittedIndex = txnVertex.P.submittedIndex ?? -1;
+  const txnDetail = txnVertex.P as TransactionDetail;
+  
+  // Quick check using our helper
+  if (!hasChangesToCommit(txnDetail)) {
+    return;
+  }
+
+  const submittedIndex = txnDetail.submittedIndex ?? -1;
+  const originalSubmittedIndex = txnDetail.originalSubmittedIndex ?? submittedIndex;
   const activeUndoIndex = getActiveUndoIndex(txnId, graph);
 
   try {
+    // Mark transaction as processing
+    txnDetail.status = 'modified';
+    txnDetail.lastModified = Date.now();
+    
     let revertSteps: TransactionValue[] = [];
     let steps: TransactionValue[];
 
+    // Check if we're in a undo-after-save situation
     if (activeUndoIndex < submittedIndex) {
-      const removedSteps = txnVertex.P.steps.slice(
+      // We've undone some committed steps, so we need to revert them
+      const removedSteps = txnDetail.steps.slice(
         activeUndoIndex + 1,
         submittedIndex + 1,
       );
-      revertSteps = [...removedSteps, ...txnVertex.P.revertSteps];
+      // Combine with any existing revert steps
+      revertSteps = [...removedSteps, ...txnDetail.revertSteps];
+      // No forward steps in this case
       steps = [];
-    } else {
-      steps = txnVertex.P.steps.slice(submittedIndex + 1, activeUndoIndex + 1);
-      revertSteps = [...txnVertex.P.revertSteps];
+    } 
+    // Check if we've undone past the original submitted index (special case)
+    else if (hasRevertedCommittedChanges(txnDetail)) {
+      // If we're undoing past the original submitted index but have
+      // revertSteps, make sure they're included
+      steps = txnDetail.steps.slice(submittedIndex + 1, activeUndoIndex + 1);
+      revertSteps = [...txnDetail.revertSteps];
+      
+      // If we don't have any explicit steps but did undo past original submitted,
+      // we need to add revert steps for those operations
+      if (steps.length === 0 && activeUndoIndex < originalSubmittedIndex) {
+        const revertedCommittedSteps = txnDetail.steps.slice(
+          activeUndoIndex + 1,
+          originalSubmittedIndex + 1
+        );
+        revertSteps = [...revertedCommittedSteps, ...revertSteps];
+      }
     }
+    else {
+      // Normal case: just get new steps since last submitted index
+      steps = txnDetail.steps.slice(submittedIndex + 1, activeUndoIndex + 1);
+      revertSteps = [...txnDetail.revertSteps];
+    }
+    
+    console.log(`Commit check - Steps: ${steps.length}, Revert steps: ${revertSteps.length}`);
+    
+    // Sanity check that there are steps to commit
     if (steps.length === 0 && revertSteps.length === 0) {
       return;
     }
-
-    // Update transaction status
-    // txnVertex.P.status = 'committed';
-    // txnVertex.P.timestamp = Date.now();
 
     // Get ID maps
     const vertexIdMap = getVertexOldIdToNewIdMap(graph);
@@ -88,7 +125,7 @@ export function commitTxn(
         insertEdge: txnDetail.deleteEdge
           ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
           : undefined,
-        insertVertex: txnDetail.deleteVertex
+        insert: txnDetail.deleteVertex
           ? updateVertexIdsToNew(
               klona(txnDetail.originalData as Vertex),
               graph,
@@ -112,7 +149,7 @@ export function commitTxn(
         replaceEdge: txnDetail.replaceEdge
           ? updateEdgeIdsToNew(klona(txnDetail.originalData as Edge), graph)
           : undefined,
-      });
+      } as TransactionValue);
     });
 
     // Process forward steps
@@ -151,14 +188,17 @@ export function commitTxn(
       // called separately after server response in submitDataCall
       return mutationArgs;
     }
+    
+    return;
   } catch (error) {
     console.error("Error during transaction commit:", error);
-    // txnVertex.P.status = 'rolled_back';
-    // txnVertex.P.error = {
-    //   code: 'COMMIT_ERROR',
-    //   message: error instanceof Error ? error.message : 'Unknown error during commit',
-    //   details: error
-    // };
+    // Update transaction status to error
+    txnDetail.status = 'error';
+    txnDetail.error = {
+      code: 'COMMIT_ERROR',
+      message: error instanceof Error ? error.message : 'Unknown error during commit',
+      details: error
+    };
     return;
   }
 }

@@ -20,8 +20,8 @@ export function formSubmit(
   showErrorToast: (message: string) => void,
   showLoadingToast: (options: {
     loadMessage: string;
-    onSuccess: (value: any) => void;
-    promise: Promise<any>;
+    onSuccess: (value: unknown) => void;
+    promise: Promise<unknown>;
     successMessage: string;
   }) => void,
   showWarningToast: (message: string) => void,
@@ -41,7 +41,9 @@ export function formSubmit(
       showWarningToast(warningMessage);
       return warningMessage;
     }
-    if (isDisabledTxn(formStoreVertex().P.txnId, graph)) {
+    
+    const txnId = formStoreVertex().P.txnId;
+    if (isDisabledTxn(txnId, graph)) {
       const warningMessage = `${label} is already saved or not changed.`;
       showWarningToast(warningMessage);
       return warningMessage;
@@ -55,19 +57,21 @@ export function formSubmit(
       showWarningToast(warningMessage);
       return warningMessage;
     }
+    
     let data;
     // TODO: add validation on form that AttrsTableData keys should not available.
     // !!!TODO!!! Handle Error Received From server when commit
     if (!isRealTime) {
-      data = commitTxn(formStoreVertex().P.txnId, graph);
+      // Get the data to submit
+      data = commitTxn(txnId, graph);
+      
       if (!data) {
         const warningMessage = "No data to Submit";
         showWarningToast(warningMessage);
         return warningMessage;
       }
 
-      const key = graph.vertexes[formStoreVertex().P.formDataId!]?.P.key;
-
+      // Check unique constraints
       const res = await checkUniqueConstrains(
         graph.vertexes[formStoreVertex().P.formDataId!],
       );
@@ -81,7 +85,9 @@ export function formSubmit(
       await showLoadingToast({
         loadMessage: `Saving ${label}...`,
         onSuccess: (value) => {
-          for (const item of value.data) {
+          const responseData = value as { data: Array<{ insert?: [string, string] }> };
+          
+          for (const item of responseData.data) {
             if (item.insert) {
               if (item.insert[0] === formStoreVertex().P.formDataId) {
                 mergeVertexProperties<FormStoreObject>(
@@ -103,7 +109,7 @@ export function formSubmit(
           }
         },
         promise: submitDataCall(
-          { ...data, key },
+          data,
           graph,
           setGraph,
           formStoreVertex().P.txnId,

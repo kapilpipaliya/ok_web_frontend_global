@@ -2,7 +2,8 @@ import type { Store } from "solid-js/store";
 
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { commitTxn } from "../core/commitTxn";
+import type { TransactionDetail } from "../types/TransactionDetail";
+import { hasChangesToCommit } from "../types/TransactionDetail";
 
 export function isDisabledTxn(
   txnId: number,
@@ -11,9 +12,19 @@ export function isDisabledTxn(
   if (!txnId) {
     return true;
   }
+  
   const txnVertex = graph.vertexes[`txn${txnId}`];
   if (!txnVertex) {
     return true;
   }
-  return commitTxn(txnId, graph) === undefined;
+
+  const txnDetail = txnVertex.P as TransactionDetail;
+  
+  // If transaction has an error status, it's disabled
+  if (txnDetail.status === 'error') {
+    return true;
+  }
+  
+  // Enable if there are any changes to commit
+  return !hasChangesToCommit(txnDetail);
 }

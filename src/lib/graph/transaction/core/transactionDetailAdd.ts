@@ -6,9 +6,9 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import type { TransactionDetail } from "../types/TransactionDetail";
 import type { TransactionValue } from "../types/TransactionType";
+import { determineTransactionStatus } from "../types/TransactionDetail";
 
 import { replaceVertexProperties } from "../../mutate/core/vertex";
-import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 
 /**
@@ -44,13 +44,16 @@ export function transactionDetailAdd(
     let steps = [...currentTxnState.steps];
     let undoStepIndexes = [...currentTxnState.undoStepIndexes];
     let revertSteps = [...currentTxnState.revertSteps];
-    let submittedIndex = currentTxnState.submittedIndex;
+    let submittedIndex = currentTxnState.submittedIndex ?? -1;
     let originalSubmittedIndex =
       currentTxnState.originalSubmittedIndex ?? submittedIndex;
+    
+    // Track when this operation occurred
+    const lastModified = Date.now();
 
     const lastStepIndex = getLastTxnIndex(txnId, graph);
-    // Get current position in undo history
-    const currentUndoPosition = getActiveUndoIndex(txnId, graph);
+    // Get current position in undo history directly from the current transaction state
+    const currentUndoPosition = currentTxnState.activeUndoIndex;
 
     // If we're adding a step after an undo, we need to handle the branching
     if (currentUndoPosition < lastStepIndex) {
@@ -88,17 +91,21 @@ export function transactionDetailAdd(
     // Add the new step and update the undo position
     steps.push(txnValue);
     const newUndoPosition = steps.length - 1;
-
+    
     // Create updated transaction state
     const updatedTxnState = {
       ...currentTxnState,
       activeUndoIndex: newUndoPosition,
+      lastModified,
       originalSubmittedIndex,
       revertSteps,
       steps,
       submittedIndex,
       undoStepIndexes,
     };
+    
+    // Use the helper function to determine the appropriate status
+    updatedTxnState.status = determineTransactionStatus(updatedTxnState);
 
     // Update the graph with new transaction state
     replaceVertexProperties(

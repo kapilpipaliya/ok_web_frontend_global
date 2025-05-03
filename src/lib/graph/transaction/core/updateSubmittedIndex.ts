@@ -5,6 +5,14 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 
+/**
+ * Updates the transaction's submitted index after a successful commit.
+ * This marks the current state as the new baseline for detecting changes.
+ * 
+ * @param txnId - The ID of the transaction to update
+ * @param graph - The current graph state
+ * @param setGraph - Function to update the graph state
+ */
 export function updateSubmittedIndex(
   txnId: number,
   graph: Store<GraphInterface>,
@@ -13,10 +21,23 @@ export function updateSubmittedIndex(
   if (!txnId) {
     return;
   }
+  
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
+  
+  // Update transaction indices
   existingTxnValue.submittedIndex = existingTxnValue.activeUndoIndex;
   existingTxnValue.originalSubmittedIndex = existingTxnValue.activeUndoIndex;
   existingTxnValue.revertSteps = [];
+  
+  // Update status information
+  existingTxnValue.status = 'committed';
+  existingTxnValue.lastModified = Date.now();
+  
+  // Clear any previous errors
+  if (existingTxnValue.error) {
+    delete existingTxnValue.error;
+  }
+  
   replaceVertexProperties(
     0,
     `txn${txnId}`,
