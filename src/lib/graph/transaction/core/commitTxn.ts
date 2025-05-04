@@ -48,10 +48,6 @@ export function commitTxn(
   const activeUndoIndex = getActiveUndoIndex(txnId, graph);
 
   try {
-    // Mark transaction as processing
-    txnDetail.status = 'modified';
-    txnDetail.lastModified = Date.now();
-    
     let revertSteps: TransactionValue[] = [];
     let steps: TransactionValue[];
 
@@ -188,17 +184,10 @@ export function commitTxn(
       // called separately after server response in submitDataCall
       return mutationArgs;
     }
-    
     return;
   } catch (error) {
     console.error("Error during transaction commit:", error);
     // Update transaction status to error
-    txnDetail.status = 'error';
-    txnDetail.error = {
-      code: 'COMMIT_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown error during commit',
-      details: error
-    };
     return;
   }
 }

@@ -20,8 +20,8 @@ export function formSubmit(
   showErrorToast: (message: string) => void,
   showLoadingToast: (options: {
     loadMessage: string;
-    onSuccess: (value: unknown) => void;
-    promise: Promise<unknown>;
+    onSuccess: (value: any) => void;
+    promise: Promise<any>;
     successMessage: string;
   }) => void,
   showWarningToast: (message: string) => void,

@@ -252,13 +252,13 @@ export function newVertex<T extends { [key: string]: any }>(
 }
 
 // replace a vertex properties
-export function replaceVertexProperties(
+export function replaceVertexProperties<T extends { [key: string]: any }>(
   txnId: number,
   vertexId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  properties: { [key: string]: unknown },
-  // clonning will reduce performance, so we can use this flag to disable it.
+  properties: T,
+  // cloning will reduce performance, so we can use this flag to disable it.
   options?: {
     cloneProperties?: boolean;
     skipPostMessage?: string;

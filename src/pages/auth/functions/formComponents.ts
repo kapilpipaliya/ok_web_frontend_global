@@ -131,6 +131,7 @@ export function createPasswordField(
           css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextInput",
           key,
+          name: key,
           props: (options: FunctionArgumentType) => ({
             onInput: (e: Event) => {
               if (e.target instanceof HTMLInputElement) {
@@ -299,6 +300,7 @@ export function createTextField(
           css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextInput",
           key,
+          name: key,
           props: (options: FunctionArgumentType) => ({
             onKeyDown: async (e: KeyboardEvent) => {
               if (e.key === "Enter") {
