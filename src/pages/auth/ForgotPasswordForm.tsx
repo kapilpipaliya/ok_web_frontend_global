@@ -14,14 +14,12 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
-import {
-  createFormHeader,
-  createFormSubmitButton,
-  createLinkButton,
-  createTextField,
-} from "./functions/formComponents";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { css } from "~/lib/styles";
+import {createFormHeader} from "~/pages/auth/functions/schema/createFormHeader";
+import {createFormSubmitButton} from "~/pages/auth/functions/schema/createFormSubmitButton";
+import {createLinkButton} from "~/pages/auth/functions/schema/createLinkButton";
+import {createTextField} from "~/pages/auth/functions/schema/createTextField";
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();

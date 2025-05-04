@@ -11,16 +11,14 @@ import { wrapFormInCard } from "~/lib/schema/wrapFormInCard";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { STYLES } from "../settings/constants";
-import {
-  createFormHeader,
-  createPasswordField,
-  createTextField,
-} from "./functions/formComponents";
 import { useFormRefs } from "./functions/useFormRefs";
 import { useFormSubmit } from "./functions/useFormSubmit";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { validateFormData } from "./functions/validateFormData";
 import { css } from "~/lib/styles";
+import {createFormHeader} from "~/pages/auth/functions/schema/createFormHeader";
+import {createPasswordField} from "~/pages/auth/functions/schema/createPasswordField";
+import {createTextField} from "~/pages/auth/functions/schema/createTextField";
 
 // Import all utilities from the index file
 
