@@ -19,13 +19,13 @@ export default function AdminGlobalSettings() {
       id: "general",
       label: "General",
     },
-    {
-      component: CompanySettings,
-      group: "Basic Settings",
-      icon: "ph:buildings",
-      id: "company",
-      label: "Company Details",
-    },
+    // {
+    //   component: CompanySettings,
+    //   group: "Basic Settings",
+    //   icon: "ph:buildings",
+    //   id: "company",
+    //   label: "Company Details",
+    // },
     {
       component: EmailSettings,
       group: "Communication",

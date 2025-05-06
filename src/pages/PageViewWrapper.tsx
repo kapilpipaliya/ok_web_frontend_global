@@ -291,6 +291,18 @@ export function PageViewWrapper(
         return { error: "No meta data found" };
       }
       if (constants.formMetaId) {
+        if (props.getFormData) {
+          try {
+            const data = await props.getFormData();
+            if (!data || data.error) {
+              return { error: data?.error || "Error fetching form data" };
+            } else {
+              return {  dataResult: { data } };
+            }
+          } catch (error) {
+            return { error: (error as Error).message };
+          }
+        }
         return {};
       }
       const metaResult = await fetchFormMetaData(
@@ -365,7 +377,7 @@ export function PageViewWrapper(
           constants.formDataId,
           idLocal,
           isNoPermissionCheck,
-          true, // shasRequiredPermissionsLocal,
+          true, // hasRequiredPermissionsLocal,
           constants.pageVertexName,
         );
         return { dataResult, formMetaId, metaResult };
@@ -375,22 +387,13 @@ export function PageViewWrapper(
 
       if (props.getFormData) {
         try {
-          // Set fetching state to true before making the API call
-          // setFormStore("isFetching", true);
-
           const data = await props.getFormData();
-
-          // Set fetching state to false after the API call completes
-          // setFormStore("isFetching", false);
-
           if (!data || data.error) {
             result = { ...result, error: data.error || "Error fetching form data" };
           } else {
             result = { ...result, dataResult: { data } };
           }
         } catch (error) {
-          // Make sure to set fetching state to false in case of error
-          // setFormStore("isFetching", false);
           result = { ...result, error: (error as Error).message };
         }
       }
@@ -489,7 +492,7 @@ export function PageViewWrapper(
   props.initializeFormStoreParent?.(pageFormVertexObject.id);
 
   const processResult = (result?: { formMetaId?: string, metaResult?: FetchFormMetaDataResult, dataResult?: FetchFormDataResult }) => {
-    if (!props.formMetaId && result) {
+    if (result) {
       untrack(() => {
         batch(() => {
           setFormMetaData(result?.metaResult, result?.formMetaId);

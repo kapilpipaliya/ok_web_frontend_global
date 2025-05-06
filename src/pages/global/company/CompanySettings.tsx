@@ -6,11 +6,42 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/general/getApi";
-import { postAPI } from "~/lib/api/general/postApi";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
+import { validateEmail } from "~/lib/validation/validateEmail";
 
+import { handleApiRequest } from "../../../lib/api/general/handleApiRequest";
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { css } from "~/lib/styles";
+
+// Validation functions
+const validateRequired = (value: string) => {
+  if (!value || value.trim() === "") {
+    return "This field is required";
+  }
+  return undefined;
+};
+
+// Validation function for form data
+const validateFormData = (data: Record<string, unknown>) => {
+  const errors: Record<string, string> = {};
+
+  // Company name is required
+  const companyNameError = validateRequired(data.companyName as string);
+  if (companyNameError) {
+    errors.companyName = companyNameError;
+  }
+
+  // Email validation if provided
+  if (data.contactEmail) {
+    const emailError = validateEmail(data.contactEmail as string);
+    if (emailError) {
+      errors.contactEmail = emailError;
+    }
+  }
+
+  return Object.keys(errors).length > 0 ? errors : null;
+};
 
 export function CompanySettings() {
   const { showErrorToast, showSuccessToast } = useToast();
@@ -19,148 +50,169 @@ export function CompanySettings() {
     return await getAPI(API.settings.company.getUrl);
   };
 
-  const form = {
-    as: "div",
+  const form: FieldAttribute = {
+    as: "",
     attributes: [
       {
         as: "div",
         attributes: [
           {
-            as: "span",
-            css: SETTINGS_CONSTANTS.LABEL_CSS,
-            componentName: "Html",
-            text: "Company Name",
-          },
-          {
-            css: PROPERTIES.Css.TextFieldCss,
-            componentName: "TextInput",
-            key: "companyName",
-            placeholder: "Enter company name",
-          },
-        ],
-        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
-        componentName: "Html",
-      },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "span",
-            css: SETTINGS_CONSTANTS.LABEL_CSS,
-            componentName: "Html",
-            text: "Address",
-          },
-          {
-            css: PROPERTIES.Css.TextFieldCss,
-            componentName: "TextArea",
-            key: "address",
-            placeholder: "Enter company address",
-          },
-        ],
-        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
-        componentName: "Html",
-      },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "span",
-            css: SETTINGS_CONSTANTS.LABEL_CSS,
-            componentName: "Html",
-            text: "Contact Email",
-          },
-          {
-            css: PROPERTIES.Css.TextFieldCss,
-            componentName: "TextInput",
-            key: "contactEmail",
-            placeholder: "Enter contact email",
-            type: "email",
-          },
-        ],
-        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
-        componentName: "Html",
-      },
-      {
-        as: "div",
-        attributes: [
-          {
-            as: "span",
-            css: SETTINGS_CONSTANTS.LABEL_CSS,
-            componentName: "Html",
-            text: "Phone",
-          },
-          {
-            css: PROPERTIES.Css.TextFieldCss,
-            componentName: "TextInput",
-            key: "phone",
-            placeholder: "Enter phone number",
-          },
-        ],
-        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
-        componentName: "Html",
-      },
-      {
-        as: "div",
-        attributes: [
-          {
+            as: "div",
             attributes: [
               {
-                as: "button",
-                css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
-                  disabled: options.contextData.saveState[0]?.isLoading,
-                  onClick: async () => {
-                    try {
-                      options.contextData.saveState[1]("isLoading", true);
-                      const settings = options.data;
-                      const response = await postAPI(
-                        API.settings.company.updateUrl,
-                        settings.P,
-                      );
-                      if (response.error) {
-                        showErrorToast(response.error);
-                      } else {
-                        showSuccessToast(
+                text: "Company Name",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "TextInput",
+                key: "companyName",
+                placeholder: "Enter company name",
+                validate: (value: string) => validateRequired(value),
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+          },
+          getErrorSchema("companyName", css`color:red; margin-top: -20px;`),
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Address",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "TextArea",
+                key: "address",
+                placeholder: "Enter company address",
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+          },
+          getErrorSchema("address", css`color:red; margin-top: -20px;`),
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Contact Email",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "TextInput",
+                key: "contactEmail",
+                placeholder: "Enter contact email",
+                type: "email",
+                validate: (value: string) => 
+                  value ? validateEmail(value) : undefined,
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+          },
+          getErrorSchema("contactEmail", css`color:red; margin-top: -20px;`),
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Phone",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "TextInput",
+                key: "phone",
+                placeholder: "Enter phone number",
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+          },
+          getErrorSchema("phone", css`color:red; margin-top: -20px;`),
+          {
+            as: "div",
+            attributes: [
+              {
+                attributes: [
+                  {
+                    as: "button",
+                    css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
+                    componentName: "Html",
+                    props: (options: FunctionArgumentType) => ({
+                      disabled: options.contextData.saveState[0]?.isLoading,
+                      onClick: async () => {
+                        // Validate form data
+                        const settings = options.data;
+                        const errors = validateFormData(settings.P as Record<string, unknown>);
+
+                        if (errors) {
+                          // Show validation errors
+                          for (const fieldKey in errors) {
+                            options.setError(errors[fieldKey], fieldKey);
+                          }
+                          showErrorToast("Please fix the validation errors");
+                          return;
+                        }
+
+                        options.clearAllErrors();
+
+                        // Use the common handleApiRequest function
+                        await handleApiRequest(
+                          API.settings.company.updateUrl,
+                          settings.P,
                           "Company details updated successfully",
+                          (isLoading) =>
+                            options.contextData.saveState[1](
+                              "isLoading",
+                              isLoading,
+                            ),
+                          showSuccessToast,
+                          showErrorToast,
                         );
-                      }
-                    } catch (error) {
-                      showErrorToast((error as Error).message);
-                    } finally {
-                      options.contextData.saveState[1]("isLoading", false);
-                    }
+                      },
+                      text: options.contextData.saveState[0]?.isLoading
+                        ? "Saving..."
+                        : "Save Changes",
+                    }),
                   },
-                  text: options.contextData.saveState[0]?.isLoading
-                    ? "Saving..."
-                    : "Save Changes",
+                ],
+                componentName: "Data",
+                name: "saveState",
+                props: () => ({
+                  data: createStore({
+                    isLoading: false,
+                  }),
                 }),
               },
             ],
-            componentName: "Data",
-            name: "saveState",
-
-            props: () => ({
-              data: createStore({
-                isLoading: false,
-              }),
-            }),
-          },
-        ],
-        css: css`
+            css: css`
   margin-top: 24px;
 `,
+            componentName: "Html",
+          },
+        ],
+        css: SETTINGS_CONSTANTS.FORM_CSS,
         componentName: "Html",
       },
     ],
-    css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       onUnmount: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
       },
     }),
-  } as FieldAttribute;
+  };
 
   return (
     <SchemaRenderer
