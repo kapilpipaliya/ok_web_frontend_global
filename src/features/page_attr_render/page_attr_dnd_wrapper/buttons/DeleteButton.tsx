@@ -41,6 +41,7 @@ export function DeleteButton(props: Readonly<DeleteButtonProps>) {
       `,
       ]}
       icon="ph:trash"
+      name="delete"
       onClick={(e) => {
         e.stopPropagation();
         deleteLayoutAttr(

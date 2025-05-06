@@ -47,6 +47,7 @@ export function LayoutTreeItem(
     collapsedKeys: Accessor<Id[]>;
     metaVertex: Vertex;
     toggleExpand: (itemId: Id) => void;
+    parentIndex: number; // Parent index for determining test ID
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -222,6 +223,62 @@ export function LayoutTreeItem(
     graph,
     setGraph
   );
+  // Generate a test ID for the layer based on the hierarchy
+  const getLayerTestId = () => {
+    try {
+      // Start with the current vertex
+      const currentVertex = props.metaVertex;
+      const path = [];
+      
+      // Get the current vertex's index among its siblings
+      const parentElements = evalExpression("<-Attr", {
+        graph, 
+        setGraph, 
+        vertexes: [currentVertex]
+      }) as Vertex[] || [];
+      
+      const childrenAtSameLevel = parentElements.length 
+        ? getChildrenAttrs(graph, setGraph, parentElements[0])
+        : getChildrenAttrs(graph, setGraph, graph.vertexes[formStoreVertex()?.P.formDataId] || null);
+          
+      const currentIndex = childrenAtSameLevel.findIndex(c => c.id === currentVertex.id);
+      
+      // Add current index to the path
+      path.unshift(currentIndex >= 0 ? currentIndex : 0);
+      
+      // Traverse up the tree to build the full path
+      let parent = parentElements[0];
+      while (parent) {
+        const grandParentElements = evalExpression("<-Attr", {
+          graph,
+          setGraph,
+          vertexes: [parent]
+        }) as Vertex[] || [];
+        
+        if (!grandParentElements.length) {
+          // We've reached the root level
+          path.unshift(0);
+          break;
+        }
+        
+        const parentsChildren = getChildrenAttrs(graph, setGraph, grandParentElements[0]);
+        const parentIndex = parentsChildren.findIndex(c => c.id === parent.id);
+        
+        // Add parent's index to the beginning of the path
+        path.unshift(parentIndex >= 0 ? parentIndex : 0);
+        
+        // Move up to the next level
+        parent = grandParentElements[0];
+      }
+      
+      // Generate the test ID using the path
+      return `l-${path.join('-')}`;
+    } catch (error) {
+      // Fallback ID if the hierarchy can't be determined
+      console.error("Error generating layer test ID:", error);
+      return `l-${props.metaVertex.id}`;
+    }
+  };
 
   return (
     <>
@@ -257,6 +314,8 @@ export function LayoutTreeItem(
           // @ts-expect-error ignore
           el.useCurrentPosition = true;
         }}
+        // data-testid={getLayerTestId()}
+        // data-text={props.metaVertex.P.text}
       >
         <TreeItemContent
           collapsedKeys={props.collapsedKeys}
@@ -264,24 +323,26 @@ export function LayoutTreeItem(
           toggleExpand={props.toggleExpand}
         />
         <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
-        <IconButton
-          css={[
-            ICON_BUTTON_STYLES.baseCss,
-            ICON_BUTTON_STYLES.defaultCss,
-            ICON_BUTTON_STYLES.spacingCss,
-            css`
-    background-color: transparent;
-    border: none;
-    ${showJsonEditor() ? 'color: ${args.theme.var.color.primary};' : ''}
-  `,]}
-          icon="tabler:json"
-          size={16}
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowJsonEditor(!showJsonEditor());
-          }}
-          title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
-        />
+        <Show when={showJsonEditor() || isSelectedHoverId(props.metaVertex.id)}>
+          <IconButton
+            css={[
+              ICON_BUTTON_STYLES.baseCss,
+              ICON_BUTTON_STYLES.defaultCss,
+              ICON_BUTTON_STYLES.spacingCss,
+              css`
+      background-color: transparent;
+      border: none;
+      ${showJsonEditor() ? 'color: ${args.theme.var.color.primary};' : ''}
+    `,]}
+            icon="tabler:json"
+            size={16}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowJsonEditor(!showJsonEditor());
+            }}
+            title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
+          />
+        </Show>
         <Show when={isSelectedHoverId(props.metaVertex.id) && props.metaVertex.L && props.metaVertex.P.componentName === "Component"}>
           <IconButton
             css={buttonStyle}
@@ -299,6 +360,7 @@ export function LayoutTreeItem(
             metaVertex={props.metaVertex}
             parentRef={parentRef()!}
           />
+          {/* {getLayerTestId()} */}
         {/* </Show> */}
       </TreeItemContainer>
       <Show when={showJsonEditor()}>
@@ -341,6 +403,7 @@ export function LayoutTreeItem(
                   collapsedKeys={props.collapsedKeys}
                   metaVertex={vertex}
                   toggleExpand={props.toggleExpand}
+                  parentIndex={props.parentIndex + 1}
                 />
               </Show>
             )}

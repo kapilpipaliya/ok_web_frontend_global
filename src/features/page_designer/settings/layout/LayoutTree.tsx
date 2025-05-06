@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, For, Show, onMount, onCleanup } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -9,6 +9,13 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { evalExpression } from "~/lib/expression_eval";
+import { undo, undoAllowed } from "~/lib/graph/transaction/history/undo";
+import { redo, redoAllowed } from "~/lib/graph/transaction/history/redo";
+import { useToast } from "~/components/styled/modal/Toast";
+import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
+import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/attributes/addComponentAttrInForm";
+import { saveAndCaptureForm } from "~/features/page_designer/utils/saveAndCapture";
+import { deleteLayoutAttr } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
 
 import {
   useDesignerFormIdContext,
@@ -21,11 +28,14 @@ import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { toggleHidden } from "./HideShowIcon";
-
+import { sortChildren } from "../../functions/drag_drop/hierachy/sortChildren";
+import { useNavigate } from "@solidjs/router";
 export function LayoutTree() {
   const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
   const [treeRef, setTreeRef] = createSignal<HTMLElement>();
+  const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
+  const navigate = useNavigate();
 
   const formStoreId = useDesignerFormIdContext();
   const layoutStoreId = useDesignerLayoutStore();
@@ -64,9 +74,9 @@ export function LayoutTree() {
     );
   };
 
-  const jsonTooltip = () => (formStoreVertex()?.P.showAllJsonEditors ?? false) 
-    ? "Hide all JSON editors" 
-    : "Show all JSON editors";
+  // const jsonTooltip = () => (formStoreVertex()?.P.showAllJsonEditors ?? false) 
+  //   ? "Hide all JSON editors" 
+  //   : "Show all JSON editors";
 
   // Focus the currently selected item
   const focusSelectedItem = () => {
@@ -85,8 +95,226 @@ export function LayoutTree() {
     }, 10);
   };
 
+
+  // Save function from SaveIconButton
+  const handleSaveForm = async () => {
+    // Unfocus (blur) any active text input before saving
+    if (document.activeElement instanceof HTMLElement && 
+        (document.activeElement.tagName === 'INPUT' || 
+         document.activeElement.tagName === 'TEXTAREA')) {
+      document.activeElement.blur();
+    }
+    
+    const isMainForm = layoutStoreVertex().P.mainFormId === formStoreId;
+    return await saveAndCaptureForm(
+      formStoreVertex,
+      graph,
+      setGraph,
+      showErrorToast,
+      showLoadingToast,
+      showWarningToast,
+      navigate,
+      isMainForm
+    );
+  };
+
+  // Check if save is disabled
+  const isSaveDisabled = () => {
+    const txnId = formStoreVertex()?.P.txnId;
+    return !!txnId && isDisabledTxn(txnId, graph);
+  };
+
+  // Function to add an HTML component at a specific position relative to selected item
+  const addHtmlComponent = (position: "center" | "before" | "after") => {
+    // Get the currently selected component
+    const currentSelectedId = formStoreVertex()?.P.selectedId;
+    if (!currentSelectedId) return;
+    
+    const selectedVertex = graph.vertexes[currentSelectedId];
+    if (!selectedVertex) return;
+    
+    // Get form data and transaction ID
+    const formDataId = formStoreVertex()?.P.formDataId;
+    if (!formDataId) return;
+    
+    const txnId = formStoreVertex()?.P.txnId || 0;
+    const formDataVertex = graph.vertexes[formDataId];
+    const formVertex = rootVertexes()[0];
+    
+    if (!formDataVertex || !formVertex) return;
+    
+    // Default HTML component properties - a simple div with padding
+    const htmlProps = { 
+      as: "div",
+      css: css`
+        padding: 10px;
+      `
+    };
+    
+    let parentVertex: Vertex;
+    let targetVertex: Vertex | undefined = selectedVertex;
+    
+    // Determine where to add the component based on position
+    if (position === "center") {
+      // Adding as a child - use selected vertex as parent
+      parentVertex = selectedVertex;
+      targetVertex = undefined; // Don't need target when adding as child
+    } else {
+      // For before/after - find the parent of selected vertex
+      const parentElements = evalExpression("<-Attr", { 
+        graph, 
+        vertexes: [selectedVertex] 
+      }) || [];
+      
+      parentVertex = parentElements.length > 0 
+        ? parentElements[0]   // Use parent if found
+        : formDataVertex;     // Fall back to root if no parent
+    }
+    
+    // Add the HTML component
+    const newComponentId = addComponentAttrInPage(
+      formVertex,                              // Form vertex
+      parentVertex,                            // Parent to add to
+      txnId,                                   // Transaction ID
+      graph,                                   // Graph
+      setGraph,                                // Graph setter
+      "Html",                                  // Component type
+      htmlProps,                               // Component properties
+      position !== "center" ? targetVertex : undefined,  // Target vertex
+      position                                 // Position
+    );
+    
+    if (newComponentId === -1) return;
+    
+    // Sort children for before/after positions to ensure correct order
+    if (position !== "center") {
+      const newComponentVertex = {
+        id: newComponentId,
+        IN: {},
+        L: ["Comp"],
+        OUT: {},
+        P: { key: "Html" }
+      } as Vertex;
+      
+      sortChildren(
+        graph,
+        setGraph,
+        txnId,
+        newComponentVertex,
+        parentVertex,
+        targetVertex,
+        position
+      );
+    }
+    
+    // Select the newly created component
+    onLayoutItemClick(
+      layoutStoreVertex(),
+      formStoreVertex(),
+      newComponentId,
+      graph,
+      setGraph
+    );
+    
+    // Focus the newly created item
+    setTimeout(focusSelectedItem, 20);
+  };
+
   // Handle keyboard navigation with DOM-based approach
   const handleKeyDown = (e: KeyboardEvent) => {
+    // Skip handling if the tree element doesn't have focus
+    const treeElement = treeRef();
+    
+    // First check for shortcuts from other components
+    // ----------------------------------------------
+    
+    // Add HTML components with shortcuts
+    // Cmd+C - Add HTML component center
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k' && !e.shiftKey && !e.altKey) {
+      e.preventDefault();
+      addHtmlComponent("center");
+      return;
+    }
+    
+    // Cmd+B - Add HTML component before
+    if ((e.metaKey || e.ctrlKey) && e.key === 'j' && !e.shiftKey && !e.altKey) {
+      e.preventDefault();
+      addHtmlComponent("before");
+      return;
+    }
+    
+    // Cmd+A - Add HTML component after
+    if ((e.metaKey || e.ctrlKey) && e.key === 'l' && !e.shiftKey && !e.altKey) {
+      e.preventDefault();
+      addHtmlComponent("after");
+      return;
+    }
+    
+    // Delete - Delete/Backspace key
+    if (((e.metaKey || e.ctrlKey) && (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'd'))) {
+      e.preventDefault();
+      const currentSelectedId = formStoreVertex()?.P.selectedId;
+      if (!currentSelectedId) return;
+      
+      const selectedVertex = graph.vertexes[currentSelectedId];
+      if (!selectedVertex) return;
+      
+      // Get component name for the toast message
+      const componentName = selectedVertex.P?.key || 'Html';
+      
+      // Import the deleteLayoutAttr functionality from DeleteButton
+      const { showSuccessToast } = useToast();
+      deleteLayoutAttr(
+        formStoreVertex(),
+        selectedVertex,
+        graph,
+        setGraph,
+        formStoreVertex()?.P.txnId,
+        componentName,
+        showSuccessToast,
+        layoutStoreId
+      );
+      return;
+    }
+    
+    // Undo - Ctrl+Z
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      const formTxnId = formStoreVertex()?.P.txnId;
+      if (formTxnId && undoAllowed(formTxnId, graph)) {
+        undo(formTxnId, graph, setGraph);
+      }
+      return;
+    }
+    
+    // Redo - Ctrl+Y or Ctrl+Shift+Z
+    if (((e.ctrlKey || e.metaKey) && e.key === 'y') || 
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')) {
+      e.preventDefault();
+      const formTxnId = formStoreVertex()?.P.txnId;
+      if (formTxnId && redoAllowed(formTxnId, graph)) {
+        redo(formTxnId, graph, setGraph);
+      }
+      return;
+    }
+    
+    // Save - Ctrl+S
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault(); // Prevent browser's save dialog
+      if (!isSaveDisabled()) {
+        handleSaveForm();
+      }
+      return;
+    }
+    
+    // Refresh - F5 or Ctrl+R
+    // if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {
+    //   e.preventDefault();
+    //   handleRefresh();
+    //   return;
+    // }
+    
+    // Tree navigation shortcuts - only process if valid keys
     if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', '\\', 'Enter'].includes(e.key)) return;
     
     e.preventDefault();
@@ -95,7 +323,6 @@ export function LayoutTree() {
     if (!currentSelectedId) return;
     
     // Find all selectable tree items in the DOM
-    const treeElement = treeRef();
     if (!treeElement) return;
 
     // Handle backslash key to toggle visibility
@@ -242,6 +469,15 @@ export function LayoutTree() {
     }
   };
 
+  // Register and clean up event listeners - now for global keyboard shortcuts
+  onMount(() => {
+    document.addEventListener('keydown', handleKeyDown);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener('keydown', handleKeyDown);
+  });
+
   return (
     <As
       as="div"
@@ -308,7 +544,6 @@ export function LayoutTree() {
           flex: 1;
           scroll-behavior: smooth;
         `}
-        onKeyDown={handleKeyDown}
         ref={setTreeRef}
       >
         <Show when={formStoreVertex()}>
@@ -318,6 +553,7 @@ export function LayoutTree() {
                 collapsedKeys={collapsedKeys}
                 metaVertex={vertex}
                 toggleExpand={toggleExpand}
+                parentIndex={0}
               />
             )}
           </For>

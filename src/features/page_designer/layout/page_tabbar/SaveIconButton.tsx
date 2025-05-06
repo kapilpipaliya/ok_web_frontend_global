@@ -1,4 +1,4 @@
-import { createMemo, onCleanup, onMount } from "solid-js";
+import { createMemo } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
@@ -50,25 +50,6 @@ export function SaveIconButton(props: { formStoreId: string }) {
 
     return !formSubmitError;
   };
-
-  // Handle keyboard shortcut for Save (Ctrl+S)
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault(); // Prevent browser's save dialog
-      if (!isDisabled()) {
-        saveAndCaptureForm();
-      }
-    }
-  };
-
-  // Register and clean up event listeners
-  onMount(() => {
-    document.addEventListener('keydown', handleKeyDown);
-  });
-
-  onCleanup(() => {
-    document.removeEventListener('keydown', handleKeyDown);
-  });
 
   // Get icon and tooltip based on transaction status
   const buttonProps = createMemo(() => {

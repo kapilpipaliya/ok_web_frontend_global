@@ -164,7 +164,7 @@ export function FormConfig() {
               txnId={graph.vertexes[openedFormId].P.txnId}
               uuid={graph.vertexes[openedFormId].P.formId}
             />
-            <TransactionDebugView openedFormId={openedFormId} />
+            {/* <TransactionDebugView openedFormId={openedFormId} /> */}
           </div>
         )}
       </For>

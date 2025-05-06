@@ -1,3 +1,4 @@
+import { isServer } from "solid-js/web";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { PROPERTIES } from "~/pages/settings/constants";
@@ -116,9 +117,11 @@ export const collectionAttr = [
   },
 ] as FieldAttribute[];
 
-let childAttrs: FieldAttribute = collectionAttr[collectionAttr.length - 1];
-for (let i = 0; i < 5; i++) {
-  const attributes = JSON.parse(JSON.stringify(collectionAttr));
-  childAttrs.attributes = attributes;
-  childAttrs = attributes[attributes.length - 1];
+if (isServer) {
+  let childAttrs: FieldAttribute = collectionAttr[collectionAttr.length - 1];
+  for (let i = 0; i < 50; i++) {
+    const attributes = JSON.parse(JSON.stringify(collectionAttr));
+    childAttrs.attributes = attributes;
+    childAttrs = attributes[attributes.length - 1];
+  }
 }

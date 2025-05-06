@@ -2,13 +2,12 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { useNavigate } from "@solidjs/router";
-import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
-import { capturePreview } from "~/lib/playwright/capturePreview";
 import { headerIconButtonCss } from "~/pages/settings/constants";
+import { saveAndCaptureForm } from "~/features/page_designer/utils/saveAndCapture";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
@@ -30,48 +29,26 @@ export function SaveAllButton() {
     return !!txnId() && isDisabledTxn(txnId()!, graph);
   };
 
-  const saveAndCaptureForm = async (openFormData: Id) => {
+  const handleSaveAndCaptureForm = async (openFormData: Id) => {
     const formStoreVertex = () =>
       graph.vertexes[
         graph.vertexes[openFormData].P.formId
       ] as Vertex<FormStoreObject>;
 
-    // Save the form
-    const formSubmitError = await formSubmit(
+    // Check if this is the main form
+    const isMainForm = layoutStore().mainFormId === graph.vertexes[openFormData].P.formId;
+    
+    // Save the form and capture preview using the global function
+    return await saveAndCaptureForm(
       formStoreVertex,
       graph,
       setGraph,
-      () => {},
       showErrorToast,
       showLoadingToast,
       showWarningToast,
-    )();
-
-    // If form saved successfully, capture preview
-    if (!formSubmitError) {
-      const isMainForm = layoutStore().mainFormId === graph.vertexes[openFormData].P.formId;
-      const previewResult = await capturePreview(formStoreVertex, graph, setGraph, showErrorToast);
-      
-      // Update URL if this is the main form and it was saved successfully
-      if (isMainForm) {
-        const formDataId = formStoreVertex().P.formDataId;
-        if (formDataId) {
-          const currentPath = window.location.pathname;
-          if (currentPath.includes('/new')) {
-            // Create new URL with the format /admin/EntityType/id
-            const urlParts = currentPath.split('/new');
-            const newUrl = `${urlParts[0]}/${formDataId}`;
-            
-            // Replace URL using navigate with replace option
-            navigate(newUrl, { replace: true });
-          }
-        }
-      }
-      
-      return previewResult;
-    }
-
-    return false;
+      navigate,
+      isMainForm // Update URL only if it's the main form
+    );
   };
 
   const handleSaveAll = async () => {
@@ -81,7 +58,7 @@ export function SaveAllButton() {
 
     // Process forms sequentially to avoid UI conflicts
     for (const openFormData of idsToSave) {
-      await saveAndCaptureForm(openFormData);
+      await handleSaveAndCaptureForm(openFormData);
     }
   };
 

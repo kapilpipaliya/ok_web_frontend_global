@@ -6,7 +6,7 @@ export function RefreshButton(props: { handleRefresh: () => void }) {
   // Handle keyboard shortcuts
   const handleKeyDown = (e: KeyboardEvent) => {
     // Refresh - F5 or Ctrl+R
-    if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {
+    if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'u')) {
       e.preventDefault();
       props.handleRefresh();
     }
@@ -27,7 +27,7 @@ export function RefreshButton(props: { handleRefresh: () => void }) {
       size={18}
       icon="ph:arrows-counter-clockwise"
       onClick={props.handleRefresh}
-      title="Refresh Preview (F5 or Ctrl+R)"
+      title="Refresh Preview (F5 or Ctrl+U)"
       tooltipGroup="page-buttons"
     />
   );

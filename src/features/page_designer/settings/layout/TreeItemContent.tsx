@@ -39,6 +39,12 @@ export function TreeItemContent(
   });
   const componentName = () =>
     getComponentName(componentVertex(), props.metaVertex);
+    
+  // Get the layer name as text content for easier testing
+  const layerName = () => {
+    const name = nameExpr(props.metaVertex, componentName(), graph);
+    return typeof name === 'string' ? name : 'Unnamed Layer';
+  };
 
   return (
     <As

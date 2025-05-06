@@ -18,16 +18,19 @@ export async function login(
     : 'http://localhost:3001/auth/login';
     
   await page.goto(loginUrl);
+
+  // wait for the hydration to complete
+  await page.waitForTimeout(1000);
   
   // Input email with pressSequentially
   await page.locator('input[name="email"]').click();
   await page.locator('input[name="email"]').fill('');
-  await page.locator('input[name="email"]').pressSequentially(email, { delay: 100 });
+  await page.locator('input[name="email"]').pressSequentially(email, { delay: 30 });
   
   // Input password with pressSequentially
   await page.locator('input[name="password"]').click();
   await page.locator('input[name="password"]').fill('');
-  await page.locator('input[name="password"]').pressSequentially(password, { delay: 100 });
+  await page.locator('input[name="password"]').pressSequentially(password, { delay: 30 });
   
   // Force blur before clicking to ensure all change events are triggered
   await page.locator('input[name="password"]').blur();

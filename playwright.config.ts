@@ -1,4 +1,3 @@
-/* eslint-disable perfectionist/sort-objects */
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -88,5 +87,8 @@ export default defineConfig({
   // },
 
   /* Set timeout to 5 minutes (300000 milliseconds) */
-  // timeout: 300000,
+  // timeout: 30000000,
+  
+  /* Prevent Playwright from writing any files after tests complete */
+  preserveOutput: 'never',
 });

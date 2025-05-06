@@ -88,6 +88,7 @@ export const Page: IFormMetaData = {
           ],
           componentName: "TextInput",
           key: "key",
+          name: "Key",
           validation: { required: true },
 
           validationRules: [

@@ -305,6 +305,7 @@ function createVertices(
         componentName: "TextInput",
         displayName: "Text",
         key: "text",
+        name: "Text",
       },
     },
     {

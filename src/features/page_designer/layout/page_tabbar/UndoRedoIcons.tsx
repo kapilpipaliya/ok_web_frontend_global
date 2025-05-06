@@ -1,4 +1,4 @@
-import { For, onCleanup, onMount, createMemo } from "solid-js";
+import { For, createMemo } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
@@ -109,69 +109,6 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
       }
     },
   ];
-
-  // Handle keyboard shortcuts
-  const handleKeyDown = (e: KeyboardEvent) => {
-    const formTxnId = formStoreVertex()?.P.txnId;
-    if (!formTxnId) return;
-    
-    // Undo - Ctrl+Z
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-      e.preventDefault();
-      if (undoAllowed(formTxnId, graph)) {
-        undo(formTxnId, graph, setGraph);
-      }
-    }
-    
-    // Redo - Ctrl+Y or Ctrl+Shift+Z
-    if (((e.ctrlKey || e.metaKey) && e.key === 'y') || 
-        ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')) {
-      e.preventDefault();
-      if (redoAllowed(formTxnId, graph)) {
-        redo(formTxnId, graph, setGraph);
-      }
-    }
-  };
-
-  // Register and clean up event listeners
-  onMount(() => {
-    document.addEventListener('keydown', handleKeyDown);
-  });
-
-  onCleanup(() => {
-    document.removeEventListener('keydown', handleKeyDown);
-  });
-
-  // Status indicator component
-  const StatusIndicator = () => {
-    const info = transactionInfo();
-    if (!info.statusText) return null;
-    
-    return (
-      <div 
-        style={{
-          "font-size": "11px",
-          "margin-left": "5px",
-          "color": getStatusColor(),
-          "white-space": "nowrap",
-        }}
-      >
-        {info.statusText}
-      </div>
-    );
-  };
-  
-  // Get color for status text
-  const getStatusColor = () => {
-    const status = txnStatus();
-    switch (status) {
-      case 'modified': return '${args.theme.var.color.orange_600}';
-      case 'reverted': return '${args.theme.var.color.blue_600}';
-      case 'committed': return '${args.theme.var.color.green_600}';
-      case 'error': return '${args.theme.var.color.red_600}';
-      default: return '${args.theme.var.color.gray_600}';
-    }
-  };
 
   return (
     <As
