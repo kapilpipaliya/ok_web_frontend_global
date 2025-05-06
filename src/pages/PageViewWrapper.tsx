@@ -778,7 +778,7 @@ export function PageViewWrapper(
   }
 
   return (
-    <Show keyed when={metaData() && formStore().P.count && (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)}>
+    <Show when={metaData() && formStore().P.count && (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)}>
       <ContentSSR />
     </Show>
   );

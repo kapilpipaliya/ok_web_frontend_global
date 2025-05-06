@@ -86,7 +86,7 @@ export function commitTxn(
       revertSteps = [...txnDetail.revertSteps];
     }
     
-    console.log(`Commit check - Steps: ${steps.length}, Revert steps: ${revertSteps.length}`);
+    // console.log(`Commit check - Steps: ${steps.length}, Revert steps: ${revertSteps.length}`);
     
     // Sanity check that there are steps to commit
     if (steps.length === 0 && revertSteps.length === 0) {

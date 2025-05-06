@@ -14,15 +14,17 @@ import {
 export function getDefaultTheme() {
   return `return {
   "var": {
-    "primary": "${DEFAULT_PRIMARY}",
-    "secondary": "${DEFAULT_SECONDARY}", 
-    "accent": "${DEFAULT_ACCENT}",
-    "neutral": "${DEFAULT_NEUTRAL}",
-    "base": "${DEFAULT_BASE}",
-    "info": "${DEFAULT_INFO}",
-    "success": "${DEFAULT_SUCCESS}",
-    "warning": "${DEFAULT_WARNING}",
-    "error": "${DEFAULT_ERROR}"
+    "color": {
+      "primary": "${DEFAULT_PRIMARY}",
+      "secondary": "${DEFAULT_SECONDARY}", 
+      "accent": "${DEFAULT_ACCENT}",
+      "neutral": "${DEFAULT_NEUTRAL}",
+      "base": "${DEFAULT_BASE}",
+      "info": "${DEFAULT_INFO}",
+      "success": "${DEFAULT_SUCCESS}",
+      "warning": "${DEFAULT_WARNING}",
+      "error": "${DEFAULT_ERROR}"
+    }
   }
 }`;
 }

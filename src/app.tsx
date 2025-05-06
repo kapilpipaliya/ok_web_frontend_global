@@ -9,7 +9,7 @@ import { ErrorBoundary, onMount, Suspense } from "solid-js";
 import { isServer } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
-import { ThemeProvider } from "~/lib/context/ThemeContext";
+import { ThemeProvider } from "./lib/context/ThemeProvider";
 
 import { LoaderNew } from "./components/styled/LoaderSimple";
 import { logError } from "./lib/error/errorLogger";
