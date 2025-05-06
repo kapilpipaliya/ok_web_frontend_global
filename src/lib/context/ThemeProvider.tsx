@@ -1,82 +1,47 @@
 import { oklch, formatHex } from "culori";
-import { type Component, createSignal, createMemo, JSX } from "solid-js";
+import { type Component, createEffect, createMemo, JSX } from "solid-js";
 import { StyleRenderer } from "~/components/StyleRenderer";
 import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
 import { themeConfig } from "../graph/get/sync/theme/themeConfig";
-import type { ThemeContext as ThemeContextType, ColorMode, ThemeColorKey, SpacingScale, TypographySettings, RadiusSize, ColorAdjustments, ColorScheme, Breakpoint } from "../styles";
+import type { ThemeContext as ThemeContextType, ColorMode, ColorAdjustments, ColorScheme, Breakpoint } from "../styles";
 import { getColorShade, createColorScheme, getContrastColor, mixColors, createGradient, getHslComponents, findAccessibleColor, getContrastRatio, meetsAccessibilityStandards } from "../styles/colorUtils";
-import { DEFAULT_PRIMARY, DEFAULT_SECONDARY, DEFAULT_ACCENT, DEFAULT_NEUTRAL, DEFAULT_BASE, DEFAULT_INFO, DEFAULT_SUCCESS, DEFAULT_WARNING, DEFAULT_ERROR, DEFAULT_THEME, CSS_RESET, FONT_PRESETS, RADIUS_PRESETS } from "../styles/constants";
+import { DEFAULT_THEME, CSS_RESET, FONT_PRESETS } from "../styles/constants";
 import { getMediaQuery, getPrefersColorSchemeQuery, getAnimationDefinition } from "../styles/mediaUtils";
-import { deepMerge, createSafeThemeProxy, ThemeContext } from "./ThemeContext";
+import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
+import { deepMerge } from "./deepMerge";
 import { useGraph } from "../graph/GraphContext";
+import { createStore, reconcile } from "solid-js/store";
 
 export interface ThemeProviderProps {
   children: JSX.Element;
-  initialTheme?: Partial<ThemeContextType>;
 }
 export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
   const [graph] = useGraph();
-  const [themeOverrides, setThemeOverrides] = createSignal<
-    Partial<ThemeContextType>
-  >(props.initialTheme || {});
 
-  // Get combined theme data from all sources using createMemo
-  const combinedTheme = createMemo(() => {
-    // Get config from graph
-    const graphConfig = themeConfig(getGlobalThemeVertex(graph)) || {};
-
-    // Create base structure with default colors
-    const result: Partial<ThemeContextType> = {
-      var: {
-        color: {
-          primary: DEFAULT_PRIMARY,
-          secondary: DEFAULT_SECONDARY,
-          accent: DEFAULT_ACCENT,
-          neutral: DEFAULT_NEUTRAL,
-          base: DEFAULT_BASE,
-          info: DEFAULT_INFO,
-          success: DEFAULT_SUCCESS,
-          warning: DEFAULT_WARNING,
-          error: DEFAULT_ERROR,
-        },
-      },
-    };
-
-    // Helper function to merge properties
-    const mergeProperties = (source: Record<string, any>) => {
-      if (!source) {
-        return;
-      }
-
-      // Handle properties inside the "var" key using deep merge
-      if (source.var) {
-        result.var = deepMerge(result.var || {}, source.var);
-      }
-
-      // Keep non-var properties at the root level
-      Object.keys(source).forEach((key) => {
-        if (key !== "var") {
-          (result as any)[key] = source[key];
-        }
-      });
-    };
-
-    // Merge in order: DEFAULT_THEME, graphConfig, themeOverrides
-    mergeProperties({ var: DEFAULT_THEME });
-    mergeProperties(graphConfig);
-    mergeProperties(themeOverrides());
-    console.log(result);
-    return result;
+  const [theme, setTheme] = createStore(themeConfig(getGlobalThemeVertex(graph)));
+  createEffect(() => {
+    const newTheme = themeConfig(getGlobalThemeVertex(graph));
+    setTheme(reconcile(newTheme));
+  }, {
+    defer: true,
   });
+  
+  const handler = {
+    get(target: Partial<ThemeContextType>, prop: string | symbol) {
+      if (typeof prop === "string" && prop === "var") {
+        return createSafeThemeProxy(target.var || {});
+      }
+      return target[prop as keyof ThemeContextType];
+    },
+  };
+
+  const themeProxy = new Proxy(theme || {}, handler);
 
   // Generate CSS styles based on the theme
   const themeCssVars = createMemo(() => {
-    const theme = combinedTheme();
     const safeThemeVars = createSafeThemeProxy(theme.var || {});
-    const colorMode = safeThemeVars.colorMode || "light";
-    const baseColor = (safeThemeVars.color as Record<string, string>)?.base || DEFAULT_BASE;
-    const _primaryColor = (safeThemeVars.color as Record<string, string>)?.primary ||
-      DEFAULT_PRIMARY;
+    const colorMode = themeProxy.var?.colorMode || "light";
+    const baseColor = themeProxy.var?.color?.base || DEFAULT_THEME.color.base;
 
     return `
       ${CSS_RESET}
@@ -98,124 +63,6 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
         font-family: ${safeThemeVars.fontMono || FONT_PRESETS.mono};
       }
     `;
-  });
-
-  // Basic theme helper functions
-  const createBasicThemeHelpers = (
-    setThemeOverrides: (
-      fn: (current: Partial<ThemeContextType>) => Partial<ThemeContextType>
-    ) => void
-  ) => ({
-    setTheme: (newTheme: Partial<ThemeContextType>) => {
-      setThemeOverrides((current: Partial<ThemeContextType>) => ({
-        ...current,
-        ...newTheme,
-      }));
-    },
-
-    setColorMode: (mode: ColorMode) => {
-      setThemeOverrides((current: Partial<ThemeContextType>) => ({
-        ...current,
-        colorMode: mode,
-      }));
-    },
-
-    toggleColorMode: () => {
-      setThemeOverrides((current: Partial<ThemeContextType>) => ({
-        ...current,
-        colorMode: current.colorMode === "dark" ? "light" : "dark",
-      }));
-    },
-
-    setColor: (colorName: ThemeColorKey | string, value: string) => {
-      setThemeOverrides((current: Partial<ThemeContextType>) => ({
-        ...current,
-        [`${colorName}Color`]: value,
-      }));
-    },
-
-    resetTheme: () => {
-      setThemeOverrides(() => ({}));
-    },
-  });
-
-  // Advanced theme configuration helpers
-  const createConfigurationHelpers = (
-    setThemeOverrides: (
-      fn: (current: Partial<ThemeContextType>) => Partial<ThemeContextType>
-    ) => void
-  ) => ({
-    setSpacingScale: (scale: SpacingScale) => {
-      setThemeOverrides((current: Partial<ThemeContextType>) => ({
-        ...current,
-        spacingScale: scale,
-      }));
-    },
-
-    setTypography: (settings: TypographySettings) => {
-      setThemeOverrides((current: Partial<ThemeContextType>) => ({
-        ...current,
-        ...settings,
-      }));
-    },
-
-    setAllColors: (colors: Record<ThemeColorKey, string>) => {
-      const colorUpdates = Object.entries(colors).reduce(
-        (acc, [key, value]) => {
-          acc[`${key}Color`] = value;
-          return acc;
-        },
-        {} as Record<string, string>
-      );
-
-      setThemeOverrides((current: Partial<ThemeContextType>) => ({
-        ...current,
-        ...colorUpdates,
-      }));
-    },
-
-    setColorScheme: (
-      baseColor: string,
-      colorKeys: ThemeColorKey[] = ["primary"]
-    ) => {
-      const scheme = createColorScheme(baseColor);
-      const updates: Record<string, string> = {};
-
-      // Map scheme colors to theme colors based on the keys provided
-      if (colorKeys.includes("primary")) {
-        updates.primaryColor = scheme.base;
-      }
-      if (colorKeys.includes("secondary")) {
-        updates.secondaryColor = scheme.analogous1;
-      }
-      if (colorKeys.includes("accent")) {
-        updates.accentColor = scheme.analogous2;
-      }
-      if (colorKeys.includes("neutral")) {
-        updates.neutralColor = scheme.triadic1;
-      }
-      if (colorKeys.includes("info")) {
-        updates.infoColor = scheme.triadic2;
-      }
-      if (colorKeys.includes("success")) {
-        updates.successColor = scheme.complementary;
-      }
-      if (colorKeys.includes("warning")) {
-        updates.warningColor = scheme.split1;
-      }
-      if (colorKeys.includes("error")) {
-        updates.errorColor = scheme.split2;
-      }
-
-      setThemeOverrides((current: Partial<ThemeContextType>) => ({
-        ...current,
-        ...updates,
-      }));
-    },
-
-    getBorderRadius: (size: RadiusSize) => {
-      return RADIUS_PRESETS[size] || RADIUS_PRESETS.md;
-    },
   });
 
   // Color utility helpers
@@ -263,9 +110,8 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
     getSemanticColor: (
       context: "text" | "background" | "border" | "surface" | "muted"
     ): string => {
-      const safeThemeVars = createSafeThemeProxy(combinedTheme.var || {});
-      const colorMode = safeThemeVars.colorMode as ColorMode;
-      const baseColor = (safeThemeVars.color?.base as string) || DEFAULT_BASE;
+      const colorMode = themeProxy.var?.colorMode as ColorMode;
+      const baseColor = themeProxy.var?.color?.base || DEFAULT_THEME.color.base;
 
       switch (context) {
         case "text":
@@ -359,28 +205,8 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
     ),
   });
 
-  const themeHelpers = createMemo(() => {
-    const theme = combinedTheme();
-    const safeThemeVars = createSafeThemeProxy(theme.var || {});
-
-    return {
-      // Spread root level properties
-      ...theme,
-
-      // Override var with safe proxied theme variables
-      var: safeThemeVars,
-
-      // Include all helper functions at top level
-      ...createBasicThemeHelpers(setThemeOverrides),
-      ...createConfigurationHelpers(setThemeOverrides),
-      ...createColorHelpers(theme),
-      ...createAccessibilityHelpers(),
-      ...createMediaQueryHelpers(),
-    } as ThemeContextType;
-  });
-
   return (
-    <ThemeContext.Provider value={themeHelpers()}>
+    <ThemeContext.Provider value={themeProxy as ThemeContextType}>
       <StyleRenderer cssContent={[themeCssVars()]} id="theme-variables" />
       {props.children}
     </ThemeContext.Provider>

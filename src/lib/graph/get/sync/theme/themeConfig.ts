@@ -1,27 +1,54 @@
 import type { Vertex } from "../../../graph";
+import { DEFAULT_THEME } from "../../../../styles/constants";
+import { deepMerge } from "../../../../context/deepMerge";
+import type { ThemeContext } from "../../../../styles";
 
-export function themeConfig(themeVertex?: Vertex) {
-  const themeConfig = themeVertex?.P?.data;
-  if (!themeConfig) {
-    return {};
+export function themeConfig(themeVertex?: Vertex): Partial<ThemeContext> {
+  // Start with a base theme object with the default theme
+  const result: Partial<ThemeContext> = {
+    var: deepMerge({}, DEFAULT_THEME),
+  };
+
+  // Get config from themeVertex
+  const vertexData = themeVertex?.P?.data;
+  if (!vertexData || !vertexData.trim()) {
+    return result;
   }
 
-  if (themeConfig.trim().startsWith("{")) {
+  let graphConfig: Record<string, unknown> = {};
+
+  // Parse the theme config from the vertex
+  if (vertexData.trim().startsWith("{")) {
     try {
-      return JSON.parse(themeConfig);
+      graphConfig = JSON.parse(vertexData);
     } catch (error) {
       console.error("Error parsing theme config JSON:", error);
-      return {};
+      return result;
     }
-  }
-  if (themeConfig.trim()) {
+  } else if (vertexData.trim()) {
     try {
-      const configFunction = new Function("variables", themeConfig);
-      return configFunction({}) || {};
+      const configFunction = new Function("variables", vertexData);
+      const configResult = configFunction({});
+      if (configResult) {
+        graphConfig = configResult as Record<string, unknown>;
+      }
     } catch (error) {
       console.error("Error evaluating theme config function:", error);
-      return {};
+      return result;
     }
   }
-  return {};
+
+  // Handle properties inside the "var" key using deep merge
+  if (graphConfig.var) {
+    result.var = deepMerge(result.var || {}, graphConfig.var as Record<string, unknown>);
+  }
+
+  // Keep non-var properties at the root level
+  Object.keys(graphConfig).forEach((key) => {
+    if (key !== "var") {
+      (result as Record<string, unknown>)[key] = graphConfig[key];
+    }
+  });
+  return result;
 }
+
