@@ -1,4 +1,5 @@
 import { createSignal, For, Show, onMount, onCleanup } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
 import { Icon } from "@iconify-icon/solid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
@@ -34,6 +35,7 @@ export function LayoutTree() {
   const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
   const [treeRef, setTreeRef] = createSignal<HTMLElement>();
+  const [jsonEditorOpenItems, setJsonEditorOpenItems] = createStore<Record<Id, boolean>>({});
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const navigate = useNavigate();
 
@@ -63,20 +65,47 @@ export function LayoutTree() {
   };
   
   const toggleAllJsonEditors = () => {
+    // Toggle the global setting
+    const newGlobalSetting = !(formStoreVertex()?.P.showAllJsonEditors ?? false);
+    
     mergeVertexProperties<FormStoreObject>(
       0,
       formStoreId!,
       graph,
       setGraph,
       {
-        showAllJsonEditors: !(formStoreVertex()?.P.showAllJsonEditors ?? false)
+        showAllJsonEditors: newGlobalSetting
       }
     );
+    
+    // Reset all individual item settings to ensure global setting is applied uniformly
+    setJsonEditorOpenItems(reconcile({}));
   };
 
-  // const jsonTooltip = () => (formStoreVertex()?.P.showAllJsonEditors ?? false) 
-  //   ? "Hide all JSON editors" 
-  //   : "Show all JSON editors";
+  // Function to toggle JSON editor for a specific item
+  const toggleJsonEditorForItem = (itemId: Id) => {
+    // Get the current global setting
+    const globalSetting = formStoreVertex()?.P.showAllJsonEditors ?? false;
+    
+    // Get the current item-specific setting, defaulting to the global setting if not set
+    const currentItemSetting = itemId in jsonEditorOpenItems 
+      ? jsonEditorOpenItems[itemId as string] 
+      : globalSetting;
+    
+    // Toggle this specific item's setting
+    setJsonEditorOpenItems(itemId as string, !currentItemSetting);
+  };
+  
+  // Function to check if JSON editor is open for a specific item
+  const isJsonEditorOpen = (itemId: Id) => {
+    // If we have an explicit setting for this item, use it
+    if (itemId in jsonEditorOpenItems) {
+      return jsonEditorOpenItems[itemId as string];
+    }
+    
+    // Otherwise use the global setting
+    return formStoreVertex()?.P.showAllJsonEditors ?? false;
+  };
 
   // Focus the currently selected item
   const focusSelectedItem = () => {
@@ -314,10 +343,9 @@ export function LayoutTree() {
     //   return;
     // }
     
-    // Tree navigation shortcuts - only process if valid keys
-    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', '\\', 'Enter'].includes(e.key)) return;
+
     
-    e.preventDefault();
+    
     
     const currentSelectedId = formStoreVertex()?.P.selectedId;
     if (!currentSelectedId) return;
@@ -327,6 +355,7 @@ export function LayoutTree() {
 
     // Handle backslash key to toggle visibility
     if (e.key === '\\') {
+      e.preventDefault();
       const itemId = String(currentSelectedId);
       const vertex = graph.vertexes[itemId];
       if (!vertex) return;
@@ -335,24 +364,16 @@ export function LayoutTree() {
       toggleHidden(itemId as Id, formStoreId!, graph, setGraph);
       return;
     }
-
-    // Handle Enter key to toggle JSON editor
-    if (e.key === 'Enter') {
+    
+    if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+      e.preventDefault();
       // Get the current item's JSON editor state
       const itemId = String(currentSelectedId);
       const vertex = graph.vertexes[itemId];
       if (!vertex) return;
 
       // Toggle JSON editor for the selected item
-      // We'll need to get a reference to the item to click its JSON button
-      const selectedElement = treeElement.querySelector(`[data-item-id="${currentSelectedId}"]`);
-      if (selectedElement) {
-        // Find the JSON button within this element
-        const jsonButton = selectedElement.querySelector('[icon="tabler:json"]') as HTMLElement;
-        if (jsonButton) {
-          jsonButton.click();
-        }
-      }
+      toggleJsonEditorForItem(itemId as Id);
       
       // Focus the item after toggling
       focusSelectedItem();
@@ -370,6 +391,7 @@ export function LayoutTree() {
     if (currentElementIndex === -1) return;
     
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
       // Vertical navigation
       let newIndex;
       if (e.key === 'ArrowUp') {
@@ -394,6 +416,7 @@ export function LayoutTree() {
         focusSelectedItem();
       }
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
       // Horizontal navigation - expand/collapse
       const itemId = String(currentSelectedId);
       
@@ -554,6 +577,8 @@ export function LayoutTree() {
                 metaVertex={vertex}
                 toggleExpand={toggleExpand}
                 parentIndex={0}
+                isJsonEditorOpen={isJsonEditorOpen}
+                toggleJsonEditorForItem={toggleJsonEditorForItem}
               />
             )}
           </For>

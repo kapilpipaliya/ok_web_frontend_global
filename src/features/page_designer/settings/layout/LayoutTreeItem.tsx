@@ -5,7 +5,6 @@ import {
   createSignal,
   For,
   Show,
-  untrack,
   createEffect,
 } from "solid-js";
 
@@ -48,6 +47,8 @@ export function LayoutTreeItem(
     metaVertex: Vertex;
     toggleExpand: (itemId: Id) => void;
     parentIndex: number; // Parent index for determining test ID
+    isJsonEditorOpen?: (itemId: Id) => boolean;
+    toggleJsonEditorForItem?: (itemId: Id) => void;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -187,33 +188,23 @@ export function LayoutTreeItem(
     return boxShadow;
   });
 
-  const [showJsonEditor, setShowJsonEditor] = createSignal(false);
-  
-  // Update local state when global setting changes
-  createEffect(() => {
-    const showAllJsonEditors = formStoreVertex()?.P.showAllJsonEditors ?? false;
-    setShowJsonEditor(showAllJsonEditors);
-  });
-
   const replacePropertiesValue = (properties: { [key: string]: unknown }) => {
-    untrack(() => {
-      replaceVertexProperties(
-        formStoreVertex()?.P.txnId,
-        props.metaVertex.id,
-        graph,
-        setGraph,
-        properties
-      );
-    });
+    replaceVertexProperties(
+      formStoreVertex()?.P.txnId,
+      props.metaVertex.id,
+      graph,
+      setGraph,
+      properties
+    );
     saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
   };
 
-    const getCopmVertex = (() =>
+  const getCopmVertex = (() =>
     (evalExpression("->$0Comp", {
-          graph,
-          setGraph,
-          vertexes: [props.metaVertex],
-        }) as Vertex[]) || ([] as Vertex[])
+      graph,
+      setGraph,
+      vertexes: [props.metaVertex],
+    }) as Vertex[]) || ([] as Vertex[])
   );
 
   // Create open in new tab handler
@@ -223,6 +214,7 @@ export function LayoutTreeItem(
     graph,
     setGraph
   );
+  /*
   // Generate a test ID for the layer based on the hierarchy
   const getLayerTestId = () => {
     try {
@@ -279,6 +271,20 @@ export function LayoutTreeItem(
       return `l-${props.metaVertex.id}`;
     }
   };
+  */
+
+  // Function to get JSON editor state for this item
+  const showJsonEditor = () => {
+    return props.isJsonEditorOpen ? props.isJsonEditorOpen(props.metaVertex.id) : false;
+  };
+
+  // Function to toggle JSON editor for this item
+  const toggleJsonEditor = (e: MouseEvent) => {
+    e.stopPropagation();
+    if (props.toggleJsonEditorForItem) {
+      props.toggleJsonEditorForItem(props.metaVertex.id);
+    }
+  };
 
   return (
     <>
@@ -323,23 +329,20 @@ export function LayoutTreeItem(
           toggleExpand={props.toggleExpand}
         />
         <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
-        <Show when={showJsonEditor() || isSelectedHoverId(props.metaVertex.id)}>
+        <Show when={isSelectedHoverId(props.metaVertex.id) || showJsonEditor()}>
           <IconButton
             css={[
               ICON_BUTTON_STYLES.baseCss,
               ICON_BUTTON_STYLES.defaultCss,
               ICON_BUTTON_STYLES.spacingCss,
               css`
-      background-color: transparent;
-      border: none;
-      ${showJsonEditor() ? 'color: ${args.theme.var.color.primary};' : ''}
-    `,]}
+                background-color: transparent;
+                border: none;
+                ${showJsonEditor() ? 'color: ${args.theme.var.color.primary};' : ''}
+              `,]}
             icon="tabler:json"
             size={16}
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowJsonEditor(!showJsonEditor());
-            }}
+            onClick={toggleJsonEditor}
             title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
           />
         </Show>
@@ -404,6 +407,8 @@ export function LayoutTreeItem(
                   metaVertex={vertex}
                   toggleExpand={props.toggleExpand}
                   parentIndex={props.parentIndex + 1}
+                  isJsonEditorOpen={props.isJsonEditorOpen}
+                  toggleJsonEditorForItem={props.toggleJsonEditorForItem}
                 />
               </Show>
             )}
