@@ -394,9 +394,12 @@ export function LayoutTreeItem(
         <As
           as="ul"
           css={css`
-  padding-left: 8px;
+  padding-left: 6px;
   padding-top: 5px;
   list-style: none;
+  margin: 0;
+  border-left: 1px dotted #ccc;
+  margin-left: 4px;
 `}
         >
           <For each={children()}>

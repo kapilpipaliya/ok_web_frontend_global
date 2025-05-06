@@ -1,7 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createMemo } from "solid-js";
 
-import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { nameExpr } from "~/features/page_designer/settings/functions/nameExpr";
@@ -9,7 +8,6 @@ import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 
-import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentName } from "../../functions/component/getComponentLabel";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
@@ -24,9 +22,6 @@ export function TreeItemContent(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
-  const formStoreId = useDesignerFormIdContext();
-  const _formStoreVertex = () =>
-    graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const children = createMemo(() =>
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
@@ -39,12 +34,6 @@ export function TreeItemContent(
   });
   const componentName = () =>
     getComponentName(componentVertex(), props.metaVertex);
-    
-  // Get the layer name as text content for easier testing
-  const layerName = () => {
-    const name = nameExpr(props.metaVertex, componentName(), graph);
-    return typeof name === 'string' ? name : 'Unnamed Layer';
-  };
 
   return (
     <As
@@ -53,7 +42,7 @@ export function TreeItemContent(
   display: flex;
   gap: 4px;
   align-items: center;
-  ${children().length ? "" : "padding-left: 27px;"}
+  ${children().length ? "" : "padding-left: 24px;"}
 `}
       // bl:1px|dashed|black
     >
