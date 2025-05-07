@@ -10,5 +10,5 @@ export function nameExpr(
   if (componentName === "Html") {
     displayName = v.P.as || "Fragment";
   }
-  return `${displayName ? ` ${displayName}` : ""}${v.P.attrLabel ? ` (${v.P.attrLabel})` : ""}`;
+  return `${displayName ? ` ${displayName}` : ""}${v.P.layerName ? ` (${v.P.layerName})` : ""}`;
 }

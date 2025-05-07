@@ -66,7 +66,7 @@ interface PropertyFieldProps {
 export function createVertexIds() {
   return {
     as: `asVertex${createUniqueId()}`,
-    attrLabel: `attrNameVertex${createUniqueId()}`,
+    layerName: `attrNameVertex${createUniqueId()}`,
     calculatedValue: `calculatedValueVertex${createUniqueId()}`,
     class: `classVertex${createUniqueId()}`,
     defaultValue: `defaultValueVertex${createUniqueId()}`,
@@ -291,12 +291,12 @@ function createVertices(
       },
     },
     {
-      id: vertexIds.attrLabel,
+      id: vertexIds.layerName,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
         displayName: "Layer Name",
-        key: "attrLabel",
+        key: "layerName",
       },
     },
     {
@@ -398,7 +398,7 @@ function getMetaVertexes(
 
   const basicVertices = [
     graph.vertexes[vertexIds.key],
-    graph.vertexes[vertexIds.attrLabel],
+    graph.vertexes[vertexIds.layerName],
     ...(isPage && componentName === "Page"
       ? [graph.vertexes[vertexIds.thankYouPage]]
       : []),
