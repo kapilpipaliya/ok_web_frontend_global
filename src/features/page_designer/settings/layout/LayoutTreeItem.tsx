@@ -56,6 +56,12 @@ export function LayoutTreeItem(
     parentIndex: number; // Parent index for determining test ID
     isJsonEditorOpen?: (itemId: Id) => boolean;
     toggleJsonEditorForItem?: (itemId: Id) => void;
+    filterTree?: (vertex: Vertex) => {
+      match: boolean;
+      matchedChildren: boolean;
+    };
+    shouldExpandForSearch?: (vertex: Vertex) => boolean;
+    searchActive?: boolean;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -81,6 +87,28 @@ export function LayoutTreeItem(
     getChildrenAttrs(graph, setGraph, props.metaVertex),
   );
   const [parentRef, setParentRef] = createSignal<HTMLElement>();
+
+  // Determine if this item should be shown based on search - optimized
+  const shouldShowItem = createMemo(() => {
+    // Always show if no search is active
+    if (!props.searchActive || !props.filterTree) {
+      return true;
+    }
+
+    // Only call filterTree once and reuse result
+    const filterResult = props.filterTree(props.metaVertex);
+    return filterResult.match || filterResult.matchedChildren;
+  });
+
+  // Determine if this item is directly matched by the search - optimized
+  const isDirectMatch = createMemo(() => {
+    if (!props.searchActive || !props.filterTree) {
+      return false;
+    }
+
+    // Direct check for match without extra processing
+    return props.filterTree(props.metaVertex).match;
+  });
 
   // Add auto-scroll effect when item is selected
   createEffect(() => {
@@ -295,10 +323,33 @@ export function LayoutTreeItem(
     }
   };
 
+  // Check if the item is in the hidden nodes list
+  const isNodeHidden = () =>
+    (formStoreVertex()?.P.hiddenNodes || []).includes(props.metaVertex.id);
+
+  // Check if the item should be expanded
+  const isExpanded = createMemo(() => {
+    if (props.shouldExpandForSearch) {
+      return props.shouldExpandForSearch(props.metaVertex);
+    }
+    return !props.collapsedKeys().includes(props.metaVertex.id);
+  });
+
+  // Add search highlight styles
+  const getHighlightStyle = createMemo(() => {
+    if (isDirectMatch()) {
+      return css`
+        font-weight: bold;
+        background-color: rgba(237, 245, 255, 0.7);
+      `;
+    }
+    return "";
+  });
+
   return (
-    <>
+    <Show when={shouldShowItem()}>
       <TreeItemContainer
-        css={css`${getBorder()}`}
+        css={[css`${getBorder()}`, getHighlightStyle()]}
         draggable={"true"}
         hasChildren={!!children().length}
         isDragOver={isActiveTargetItem()}
@@ -338,7 +389,9 @@ export function LayoutTreeItem(
           toggleExpand={props.toggleExpand}
           parentIndex={props.parentIndex}
         />
-        <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
+        <Show when={isSelectedHoverId(props.metaVertex.id) || isNodeHidden()}>
+          <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
+        </Show>
         <Show when={isSelectedHoverId(props.metaVertex.id) || showJsonEditor()}>
           <IconButton
             css={[
@@ -402,22 +455,16 @@ export function LayoutTreeItem(
         </As>
       </Show>
 
-      <Show
-        when={
-          !props.collapsedKeys().includes(props.metaVertex?.id) &&
-          children().length > 0
-        }
-      >
+      <Show when={isExpanded() && children().length > 0}>
         <As
           as="ul"
           css={css`
-  padding-left: 6px;
-  padding-top: 5px;
-  list-style: none;
-  margin: 0;
-  border-left: 1px ${getTreeItemBorder(props.parentIndex).style} ${getTreeItemBorder(props.parentIndex).color};
-  margin-left: 4px;
-`}
+              padding-left: 6px;
+              padding-top: 5px;
+              list-style: none;
+              border-left: 1px ${getTreeItemBorder(props.parentIndex).style} ${getTreeItemBorder(props.parentIndex).color};
+              margin: 0 0 0 4px;
+          `}
         >
           <For each={children()}>
             {(vertex) => (
@@ -429,6 +476,9 @@ export function LayoutTreeItem(
                   parentIndex={props.parentIndex + 1}
                   isJsonEditorOpen={props.isJsonEditorOpen}
                   toggleJsonEditorForItem={props.toggleJsonEditorForItem}
+                  filterTree={props.filterTree}
+                  shouldExpandForSearch={props.shouldExpandForSearch}
+                  searchActive={props.searchActive}
                 />
               </Show>
             )}
@@ -443,6 +493,6 @@ export function LayoutTreeItem(
 `}
         />
       </Show>
-    </>
+    </Show>
   );
 }

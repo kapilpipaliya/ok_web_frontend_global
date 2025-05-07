@@ -134,7 +134,7 @@ export function ComponentList(props: {
 
   return (
     <>
-      <Show when={filteredChildren().length >= 5}>
+      <Show when={filteredChildren().length >= 5 || searchQuery().trim()}>
         <SearchBar
           handleChange={(value) => {
             setSearchQuery(value);

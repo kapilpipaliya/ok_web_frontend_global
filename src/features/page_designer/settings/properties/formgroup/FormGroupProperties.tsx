@@ -196,7 +196,7 @@ function createVertices(
       P: {
         css: PROPERTIES.Css.TextFieldCss,
         componentName: "TextInput",
-        displayName: "Unique ID",
+        displayName: "Unique Key",
         key: uniqueNameKey,
       },
     },

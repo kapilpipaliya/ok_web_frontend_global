@@ -1,9 +1,11 @@
 import { createSignal, For, Show, onMount, onCleanup } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
+import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 import { Icon } from "@iconify-icon/solid";
+import { debounce } from "@solid-primitives/scheduled";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
@@ -17,6 +19,7 @@ import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/attributes/addComponentAttrInForm";
 import { saveAndCaptureForm } from "~/features/page_designer/utils/saveAndCapture";
 import { deleteLayoutAttr } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
+import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 
 import {
   useDesignerFormIdContext,
@@ -31,6 +34,134 @@ import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { toggleHidden } from "./HideShowIcon";
 import { sortChildren } from "../../functions/drag_drop/hierachy/sortChildren";
 import { useNavigate } from "@solidjs/router";
+
+// ---- Utility Functions ----
+
+/**
+ * Filter tree items based on search query
+ * @param vertex The vertex to check
+ * @param query The search query string
+ * @param graph The current graph
+ * @param setGraph The graph setter function
+ * @returns Object containing match results
+ */
+function filterTreeVertex(
+  vertex: Vertex,
+  query: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+): { match: boolean; matchedChildren: boolean } {
+  if (!query.trim()) {
+    return { match: true, matchedChildren: false };
+  }
+
+  const queryLower = query.toLowerCase();
+
+  // Early termination check for direct match - check most common properties first
+  const vertexKey = String(vertex.P?.key || "").toLowerCase();
+  if (vertexKey.includes(queryLower)) {
+    return { match: true, matchedChildren: false };
+  }
+
+  const vertexLayerName = String(vertex.P?.layerName || "").toLowerCase();
+  if (vertexLayerName.includes(queryLower)) {
+    return { match: true, matchedChildren: false };
+  }
+
+  const vertexText = String(vertex.P?.text || "").toLowerCase();
+  if (vertexText.includes(queryLower)) {
+    return { match: true, matchedChildren: false };
+  }
+
+  const vertexAs = String(vertex.P?.as || "").toLowerCase();
+  if (vertexAs.includes(queryLower)) {
+    return { match: true, matchedChildren: false };
+  }
+
+  // Get children once instead of repeatedly
+  const children = getChildrenAttrs(graph, setGraph, vertex);
+
+  // Early return if no children
+  if (children.length === 0) {
+    return { match: false, matchedChildren: false };
+  }
+
+  // Use some() to short-circuit evaluation once a match is found
+  const hasMatchingChild = children.some((child) => {
+    // Ensure we're getting a proper result object, not an Element
+    const childResult = filterTreeVertex(child, queryLower, graph, setGraph);
+    if (typeof childResult !== "object" || childResult === null) {
+      return false;
+    }
+    return childResult.match || childResult.matchedChildren;
+  });
+
+  return { match: false, matchedChildren: hasMatchingChild };
+}
+
+/**
+ * Check if a vertex should be expanded during search
+ * @param vertex The vertex to check
+ * @param query The search query string
+ * @param collapsedKeys Array of collapsed keys
+ * @param graph The current graph
+ * @param setGraph The graph setter function
+ * @returns Whether the vertex should be expanded
+ */
+function shouldExpandVertexForSearch(
+  vertex: Vertex,
+  query: string,
+  collapsedKeys: Id[],
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+): boolean {
+  if (!query.trim()) {
+    return !collapsedKeys.includes(vertex.id);
+  }
+
+  const result = filterTreeVertex(vertex, query, graph, setGraph);
+  // Only expand if necessary
+  if (result.matchedChildren) {
+    return true;
+  }
+
+  // Fall back to normal collapsed state
+  return !collapsedKeys.includes(vertex.id);
+}
+
+/**
+ * Filter the root vertices based on search query
+ * @param roots Array of root vertices
+ * @param query The search query string
+ * @param graph The current graph
+ * @param setGraph The graph setter function
+ * @returns Filtered array of vertices
+ */
+function filterRootVertices(
+  roots: Vertex[],
+  query: string,
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+): Vertex[] {
+  const queryTrim = query.trim();
+
+  if (!queryTrim) {
+    return roots;
+  }
+
+  // Only process if we have search query and roots
+  if (roots.length === 0) {
+    return [];
+  }
+
+  return roots.filter((vertex) => {
+    const result = filterTreeVertex(vertex, queryTrim, graph, setGraph);
+    return result.match || result.matchedChildren;
+  });
+}
+
+// ---- Component ----
+
 export function LayoutTree() {
   const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
@@ -38,6 +169,8 @@ export function LayoutTree() {
   const [jsonEditorOpenItems, setJsonEditorOpenItems] = createStore<
     Record<Id, boolean>
   >({});
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal("");
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const navigate = useNavigate();
 
@@ -513,6 +646,46 @@ export function LayoutTree() {
     document.removeEventListener("keydown", handleKeyDown);
   });
 
+  // Create a debounced function using Solid's primitive
+  const debouncedSearch = debounce((value: string) => {
+    setDebouncedSearchQuery(value);
+  }, 200);
+
+  // Handle search input changes with improved debouncing
+  const onSearchChange = (value: string) => {
+    setSearchQuery(value); // Update displayed value immediately
+    debouncedSearch(value); // Use the Solid primitive for debounced updates
+  };
+
+  // Clean up the debounce on component cleanup
+  onCleanup(() => {
+    debouncedSearch.clear();
+  });
+
+  // Use the refactored utility functions
+  const filterTree = (vertex: Vertex) => {
+    return filterTreeVertex(vertex, debouncedSearchQuery(), graph, setGraph);
+  };
+
+  const shouldExpandForSearch = (vertex: Vertex) => {
+    return shouldExpandVertexForSearch(
+      vertex,
+      debouncedSearchQuery(),
+      collapsedKeys(),
+      graph,
+      setGraph,
+    );
+  };
+
+  const filteredRootVertexes = () => {
+    return filterRootVertices(
+      rootVertexes(),
+      debouncedSearchQuery(),
+      graph,
+      setGraph,
+    );
+  };
+
   return (
     <As
       as="div"
@@ -569,6 +742,15 @@ export function LayoutTree() {
           size={18}
         />
       </As>
+
+      <As as="div">
+        <SearchBar
+          handleChange={onSearchChange}
+          placeholder="Search layers..."
+          value={searchQuery()}
+        />
+      </As>
+
       <As
         as="div"
         css={css`
@@ -581,7 +763,7 @@ export function LayoutTree() {
         ref={setTreeRef}
       >
         <Show when={formStoreVertex()}>
-          <For each={rootVertexes()}>
+          <For each={filteredRootVertexes()}>
             {(vertex) => (
               <LayoutTreeItem
                 collapsedKeys={collapsedKeys}
@@ -590,6 +772,9 @@ export function LayoutTree() {
                 parentIndex={0}
                 isJsonEditorOpen={isJsonEditorOpen}
                 toggleJsonEditorForItem={toggleJsonEditorForItem}
+                filterTree={filterTree}
+                shouldExpandForSearch={shouldExpandForSearch}
+                searchActive={!!debouncedSearchQuery().trim()}
               />
             )}
           </For>

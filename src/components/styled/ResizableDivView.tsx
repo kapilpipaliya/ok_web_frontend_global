@@ -154,7 +154,7 @@ export function ResizableContainer(
       setGraph,
       {
         activeItem: formStoreVertex()?.P.formDataId,
-        position: "center",
+        dragPosition: "center",
       },
     );
 

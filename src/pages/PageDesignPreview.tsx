@@ -96,7 +96,7 @@ function DroppableWrapper(props: { children: any; formStoreId: string }) {
           setGraph,
           {
             activeItem: formStoreVertex()?.P.formDataId,
-            position: "center",
+            dragPosition: "center",
           },
         );
 
