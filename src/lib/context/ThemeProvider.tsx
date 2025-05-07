@@ -1,5 +1,5 @@
 import { oklch, formatHex } from "culori";
-import { type Component, createEffect, createMemo, type JSX } from "solid-js";
+import { type Component, createMemo, type JSX } from "solid-js";
 import { StyleRenderer } from "~/components/StyleRenderer";
 import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
 import { themeConfig } from "../graph/get/sync/theme/themeConfig";
@@ -29,7 +29,6 @@ import {
 } from "../styles/mediaUtils";
 import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
 import { useGraph } from "../graph/GraphContext";
-import { createStore, reconcile } from "solid-js/store";
 
 export interface ThemeProviderProps {
   children: JSX.Element;
@@ -37,33 +36,25 @@ export interface ThemeProviderProps {
 export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
   const [graph] = useGraph();
 
-  const [theme, setTheme] = createStore(
-    themeConfig(getGlobalThemeVertex(graph)),
-  );
-  createEffect(
-    () => {
-      const newTheme = themeConfig(getGlobalThemeVertex(graph));
-      setTheme(reconcile(newTheme));
-    },
+  const themeMemo = createMemo(() => {
+    return themeConfig(getGlobalThemeVertex(graph));
+  });
+
+  const themeProxy = new Proxy(
+    {},
     {
-      defer: true,
+      get(target: Partial<ThemeContextType>, prop: string | symbol) {
+        if (typeof prop === "string" && prop === "var") {
+          return createSafeThemeProxy(themeMemo().var || {});
+        }
+        return themeMemo()[prop as keyof ThemeContextType];
+      },
     },
   );
-
-  const handler = {
-    get(target: Partial<ThemeContextType>, prop: string | symbol) {
-      if (typeof prop === "string" && prop === "var") {
-        return createSafeThemeProxy(target.var || {});
-      }
-      return target[prop as keyof ThemeContextType];
-    },
-  };
-
-  const themeProxy = new Proxy(theme || {}, handler);
 
   // Generate CSS styles based on the theme
   const themeCssVars = createMemo(() => {
-    const safeThemeVars = createSafeThemeProxy(theme.var || {});
+    const safeThemeVars = createSafeThemeProxy(themeMemo().var || {});
     const colorMode = themeProxy.var?.colorMode || "light";
     const baseColor = themeProxy.var?.color?.base || DEFAULT_THEME.color.base;
 

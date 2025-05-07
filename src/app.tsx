@@ -10,8 +10,6 @@ import { isServer } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
 import { ThemeProvider } from "./lib/context/ThemeProvider";
-
-import { LoaderNew } from "./components/styled/LoaderSimple";
 import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
 import { GraphContext } from "./lib/graph/GraphContext";
@@ -58,31 +56,26 @@ export default function App() {
           return (
             <MetaProvider>
               <GraphContext.Provider value={graph}>
-                <ThemeProvider>
-                  <ErrorBoundary
-                    fallback={(error, reset) => {
-                      // Log the UI error
-                      if (!isServer) {
-                        logError(error, { location: location.pathname });
-                      }
-                      return (
-                        <ErrorFallback
-                          error={error}
-                          resetErrorBoundary={reset}
-                        />
-                      );
-                    }}
-                  >
-                    <Suspense fallback={<LoaderNew />}>
-                      {props.children}
-                    </Suspense>
-                  </ErrorBoundary>
-                  <Show when={isHydrated()}>
-                    {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
-                    <Toaster />
-                    {/* </Show> */}
-                  </Show>
-                </ThemeProvider>
+                <ErrorBoundary
+                  fallback={(error, reset) => {
+                    // Log the UI error
+                    if (!isServer) {
+                      logError(error, { location: location.pathname });
+                    }
+                    return (
+                      <ErrorFallback error={error} resetErrorBoundary={reset} />
+                    );
+                  }}
+                >
+                  <Suspense>
+                    <ThemeProvider>{props.children}</ThemeProvider>
+                  </Suspense>
+                </ErrorBoundary>
+                <Show when={isHydrated()}>
+                  {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
+                  <Toaster />
+                  {/* </Show> */}
+                </Show>
               </GraphContext.Provider>
             </MetaProvider>
           );
