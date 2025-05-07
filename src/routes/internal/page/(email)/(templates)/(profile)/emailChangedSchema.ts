@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Email Change Notification",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "We're writing to let you know that a request has been made to change the email address associated with your account.",
   },
   {
@@ -28,7 +28,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     text: "If you initiated this change, no further action is required. The new email address will be activated after verification.",
   },
   {
@@ -39,7 +39,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     text: "If you did not request this change, please contact our support team immediately.",
   },
   {
@@ -58,7 +58,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 5,
+    displayOrder: 5,
     props: `return {
       href: "${typeof window !== "undefined" ? window.location.origin : ""}/support/contact"
     }`,

@@ -46,7 +46,7 @@ export async function getTreeDataAPICall(
       const childNodes: TreeNode[] = [];
       // Using await Promise.all close the dbSession first, so used for...of
       for (const child of (children || []).sort(
-        (a: Vertex, b: Vertex) => a.P.pos - b.P.pos,
+        (a: Vertex, b: Vertex) => a.P.displayOrder - b.P.displayOrder,
       )) {
         const key =
           levels?.nameExpr?.(child) ||

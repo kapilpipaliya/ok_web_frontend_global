@@ -17,7 +17,7 @@ export function getLogoSchema(
             as: "img",
             css: imageCss,
             componentName: "Html",
-            pos: 1,
+            displayOrder: 1,
             props: `return {
             alt: "Logo",
             src: "${typeof window !== "undefined" ? window.location.origin : ""}${API.file.downloadCompanyRectangularLogoUrl}"
@@ -26,18 +26,18 @@ export function getLogoSchema(
         ],
         componentName: "Html",
         href: "/",
-        pos: 1,
+        displayOrder: 1,
       },
       {
         as: "hr",
         css: borderCss,
         componentName: "Html",
-        pos: 2,
+        displayOrder: 2,
       },
     ],
     css: containerCss,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
   } as FieldAttribute;
 }
 
@@ -53,7 +53,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             as: "",
             attributes: content,
             componentName: "Html",
-            pos: 2,
+            displayOrder: 2,
           },
           {
             as: "div",
@@ -65,7 +65,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
   font-size: 12px;
 `,
                 componentName: "Html",
-                pos: 1,
+                displayOrder: 1,
                 text: "© 2024 Your Company. All rights reserved.",
               },
             ],
@@ -74,7 +74,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
   text-align: center;
 `,
             componentName: "Html",
-            pos: 3,
+            displayOrder: 3,
           },
         ],
         css: returnCSS`
@@ -84,7 +84,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
   background-color: \${args.theme.var.color.base_2};
 `,
         componentName: "Html",
-        pos: 1,
+        displayOrder: 1,
       },
     ],
     css: returnCSS`
@@ -93,5 +93,5 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
   padding: 32px;
 `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
   }) as FieldAttribute;

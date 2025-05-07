@@ -22,7 +22,7 @@ export function getRowProps(
   formVertex: Vertex,
 ) {
   const props = klona(fromVertex.P);
-  delete props.pos;
+  delete props.displayOrder;
   const uniqueName = getUniqueName(txnId, graph, setGraph, formVertex, {
     id: 0,
   } as unknown as Vertex);

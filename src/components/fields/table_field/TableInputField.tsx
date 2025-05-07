@@ -119,7 +119,7 @@ export function TableInputField(
           graph,
           setGraph,
           {
-            pos: index + 1,
+            displayOrder: index + 1,
           },
         );
       }

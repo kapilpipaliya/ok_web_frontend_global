@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Your Verification Code",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "Use the following code to verify your account:",
   },
   {
@@ -33,7 +33,7 @@ const content = [
           letter-spacing: 4px;
         `,
         componentName: "Html",
-        pos: 1,
+        displayOrder: 1,
         text: "123456",
       },
     ],
@@ -45,7 +45,7 @@ const content = [
       text-align: center;
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
   },
   {
     as: "p",
@@ -53,7 +53,7 @@ const content = [
       color: \${args.theme.var.color.base};
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     text: "This code will expire in 10 minutes.",
   },
 ];

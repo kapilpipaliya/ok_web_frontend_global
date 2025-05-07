@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Reset Your Password",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "We received a request to reset your password. Please use the following verification code to complete the process:",
   },
   {
@@ -33,7 +33,7 @@ const content = [
           letter-spacing: 4px;
         `,
         componentName: "Html",
-        pos: 1,
+        displayOrder: 1,
         props: `return {
             text: args.searchParams.otp,
           }`,
@@ -47,7 +47,7 @@ const content = [
       text-align: center;
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
   },
   {
     as: "p",
@@ -55,7 +55,7 @@ const content = [
       color: \${args.theme.var.color.base};
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     text: "This code will expire in 10 minutes. If you didn't request this password reset, please ignore this email or contact support if you have concerns.",
   },
 ];

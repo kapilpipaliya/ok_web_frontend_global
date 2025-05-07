@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Profile Updated Successfully",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "Your profile information has been successfully updated.",
   },
   {
@@ -38,7 +38,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     props: `return {
       // href: window.location.origin + "/admin/UserSettings",
       href: "${typeof window !== "undefined" ? window.location.origin : ""}/"

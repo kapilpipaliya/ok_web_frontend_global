@@ -35,9 +35,9 @@ export function getTreeData(
       graph,
       setGraph,
       vertexes: vertexes,
-    });
+    }) as Vertex[];
     for (const child of (children || []).sort(
-      (a: any, b: any) => a.P.pos - b.P.pos,
+      (a, b) => a.P.displayOrder - b.P.displayOrder,
     )) {
       if (!child?.P?.key) {
         continue;

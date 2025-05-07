@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Confirm Your Email Address",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "Thank you for signing up! Please confirm your email address to activate your account.",
   },
   {
@@ -39,7 +39,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     props: `return {
       href: args.searchParams.url,
     }`,
@@ -52,7 +52,7 @@ const content = [
       color: \${args.theme.var.color.base};
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     text: "If you didn't create an account, you can safely ignore this email.",
   },
 ];

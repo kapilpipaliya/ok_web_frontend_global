@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Email Change Successful",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "Your email address has been successfully updated. This is now your primary email for account notifications and communications.",
   },
   {
@@ -28,7 +28,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     text: "If you need to make any additional changes to your account, please visit your account settings.",
   },
   {
@@ -47,7 +47,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     props: `return {
       // href: window.location.origin + "/admin/UserSettings",
       href: "${typeof window !== "undefined" ? window.location.origin : ""}/"

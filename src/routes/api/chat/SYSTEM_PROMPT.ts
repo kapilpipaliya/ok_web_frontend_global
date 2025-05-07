@@ -28,7 +28,7 @@ Basic Structure:
 
 Attr Vertex:
 - Required Properties:
-  - pos: number - Determines Item order among siblings
+  - displayOrder: number - Determines Item order among siblings
 - Optional Properties:
   - componentName: string - name of the component any of: 'Html', 'Data', 'Slot'
   - props: Function Body string - dynamic properties for the Item e.g. 'props: "return {}"'. Its the place where you add javascript code to generate dynamic properties for the Item.

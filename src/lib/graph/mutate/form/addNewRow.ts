@@ -67,7 +67,7 @@ export function getSublistRows(
       graph,
       vertexes: [vertex],
     }) || []
-  ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
+  ).sort((a: Vertex, b: Vertex) => a.P.displayOrder - b.P.displayOrder);
 }
 
 export function getSublistRowsForType(
@@ -81,7 +81,7 @@ export function getSublistRowsForType(
       graph,
       vertexes: [vertex],
     }) || []
-  ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
+  ).sort((a: Vertex, b: Vertex) => a.P.displayOrder - b.P.displayOrder);
 }
 
 export function newRow(

@@ -35,7 +35,7 @@ export async function handleParentChange(
       toVertex.id,
     );
     mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
-      pos: 9999999,
+      displayOrder: 9999999,
     }); // move to end
   } else {
     setParentValue(

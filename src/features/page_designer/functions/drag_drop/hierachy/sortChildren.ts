@@ -16,13 +16,13 @@ export function sortChildren(
   toVertex: undefined | Vertex,
   dragPosition: string,
 ) {
-  let pos = 1;
+  let displayOrder = 1;
   const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
   for (const child of childrenAttrs) {
     if (child.id === fromVertex?.id && dragPosition !== "center") {
       continue;
     }
-    // const childIndex = child.P.pos;
+    // const childIndex = child.P.displayOrder;
     // if (childIndex === undefined) {
     //  alert ('childIndex Pos should not be undefined.');
     // }
@@ -32,33 +32,39 @@ export function sortChildren(
       }
       // childIndex === toIndex, childIndex may be undefined.
       if (dragPosition === "before" || dragPosition === "left") {
-        if (fromVertex?.P.pos !== pos) {
+        if (fromVertex?.P.displayOrder !== displayOrder) {
           mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
-            pos,
+            displayOrder,
           });
         }
-        pos++;
-        if (child.P.pos !== pos) {
-          mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
+        displayOrder++;
+        if (child.P.displayOrder !== displayOrder) {
+          mergeVertexProperties(txnId, child.id, graph, setGraph, {
+            displayOrder,
+          });
         }
-        pos++;
+        displayOrder++;
       } else if (dragPosition === "after" || dragPosition === "right") {
-        if (child.P.pos !== pos) {
-          mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
-        }
-        pos++;
-        if (fromVertex?.P.pos !== pos) {
-          mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
-            pos,
+        if (child.P.displayOrder !== displayOrder) {
+          mergeVertexProperties(txnId, child.id, graph, setGraph, {
+            displayOrder,
           });
         }
-        pos++;
+        displayOrder++;
+        if (fromVertex?.P.displayOrder !== displayOrder) {
+          mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
+            displayOrder,
+          });
+        }
+        displayOrder++;
       }
     } else {
-      if (child.P.pos !== pos) {
-        mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
+      if (child.P.displayOrder !== displayOrder) {
+        mergeVertexProperties(txnId, child.id, graph, setGraph, {
+          displayOrder,
+        });
       }
-      pos++;
+      displayOrder++;
     }
   }
 }

@@ -73,7 +73,7 @@ export function componentDrop(
   let props = properties ?? {};
 
   // Calculate the dragPosition value
-  const posValue = calculateInitialPosition(
+  const newDisplayOrderValue = calculateInitialDragPosition(
     graph,
     setGraph,
     toParentVertex,
@@ -81,7 +81,11 @@ export function componentDrop(
     dragPosition,
     toIndex,
   );
-  props = { ...props, pos: posValue, [uniqueNameKey]: uniqueName };
+  props = {
+    ...props,
+    displayOrder: newDisplayOrderValue,
+    [uniqueNameKey]: uniqueName,
+  };
 
   if (fromVertex.L[0] === "Comp") {
     const compProps = getCompPropsObj(graph, fromVertex);
@@ -94,7 +98,7 @@ export function componentDrop(
     }
   } else if (fromVertex.L[0] === "Attr") {
     const p = klona(fromVertex.P);
-    delete p.pos;
+    delete p.displayOrder;
     delete p.key;
     props = { ...props, ...p };
   } else if (fromVertex.L[0] === "Component") {
@@ -158,7 +162,7 @@ export function componentDrop(
 /**
  * Calculate the dragPosition value for component placement
  */
-function calculateInitialPosition(
+function calculateInitialDragPosition(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   toParentVertex: Vertex,
@@ -174,7 +178,7 @@ function calculateInitialPosition(
   const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex);
   const lastPos =
     childrenAttrs.length > 0
-      ? Math.max(...childrenAttrs.map((child) => child.P.pos || 0))
+      ? Math.max(...childrenAttrs.map((child) => child.P.displayOrder || 0))
       : 0;
 
   // If no target vertex or center dragPosition, append at the end

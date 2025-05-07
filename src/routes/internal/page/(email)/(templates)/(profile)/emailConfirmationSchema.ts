@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Confirm Your New Email Address",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "Please confirm your new email address by clicking the button below:",
   },
   {
@@ -39,7 +39,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     props: `return {
       href: args.searchParams.url,
     }`,
@@ -53,7 +53,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     text: "This link will expire in 24 hours. If you did not request this change, please ignore this email or contact support if you have concerns.",
   },
 ];

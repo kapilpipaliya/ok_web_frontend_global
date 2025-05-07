@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Password Changed Successfully",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 24px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "Your password has been successfully changed. If you did not make this change, please contact our support team immediately.",
   },
   {
@@ -38,7 +38,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     props: `return {
       href: "${typeof window !== "undefined" ? window.location.origin : ""}/support/contact"
     }`,

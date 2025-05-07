@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "You've Been Invited",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "You've been invited to join our platform. Please click the button below to complete your registration and set up your account.",
   },
   {
@@ -39,7 +39,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     props: `return {
       href: args.searchParams.url,
     }`,
@@ -53,7 +53,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     text: "This invitation link will expire in 7 days. If you have any questions, please contact the administrator who invited you.",
   },
 ];

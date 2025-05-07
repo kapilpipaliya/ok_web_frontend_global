@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Welcome to Our Platform!",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "We're excited to have you on board. Here are some things you can do to get started:",
   },
   {
@@ -28,13 +28,13 @@ const content = [
       {
         as: "li",
         componentName: "Html",
-        pos: 1,
+        displayOrder: 1,
         text: "Complete your profile",
       },
       {
         as: "li",
         componentName: "Html",
-        pos: 2,
+        displayOrder: 2,
         text: "Explore our features",
       },
     ],
@@ -42,7 +42,7 @@ const content = [
       margin-bottom: 24px;
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
   },
   {
     as: "a",
@@ -60,7 +60,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     props: `return {
       href: "${typeof window !== "undefined" ? window.location.origin : ""}/admin/"
     }`,

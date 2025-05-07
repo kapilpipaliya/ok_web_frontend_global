@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Test Email",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "This is a test email to verify that your email configuration is working correctly.",
   },
   {
@@ -28,7 +28,7 @@ const content = [
       color: \${args.theme.var.color.primary};
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     text: "If you received this email, your email settings are configured properly.",
   },
 ];

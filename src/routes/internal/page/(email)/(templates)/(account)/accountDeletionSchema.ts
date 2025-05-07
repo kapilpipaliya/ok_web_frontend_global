@@ -10,7 +10,7 @@ const content = [
       margin-bottom: 16;
     `,
     componentName: "Html",
-    pos: 1,
+    displayOrder: 1,
     text: "Account Deletion Request",
   },
   {
@@ -19,7 +19,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 2,
+    displayOrder: 2,
     text: "We've received a request to delete your account. Your account will be scheduled for deletion and will be permanently removed after 48 hours from now.",
   },
   {
@@ -28,7 +28,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 3,
+    displayOrder: 3,
     text: "During this 48-hour period, you will no longer be able to log in to your account. If you change your mind, please contact our support team immediately to cancel the deletion process.",
   },
   {
@@ -37,7 +37,7 @@ const content = [
       margin-bottom: 16px;
     `,
     componentName: "Html",
-    pos: 4,
+    displayOrder: 4,
     text: "Please note that once your account is deleted, all your data will be permanently removed and cannot be recovered.",
   },
   {
@@ -57,7 +57,7 @@ const content = [
       }
     `,
     componentName: "Html",
-    pos: 5,
+    displayOrder: 5,
     props: `return {
       href: "${typeof window !== "undefined" ? window.location.origin : ""}/support/contact"
     }`,
