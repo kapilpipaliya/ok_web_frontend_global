@@ -1,4 +1,4 @@
-import { createEffect, createMemo, on, Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import { createAsync } from "@solidjs/router";
 
 import type { Vertex } from "~/lib/graph/graph";
@@ -11,16 +11,17 @@ import {
   PreviewContext,
   usePreviewContext,
 } from "~/features/page_designer/context/PreviewContext";
-import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { GenericComponentProps } from "../type/FieldType";
 
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
-import { DataContext, useDataContext } from "~/features/page_attr_render/context/DataContext";
+import {
+  DataContext,
+  useDataContext,
+} from "~/features/page_attr_render/context/DataContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 export function ComponentField(
@@ -37,20 +38,23 @@ export function ComponentField(
   const getCompVertex = createMemo(() =>
     meta()
       ? (evalExpression("->$0Comp", {
-        graph,
-        setGraph,
-        vertexes: [meta()],
-      }) as Vertex[]) || ([] as Vertex[])
+          graph,
+          setGraph,
+          vertexes: [meta()],
+        }) as Vertex[]) || ([] as Vertex[])
       : [],
   );
 
-  const componentData = createAsync(async () => {
-    const vertices = getCompVertex();
-    if (!vertices.length) {
-      return null;
-    }
-    return await fetchComponentData([vertices[0]], graph, setGraph);
-  }, { deferStream: true });
+  const componentData = createAsync(
+    async () => {
+      const vertices = getCompVertex();
+      if (!vertices.length) {
+        return null;
+      }
+      return await fetchComponentData([vertices[0]], graph, setGraph);
+    },
+    { deferStream: true },
+  );
 
   // createEffect(
   //   on(getCompVertex, (component, prevComponent) => {
@@ -80,18 +84,25 @@ export function ComponentField(
 
   const ComponentWrapper = () => {
     const contextData = useDataContext() || {};
-    
-    const valuesProxy = new Proxy({}, {
-      get(_, key) {
-        const propValue = props[key as keyof typeof props];
-        if (propValue !== undefined && propValue !== null) {
-          return propValue;
-        }
-        const defaultValues = getComponentDefaultValues(getCompVertex()[0], graph, setGraph);
-        return defaultValues[key as keyof typeof defaultValues];
-      }
-    });
-  
+
+    const valuesProxy = new Proxy(
+      {},
+      {
+        get(_, key) {
+          const propValue = props[key as keyof typeof props];
+          if (propValue !== undefined && propValue !== null) {
+            return propValue;
+          }
+          const defaultValues = getComponentDefaultValues(
+            getCompVertex()[0],
+            graph,
+            setGraph,
+          );
+          return defaultValues[key as keyof typeof defaultValues];
+        },
+      },
+    );
+
     const newDataContext = new Proxy(contextData, {
       get(target, key) {
         if (key === "props") {
@@ -100,13 +111,15 @@ export function ComponentField(
         return target[key];
       },
     });
-  
+
     return (
       <DataContext.Provider value={newDataContext}>
         <PageAttrRender
           data={data()}
           metaVertex={getCompVertex()[0] as Vertex}
-          isNoPermissionCheck={parentRenderContext()?.context.isNoPermissionCheck}
+          isNoPermissionCheck={
+            parentRenderContext()?.context.isNoPermissionCheck
+          }
         />
       </DataContext.Provider>
     );
@@ -121,29 +134,31 @@ export function ComponentField(
       }
     };
     return (
-      <PreviewContext.Provider
-        value={[previewStoreProxy, setPreviewStore]}
-      >
+      <PreviewContext.Provider value={[previewStoreProxy, setPreviewStore]}>
         <Show when={meta()}>
           <PageAttrRender
             data={data()}
-            isNoPermissionCheck={parentRenderContext()?.context.isNoPermissionCheck}
+            isNoPermissionCheck={
+              parentRenderContext()?.context.isNoPermissionCheck
+            }
             metaVertex={meta() as Vertex}
             filter={slotFilter}
           />
         </Show>
       </PreviewContext.Provider>
     );
-  }
+  };
 
   const Content = () => {
     if (componentData()) {
-      setGraphData(graph, setGraph, componentData()!.graph!, { skipExisting: true });
+      setGraphData(graph, setGraph, componentData()!.graph!, {
+        skipExisting: true,
+      });
     }
     return (
       <Show when={getCompVertex().length} fallback={<div>Error</div>}>
         <SlotContext.Provider value={Children}>
-          <ComponentWrapper/>
+          <ComponentWrapper />
         </SlotContext.Provider>
       </Show>
     );

@@ -1,5 +1,5 @@
 import { createAsync, query, useNavigate } from "@solidjs/router";
-import { createEffect, Match, type ParentProps, Show, Switch } from "solid-js";
+import { Match, type ParentProps, Show, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
@@ -26,10 +26,10 @@ const fetchData = query(async (authenticate?: boolean) => {
   const [initialData, userData] = await Promise.all([
     getInitialData(),
     // authenticate ?
-      getUserRPC().catch(() => {
-          return null; // Return null to avoid further processing
-        })
-      // : Promise.resolve(null),
+    getUserRPC().catch(() => {
+      return null; // Return null to avoid further processing
+    }),
+    // : Promise.resolve(null),
   ]);
   return { initialData, userData };
 }, "initialData");
@@ -72,7 +72,7 @@ export function GetInitialData(props: GetInitialDataProps) {
   const Content = () => {
     setData(data()!.initialData, data()!.userData as UserData);
     return props.children;
-  }
+  };
 
   return (
     <Show when={data()}>

@@ -41,7 +41,7 @@ export function formSubmit(
       showWarningToast(warningMessage);
       return warningMessage;
     }
-    
+
     const txnId = formStoreVertex().P.txnId;
     if (isDisabledTxn(txnId, graph)) {
       const warningMessage = `${label} is already saved or not changed.`;
@@ -57,14 +57,14 @@ export function formSubmit(
       showWarningToast(warningMessage);
       return warningMessage;
     }
-    
+
     let data;
     // TODO: add validation on form that AttrsTableData keys should not available.
     // !!!TODO!!! Handle Error Received From server when commit
     if (!isRealTime) {
       // Get the data to submit
       data = commitTxn(txnId, graph);
-      
+
       if (!data) {
         const warningMessage = "No data to Submit";
         showWarningToast(warningMessage);
@@ -85,8 +85,10 @@ export function formSubmit(
       await showLoadingToast({
         loadMessage: `Saving ${label}...`,
         onSuccess: (value) => {
-          const responseData = value as { data: Array<{ insert?: [string, string] }> };
-          
+          const responseData = value as {
+            data: Array<{ insert?: [string, string] }>;
+          };
+
           for (const item of responseData.data) {
             if (item.insert) {
               if (item.insert[0] === formStoreVertex().P.formDataId) {

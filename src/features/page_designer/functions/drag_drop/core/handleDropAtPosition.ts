@@ -91,10 +91,7 @@ export async function handleDropAtPosition(
     graph,
     vertexes: [fromVertex],
   })?.[0];
-  if (
-    position !== "center" &&
-    fromParentVertex?.id === toParentVertex?.id
-  ) {
+  if (position !== "center" && fromParentVertex?.id === toParentVertex?.id) {
     sortChildren(
       graph,
       setGraph,

@@ -12,7 +12,6 @@ import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValu
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { CollAndData } from "./CollAndData";
 import { ComponentVariantsInput } from "./ComponentVariantsInput";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 
@@ -54,7 +53,7 @@ export function PropertiesBody() {
           setGraph,
           {
             [meta.P.key]: value,
-          }
+          },
         );
       });
       if (value === null) {
@@ -114,11 +113,10 @@ export function PropertiesBody() {
         />
       </Show>
 
-      <Show when={
-        graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith(
+      <Show
+        when={graph.vertexes[formStoreVertex()?.P.selectedId].L?.[0]?.endsWith(
           "Attr",
-        )
-      }
+        )}
       >
         <FormGroupProperties
           metaAttributes={selectedComponentProperties() ?? []}

@@ -1,6 +1,6 @@
-import type {FunctionArgumentType} from "~/components/form/type/FieldSchemaType";
-import {STYLES} from "~/pages/settings/constants";
-import {css} from "~/lib/styles";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { STYLES } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
 
 /**
  * Creates a form submit button with loading state

@@ -262,12 +262,10 @@ export function RenderMainContent() {
       css={css`
         display: grid;
         grid-template-columns: ${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px ` : ""}${layoutStore()
-          .mainPanel?.map(
-            (panel) => {
-              const width = layoutStore()[`mainPanel${panel}Width`];
-              return typeof width === 'number' ? `${width}px` : (width ?? "1fr");
-            }
-          )
+          .mainPanel?.map((panel) => {
+            const width = layoutStore()[`mainPanel${panel}Width`];
+            return typeof width === "number" ? `${width}px` : (width ?? "1fr");
+          })
           .join(
             " ",
           )}${layoutStore().mainPanel?.findIndex((panel) => layoutStore()[`mainPanel${panel}Width`] === "1fr") !== -1 ? " 0px" : " 1fr"}${layoutStore().isRight0Open ? ` ${layoutStore().rightWidth0}px` : ""}${layoutStore().isRight1Open ? ` ${layoutStore().rightWidth1}px` : ""}${layoutStore().isRight2Open ? ` ${layoutStore().rightWidth2}px` : ""};

@@ -43,7 +43,10 @@ import { evalExpression } from "~/lib/expression_eval";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import {
+  mergeVertexProperties,
+  replaceVertexProperties,
+} from "~/lib/graph/mutate/core/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
@@ -56,17 +59,17 @@ import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { getDynamicComponent } from "./functions/getDynamicComponent";
 import { useTheme } from "~/lib/context/ThemeContext";
 import { processCssContent } from "~/lib/styles/processCss";
-import { 
-  deleteTxnIdAndCreateNew, 
-  ensureData, 
-  removeTxnIdAndCreateNew, 
-  setError} from "./functions/formFunctions";
+import {
+  deleteTxnIdAndCreateNew,
+  ensureData,
+  removeTxnIdAndCreateNew,
+  setError,
+} from "./functions/formFunctions";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import {createUniqueId} from "~/lib/solid/createUniqueId";
+import { createUniqueId } from "~/lib/solid/createUniqueId";
 import { createFunctionProxy } from "./createFunctionProxy";
 import { PermissionLevel } from "~/pages/PageViewWrapper";
-import { PageView } from "~/pages/PageViewWrapper";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -139,7 +142,7 @@ export function DynamicComponent(
   const hasCreatePermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), PermissionLevel.CREATE) ??
-      parentRenderContext()?.context?.hasCreatePermission ?? 
+      parentRenderContext()?.context?.hasCreatePermission ??
       (previewStore.hasEditPermission || previewStore.hasFullPermission)
     );
   });
@@ -147,21 +150,23 @@ export function DynamicComponent(
   const hasEditPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), PermissionLevel.EDIT) ??
-      parentRenderContext()?.context?.hasEditPermission ?? 
+      parentRenderContext()?.context?.hasEditPermission ??
       previewStore.hasFullPermission
     );
   });
   const hasViewPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), PermissionLevel.VIEW) ??
-      parentRenderContext()?.context?.hasViewPermission ?? 
-      (previewStore.hasCreatePermission || previewStore.hasEditPermission || previewStore.hasFullPermission)
+      parentRenderContext()?.context?.hasViewPermission ??
+      (previewStore.hasCreatePermission ||
+        previewStore.hasEditPermission ||
+        previewStore.hasFullPermission)
     );
   });
   const hasFullPermission = createLazyMemo(() => {
     return (
       hasPermissions(allConfiguredPermission(), PermissionLevel.FULL) ??
-      parentRenderContext()?.context?.hasFullPermission ?? 
+      parentRenderContext()?.context?.hasFullPermission ??
       previewStore.hasFullPermission
     );
   });
@@ -182,7 +187,12 @@ export function DynamicComponent(
     // Check if user has any valid permission level
     // Following the hierarchy: FULL > EDIT > CREATE > VIEW
     // Having a higher permission implicitly grants lower permissions
-    return hasFullPermission() || hasEditPermission() || hasCreatePermission() || hasViewPermission();
+    return (
+      hasFullPermission() ||
+      hasEditPermission() ||
+      hasCreatePermission() ||
+      hasViewPermission()
+    );
   };
 
   const isDisabledByPermissions = () => {
@@ -296,7 +306,13 @@ export function DynamicComponent(
       searchParams,
       setError: (error: string | undefined, key?: string) => {
         const errorVertexId = `${props.data?.id}-error`;
-        setError(errorVertexId, key ?? props.meta.P.key, error, graph, setGraph);
+        setError(
+          errorVertexId,
+          key ?? props.meta.P.key,
+          error,
+          graph,
+          setGraph,
+        );
       },
       get setGraph() {
         return setGraph;
@@ -403,7 +419,13 @@ export function DynamicComponent(
   const dynamicFns = createMemo(() => {
     try {
       // Helper to evaluate fns from a vertex
-      const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
+      const evaluateFns = (
+        fns:
+          | ((args: FunctionArgumentType) => Record<string, unknown>)
+          | string
+          | undefined
+          | null,
+      ) => {
         if (typeof fns === "function") {
           return fns(getFunctionArgumentWithValue());
         }
@@ -420,26 +442,34 @@ export function DynamicComponent(
 
       // For Component type, merge fns from component vertex and meta
       if (props.meta.P.componentName === "Component") {
-        const componentVertex = (evalExpression("->$0Comp", {
-          graph,
-          setGraph,
-          vertexes: [props.meta],
-        }) as Vertex[])?.[0];
-        
-        
-        return new Proxy({}, {
-          get(_, key: string) {
-            const metaFns = evaluateFns(props.meta.P.fns);
-            if (metaFns && key in metaFns) return metaFns[key];
-            const componentFns = evaluateFns(componentVertex.P.fns);
-            if (componentFns && key in componentFns) return componentFns[key];
-            return parentRenderContext()?.context?.fns?.[key];
-          }
-        });
+        const componentVertex = (
+          evalExpression("->$0Comp", {
+            graph,
+            setGraph,
+            vertexes: [props.meta],
+          }) as Vertex[]
+        )?.[0];
+
+        return new Proxy(
+          {},
+          {
+            get(_, key: string) {
+              const metaFns = evaluateFns(props.meta.P.fns);
+              if (metaFns && key in metaFns) return metaFns[key];
+              const componentFns = evaluateFns(componentVertex.P.fns);
+              if (componentFns && key in componentFns) return componentFns[key];
+              return parentRenderContext()?.context?.fns?.[key];
+            },
+          },
+        );
       }
-      
+
       // For other components, just use meta fns
-      return evaluateFns(props.meta.P.fns) ?? parentRenderContext()?.context?.fns ?? {};
+      return (
+        evaluateFns(props.meta.P.fns) ??
+        parentRenderContext()?.context?.fns ??
+        {}
+      );
     } catch (error) {
       console.error("Error in dynamicFns:", error);
       return parentRenderContext()?.context?.fns ?? {};

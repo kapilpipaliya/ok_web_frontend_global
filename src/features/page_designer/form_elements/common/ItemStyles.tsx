@@ -35,50 +35,58 @@ export const buttonStyle = css`
 // Helper for preview behavior
 export function setupPreview(
   props: () => {
-    previewPageId: Id | null, 
-    setPreviewPageId: (id: Id | null) => void,
-    itemId: Id
+    previewPageId: Id | null;
+    setPreviewPageId: (id: Id | null) => void;
+    itemId: Id;
   },
   callbacks: {
-    setHoverPageId: (id: Id | null) => void,
-    setIsHovered?: (isHovered: boolean) => void,
+    setHoverPageId: (id: Id | null) => void;
+    setIsHovered?: (isHovered: boolean) => void;
   },
-  delay = 500
+  delay = 500,
 ): {
-  handleMouseEnter: () => void, 
-  handleMouseLeave: (event: MouseEvent, floatingElement?: Node | null, previewRef?: HTMLElement | null) => void,
-  previewTimer: NodeJS.Timeout | null
+  handleMouseEnter: () => void;
+  handleMouseLeave: (
+    event: MouseEvent,
+    floatingElement?: Node | null,
+    previewRef?: HTMLElement | null,
+  ) => void;
+  previewTimer: NodeJS.Timeout | null;
 } {
   let previewTimer: NodeJS.Timeout | null = null;
 
   const handleMouseEnter = () => {
     const { previewPageId, setPreviewPageId, itemId } = props();
-    
+
     if (previewPageId !== itemId) {
       setPreviewPageId(null);
     }
-    
+
     callbacks.setHoverPageId(itemId);
     if (callbacks.setIsHovered) {
       callbacks.setIsHovered(true);
     }
-    
+
     previewTimer = setTimeout(() => {
       const { setPreviewPageId, itemId } = props();
       setPreviewPageId(itemId);
     }, delay);
   };
 
-  const handleMouseLeave = (event: MouseEvent, floatingElement?: Node | null, previewRef?: HTMLElement | null) => {
+  const handleMouseLeave = (
+    event: MouseEvent,
+    floatingElement?: Node | null,
+    previewRef?: HTMLElement | null,
+  ) => {
     if (previewTimer) {
       clearTimeout(previewTimer);
     }
-    
+
     callbacks.setHoverPageId(null);
     if (callbacks.setIsHovered) {
       callbacks.setIsHovered(false);
     }
-    
+
     const relatedTarget = event.relatedTarget as Node;
     if (
       (floatingElement && floatingElement.contains(relatedTarget)) ||
@@ -87,7 +95,7 @@ export function setupPreview(
       // Mouse is over floating element or preview, don't close
       return;
     }
-    
+
     const { setPreviewPageId } = props();
     setPreviewPageId(null);
   };
@@ -95,7 +103,7 @@ export function setupPreview(
   return {
     handleMouseEnter,
     handleMouseLeave,
-    previewTimer
+    previewTimer,
   };
 }
 
@@ -104,7 +112,7 @@ export function createOpenInNewTab(
   layoutStoreId: Id,
   vertex: Vertex,
   graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   return () => openInNewInternalTab(layoutStoreId, vertex, graph, setGraph);
-} 
+}

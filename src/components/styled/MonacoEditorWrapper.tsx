@@ -50,13 +50,16 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
   // Flag to track if we've initialized our extensions
   let extensionsInitialized = false;
   // Handle editor mount and setup custom language extensions if needed
-  const handleEditorMount = (monaco: typeof Monaco, editor: Monaco.editor.IStandaloneCodeEditor) => {
+  const handleEditorMount = (
+    monaco: typeof Monaco,
+    editor: Monaco.editor.IStandaloneCodeEditor,
+  ) => {
     // Initialize extensions only once
     if (!extensionsInitialized) {
       configureCssLanguageExtensions();
       extensionsInitialized = true;
     }
-    
+
     // Apply customCss language for CSS editors
     if (props.language === "css") {
       const model = editor.getModel();
@@ -64,11 +67,11 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
         monaco.editor.setModelLanguage(model, "customCss");
       }
     }
-    
+
     // Call the original onMount handler
     props.onMount?.(monaco, editor);
   };
-  
+
   return (
     <As
       as={MonacoEditor}

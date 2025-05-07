@@ -16,10 +16,10 @@ import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { css } from "~/lib/styles";
-import {createFormHeader} from "~/pages/auth/functions/schema/createFormHeader";
-import {createFormSubmitButton} from "~/pages/auth/functions/schema/createFormSubmitButton";
-import {createLinkButton} from "~/pages/auth/functions/schema/createLinkButton";
-import {createTextField} from "~/pages/auth/functions/schema/createTextField";
+import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
+import { createFormSubmitButton } from "~/pages/auth/functions/schema/createFormSubmitButton";
+import { createLinkButton } from "~/pages/auth/functions/schema/createLinkButton";
+import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 
 export function ForgotPasswordForm() {
   const navigate = useNavigate();
@@ -336,7 +336,8 @@ export function ForgotPasswordForm() {
                 as: "div",
                 attributes: [
                   {
-                    componentName: "Html", as: "icon",
+                    componentName: "Html",
+                    as: "icon",
                     props: () => ({
                       icon: showPassword.newPassword
                         ? "ph:eye"
@@ -403,7 +404,8 @@ export function ForgotPasswordForm() {
                 as: "div",
                 attributes: [
                   {
-                    componentName: "Html", as: "icon",
+                    componentName: "Html",
+                    as: "icon",
                     props: () => ({
                       icon: showPassword.confirmPassword
                         ? "ph:eye"

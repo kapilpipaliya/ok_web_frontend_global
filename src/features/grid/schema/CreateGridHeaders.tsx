@@ -325,8 +325,7 @@ export function CreateGridHeaders(
               when={
                 !hideDeleteAction &&
                 (gridState.isNoPermissionCheck ||
-                  (!!gridState.formMetaData() &&
-                    gridState.hasFullPermission()))
+                  (!!gridState.formMetaData() && gridState.hasFullPermission()))
               }
             >
               <IconButton

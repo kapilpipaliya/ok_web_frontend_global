@@ -1,12 +1,10 @@
 import { Show, useContext } from "solid-js";
-import { Dynamic } from "solid-js/web";
 
 import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 export const SlotField = () => {
-
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
@@ -14,5 +12,9 @@ export const SlotField = () => {
 
   const SlotComponent = useContext(SlotContext);
 
-  return <Show when={SlotComponent}><SlotComponent slot={meta()?.P.slot} /></Show>;
+  return (
+    <Show when={SlotComponent}>
+      <SlotComponent slot={meta()?.P.slot} />
+    </Show>
+  );
 };

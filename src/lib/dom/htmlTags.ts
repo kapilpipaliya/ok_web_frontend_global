@@ -88,10 +88,7 @@ export const inlineTextElements = [
 ];
 
 // Custom elements
-export const customElements = [
-  "icon",
-  "portal",
-];
+export const customElements = ["icon", "portal"];
 
 // Image and multimedia elements
 export const multimediaElements = [
@@ -279,9 +276,13 @@ export const htmlTagsTree = {
     //   label: "Root Elements"
     // },
     {
-      children: metadataElements.map(tag => ({ children: [], id: tag, label: tag })),
+      children: metadataElements.map((tag) => ({
+        children: [],
+        id: tag,
+        label: tag,
+      })),
       id: "metadata-elements",
-      label: "Metadata Elements"
+      label: "Metadata Elements",
     },
     {
       children: sectioningElements.map((tag) => ({

@@ -129,7 +129,8 @@ export function HighlightSetValueContent(
           </Match>
           <Match
             when={
-              (selectedAttr()?.P.componentName === "Html" && selectedAttr()?.P.as === "icon") &&
+              selectedAttr()?.P.componentName === "Html" &&
+              selectedAttr()?.P.as === "icon" &&
               props.meta.P.key === "icon"
             }
           >

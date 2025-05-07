@@ -31,7 +31,7 @@ export function HideShowIcon(props: { iconSize: number; metaVertex: Vertex }) {
         css`
     background-color: transparent;
     border: none;
-    ${isHiddenAttr() ? 'color: ${args.theme.var.color.primary};' : ''}
+    ${isHiddenAttr() ? "color: ${args.theme.var.color.primary};" : ""}
   `,
       ]}
       icon={icon()}

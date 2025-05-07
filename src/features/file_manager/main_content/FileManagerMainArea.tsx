@@ -28,9 +28,7 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
       fileManagerStore.toParentEdgeType,
       item.id,
     );
-    // @ts-expect-error ignore
     if (!data.error && data.result) {
-      // @ts-expect-error ignore
       setChildren(data.result);
     }
     return data;

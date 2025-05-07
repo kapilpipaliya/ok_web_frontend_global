@@ -8,7 +8,7 @@ import {
   splitProps,
 } from "solid-js";
 import { Portal } from "solid-js/web";
-import {createUniqueId} from "~/lib/solid/createUniqueId";
+import { createUniqueId } from "~/lib/solid/createUniqueId";
 import {
   arrow as floatingArrow,
   computePosition,

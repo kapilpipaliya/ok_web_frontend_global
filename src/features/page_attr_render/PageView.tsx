@@ -13,10 +13,16 @@ import {
 } from "~/features/page_designer/context/PreviewContext";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { DataContext, useDataContext } from "~/features/page_attr_render/context/DataContext";
-import { PageRenderContextProvider, PageRenderObject } from "./context/PageRenderContext";
+import {
+  DataContext,
+  useDataContext,
+} from "~/features/page_attr_render/context/DataContext";
+import {
+  PageRenderContextProvider,
+  type PageRenderObject,
+} from "./context/PageRenderContext";
 import { createFunctionProxy } from "~/components/form/createFunctionProxy";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export function PageView(
   props: Readonly<{
@@ -119,7 +125,13 @@ export function PageView(
       // get' on proxy: property 'Symbol(solid-proxy)' is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value
       // (expected '#<Object>' but got 'undefined')
       // because in createFunctionProxy we return dynamicFns() in case of $PROXY
-      const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
+      const evaluateFns = (
+        fns:
+          | ((args: FunctionArgumentType) => Record<string, unknown>)
+          | string
+          | undefined
+          | null,
+      ) => {
         if (typeof fns === "function") {
           return fns(previewStore[0].context) || {};
         }
@@ -147,9 +159,9 @@ export function PageView(
       return {
         get fns() {
           return functionProxy;
-        }
-      }
-    }
+        },
+      };
+    },
   } as PageRenderObject);
 
   return (

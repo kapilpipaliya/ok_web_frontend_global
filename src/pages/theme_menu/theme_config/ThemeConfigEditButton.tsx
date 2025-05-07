@@ -5,11 +5,11 @@ import type { Vertex } from "~/lib/graph/graph";
 import { IconButton } from "~/components/styled/IconButton";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
-import { getThemeFormSchema } from "./themeFormSchema";
+import { getThemeFormSchema } from "./schema/themeFormSchema";
 import { css } from "~/lib/styles";
 import type { CssType } from "~/components/form/type/FieldSchemaType";
 
-export function ThemeConfigButton(props: {
+export function ThemeConfigEditButton(props: {
   css?: CssType;
   item: Vertex;
   size: number;

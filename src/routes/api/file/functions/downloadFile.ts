@@ -2,12 +2,12 @@ import type { Session } from "neo4j-driver";
 import fs from "node:fs/promises";
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
-import {Vertex} from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 interface FileMetadata {
-    filePath: string;
-    originalFilename: string;
-    mimeType: string;
+  filePath: string;
+  originalFilename: string;
+  mimeType: string;
 }
 
 /**
@@ -17,7 +17,10 @@ interface FileMetadata {
  * @returns Response object containing the file data or an error message
  * @throws APIError if the file is not found or cannot be read
  */
-export async function downloadFile(fileId: string, dbSession: Session): Promise<Response> {
+export async function downloadFile(
+  fileId: string,
+  dbSession: Session,
+): Promise<Response> {
   const fileMetadata = await getFileMetadata(dbSession, fileId);
 
   if (!fileMetadata) {
@@ -40,7 +43,8 @@ export async function downloadFile(fileId: string, dbSession: Session): Promise<
       status: 200,
     });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
     throw new APIError(`Error reading file from disk: ${errorMessage}`, 500);
   }
 }

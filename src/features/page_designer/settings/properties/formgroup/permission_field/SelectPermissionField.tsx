@@ -15,7 +15,7 @@ interface SelectPermissionFieldProps {
 
 export function SelectPermissionField(props: SelectPermissionFieldProps) {
   const [graph] = useGraph();
-  
+
   const metaAttribute = klona(pageAttr.find((meta) => meta.key === "Perm"));
   const { metaVertexId } = generateTableInputMeta(metaAttribute!);
 

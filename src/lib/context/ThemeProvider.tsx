@@ -1,14 +1,33 @@
 import { oklch, formatHex } from "culori";
-import { type Component, createEffect, createMemo, JSX } from "solid-js";
+import { type Component, createEffect, createMemo, type JSX } from "solid-js";
 import { StyleRenderer } from "~/components/StyleRenderer";
 import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
 import { themeConfig } from "../graph/get/sync/theme/themeConfig";
-import type { ThemeContext as ThemeContextType, ColorMode, ColorAdjustments, ColorScheme, Breakpoint } from "../styles";
-import { getColorShade, createColorScheme, getContrastColor, mixColors, createGradient, getHslComponents, findAccessibleColor, getContrastRatio, meetsAccessibilityStandards } from "../styles/colorUtils";
+import type {
+  ThemeContext as ThemeContextType,
+  ColorMode,
+  ColorAdjustments,
+  ColorScheme,
+  Breakpoint,
+} from "../styles";
+import {
+  getColorShade,
+  createColorScheme,
+  getContrastColor,
+  mixColors,
+  createGradient,
+  getHslComponents,
+  findAccessibleColor,
+  getContrastRatio,
+  meetsAccessibilityStandards,
+} from "../styles/colorUtils";
 import { DEFAULT_THEME, CSS_RESET, FONT_PRESETS } from "../styles/constants";
-import { getMediaQuery, getPrefersColorSchemeQuery, getAnimationDefinition } from "../styles/mediaUtils";
+import {
+  getMediaQuery,
+  getPrefersColorSchemeQuery,
+  getAnimationDefinition,
+} from "../styles/mediaUtils";
 import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
-import { deepMerge } from "./deepMerge";
 import { useGraph } from "../graph/GraphContext";
 import { createStore, reconcile } from "solid-js/store";
 
@@ -18,14 +37,19 @@ export interface ThemeProviderProps {
 export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
   const [graph] = useGraph();
 
-  const [theme, setTheme] = createStore(themeConfig(getGlobalThemeVertex(graph)));
-  createEffect(() => {
-    const newTheme = themeConfig(getGlobalThemeVertex(graph));
-    setTheme(reconcile(newTheme));
-  }, {
-    defer: true,
-  });
-  
+  const [theme, setTheme] = createStore(
+    themeConfig(getGlobalThemeVertex(graph)),
+  );
+  createEffect(
+    () => {
+      const newTheme = themeConfig(getGlobalThemeVertex(graph));
+      setTheme(reconcile(newTheme));
+    },
+    {
+      defer: true,
+    },
+  );
+
   const handler = {
     get(target: Partial<ThemeContextType>, prop: string | symbol) {
       if (typeof prop === "string" && prop === "var") {
@@ -104,11 +128,11 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
 
     getContrastColor: (
       color: string,
-      options: string[] = ["#ffffff", "#000000"]
+      options: string[] = ["#ffffff", "#000000"],
     ): string => getContrastColor(color, options),
 
     getSemanticColor: (
-      context: "text" | "background" | "border" | "surface" | "muted"
+      context: "text" | "background" | "border" | "surface" | "muted",
     ): string => {
       const colorMode = themeProxy.var?.colorMode as ColorMode;
       const baseColor = themeProxy.var?.color?.base || DEFAULT_THEME.color.base;
@@ -139,13 +163,14 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
       }
     },
 
-    mixColors: (color1: string, color2: string, amount = 50): string => mixColors(color1, color2, amount),
+    mixColors: (color1: string, color2: string, amount = 50): string =>
+      mixColors(color1, color2, amount),
 
     createGradient: (
       type: "linear" | "radial",
       colors: string[],
       stops?: number[],
-      angle = 0
+      angle = 0,
     ): string => createGradient(type, colors, stops, angle),
 
     getHsl: (color: string) => getHslComponents(color),
@@ -154,36 +179,41 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
       baseColor: string,
       backgroundColor: string,
       level: "AA" | "AAA" = "AA",
-      size: "normal" | "large" = "normal"
+      size: "normal" | "large" = "normal",
     ): string => findAccessibleColor(baseColor, backgroundColor, level, size),
   });
 
   // Accessibility helpers
   const createAccessibilityHelpers = () => ({
-    getContrastRatio: (color1: string, color2: string): number => getContrastRatio(color1, color2),
+    getContrastRatio: (color1: string, color2: string): number =>
+      getContrastRatio(color1, color2),
 
     meetsAccessibilityStandards: (
       foreground: string,
       background: string,
       level: "AA" | "AAA" = "AA",
-      size: "normal" | "large" = "normal"
-    ): boolean => meetsAccessibilityStandards(foreground, background, level, size),
+      size: "normal" | "large" = "normal",
+    ): boolean =>
+      meetsAccessibilityStandards(foreground, background, level, size),
 
     findAccessibleColor: (
       baseColor: string,
       backgroundColor: string,
       level: "AA" | "AAA" = "AA",
-      size: "normal" | "large" = "normal"
+      size: "normal" | "large" = "normal",
     ): string => findAccessibleColor(baseColor, backgroundColor, level, size),
   });
 
   // Media query helpers
   const createMediaQueryHelpers = () => ({
-    getMediaQuery: (breakpoint: Breakpoint): string => getMediaQuery(breakpoint),
+    getMediaQuery: (breakpoint: Breakpoint): string =>
+      getMediaQuery(breakpoint),
 
-    getPrefersColorSchemeQuery: (mode: "light" | "dark"): string => getPrefersColorSchemeQuery(mode),
+    getPrefersColorSchemeQuery: (mode: "light" | "dark"): string =>
+      getPrefersColorSchemeQuery(mode),
 
-    getContainerQuery: (size: string): string => `@container (min-width: ${size})`,
+    getContainerQuery: (size: string): string =>
+      `@container (min-width: ${size})`,
 
     // Animation helpers
     getAnimationDefinition: (
@@ -193,16 +223,17 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
       delay = "0ms",
       iterationCount: string | number = 1,
       direction = "normal",
-      fillMode = "none"
-    ): string => getAnimationDefinition(
-      name,
-      duration,
-      timing,
-      delay,
-      iterationCount,
-      direction,
-      fillMode
-    ),
+      fillMode = "none",
+    ): string =>
+      getAnimationDefinition(
+        name,
+        duration,
+        timing,
+        delay,
+        iterationCount,
+        direction,
+        fillMode,
+      ),
   });
 
   return (

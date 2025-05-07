@@ -1,7 +1,7 @@
-import type {FunctionArgumentType} from "~/components/form/type/FieldSchemaType";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
-import {css} from "~/lib/styles";
-import {getErrorSchema} from "~/lib/schema/getErrorSchema";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 /**
  * Creates a text input field
@@ -17,7 +17,7 @@ export function createTextField(
   label: string,
   onEnterKeyHandler?: (options: FunctionArgumentType) => void,
   setRef?: (ref: HTMLInputElement) => void,
-  validation: Record<string, any> = {required: true},
+  validation: Record<string, any> = { required: true },
 ) {
   return [
     {

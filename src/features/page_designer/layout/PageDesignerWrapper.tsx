@@ -93,10 +93,7 @@ export function PageDesignerWrapper(): JSX.Element {
     if (dbPromise) {
       // Get stored layout properties
       const db = await dbPromise;
-      const storedLayout = await db.get(
-        "keyval",
-        "page_designer_layout",
-      );
+      const storedLayout = await db.get("keyval", "page_designer_layout");
       if (storedLayout) {
         mergeVertexProperties<PageLayoutObject>(
           0,
@@ -148,11 +145,7 @@ export function PageDesignerWrapper(): JSX.Element {
     (async () => {
       if (!isServer && dbPromise) {
         const db = await dbPromise;
-        await db.put(
-          "keyval",
-          widthProps,
-          "page_designer_layout",
-        );
+        await db.put("keyval", widthProps, "page_designer_layout");
       }
     })();
   });

@@ -21,7 +21,7 @@ export function SaveIconButton(props: { formStoreId: string }) {
 
   // Check if save is disabled
   const isDisabled = createMemo(
-    () => !!txnId() && isDisabledTxn(txnId()!, graph)
+    () => !!txnId() && isDisabledTxn(txnId()!, graph),
   );
 
   // Get transaction status for UI enhancement
@@ -54,8 +54,8 @@ export function SaveIconButton(props: { formStoreId: string }) {
   // Get icon and tooltip based on transaction status
   const buttonProps = createMemo(() => {
     const status = txnStatus();
-    
-    if (status === 'modified') {
+
+    if (status === "modified") {
       return {
         icon: "ph:floppy-disk",
         title: "Save changes (Ctrl+S)",
@@ -66,10 +66,10 @@ export function SaveIconButton(props: { formStoreId: string }) {
             &:hover {
               color: \${args.theme.var.color.orange_500};
             }
-          `
-        ]
+          `,
+        ],
       };
-    } else if (status === 'reverted') {
+    } else if (status === "reverted") {
       return {
         // icon: "ph:arrow-clockwise-bold",
         // title: "Restore changes (Ctrl+S)",
@@ -82,10 +82,10 @@ export function SaveIconButton(props: { formStoreId: string }) {
             &:hover {
               color: \${args.theme.var.color.blue_500};
             }
-          `
-        ]
+          `,
+        ],
       };
-    } else if (status === 'error') {
+    } else if (status === "error") {
       return {
         icon: "ph:warning-circle",
         title: "Error occurred",
@@ -96,15 +96,15 @@ export function SaveIconButton(props: { formStoreId: string }) {
             &:hover {
               color: \${args.theme.var.color.red_500};
             }
-          `
-        ]
+          `,
+        ],
       };
     } else {
       // Default for committed/idle states
       return {
         icon: "ph:floppy-disk",
         title: "Save (Ctrl+S)",
-        css: headerIconButtonCss
+        css: headerIconButtonCss,
       };
     }
   });

@@ -94,7 +94,7 @@ const SectionHeader = (props: SectionHeaderProps) => (
       {props.icon && <Icon icon={props.icon} width="18" height="18" />}
       {props.title}
     </As>
-    <PlusIconButton 
+    <PlusIconButton
       onClick={props.onAddClick}
       ariaLabel={`Add new ${props.title}`}
     />
@@ -124,13 +124,14 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   createEffect(() => {
     if (props.rootLevel) {
       // Fetch children level Components
-      const vertexes: Vertex[] = evalExpression("g:'Component'", {
-        graph,
-        setGraph,
-        vertexes: [],
-      }) || [];
+      const vertexes: Vertex[] =
+        evalExpression("g:'Component'", {
+          graph,
+          setGraph,
+          vertexes: [],
+        }) || [];
       setRootVertexes(
-        vertexes //.filter((vertex) => !vertex.OUT?.ParentComponent || Object.keys(vertex.OUT.ParentComponent).length === 0) || [],
+        vertexes, //.filter((vertex) => !vertex.OUT?.ParentComponent || Object.keys(vertex.OUT.ParentComponent).length === 0) || [],
       );
     } else {
       // children level Components are already fetched when page is loaded.
@@ -162,9 +163,7 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
         L: ["Component"],
         OUT: {},
         P: {
-          parentId: props.rootLevel
-            ? null
-            : formStoreVertex().P.formDataId,
+          parentId: props.rootLevel ? null : formStoreVertex().P.formDataId,
         },
       } as Vertex,
       graph,
@@ -174,9 +173,9 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
 
   return (
     <>
-      <SectionHeader 
-        title={props.rootLevel ? "Components" : "Page Components"} 
-        onAddClick={handleAddComponentClick} 
+      <SectionHeader
+        title={props.rootLevel ? "Components" : "Page Components"}
+        onAddClick={handleAddComponentClick}
         icon={props.rootLevel ? "ph:puzzle-piece" : "ph:layout"}
       />
       <ComponentList
@@ -216,9 +215,9 @@ const TemplatesSection = () => {
 `,
       ]}
     >
-      <SectionHeader 
-        title="Templates" 
-        onAddClick={handleAddTemplateClick} 
+      <SectionHeader
+        title="Templates"
+        onAddClick={handleAddTemplateClick}
         icon="ph:files"
       />
       <PagesList coll="Template" />
@@ -226,10 +225,10 @@ const TemplatesSection = () => {
   );
 };
 
-const TabList = (props: { 
-  tabs: Array<{ collection: string; title: string }>,
-  selectedTab: { collection: string; title: string },
-  onSelect: (tab: { collection: string; title: string }) => void
+const TabList = (props: {
+  tabs: Array<{ collection: string; title: string }>;
+  selectedTab: { collection: string; title: string };
+  onSelect: (tab: { collection: string; title: string }) => void;
 }) => (
   <UlContainer>
     <For each={props.tabs}>
@@ -279,7 +278,7 @@ export function FormElementTabs() {
 `}
       >
         <TabsContainer>
-          <TabList 
+          <TabList
             tabs={leftMenuTabs}
             selectedTab={selectedTab()}
             onSelect={setSelectedTab}
@@ -301,9 +300,9 @@ export function FormElementTabs() {
               edgeName="ParentComp"
               rootExpression={`g:'Comp[Root]'`}
             />
-            
+
             <Divider />
-            
+
             {/* <Show keyed when={formStoreVertex()?.id}>
               <DesignerFormIdContext.Provider value={formStoreVertex().id}>
                 <PageLevelComponents rootLevel={false} />

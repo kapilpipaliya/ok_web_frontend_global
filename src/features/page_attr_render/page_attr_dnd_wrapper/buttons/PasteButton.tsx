@@ -6,7 +6,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
-  type PageLayoutObject
+  type PageLayoutObject,
 } from "~/features/page_designer/context/LayoutContext";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
@@ -23,15 +23,15 @@ interface PasteButtonProps {
 
 export function PasteButton(props: Readonly<PasteButtonProps>) {
   const [graph, setGraph] = useGraph();
-  
+
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-  
+
   const layoutStoreId = useDesignerLayoutStore();
-  const layoutVertex = () => 
+  const layoutVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
-  
+
   const copiedItem = () => layoutVertex().P.copiedItem;
 
   return (
@@ -67,4 +67,4 @@ export function PasteButton(props: Readonly<PasteButtonProps>) {
       />
     </Show>
   );
-} 
+}

@@ -1,6 +1,5 @@
 import { SettingsLayout } from "~/components/styled/SettingsLayout";
 import { ActivityLog } from "~/pages/global/activity/ActivityLog";
-import { CompanySettings } from "~/pages/global/company/CompanySettings";
 import { EmailAudit } from "~/pages/global/email/EmailAudit";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";

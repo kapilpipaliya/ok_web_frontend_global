@@ -5,8 +5,7 @@ import type { Navigator } from "@solidjs/router";
 
 import { formSubmit } from "~/components/form/functions/formSubmit";
 import { capturePreview } from "~/lib/playwright/capturePreview";
-import { useNavigate } from "@solidjs/router";
-import { GraphInterface } from "~/lib/graph/GraphContext";
+import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 /**
  * Saves a form and captures a preview
@@ -14,7 +13,7 @@ import { GraphInterface } from "~/lib/graph/GraphContext";
  * @param graph Current graph state
  * @param setGraph Graph setter function
  * @param showErrorToast Error toast function
- * @param showLoadingToast Loading toast function 
+ * @param showLoadingToast Loading toast function
  * @param showWarningToast Warning toast function
  * @param updateUrl Whether to update URL after saving (for main forms)
  * @returns Promise<boolean> indicating success
@@ -24,10 +23,15 @@ export const saveAndCaptureForm = async (
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   showErrorToast: (message: string) => void,
-  showLoadingToast: (options: { loadMessage: string; onSuccess: (value: any) => void; promise: Promise<any>; successMessage: string; }) => void,
+  showLoadingToast: (options: {
+    loadMessage: string;
+    onSuccess: (value: any) => void;
+    promise: Promise<any>;
+    successMessage: string;
+  }) => void,
   showWarningToast: (message: string) => void,
   navigate: Navigator,
-  updateUrl: boolean = false,
+  updateUrl = false,
 ) => {
   // Save the form
   const formSubmitError = await formSubmit(
@@ -42,26 +46,31 @@ export const saveAndCaptureForm = async (
 
   // If form saved successfully, capture preview
   if (!formSubmitError) {
-    const previewResult = await capturePreview(formStoreVertex, graph, setGraph, showErrorToast);
-    
+    const previewResult = await capturePreview(
+      formStoreVertex,
+      graph,
+      setGraph,
+      showErrorToast,
+    );
+
     // Update URL if needed and form was saved successfully
     if (updateUrl) {
       const formDataId = formStoreVertex().P.formDataId;
       if (formDataId) {
         const currentPath = window.location.pathname;
-        if (currentPath.includes('/new')) {
+        if (currentPath.includes("/new")) {
           // Create new URL with the format /admin/EntityType/id
-          const urlParts = currentPath.split('/new');
+          const urlParts = currentPath.split("/new");
           const newUrl = `${urlParts[0]}/${formDataId}`;
-          
+
           // Replace URL using navigate
           navigate(newUrl, { replace: true });
         }
       }
     }
-    
+
     return previewResult;
   }
 
   return false;
-}; 
+};

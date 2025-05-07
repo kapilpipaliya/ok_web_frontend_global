@@ -12,19 +12,19 @@ export function isDisabledTxn(
   if (!txnId) {
     return true;
   }
-  
+
   const txnVertex = graph.vertexes[`txn${txnId}`];
   if (!txnVertex) {
     return true;
   }
 
   const txnDetail = txnVertex.P as TransactionDetail;
-  
+
   // If transaction has an error status, it's disabled
-  if (txnDetail.status === 'error') {
+  if (txnDetail.status === "error") {
     return true;
   }
-  
+
   // Enable if there are any changes to commit
   return !hasChangesToCommit(txnDetail);
 }

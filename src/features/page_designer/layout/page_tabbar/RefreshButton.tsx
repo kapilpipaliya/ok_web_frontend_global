@@ -6,7 +6,7 @@ export function RefreshButton(props: { handleRefresh: () => void }) {
   // Handle keyboard shortcuts
   const handleKeyDown = (e: KeyboardEvent) => {
     // Refresh - F5 or Ctrl+R
-    if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'u')) {
+    if (e.key === "F5" || ((e.ctrlKey || e.metaKey) && e.key === "u")) {
       e.preventDefault();
       props.handleRefresh();
     }
@@ -14,11 +14,11 @@ export function RefreshButton(props: { handleRefresh: () => void }) {
 
   // Register and clean up event listeners
   onMount(() => {
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
   });
 
   onCleanup(() => {
-    document.removeEventListener('keydown', handleKeyDown);
+    document.removeEventListener("keydown", handleKeyDown);
   });
 
   return (

@@ -40,7 +40,10 @@ export function themeConfig(themeVertex?: Vertex): Partial<ThemeContext> {
 
   // Handle properties inside the "var" key using deep merge
   if (graphConfig.var) {
-    result.var = deepMerge(result.var || {}, graphConfig.var as Record<string, unknown>);
+    result.var = deepMerge(
+      result.var || {},
+      graphConfig.var as Record<string, unknown>,
+    );
   }
 
   // Keep non-var properties at the root level
@@ -51,4 +54,3 @@ export function themeConfig(themeVertex?: Vertex): Partial<ThemeContext> {
   });
   return result;
 }
-

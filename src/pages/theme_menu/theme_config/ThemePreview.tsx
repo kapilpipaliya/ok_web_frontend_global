@@ -34,7 +34,7 @@ export function ThemePreview(props: { item: Vertex }) {
           <As
             as="div"
             css={css`
-  ${getColorClass(themeData()?.variables?.[variable])}
+  ${getColorClass(themeData()?.var?.color?.[variable])}
   height: 20px;
   width: 0.5rem;
 `}

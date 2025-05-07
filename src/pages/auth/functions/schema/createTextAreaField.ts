@@ -1,7 +1,7 @@
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
-import {css} from "~/lib/styles";
-import type {FunctionArgumentType} from "~/components/form/type/FieldSchemaType";
-import {getErrorSchema} from "~/lib/schema/getErrorSchema";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 /**
  * Creates a text area field
@@ -15,7 +15,7 @@ export function createTextAreaField(
   key: string,
   label: string,
   rows = 6,
-  validation: Record<string, any> = {required: true},
+  validation: Record<string, any> = { required: true },
 ) {
   return [
     {

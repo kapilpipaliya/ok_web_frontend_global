@@ -21,7 +21,7 @@ import { deleteLayoutAttr } from "~/features/page_designer/functions/layout/dele
 import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
-  type PageLayoutObject
+  type PageLayoutObject,
 } from "../../context/LayoutContext";
 import { LayoutTreeItem } from "./LayoutTreeItem";
 import { IconButton } from "~/components/styled/IconButton";
@@ -35,16 +35,18 @@ export function LayoutTree() {
   const [graph, setGraph] = useGraph();
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
   const [treeRef, setTreeRef] = createSignal<HTMLElement>();
-  const [jsonEditorOpenItems, setJsonEditorOpenItems] = createStore<Record<Id, boolean>>({});
+  const [jsonEditorOpenItems, setJsonEditorOpenItems] = createStore<
+    Record<Id, boolean>
+  >({});
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const navigate = useNavigate();
 
   const formStoreId = useDesignerFormIdContext();
   const layoutStoreId = useDesignerLayoutStore();
-  
+
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-    
+
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
 
@@ -63,21 +65,17 @@ export function LayoutTree() {
         : []
       : [];
   };
-  
+
   const toggleAllJsonEditors = () => {
     // Toggle the global setting
-    const newGlobalSetting = !(formStoreVertex()?.P.showAllJsonEditors ?? false);
-    
-    mergeVertexProperties<FormStoreObject>(
-      0,
-      formStoreId!,
-      graph,
-      setGraph,
-      {
-        showAllJsonEditors: newGlobalSetting
-      }
+    const newGlobalSetting = !(
+      formStoreVertex()?.P.showAllJsonEditors ?? false
     );
-    
+
+    mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
+      showAllJsonEditors: newGlobalSetting,
+    });
+
     // Reset all individual item settings to ensure global setting is applied uniformly
     setJsonEditorOpenItems(reconcile({}));
   };
@@ -86,23 +84,24 @@ export function LayoutTree() {
   const toggleJsonEditorForItem = (itemId: Id) => {
     // Get the current global setting
     const globalSetting = formStoreVertex()?.P.showAllJsonEditors ?? false;
-    
+
     // Get the current item-specific setting, defaulting to the global setting if not set
-    const currentItemSetting = itemId in jsonEditorOpenItems 
-      ? jsonEditorOpenItems[itemId as string] 
-      : globalSetting;
-    
+    const currentItemSetting =
+      itemId in jsonEditorOpenItems
+        ? jsonEditorOpenItems[itemId as string]
+        : globalSetting;
+
     // Toggle this specific item's setting
     setJsonEditorOpenItems(itemId as string, !currentItemSetting);
   };
-  
+
   // Function to check if JSON editor is open for a specific item
   const isJsonEditorOpen = (itemId: Id) => {
     // If we have an explicit setting for this item, use it
     if (itemId in jsonEditorOpenItems) {
       return jsonEditorOpenItems[itemId as string];
     }
-    
+
     // Otherwise use the global setting
     return formStoreVertex()?.P.showAllJsonEditors ?? false;
   };
@@ -111,29 +110,32 @@ export function LayoutTree() {
   const focusSelectedItem = () => {
     const currentSelectedId = formStoreVertex()?.P.selectedId;
     if (!currentSelectedId) return;
-    
+
     const treeElement = treeRef();
     if (!treeElement) return;
-    
+
     // Short delay to ensure the DOM has updated
     setTimeout(() => {
-      const selectedElement = treeElement.querySelector(`[data-item-id="${currentSelectedId}"]`) as HTMLElement;
+      const selectedElement = treeElement.querySelector(
+        `[data-item-id="${currentSelectedId}"]`,
+      ) as HTMLElement;
       if (selectedElement) {
         selectedElement.focus();
       }
     }, 10);
   };
 
-
   // Save function from SaveIconButton
   const handleSaveForm = async () => {
     // Unfocus (blur) any active text input before saving
-    if (document.activeElement instanceof HTMLElement && 
-        (document.activeElement.tagName === 'INPUT' || 
-         document.activeElement.tagName === 'TEXTAREA')) {
+    if (
+      document.activeElement instanceof HTMLElement &&
+      (document.activeElement.tagName === "INPUT" ||
+        document.activeElement.tagName === "TEXTAREA")
+    ) {
       document.activeElement.blur();
     }
-    
+
     const isMainForm = layoutStoreVertex().P.mainFormId === formStoreId;
     return await saveAndCaptureForm(
       formStoreVertex,
@@ -143,7 +145,7 @@ export function LayoutTree() {
       showLoadingToast,
       showWarningToast,
       navigate,
-      isMainForm
+      isMainForm,
     );
   };
 
@@ -158,31 +160,31 @@ export function LayoutTree() {
     // Get the currently selected component
     const currentSelectedId = formStoreVertex()?.P.selectedId;
     if (!currentSelectedId) return;
-    
+
     const selectedVertex = graph.vertexes[currentSelectedId];
     if (!selectedVertex) return;
-    
+
     // Get form data and transaction ID
     const formDataId = formStoreVertex()?.P.formDataId;
     if (!formDataId) return;
-    
+
     const txnId = formStoreVertex()?.P.txnId || 0;
     const formDataVertex = graph.vertexes[formDataId];
     const formVertex = rootVertexes()[0];
-    
+
     if (!formDataVertex || !formVertex) return;
-    
+
     // Default HTML component properties - a simple div with padding
-    const htmlProps = { 
+    const htmlProps = {
       as: "div",
       css: css`
         padding: 10px;
-      `
+      `,
     };
-    
+
     let parentVertex: Vertex;
     let targetVertex: Vertex | undefined = selectedVertex;
-    
+
     // Determine where to add the component based on position
     if (position === "center") {
       // Adding as a child - use selected vertex as parent
@@ -190,31 +192,33 @@ export function LayoutTree() {
       targetVertex = undefined; // Don't need target when adding as child
     } else {
       // For before/after - find the parent of selected vertex
-      const parentElements = evalExpression("<-Attr", { 
-        graph, 
-        vertexes: [selectedVertex] 
-      }) || [];
-      
-      parentVertex = parentElements.length > 0 
-        ? parentElements[0]   // Use parent if found
-        : formDataVertex;     // Fall back to root if no parent
+      const parentElements =
+        evalExpression("<-Attr", {
+          graph,
+          vertexes: [selectedVertex],
+        }) || [];
+
+      parentVertex =
+        parentElements.length > 0
+          ? parentElements[0] // Use parent if found
+          : formDataVertex; // Fall back to root if no parent
     }
-    
+
     // Add the HTML component
     const newComponentId = addComponentAttrInPage(
-      formVertex,                              // Form vertex
-      parentVertex,                            // Parent to add to
-      txnId,                                   // Transaction ID
-      graph,                                   // Graph
-      setGraph,                                // Graph setter
-      "Html",                                  // Component type
-      htmlProps,                               // Component properties
-      position !== "center" ? targetVertex : undefined,  // Target vertex
-      position                                 // Position
+      formVertex, // Form vertex
+      parentVertex, // Parent to add to
+      txnId, // Transaction ID
+      graph, // Graph
+      setGraph, // Graph setter
+      "Html", // Component type
+      htmlProps, // Component properties
+      position !== "center" ? targetVertex : undefined, // Target vertex
+      position, // Position
     );
-    
+
     if (newComponentId === -1) return;
-    
+
     // Sort children for before/after positions to ensure correct order
     if (position !== "center") {
       const newComponentVertex = {
@@ -222,9 +226,9 @@ export function LayoutTree() {
         IN: {},
         L: ["Comp"],
         OUT: {},
-        P: { key: "Html" }
+        P: { key: "Html" },
       } as Vertex;
-      
+
       sortChildren(
         graph,
         setGraph,
@@ -232,19 +236,19 @@ export function LayoutTree() {
         newComponentVertex,
         parentVertex,
         targetVertex,
-        position
+        position,
       );
     }
-    
+
     // Select the newly created component
     onLayoutItemClick(
       layoutStoreVertex(),
       formStoreVertex(),
       newComponentId,
       graph,
-      setGraph
+      setGraph,
     );
-    
+
     // Focus the newly created item
     setTimeout(focusSelectedItem, 20);
   };
@@ -253,44 +257,47 @@ export function LayoutTree() {
   const handleKeyDown = (e: KeyboardEvent) => {
     // Skip handling if the tree element doesn't have focus
     const treeElement = treeRef();
-    
+
     // First check for shortcuts from other components
     // ----------------------------------------------
-    
+
     // Add HTML components with shortcuts
     // Cmd+C - Add HTML component center
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k' && !e.shiftKey && !e.altKey) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "k" && !e.shiftKey && !e.altKey) {
       e.preventDefault();
       addHtmlComponent("center");
       return;
     }
-    
+
     // Cmd+B - Add HTML component before
-    if ((e.metaKey || e.ctrlKey) && e.key === 'j' && !e.shiftKey && !e.altKey) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "j" && !e.shiftKey && !e.altKey) {
       e.preventDefault();
       addHtmlComponent("before");
       return;
     }
-    
+
     // Cmd+A - Add HTML component after
-    if ((e.metaKey || e.ctrlKey) && e.key === 'l' && !e.shiftKey && !e.altKey) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "l" && !e.shiftKey && !e.altKey) {
       e.preventDefault();
       addHtmlComponent("after");
       return;
     }
-    
+
     // Delete - Delete/Backspace key
-    if (((e.metaKey || e.ctrlKey) && (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'd'))) {
+    if (
+      (e.metaKey || e.ctrlKey) &&
+      (e.key === "Delete" || e.key === "Backspace" || e.key === "d")
+    ) {
       e.preventDefault();
       const currentSelectedId = formStoreVertex()?.P.selectedId;
       if (!currentSelectedId) return;
-      
+
       const selectedVertex = graph.vertexes[currentSelectedId];
       if (!selectedVertex) return;
-      
+
       // Get component name for the toast message
-      const componentName = selectedVertex.P?.key || 'Html';
-      
+      const componentName = selectedVertex.P?.key || "Html";
+
       // Import the deleteLayoutAttr functionality from DeleteButton
       const { showSuccessToast } = useToast();
       deleteLayoutAttr(
@@ -301,13 +308,13 @@ export function LayoutTree() {
         formStoreVertex()?.P.txnId,
         componentName,
         showSuccessToast,
-        layoutStoreId
+        layoutStoreId,
       );
       return;
     }
-    
+
     // Undo - Ctrl+Z
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
       e.preventDefault();
       const formTxnId = formStoreVertex()?.P.txnId;
       if (formTxnId && undoAllowed(formTxnId, graph)) {
@@ -315,10 +322,12 @@ export function LayoutTree() {
       }
       return;
     }
-    
+
     // Redo - Ctrl+Y or Ctrl+Shift+Z
-    if (((e.ctrlKey || e.metaKey) && e.key === 'y') || 
-        ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'z')) {
+    if (
+      ((e.ctrlKey || e.metaKey) && e.key === "y") ||
+      ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "z")
+    ) {
       e.preventDefault();
       const formTxnId = formStoreVertex()?.P.txnId;
       if (formTxnId && redoAllowed(formTxnId, graph)) {
@@ -326,46 +335,42 @@ export function LayoutTree() {
       }
       return;
     }
-    
+
     // Save - Ctrl+S
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
       e.preventDefault(); // Prevent browser's save dialog
       if (!isSaveDisabled()) {
         handleSaveForm();
       }
       return;
     }
-    
+
     // Refresh - F5 or Ctrl+R
     // if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key === 'r')) {
     //   e.preventDefault();
     //   handleRefresh();
     //   return;
     // }
-    
 
-    
-    
-    
     const currentSelectedId = formStoreVertex()?.P.selectedId;
     if (!currentSelectedId) return;
-    
+
     // Find all selectable tree items in the DOM
     if (!treeElement) return;
 
     // Handle backslash key to toggle visibility
-    if (e.key === '\\') {
+    if (e.key === "\\") {
       e.preventDefault();
       const itemId = String(currentSelectedId);
       const vertex = graph.vertexes[itemId];
       if (!vertex) return;
-      
+
       // Call toggleHidden from HideShowIcon
       toggleHidden(itemId as Id, formStoreId!, graph, setGraph);
       return;
     }
-    
-    if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+
+    if ((e.ctrlKey || e.metaKey) && e.key === "o") {
       e.preventDefault();
       // Get the current item's JSON editor state
       const itemId = String(currentSelectedId);
@@ -374,35 +379,41 @@ export function LayoutTree() {
 
       // Toggle JSON editor for the selected item
       toggleJsonEditorForItem(itemId as Id);
-      
+
       // Focus the item after toggling
       focusSelectedItem();
       return;
     }
-    
-    const itemElements = treeElement.querySelectorAll('[data-item-id]');
+
+    const itemElements = treeElement.querySelectorAll("[data-item-id]");
     if (itemElements.length === 0) return;
-    
+
     // Find the currently selected element
     const currentElementIndex = Array.from(itemElements).findIndex(
-      el => el.getAttribute('data-item-id') === String(currentSelectedId)
+      (el) => el.getAttribute("data-item-id") === String(currentSelectedId),
     );
-    
+
     if (currentElementIndex === -1) return;
-    
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault();
       // Vertical navigation
       let newIndex;
-      if (e.key === 'ArrowUp') {
+      if (e.key === "ArrowUp") {
         // Move to previous visible item
-        newIndex = currentElementIndex > 0 ? currentElementIndex - 1 : itemElements.length - 1;
+        newIndex =
+          currentElementIndex > 0
+            ? currentElementIndex - 1
+            : itemElements.length - 1;
       } else {
         // Move to next visible item
-        newIndex = currentElementIndex < itemElements.length - 1 ? currentElementIndex + 1 : 0;
+        newIndex =
+          currentElementIndex < itemElements.length - 1
+            ? currentElementIndex + 1
+            : 0;
       }
-      
-      const nextItemId = itemElements[newIndex].getAttribute('data-item-id');
+
+      const nextItemId = itemElements[newIndex].getAttribute("data-item-id");
       if (nextItemId) {
         onLayoutItemClick(
           layoutStoreVertex(),
@@ -411,35 +422,36 @@ export function LayoutTree() {
           graph,
           setGraph,
         );
-        
+
         // Focus the newly selected item
         focusSelectedItem();
       }
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault();
       // Horizontal navigation - expand/collapse
       const itemId = String(currentSelectedId);
-      
+
       // Check if the item has children
       const vertex = graph.vertexes[itemId];
       if (!vertex) return;
-      
+
       const hasChildren = getChildrenAttrs(graph, setGraph, vertex).length > 0;
-      
-      if (e.key === 'ArrowLeft') {
+
+      if (e.key === "ArrowLeft") {
         const isExpanded = !collapsedKeys().includes(itemId as Id);
-        
+
         if (isExpanded && hasChildren) {
           // Collapse if expanded
           toggleExpand(itemId as Id);
-          
+
           // Focus the current item after collapsing
           focusSelectedItem();
         } else {
           // If already collapsed or no children, try to move to parent
           // Use evalExpression directly to get the parent since getChildrenAttrs doesn't support a parent parameter
-          const parentElements = evalExpression("<-Attr", { graph, vertexes: [vertex] }) || [];
-          
+          const parentElements =
+            evalExpression("<-Attr", { graph, vertexes: [vertex] }) || [];
+
           if (parentElements && parentElements.length > 0) {
             onLayoutItemClick(
               layoutStoreVertex(),
@@ -448,7 +460,7 @@ export function LayoutTree() {
               graph,
               setGraph,
             );
-            
+
             // Focus the parent item
             focusSelectedItem();
           } else {
@@ -456,19 +468,13 @@ export function LayoutTree() {
             focusSelectedItem();
           }
         }
-      } else if (e.key === 'ArrowRight' && hasChildren) {
+      } else if (e.key === "ArrowRight" && hasChildren) {
         const isExpanded = !collapsedKeys().includes(itemId as Id);
-        
-        if (!isExpanded) {
-          // Expand if collapsed
-          toggleExpand(itemId as Id);
-          
-          // Focus the current item after expanding
-          focusSelectedItem();
-        } else {
+
+        if (isExpanded) {
           // If already expanded, move to first child
           const childElements = getChildrenAttrs(graph, setGraph, vertex);
-          
+
           if (childElements.length > 0) {
             onLayoutItemClick(
               layoutStoreVertex(),
@@ -477,13 +483,19 @@ export function LayoutTree() {
               graph,
               setGraph,
             );
-            
+
             // Focus the first child
             focusSelectedItem();
           } else {
             // Make sure we maintain focus if something went wrong
             focusSelectedItem();
           }
+        } else {
+          // Expand if collapsed
+          toggleExpand(itemId as Id);
+
+          // Focus the current item after expanding
+          focusSelectedItem();
         }
       } else {
         // Just ensure focus is maintained
@@ -494,11 +506,11 @@ export function LayoutTree() {
 
   // Register and clean up event listeners - now for global keyboard shortcuts
   onMount(() => {
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
   });
 
   onCleanup(() => {
-    document.removeEventListener('keydown', handleKeyDown);
+    document.removeEventListener("keydown", handleKeyDown);
   });
 
   return (
@@ -525,7 +537,7 @@ export function LayoutTree() {
           background-color: white;
         `}
       >
-              <As
+        <As
           as="h3"
           css={css`
             color: rgb(17,24,39);
@@ -541,22 +553,21 @@ export function LayoutTree() {
           Layers
         </As>
 
-
-          <IconButton
+        <IconButton
           onClick={toggleAllJsonEditors}
-            css={[
-              ICON_BUTTON_STYLES.baseCss,
-              ICON_BUTTON_STYLES.defaultCss,
-              ICON_BUTTON_STYLES.spacingCss,
-              css`
+          css={[
+            ICON_BUTTON_STYLES.baseCss,
+            ICON_BUTTON_STYLES.defaultCss,
+            ICON_BUTTON_STYLES.spacingCss,
+            css`
               ${formStoreVertex()?.P.showAllJsonEditors ? "color: ${args.theme.var.color.primary};" : ""}
               background-color: transparent;
               border: none;
-        `,]}
-            icon="tabler:json" 
-            size={18} 
-          />
-
+        `,
+          ]}
+          icon="tabler:json"
+          size={18}
+        />
       </As>
       <As
         as="div"

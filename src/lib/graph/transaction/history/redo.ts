@@ -69,7 +69,7 @@ export function redo(
       // but only up to our current position
       txnValue.submittedIndex = Math.min(nextUndoIndex, originalSubmittedIndex);
     }
-    
+
     // Update transaction status using the helper function
     // This will handle all the different state permutations consistently
     txnValue.status = determineTransactionStatus(txnValue);
@@ -89,13 +89,14 @@ export function redo(
   } catch (error) {
     console.error("Error during redo operation:", error);
     // Update error status
-    txnValue.status = 'error';
+    txnValue.status = "error";
     txnValue.error = {
-      code: 'REDO_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown error during redo',
-      details: error
+      code: "REDO_ERROR",
+      message:
+        error instanceof Error ? error.message : "Unknown error during redo",
+      details: error,
     };
-    
+
     // Still try to update the transaction state
     replaceVertexProperties(
       0,

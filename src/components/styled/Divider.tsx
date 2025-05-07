@@ -9,6 +9,7 @@ export function Divider() {
       height: 1px;
       background-color: \${args.theme.var.color.base_20};
       margin: 8px 0;
-    `} />
+    `}
+    />
   );
 }

@@ -67,21 +67,21 @@ export function HtmlField(
       metaVertex
     ) {
       untrack(() => {
-        mergeVertexProperties(
-          txnId,
-          metaVertex.id,
-          graph,
-          setGraph,
-          {
-            text: target.textContent,
-          }
-        );
+        mergeVertexProperties(txnId, metaVertex.id, graph, setGraph, {
+          text: target.textContent,
+        });
       });
       saveUndoPoint(txnId, graph, setGraph);
     }
   };
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey) {
+    if (
+      e.key === "Enter" &&
+      !e.ctrlKey &&
+      !e.shiftKey &&
+      !e.altKey &&
+      !e.metaKey
+    ) {
       e.preventDefault();
       handleTextChange(e);
       // manually update the text, if changed
@@ -146,19 +146,19 @@ export function HtmlField(
       <Match when={local.as === "base"}>
         <Base {...others} />
       </Match>
-      
+
       <Match when={local.as === "link"}>
         <Link {...others} />
       </Match>
-      
+
       <Match when={local.as === "meta"}>
         <Meta {...others} />
       </Match>
-      
+
       <Match when={local.as === "style"}>
         <Style>{local.text}</Style>
       </Match>
-      
+
       <Match when={local.as === "title"}>
         <Title>{local.text}</Title>
       </Match>

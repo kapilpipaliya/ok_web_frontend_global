@@ -19,7 +19,7 @@ export async function GET({ request }: APIEvent) {
 
     if (result.records.length === 0) {
       // throw new APIError("Company logo not found", 404);
-      return redirect("/public/images/logo.svg");
+      return redirect("/images/logo.svg");
     }
 
     const fileId = result.records[0].get("fileId");

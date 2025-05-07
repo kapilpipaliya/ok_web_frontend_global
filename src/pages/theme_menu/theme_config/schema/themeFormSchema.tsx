@@ -167,6 +167,7 @@ export const getThemeFormSchema = (
       return;
     }
     const formData = options.data;
+    const formDataId = formData.id;
 
     try {
       options.contextData.modalState[1]("isLoading", true);
@@ -174,7 +175,7 @@ export const getThemeFormSchema = (
       const newFormTxnId = generateNewTxnId(graph, setGraph);
       let result;
 
-      if (formData.id.startsWith("-")) {
+      if (formDataId.startsWith("-")) {
         // Create new theme
         result = createFormVertex(graph, setGraph, newFormTxnId, "Theme", {
           data: options.contextData.modalState[0]?.editorData,
@@ -204,9 +205,10 @@ export const getThemeFormSchema = (
 
       try {
         await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
-        // we not need to ensure data here, because clicking on Add new Theme will create a new form..
-        // options.removeTxnIdAndCreateNew(options.txnId);
-        // options.ensureData();
+        // clicking on Add new Theme will create a new form..
+        if (formDataId.startsWith("-")) {
+          options.revertTransactionUpToIndex(options.txnId, -1);
+        }
         showSuccessToast("Theme Saved Successfully");
         options.contextData.modalState[1]("showModal", false);
         onSuccess();
@@ -327,7 +329,8 @@ export const getThemeFormSchema = (
                     }),
                   },
                 ],
-                componentName: "Html", as: "portal",
+                componentName: "Html",
+                as: "portal",
                 props: (options: FunctionArgumentType) => ({
                   hide: !options.contextData.modalState[0]?.showModal,
                 }),

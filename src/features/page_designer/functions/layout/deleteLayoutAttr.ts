@@ -28,7 +28,8 @@ function findParentVertex(
   layoutVertex: Vertex,
   graph: GraphInterface,
 ): Vertex | null {
-  const parentElements = evalExpression("<-Attr", { graph, vertexes: [layoutVertex] }) || [];
+  const parentElements =
+    evalExpression("<-Attr", { graph, vertexes: [layoutVertex] }) || [];
   return parentElements.length > 0 ? parentElements[0] : null;
 }
 
@@ -40,22 +41,26 @@ function findSiblings(
   parentVertex: Vertex | null,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-): { nextSibling: Vertex | null, prevSibling: Vertex | null } {
+): { nextSibling: Vertex | null; prevSibling: Vertex | null } {
   if (!parentVertex) {
     return { nextSibling: null, prevSibling: null };
   }
-  
+
   // Get all siblings including the current vertex
   const siblings = getChildrenAttrs(graph, setGraph, parentVertex);
-  
+
   // Find the index of the current vertex in the siblings array
-  const currentIndex = siblings.findIndex(sibling => sibling.id === layoutVertex.id);
-  
+  const currentIndex = siblings.findIndex(
+    (sibling) => sibling.id === layoutVertex.id,
+  );
+
   // Determine next and previous siblings
-  const nextSibling = currentIndex !== -1 && currentIndex < siblings.length - 1 ? 
-    siblings[currentIndex + 1] : null;
+  const nextSibling =
+    currentIndex !== -1 && currentIndex < siblings.length - 1
+      ? siblings[currentIndex + 1]
+      : null;
   const prevSibling = currentIndex > 0 ? siblings[currentIndex - 1] : null;
-  
+
   return { nextSibling, prevSibling };
 }
 
@@ -70,22 +75,22 @@ function clearSelectedAndHoverIds(
 ): void {
   batch(() => {
     const updates: Partial<FormStoreObject> = {};
-    
+
     if (formStoreVertex?.P.selectedId === layoutVertex.id) {
       updates.selectedId = -1;
     }
-    
+
     if (formStoreVertex?.P.hoverId === layoutVertex.id) {
       updates.hoverId = -1;
     }
-    
+
     if (Object.keys(updates).length > 0) {
       mergeVertexProperties<FormStoreObject>(
         0,
         formStoreVertex.id!,
         graph,
         setGraph,
-        updates
+        updates,
       );
     }
   });
@@ -99,7 +104,7 @@ function clearSelectedAndHoverIds(
  * 4. Root vertex
  */
 function determineVertexToSelect(
-  nextSibling: Vertex | null, 
+  nextSibling: Vertex | null,
   prevSibling: Vertex | null,
   parentVertex: Vertex | null,
   formStoreVertex: Vertex<FormStoreObject>,
@@ -108,23 +113,26 @@ function determineVertexToSelect(
   // Priority 1: Next sibling
   if (nextSibling) {
     return nextSibling;
-  } 
-  
+  }
+
   // Priority 2: Previous sibling
   if (prevSibling) {
     return prevSibling;
   }
-  
+
   // Priority 3: Parent
   if (parentVertex) {
     return parentVertex;
   }
-  
+
   // Priority 4: Root form data item
-  if (formStoreVertex?.P.formDataId && graph.vertexes[formStoreVertex.P.formDataId]) {
+  if (
+    formStoreVertex?.P.formDataId &&
+    graph.vertexes[formStoreVertex.P.formDataId]
+  ) {
     return graph.vertexes[formStoreVertex.P.formDataId];
   }
-  
+
   return null;
 }
 
@@ -143,7 +151,7 @@ function selectVertex(
     formStoreVertex,
     vertexToSelect.id,
     graph,
-    setGraph
+    setGraph,
   );
 }
 
@@ -163,7 +171,12 @@ export function deleteLayoutAttr(
 
   // Find parent and siblings
   const parentVertex = findParentVertex(layoutVertex, graph);
-  const { nextSibling, prevSibling } = findSiblings(layoutVertex, parentVertex, graph, setGraph);
+  const { nextSibling, prevSibling } = findSiblings(
+    layoutVertex,
+    parentVertex,
+    graph,
+    setGraph,
+  );
 
   // Clear selection if currently selected item is being deleted
   clearSelectedAndHoverIds(formStoreVertex, layoutVertex, graph, setGraph);
@@ -171,12 +184,12 @@ export function deleteLayoutAttr(
   // Delete the layout
   deleteNestedLayout(graph, setGraph, txnId, [layoutVertex]);
   saveUndoPoint(txnId, graph, setGraph);
-  
+
   // Get layout store vertex for selection update
-  const layoutStoreVertex = layoutStoreId ? 
-    graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject> : 
-    null;
-  
+  const layoutStoreVertex = layoutStoreId
+    ? (graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>)
+    : null;
+
   // Select appropriate item after deletion
   if (layoutStoreVertex) {
     const vertexToSelect = determineVertexToSelect(
@@ -184,14 +197,20 @@ export function deleteLayoutAttr(
       prevSibling,
       parentVertex,
       formStoreVertex,
-      graph
+      graph,
     );
-    
+
     if (vertexToSelect) {
-      selectVertex(layoutStoreVertex, formStoreVertex, vertexToSelect, graph, setGraph);
+      selectVertex(
+        layoutStoreVertex,
+        formStoreVertex,
+        vertexToSelect,
+        graph,
+        setGraph,
+      );
     }
   }
-  
+
   if (key) {
     showSuccessToast(`${key} deleted successfully`);
   }

@@ -1,4 +1,8 @@
-import { addNewVertex, deleteVertex, mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import {
+  addNewVertex,
+  deleteVertex,
+  mergeVertexProperties,
+} from "~/lib/graph/mutate/core/vertex";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
@@ -6,7 +10,12 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import type { FormStoreObject } from "../context/FormContext";
 
-export function deleteTxnIdAndCreateNew(txnId: number, formId: string, graph: GraphInterface, setGraph: ReturnType<typeof useGraph>[1]) {
+export function deleteTxnIdAndCreateNew(
+  txnId: number,
+  formId: string,
+  graph: GraphInterface,
+  setGraph: ReturnType<typeof useGraph>[1],
+) {
   // Delete existing transaction
   revertTransaction(txnId, graph, setGraph);
   // Generate and return a new transaction ID
@@ -22,7 +31,7 @@ export function ensureData(
   formId: string,
   formVertex: () => Vertex<FormStoreObject> | undefined,
   graph: GraphInterface,
-  setGraph: ReturnType<typeof useGraph>[1]
+  setGraph: ReturnType<typeof useGraph>[1],
 ) {
   // If data vertex exists, return its ID
   if (dataId) {
@@ -66,7 +75,12 @@ export function ensureData(
   return createResult.vertex?.id;
 }
 
-export function removeTxnIdAndCreateNew(txnId: number, formId: string, graph: GraphInterface, setGraph: ReturnType<typeof useGraph>[1]) {
+export function removeTxnIdAndCreateNew(
+  txnId: number,
+  formId: string,
+  graph: GraphInterface,
+  setGraph: ReturnType<typeof useGraph>[1],
+) {
   deleteVertex(0, `txn${txnId}`, graph, setGraph);
   const newTxnId = generateNewTxnId(graph, setGraph);
   mergeVertexProperties<FormStoreObject>(0, formId, graph, setGraph, {
@@ -80,7 +94,7 @@ export function setError(
   errorKey: string,
   error: string | undefined,
   graph: GraphInterface,
-  setGraph: ReturnType<typeof useGraph>[1]
+  setGraph: ReturnType<typeof useGraph>[1],
 ) {
   if (graph.vertexes[errorVertexId]) {
     mergeVertexProperties(0, errorVertexId, graph, setGraph, {

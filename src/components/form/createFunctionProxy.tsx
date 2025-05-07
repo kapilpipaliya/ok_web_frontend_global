@@ -2,7 +2,9 @@ import { $PROXY } from "solid-js";
 
 export function createFunctionProxy(
   dynamicFns: () => Record<string, unknown>,
-  parentRenderContext: () => { context?: { fns?: Record<string, unknown>; }; } | undefined
+  parentRenderContext: () =>
+    | { context?: { fns?: Record<string, unknown> } }
+    | undefined,
 ) {
   return new Proxy(
     {},
@@ -22,6 +24,6 @@ export function createFunctionProxy(
           return undefined;
         }
       },
-    }
+    },
   );
 }

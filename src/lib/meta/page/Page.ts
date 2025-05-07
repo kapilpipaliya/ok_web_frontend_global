@@ -245,7 +245,8 @@ string`,
           as: "button",
           attributes: [
             {
-              componentName: "Html", as: "icon",
+              componentName: "Html",
+              as: "icon",
               icon: "ph:x",
               size: 16,
             },

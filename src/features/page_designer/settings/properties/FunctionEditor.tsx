@@ -10,7 +10,10 @@ import { IconButton } from "~/components/styled/IconButton";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { formatCSSCode, formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
+import {
+  formatCSSCode,
+  formatJavaScriptCode,
+} from "~/lib/data_structure/string/formatUtils";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { validateFunction } from "~/lib/validation/validateFunction";
 import { css } from "~/lib/styles";
@@ -29,9 +32,9 @@ const buttonStyles = (args: FunctionArgumentType, color: string) => css`
 `;
 
 // Button components
-const EditorButton = (props: { 
-  onClick: () => void; 
-  color: string; 
+const EditorButton = (props: {
+  onClick: () => void;
+  color: string;
   children: JSX.Element;
   title?: string;
 }) => (
@@ -57,38 +60,39 @@ export function FunctionEditor(props: {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-    
+
   // Derived state
   const propertyKey = () => props.keyName || "props";
   const getPropertyValue = () => {
-    const currentValue = graph.vertexes[formStoreVertex()?.P.selectedId]?.P[propertyKey()];
-    
+    const currentValue =
+      graph.vertexes[formStoreVertex()?.P.selectedId]?.P[propertyKey()];
+
     // If value exists, return it
     if (currentValue !== undefined && currentValue !== null) {
       return currentValue;
     }
-    
+
     // Use prop defaultValue if provided
     if (props.defaultValue !== undefined) {
       return props.defaultValue;
     }
-    
+
     // Default values based on keyName
     if (propertyKey() === "css") {
       return `return \`._id {}\`;`;
     } else if (propertyKey() === "fns" || propertyKey() === "props") {
       return "return {}";
     }
-    
+
     // Fallback to empty string for other cases
     return "";
   };
-    
+
   // State
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
   const [isModalOpen, setIsModalOpen] = createSignal(false);
   const [editorValue, setEditorValue] = createSignal(getPropertyValue());
-  
+
   // Editor reference
   let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
 
@@ -130,14 +134,21 @@ export function FunctionEditor(props: {
 
   const formatCode = async () => {
     if (!editorRef) return;
-    
+
     const model = editorRef.getModel();
     if (!model) return;
-    
+
     try {
       const language = props.language?.toLowerCase() || "javascript";
-      const isJavaScript = ["javascript", "typescript", "js", "ts", "jsx", "tsx"].includes(language);
-      
+      const isJavaScript = [
+        "javascript",
+        "typescript",
+        "js",
+        "ts",
+        "jsx",
+        "tsx",
+      ].includes(language);
+
       if (isJavaScript) {
         model.setValue(await formatJavaScriptCode(model.getValue()));
       } else if (language === "css") {
@@ -170,25 +181,25 @@ export function FunctionEditor(props: {
           margin-top: 4px;
         `}
       >
-        <EditorButton 
-          color={"${args.theme.var.color.primary}"} 
+        <EditorButton
+          color={"${args.theme.var.color.primary}"}
           onClick={handleSave}
         >
           Submit
         </EditorButton>
-        
-        <EditorButton 
-          color={"${args.theme.var.color.secondary_70}"} 
+
+        <EditorButton
+          color={"${args.theme.var.color.secondary_70}"}
           onClick={formatCode}
           title="Format Code with Prettier"
         >
           Format
         </EditorButton>
-        
+
         <Show when={isModalOpen()}>
           <As as="div" css={css`margin-left: auto;`}>
-            <EditorButton 
-              color={"${args.theme.var.color.error_200}"} 
+            <EditorButton
+              color={"${args.theme.var.color.error_200}"}
               onClick={() => setIsModalOpen(false)}
             >
               Cancel
@@ -196,7 +207,7 @@ export function FunctionEditor(props: {
           </As>
         </Show>
       </As>
-      
+
       <Show when={!isFunctionValid()}>
         <As
           as="span"
@@ -231,7 +242,7 @@ export function FunctionEditor(props: {
         </As>
         <EditorContent height="200px" />
       </As>
-      
+
       <CustomModal
         open={isModalOpen}
         setOpen={setIsModalOpen}

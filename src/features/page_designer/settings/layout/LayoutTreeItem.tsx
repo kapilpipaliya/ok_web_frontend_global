@@ -19,9 +19,15 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import {
+  mergeVertexProperties,
+  replaceVertexProperties,
+} from "~/lib/graph/mutate/core/vertex";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
-import { createOpenInNewTab, buttonStyle } from "../../form_elements/common/ItemStyles";
+import {
+  createOpenInNewTab,
+  buttonStyle,
+} from "../../form_elements/common/ItemStyles";
 
 import {
   type PageLayoutObject,
@@ -80,9 +86,9 @@ export function LayoutTreeItem(
     if (isSelectedLayoutId(props.metaVertex.id) && parentRef()) {
       // Use a small timeout to ensure the DOM is fully updated
       setTimeout(() => {
-        parentRef()?.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'nearest'
+        parentRef()?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
         });
       }, 50);
     }
@@ -194,25 +200,24 @@ export function LayoutTreeItem(
       props.metaVertex.id,
       graph,
       setGraph,
-      properties
+      properties,
     );
     saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
   };
 
-  const getCopmVertex = (() =>
+  const getCopmVertex = () =>
     (evalExpression("->$0Comp", {
       graph,
       setGraph,
       vertexes: [props.metaVertex],
-    }) as Vertex[]) || ([] as Vertex[])
-  );
+    }) as Vertex[]) || ([] as Vertex[]);
 
   // Create open in new tab handler
   const openInNewTab = createOpenInNewTab(
     layoutStoreId,
     getCopmVertex()[0],
     graph,
-    setGraph
+    setGraph,
   );
   /*
   // Generate a test ID for the layer based on the hierarchy
@@ -275,7 +280,9 @@ export function LayoutTreeItem(
 
   // Function to get JSON editor state for this item
   const showJsonEditor = () => {
-    return props.isJsonEditorOpen ? props.isJsonEditorOpen(props.metaVertex.id) : false;
+    return props.isJsonEditorOpen
+      ? props.isJsonEditorOpen(props.metaVertex.id)
+      : false;
   };
 
   // Function to toggle JSON editor for this item
@@ -338,15 +345,22 @@ export function LayoutTreeItem(
               css`
                 background-color: transparent;
                 border: none;
-                ${showJsonEditor() ? 'color: ${args.theme.var.color.primary};' : ''}
-              `,]}
+                ${showJsonEditor() ? "color: ${args.theme.var.color.primary};" : ""}
+              `,
+            ]}
             icon="tabler:json"
             size={16}
             onClick={toggleJsonEditor}
             title={showJsonEditor() ? "Hide JSON editor" : "Show JSON editor"}
           />
         </Show>
-        <Show when={isSelectedHoverId(props.metaVertex.id) && props.metaVertex.L && props.metaVertex.P.componentName === "Component"}>
+        <Show
+          when={
+            isSelectedHoverId(props.metaVertex.id) &&
+            props.metaVertex.L &&
+            props.metaVertex.P.componentName === "Component"
+          }
+        >
           <IconButton
             css={buttonStyle}
             icon="ph:arrow-square-out"
@@ -359,11 +373,11 @@ export function LayoutTreeItem(
           />
         </Show>
         {/* <Show when={formStoreVertex()?.P.formDataId !== props.metaVertex.id}> */}
-          <AttrConfigIcons
-            metaVertex={props.metaVertex}
-            parentRef={parentRef()!}
-          />
-          {/* {getLayerTestId()} */}
+        <AttrConfigIcons
+          metaVertex={props.metaVertex}
+          parentRef={parentRef()!}
+        />
+        {/* {getLayerTestId()} */}
         {/* </Show> */}
       </TreeItemContainer>
       <Show when={showJsonEditor()}>
@@ -377,10 +391,10 @@ export function LayoutTreeItem(
             overflow: visible;
           `}
         >
-          <JsonEditorFieldComponent 
-            vertexId={props.metaVertex.id} 
-            hideLabel={true} 
-            replaceProperties={replacePropertiesValue} 
+          <JsonEditorFieldComponent
+            vertexId={props.metaVertex.id}
+            hideLabel={true}
+            replaceProperties={replacePropertiesValue}
           />
         </As>
       </Show>

@@ -7,7 +7,7 @@ interface PlusIconButtonProps {
   size?: string;
 }
 
-export function PlusIconButton(props: PlusIconButtonProps) {  
+export function PlusIconButton(props: PlusIconButtonProps) {
   return (
     <IconButton
       css={css`
@@ -26,4 +26,4 @@ export function PlusIconButton(props: PlusIconButtonProps) {
       onClick={props.onClick}
     />
   );
-} 
+}

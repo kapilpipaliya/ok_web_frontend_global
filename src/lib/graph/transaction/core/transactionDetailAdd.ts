@@ -47,7 +47,7 @@ export function transactionDetailAdd(
     let submittedIndex = currentTxnState.submittedIndex ?? -1;
     let originalSubmittedIndex =
       currentTxnState.originalSubmittedIndex ?? submittedIndex;
-    
+
     // Track when this operation occurred
     const lastModified = Date.now();
 
@@ -91,7 +91,7 @@ export function transactionDetailAdd(
     // Add the new step and update the undo position
     steps.push(txnValue);
     const newUndoPosition = steps.length - 1;
-    
+
     // Create updated transaction state
     const updatedTxnState = {
       ...currentTxnState,
@@ -103,7 +103,7 @@ export function transactionDetailAdd(
       submittedIndex,
       undoStepIndexes,
     };
-    
+
     // Use the helper function to determine the appropriate status
     updatedTxnState.status = determineTransactionStatus(updatedTxnState);
 

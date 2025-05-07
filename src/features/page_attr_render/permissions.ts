@@ -14,7 +14,7 @@ export function getConfiguredPermissions(
   }
   const configuredPermissions: Vertex[] = [];
   const label = vertex.L[0];
-   // RolePagePage
+  // RolePagePage
   const allRolePermissions: Vertex[] =
     evalExpression(label === "Attr" ? `->$0Perm` : `<-Role$0$0`, {
       graph,
@@ -46,16 +46,26 @@ export function hasPermissions(
       return true;
     }
     // Higher level permissions implicitly grant lower level permissions
-    if (permission === PermissionLevel.VIEW && 
-        [PermissionLevel.EDIT, PermissionLevel.FULL, PermissionLevel.CREATE].includes(r.P.access)) {
+    if (
+      permission === PermissionLevel.VIEW &&
+      [
+        PermissionLevel.EDIT,
+        PermissionLevel.FULL,
+        PermissionLevel.CREATE,
+      ].includes(r.P.access)
+    ) {
       return true;
     }
-    if (permission === PermissionLevel.CREATE && 
-        [PermissionLevel.EDIT, PermissionLevel.FULL].includes(r.P.access)) {
+    if (
+      permission === PermissionLevel.CREATE &&
+      [PermissionLevel.EDIT, PermissionLevel.FULL].includes(r.P.access)
+    ) {
       return true;
     }
-    if (permission === PermissionLevel.EDIT && 
-        PermissionLevel.FULL === r.P.access) {
+    if (
+      permission === PermissionLevel.EDIT &&
+      PermissionLevel.FULL === r.P.access
+    ) {
       return true;
     }
   }

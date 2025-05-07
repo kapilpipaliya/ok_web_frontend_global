@@ -4,7 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { IconButton } from "~/components/styled/IconButton";
 import {
   useDesignerLayoutStore,
-  useDesignerFormIdContext
+  useDesignerFormIdContext,
 } from "~/features/page_designer/context/LayoutContext";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
@@ -41,7 +41,7 @@ export function CopyButton(props: Readonly<CopyButtonProps>) {
       icon="ph:copy-simple"
       onClick={(e) => {
         e.stopPropagation();
-        
+
         // If ctrl/cmd key is pressed, perform duplicate action
         if (e.ctrlKey || e.metaKey) {
           cloneLayoutAndChildren(
@@ -55,17 +55,13 @@ export function CopyButton(props: Readonly<CopyButtonProps>) {
           );
         } else {
           // Regular click - copy to context
-          mergeVertexProperties(
-            0,
-            layoutStoreId,
-            graph,
-            setGraph,
-            { copiedItem: props.item }
-          );
+          mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+            copiedItem: props.item,
+          });
         }
       }}
       size={props.size}
       title="Copy (Ctrl+Click to Duplicate)"
     />
   );
-} 
+}

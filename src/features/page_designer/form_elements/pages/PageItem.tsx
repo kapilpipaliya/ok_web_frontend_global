@@ -13,12 +13,12 @@ import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import type { NavItem } from "../functions/getTreeData";
-import { 
-  baseItemStyle, 
-  hoverItemStyle, 
+import {
+  baseItemStyle,
+  hoverItemStyle,
   buttonStyle,
   setupPreview,
-  createOpenInNewTab
+  createOpenInNewTab,
 } from "../common/ItemStyles";
 
 import {
@@ -50,7 +50,9 @@ export function PageItem(
 
   const formStoreVertex = () => {
     const formId = layoutStoreVertex()?.P.formId;
-    return formId ? graph.vertexes[formId] as Vertex<FormStoreObject> : undefined;
+    return formId
+      ? (graph.vertexes[formId] as Vertex<FormStoreObject>)
+      : undefined;
   };
 
   let menuRef: HTMLDivElement | undefined;
@@ -60,29 +62,27 @@ export function PageItem(
     () => ({
       previewPageId: props.previewPageId,
       setPreviewPageId: props.setPreviewPageId,
-      itemId: props.child.id
+      itemId: props.child.id,
     }),
     {
       setHoverPageId,
-      setIsHovered
+      setIsHovered,
     },
   );
 
   // Get combined item style
   const getItemStyle = () => {
     const baseStyle = baseItemStyle;
-    return hoverPageId() === props.child.id ? `${baseStyle} ${hoverItemStyle}` : baseStyle;
+    return hoverPageId() === props.child.id
+      ? `${baseStyle} ${hoverItemStyle}`
+      : baseStyle;
   };
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId,
-      graph,
-      setGraph,
-      { draggedVertexIds: [] },
-    );
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      draggedVertexIds: [],
+    });
     if (previewTimer) {
       clearTimeout(previewTimer);
     }
@@ -91,41 +91,31 @@ export function PageItem(
       selectedComponents().size > 0
         ? Array.from(selectedComponents())
         : [graph.vertexes[props.child.id]];
-    
+
     // Safely access draggedVertexIds
     const currentDraggedIds = layoutStoreVertex()?.P.draggedVertexIds || [];
-    
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId,
-      graph,
-      setGraph,
-      {
-        draggedVertexIds: [
-          ...currentDraggedIds,
-          ...dataTransfer.map((v) => v.id),
-        ],
-      },
-    );
+
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      draggedVertexIds: [
+        ...currentDraggedIds,
+        ...dataTransfer.map((v) => v.id),
+      ],
+    });
     setSelectedComponents(new Set<Vertex>());
   };
 
   const handleDoubleClick = () => {
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId,
-      graph,
-      setGraph,
-      { draggedVertexIds: [props.child.id] },
-    );
-    
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      draggedVertexIds: [props.child.id],
+    });
+
     const formStore = formStoreVertex();
     if (!formStore) return;
-    
+
     // Safe access to properties
     const draggedVertex = layoutStoreVertex()?.P.draggedVertexIds?.[0];
     if (!draggedVertex) return;
-    
+
     onClickAddComponent(
       graph,
       setGraph,
@@ -136,13 +126,9 @@ export function PageItem(
         ? formStore.P.selectedId
         : formStore.P.formDataId,
     );
-    mergeVertexProperties<PageLayoutObject>(
-      0,
-      layoutStoreId,
-      graph,
-      setGraph,
-      { draggedVertexIds: [] },
-    );
+    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
+      draggedVertexIds: [],
+    });
   };
 
   // Use shared function to create open in new tab handler
@@ -150,7 +136,7 @@ export function PageItem(
     layoutStoreId,
     graph.vertexes[props.child.id],
     graph,
-    setGraph
+    setGraph,
   );
 
   onCleanup(() => {
@@ -177,17 +163,11 @@ export function PageItem(
           noobserver
           width={22}
         /> */}
-        <As
-          as="div"
-          css={css`font-size: 14px;`}
-        >
+        <As as="div" css={css`font-size: 14px;`}>
           {toTitle(props.child.key)}
         </As>
         <Show when={isHovered()}>
-          <As
-            as="div"
-            css={css`margin-left: auto;`}
-          >
+          <As as="div" css={css`margin-left: auto;`}>
             <IconButton
               css={buttonStyle}
               icon="ph:arrow-square-out"

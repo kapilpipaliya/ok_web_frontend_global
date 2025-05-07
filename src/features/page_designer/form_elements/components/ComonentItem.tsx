@@ -23,12 +23,12 @@ import { getCompChildren } from "./functions/getCompChildren";
 import { onCompDragStart } from "./functions/onCompDragStart";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { 
-  baseItemStyle, 
-  hoverItemStyle, 
-  buttonStyle, 
+import {
+  baseItemStyle,
+  hoverItemStyle,
+  buttonStyle,
   setupPreview,
-  createOpenInNewTab
+  createOpenInNewTab,
 } from "../common/ItemStyles";
 
 export function ComponentItem(
@@ -64,18 +64,20 @@ export function ComponentItem(
     () => ({
       previewPageId: props.previewPageId,
       setPreviewPageId: props.setPreviewPageId,
-      itemId: props.child.id
+      itemId: props.child.id,
     }),
     {
       setHoverPageId,
-      setIsHovered
-    }
+      setIsHovered,
+    },
   );
 
   const getItemStyle = () => {
     const backgroundColor = isNegative(props.child.id) ? "#e8ffe8" : "white";
     const baseStyle = `${baseItemStyle}; background-color: ${backgroundColor};`;
-    return hoverPageId() === props.child.id ? `${baseStyle} ${hoverItemStyle}` : baseStyle;
+    return hoverPageId() === props.child.id
+      ? `${baseStyle} ${hoverItemStyle}`
+      : baseStyle;
   };
 
   // const handleCheckboxChange = (event: Event, id: Id) => {
@@ -94,28 +96,30 @@ export function ComponentItem(
   const onDragEnd = () => {
     resetDragDropState(layoutStoreVertex(), graph, setGraph);
   };
-  
+
   const children = createMemo(() =>
     getCompChildren([props.child], props.edgeName, graph),
   );
-  
+
   // Use shared function to create open in new tab handler
   const openInNewTab = createOpenInNewTab(
     layoutStoreId,
     props.child,
     graph,
-    setGraph
+    setGraph,
   );
 
   // Check if component should show an icon (not from Component or Templates)
   const shouldShowIcon = () => {
-    return props.child.L[0] !== "Component" && props.child.L[0] !== "TemplatePage";
+    return (
+      props.child.L[0] !== "Component" && props.child.L[0] !== "TemplatePage"
+    );
   };
 
   // Get display name for the component
   const getDisplayName = () => {
     const rawName = props.child?.P.label || props.child?.P.key;
-    return rawName ? toTitle(rawName) : '';
+    return rawName ? toTitle(rawName) : "";
   };
 
   return (
@@ -150,7 +154,7 @@ export function ComponentItem(
             toggleExpand={props.toggleExpand}
           />
         </Show>
-        
+
         <Show when={shouldShowIcon()}>
           <Icon
             height={22}
@@ -162,7 +166,7 @@ export function ComponentItem(
             width={22}
           />
         </Show>
-        
+
         <As
           as="div"
           css={css`
@@ -173,7 +177,7 @@ export function ComponentItem(
         >
           {getDisplayName()}
         </As>
-        
+
         {/* <Show when={isHovered()}>
           <OpenComponentSettings
             css={css`
@@ -199,12 +203,9 @@ export function ComponentItem(
             type="checkbox"
           />
         </Show> */}
-        
+
         <Show when={props.child.L[0] !== "Comp" && isHovered()}>
-          <As
-            as="div"
-            css={css`margin-left: auto;`}
-          >
+          <As as="div" css={css`margin-left: auto;`}>
             <IconButton
               css={buttonStyle}
               icon="ph:arrow-square-out"
@@ -215,9 +216,15 @@ export function ComponentItem(
           </As>
         </Show>
       </As>
-      
+
       {/* Handle dropdown preview */}
-      <Show when={props.child.L[0] !== "Comp" && props.previewPageId === props.child.id && menuRef}>
+      <Show
+        when={
+          props.child.L[0] !== "Comp" &&
+          props.previewPageId === props.child.id &&
+          menuRef
+        }
+      >
         <DropdownMenu
           offset={{ crossAxis: 30 }}
           onClickOutside={() => props.setPreviewPageId(null)}
@@ -237,9 +244,13 @@ export function ComponentItem(
           />
         </DropdownMenu>
       </Show>
-      
+
       {/* Render children */}
-      <Show when={children().length > 0 && props.expandedKeys.includes(props.child.id)}>
+      <Show
+        when={
+          children().length > 0 && props.expandedKeys.includes(props.child.id)
+        }
+      >
         <As
           as="ul"
           css={css`

@@ -40,35 +40,11 @@ export async function renderPageAsHtml({
     );
     browser = browserSetup.browser;
 
-    // Wait for master CSS to be applied
-    await browserSetup.page.waitForSelector("style#master", {
-      state: "attached",
-    });
-
     // Convert all relative links to absolute links
     await convertRelativeLinksToAbsolute(browserSetup.page);
 
-    // Get the computed styles
-    const masterStyles = await browserSetup.page.evaluate(() => {
-      const masterStyleEl = document.querySelector(
-        "style#master",
-      ) as HTMLStyleElement;
-      if (!masterStyleEl?.sheet) {
-        return "";
-      }
-
-      const cssRules = Array.from(masterStyleEl.sheet.cssRules);
-      return cssRules.map((rule) => rule.cssText).join("\n");
-    });
-
     // Get page content
     let html = await browserSetup.page.content();
-
-    // Replace empty master style tag with computed styles
-    html = html.replace(
-      /<style id="master"><\/style>/,
-      `<style id="master">${masterStyles}</style>`,
-    );
 
     if (!html) {
       throw new Error("Failed to render page");
@@ -245,14 +221,15 @@ async function setupBrowserAndPage(
     searchParams.set("redirect", redirectUrl);
   }
 
-  const protocol = isDev ? "http" : "https";
   const domainPort = process.env.DOMAIN_PORT
     ? `:${process.env.DOMAIN_PORT}`
     : "";
   const subDomainPart =
     subDomain && subDomain !== "super" ? `${subDomain}.` : "";
-
-  const baseUrl = `${protocol}://${subDomainPart}${process.env.DOMAIN}${isDev ? domainPort : ""}`;
+  const isDomainLocalhost = process.env.DOMAIN === "localhost";
+  const isDevEnvironment = isDev || isDomainLocalhost;
+  const protocol = isDevEnvironment ? "http" : "https";
+  const baseUrl = `${protocol}://${subDomainPart}${process.env.DOMAIN}${isDevEnvironment ? domainPort : ""}`;
   const queryString = searchParams.toString();
 
   const url = token

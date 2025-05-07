@@ -90,11 +90,11 @@ export function undo(
         }
       }
     }
-    
+
     // Note: We don't need to calculate revertSteps here as that's handled in:
     // 1. transactionDetailAdd - when adding new steps after an undo
     // 2. commitTxn - when preparing the steps to be submitted
-    
+
     // Update status using the helper function for consistency
     txnValue.status = determineTransactionStatus(txnValue);
     txnValue.lastModified = Date.now();
@@ -113,13 +113,14 @@ export function undo(
   } catch (error) {
     console.error("Error during undo operation:", error);
     // Update error status
-    txnValue.status = 'error';
+    txnValue.status = "error";
     txnValue.error = {
-      code: 'UNDO_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown error during undo',
-      details: error
+      code: "UNDO_ERROR",
+      message:
+        error instanceof Error ? error.message : "Unknown error during undo",
+      details: error,
     };
-    
+
     // Still try to update the transaction state
     replaceVertexProperties(
       0,

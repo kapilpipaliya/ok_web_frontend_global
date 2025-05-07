@@ -1,13 +1,13 @@
-import {createMemo, For, Suspense} from "solid-js";
+import { createMemo, For, Suspense } from "solid-js";
 
-import type {Id} from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
 
-import {useGraph} from "~/lib/graph/GraphContext";
-import {getExistingOrDefaultTxnValue} from "~/lib/graph/transaction/value/getExistingOrDefaultTxnValue";
-import {PageViewWrapper} from "~/pages/PageViewWrapper";
+import { useGraph } from "~/lib/graph/GraphContext";
+import { getExistingOrDefaultTxnValue } from "~/lib/graph/transaction/value/getExistingOrDefaultTxnValue";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-import type {PageLayoutObject} from "../../context/LayoutContext";
-import {useDesignerLayoutStore} from "../../context/LayoutContext";
+import type { PageLayoutObject } from "../../context/LayoutContext";
+import { useDesignerLayoutStore } from "../../context/LayoutContext";
 
 export function FormConfig() {
   const [graph] = useGraph();
@@ -21,12 +21,12 @@ export function FormConfig() {
     const memoizedTxnValue = createMemo(() => {
       return getExistingOrDefaultTxnValue(txnId(), graph);
     });
-    
+
     // Create a display copy for UI without modifying the original
     const displaySteps = createMemo(() => {
       const steps = memoizedTxnValue().steps || [];
       // Instead of modifying the steps, we'll create a new array for display
-      return steps.map(step => {
+      return steps.map((step) => {
         // We intentionally extract and omit the originalData property to save memory
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { originalData, ...essentialData } = step;
@@ -38,11 +38,16 @@ export function FormConfig() {
     const getStatusColor = () => {
       const status = memoizedTxnValue().status;
       switch (status) {
-        case 'modified': return 'theme.var.color.orange_600';
-        case 'reverted': return 'theme.var.color.blue_600';
-        case 'committed': return 'theme.var.color.green_600';
-        case 'error': return 'theme.var.color.red_600';
-        default: return 'theme.var.color.gray_600';
+        case "modified":
+          return "theme.var.color.orange_600";
+        case "reverted":
+          return "theme.var.color.blue_600";
+        case "committed":
+          return "theme.var.color.green_600";
+        case "error":
+          return "theme.var.color.red_600";
+        default:
+          return "theme.var.color.gray_600";
       }
     };
 
@@ -57,54 +62,56 @@ export function FormConfig() {
         undoAvailable: txn.activeUndoIndex >= 0,
         redoAvailable: txn.activeUndoIndex < txn.steps.length - 1,
         status: txn.status,
-        lastModified: txn.lastModified ? new Date(txn.lastModified).toLocaleString() : 'Unknown'
+        lastModified: txn.lastModified
+          ? new Date(txn.lastModified).toLocaleString()
+          : "Unknown",
       };
     };
 
     const txnStats = createMemo(() => getTxnStats());
 
     return (
-      <div 
+      <div
         class="transaction-debug"
         style={{
           "margin-top": "20px",
-          "border": `1px solid ${args => args.theme.var.color.gray_300}`,
+          border: `1px solid ${(args) => args.theme.var.color.gray_300}`,
           "border-radius": "4px",
-          "padding": "12px",
-          "background-color": `${args => args.theme.var.color.gray_100}`,
-          "font-family": "monospace"
+          padding: "12px",
+          "background-color": `${(args) => args.theme.var.color.gray_100}`,
+          "font-family": "monospace",
         }}
       >
-        <h3 
+        <h3
           style={{
-            "display": "flex",
+            display: "flex",
             "align-items": "center",
-            "gap": "8px",
-            "margin-top": "0"
+            gap: "8px",
+            "margin-top": "0",
           }}
         >
           <span>Transaction State</span>
-          <span 
+          <span
             style={{
-              "display": "inline-block",
-              "padding": "3px 8px",
+              display: "inline-block",
+              padding: "3px 8px",
               "border-radius": "12px",
               "font-size": "12px",
-              "background-color": `${args => args.theme.var.color[getStatusColor().split('.').pop() || ""]}`,
-              "color": "white"
+              "background-color": `${(args) => args.theme.var.color[getStatusColor().split(".").pop() || ""]}`,
+              color: "white",
             }}
           >
             {memoizedTxnValue().status}
           </span>
         </h3>
-        
-        <div 
+
+        <div
           class="transaction-summary"
           style={{
-            "display": "grid",
+            display: "grid",
             "grid-template-columns": "1fr 1fr",
-            "gap": "8px",
-            "margin-bottom": "12px"
+            gap: "8px",
+            "margin-bottom": "12px",
           }}
         >
           <div>Steps: {txnStats().totalSteps}</div>
@@ -113,28 +120,45 @@ export function FormConfig() {
           <div>Original Submitted: {txnStats().originalSubmittedIndex}</div>
           <div>Last Modified: {txnStats().lastModified}</div>
           <div>
-            Actions: 
-            <span style={{ "color": txnStats().undoAvailable ? `${args => args.theme.var.color.blue_600}` : `${args => args.theme.var.color.gray_500}` }}>
+            Actions:
+            <span
+              style={{
+                color: txnStats().undoAvailable
+                  ? `${(args) => args.theme.var.color.blue_600}`
+                  : `${(args) => args.theme.var.color.gray_500}`,
+              }}
+            >
               {txnStats().undoAvailable ? " Undo" : " No Undo"}
-            </span> / 
-            <span style={{ "color": txnStats().redoAvailable ? `${args => args.theme.var.color.blue_600}` : `${args => args.theme.var.color.gray_500}` }}>
+            </span>{" "}
+            /
+            <span
+              style={{
+                color: txnStats().redoAvailable
+                  ? `${(args) => args.theme.var.color.blue_600}`
+                  : `${(args) => args.theme.var.color.gray_500}`,
+              }}
+            >
               {txnStats().redoAvailable ? "Redo" : "No Redo"}
             </span>
           </div>
         </div>
-        
-        <div style={{ "max-height": "400px", "overflow": "auto" }}>
-          <pre 
-            style={{ 
+
+        <div style={{ "max-height": "400px", overflow: "auto" }}>
+          <pre
+            style={{
               "font-size": "12px",
-              "margin": "0"
+              margin: "0",
             }}
           >
             {/* Display a simplified version without originalData */}
-            {JSON.stringify({ 
-              ...memoizedTxnValue(), 
-              steps: displaySteps() 
-            }, null, 2)}
+            {JSON.stringify(
+              {
+                ...memoizedTxnValue(),
+                steps: displaySteps(),
+              },
+              null,
+              2,
+            )}
           </pre>
         </div>
       </div>

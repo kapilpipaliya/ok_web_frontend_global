@@ -100,7 +100,12 @@ export function Variants() {
   margin-top: 0.5rem;
 `}
       >
-        <Show when={formStoreVertex()?.P.formDataId && formStoreVertex()?.P.componentValue}>
+        <Show
+          when={
+            formStoreVertex()?.P.formDataId &&
+            formStoreVertex()?.P.componentValue
+          }
+        >
           <ComponentVariantsInput
             compVertex={graph.vertexes[formStoreVertex()!.P.formDataId!]}
             dataVertex={graph.vertexes[formStoreVertex()!.P.componentValue!]}
@@ -111,10 +116,7 @@ export function Variants() {
 
       <Show when={showVariantModal()}>
         <ZIndex>
-          <VariantsModal
-            closeModal={closeModal}
-            onSubmit={closeModal}
-          />
+          <VariantsModal closeModal={closeModal} onSubmit={closeModal} />
         </ZIndex>
       </Show>
     </As>

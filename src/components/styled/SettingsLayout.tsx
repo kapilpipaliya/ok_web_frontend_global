@@ -1,5 +1,5 @@
 import { useSearchParams } from "@solidjs/router";
-import { type Component, createEffect, createSignal } from "solid-js";
+import { type Component, createEffect, createSignal, Suspense } from "solid-js";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
@@ -10,6 +10,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
+import { Dynamic } from "solid-js/web";
 
 export interface MenuItem {
   adminOnly?: boolean;
@@ -67,7 +68,8 @@ export function SettingsLayout(props: SettingsLayoutProps) {
         as: "div",
         attributes: [
           {
-            componentName: "Html", as: "title",
+            componentName: "Html",
+            as: "title",
             props: () => ({
               text: `${props.title} - ${props.menuItems.find((item) => item.id === selectedMenu())?.label}`,
             }),
@@ -163,14 +165,20 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                     componentName: "Html",
                                     as: "icon",
                                     props: (args: FunctionArgumentType) => ({
-                                      icon: (args.contextData.menuItems as MenuItem).icon,
-                                      hide: !(args.contextData.menuItems as MenuItem).icon,
+                                      icon: (
+                                        args.contextData.menuItems as MenuItem
+                                      ).icon,
+                                      hide: !(
+                                        args.contextData.menuItems as MenuItem
+                                      ).icon,
                                     }),
                                   },
                                   {
                                     componentName: "Html",
                                     props: (args: FunctionArgumentType) => ({
-                                      text: (args.contextData.menuItems as MenuItem).label,
+                                      text: (
+                                        args.contextData.menuItems as MenuItem
+                                      ).label,
                                     }),
                                   },
                                 ],
@@ -223,9 +231,17 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                   {
                     componentName: "Html",
                     props: () => ({
-                      componentName: props.menuItems.find(
-                        (item) => item.id === selectedMenu(),
-                      )?.component,
+                      componentName: () => (
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <Dynamic
+                            component={
+                              props.menuItems.find(
+                                (item) => item.id === selectedMenu(),
+                              )?.component
+                            }
+                          />
+                        </Suspense>
+                      ),
                     }),
                   },
                 ],

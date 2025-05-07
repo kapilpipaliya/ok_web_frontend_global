@@ -238,7 +238,7 @@ export default class JsxParser {
           graph.vertexes[rowId].id,
           graph,
           setGraph,
-          { as: comp }
+          { as: comp },
         );
       });
     }
@@ -319,7 +319,7 @@ export default class JsxParser {
           graph.vertexes[rowId].id,
           graph,
           setGraph,
-          { attr: JSON.stringify(uiKitProps) }
+          { attr: JSON.stringify(uiKitProps) },
         );
       });
     }
@@ -334,7 +334,10 @@ export default class JsxParser {
           graph.vertexes[rowId].id,
           graph,
           setGraph,
-          { [key === "className" || key === "class" ? "class" : key]: nonUiKitProps[key] }
+          {
+            [key === "className" || key === "class" ? "class" : key]:
+              nonUiKitProps[key],
+          },
         );
       });
     }
@@ -346,7 +349,7 @@ export default class JsxParser {
           graph.vertexes[rowId].id,
           graph,
           setGraph,
-          { icon: `'${"ph:hamburger".replaceAll("'", "\\'")}'` }
+          { icon: `'${"ph:hamburger".replaceAll("'", "\\'")}'` },
         );
       });
       return;
@@ -388,7 +391,7 @@ export default class JsxParser {
               graph.vertexes[rowId].id,
               graph,
               setGraph,
-              { text: `'${value.replaceAll("'", "\\'")}'` }
+              { text: `'${value.replaceAll("'", "\\'")}'` },
             );
           });
         }
@@ -435,7 +438,7 @@ export default class JsxParser {
             graph.vertexes[rowId].id,
             graph,
             setGraph,
-            { text: `'${children.replaceAll("'", "\\'")}'` }
+            { text: `'${children.replaceAll("'", "\\'")}'` },
           );
         });
       }

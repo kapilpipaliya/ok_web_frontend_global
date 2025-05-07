@@ -1,7 +1,7 @@
-import type {FunctionArgumentType} from "~/components/form/type/FieldSchemaType";
-import {PROPERTIES, SETTINGS_CONSTANTS} from "~/pages/settings/constants";
-import {css} from "~/lib/styles";
-import {getErrorSchema} from "~/lib/schema/getErrorSchema";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
+import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
 /**
  * Creates a password field with visibility toggle
@@ -69,13 +69,14 @@ export function createPasswordField(
             ref: setRef,
             type: showPassword[key] ? "text" : "password",
           }),
-          validation: {required: true},
+          validation: { required: true },
         },
         {
           as: "div",
           attributes: [
             {
-              componentName: "Html", as: "icon",
+              componentName: "Html",
+              as: "icon",
               props: () => ({
                 icon: showPassword[key] ? "ph:eye" : "ph:eye-slash",
                 onClick: () => toggleVisibility(key),

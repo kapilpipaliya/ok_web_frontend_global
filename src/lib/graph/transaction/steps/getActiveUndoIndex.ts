@@ -2,8 +2,6 @@ import type { Store } from "solid-js/store";
 
 import type { GraphInterface } from "../../GraphContext";
 
-import { getLastTxnIndex } from "../value/getLastTxnIndex";
-
 export function getActiveUndoIndex(
   txnId: number,
   graph: Store<GraphInterface>,

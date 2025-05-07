@@ -126,7 +126,10 @@ export function DynamicCSSComponent(
   };
 
   const value = createMemo(() => {
-    return path([...(projections() || []), (props.meta as FormField).key || ""])(cssState)
+    return path([
+      ...(projections() || []),
+      (props.meta as FormField).key || "",
+    ])(cssState);
   });
 
   const onChange = (data: any) => {

@@ -19,37 +19,38 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
 
   // Get transaction details
   const txnId = () => formStoreVertex()?.P.txnId;
-  const txnVertex = () => txnId() ? graph.vertexes[`txn${txnId()}`] : undefined;
+  const txnVertex = () =>
+    txnId() ? graph.vertexes[`txn${txnId()}`] : undefined;
   const txnStatus = () => txnVertex()?.P?.status;
-  
+
   // Create transaction state info for tooltips
   const transactionInfo = createMemo(() => {
     if (!txnVertex()) return { undoSteps: 0, redoSteps: 0, statusText: "" };
-    
+
     const txn = txnVertex()?.P;
     if (!txn) return { undoSteps: 0, redoSteps: 0, statusText: "" };
-    
+
     const totalSteps = txn.steps.length;
     const activeIndex = txn.activeUndoIndex;
-    
+
     // Calculate how many steps can be undone and redone
     const undoSteps = activeIndex + 1;
     const redoSteps = totalSteps - activeIndex - 1;
-    
+
     // Status text for tooltip
     let statusText = "";
-    if (txn.status === 'modified') statusText = "Unsaved changes";
-    else if (txn.status === 'reverted') statusText = "Reverted changes";
-    else if (txn.status === 'error') statusText = "Error state";
-    else if (txn.status === 'committed') statusText = "All changes saved";
-    
+    if (txn.status === "modified") statusText = "Unsaved changes";
+    else if (txn.status === "reverted") statusText = "Reverted changes";
+    else if (txn.status === "error") statusText = "Error state";
+    else if (txn.status === "committed") statusText = "All changes saved";
+
     return {
       undoSteps,
       redoSteps,
-      statusText
+      statusText,
     };
   });
-  
+
   // Enhanced with visual indicators for transaction status
   const icons = [
     {
@@ -59,26 +60,29 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
       getTooltip: () => {
         const info = transactionInfo();
         const undoTooltip = `Undo (Ctrl+Z)`;
-        
+
         if (info.undoSteps > 0) {
-          return `${undoTooltip} - ${info.undoSteps} ${info.undoSteps === 1 ? 'step' : 'steps'} available`;
+          return `${undoTooltip} - ${info.undoSteps} ${info.undoSteps === 1 ? "step" : "steps"} available`;
         }
-        
+
         return undoTooltip;
       },
       getCss: () => {
         // When there are uncommitted or reverted changes, highlight undo button
         const status = txnStatus();
-        if (status === 'modified' || status === 'reverted') {
-          return [headerIconButtonCss, css`
+        if (status === "modified" || status === "reverted") {
+          return [
+            headerIconButtonCss,
+            css`
             color: \${args.theme.var.color.blue_600};
             &:hover:not(:disabled) {
               color: \${args.theme.var.color.blue_500};
             }
-          `];
+          `,
+          ];
         }
         return headerIconButtonCss;
-      }
+      },
     },
     {
       disabled: () => !redoAllowed(formStoreVertex()?.P.txnId, graph),
@@ -87,26 +91,29 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
       getTooltip: () => {
         const info = transactionInfo();
         const redoTooltip = `Redo (Ctrl+Y)`;
-        
+
         if (info.redoSteps > 0) {
-          return `${redoTooltip} - ${info.redoSteps} ${info.redoSteps === 1 ? 'step' : 'steps'} available`;
+          return `${redoTooltip} - ${info.redoSteps} ${info.redoSteps === 1 ? "step" : "steps"} available`;
         }
-        
+
         return redoTooltip;
       },
       getCss: () => {
         // Check if there are steps that can be redone
         const isRedoAvailable = redoAllowed(formStoreVertex()?.P.txnId, graph);
         if (isRedoAvailable) {
-          return [headerIconButtonCss, css`
+          return [
+            headerIconButtonCss,
+            css`
             color: \${args.theme.var.color.blue_600};
             &:hover:not(:disabled) {
               color: \${args.theme.var.color.blue_500};
             }
-          `];
+          `,
+          ];
         }
         return headerIconButtonCss;
-      }
+      },
     },
   ];
 

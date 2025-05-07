@@ -48,6 +48,7 @@ export const getComponentFormSchema = (
     const res = await checkUniqueConstrains({
       L: [saveAsLabel || "Comp"],
       P: { key: formData.P.key },
+      id: formData.id,
     } as unknown as Vertex);
     if (res.error) {
       showErrorToast(res.error);
@@ -294,7 +295,8 @@ export const getComponentFormSchema = (
                     }),
                   },
                 ],
-                componentName: "Html", as: "portal",
+                componentName: "Html",
+                as: "portal",
                 props: (options: FunctionArgumentType) => ({
                   hide: !options.contextData.modalState[0]?.showModal,
                 }),

@@ -3,7 +3,7 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 export function getTabLabel(openedFormId: Id, graph: GraphInterface) {
   let baseLabel = graph.vertexes[openedFormId]?.P.label || "";
-  
+
   // Remove "Page" suffix if it's not just "Page"
   if (baseLabel !== "Page" && baseLabel.endsWith("Page")) {
     baseLabel = baseLabel.slice(0, -4);

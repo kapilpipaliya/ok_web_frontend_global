@@ -6,11 +6,7 @@ import {
   wcagContrast,
   wcagLuminance,
 } from "culori";
-import type {
-  ColorAdjustments,
-  ColorScheme,
-  ShadeNumber,
-} from "~/lib/styles";
+import type { ColorAdjustments, ColorScheme, ShadeNumber } from "~/lib/styles";
 
 /**
  * Format an OKLCH color object as a string
@@ -153,16 +149,23 @@ export function createColorScheme(baseColor: string): ColorScheme {
     analogous1:
       formatOklchString(oklch({ ...colorObj, h: (h + 30) % 360 })) || baseColor,
     analogous2:
-      formatOklchString(oklch({ ...colorObj, h: (h - 30 + 360) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h - 30 + 360) % 360 })) ||
+      baseColor,
     triadic1:
-      formatOklchString(oklch({ ...colorObj, h: (h + 120) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h + 120) % 360 })) ||
+      baseColor,
     triadic2:
-      formatOklchString(oklch({ ...colorObj, h: (h - 120 + 360) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h - 120 + 360) % 360 })) ||
+      baseColor,
     complementary:
-      formatOklchString(oklch({ ...colorObj, h: (h + 180) % 360 })) || baseColor,
-    split1: formatOklchString(oklch({ ...colorObj, h: (h + 150) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h + 180) % 360 })) ||
+      baseColor,
+    split1:
+      formatOklchString(oklch({ ...colorObj, h: (h + 150) % 360 })) ||
+      baseColor,
     split2:
-      formatOklchString(oklch({ ...colorObj, h: (h - 150 + 360) % 360 })) || baseColor,
+      formatOklchString(oklch({ ...colorObj, h: (h - 150 + 360) % 360 })) ||
+      baseColor,
   };
 }
 

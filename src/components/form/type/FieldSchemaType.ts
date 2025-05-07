@@ -75,7 +75,13 @@ export interface FunctionArgumentBaseType {
   theme: ThemeContext;
   txnId: number;
   updateValue: (value: unknown) => void;
-  mergeVertexProperties: (txnId: number, vertexId: string, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, data: any) => void;
+  mergeVertexProperties: (
+    txnId: number,
+    vertexId: string,
+    graph: GraphInterface,
+    setGraph: SetStoreFunction<GraphInterface>,
+    data: any,
+  ) => void;
   zIndex: number;
 }
 

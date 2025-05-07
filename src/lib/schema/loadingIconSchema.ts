@@ -8,7 +8,8 @@ export function loadingIconSchema() {
         css: css`
   rotate: 2s linear infinite;
 `,
-        componentName: "Html", as: "icon",
+        componentName: "Html",
+        as: "icon",
         height: 32,
         icon: "ph:spinner",
         width: 32,

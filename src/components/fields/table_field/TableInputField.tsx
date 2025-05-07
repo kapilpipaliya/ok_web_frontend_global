@@ -138,7 +138,7 @@ export function TableInputField(
         props.isRealTime ?? false,
         graph,
         setGraph,
-      )
+      ),
     );
   };
 
@@ -267,7 +267,10 @@ export function TableInputField(
                     dragFromIndex={dragFromIndex}
                     dragToIndex={dragToIndex}
                     handleDrop={handleDrop}
-                    isNoPermissionCheck={props.isNoPermissionCheck ?? parentRenderContext()?.context.isNoPermissionCheck}
+                    isNoPermissionCheck={
+                      props.isNoPermissionCheck ??
+                      parentRenderContext()?.context.isNoPermissionCheck
+                    }
                     isRealTime={props.isRealTime ?? false}
                     joinVertex={vertex}
                     meta={meta()!}

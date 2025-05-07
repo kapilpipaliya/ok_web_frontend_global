@@ -236,14 +236,14 @@ export function SaveAsTemplateMenu(
         onInput={setTemplateName}
         ref={(el) => (nameInputRef = el)}
       />
-      
+
       {/* <Show when={props.saveAsLabel !== "Template"}>
         <SaveInCurrentPageCheckbox 
           checked={saveInCurrentPage()} 
           onChange={setSaveInCurrentPage} 
         />
       </Show> */}
-      
+
       <Show when={error()}>
         <As
           as="div"

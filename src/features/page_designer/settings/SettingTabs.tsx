@@ -59,11 +59,10 @@ export function SettingTabs() {
 `}
         >
           <FormConfig />
-          
+
           <Show keyed when={formStoreVertex()?.id}>
             <DesignerFormIdContext.Provider value={formStoreVertex().id}>
               <FormContext.Provider value={formStoreVertex().id}>
-
                 <Show
                   when={
                     graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] ===
@@ -81,7 +80,10 @@ export function SettingTabs() {
                 </Show>
 
                 <Show
-                  when={isPermissionsConfigurable(graph, formStoreVertex()?.P.formDataId)}
+                  when={isPermissionsConfigurable(
+                    graph,
+                    formStoreVertex()?.P.formDataId,
+                  )}
                 >
                   <Divider />
                   <Permission />
@@ -89,7 +91,8 @@ export function SettingTabs() {
 
                 <Show
                   when={
-                    graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] === "Component"
+                    graph.vertexes[formStoreVertex()?.P.formDataId]?.L?.[0] ===
+                    "Component"
                   }
                 >
                   <Divider />

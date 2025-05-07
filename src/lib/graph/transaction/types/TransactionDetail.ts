@@ -27,13 +27,13 @@ export interface TransactionDetail {
 
   // Special indexes that mark important undo points/checkpoints
   undoStepIndexes: number[];
-  
+
   // Transaction status for more explicit state tracking
-  status: 'idle' | 'modified' | 'committed' | 'reverted' | 'error';
-  
+  status: "idle" | "modified" | "committed" | "reverted" | "error";
+
   // Timestamp of last modification for better auditing
   lastModified: number;
-  
+
   // Optional error information if status is 'error'
   error?: {
     code: string;
@@ -63,52 +63,58 @@ export function hasRevertedCommittedChanges(txn: TransactionDetail): boolean {
  * have been restored through redo
  */
 export function isAtRedoneCommittedState(txn: TransactionDetail): boolean {
-  return txn.activeUndoIndex === txn.submittedIndex && 
-         txn.submittedIndex < txn.originalSubmittedIndex;
+  return (
+    txn.activeUndoIndex === txn.submittedIndex &&
+    txn.submittedIndex < txn.originalSubmittedIndex
+  );
 }
 
 /**
  * Checks if we're at a fully committed state with no pending changes
  */
 export function isFullyCommitted(txn: TransactionDetail): boolean {
-  return txn.activeUndoIndex === txn.submittedIndex && 
-         txn.submittedIndex === txn.originalSubmittedIndex && 
-         txn.revertSteps.length === 0 &&
-         txn.status === 'committed';
+  return (
+    txn.activeUndoIndex === txn.submittedIndex &&
+    txn.submittedIndex === txn.originalSubmittedIndex &&
+    txn.revertSteps.length === 0 &&
+    txn.status === "committed"
+  );
 }
 
 /**
  * Determines the appropriate transaction status based on the current state
  * of the undo/redo indices and other transaction properties.
- * 
+ *
  * This centralizes our status determination logic in one place for consistency.
- * 
+ *
  * @param txn The transaction detail object
  * @returns The appropriate status for the current transaction state
  */
-export function determineTransactionStatus(txn: TransactionDetail): 'idle' | 'modified' | 'committed' | 'reverted' | 'error' {
+export function determineTransactionStatus(
+  txn: TransactionDetail,
+): "idle" | "modified" | "committed" | "reverted" | "error" {
   // If there's an error, preserve that status
-  if (txn.status === 'error') {
-    return 'error';
+  if (txn.status === "error") {
+    return "error";
   }
-  
+
   // If we've undone committed steps
   if (txn.activeUndoIndex < txn.originalSubmittedIndex) {
-    return 'reverted';
+    return "reverted";
   }
-  
+
   // If we're at exactly a committed point
   if (txn.activeUndoIndex === txn.submittedIndex) {
     // Special case: if we're at submittedIndex but below originalSubmittedIndex,
     // this means we've restored some previously committed steps but not all of them
     if (txn.submittedIndex < txn.originalSubmittedIndex) {
-      return 'modified';
+      return "modified";
     }
-    return 'committed';
+    return "committed";
   }
-  
+
   // Otherwise we have uncommitted changes
-  return 'modified';
+  return "modified";
 }
 
 /**
@@ -125,18 +131,17 @@ export function hasChangesToCommit(txn: TransactionDetail): boolean {
   if (isFullyCommitted(txn)) {
     return false;
   }
-  
+
   // Check if any steps would need to be committed based on indices
-  const hasStepsToCommit = 
-    hasUncommittedChanges(txn) || 
-    hasRevertedCommittedChanges(txn) || 
+  const hasStepsToCommit =
+    hasUncommittedChanges(txn) ||
+    hasRevertedCommittedChanges(txn) ||
     isAtRedoneCommittedState(txn) ||
     (txn.revertSteps && txn.revertSteps.length > 0);
-    
+
   // Also check status for explicit indication of changes
-  const hasChangesBasedOnStatus = 
-    txn.status === 'modified' || 
-    txn.status === 'reverted';
-    
+  const hasChangesBasedOnStatus =
+    txn.status === "modified" || txn.status === "reverted";
+
   return hasStepsToCommit || hasChangesBasedOnStatus;
 }

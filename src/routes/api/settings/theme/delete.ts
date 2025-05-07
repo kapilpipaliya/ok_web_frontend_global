@@ -1,4 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { checkRole } from "~/cypher/permissions/isPermission";
@@ -35,22 +36,39 @@ export async function DELETE({ request }: APIEvent) {
     }
 
     // Check if theme exists and is not currently selected
-    const result = await dbSession.run(
+    // First get the theme name before deleting it
+    const themeQuery = await dbSession.run(
       `MATCH (t:Theme)
        WHERE elementId(t) = $themeId
-       AND NOT EXISTS((:GlobalSetting)-[:GlobalSettingTheme]->(t))
-       DELETE t
        RETURN t`,
       { themeId },
     );
 
-    const deletedCount = result.records.length;
-
-    if (deletedCount === 0) {
-      throw new APIError("Theme not found or is currently selected", 404);
+    if (themeQuery.records.length === 0) {
+      throw new APIError("Theme not found", 404);
     }
 
-    const themeName = result.records[0]?.get("t").P.key || "Unknown theme";
+    const theme = convertNodeToJson(themeQuery.records[0].get("t"));
+    const themeName = theme.P.key || "Unknown theme";
+
+    // Now check if it's not selected and delete it
+    const deleteResult = await dbSession.run(
+      `MATCH (t:Theme)
+       WHERE elementId(t) = $themeId
+       AND NOT EXISTS((:GlobalSetting)-[:GlobalSettingTheme]->(t))
+       DELETE t
+       RETURN count(t) as deletedCount`,
+      { themeId },
+    );
+
+    const deletedCount = deleteResult.records[0].get("deletedCount");
+
+    if (deletedCount === 0) {
+      throw new APIError(
+        "Theme is currently selected and cannot be deleted",
+        400,
+      );
+    }
     // Log theme deletion
     await createActivityLog(
       dbSession,

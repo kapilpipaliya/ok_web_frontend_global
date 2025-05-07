@@ -31,8 +31,9 @@ export function AttrConfigIcons(
   const isSelectedLayoutId = createSelector(
     () => formStoreVertex()?.P.selectedId,
   );
-  
-  const isRootLevel = () => formStoreVertex()?.P.formDataId === props.metaVertex.id;
+
+  const isRootLevel = () =>
+    formStoreVertex()?.P.formDataId === props.metaVertex.id;
 
   // const isSelectedHoverId = createSelector(() => formStoreVertex()?.P.hoverId);
 
@@ -65,21 +66,21 @@ export function AttrConfigIcons(
           <Show when={!isRootLevel()}>
             <ParentButton item={props.metaVertex} size={iconSize} />
           </Show>
-          
+
           <CopyButton item={props.metaVertex} size={iconSize} />
-          
+
           <PasteButton item={props.metaVertex} size={iconSize} />
-          
+
           {/* <Show when={!isRootLevel()}> */}
-            <SaveAsTemplateButton item={props.metaVertex} size={iconSize} />
+          <SaveAsTemplateButton item={props.metaVertex} size={iconSize} />
           {/* </Show> */}
-          
+
           <ImportHtmlButton item={props.metaVertex} size={iconSize} />
-          
+
           <Show when={!isRootLevel()}>
             <HideShowIcon iconSize={iconSize} metaVertex={props.metaVertex} />
           </Show>
-          
+
           <Show when={!isRootLevel()}>
             <DeleteButton
               componentName={getComponent()!}

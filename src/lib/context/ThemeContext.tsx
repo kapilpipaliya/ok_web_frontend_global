@@ -1,8 +1,4 @@
-import {
-  createContext,
-  type JSX,
-  useContext,
-} from "solid-js";
+import { createContext, useContext } from "solid-js";
 import type {
   ColorMode,
   ShadeNumber,
@@ -26,7 +22,6 @@ import {
   getHslComponents,
   parseColorName,
 } from "~/lib/styles/colorUtils";
-
 
 export const ThemeContext = createContext<ThemeContextType>();
 

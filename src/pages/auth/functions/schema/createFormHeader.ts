@@ -1,6 +1,6 @@
-import {getLogoSchema} from "~/routes/internal/page/(email)/baseEmailTemplate";
-import {css} from "~/lib/styles";
-import {SETTINGS_CONSTANTS} from "~/pages/settings/constants";
+import { getLogoSchema } from "~/routes/internal/page/(email)/baseEmailTemplate";
+import { css } from "~/lib/styles";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 /**
  * Creates a form header with logo and title

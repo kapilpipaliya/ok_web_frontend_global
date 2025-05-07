@@ -65,9 +65,12 @@ export const processStyle = (
 
   if (typeof style === "string") {
     // Handle template string evaluation
-    if (style.trim() !== "" && (style.includes("args.") || style.includes("return"))) {
+    if (
+      style.trim() !== "" &&
+      (style.includes("args.") || style.includes("return"))
+    ) {
       try {
-        const cssFunction = style.includes("return") 
+        const cssFunction = style.includes("return")
           ? new Function("args", style)
           : new Function("args", `return \`${style}\``);
         const evaluatedStyle = cssFunction(functionArgs);

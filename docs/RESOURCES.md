@@ -86,3 +86,6 @@
 
 ### LLaMA
 https://llama.meta.com/docs/llama-everywhere/running-meta-llama-on-linux/ 
+
+## Can be made components from:
+https://github.com/solid-component/guya-ui/tree/main

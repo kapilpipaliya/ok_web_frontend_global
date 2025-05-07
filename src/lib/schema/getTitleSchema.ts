@@ -7,7 +7,8 @@ export function getTitleSchema(title: string) {
   return {
     attributes: [
       {
-        componentName: "Html", as: "title",
+        componentName: "Html",
+        as: "title",
         props: (options: FunctionArgumentType) => ({
           text: getTitle(title, options.graph),
         }),

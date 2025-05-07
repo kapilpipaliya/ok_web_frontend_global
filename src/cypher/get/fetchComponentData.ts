@@ -5,7 +5,6 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
-import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
 export async function fetchComponentData(

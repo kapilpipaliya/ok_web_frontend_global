@@ -20,19 +20,21 @@ export function Permission() {
     FormMetaData[formStoreVertex()?.P.formId as keyof typeof FormMetaData]
       .attributes,
   ).find((meta) => meta.key === "PermGlobal");
-  
+
   if (!permissionsMetaAttribute) {
     return <></>;
   }
-  
-  const { metaVertexId } = generateTableInputMeta(
-    permissionsMetaAttribute,
-  );
+
+  const { metaVertexId } = generateTableInputMeta(permissionsMetaAttribute);
 
   return (
     <PermissionPanel
       title="Permissions"
-      data={formStoreVertex()?.P.formDataId ? graph.vertexes[formStoreVertex().P.formDataId] : undefined}
+      data={
+        formStoreVertex()?.P.formDataId
+          ? graph.vertexes[formStoreVertex().P.formDataId]
+          : undefined
+      }
       meta={graph.vertexes[metaVertexId]}
       isNoPermissionCheck={true}
       isRealTime={false}

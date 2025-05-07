@@ -14,9 +14,15 @@ import { css } from "~/lib/styles";
 
 export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const [graph, setGraph] = useGraph();
-  const [insertBeforeButtonsRef, setInsertBeforeButtonsRef] = createSignal<HTMLElement | undefined>();
-  const [insertAfterButtonsRef, setInsertAfterButtonsRef] = createSignal<HTMLElement | undefined>();
-  const [insertInsideButtonsRef, setInsertInsideButtonsRef] = createSignal<HTMLElement | undefined>();
+  const [insertBeforeButtonsRef, setInsertBeforeButtonsRef] = createSignal<
+    HTMLElement | undefined
+  >();
+  const [insertAfterButtonsRef, setInsertAfterButtonsRef] = createSignal<
+    HTMLElement | undefined
+  >();
+  const [insertInsideButtonsRef, setInsertInsideButtonsRef] = createSignal<
+    HTMLElement | undefined
+  >();
   const [showBeforeMenu, setShowBeforeMenu] = createSignal(false);
   const [showAfterMenu, setShowAfterMenu] = createSignal(false);
   const [showInsideMenu, setShowInsideMenu] = createSignal(false);
@@ -24,12 +30,13 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-    
+
   // Check if this is a root-level component
   const isRootLevel = () => formStoreVertex()?.P.formDataId === props.item.id;
-  
+
   // Safe reference to form data for drag and drop operations
-  const getFormData = () => graph.vertexes[formStoreVertex()?.P.formDataId || ""] || undefined;
+  const getFormData = () =>
+    graph.vertexes[formStoreVertex()?.P.formDataId || ""] || undefined;
 
   return (
     <>

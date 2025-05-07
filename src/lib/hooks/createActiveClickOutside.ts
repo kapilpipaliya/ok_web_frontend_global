@@ -1,7 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { onCleanup } from "solid-js";
-import {createUniqueId} from "~/lib/solid/createUniqueId";
+import { createUniqueId } from "~/lib/solid/createUniqueId";
 
 import type { Vertex } from "~/lib/graph/graph";
 import type {

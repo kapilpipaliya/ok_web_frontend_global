@@ -9,7 +9,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 
-export function JsonEditorFieldComponent(props: { 
+export function JsonEditorFieldComponent(props: {
   vertexId?: string;
   hideLabel?: boolean;
   height?: string;
@@ -26,15 +26,15 @@ export function JsonEditorFieldComponent(props: {
     if (props?.vertexId) {
       return graph.vertexes[props.vertexId];
     }
-    return formStoreVertex()?.P.selectedId !== -1 
-      ? graph.vertexes[formStoreVertex()?.P.selectedId] 
+    return formStoreVertex()?.P.selectedId !== -1
+      ? graph.vertexes[formStoreVertex()?.P.selectedId]
       : undefined;
   };
 
   const replacePropertyValue = (value: string) => {
     const vertex = getVertexToEdit();
     if (!vertex) return;
-    
+
     try {
       const parsedValue = JSON.parse(value);
       props.replaceProperties(parsedValue);

@@ -36,8 +36,9 @@ export function SaveAllButton() {
       ] as Vertex<FormStoreObject>;
 
     // Check if this is the main form
-    const isMainForm = layoutStore().mainFormId === graph.vertexes[openFormData].P.formId;
-    
+    const isMainForm =
+      layoutStore().mainFormId === graph.vertexes[openFormData].P.formId;
+
     // Save the form and capture preview using the global function
     return await saveAndCaptureForm(
       formStoreVertex,
@@ -47,7 +48,7 @@ export function SaveAllButton() {
       showLoadingToast,
       showWarningToast,
       navigate,
-      isMainForm // Update URL only if it's the main form
+      isMainForm, // Update URL only if it's the main form
     );
   };
 

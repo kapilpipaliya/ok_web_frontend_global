@@ -157,7 +157,8 @@ function createPasswordFieldWithHint(
             as: "div",
             attributes: [
               {
-                componentName: "Html", as: "icon",
+                componentName: "Html",
+                as: "icon",
                 props: () => ({
                   icon: showPassword[key] ? "ph:eye" : "ph:eye-slash",
                   onClick: () => setShowPassword(key, !showPassword[key]),

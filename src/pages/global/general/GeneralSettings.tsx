@@ -61,7 +61,7 @@ export function GeneralSettings() {
         css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
       },
-      {
+      /*{
         as: "div",
         attributes: [
           {
@@ -84,7 +84,7 @@ export function GeneralSettings() {
         ],
         css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
-      },
+      },*/
       {
         as: "div",
         attributes: [

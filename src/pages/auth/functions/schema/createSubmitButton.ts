@@ -1,5 +1,5 @@
-import {STYLES} from "~/pages/settings/constants";
-import {css} from "~/lib/styles";
+import { STYLES } from "~/pages/settings/constants";
+import { css } from "~/lib/styles";
 
 /**
  * Creates a submit button

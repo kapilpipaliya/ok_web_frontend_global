@@ -112,7 +112,7 @@ export function CompanySettings() {
                 key: "contactEmail",
                 placeholder: "Enter contact email",
                 type: "email",
-                validate: (value: string) => 
+                validate: (value: string) =>
                   value ? validateEmail(value) : undefined,
               },
             ],
@@ -154,7 +154,9 @@ export function CompanySettings() {
                       onClick: async () => {
                         // Validate form data
                         const settings = options.data;
-                        const errors = validateFormData(settings.P as Record<string, unknown>);
+                        const errors = validateFormData(
+                          settings.P as Record<string, unknown>,
+                        );
 
                         if (errors) {
                           // Show validation errors

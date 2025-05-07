@@ -5,7 +5,7 @@ import { FileRoutes } from "@solidjs/start/router";
 import { ToastProvider } from "solid-hot-toast";
 
 // import "~/base.css";
-import { ErrorBoundary, onMount, Suspense } from "solid-js";
+import { ErrorBoundary, onMount, Suspense, createSignal, Show } from "solid-js";
 import { isServer } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
@@ -35,12 +35,17 @@ const ErrorFallback = (props: {
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
   const graph = createAppState();
+  const [isHydrated, setIsHydrated] = createSignal(false);
   const Toaster = clientOnly(() => import("./Toaster"));
 
   // Set up global error handlers on client-side only
   onMount(() => {
     if (!isServer) {
       setupGlobalErrorHandlers();
+      // Set isHydrated to true after a short delay to ensure components are ready
+      setTimeout(() => {
+        setIsHydrated(true);
+      }, 3000);
     }
   });
 
@@ -72,9 +77,11 @@ export default function App() {
                       {props.children}
                     </Suspense>
                   </ErrorBoundary>
-                  {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
-                  <Toaster />
-                  {/* </Show> */}
+                  <Show when={isHydrated()}>
+                    {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
+                    <Toaster />
+                    {/* </Show> */}
+                  </Show>
                 </ThemeProvider>
               </GraphContext.Provider>
             </MetaProvider>

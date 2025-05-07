@@ -35,5 +35,3 @@ Super User Setup:
 ```bash
 npx playwright test tests/auth/superuser/super_user_setup.spec.ts --project=chromium
 ```
-
-Sign up an account for adminpaneluicomponents subdomain. 

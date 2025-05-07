@@ -19,15 +19,14 @@ import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId"
 import { GlobalSetting } from "~/lib/meta/base/GlobalSetting";
 
 import { SETTINGS_CONSTANTS } from "../settings/constants";
-import { AddNewThemeDialog } from "./AddNewThemeDialog";
-import { ThemeConfigButton } from "./theme_config/ThemeConfigButton";
+import { AddNewThemeDialog } from "./theme_config/AddNewThemeDialog";
+import { ThemeConfigEditButton } from "./theme_config/ThemeConfigEditButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 
 export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   const [graph, setGraph] = useGraph();
-  const [_selectedTheme, setSelectedTheme] = createSignal<Id>();
   const [loading, setLoading] = createSignal(true);
   const { showErrorToast, showSuccessToast } = useToast();
   const [error, setError] = createSignal<null | string>(null);
@@ -49,7 +48,6 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   });
 
   const handleThemeSelect = async (themeId: Id) => {
-    setSelectedTheme(themeId);
     const globalSettingVertex = getGlobalSettingVertex(graph);
     if (!globalSettingVertex) {
       return;
@@ -210,7 +208,10 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                   >
                     <ThemePreview item={graph.vertexes[theme]} />
 
-                    <ThemeConfigButton item={graph.vertexes[theme]} size={18} />
+                    <ThemeConfigEditButton
+                      item={graph.vertexes[theme]}
+                      size={18}
+                    />
 
                     <Show when={!isSelected()}>
                       <IconButton
@@ -245,19 +246,19 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
         <Portal>
           <As
             as="div"
-            css={(_args) => css`
+            css={() => css`
   ${SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS}
 `}
           >
             <As
               as="div"
-              css={(_args) => css`
+              css={() => css`
   ${SETTINGS_CONSTANTS.MODAL.HEADER.CSS}
 `}
             >
               <As
                 as="h3"
-                css={(_args) => css`
+                css={() => css`
   ${SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS}
 `}
               >
@@ -266,7 +267,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
             </As>
             <As
               as="p"
-              css={(_args) => css`
+              css={() => css`
   ${SETTINGS_CONSTANTS.MODAL.BODY.CSS}
 `}
             >
@@ -274,13 +275,13 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
             </As>
             <As
               as="div"
-              css={(_args) => css`
+              css={() => css`
   ${SETTINGS_CONSTANTS.MODAL.FOOTER.CSS}
 `}
             >
               <As
                 as="button"
-                css={(_args) => css`
+                css={() => css`
                 ${SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CSS}
               `}
                 onClick={handleDeleteConfirmation}
@@ -289,7 +290,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
               </As>
               <As
                 as="button"
-                css={(_args) => css`
+                css={() => css`
                 ${SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS}
               `}
                 onClick={() => setConfirmDelete(null)}

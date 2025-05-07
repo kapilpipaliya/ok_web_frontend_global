@@ -10,7 +10,6 @@ import {
   batch,
   createEffect,
   createMemo,
-  createSignal,
   Match,
   on,
   onCleanup,
@@ -71,7 +70,7 @@ import {
   type FetchFormMetaDataResult,
 } from "./functions/fetchPageData";
 import { fetchFormMetaData } from "./functions/fetchFormMetaData";
-import { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 // Permission levels
 export enum PermissionLevel {
@@ -194,7 +193,13 @@ export function PageViewWrapper(
   const getDynamicFns = () => {
     try {
       // Helper to evaluate fns from a vertex
-      const evaluateFns = (fns: ((args: FunctionArgumentType) => Record<string, unknown>) | string | undefined | null) => {
+      const evaluateFns = (
+        fns:
+          | ((args: FunctionArgumentType) => Record<string, unknown>)
+          | string
+          | undefined
+          | null,
+      ) => {
         if (typeof fns === "function") {
           return fns({} as FunctionArgumentType) || {};
         }
@@ -214,7 +219,7 @@ export function PageViewWrapper(
       console.error("Error in dynamicFns:", error);
       return {};
     }
-  }
+  };
   // const dynamicFns = createMemo(getDynamicFns);
 
   const isNoPermissionCheck = () =>
@@ -222,21 +227,19 @@ export function PageViewWrapper(
     metaVertex()?.P.isNoPermissionCheck ||
     previewStore.isNoPermissionCheck;
 
-
-  const allConfiguredPermission = (() =>
+  const allConfiguredPermission = () =>
     getConfiguredPermissions(
       getGlobalStore(graph).P.userRoles,
       metaVertex()!,
       graph,
-    )
-  );
+    );
 
   const permissions = {
-    full: (() => checkPermission(PermissionLevel.FULL)),
-    edit: (() => checkPermission(PermissionLevel.EDIT)),
-    create: (() => checkPermission(PermissionLevel.CREATE)),
-    view: (() => checkPermission(PermissionLevel.VIEW)),
-    none: (() => checkPermission(PermissionLevel.NONE)),
+    full: () => checkPermission(PermissionLevel.FULL),
+    edit: () => checkPermission(PermissionLevel.EDIT),
+    create: () => checkPermission(PermissionLevel.CREATE),
+    view: () => checkPermission(PermissionLevel.VIEW),
+    none: () => checkPermission(PermissionLevel.NONE),
   };
 
   function checkPermission(level: PermissionLevel) {
@@ -297,7 +300,7 @@ export function PageViewWrapper(
             if (!data || data.error) {
               return { error: data?.error || "Error fetching form data" };
             } else {
-              return {  dataResult: { data } };
+              return { dataResult: { data } };
             }
           } catch (error) {
             return { error: (error as Error).message };
@@ -383,13 +386,21 @@ export function PageViewWrapper(
         return { dataResult, formMetaId, metaResult };
       }
 
-      let result: { formMetaId?: string, metaResult?: FetchFormMetaDataResult, dataResult?: FetchFormDataResult, error?: string } = { formMetaId, metaResult };
+      let result: {
+        formMetaId?: string;
+        metaResult?: FetchFormMetaDataResult;
+        dataResult?: FetchFormDataResult;
+        error?: string;
+      } = { formMetaId, metaResult };
 
       if (props.getFormData) {
         try {
           const data = await props.getFormData();
           if (!data || data.error) {
-            result = { ...result, error: data.error || "Error fetching form data" };
+            result = {
+              ...result,
+              error: data.error || "Error fetching form data",
+            };
           } else {
             result = { ...result, dataResult: { data } };
           }
@@ -461,7 +472,8 @@ export function PageViewWrapper(
     if (
       formStore().P.formMetaId &&
       !isNoPermissionCheck() &&
-      ((["Page"].includes(metaVertex()?.L[0]) && !getDynamicFns().enabled?.()))
+      ["Page"].includes(metaVertex()?.L[0]) &&
+      !getDynamicFns().enabled?.()
     ) {
       const errorMsg = `${props.pageVertexName} is not enabled. Please contact your administrator.`;
       setFormStore("error", errorMsg);
@@ -469,7 +481,7 @@ export function PageViewWrapper(
     }
 
     if (!metaVertex()) {
-      const errorMsg = "No form meta data found";
+      const errorMsg = "No Page found";
       setFormStore("error", errorMsg);
       return errorMsg;
     }
@@ -491,7 +503,11 @@ export function PageViewWrapper(
 
   props.initializeFormStoreParent?.(pageFormVertexObject.id);
 
-  const processResult = (result?: { formMetaId?: string, metaResult?: FetchFormMetaDataResult, dataResult?: FetchFormDataResult }) => {
+  const processResult = (result?: {
+    formMetaId?: string;
+    metaResult?: FetchFormMetaDataResult;
+    dataResult?: FetchFormDataResult;
+  }) => {
     if (result) {
       untrack(() => {
         batch(() => {
@@ -503,20 +519,20 @@ export function PageViewWrapper(
         });
       });
     }
-  }
+  };
 
   // Make SSR work when props.formMetaId is set
-  untrack(() => {
-    batch(() => {
-      if (props.formMetaId) {
-        setFormMetaData();
-        const validationError = validateMetaVertex();
-        if (!validationError) {
-          handleFormData();
-        }
-      }
-    });
-  });
+  // untrack(() => {
+  //   batch(() => {
+  //     if (props.formMetaId) {
+  //       setFormMetaData();
+  //       const validationError = validateMetaVertex();
+  //       if (!validationError) {
+  //         handleFormData();
+  //       }
+  //     }
+  //   });
+  // });
 
   // function hasRequiredPermissions() {
   //   return (
@@ -691,8 +707,9 @@ export function PageViewWrapper(
   const ContentSSR = () => {
     processResult(metaData());
 
-    return <>
-      {/* <Show when={props.enableSEO}>
+    return (
+      <>
+        {/* <Show when={props.enableSEO}>
         <Show when={metaVertex()?.P.seoTitle}>
           <SiteTitle>
             {getPageTitle(metaVertex()!)}
@@ -710,12 +727,11 @@ export function PageViewWrapper(
         </Show>
       </Show> */}
 
-      <Show when={formStore().P.error}>
-        <SimpleWarningAlert message={formStore().P.error} />
-      </Show>
+        <Show when={formStore().P.error}>
+          <SimpleWarningAlert message={formStore().P.error} />
+        </Show>
 
-
-      {/* <Show when={getGlobalStore(graph).P.isDevelopment}>
+        {/* <Show when={getGlobalStore(graph).P.isDevelopment}>
         <DebugPermissionInfo
           allConfiguredPermission={allConfiguredPermission()}
           authError={authError()}
@@ -729,56 +745,65 @@ export function PageViewWrapper(
           userRoles={getGlobalStore(graph).P.userRoles}
         />
       </Show> */}
-      <Show
-        fallback={<div>Data not found!</div>}
-        // when={dataVertex()}
-        when={
-          metaData() &&
-          (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)
-        }
-      >
-        <FormContext.Provider value={formStore().id}>
-          <Switch>
-            <Match
-              when={
-                !formStore().P.error &&
-                // formStore().P.mounted &&
-                metaVertex() &&
-                (props.dataId && props.dataId !== "new"
-                  ? dataVertex() || formStore().P.isFetching
-                  : true)
-              }
-            >
-              <Content />
-              {/* <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
+        <Show
+          fallback={<div>Data not found!</div>}
+          // when={dataVertex()}
+          when={
+            metaData() &&
+            (props.getFormData
+              ? dataVertex() || !formStore().P.isFetching
+              : true)
+          }
+        >
+          <FormContext.Provider value={formStore().id}>
+            <Switch>
+              <Match
+                when={
+                  !formStore().P.error &&
+                  // formStore().P.mounted &&
+                  metaVertex() &&
+                  (props.dataId && props.dataId !== "new"
+                    ? dataVertex() || formStore().P.isFetching
+                    : true)
+                }
+              >
+                <Content />
+                {/* <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
                 <SaveCancelButton
                   closePopUp={props.closePopUp}
                   disabled={isDisabledTxn(formStore().P.txnId, graph)}
                 />
               </Show> */}
-            </Match>
-          </Switch>
-        </FormContext.Provider>
-      </Show>
-      <Show when={formStore().P.discardPopup}>
-        <DialogWithButtons
-          message="Discard unsaved changes - are you sure?"
-          onCancel={() => setFormStore("discardPopup", false)}
-          onConfirm={() => {
-            revertTransaction(formStore().P.txnId, graph, setGraph);
-            setFormStore("discardPopup", false);
-            onConfirmExit();
-          }}
-          open={() => formStore().P.discardPopup}
-          setOpen={setFormStore.bind(null, "discardPopup")}
-          title="Discard changes"
-        />
-      </Show>
-    </>
-  }
+              </Match>
+            </Switch>
+          </FormContext.Provider>
+        </Show>
+        <Show when={formStore().P.discardPopup}>
+          <DialogWithButtons
+            message="Discard unsaved changes - are you sure?"
+            onCancel={() => setFormStore("discardPopup", false)}
+            onConfirm={() => {
+              revertTransaction(formStore().P.txnId, graph, setGraph);
+              setFormStore("discardPopup", false);
+              onConfirmExit();
+            }}
+            open={() => formStore().P.discardPopup}
+            setOpen={setFormStore.bind(null, "discardPopup")}
+            title="Discard changes"
+          />
+        </Show>
+      </>
+    );
+  };
 
   return (
-    <Show when={metaData() && formStore().P.count && (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)}>
+    <Show
+      when={
+        metaData() &&
+        formStore().P.count &&
+        (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)
+      }
+    >
       <ContentSSR />
     </Show>
   );

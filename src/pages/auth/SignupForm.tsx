@@ -19,8 +19,8 @@ import { useFormSubmit } from "./functions/useFormSubmit";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { validateFormData } from "./functions/validateFormData";
 import { css } from "~/lib/styles";
-import {createFormHeader} from "~/pages/auth/functions/schema/createFormHeader";
-import {createTextField} from "~/pages/auth/functions/schema/createTextField";
+import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
+import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 
 export function SignupForm() {
   const navigate = useNavigate();
@@ -164,7 +164,8 @@ export function SignupForm() {
                     as: "div",
                     attributes: [
                       {
-                        componentName: "Html", as: "icon",
+                        componentName: "Html",
+                        as: "icon",
                         props: () => ({
                           icon: showPassword.password
                             ? "ph:eye"

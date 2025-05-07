@@ -9,7 +9,7 @@ import {
   Show,
   Switch,
 } from "solid-js";
-import {createUniqueId} from "~/lib/solid/createUniqueId";
+import { createUniqueId } from "~/lib/solid/createUniqueId";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
@@ -33,7 +33,11 @@ import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransact
 import { PROPERTIES } from "~/pages/settings/constants";
 import { evalExpression } from "~/lib/expression_eval";
 
-import { PageLayoutObject, useDesignerFormIdContext, useDesignerLayoutStore } from "../../../context/LayoutContext";
+import {
+  type PageLayoutObject,
+  useDesignerFormIdContext,
+  useDesignerLayoutStore,
+} from "../../../context/LayoutContext";
 import { ValidationConfig } from "../validations/ValidationConfig";
 import { HighlightSetValueContent } from "./HighlightSetValueContent";
 import { Label } from "./Label";
@@ -96,7 +100,9 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
-  const isHtmlIcon = () => selectedAttr()?.P.componentName === "Html" && selectedAttr()?.P.as === "icon";
+  const isHtmlIcon = () =>
+    selectedAttr()?.P.componentName === "Html" &&
+    selectedAttr()?.P.as === "icon";
   const propAttributes = createMemo(
     () =>
       clonePropAttributes(props.metaAttributes, metaTxnId, graph, setGraph) ??
@@ -135,12 +141,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           />
         )}
       </For>
-      <Show
-        when={
-          selectedAttr()?.P.componentName === "Html" ||
-          isHtmlIcon()
-        }
-      >
+      <Show when={selectedAttr()?.P.componentName === "Html" || isHtmlIcon()}>
         <FunctionEditor
           keyName="css"
           label="CSS"
@@ -377,7 +378,8 @@ function getMetaVertexes(
     selectedAttr()?.P.as === "textarea" ||
     selectedAttr()?.P.as === "select" ||
     ["CheckBox", "MultiSelect", "Select", "TextInput"].includes(componentName);
-  const isHtmlIcon = componentName === "Html" && selectedAttr()?.P.as === "icon";
+  const isHtmlIcon =
+    componentName === "Html" && selectedAttr()?.P.as === "icon";
   const isDataComponent = componentName === "Data";
 
   // Check if parent component is a Slot
@@ -386,7 +388,7 @@ function getMetaVertexes(
     vertexes: [selectedAttr()],
   })?.[0];
   const isParentSlot = parentVertex?.P.componentName === "Component";
-  
+
   // Check if the current component is a Slot
   const isCurrentComponentSlot = selectedAttr()?.P.componentName === "Slot";
 
@@ -405,11 +407,13 @@ function getMetaVertexes(
     // always displayed properties
     graph.vertexes[vertexIds.calculatedValue],
     ...(componentName === "Html" ? [graph.vertexes[vertexIds.as]] : []),
-    ...(isDataComponent ? [
-      graph.vertexes[vertexIds.name],
-      graph.vertexes[vertexIds.loop],
-      graph.vertexes[vertexIds.expression],
-    ] : []),
+    ...(isDataComponent
+      ? [
+          graph.vertexes[vertexIds.name],
+          graph.vertexes[vertexIds.loop],
+          graph.vertexes[vertexIds.expression],
+        ]
+      : []),
     graph.vertexes[vertexIds.required],
     graph.vertexes[vertexIds.hide],
     graph.vertexes[vertexIds.disabled],
@@ -439,7 +443,6 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
 
   const formStoreVertex = () =>
     graph.vertexes[layoutStore().formId!] as Vertex<FormStoreObject>;
-
 
   const metaProps = getPropsFromMetaExpression(
     graph,
@@ -494,7 +497,10 @@ function PropertyField(props: Readonly<PropertyFieldProps>) {
         </Match>
         <Match when={props.meta.P.key === "perm"}>
           <Show
-            when={isPermissionsConfigurable(graph, formStoreVertex()?.P.formDataId)}
+            when={isPermissionsConfigurable(
+              graph,
+              formStoreVertex()?.P.formDataId,
+            )}
           >
             <SelectPermissionField
               meta={props.meta}

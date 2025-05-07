@@ -12,11 +12,11 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { useFormSubmit } from "./functions/useFormSubmit";
-import {createFormHeader} from "~/pages/auth/functions/schema/createFormHeader";
-import {createFormSubmitButton} from "~/pages/auth/functions/schema/createFormSubmitButton";
-import {createLinkButton} from "~/pages/auth/functions/schema/createLinkButton";
-import {createTextAreaField} from "~/pages/auth/functions/schema/createTextAreaField";
-import {createTextField} from "~/pages/auth/functions/schema/createTextField";
+import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
+import { createFormSubmitButton } from "~/pages/auth/functions/schema/createFormSubmitButton";
+import { createLinkButton } from "~/pages/auth/functions/schema/createLinkButton";
+import { createTextAreaField } from "~/pages/auth/functions/schema/createTextAreaField";
+import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 
 export function ContactForm() {
   const navigate = useNavigate();

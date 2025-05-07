@@ -1,5 +1,5 @@
-import type {FunctionArgumentType} from "~/components/form/type/FieldSchemaType";
-import {css} from "~/lib/styles";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import { css } from "~/lib/styles";
 
 /**
  * Creates a link button
