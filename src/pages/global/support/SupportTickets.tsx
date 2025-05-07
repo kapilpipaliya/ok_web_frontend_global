@@ -11,7 +11,7 @@ import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 
-import { getSupportTicketFormSchema } from "./functions/formSchema";
+import { getSupportTicketFormSchema } from "./functions/supportTicketFormSchema";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 

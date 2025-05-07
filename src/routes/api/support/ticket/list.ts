@@ -6,7 +6,7 @@ import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
-import { getSupportTicketFormSchema } from "~/pages/global/support/functions/formSchema";
+import { getSupportTicketFormSchema } from "~/pages/global/support/functions/supportTicketFormSchema";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 export async function POST({ request }: APIEvent) {

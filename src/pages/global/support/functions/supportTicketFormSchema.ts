@@ -132,29 +132,25 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                   },
                                 ],
                                 componentName: "Html",
-                                props: () => {
+                                css: () => {
                                   // const isUser = options.data?.P.email !== "Support";
                                   // ${isUser ? 'bg:primary-10' : 'bg:base-10'}
-                                  return {
-                                    css: css`
+                                  return css`
   display: inline-block;
   padding: 8px;
   border-radius: 6px;
   background-color: \${args.theme.var.color.base_20};
-`,
-                                  };
+`;
                                 },
                               },
                             ],
                             componentName: "Html",
-                            props: () => {
+                            css: () => {
                               // const isUser = options.data?.P.email !== "Support";
                               // isUser ? 'text-align:right;' : ''}`
-                              return {
-                                css: css`
-  margin-bottom: 12px;
-`,
-                              };
+                              return css`
+  margin-bottom: 8px;
+`;
                             },
                           },
                         ],
@@ -195,10 +191,10 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   border: 1px solid \${args.theme.var.color.base_40};
   border-radius: 6px;
   padding: 12px;
-  background-color: \${args.theme.var.color.base_20};
-  /* chat-history-container */
+  background-color: \${args.theme.var.color.base_10};
 `,
                 componentName: "Html",
+                class: "chat-history-container",
               },
               {
                 as: "div",
@@ -229,6 +225,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   color: \${args.theme.var.color.base};
   padding: 8px 16px;  
   border-radius: 6px;
+  border: none;
 `,
                         componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
@@ -306,6 +303,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     ],
                     css: css`
   display: flex;
+  gap: 2px;
   margin-top: 8px;
 `,
                     componentName: "Html",
