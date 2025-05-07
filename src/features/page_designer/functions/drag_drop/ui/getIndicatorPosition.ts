@@ -12,7 +12,7 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   const height = bounds.bottom - bounds.top;
   const width = bounds.right - bounds.left;
 
-  // Determine the position based on offsets
+  // Determine the dragPosition based on offsets
   // @ts-expect-error ignore
   if (node.useCurrentPosition) {
     if (offsetY < 4) {

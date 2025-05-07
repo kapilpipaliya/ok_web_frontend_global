@@ -12,7 +12,7 @@ export function handleDragLeave(
 ) {
   mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
     activeItem: null,
-    position: null,
+    dragPosition: null,
   });
   // Do not uncomment this, because drag is called before on drop
   // setDraggedVertex(null);

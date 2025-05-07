@@ -1,5 +1,5 @@
 export function getDnDBoxShadowArgs(
-  position: null | string,
+  dragPosition: null | string,
   color: string,
   inset = "inset",
 ) {
@@ -14,7 +14,7 @@ export function getDnDBoxShadowArgs(
     spread: "0",
   };
 
-  switch (position) {
+  switch (dragPosition) {
     case "after": {
       boxShadowProps["offset-y"] = "-8px";
       boxShadowProps.spread = "-6px";

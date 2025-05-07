@@ -16,7 +16,7 @@ export function addComponentAttrInPage(
   componentName: string,
   properties: Record<string, any> = {},
   toVertex?: Vertex,
-  position = "center",
+  dragPosition = "center",
 ) {
   // now we are not fetching components initially
   // const formCompVertex = findVertexByLabelAndUniqueId(
@@ -49,6 +49,6 @@ export function addComponentAttrInPage(
     undefined,
     properties,
     toVertex,
-    position,
+    dragPosition,
   );
 }

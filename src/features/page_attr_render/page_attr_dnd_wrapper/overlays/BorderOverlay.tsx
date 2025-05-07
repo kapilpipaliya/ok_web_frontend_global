@@ -51,7 +51,7 @@ export function BorderOverlay(
 
     if (isActiveTargetItem()) {
       const boxShadowProps = getDnDBoxShadowArgs(
-        layoutStoreVertex()?.P.position,
+        layoutStoreVertex()?.P.dragPosition,
         "green",
       );
       styles = {

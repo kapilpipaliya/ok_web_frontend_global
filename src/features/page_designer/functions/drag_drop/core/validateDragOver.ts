@@ -11,7 +11,7 @@ export function validateDragOver(
   fromVertex: Vertex,
   toVertexId: Id | number,
   formData: Vertex,
-  position: string,
+  dragPosition: string,
 ) {
   // If fromVertex is not valid, don't allow drop
   if (!fromVertex) {
@@ -39,7 +39,7 @@ export function validateDragOver(
     parentVertex = parentResult;
   }
 
-  if (position === "center") {
+  if (dragPosition === "center") {
     // is Top Layer:
     if (toVertexId === formData.id) {
       // Allow drag over it

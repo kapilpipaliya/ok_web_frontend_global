@@ -22,7 +22,7 @@ export function resetDragDropState(
       {
         activeItem: null,
         draggedVertexIds: [],
-        position: null,
+        dragPosition: null,
       },
     );
   });

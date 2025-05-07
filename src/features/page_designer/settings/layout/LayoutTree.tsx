@@ -155,8 +155,8 @@ export function LayoutTree() {
     return !!txnId && isDisabledTxn(txnId, graph);
   };
 
-  // Function to add an HTML component at a specific position relative to selected item
-  const addHtmlComponent = (position: "center" | "before" | "after") => {
+  // Function to add an HTML component at a specific dragPosition relative to selected item
+  const addHtmlComponent = (dragPosition: "center" | "before" | "after") => {
     // Get the currently selected component
     const currentSelectedId = formStoreVertex()?.P.selectedId;
     if (!currentSelectedId) return;
@@ -185,8 +185,8 @@ export function LayoutTree() {
     let parentVertex: Vertex;
     let targetVertex: Vertex | undefined = selectedVertex;
 
-    // Determine where to add the component based on position
-    if (position === "center") {
+    // Determine where to add the component based on dragPosition
+    if (dragPosition === "center") {
       // Adding as a child - use selected vertex as parent
       parentVertex = selectedVertex;
       targetVertex = undefined; // Don't need target when adding as child
@@ -213,14 +213,14 @@ export function LayoutTree() {
       setGraph, // Graph setter
       "Html", // Component type
       htmlProps, // Component properties
-      position !== "center" ? targetVertex : undefined, // Target vertex
-      position, // Position
+      dragPosition !== "center" ? targetVertex : undefined, // Target vertex
+      dragPosition, // Position
     );
 
     if (newComponentId === -1) return;
 
     // Sort children for before/after positions to ensure correct order
-    if (position !== "center") {
+    if (dragPosition !== "center") {
       const newComponentVertex = {
         id: newComponentId,
         IN: {},
@@ -236,7 +236,7 @@ export function LayoutTree() {
         newComponentVertex,
         parentVertex,
         targetVertex,
-        position,
+        dragPosition,
       );
     }
 

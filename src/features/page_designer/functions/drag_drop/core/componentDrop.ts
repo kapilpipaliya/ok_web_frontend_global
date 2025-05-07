@@ -33,7 +33,7 @@ export function componentDrop(
   toIndex?: number,
   properties?: { [key: string]: number | string },
   toVertex?: Vertex,
-  position = "center",
+  dragPosition = "center",
 ) {
   if (!fromVertex) {
     return -1;
@@ -72,13 +72,13 @@ export function componentDrop(
   };
   let props = properties ?? {};
 
-  // Calculate the position value
+  // Calculate the dragPosition value
   const posValue = calculateInitialPosition(
     graph,
     setGraph,
     toParentVertex,
     toVertex,
-    position,
+    dragPosition,
     toIndex,
   );
   props = { ...props, pos: posValue, [uniqueNameKey]: uniqueName };
@@ -156,14 +156,14 @@ export function componentDrop(
 }
 
 /**
- * Calculate the position value for component placement
+ * Calculate the dragPosition value for component placement
  */
 function calculateInitialPosition(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   toParentVertex: Vertex,
   toVertex?: Vertex,
-  position = "center",
+  dragPosition = "center",
   toIndex?: number,
 ): number {
   // If toIndex is provided, use it directly
@@ -177,12 +177,12 @@ function calculateInitialPosition(
       ? Math.max(...childrenAttrs.map((child) => child.P.pos || 0))
       : 0;
 
-  // If no target vertex or center position, append at the end
-  if (position === "center" || !toVertex) {
+  // If no target vertex or center dragPosition, append at the end
+  if (dragPosition === "center" || !toVertex) {
     return lastPos + 1;
   }
 
-  // Find the position of the target vertex
+  // Find the dragPosition of the target vertex
   const targetIndex = childrenAttrs.findIndex(
     (child) => child.id === toVertex.id,
   );
@@ -190,12 +190,12 @@ function calculateInitialPosition(
     return lastPos + 1;
   }
 
-  const posCounter = targetIndex + 1; // 1-based position
+  const posCounter = targetIndex + 1; // 1-based dragPosition
 
-  if (position === "before" || position === "left") {
+  if (dragPosition === "before" || dragPosition === "left") {
     return posCounter - 0.5;
   }
-  if (position === "after" || position === "right") {
+  if (dragPosition === "after" || dragPosition === "right") {
     // If this is the last item, add 1 instead of 0.5
     return posCounter === lastPos ? posCounter + 1 : posCounter + 0.5;
   }

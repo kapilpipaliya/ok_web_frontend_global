@@ -22,28 +22,28 @@ export function handleDragOverAndSetDropPosition(
   setGraph: SetStoreFunction<GraphInterface>,
   formData: Vertex,
 ) {
-  let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
+  let dragPosition = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
     | "after"
     | "before"
     | "center"
     | "left"
     | "right"
     | null;
-  if (!position) {
+  if (!dragPosition) {
     mergeVertexProperties<PageLayoutObject>(
       0,
       layoutStoreVertex.id!,
       graph,
       setGraph,
-      { activeItem: null, position: null },
+      { activeItem: null, dragPosition: null },
     );
     return;
   }
 
   let activeItem: Id;
-  if (position === "before" || position === "left") {
+  if (dragPosition === "before" || dragPosition === "left") {
     activeItem = layoutVertex.id;
-  } else if (position === "after" || position === "right") {
+  } else if (dragPosition === "after" || dragPosition === "right") {
     if (
       isDesignMode ||
       typeof collapsedKeys !== "function" ||
@@ -55,7 +55,7 @@ export function handleDragOverAndSetDropPosition(
       // expanded State
       if (children().length) {
         activeItem = children()[0].id;
-        position = "before";
+        dragPosition = "before";
       } else {
         activeItem = layoutVertex.id;
       }
@@ -74,22 +74,22 @@ export function handleDragOverAndSetDropPosition(
       fromVertex,
       toVertexId,
       formData,
-      position,
+      dragPosition,
     )
   ) {
-    position = null;
+    dragPosition = null;
   }
 
   if (
     layoutStoreVertex.P.activeItem !== activeItem ||
-    layoutStoreVertex.P.position !== position
+    layoutStoreVertex.P.dragPosition !== dragPosition
   ) {
     mergeVertexProperties<PageLayoutObject>(
       0,
       layoutStoreVertex.id!,
       graph,
       setGraph,
-      { activeItem, position },
+      { activeItem, dragPosition },
     );
   }
 }

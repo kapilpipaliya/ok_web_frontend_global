@@ -21,7 +21,7 @@ export function handleDragOver(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   formData: Vertex,
-  expandChildren?: (position: string) => void,
+  expandChildren?: (dragPosition: string) => void,
 ) {
   e.stopPropagation();
 
@@ -38,15 +38,15 @@ export function handleDragOver(
     formData,
   );
 
-  if (!layoutStoreVertex?.P.position) {
+  if (!layoutStoreVertex.P.dragPosition) {
     // Don't allow drag and drop
     return;
   }
-  expandChildren?.(layoutStoreVertex?.P.position!);
+  expandChildren?.(layoutStoreVertex.P.dragPosition!);
 
-  for (const vertexId of layoutStoreVertex?.P.draggedVertexIds) {
+  for (const vertexId of layoutStoreVertex.P.draggedVertexIds) {
     const fromVertex = graph.vertexes[vertexId];
-    const toVertexId = layoutStoreVertex?.P.activeItem!;
+    const toVertexId = layoutStoreVertex.P.activeItem!;
     if (!fromVertex) {
       // Don't allow drag and drop
       return;
@@ -59,7 +59,7 @@ export function handleDragOver(
         fromVertex,
         toVertexId,
         formData,
-        layoutStoreVertex?.P.position!,
+        layoutStoreVertex.P.dragPosition!,
       )
     ) {
       // Don't allow drag and drop

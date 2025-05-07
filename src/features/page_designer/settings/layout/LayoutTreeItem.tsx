@@ -110,8 +110,8 @@ export function LayoutTreeItem(
       graph,
       setGraph,
       graph.vertexes[formStoreVertex()?.P.formDataId] || null,
-      (position) => {
-        if (position === "center" && Date.now() - startTime > 1000) {
+      (dragPosition) => {
+        if (dragPosition === "center" && Date.now() - startTime > 1000) {
           if (props.collapsedKeys().includes(props.metaVertex.id)) {
             props.toggleExpand(props.metaVertex.id);
           }
@@ -128,7 +128,7 @@ export function LayoutTreeItem(
       setGraph,
       {
         activeItem: null,
-        position: null,
+        dragPosition: null,
       },
     );
   };
@@ -170,16 +170,17 @@ export function LayoutTreeItem(
   };
 
   const isAfter = createMemo(
-    () => isActiveTargetItem() && layoutStoreVertex()?.P.position === "after",
+    () =>
+      isActiveTargetItem() && layoutStoreVertex()?.P.dragPosition === "after",
   );
 
   const getBorder = createMemo(() => {
     let boxShadow = "";
 
     if (isActiveTargetItem()) {
-      if (layoutStoreVertex()?.P.position !== "after") {
+      if (layoutStoreVertex()?.P.dragPosition !== "after") {
         const boxShadowProps = getDnDBoxShadowArgs(
-          layoutStoreVertex()?.P.position,
+          layoutStoreVertex()?.P.dragPosition,
           "green",
         );
         boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])};`;

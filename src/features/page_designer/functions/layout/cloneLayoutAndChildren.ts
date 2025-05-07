@@ -22,7 +22,7 @@ export function cloneLayoutAndChildren(
   const toVertex = toExternalVertex ?? layoutVertex;
   const txnId2 = externalTxnId ?? txnId;
 
-  const position = toExternalVertex ? "center" : "after";
+  const dragPosition = toExternalVertex ? "center" : "after";
 
   const toParentVertex =
     toExternalVertex ??
@@ -41,7 +41,7 @@ export function cloneLayoutAndChildren(
     undefined,
     undefined,
     toVertex,
-    position,
+    dragPosition,
   );
   if (layoutRowId === -1) {
     return;
@@ -56,7 +56,7 @@ export function cloneLayoutAndChildren(
     fromVertex,
     toParentVertex!,
     toVertex,
-    position,
+    dragPosition,
   );
 
   saveUndoPoint(txnId2, graph, setGraph);

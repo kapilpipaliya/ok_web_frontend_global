@@ -14,7 +14,7 @@ export async function handlePageDrag(
   toVertex: Vertex,
   toParentVertex: undefined | Vertex,
   formData: Vertex,
-  position: string,
+  dragPosition: string,
 ) {
   const layoutRowId = componentDrop(
     formData,
@@ -26,7 +26,7 @@ export async function handlePageDrag(
     undefined,
     undefined,
     toVertex,
-    position,
+    dragPosition,
   );
   if (layoutRowId === -1) {
     return;
@@ -41,6 +41,6 @@ export async function handlePageDrag(
     fromVertex,
     toParentVertex!,
     toVertex,
-    position,
+    dragPosition,
   );
 }

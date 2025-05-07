@@ -14,12 +14,12 @@ export function sortChildren(
   fromVertex: undefined | Vertex,
   toParentVertex: Vertex,
   toVertex: undefined | Vertex,
-  position: string,
+  dragPosition: string,
 ) {
   let pos = 1;
   const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
   for (const child of childrenAttrs) {
-    if (child.id === fromVertex?.id && position !== "center") {
+    if (child.id === fromVertex?.id && dragPosition !== "center") {
       continue;
     }
     // const childIndex = child.P.pos;
@@ -31,7 +31,7 @@ export function sortChildren(
         continue;
       }
       // childIndex === toIndex, childIndex may be undefined.
-      if (position === "before" || position === "left") {
+      if (dragPosition === "before" || dragPosition === "left") {
         if (fromVertex?.P.pos !== pos) {
           mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
             pos,
@@ -42,7 +42,7 @@ export function sortChildren(
           mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
         }
         pos++;
-      } else if (position === "after" || position === "right") {
+      } else if (dragPosition === "after" || dragPosition === "right") {
         if (child.P.pos !== pos) {
           mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
         }

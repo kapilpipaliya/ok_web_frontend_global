@@ -44,7 +44,13 @@ export function getInitialDesignerLayoutStore() {
     mainFormId: null as Id | null,
     mainPanel: [mainPanel],
     openedFormIds: [] as Id[],
-    position: null as "after" | "before" | "center" | "left" | "right" | null,
+    dragPosition: null as
+      | "after"
+      | "before"
+      | "center"
+      | "left"
+      | "right"
+      | null,
     rightWidth0: INITIAL_WIDTHS.right0,
     rightWidth1: INITIAL_WIDTHS.right1,
     rightWidth2: INITIAL_WIDTHS.right2,

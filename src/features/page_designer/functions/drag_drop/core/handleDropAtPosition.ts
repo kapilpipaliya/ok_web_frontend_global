@@ -20,7 +20,7 @@ export async function handleDropAtPosition(
   formData: any,
   fromVertex: Vertex,
   toVertex: Vertex,
-  position: string,
+  dragPosition: string,
 ) {
   if (
     !validateDragOver(
@@ -29,13 +29,13 @@ export async function handleDropAtPosition(
       fromVertex,
       toVertex.id,
       formData,
-      position,
+      dragPosition,
     )
   ) {
     return;
   }
   const toParentVertex =
-    position === "center"
+    dragPosition === "center"
       ? toVertex
       : evalExpression("<-Attr", {
           graph,
@@ -53,7 +53,7 @@ export async function handleDropAtPosition(
       undefined,
       undefined,
       toVertex,
-      position,
+      dragPosition,
     );
     if (layoutRowId === -1) {
       return layoutRowId;
@@ -68,7 +68,7 @@ export async function handleDropAtPosition(
       fromVertex,
       toParentVertex!,
       toVertex,
-      position,
+      dragPosition,
     );
 
     saveUndoPoint(txnId, graph, setGraph);
@@ -84,14 +84,17 @@ export async function handleDropAtPosition(
       toVertex,
       toParentVertex,
       formData,
-      position,
+      dragPosition,
     );
   }
   const fromParentVertex = evalExpression("<-Attr", {
     graph,
     vertexes: [fromVertex],
   })?.[0];
-  if (position !== "center" && fromParentVertex?.id === toParentVertex?.id) {
+  if (
+    dragPosition !== "center" &&
+    fromParentVertex?.id === toParentVertex?.id
+  ) {
     sortChildren(
       graph,
       setGraph,
@@ -99,7 +102,7 @@ export async function handleDropAtPosition(
       fromVertex,
       toParentVertex!,
       toVertex,
-      position,
+      dragPosition,
     );
     saveUndoPoint(txnId, graph, setGraph);
   } else {
@@ -110,7 +113,7 @@ export async function handleDropAtPosition(
       fromVertex,
       fromParentVertex,
       toParentVertex!,
-      position,
+      dragPosition,
       toVertex,
     );
     saveUndoPoint(txnId, graph, setGraph);

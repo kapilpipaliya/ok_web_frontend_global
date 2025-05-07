@@ -14,7 +14,7 @@ export async function handleParentChange(
   fromVertex: Vertex,
   fromParentVertex: undefined | Vertex,
   toParentVertex: Vertex,
-  position: string,
+  dragPosition: string,
   toVertex: Vertex,
 ) {
   // remove previous incoming edge if present.
@@ -25,7 +25,7 @@ export async function handleParentChange(
     setParentValue(graph, setGraph, txnId, fromVertex, attrMetaVertex);
   }
   // add new edge.
-  if (position === "center") {
+  if (dragPosition === "center") {
     setParentValue(
       graph,
       setGraph,
@@ -58,6 +58,6 @@ export async function handleParentChange(
     fromVertex,
     toParentVertex,
     toVertex,
-    position,
+    dragPosition,
   );
 }
