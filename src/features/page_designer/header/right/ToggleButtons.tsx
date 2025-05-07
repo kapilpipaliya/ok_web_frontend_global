@@ -4,7 +4,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import {
-  INITIAL_WIDTHS,
+  getInitialLayoutSettings,
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
@@ -24,16 +24,13 @@ export function ToggleButtons() {
   };
 
   const resetLayout = () => {
-    mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
-      isLeftOpen: true,
-      isRight0Open: true,
-      isRight1Open: true,
-      isRight2Open: true,
-      leftWidth: INITIAL_WIDTHS.left,
-      rightWidth0: INITIAL_WIDTHS.right0,
-      rightWidth1: INITIAL_WIDTHS.right1,
-      rightWidth2: INITIAL_WIDTHS.right2,
-    });
+    mergeVertexProperties<PageLayoutObject>(
+      0,
+      layoutStoreId,
+      graph,
+      setGraph,
+      getInitialLayoutSettings(),
+    );
   };
 
   return (

@@ -23,6 +23,19 @@ export const INITIAL_WIDTHS = {
   right2: 310,
 } as const;
 
+export function getInitialLayoutSettings() {
+  return {
+    isLeftOpen: true,
+    isRight0Open: false,
+    isRight1Open: true,
+    isRight2Open: true,
+    leftWidth: INITIAL_WIDTHS.left,
+    rightWidth0: INITIAL_WIDTHS.right0,
+    rightWidth1: INITIAL_WIDTHS.right1,
+    rightWidth2: INITIAL_WIDTHS.right2,
+  };
+}
+
 export function getInitialDesignerLayoutStore() {
   const mainPanel = uuidv7();
   return {
@@ -35,12 +48,8 @@ export function getInitialDesignerLayoutStore() {
     draggedVertexIds: [] as Id[],
     formId: null as Id | null,
     id: uuidv7(),
-    isLeftOpen: true,
-    isRight0Open: true,
-    isRight1Open: true,
-    isRight2Open: true,
+    ...getInitialLayoutSettings(),
     isSmallScreen: false,
-    leftWidth: INITIAL_WIDTHS.left,
     mainFormId: null as Id | null,
     mainPanel: [mainPanel],
     openedFormIds: [] as Id[],
@@ -51,9 +60,6 @@ export function getInitialDesignerLayoutStore() {
       | "left"
       | "right"
       | null,
-    rightWidth0: INITIAL_WIDTHS.right0,
-    rightWidth1: INITIAL_WIDTHS.right1,
-    rightWidth2: INITIAL_WIDTHS.right2,
     selectedSection: "build",
     selectedTab: "settings",
   };
