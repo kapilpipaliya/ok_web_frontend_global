@@ -46,6 +46,7 @@ import { JsonEditorFieldComponent } from "../properties/JsonEditorField";
 import { IconButton } from "~/components/styled/IconButton";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { evalExpression } from "~/lib/expression_eval";
+import { getTreeItemBorder } from "./treeUtils";
 
 export function LayoutTreeItem(
   props: Readonly<{
@@ -334,6 +335,7 @@ export function LayoutTreeItem(
           collapsedKeys={props.collapsedKeys}
           metaVertex={props.metaVertex}
           toggleExpand={props.toggleExpand}
+          parentIndex={props.parentIndex}
         />
         <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
         <Show when={isSelectedHoverId(props.metaVertex.id) || showJsonEditor()}>
@@ -412,7 +414,7 @@ export function LayoutTreeItem(
   padding-top: 5px;
   list-style: none;
   margin: 0;
-  border-left: 1px dotted #ccc;
+  border-left: 1px ${getTreeItemBorder(props.parentIndex).style} ${getTreeItemBorder(props.parentIndex).color};
   margin-left: 4px;
 `}
         >

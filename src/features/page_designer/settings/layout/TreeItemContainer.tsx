@@ -3,6 +3,7 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { CssType } from "~/components/form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { getSelectedItemStyle } from "./treeUtils";
 
 export interface TreeItemContainerProps {
   children: JSX.Element;
@@ -49,8 +50,10 @@ export function TreeItemContainer(props: TreeItemContainerProps) {
     width: 100%;
     border-radius: ${local.hasChildren ? "5px" : "0 5px 5px 0"};
     ${local.isHovered ? "background-color: #F2EDED;" : ""}
-    ${local.isSelected ? "background-color: rgb(197, 221, 255);" : ""}
+    ${local.isSelected ? getSelectedItemStyle() : ""}
     ${!local.isDragOver && local.hasChildren ? "box-shadow: rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px;" : ""}
+    padding: 2px 0;
+    transition: all 0.15s ease-in-out;
   `,
   );
 

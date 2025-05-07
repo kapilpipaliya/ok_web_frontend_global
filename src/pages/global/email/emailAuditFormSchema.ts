@@ -225,6 +225,11 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
         css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         componentName: "Html",
         text: "Add New Email Audit",
+        props: (options: FunctionArgumentType) => ({
+          text: options.data.id.startsWith("-")
+            ? "Add New Email Audit"
+            : "View Email Audit",
+        }),
       },
     ],
     css: SETTINGS_CONSTANTS.MODAL.HEADER.CSS,

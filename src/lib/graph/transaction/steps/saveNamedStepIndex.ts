@@ -5,7 +5,7 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 
-export function saveStepIndex(
+export function saveNamedStepIndex(
   txnId: number,
   key: string,
   graph: Store<GraphInterface>,

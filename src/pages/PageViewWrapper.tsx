@@ -55,7 +55,7 @@ import { createCompContextVertex } from "~/lib/graph/mutate/vertex/createCompCon
 import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
-import { saveStepIndex } from "~/lib/graph/transaction/steps/saveStepIndex";
+import { saveNamedStepIndex } from "~/lib/graph/transaction/steps/saveNamedStepIndex";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/steps/setPreventUndoAtOrBeforeIndex";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
@@ -606,7 +606,7 @@ export function PageViewWrapper(
     if (!(props.parentId || props.txnId) && props.isDesignMode) {
       setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
     }
-    saveStepIndex(formStore().P.txnId, "initial", graph, setGraph);
+    saveNamedStepIndex(formStore().P.txnId, "initial", graph, setGraph);
     saveUndoPoint(formStore().P.txnId, graph, setGraph);
 
     if (!result) {

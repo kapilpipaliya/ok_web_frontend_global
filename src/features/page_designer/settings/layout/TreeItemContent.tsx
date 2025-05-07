@@ -13,12 +13,14 @@ import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { getTreeItemColor } from "./treeUtils";
 
 export function TreeItemContent(
   props: Readonly<{
     collapsedKeys: Accessor<Id[]>;
     metaVertex: Vertex;
     toggleExpand: (itemId: Id) => void;
+    parentIndex?: number;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -59,6 +61,7 @@ export function TreeItemContent(
           iconMap[componentName() as keyof typeof iconMap] ??
           "ph:circle"
         }
+        style={{ color: getTreeItemColor(props.parentIndex) }}
         noobserver
         width={17}
       />
