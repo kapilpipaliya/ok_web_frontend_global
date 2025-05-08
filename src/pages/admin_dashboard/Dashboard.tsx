@@ -30,7 +30,6 @@ export default function AdminDashboard() {
     const baseTabs = [
       { id: "Page", label: "Pages" },
       { id: "Component", label: "Components" },
-      { id: "Template", label: "Templates" },
     ];
 
     // Only add the EmailTemplate tab if the user has admin role

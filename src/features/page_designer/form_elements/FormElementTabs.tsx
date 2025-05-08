@@ -187,44 +187,6 @@ const PageLevelComponents = (props: Readonly<{ rootLevel?: boolean }>) => {
   );
 };
 
-const TemplatesSection = () => {
-  const [graph, setGraph] = useGraph();
-  const layoutStoreId = useDesignerLayoutStore();
-
-  const handleAddTemplateClick = () => {
-    return openInNewInternalTab(
-      layoutStoreId,
-      {
-        id: "new",
-        IN: {},
-        L: ["Template"],
-        OUT: {},
-        P: {},
-      } as Vertex,
-      graph,
-      setGraph,
-    );
-  };
-
-  return (
-    <As
-      as="div"
-      css={[
-        css`
-  margin-top: 4px;
-`,
-      ]}
-    >
-      <SectionHeader
-        title="Templates"
-        onAddClick={handleAddTemplateClick}
-        icon="ph:files"
-      />
-      <PagesList coll="Template" />
-    </As>
-  );
-};
-
 const TabList = (props: {
   tabs: Array<{ collection: string; title: string }>;
   selectedTab: { collection: string; title: string };
@@ -325,10 +287,6 @@ export function FormElementTabs() {
                 </DesignerFormIdContext.Provider>
               </Show>
             </As>
-
-            <Divider />
-
-            <TemplatesSection />
           </Match>
           <Match
             keyed
