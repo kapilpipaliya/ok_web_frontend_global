@@ -433,7 +433,7 @@ export function MultiSelectField(
   align-items: center;
   display: flex;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 3px 8px;
   width: 100%;
   min-height: 38px;
 `,

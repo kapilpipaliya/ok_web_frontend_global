@@ -7,6 +7,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { PROPERTIES } from "~/pages/settings/constants";
+import { TextInputField } from "~/components/fields/TextInputField";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
@@ -66,6 +67,19 @@ export function ComponentVariantsInput(props: {
 `}
               >
                 {variant.P.label || variant.P.key}
+                {variant.P.defValue !== undefined &&
+                  variant.P.defValue !== null && (
+                    <As
+                      as="span"
+                      css={css`
+                    color: #888;
+                    font-size: 13px;
+                  `}
+                    >
+                      {" "}
+                      ({String(variant.P.defValue)})
+                    </As>
+                  )}
               </As>
               <As
                 as="div"
@@ -77,7 +91,7 @@ export function ComponentVariantsInput(props: {
 `}
               >
                 <Switch>
-                  <Match when={options()}>
+                  <Match when={options() && options().length > 0}>
                     <As
                       as="select"
                       css={[
@@ -105,13 +119,10 @@ export function ComponentVariantsInput(props: {
                       </For>
                     </As>
                   </Match>
-                  <Match when={variant.P.type?.toLowerCase() === "boolean"}>
+                  <Match when={!options() || options().length === 0}>
                     <As
-                      as="input"
-                      checked={props.dataVertex.P[variant.P.key]}
-                      css={[
-                        PROPERTIES.Css.TextFieldCss,
-                        css`
+                      as={TextInputField}
+                      css={css`
   flex: 1;
   padding-left: 2px;
   padding-right: 2px;
@@ -119,61 +130,19 @@ export function ComponentVariantsInput(props: {
   padding-bottom: 1px;
   border: 1px solid #ccc;
   border-radius: 4px;
-`,
-                      ]}
-                      onChange={(e) =>
-                        props.setPropertyValue(variant, e.currentTarget.checked)
+`}
+                      onChange={(value) =>
+                        props.setPropertyValue(variant, value)
                       }
-                      type="checkbox"
-                    />
-                  </Match>
-                  <Match
-                    when={
-                      variant.P.type?.toLowerCase() === "number" ||
-                      variant.P.type?.toLowerCase() === "date"
-                    }
-                  >
-                    <As
-                      as="input"
-                      css={[
-                        PROPERTIES.Css.TextFieldCss,
-                        css`
-  flex: 1;
-  padding-left: 2px; padding-right: 2px;
-  padding-top: 1px; padding-bottom: 1px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-`,
-                      ]}
-                      onChange={(e) =>
-                        props.setPropertyValue(
-                          variant,
-                          variant.P.type?.toLowerCase() === "number"
-                            ? Number(e.currentTarget.value)
-                            : e.currentTarget.value,
-                        )
+                      type={
+                        variant.P.type === "boolean"
+                          ? "checkbox"
+                          : variant.P.type === "number"
+                            ? "number"
+                            : variant.P.type === "date"
+                              ? "date"
+                              : "text"
                       }
-                      type={variant.P.type?.toLowerCase()}
-                      value={props.dataVertex.P[variant.P.key] || ""}
-                    />
-                  </Match>
-                  <Match when={true}>
-                    <As
-                      as="input"
-                      css={[
-                        PROPERTIES.Css.TextFieldCss,
-                        css`
-  flex: 1;
-  padding-left: 2px; padding-right: 2px;
-  padding-top: 1px; padding-bottom: 1px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-`,
-                      ]}
-                      onChange={(e) =>
-                        props.setPropertyValue(variant, e.currentTarget.value)
-                      }
-                      type="text"
                       value={props.dataVertex.P[variant.P.key] || ""}
                     />
                   </Match>
@@ -187,6 +156,8 @@ export function ComponentVariantsInput(props: {
                   <IconButton
                     css={css`
   color: \${args.theme.var.color.error};
+  border: none;
+  background-color: transparent;
 `}
                     icon="ph:x"
                     onClick={() => props.setPropertyValue(variant, null)}

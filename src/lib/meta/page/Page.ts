@@ -219,9 +219,10 @@ export const variantAttributes = {
       key: "type",
 
       options: `boolean
-string`,
+string
+number
+date`,
       // date
-      // number
     },
     {
       as: "div",
@@ -230,15 +231,12 @@ string`,
           displayName: "Default Value",
           key: "defValue",
           // componentName: "::'P.type'",
-          css: `const type = 
-              args.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
-            return type === "CheckBox"
-              ? \`${PROPERTIES.Css.CheckBoxCss}\`
-              : \`${PROPERTIES.Css.TextFieldCss}\`;`,
-          props: `const type =
-              args.data?.P.type === "boolean" ? "CheckBox" : "TextInput";
-            return {
-              componentName: type,
+          css: css`${PROPERTIES.Css.TextFieldCss}`,
+          props: `return {
+              componentName: "TextInput",
+              type: args.data?.P.type === "number" ? "number" : 
+                   args.data?.P.type === "boolean" ? "checkbox" :
+                   args.data?.P.type === "date" ? "date" : "text",
             };`,
         },
         {
@@ -254,8 +252,19 @@ string`,
           css: css`
   display: flex;
   align-items: center;
-  gap: 2px;
+  justify-content: center;
+  gap: 4px;
   color: \${args.theme.var.color.error};
+  background-color: transparent;
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  &:hover {
+    background-color: \${args.theme.var.color.error_20};
+    color: \${args.theme.var.color.error};
+  }
 `,
           componentName: "Html",
           key: "button",
@@ -277,6 +286,7 @@ string`,
                   },
                 );
               },
+              title: "Clear default value",
             };`,
           type: "button",
         },
@@ -284,7 +294,8 @@ string`,
       css: css`
   display: flex;
   align-items: center;
-  gap: 2px;
+  justify-content: space-between;
+  gap: 4px;
 `,
       componentName: "Html",
       displayName: "Default Value",
@@ -302,6 +313,7 @@ string`,
     {
       attributes: [
         {
+          css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextInput",
           displayName: "Property Name",
           key: "key",
@@ -309,13 +321,18 @@ string`,
         {
           displayName: "Value",
           key: "value",
+          css: css`${PROPERTIES.Css.TextFieldCss}`,
           props: `const type = args.evalExpression("<-$0::'P.type'", {
               graph: args.graph,
               setGraph: args.setGraph,
               vertexes: [args.data],
             });
             return {
-              componentName: type === "boolean" ? "CheckBox" : "TextInput",
+              componentName: "TextInput",
+              type: type === "number" ? "number" : 
+                   type === "boolean" ? "checkbox" :
+                   type === "date" ? "date" : "text",
+              valueFormat: type === "date" ? "iso" : undefined,
             };`,
         },
       ],

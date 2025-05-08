@@ -38,6 +38,9 @@ export const getComponentClass = (componentName: string) => {
       return "min-width:200px;";
     case "TextArea":
       return "min-width:200px;";
+    case "Table":
+    case "DynamicTable":
+      return "min-width:250px;";
     default:
       return "min-width:150px;";
   }
@@ -198,30 +201,29 @@ export function DisplayProperty(
           </As>
         </As>
       </Match>
-      <Match when={componentName() === "DynamicTable"}>
+      <Match
+        when={componentName() === "Table" || componentName() === "DynamicTable"}
+      >
         <As
           as="td"
           css={css`
-  align-content: center;
+  ${getComponentClass(componentName()!)}
+  text-align: left;
+  padding: 1px;
 `}
         >
-          <Show when={!props.disabled()}>
-            <As
-              as="div"
-              css={css`
-  ${getComponentClass(componentName()!)}
-  display: flex;
-  align-items: center;
-  justify-content: center;
+          <As
+            as="div"
+            css={css`
+  width: 100%;
 `}
-            >
-              <DefaultValue
-                joinVertex={props.joinVertex}
-                metaVertex={metaVertex()}
-              />
-              <Content />
-            </As>
-          </Show>
+          >
+            <DefaultValue
+              joinVertex={props.joinVertex}
+              metaVertex={metaVertex()}
+            />
+            <Content />
+          </As>
         </As>
       </Match>
       <Match when={true}>

@@ -346,10 +346,11 @@ ${Object.keys(binopsInitial).join("\n")}`,
   EDIT
   FULL`,
           },
-          {
-            componentName: "TextInput",
-            key: "scope",
-          },
+          // {
+          //   css: PROPERTIES.Css.TextFieldCss,
+          //   componentName: "TextInput",
+          //   key: "scope",
+          // },
         ],
         componentName: "DynamicTable",
         hide: true,

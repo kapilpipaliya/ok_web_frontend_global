@@ -89,7 +89,7 @@ export function Variants() {
             }
           `}
           size="18"
-          aria-label="Add new variant"
+          title="Manage Variants"
           onClick={handleAddVariant}
         />
       </As>

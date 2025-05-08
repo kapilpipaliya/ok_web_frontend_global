@@ -89,3 +89,6 @@ https://llama.meta.com/docs/llama-everywhere/running-meta-llama-on-linux/
 
 ## Can be made components from:
 https://github.com/solid-component/guya-ui/tree/main
+
+for trigger:
+https://github.com/solid-component/solid-trigger/tree/main

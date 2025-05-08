@@ -18,6 +18,7 @@ import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 import { Overlay } from "../settings/properties/formgroup/permission_field/Overlay";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 const getMetaAttributes = (selectedVariant?: null | Vertex) => {
   let metaAttribute = klona(
@@ -203,15 +204,16 @@ export function VariantsModal(
                     {error()}
                   </As>
                 )}
-                <As as="button" onClick={onVariantsSubmit}>
+                <As
+                  as="button"
+                  css={SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS}
+                  onClick={onVariantsSubmit}
+                >
                   Submit
                 </As>
                 <As
                   as="button"
-                  css={css`
-  border-color: #FF0000;
-  color: #FF0000;
-`}
+                  css={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS}
                   onClick={onVariantsCancel}
                 >
                   Cancel
