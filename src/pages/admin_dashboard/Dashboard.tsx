@@ -1,7 +1,7 @@
 import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal } from "solid-js";
 
-import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
+import { type TabItem, TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/GraphContext";
@@ -27,14 +27,18 @@ export default function AdminDashboard() {
   };
 
   const tabs = () => {
-    const baseTabs = [
-      { id: "Page", label: "Pages" },
-      { id: "Component", label: "Components" },
+    const baseTabs: TabItem[] = [
+      { id: "Page", label: "Pages", icon: "ph:file-text" },
+      { id: "Component", label: "Components", icon: "ph:puzzle-piece" },
     ];
 
     // Only add the EmailTemplate tab if the user has admin role
     if (isAdminRole(graph)) {
-      baseTabs.push({ id: "EmailTemplate", label: "Email Templates" });
+      baseTabs.push({
+        id: "EmailTemplate",
+        label: "Email Templates",
+        icon: "ph:envelope",
+      });
     }
 
     return baseTabs;
@@ -47,6 +51,7 @@ export default function AdminDashboard() {
         onTabClick={handleTabClick}
         selectedKey={selectedId()}
         tabs={tabs()}
+        iconSize={18}
       />
       <DataGrid isShowPagination={true} tableId={selectedId()} />
     </div>

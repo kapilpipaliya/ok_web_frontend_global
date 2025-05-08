@@ -1,19 +1,28 @@
-import { For } from "solid-js";
+import { For, type JSX, Show } from "solid-js";
+import { Icon } from "@iconify-icon/solid";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
 import { css } from "~/lib/styles";
 import { As } from "../As";
 
+export type TabItem = {
+  id: string;
+  label?: string;
+  icon?: string | JSX.Element;
+  [key: string]: string | JSX.Element | undefined;
+};
+
 export function TabsWithUnderline(
   props: Readonly<{
-    displayValueKey: string;
+    displayValueKey?: string;
     onTabClick: (key: string) => void;
     selectedKey: string;
-    tabs: Array<{ id: string }>;
+    tabs: Array<TabItem>;
+    iconSize?: number;
   }>,
 ) {
-  const getOptionLabel = (option: any) => {
+  const getOptionLabel = (option: TabItem) => {
     if (isObject(option) && props.displayValueKey) {
       if (props.displayValueKey.includes("::")) {
         return evalExpression(props.displayValueKey, option);
@@ -23,6 +32,26 @@ export function TabsWithUnderline(
 
     return isObject(option) ? option.label : option;
   };
+
+  // Inner component to handle icon rendering with Show
+  const IconDisplay = (props: {
+    icon?: string | JSX.Element;
+    size?: number;
+  }) => (
+    <Show when={props.icon}>
+      {(icon) =>
+        typeof icon() === "string" ? (
+          <Icon
+            icon={icon() as string}
+            height={props.size || 20}
+            width={props.size || 20}
+          />
+        ) : (
+          icon()
+        )
+      }
+    </Show>
+  );
 
   return (
     <As as="div">
@@ -146,10 +175,14 @@ export function TabsWithUnderline(
                     font-weight: 500;
                     padding: 0.5rem 0.25rem;
                     white-space: nowrap;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
                   `}
                   onClick={() => props.onTabClick(tab.id)}
                   type="button"
                 >
+                  <IconDisplay icon={tab.icon} size={props.iconSize} />
                   {getOptionLabel(tab)}
                 </As>
               )}
