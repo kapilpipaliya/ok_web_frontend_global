@@ -6,7 +6,6 @@ import {
   FormContext,
   type FormStoreObject,
 } from "~/components/form/context/FormContext";
-import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { useGraph } from "~/lib/graph/GraphContext";
 
 import {
@@ -72,10 +71,10 @@ export function SettingTabs() {
                   <Divider />
                   <NameKey />
                   <Divider />
-                  <HeaderWithDescription
+                  {/* <HeaderWithDescription
                     description="Add unique constrains to your form to ensure that no duplicate data is submitted."
                     title="Unique Constrains"
-                  />
+                  /> */}
                   <UniqueConstrains />
                 </Show>
 
