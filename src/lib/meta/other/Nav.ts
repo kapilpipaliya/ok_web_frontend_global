@@ -57,7 +57,9 @@ export const Nav = {
           key: "definition",
         },
         {
-          componentName: "CheckBox",
+          componentName: "TextInput",
+          css: [PROPERTIES.Css.CheckBoxCss],
+          type: "checkbox",
           key: "expanded",
         },
         {
@@ -116,7 +118,9 @@ Url`,
               key: "definition",
             },
             {
-              componentName: "CheckBox",
+              componentName: "TextInput",
+              css: [PROPERTIES.Css.CheckBoxCss],
+              type: "checkbox",
               key: "expanded",
             },
             {
@@ -175,7 +179,9 @@ Url`,
                   key: "definition",
                 },
                 {
-                  componentName: "CheckBox",
+                  componentName: "TextInput",
+                  css: [PROPERTIES.Css.CheckBoxCss],
+                  type: "checkbox",
                   key: "expanded",
                 },
                 {
@@ -234,7 +240,9 @@ Url`,
                       key: "definition",
                     },
                     {
-                      componentName: "CheckBox",
+                      componentName: "TextInput",
+                      css: [PROPERTIES.Css.CheckBoxCss],
+                      type: "checkbox",
                       key: "expanded",
                     },
                     {

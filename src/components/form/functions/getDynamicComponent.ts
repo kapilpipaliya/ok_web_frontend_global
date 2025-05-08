@@ -11,7 +11,6 @@ import { TableInputField } from "~/components/fields/table_field/TableInputField
 import { TextInputField } from "~/components/fields/TextInputField";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { componentMap } from "~/features/css_editor/components/componentMap";
-import { CheckboxField } from "~/features/css_editor/components/fields/CheckboxField";
 import { TextAreaField } from "~/features/css_editor/components/fields/TextArea";
 
 // import { ButtonField } from "../../fields/ButtonField";
@@ -32,7 +31,6 @@ export const corvuComponents = {
 
 export const componentsMap: Record<string, any> = {
   // Button: ButtonField,
-  CheckBox: CheckboxField,
   Component: ComponentField,
   Slot: SlotField,
   Data: DataField,

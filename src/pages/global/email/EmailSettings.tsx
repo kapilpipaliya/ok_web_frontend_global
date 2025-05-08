@@ -297,7 +297,9 @@ export function EmailSettings() {
                 text: "Use Secure Connection",
               },
               {
-                componentName: "CheckBox",
+                componentName: "TextInput",
+                css: [PROPERTIES.Css.CheckBoxCss],
+                type: "checkbox",
                 key: "secure",
               },
             ],

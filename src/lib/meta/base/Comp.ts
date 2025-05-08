@@ -72,12 +72,16 @@ export const Comp: IFormMetaData = {
       parentLabel: "DataType",
     },
     {
-      componentName: "CheckBox",
+      componentName: "TextInput",
+      css: [PROPERTIES.Css.CheckBoxCss],
+      type: "checkbox",
       displayName: "Children",
       key: "child",
     },
     // {
-    //   componentName: "CheckBox",
+    //   componentName: "TextInput",
+    //   css: [PROPERTIES.Css.CheckBoxCss],
+    //   type: "checkbox",
     //   displayName: "Hidden",
     //   key: "hide",
     // },

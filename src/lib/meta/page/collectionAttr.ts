@@ -40,11 +40,15 @@ export const collectionAttr = [
     key: "coll",
   },
   {
-    componentName: "CheckBox",
+    componentName: "TextInput",
+    css: [PROPERTIES.Css.CheckBoxCss],
+    type: "checkbox",
     key: "required",
   },
   {
-    componentName: "CheckBox",
+    componentName: "TextInput",
+    css: [PROPERTIES.Css.CheckBoxCss],
+    type: "checkbox",
     key: "disabled",
   },
   {

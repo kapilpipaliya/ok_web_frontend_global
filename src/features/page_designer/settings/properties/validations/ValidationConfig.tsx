@@ -16,7 +16,6 @@ interface ValidationProps {
 }
 
 export const validations = {
-  CheckBox: "required",
   TextInputField: "required|email|minLength|maxLength|regex",
 };
 

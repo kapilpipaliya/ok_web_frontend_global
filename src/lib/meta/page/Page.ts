@@ -135,11 +135,15 @@ export const Page: IFormMetaData = {
         //   parentLabel: "Dashboard",
         // },
         // wrapWithTitle("Public", false, {
-        //   componentName: "CheckBox",
+        //   componentName: "TextInput",
+        //   css: [PROPERTIES.Css.CheckBoxCss],
+        //   type: "checkbox",
         //   hideInGrid: true,
         //   key: "public",
         // }),
-        /*{ componentName: "CheckBox", key: "isRealTime" },
+        /*{         componentName: "TextInput",
+        css: [PROPERTIES.Css.CheckBoxCss],
+        type: "checkbox", key: "isRealTime" },
         {
           collection: "g:'Page'",
           componentName: "Select",
@@ -300,16 +304,6 @@ date`,
       componentName: "Html",
       displayName: "Default Value",
     },
-    // {
-    //   // componentName: "::'P.type'",
-    //   props: (options: FunctionArgumentType) => {
-    //     return {
-    //       componentName: options.data?.P.type === "boolean" ? "CheckBox" : "TextInput"
-    //     }
-    //   },
-    //   displayName: "Value",
-    //   key: "value",
-    // },
     {
       attributes: [
         {

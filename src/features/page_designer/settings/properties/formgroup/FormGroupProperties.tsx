@@ -330,7 +330,9 @@ function createVertices(
     {
       id: vertexIds.loop,
       P: {
-        componentName: "CheckBox",
+        componentName: "TextInput",
+        css: [PROPERTIES.Css.CheckBoxCss],
+        type: "checkbox",
         displayName: "Loop",
         key: "loop",
       },
@@ -377,7 +379,7 @@ function getMetaVertexes(
     (isPage && selectedAttr()?.P.as === "input") ||
     selectedAttr()?.P.as === "textarea" ||
     selectedAttr()?.P.as === "select" ||
-    ["CheckBox", "MultiSelect", "Select", "TextInput"].includes(componentName);
+    ["MultiSelect", "Select", "TextInput"].includes(componentName);
   const isHtmlIcon =
     componentName === "Html" && selectedAttr()?.P.as === "icon";
   const isDataComponent = componentName === "Data";

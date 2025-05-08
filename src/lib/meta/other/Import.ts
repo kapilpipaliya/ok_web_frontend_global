@@ -13,7 +13,12 @@ export const Import = {
       componentName: "TextInput",
       key: "label",
     },
-    { componentName: "CheckBox", key: "dry" },
+    {
+      componentName: "TextInput",
+      css: [PROPERTIES.Css.CheckBoxCss],
+      type: "checkbox",
+      key: "dry",
+    },
     {
       componentName: "TextInput",
       key: "lookup",
@@ -58,7 +63,12 @@ export const Import = {
           displayName: "Lookup Label",
           key: "collLabel",
         },
-        { componentName: "CheckBox", key: "inward" },
+        {
+          componentName: "TextInput",
+          css: [PROPERTIES.Css.CheckBoxCss],
+          type: "checkbox",
+          key: "inward",
+        },
         {
           componentName: "TextInput",
           displayName: "Lookup Collection ID",
@@ -79,7 +89,12 @@ export const Import = {
           key: "func",
           saveValue: true,
         },
-        { componentName: "CheckBox", key: "skip" },
+        {
+          componentName: "TextInput",
+          css: [PROPERTIES.Css.CheckBoxCss],
+          type: "checkbox",
+          key: "skip",
+        },
         {
           css: PROPERTIES.Css.TextFieldCss,
           componentName: "TextArea",

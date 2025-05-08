@@ -88,6 +88,11 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
 
   const handleChange = (event: Event) => {
     event.stopPropagation();
+    // In HTML, the readonly attribute does not apply to checkboxes.
+    // So we need to prevent the default behavior of the checkbox when it is readonly
+    if (otherProps.disabled || otherProps.readOnly) {
+      return;
+    }
     const target = event.target as HTMLInputElement | HTMLTextAreaElement;
 
     let value: string | number | FileList | boolean = target.value;
