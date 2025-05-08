@@ -237,6 +237,11 @@ export function MultiSelectField(
         return Array.isArray(children) && children.length > 0;
       };
 
+      const isSelected = () =>
+        selectedValue().some(
+          (item) => getOptionValue(item) === getOptionValue(p.option),
+        );
+
       return (
         <Show
           fallback={
@@ -245,18 +250,19 @@ export function MultiSelectField(
               css={({ theme }) => css`
   cursor: pointer;
   font-size: 14px;
-  margin: 3px;
-  padding: 8px;
+  margin: 2px 3px;
+  padding: 8px 12px;
   border-radius: 5px;
+  transition: background-color 0.2s ease;
   ${
-    selectedValue().some(
-      (item) => getOptionValue(item) === getOptionValue(p.option),
-    )
-      ? `background-color: ${theme.var.color.primary_80};`
+    isSelected()
+      ? `background-color: ${theme.var.color.primary_80};
+         color: white;`
       : ""
   }
   &:hover {
     background-color: ${theme.var.color.primary_40};
+    color: white;
   }
 `}
               onClick={() =>
@@ -287,13 +293,7 @@ export function MultiSelectField(
   margin: 3px;
   padding: 8px;
   border-radius: 5px;
-  ${
-    selectedValue().some(
-      (item) => getOptionValue(item) === getOptionValue(p.option),
-    )
-      ? `background-color: ${theme.var.color.primary_80};`
-      : ""
-  }
+  ${isSelected() ? `background-color: ${theme.var.color.primary_80};` : ""}
   &:hover {
     background-color: ${theme.var.color.primary_40};
   }
@@ -336,15 +336,15 @@ export function MultiSelectField(
         css={[
           STYLES.overflowCss,
           ({ theme }) => css`
-  border-radius: 5px;
-  display: flex;
-  background-color: ${theme.var.color.base_10};
-  display: flex;
-  flex-direction: column;
-  max-height: 200px;
-  width: 100%;
-  z-index: ${zIndex};
-`,
+              border-radius: 8px;
+              display: flex;
+              background-color: ${theme.var.color.base_10};
+              flex-direction: column;
+              max-height: 250px;
+              width: 100%;
+              z-index: ${zIndex};
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          `,
         ]}
       >
         <Show
@@ -353,8 +353,13 @@ export function MultiSelectField(
               as="div"
               css={css`
   cursor: pointer;
-  padding: 8px;
+  padding: 12px 8px;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: \${args.theme.var.color.base_80};
+  font-style: italic;
 `}
             >
               Loading...
@@ -369,8 +374,13 @@ export function MultiSelectField(
                 as="div"
                 css={css`
   cursor: pointer;
-  padding: 8px;
+  padding: 12px 8px;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: \${args.theme.var.color.base_80};
+  font-style: italic;
 `}
               >
                 No item found{" "}
@@ -391,10 +401,15 @@ export function MultiSelectField(
         ensureArray(props.css),
         css`
   border: 1px solid \${args.theme.var.color.base};
-  padding: 0 3px;
-  border-radius: 4px;
+  padding: 0;
+  border-radius: 6px;
   text-align: left;
   width: 100%;
+  transition: all 0.2s ease;
+  &:focus-within {
+    border-color: \${args.theme.var.color.primary};
+    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_20};
+  }
   ${props.error ? "border: 1px solid ${args.theme.var.color.error};" : ""}
 `,
       ]}
@@ -413,60 +428,82 @@ export function MultiSelectField(
         <As
           as="div"
           css={[
-            props.selectionLimit !== 1 ? "flex-wrap: wrap" : "",
+            props.selectionLimit !== 1 ? css`flex-wrap: wrap;` : "",
             css`
   align-items: center;
   display: flex;
-  gap: 5px;
-  padding: 4px 6px;
+  gap: 8px;
+  padding: 6px 8px;
   width: 100%;
+  min-height: 38px;
 `,
           ]}
         >
-          <For each={selectedValue()}>
-            {(tag) => (
-              <As
-                as="div"
-                css={css`
+          <As
+            as="div"
+            css={css`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
-  background-color: \${args.theme.var.color.primary_60};
+`}
+          >
+            <For each={selectedValue()}>
+              {(tag) => (
+                <As
+                  as="div"
+                  css={css`
+  align-items: center;
+  background-color: \${args.theme.var.color.primary};
   cursor: default;
   display: flex;
   font-size: 14px;
-  gap: 5px;
-  padding: 2px 5px;
+  gap: 6px;
+  padding: 4px 10px;
   border-radius: 4px;
-`}
-              >
-                <As
-                  as="span"
-                  css={css`
-  white-space: nowrap;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 `}
                 >
-                  {props.renderLabel
-                    ? props.renderLabel(tag, true)
-                    : getOptionLabel(tag)}
-                </As>
-                <IconButton
-                  icon="ph:x"
-                  css={css`
+                  <As
+                    as="span"
+                    css={css`
+  white-space: nowrap;
+`}
+                  >
+                    {props.renderLabel
+                      ? props.renderLabel(tag, true)
+                      : getOptionLabel(tag)}
+                  </As>
+                  <IconButton
+                    icon="ph:x"
+                    css={css`
     background-color: transparent;
     border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border-radius: 50%;
+    color: white;
+    transition: all 0.2s ease;
     &:hover {
-      color: \${args.theme.var.color.error};
+      background-color: rgba(255, 255, 255, 0.2);
     }
   `}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    return handleRemoveTag(getOptionValue(tag));
-                  }}
-                  size={16}
-                />
-              </As>
-            )}
-          </For>
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopImmediatePropagation();
+                      return handleRemoveTag(getOptionValue(tag));
+                    }}
+                    size={14}
+                  />
+                </As>
+              )}
+            </For>
+          </As>
           <As
             as="div"
             css={css`
@@ -486,6 +523,8 @@ export function MultiSelectField(
   flex: 1;
   outline: none;
   padding: 5px;
+  font-size: 14px;
+  background: transparent;
 `,
               ]}
               data-lpignore="true"
@@ -516,8 +555,14 @@ export function MultiSelectField(
             css={({ theme }) => css`
   color: ${theme.var.color.base};
   cursor: pointer;
+  transition: transform 0.2s ease;
+  transform: rotate(${dropdownVisible() ? "180deg" : "0deg"});
+  opacity: 0.7;
+  &:hover {
+    opacity: 1;
+  }
 `}
-            icon={dropdownVisible() ? "ph:caret-up-bold" : "ph:caret-down-bold"}
+            icon="ph:caret-down-bold"
             noobserver
             onClick={() => {
               const newState = !dropdownVisible();
