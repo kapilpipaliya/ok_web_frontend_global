@@ -18,15 +18,14 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { validateFunction } from "~/lib/validation/validateFunction";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
 // Shared button styles
-const buttonStyles = (args: FunctionArgumentType, color: string) => css`
+const buttonStyles = (color: string) => css`
   padding: 1px 4px;
   background-color: ${color};
-  color: ${args.theme.var.color.base_10};
+  color: $\{args.theme.var.color.base_10};
   border-radius: 1px;
   border: none;
 `;
@@ -37,12 +36,20 @@ const EditorButton = (props: {
   color: string;
   children: JSX.Element;
   title?: string;
+  disabled?: boolean;
 }) => (
   <As
     as="button"
-    css={(args: FunctionArgumentType) => buttonStyles(args, props.color)}
+    css={[
+      buttonStyles(props.color),
+      css`
+      opacity: ${props.disabled ? "0.5" : "1"};
+      cursor: ${props.disabled ? "not-allowed" : "pointer"};
+    `,
+    ]}
     onClick={props.onClick}
     title={props.title}
+    disabled={props.disabled}
   >
     {props.children}
   </As>
@@ -79,9 +86,9 @@ export function FunctionEditor(props: {
 
     // Default values based on keyName
     if (propertyKey() === "css") {
-      return `return \`._id {}\`;`;
+      return `return \`._id {\n  \n}\`;`;
     } else if (propertyKey() === "fns" || propertyKey() === "props") {
-      return "return {}";
+      return "return {\n  \n}";
     }
 
     // Fallback to empty string for other cases
@@ -92,6 +99,8 @@ export function FunctionEditor(props: {
   const [isFunctionValid, setIsFunctionValid] = createSignal(true);
   const [isModalOpen, setIsModalOpen] = createSignal(false);
   const [editorValue, setEditorValue] = createSignal(getPropertyValue());
+  const [originalValue, setOriginalValue] = createSignal(getPropertyValue());
+  const [hasChanges, setHasChanges] = createSignal(false);
 
   // Editor reference
   let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
@@ -102,13 +111,22 @@ export function FunctionEditor(props: {
       () => formStoreVertex()?.P.selectedId,
       () => {
         if (formStoreVertex()?.P.selectedId !== -1) {
+          const newValue = getPropertyValue();
           setIsFunctionValid(true);
-          setEditorValue(getPropertyValue());
+          setEditorValue(newValue);
+          setOriginalValue(newValue);
+          setHasChanges(false);
         }
       },
       { defer: true },
     ),
   );
+
+  // Check for changes when editor value updates
+  const handleEditorChange = (value: string) => {
+    setEditorValue(value);
+    setHasChanges(value !== originalValue());
+  };
 
   // Handlers
   const evaluateProperty = (value: string) => {
@@ -120,6 +138,8 @@ export function FunctionEditor(props: {
         { P: { key: propertyKey() } } as unknown as Vertex,
         value,
       );
+      setOriginalValue(value);
+      setHasChanges(false);
     } else {
       console.error("Function validation error:", validation.error);
     }
@@ -150,9 +170,13 @@ export function FunctionEditor(props: {
       ].includes(language);
 
       if (isJavaScript) {
-        model.setValue(await formatJavaScriptCode(model.getValue()));
+        const formatted = await formatJavaScriptCode(model.getValue());
+        model.setValue(formatted);
+        setHasChanges(formatted !== originalValue());
       } else if (language === "css") {
-        model.setValue(await formatCSSCode(model.getValue()));
+        const formatted = await formatCSSCode(model.getValue());
+        model.setValue(formatted);
+        setHasChanges(formatted !== originalValue());
       } else {
         console.warn(`Formatting not supported for ${language} language`);
       }
@@ -168,7 +192,7 @@ export function FunctionEditor(props: {
         error={!isFunctionValid()}
         height={p.height}
         language={props.language || "javascript"}
-        onChange={setEditorValue}
+        onChange={handleEditorChange}
         onMount={(_monaco, editor) => (editorRef = editor)}
         showMinimap={false}
         value={editorValue()}
@@ -184,6 +208,7 @@ export function FunctionEditor(props: {
         <EditorButton
           color={"${args.theme.var.color.primary}"}
           onClick={handleSave}
+          disabled={!hasChanges()}
         >
           Submit
         </EditorButton>

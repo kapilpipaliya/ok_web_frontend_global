@@ -104,6 +104,8 @@ export function PageView(
       get(target, key) {
         if (key === "props") {
           return values();
+        } else if (key === "index") {
+          return 0;
         }
         return target[key];
       },
@@ -175,11 +177,13 @@ export function PageView(
                   <ComponentWrapper />
                 </Match>
                 <Match when={true}>
-                  <PageAttrRender
-                    data={props.data}
-                    isNoPermissionCheck={props.isNoPermissionCheck!}
-                    metaVertex={props.metaVertex!}
-                  />
+                  <DataContext.Provider value={{ index: 0 }}>
+                    <PageAttrRender
+                      data={props.data}
+                      isNoPermissionCheck={props.isNoPermissionCheck!}
+                      metaVertex={props.metaVertex!}
+                    />
+                  </DataContext.Provider>
                 </Match>
               </Switch>
             </Match>

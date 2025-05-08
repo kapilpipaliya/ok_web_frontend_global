@@ -19,8 +19,9 @@ export function DataInternal(props: {
     get(target, key) {
       if (key === props.name) {
         return props.repeaterValue;
-      }
-      if (key === `${props.name}Index`) {
+      } else if (key === `${props.name}Index`) {
+        return props.index;
+      } else if (key === "index") {
         return props.index;
       }
       return target[key];

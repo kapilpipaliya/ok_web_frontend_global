@@ -29,6 +29,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { BorderOverlay } from "../overlays/BorderOverlay";
 import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
+import { useDataContext } from "../../context/DataContext";
 
 interface PageAttrDnDWrapperProps {
   children: JSX.Element;
@@ -56,6 +57,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
   const resolvedChildren = children(() => props.children);
 
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
+  const contextData = useDataContext() || {};
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation();
@@ -65,6 +67,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       props.item.id,
       graph,
       setGraph,
+      contextData.index,
     );
   };
 
@@ -85,6 +88,11 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
 
   // debounce is giving error, node not found when running element.currentTarget and we must need it
   const handleDragOverEvent = (e: DragEvent) => {
+    const formDataId = formStoreVertex()?.P.formDataId;
+    if (!formDataId) {
+      return; // Exit early if formDataId doesn't exist
+    }
+
     handleDragOver(
       e,
       layoutStoreVertex(),
@@ -95,7 +103,7 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
       childrenAttrs,
       graph,
       setGraph,
-      graph.vertexes[formStoreVertex()?.P.formDataId!],
+      graph.vertexes[formDataId],
     );
   };
 
@@ -149,7 +157,11 @@ export function PageAttrDnDWrapper(props: Readonly<PageAttrDnDWrapperProps>) {
         }
       >
         <AttrConfigPopOverWrapper
-          isSelectedLayoutId={isSelectedLayoutId(props.item.id)}
+          isSelectedLayoutId={
+            isSelectedLayoutId(props.item.id) &&
+            (formStoreVertex()?.P.selectedIndex === contextData.index ||
+              formStoreVertex()?.P.selectedIndex === -1)
+          }
           item={props.item}
           reference={reference}
         />

@@ -8,10 +8,8 @@ import { Portal } from "solid-js/web";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { ZIndex } from "~/components/fields/ZIndex";
-import {
-  type PageLayoutObject,
-  useDesignerFormIdContext,
-} from "~/features/page_designer/context/LayoutContext";
+import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
+import type { FormStoreObject } from "~/components/form/context/FormContext";
 import createFloating from "~/lib/dom/createFloating";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
@@ -62,17 +60,15 @@ export function AttrConfigPopOverWrapper(
         eventClickPath.includes(props.reference()!)
       )
     ) {
-      const formStore = graph.vertexes[
-        formStoreId!
-      ] as Vertex<PageLayoutObject>;
-      if (formStore?.P.selectedId !== null) {
-        mergeVertexProperties<PageLayoutObject>(
+      const formStore = graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+      if (formStore?.P.selectedId !== -1) {
+        mergeVertexProperties<FormStoreObject>(
           0,
           formStoreId!,
           graph,
           setGraph,
           {
-            selectedId: null,
+            selectedId: -1,
           },
         );
       }

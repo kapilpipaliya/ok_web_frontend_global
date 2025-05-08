@@ -22,12 +22,13 @@ export const DataField = (props: {
   data: (() => any[]) | any[];
   expression: string;
   loop: boolean;
+  name: string;
 }) => {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
-  const meta = () => parentRenderContext()?.context.meta!;
-  const data = () => parentRenderContext()?.context.data!;
+  const meta = () => parentRenderContext()?.context.meta;
+  const data = () => parentRenderContext()?.context.data;
 
   const [options, setOptions] = createSignal([] as Vertex[]);
   const [isFetching, setIsFetching] = createSignal(false);
@@ -47,7 +48,7 @@ export const DataField = (props: {
         {
           nodes: {},
           relationships: {},
-          vertexes: [data()],
+          vertexes: [data()!],
         },
       );
     },
@@ -136,7 +137,7 @@ export const DataField = (props: {
               <DataInternal
                 data={data()}
                 index={index()}
-                meta={meta()}
+                meta={meta()!}
                 name={props.name}
                 repeaterValue={value}
               />
@@ -148,7 +149,7 @@ export const DataField = (props: {
         <DataInternal
           data={data()}
           index={0}
-          meta={meta()}
+          meta={meta()!}
           name={props.name}
           repeaterValue={options()}
         />

@@ -16,6 +16,7 @@ export function onLayoutItemClick(
   layoutVertexId: Id,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
+  selectedIndex = 0,
 ) {
   batch(() => {
     if (layoutStoreVertex.P.formId !== formStoreVertex.id) {
@@ -36,6 +37,7 @@ export function onLayoutItemClick(
       setGraph,
       {
         selectedId: layoutVertexId ?? -1,
+        selectedIndex,
       },
     );
   });
