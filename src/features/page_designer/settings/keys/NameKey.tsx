@@ -9,6 +9,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 export function NameKey() {
   const [graph, setGraph] = useGraph();
@@ -44,14 +45,22 @@ export function NameKey() {
 `}
       >
         <DynamicComponent
-          componentName={"MultiSelect"}
-          data={graph.vertexes[formStoreVertex()?.P.formDataId!]}
+          componentName={"TextInput"}
+          data={
+            formStoreVertex()?.P.formDataId
+              ? graph.vertexes[formStoreVertex()?.P.formDataId]
+              : undefined
+          }
           isNoPermissionCheck={true}
           isRealTime={false}
+          // Accepts string template format like: `${key1} - ${key2}`
           meta={
             {
               P: modifyFieldMetaAllFields(
-                { key: "nameKey" } as FieldAttribute,
+                {
+                  key: "nameKey",
+                  css: PROPERTIES.Css.TextFieldCss,
+                } as FieldAttribute,
                 graph,
                 setGraph,
                 formStoreVertex(),

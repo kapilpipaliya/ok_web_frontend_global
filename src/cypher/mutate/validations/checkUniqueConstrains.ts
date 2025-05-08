@@ -10,55 +10,72 @@ export async function checkUniqueConstrains(vertex: Vertex) {
   "use server";
   const { dbSession } = await getDBSessionForSubdomain();
 
-  const label = vertex.L[0];
-  const key = vertex.P.key;
-  const id = vertex.id;
-
-  if (!key) {
-    return { error: "Please configure the key first" };
-  }
-
-  if (isReservedKeyword(key)) {
-    return {
-      error: `The key "${key}" is a reserved word and cannot be used`,
-    };
-  }
-
   try {
-    if (await doesNameExist(dbSession, label, key, id)) {
+    const label = vertex.L[0];
+    const key = vertex.P.key;
+    const id = vertex.id;
+
+    if (!key) return { error: "Please configure the key first" };
+    if (isReservedKeyword(key))
+      return {
+        error: `The key "${key}" is a reserved word and cannot be used`,
+      };
+    if (await doesNameExist(dbSession, label, key, id))
       return { error: "Provided key already exists" };
-    }
 
     const uniqueConstrains = await evalExpressionAsync(
       `g:'Page[${label}]'->$0Unique`,
       {},
     );
-    if (!Array.isArray(uniqueConstrains)) {
-      return { error: false };
-    }
-    for (const uniqueConstraintVertex of uniqueConstrains) {
-      const keys = await evalExpressionAsync("->$0Key", {
-        vertexes: [uniqueConstraintVertex],
-      });
-      if (keys.length > 0) {
-        const uniqueConstraintExists = await doesUniqueConstraintExist(
+    if (!Array.isArray(uniqueConstrains)) return { error: false };
+
+    for (const constraint of uniqueConstrains) {
+      let keysToCheck: Vertex[] = [];
+
+      // If constraint has a comma-separated key property, use it
+      if (constraint.P.key) {
+        keysToCheck = constraint.P.key
+          .split(",")
+          .map((k: string) => k.trim())
+          .map(
+            (keyName: string) =>
+              ({
+                id: "",
+                L: [],
+                P: { key: keyName },
+                IN: {},
+                OUT: {},
+              }) as Vertex,
+          );
+      } else {
+        // Otherwise fall back to the relationship lookup
+        const keys = await evalExpressionAsync("->$0Key", {
+          vertexes: [constraint],
+        });
+        if (keys.length > 0) keysToCheck = keys;
+      }
+
+      // Skip if no keys to check
+      if (keysToCheck.length === 0) continue;
+
+      // Check for constraint violation
+      if (
+        await doesUniqueConstraintExist(
           dbSession,
           label,
           id,
-          keys,
+          keysToCheck,
           vertex,
-        );
-        if (uniqueConstraintExists) {
-          return {
-            error: `Unique constraint ${keys.map((k: Vertex) => k.P.key).join(", ")} already exists`,
-          };
-        }
+        )
+      ) {
+        const keyNames = keysToCheck.map((k: Vertex) => k.P.key).join(", ");
+        return { error: `Unique constraint ${keyNames} already exists` };
       }
     }
 
     return { error: false };
-  } catch (error: any) {
-    return { error: error.message };
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : String(error) };
   } finally {
     await dbSession.close();
   }
@@ -71,8 +88,7 @@ async function doesNameExist(
   id?: string,
 ) {
   const query = `MATCH (v:${label}) WHERE v.key = $key ${id ? "AND elementId(v) <> $id" : ""} RETURN v`;
-  const params = id ? { id, key } : { key };
-  const result = await dbSession.run(query, params);
+  const result = await dbSession.run(query, id ? { id, key } : { key });
   return result.records.length > 0;
 }
 
@@ -83,7 +99,7 @@ async function doesUniqueConstraintExist(
   keys: Vertex[],
   vertex: Vertex,
 ) {
-  const params: Record<string, any> = { id };
+  const params: Record<string, string | undefined> = { id };
   let query = `MATCH (v:${label}) WHERE ${id ? "elementId(v) <> $id AND " : ""}`;
 
   for (const key of keys) {

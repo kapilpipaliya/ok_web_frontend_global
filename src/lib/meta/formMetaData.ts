@@ -10,6 +10,7 @@ import { Import } from "./other/Import";
 import { Nav } from "./other/Nav";
 import { Coll } from "./page/Coll";
 import { Page, variantAttributes } from "./page/Page";
+import { PROPERTIES } from "~/pages/settings/constants";
 
 const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
   Import: Import,
@@ -47,7 +48,9 @@ FormMetaData.Page.attributes.push({
 FormMetaData.Page.attributes.push({
   attributes: [
     {
-      componentName: "MultiSelect",
+      // componentName: "MultiSelect", // MultiSelect also supported
+      componentName: "TextInput",
+      css: PROPERTIES.Css.TextFieldCss,
       key: "key",
     },
   ],
