@@ -28,7 +28,7 @@
 ### Support
 - http://localhost:3001/support/contact
 
-### System Setup
-- http://localhost:3001/api/setup/superUserSetup
-- http://localhost:3001/api/setup/systemCleanup
 
+### System Setup and Cleanup
+- Super User Setup: http://localhost:3001/api/setup/superUserSetup
+- System Cleanup: http://localhost:3001/api/setup/systemCleanup
