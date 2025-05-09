@@ -7,15 +7,21 @@ export async function getSubDomain(host: string) {
   const result = parse(host);
   const { domain, subdomain, hostname } = result;
 
-  // If domain is null, set it to "super"
+  if (hostname === "localhost") {
+    return { domain, subdomain: "super" };
+  }
+
   const effectiveDomain = domain || hostname;
+  // If domain is null, set it to "www"
+  const effectiveSubdomain = subdomain || "www";
 
   // If it matches the current domain from env, use system subdomain
   if (effectiveDomain === process.env.DOMAIN) {
-    if (!subdomain || subdomain === "www" || subdomain === "system") {
+    if (effectiveSubdomain === "system" || effectiveSubdomain === "admin") {
       return { domain, subdomain: SYSTEM_DB_NAME };
     }
-    return { domain, subdomain };
+
+    return { domain, subdomain: effectiveSubdomain };
   }
 
   // Otherwise look up the domain in SubDomain vertex

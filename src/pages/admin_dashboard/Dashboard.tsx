@@ -1,7 +1,10 @@
 import { useSearchParams } from "@solidjs/router";
 import { createEffect, createSignal } from "solid-js";
 
-import { type TabItem, TabsWithUnderline } from "~/components/styled/SimpleTabs";
+import {
+  type TabItem,
+  TabsWithUnderline,
+} from "~/components/styled/SimpleTabs";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { useGraph } from "~/lib/graph/GraphContext";
