@@ -9,7 +9,7 @@ import type { Vertex } from "~/lib/graph/graph";
 // Example: npm run send-test-email -- decodeui.io admin@decodeui.io test@test.com
 
 // Mock request object for getting the DB session
-const mockRequest = new Request("https://example.com");
+const mockRequest = new Request("https://admin.decodeui.io");
 
 async function sendTestEmail() {
   // Get command line arguments

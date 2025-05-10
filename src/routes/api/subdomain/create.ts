@@ -13,6 +13,30 @@ import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
+// Reserved subdomain keys that cannot be used
+const RESERVED_SUBDOMAINS = new Set([
+  "admin",
+  "system",
+  "api",
+  // "www",
+  "app",
+  "dashboard",
+  "login",
+  "auth",
+  "support",
+  "help",
+  "mail",
+  "email",
+  "blog",
+  "static",
+  "docs",
+  "billing",
+  "payment",
+  "test",
+  "dev",
+  "staging",
+]);
+
 export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
@@ -142,6 +166,15 @@ async function validateKeyAndDomain(
   key: string,
   domain: string,
 ) {
+  // Check if subdomain key is reserved
+  const lowerKey = key.toLowerCase();
+  if (RESERVED_SUBDOMAINS.has(lowerKey)) {
+    throw new APIError(
+      `'${key}' is a reserved subdomain key and cannot be used`,
+      400,
+    );
+  }
+
   const existingKey = await dbSession.run(
     "MATCH (s:SubDomain {key: $key}) RETURN s",
     { key },

@@ -15,12 +15,11 @@ export async function getSubDomain(host: string) {
   // If domain is null, set it to "www"
   const effectiveSubdomain = subdomain || "www";
 
+  if (effectiveSubdomain === "system" || effectiveSubdomain === "admin") {
+    return { domain, subdomain: SYSTEM_DB_NAME };
+  }
   // If it matches the current domain from env, use system subdomain
   if (effectiveDomain === process.env.DOMAIN) {
-    if (effectiveSubdomain === "system" || effectiveSubdomain === "admin") {
-      return { domain, subdomain: SYSTEM_DB_NAME };
-    }
-
     return { domain, subdomain: effectiveSubdomain };
   }
 
@@ -33,13 +32,13 @@ export async function getSubDomain(host: string) {
         MATCH (s:SubDomain {domain: $domain})
         RETURN s.key as subdomain
       `;
-      const result = await dbSession.run(query, { domain: effectiveDomain });
+      const result = await dbSession.run(query, { domain: effectiveSubdomain });
 
       if (result.records.length > 0) {
         return { domain, subdomain: result.records[0].get("subdomain") };
       }
     } catch (error) {
-      console.error("Error looking up domain:", error, effectiveDomain);
+      console.error("Error looking up domain:", error, effectiveSubdomain);
       throw error;
     }
   }
