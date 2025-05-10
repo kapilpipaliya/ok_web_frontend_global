@@ -168,6 +168,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
           onClick: () => {
             options.contextData.modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
+            options.ensureData();
           },
           text: "Cancel",
         }),
