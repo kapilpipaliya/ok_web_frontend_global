@@ -1,6 +1,6 @@
 import { createAsync } from "@solidjs/router";
 import { createEffect, Show } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -24,6 +24,17 @@ import { SchemaRenderer } from "../../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+
+// Define a type for the save state
+type SaveState = {
+  isLoading: boolean;
+  isSuccess: boolean;
+};
+
+// Define a type for the save state context data
+type SaveStateContextData = {
+  saveState: [SaveState, SetStoreFunction<SaveState>];
+};
 
 export function ProfileSettings() {
   const [graph, setGraph] = useGraph();
@@ -180,7 +191,7 @@ margin-right: 8px;
                 text: "Resend Confirmation Email",
               },
             ],
-            props: (options: FunctionArgumentType) => ({
+            props: () => ({
               onClick: async () => {
                 try {
                   const response = await postAPI(
@@ -188,7 +199,7 @@ margin-right: 8px;
                     {},
                   );
                   if (response.error) {
-                    showErrorToast(response.error);
+                    showErrorToast(response.error as string);
                   } else {
                     showSuccessToast(
                       (response.message as string) ||
@@ -275,57 +286,62 @@ align-items: flex-start;
         attributes: [
           {
             as: "button",
-            css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
             componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              disabled: options.contextData.saveState[0]?.isLoading,
-              onClick: async () => {
-                options.contextData.saveState[1]("isLoading", true);
-                options.contextData.saveState[1]("isSuccess", false);
+            props: (options: FunctionArgumentType) => {
+              const { saveState } = options.contextData as SaveStateContextData;
+              return {
+                disabled: saveState[0]?.isLoading,
+                onClick: async () => {
+                  saveState[1]("isLoading", true);
+                  saveState[1]("isSuccess", false);
 
-                // Form validation and submission
-                const user = graph.vertexes[formDataId];
-                if (!user.P.username.trim) {
-                  showErrorToast("Please enter username");
-                  options.contextData.saveState[1]("isLoading", false);
-                  return;
-                }
-
-                if (!user.P.email.trim) {
-                  showErrorToast("Please enter email");
-                  options.contextData.saveState[1]("isLoading", false);
-                  return;
-                }
-
-                if (validateEmail(user.P.email)) {
-                  showErrorToast("Please enter a valid email");
-                  options.contextData.saveState[1]("isLoading", false);
-                  return;
-                }
-
-                try {
-                  const payload = {
-                    email: user.P.email,
-                    username: user.P.username,
-                    uuid: user.P.uuid,
-                  };
-                  const response = await postAPI(API.auth.profileUrl, payload);
-                  if (response.error) {
-                    showErrorToast(response.error);
-                  } else {
-                    showSuccessToast(
-                      (response.message as string) ||
-                        "Profile updated successfully",
-                    );
-                    options.contextData.saveState[1]("isSuccess", true);
+                  // Form validation and submission
+                  const user = graph.vertexes[formDataId];
+                  if (!user.P.username.trim) {
+                    showErrorToast("Please enter username");
+                    saveState[1]("isLoading", false);
+                    return;
                   }
-                } catch (error) {
-                  showErrorToast((error as Error).message);
-                } finally {
-                  options.contextData.saveState[1]("isLoading", false);
-                }
-              },
-            }),
+
+                  if (!user.P.email.trim) {
+                    showErrorToast("Please enter email");
+                    saveState[1]("isLoading", false);
+                    return;
+                  }
+
+                  if (validateEmail(user.P.email)) {
+                    showErrorToast("Please enter a valid email");
+                    saveState[1]("isLoading", false);
+                    return;
+                  }
+
+                  try {
+                    const payload = {
+                      email: user.P.email,
+                      username: user.P.username,
+                      uuid: user.P.uuid,
+                    };
+                    const response = await postAPI(
+                      API.auth.profileUrl,
+                      payload,
+                    );
+                    if (response.error) {
+                      showErrorToast(response.error as string);
+                    } else {
+                      showSuccessToast(
+                        (response.message as string) ||
+                          "Profile updated successfully",
+                      );
+                      saveState[1]("isSuccess", true);
+                    }
+                  } catch (error) {
+                    showErrorToast((error as Error).message);
+                  } finally {
+                    saveState[1]("isLoading", false);
+                  }
+                },
+              };
+            },
             attributes: [
               {
                 as: "icon",
@@ -336,21 +352,37 @@ font-size: 20px;
 margin-right: 8px;
 `,
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
-                  hide: !options.contextData.saveState[0]?.isSuccess,
-                }),
+                props: (options: FunctionArgumentType) => {
+                  const { saveState } =
+                    options.contextData as SaveStateContextData;
+                  return {
+                    hide: !saveState[0]?.isSuccess,
+                  };
+                },
               },
               {
                 as: "span",
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
-                  text: options.contextData.saveState[0]?.isLoading
-                    ? "Saving..."
-                    : options.contextData.saveState[0]?.isSuccess
-                      ? "Saved!"
-                      : "Save Changes",
-                }),
+                props: (options: FunctionArgumentType) => {
+                  const { saveState } =
+                    options.contextData as SaveStateContextData;
+                  return {
+                    text: saveState[0]?.isLoading
+                      ? "Saving..."
+                      : saveState[0]?.isSuccess
+                        ? "Saved!"
+                        : "Save Changes",
+                  };
+                },
               },
+            ],
+            css: [
+              SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
+              css`
+display: flex;
+align-items: center;
+justify-content: center;
+`,
             ],
           },
         ],
@@ -363,7 +395,7 @@ display: flex;
     componentName: "Data",
     name: "saveState",
     props: () => ({
-      data: createStore({
+      data: createStore<SaveState>({
         isLoading: false,
         isSuccess: false,
       }),

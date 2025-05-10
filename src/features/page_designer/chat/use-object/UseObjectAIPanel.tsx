@@ -192,11 +192,19 @@ Choose colors that work well for the context and maintain good contrast ratios.
   display: grid;
   grid-template-rows: 1fr auto;
   height: 100%;
+  background: \${args.theme.var.color.base_1};
 `}
     >
       <As
         as="div"
-        css={[STYLES.overflowCss]}
+        css={[
+          STYLES.overflowCss,
+          css`
+            padding: 16px;
+            scroll-behavior: smooth;
+            background: linear-gradient(to bottom, \${args.theme.var.color.base_1}, \${args.theme.var.color.base_3});
+          `,
+        ]}
         class="chat-history"
         ref={chatHistoryRef!}
       >
@@ -206,7 +214,13 @@ Choose colors that work well for the context and maintain good contrast ratios.
               as="div"
               css={[
                 css`
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  animation: fadeIn 0.3s ease-in-out;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 `,
               ]}
             >
@@ -236,22 +250,31 @@ Choose colors that work well for the context and maintain good contrast ratios.
   padding: 16px;
   margin-bottom: 16px;
   color: rgb(239,68,68);
-  background: rgb(254,242,242);
-  border-radius: 6px;
+  background: rgba(254,242,242, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(239,68,68, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
 `,
             ]}
           >
-            An error occurred. {error()?.message}
+            <As as="span">An error occurred. {error()?.message}</As>
             <As
               as="button"
               css={css`
   padding: 8px 16px;
-  margin-top: 8px;
-  color: rgb(59,130,246);
-  border: 1px solid #3b82f6;
+  color: white;
+  background: rgb(59,130,246);
+  border: none;
   border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  
   &:hover {
-    background: rgb(239,246,255);
+    background: rgb(37,99,235);
   }
 `}
               onClick={() => reload()}
@@ -270,8 +293,11 @@ Choose colors that work well for the context and maintain good contrast ratios.
   padding: 16px;
   color: rgb(107,114,128);
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
+  background: \${args.theme.var.color.base_5};
+  border-radius: 8px;
+  margin-bottom: 16px;
 `,
             ]}
           >
@@ -281,7 +307,8 @@ Choose colors that work well for the context and maintain good contrast ratios.
                 css`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  flex: 1;
 `,
               ]}
             >
@@ -289,27 +316,43 @@ Choose colors that work well for the context and maintain good contrast ratios.
                 as="div"
                 css={[
                   css`
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: 2px solid #3b82f6;
-  border-top-color: transparent;
+  border: 3px solid \${args.theme.var.color.base_20};
+  border-top-color: rgb(59,130,246);
   animation: spin 1s infinite linear;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 `,
                 ]}
               />
-              <As as="span">AI is thinking...</As>
+              <As
+                as="span"
+                css={css`
+                  font-weight: 500;
+                `}
+              >
+                AI is thinking...
+              </As>
             </As>
             <As
               as="button"
               css={css`
   padding: 8px 16px;
-  color: rgb(59,130,246);
-  border: 1px solid #3b82f6;
+  color: white;
+  background: rgb(239,68,68);
+  border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+  
   &:hover {
-    background: rgb(239,246,255);
+    background: rgb(220,38,38);
   }
 `}
               onClick={() => stop()}

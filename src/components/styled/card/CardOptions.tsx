@@ -2,6 +2,7 @@ import { createSignal, type JSX } from "solid-js";
 import { For } from "solid-js/web";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 type CardOption = {
   action: () => void;
@@ -18,13 +19,20 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
         as="button"
         aria-expanded={isDropdownOpen()}
         aria-haspopup="true"
-        css={css`
-  color: rgb(156,163,175);
+        css={(args: FunctionArgumentType) => css`
+  color: ${args.theme.var.color.primary_45};
   display: block;
   margin: -0.625rem;
   padding: 0.625rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
   &:hover {
-    color: rgb(107,114,128);
+    color: ${args.theme.var.color.primary_75};
+    background-color: ${args.theme.var.color.primary_15};
+  }
+  &:focus {
+    outline: 2px solid ${args.theme.var.color.primary_35};
+    outline-offset: 2px;
   }
 `}
         onClick={toggleDropdown}
@@ -49,20 +57,33 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
           as="div"
           aria-labelledby={`options-menu-${props.title}-button`}
           aria-orientation="vertical"
-          css={css`
-  background-color: rgb(255,255,255);
-  border-radius: 0.375rem;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  margin-top: 0.125rem;
-  outline-offset: 2px;
-  outline: 2px solid transparent;
-  position: absolute;
-  padding-top: 0.5rem; padding-bottom: 0.5rem;
-  right: 0px;
-  transform-origin: top right;
-  width: 8rem;
-  z-index: 1;
-`}
+          css={(args: FunctionArgumentType) => css`
+              background-color: ${args.theme.var.color.base_5};
+              border-radius: 0.5rem;
+              box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+              border: 1px solid ${args.theme.var.color.primary_25};
+              margin-top: 0.25rem;
+              outline-offset: 2px;
+              outline: 2px solid transparent;
+              position: absolute;
+              padding: 0.5rem;
+              right: 0px;
+              transform-origin: top right;
+              width: 10rem;
+              z-index: 10;
+              animation: dropdown 0.2s ease forwards;
+
+              @keyframes dropdown {
+                  from {
+                      opacity: 0;
+                      transform: translateY(-8px) scale(0.96);
+                  }
+                  to {
+                      opacity: 1;
+                      transform: translateY(0) scale(1);
+                  }
+              }
+          `}
           role="menu"
           tabindex="-1"
         >
@@ -70,18 +91,30 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
             {(option, index) => (
               <As
                 as="a"
-                css={css`
-  color: rgb(17,24,39);
+                css={(args: FunctionArgumentType) => css`
+  color: ${args.theme.var.color.base_75};
   display: block;
   font-size: 0.875rem;
-  padding-left: 0.75rem; padding-right: 0.75rem;
-  padding-top: 0.25rem; padding-bottom: 0.25rem;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  &:hover {
+    color: ${args.theme.var.color.base_95};
+    background-color: ${args.theme.var.color.primary_15};
+  }
+  &:focus {
+    outline: 2px solid ${args.theme.var.color.primary_35};
+    outline-offset: -1px;
+  }
 `}
                 href="#"
                 id={`options-menu-${props.title}-item-${index()}`}
                 onClick={(e) => {
                   e.preventDefault();
                   option.action();
+                  setDropdownOpen(false);
                 }}
                 role="menuitem"
                 tabindex="-1"

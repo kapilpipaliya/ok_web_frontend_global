@@ -11,6 +11,7 @@ import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 
 export default function Admin() {
   return (
@@ -44,6 +45,7 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
             <UserDropdownMenuDisplay />
           </As>
         </As>
+        <EmailConfirmationBanner />
         {props.children}
       </GetInitialData>
     </PermissionGuard>

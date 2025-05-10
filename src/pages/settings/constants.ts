@@ -280,6 +280,7 @@ export const PROPERTIES = {
         border: 1px solid \${args.theme.var.color.base};
         width: 100%;
         padding: 7px;
+        min-width: 50px;
         border-radius: 6px;
       }
     `,

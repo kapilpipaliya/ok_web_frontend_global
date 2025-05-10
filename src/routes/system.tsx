@@ -11,7 +11,7 @@ import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-
+import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
   return (
@@ -31,6 +31,7 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
             <UserDropdownMenuDisplay />
           </As>
         </As>
+        <EmailConfirmationBanner />
         {props.children}
       </PermissionGuard>
     </GetInitialData>

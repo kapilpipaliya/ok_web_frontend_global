@@ -11,9 +11,11 @@ import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 
 export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
+
   return (
     <PermissionGuard>
       <GetInitialData authenticate>
@@ -31,6 +33,8 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
             <UserDropdownMenuDisplay />
           </As>
         </As>
+        aa
+        <EmailConfirmationBanner />
         {props.children}
       </GetInitialData>
     </PermissionGuard>

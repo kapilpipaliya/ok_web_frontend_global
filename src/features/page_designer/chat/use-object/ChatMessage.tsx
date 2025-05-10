@@ -21,10 +21,19 @@ export function ChatMessage(props: ChatMessageProps) {
       as="div"
       css={[
         css`
-  padding: 12px;
-  background: rgb(243,244,246);
-  border-radius: 6px;
-  margin-bottom: 8px;
+  padding: 16px;
+  background: \${args.theme.var.color.base_2};
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border: 1px solid \${args.theme.var.color.base_10};
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease;
+  width: 100%;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
 `,
       ]}
     >
@@ -33,26 +42,82 @@ export function ChatMessage(props: ChatMessageProps) {
         message={props.message}
         onDelete={props.onDelete}
       />
-      <div>{props.message.P?.prompt}</div>
-      {props.message.P?.timestamp && (
-        <As
-          as="div"
-          css={css`
-  font-size: 10px;
-  color: rgb(107,114,128);
-`}
-        >
-          {new Date(props.message.P.timestamp).toLocaleTimeString()}
-        </As>
-      )}
       <As
         as="div"
         css={css`
-  font-size: 10px;
-  color: rgb(107,114,128);
-`}
+          margin: 10px 0 14px;
+          font-size: 15px;
+          line-height: 1.5;
+          white-space: pre-wrap;
+          word-break: break-word;
+          width: 100%;
+        `}
       >
-        Model: {props.message.P?.model}
+        {props.message.P?.prompt}
+      </As>
+      <As
+        as="div"
+        css={css`
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px solid \${args.theme.var.color.base_10};
+          font-size: 11px;
+          color: \${args.theme.var.color.base_40};
+          width: 100%;
+        `}
+      >
+        <As
+          as="div"
+          css={css`
+            display: flex;
+            gap: 12px;
+            align-items: center;
+          `}
+        >
+          {props.message.P?.timestamp && (
+            <As
+              as="div"
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              `}
+            >
+              <As
+                as="span"
+                css={css`
+                  display: flex;
+                  align-items: center;
+                `}
+              >
+                <Icon icon="ph:clock" />
+              </As>
+              {new Date(props.message.P.timestamp).toLocaleTimeString()}
+            </As>
+          )}
+          <As
+            as="div"
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: 4px;
+            `}
+          >
+            <As
+              as="span"
+              css={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <Icon icon="ph:robot" />
+            </As>
+            {props.message.P?.model || "Unknown model"}
+          </As>
+        </As>
       </As>
       {/* Commenting out file attachments for now
       // The file handling functionality can be revisited later when we have a proper solution for file storage.
@@ -91,52 +156,75 @@ function MessageHeader(props: {
   onDelete: (message: Vertex) => void;
 }) {
   return (
-    <>
-      <As
-        as="div"
-        css={[
-          css`
+    <As
+      as="div"
+      css={[
+        css`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 500;
-  margin-bottom: 4px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  width: 100%;
 `,
-        ]}
-      >
-        <As
-          as="div"
-          css={css`
+      ]}
+    >
+      <As
+        as="div"
+        css={css`
   display: flex;
   gap: 8px;
   align-items: center;
+  background: \${args.theme.var.color.base_5};
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 13px;
 `}
+      >
+        <As
+          as="span"
+          css={css`
+            font-size: 16px;
+            color: \${args.theme.var.color.base_50};
+            display: flex;
+            align-items: center;
+          `}
         >
-          <As as="span">Prompt #{props.index}</As>
-          {props.message.P?.hasFile && (
-            <Icon
-              css={css`
-  font-size: 12px;
-  color: rgb(107,114,128);
-`}
-              icon="ph:paperclip"
-            />
-          )}
+          <Icon icon="ph:chat-circle-text" />
         </As>
-        <IconButton
-          css={[
-            headerIconButtonCss,
-            css`
-  color: rgb(239,68,68);
+        <As as="span">Prompt #{props.index}</As>
+        {props.message.P?.hasFile && (
+          <As
+            as="span"
+            css={css`
+              font-size: 14px;
+              color: \${args.theme.var.color.base_50};
+              display: flex;
+              align-items: center;
+            `}
+          >
+            <Icon icon="ph:paperclip" />
+          </As>
+        )}
+      </As>
+      <IconButton
+        css={[
+          headerIconButtonCss,
+          css`
+  color: \${args.theme.var.color.base_40};
   background-color: transparent;
   border: none;
+  transition: color 0.2s;
+  
+  &:hover {
+    color: rgb(239,68,68);
+  }
 `,
-          ]}
-          icon="ph:trash"
-          onClick={() => props.onDelete(props.message)}
-          title="Delete"
-        />
-      </As>
-    </>
+        ]}
+        icon="ph:trash"
+        onClick={() => props.onDelete(props.message)}
+        title="Delete"
+      />
+    </As>
   );
 }
