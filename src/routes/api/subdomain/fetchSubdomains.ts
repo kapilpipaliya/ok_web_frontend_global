@@ -2,6 +2,7 @@ import type { Node, Record, Session } from "neo4j-driver";
 import type { Edge, Vertex } from "~/lib/graph/graph";
 import { processResult } from "~/cypher/conversion/processResult";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import type { ServerResult } from "~/cypher/types/ServerResult";
 
 export async function fetchSubdomains(dbSession: Session, email: string) {
   const nodes: { [key: string]: Vertex } = {};
@@ -48,5 +49,5 @@ export async function fetchSubdomains(dbSession: Session, email: string) {
     },
     result: subdomains,
     timestamp: new Date().getTime(),
-  };
+  } as ServerResult;
 }

@@ -79,10 +79,10 @@ export function CreateGridHeaders(
   hideEditJsonAction?: boolean,
   hideEditAction?: boolean,
 ) {
-  const tableColumns = [] as ColumnDef<any>[];
+  const tableColumns = [] as ColumnDef<Vertex>[];
 
   for (const attribute of formNew.attributes) {
-    const column = { ...attribute } as unknown as ColumnDef<any>;
+    const column = { ...attribute } as unknown as ColumnDef<Vertex>;
     if (
       attribute.hideInGrid ||
       attribute.componentName === "Table" ||
@@ -224,14 +224,14 @@ export function CreateGridHeaders(
           </Switch>
         );
       });
-    column.header = (_info) =>
+    column.header = () =>
       capitalizeFirstLetter(
         attribute.title ||
           attribute.label ||
           attribute.displayName ||
           attribute.key,
       );
-    column.footer = (_info) =>
+    column.footer = () =>
       capitalizeFirstLetter(
         attribute.title || attribute.displayName || attribute.key,
       );

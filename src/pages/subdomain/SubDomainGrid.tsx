@@ -12,6 +12,7 @@ import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { getSubDomains } from "~/routes/api/subdomain/getSubDomains";
+import type { ServerResult } from "~/cypher/types/ServerResult";
 
 export interface SubDomain {
   domain: string;
@@ -27,7 +28,7 @@ export interface SubDomain {
 export const SubDomainGrid = () => {
   // const [graph, setGraph] = useGraph();
   const getTableData = async () => {
-    const data = await getSubDomains();
+    const data = (await getSubDomains()) as ServerResult;
     // data.result.map((subdomain: Vertex<SubDomain>) => {
     //   subdomain.P.activity = subdomain.P.recentActivities?.length > 0
     //     ? `${subdomain.P.recentActivities[0].P.action}`
