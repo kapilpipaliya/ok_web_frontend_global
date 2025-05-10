@@ -4,6 +4,10 @@ import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import type { Vertex } from "~/lib/graph/graph";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { superUserData } from "~/cypher/mutate/manage/superUserData";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { getDriver } from "~/cypher/core/driver";
 
 // Usage: npm run send-test-email -- <subdomain> <from_email> <to_email>
 // Example: npm run send-test-email -- decodeui.io admin@decodeui.io test@test.com
@@ -28,19 +32,18 @@ async function sendTestEmail() {
   try {
     console.log(`Sending test email from ${fromEmail} to ${toEmail} via subdomain ${subdomain}...`);
     
-    // Create mock user data with required fields
-    const userData: UserData = {
-      email: toEmail,
-      uuid: "test-user-uuid",
-    };
+    // Get the superuser instead of creating a mock user
+    const user = await findAndUseSuperUser();
     
-    // Create mock user vertex
-    const mockUser: Vertex<UserData> = {
-      id: "test-user-id",
-      L: [], // Labels
-      IN: {}, // Incoming relationships
-      OUT: {}, // Outgoing relationships
-      P: userData
+    if (!user) {
+      console.error("Super user not found. Cannot send test email.");
+      process.exit(1);
+    }
+    
+    // Create user data from the super user
+    const userData: UserData = {
+      email: user.P.email,
+      uuid: user.P.uuid,
     };
     
     // Generate secure token
@@ -54,7 +57,7 @@ async function sendTestEmail() {
         param2: "Test Parameter 2",
       },
       "Command Line Test Email",
-      mockUser,
+      user,
       subdomain,
       secureToken,
     );
@@ -65,6 +68,38 @@ async function sendTestEmail() {
     process.exit(1);
   } finally {
     await dbSession.close();
+  }
+}
+
+async function findAndUseSuperUser(): Promise<null | Vertex> {
+  const superDbSession = (await getDriver()).session({
+    database: SYSTEM_DB_NAME,
+  });
+  
+  try {
+    // Find user by email
+    const query = `
+      MATCH (u:User)
+      WHERE u.email = $email OR u.username = $username
+      RETURN u
+    `;
+    
+    const result = await superDbSession.run(query, { 
+      email: superUserData.email,
+      username: superUserData.username
+    });
+    
+    if (result.records.length === 0) {
+      return null;
+    }
+    
+    // Convert the user node to a Vertex object
+    return convertNodeToJson(result.records[0].get("u"));
+  } catch (error) {
+    console.error("Error finding super user:", error);
+    return null;
+  } finally {
+    await superDbSession.close();
   }
 }
 
