@@ -6,12 +6,12 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
-import { getAPI } from "~/lib/api/general/getApi";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { getSubDomains } from "~/routes/api/subdomain/getSubDomains";
 
 export interface SubDomain {
   domain: string;
@@ -27,7 +27,7 @@ export interface SubDomain {
 export const SubDomainGrid = () => {
   // const [graph, setGraph] = useGraph();
   const getTableData = async () => {
-    const data = await getAPI(API.subdomain.listUrl);
+    const data = await getSubDomains();
     // data.result.map((subdomain: Vertex<SubDomain>) => {
     //   subdomain.P.activity = subdomain.P.recentActivities?.length > 0
     //     ? `${subdomain.P.recentActivities[0].P.action}`

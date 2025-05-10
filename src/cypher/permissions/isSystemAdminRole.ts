@@ -24,7 +24,6 @@ export async function checkSuperUserAuthorization(
   }
 
   const isSystemUser = await checkRole(
-    request,
     SYSTEM_ROLES.SYSTEM_ADMIN,
     dbSession,
     user,

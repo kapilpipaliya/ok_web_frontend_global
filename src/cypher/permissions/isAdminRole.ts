@@ -10,7 +10,7 @@ export async function isAdminRole(request: Request): Promise<boolean> {
 
   try {
     const user = await getUserFromSession(request);
-    return await checkRole(request, SYSTEM_ROLES.ADMIN, dbSession, user);
+    return await checkRole(SYSTEM_ROLES.ADMIN, dbSession, user);
   } finally {
     await dbSession.close();
   }

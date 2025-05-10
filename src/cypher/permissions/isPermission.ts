@@ -3,7 +3,6 @@ import type { Session } from "neo4j-driver";
 import type { Vertex } from "~/lib/graph/graph";
 
 export async function checkRole(
-  _request: Request,
   role: string | string[],
   dbSession: Session,
   user?: Vertex,
@@ -27,8 +26,8 @@ export async function checkRole(
   return result.records[0]?.get("hasRole");
 }
 
+// still not used in the codebase
 export async function isPermission(
-  _request: Request,
   permission: string | string[],
   dbSession: Session,
   user?: Vertex,

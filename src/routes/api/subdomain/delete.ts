@@ -25,12 +25,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("User not found", 404);
     }
 
-    const isAdmin = await checkRole(
-      request,
-      SYSTEM_ROLES.ADMIN,
-      dbSession,
-      user,
-    );
+    const isAdmin = await checkRole(SYSTEM_ROLES.ADMIN, dbSession, user);
 
     if (!isAdmin) {
       throw new APIError("Unauthorized. Admin access required.", 403);
