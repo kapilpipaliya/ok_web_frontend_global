@@ -44,7 +44,7 @@ export async function POST({ request }: APIEvent) {
 
     try {
       await sendNotificationEmail(
-        EMAIL_TEMPLATES.TEST_EMAIL,
+        EMAIL_TEMPLATES.TestEmail,
         {
           param1: "value1",
           param2: "value2",

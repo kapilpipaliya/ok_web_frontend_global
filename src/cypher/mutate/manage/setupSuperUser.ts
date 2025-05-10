@@ -9,8 +9,8 @@ import { signupAdmin } from "../signup/signupAdmin";
 import { getAllDatabases } from "./getAllDatabases";
 
 export const superUserData = {
-  email: "admin@decodeui.io",
-  password: "kK11235813@",
+  email: `admin@${process.env.DOMAIN || "decodeui.io"}`,
+  password: process.env.SUPER_USER_PASSWORD || "",
   subDomain: SYSTEM_DB_NAME,
   username: "admin",
 };

@@ -1,5 +1,5 @@
 {
-  "name": "easyformforge-start",
+  "name": "decodeui-page-builder",
   "type": "module",
   "scripts": {
     "check-errors": "npx tsc --noEmit && npx eslint . --ext .ts,.tsx && npm run build",
@@ -9,7 +9,8 @@
     "startDev": "dotenv -e .env -- vinxi start --port 3001",
     "start": "dotenv -e .env -- vinxi start --port 3001",
     "prepare": "husky",
-    "s": "git pull && npm run build && npm run start"
+    "s": "git pull && npm i --force && npm run build && npm run start",
+    "send-test-email": "tsx scripts/sendTestEmail.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "1.3.22",
@@ -112,6 +113,7 @@
     "globals": "^16.1.0",
     "husky": "^9.1.7",
     "solid-devtools": "^0.34.0",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.0"
   },

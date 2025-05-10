@@ -74,3 +74,4 @@ RewriteRule ^(.*)$ http://decodeuiio/$1 [P,NE,L]
    Graceful restart
 7. renew SSL every month, using acme tool for all subdomains.
 
+Node: do not reset super database because if we change it we need to also reset all the databases too.
