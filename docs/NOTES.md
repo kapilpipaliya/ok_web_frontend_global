@@ -57,9 +57,6 @@ Consider using [@tanstack/react-table](https://www.npmjs.com/package/@tanstack/r
 - ✅ Drag Handles → Added three small dots to signify movement & modularity.
 - ✅ Sharp & Clean Lines → Matches modern UI/UX aesthetics.
 
-## SSL Setup
-
-- Setup a wildcard domain including free SSL | Let's Encrypt: [YouTube Tutorial](https://www.youtube.com/watch?v=oJ_sP9y9KWo)
 
 ## UI/UX Terminology
 

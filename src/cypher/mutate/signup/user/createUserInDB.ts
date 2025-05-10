@@ -4,6 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { hashPassword } from "~/lib/auth/password";
+import type { Vertex } from "~/lib/graph/graph";
 
 // Common interfaces
 interface BaseUserData {
@@ -16,23 +17,13 @@ interface UserDataWithPassword extends BaseUserData {
   password: string;
 }
 
-// Define a loose return type to accommodate what convertNodeToJson returns
-type UserResult = {
-  [key: string]: unknown;
-  createdAt: string;
-  email: string;
-  emailConfirmed: boolean;
-  username: string;
-  uuid: string;
-};
-
 /**
  * Create a user in the super database
  */
 export async function createUserInSuperDB(
   superTx: Session | Transaction,
   userData: UserDataWithPassword,
-): Promise<UserResult> {
+): Promise<Vertex> {
   const uuid = uuidv7();
   const { hashedPassword, processedData, salt } =
     await processUserData(userData);
@@ -59,7 +50,7 @@ export async function createUserInUserDB(
   sessionOrTx: Session | Transaction,
   params: Record<string, unknown> & UserDataWithPassword,
   isSystemUser?: boolean,
-): Promise<UserResult> {
+): Promise<Vertex> {
   const uuid = (params.uuid as string) || uuidv7();
   const { hashedPassword, processedData, salt } = await processUserData(
     params,
@@ -137,7 +128,7 @@ async function executeUserCreationQuery(
   query: string,
   params: Record<string, unknown>,
   dbName: string,
-): Promise<UserResult> {
+): Promise<Vertex> {
   try {
     const result = await sessionOrTx.run(query, params);
     const userNode = result.records[0]?.get("u");
@@ -147,7 +138,7 @@ async function executeUserCreationQuery(
     }
 
     // Convert to unknown first, then to the expected type
-    return convertNodeToJson(userNode) as unknown as UserResult;
+    return convertNodeToJson(userNode);
   } catch (error) {
     console.error(`Error creating user in ${dbName}:`, error);
     throw error;
