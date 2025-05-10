@@ -27,7 +27,7 @@ export async function updateProfile(
   dbSession: Session,
   subDomain: string,
 ): Promise<ServerResult | { error: string; status: number }> {
-  const { email, username } = payload;
+  const { email, username, uuid } = payload;
 
   const isSystemUserResult = await isSystemUser(dbSession, currentUser.P.uuid);
   if (isSystemUserResult.isSystemUser) {
@@ -75,9 +75,17 @@ export async function updateProfile(
         throw new Error("No updates to perform");
       }
       const updatePromises = [
-        dbSession.run(updateQuery, { username, uuid: currentUser.P.uuid }),
+        dbSession.run(updateQuery, {
+          email,
+          username,
+          uuid: currentUser.P.uuid,
+        }),
         ...validationSessions.map((session) =>
-          session.run(updateQuery, { username, uuid: currentUser.P.uuid }),
+          session.run(updateQuery, {
+            email,
+            username,
+            uuid: currentUser.P.uuid,
+          }),
         ),
       ];
 
@@ -110,6 +118,9 @@ export async function updateProfile(
           vertexes: { [userNew.id]: userNew },
         },
         result: userNew,
+        message: isEmailChanged
+          ? "Profile updated successfully. Please check your email to confirm your new email address."
+          : "Profile updated successfully",
       };
     } catch (err) {
       return {
@@ -164,6 +175,9 @@ export async function updateProfile(
         vertexes: { [userNew.id]: userNew },
       },
       result: userNew,
+      message: isEmailChanged
+        ? "Profile updated successfully. Please check your email to confirm your new email address."
+        : "Profile updated successfully",
     };
   }
 }
@@ -180,7 +194,7 @@ function buildUpdateQuery(
     updates.push("u.username = $username");
   }
 
-  const updateString = updates.length ? updates.join(", ") : "";
+  const updateString = updates.length ? `${updates.join(", ")},` : "";
   return updateString
     ? `
     MATCH (u:User {uuid: $uuid})

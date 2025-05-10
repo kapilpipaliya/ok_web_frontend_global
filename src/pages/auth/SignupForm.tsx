@@ -44,10 +44,10 @@ export function SignupForm() {
     await submitForm(formData, {
       apiCall: (data) =>
         postAPI(API.auth.signUpUrl, {
-          email: data.P.email.toLowerCase,
+          email: data.P.email.toLowerCase(),
           password: data.P.password,
           subDomain: data.P.subDomain,
-          username: data.P.username.toLowerCase,
+          username: data.P.username.toLowerCase(),
         }),
       loadMessage: "Registering User...",
       navigate,

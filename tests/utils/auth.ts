@@ -9,7 +9,7 @@ import { Page, expect } from '@playwright/test';
  */
 export async function login(
   page: Page, 
-  email: string = 'superuser', 
+  email: string = 'admin', 
   password: string = 'kK11235813@',
   redirectUrl?: string
 ) {

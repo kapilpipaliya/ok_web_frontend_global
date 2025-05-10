@@ -33,8 +33,8 @@ export default defineConfig({
     // },
     // server: {
       // https: {
-        // cert: "/etc/letsencrypt/live/easyformforge.com/fullchain.pem",
-        // key: "/etc/letsencrypt/live/easyformforge.com/privkey.pem",
+        // cert: "/etc/letsencrypt/live/decodeui.io/fullchain.pem",
+        // key: "/etc/letsencrypt/live/decodeui.io/privkey.pem",
       // },
       // port: 36075, // Change this to the desired port number for the server
       // hmr: {

@@ -1,6 +1,7 @@
 import { getErrorMessage } from "./getErrorMessage";
 import { isValidResponse } from "./isValidResponse";
 
+// must use this function in try catch block
 export async function postAPI(
   url: string,
   data: object,

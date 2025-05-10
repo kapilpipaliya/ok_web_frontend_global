@@ -9,10 +9,10 @@ import { signupAdmin } from "../signup/signupAdmin";
 import { getAllDatabases } from "./getAllDatabases";
 
 export const superUserData = {
-  email: "superuser@easyformforge.com",
+  email: "admin@decodeui.io",
   password: "kK11235813@",
   subDomain: SYSTEM_DB_NAME,
-  username: "superuser",
+  username: "admin",
 };
 
 export async function setupSuperUser(): Promise<{

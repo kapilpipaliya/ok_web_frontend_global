@@ -12,6 +12,7 @@ export const API = {
     },
     prepareAutoLoginUrl: "/api/auth/prepareAutoLogin",
     profileUrl: "/api/auth/updateProfile",
+    resendEmailConfirmationUrl: "/api/auth/resendEmailConfirmation",
     signUpUrl: "/api/auth/signup",
     updateProfileImageUrl: "/api/auth/updateProfileImage",
   },
