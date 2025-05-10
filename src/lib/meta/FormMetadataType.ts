@@ -3,7 +3,7 @@ import type { CssType } from "~/components/form/type/FieldSchemaType";
 export interface FieldAttribute {
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes?: FieldAttribute[];
-  css?: CssType;
+  css?: CssType | CssType[];
   componentName: string;
   displayName?: string;
   key?: string;
