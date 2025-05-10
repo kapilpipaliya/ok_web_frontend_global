@@ -7,6 +7,7 @@ import { useGraph } from "~/lib/graph/GraphContext";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { Loader } from "~/components/Loader";
 
 export default function Logout() {
   const navigate = useNavigate();
@@ -64,23 +65,7 @@ export default function Logout() {
         >
           Logging out...
         </As>
-        <As
-          as="div"
-          css={[
-            css`
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid \${args.theme.var.color.base_30};
-            border-radius: 50%;
-            border-top-color: \${args.theme.var.color.primary};
-            animation: spinner 1s ease-in-out infinite;
-          `,
-            `@keyframes spinner {
-              to {transform: rotate(360deg);}
-            }`,
-          ]}
-        />
+        <Loader message="" size="medium" />
       </As>
     </As>
   );

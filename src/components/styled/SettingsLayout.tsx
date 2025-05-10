@@ -11,6 +11,7 @@ import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { Dynamic } from "solid-js/web";
+import { Loader } from "../Loader";
 
 export interface MenuItem {
   adminOnly?: boolean;
@@ -232,7 +233,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                     componentName: "Html",
                     props: () => ({
                       componentName: () => (
-                        <Suspense fallback={<div>Loading...</div>}>
+                        <Suspense
+                          fallback={<Loader message="Loading" size="medium" />}
+                        >
                           <Dynamic
                             component={
                               props.menuItems.find(
