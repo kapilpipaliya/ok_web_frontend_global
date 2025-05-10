@@ -1,10 +1,10 @@
 import { GetInitialData } from "~/GetInitialData";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
-export default function Notfound() {
+export default function HomePage() {
   return (
-    <GetInitialData authenticate={true} dontRedirectToLogin={true}>
-      <PageViewWrapper pageKeyName={"home"} pageVertexName={"home"} />
+    <GetInitialData authenticate={false} dontRedirectToLogin={true}>
+      <PageViewWrapper pageKeyName={"Home"} pageVertexName={"Page"} />
     </GetInitialData>
   );
 }
