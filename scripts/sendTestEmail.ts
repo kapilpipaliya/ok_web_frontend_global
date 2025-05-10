@@ -49,6 +49,7 @@ async function sendTestEmail() {
     // Generate secure token
     const secureToken = await generateSecureToken(encodeUserData(userData), dbSession);
     
+    user.P.email = toEmail;
     // Send email
     await sendNotificationEmail(
       EMAIL_TEMPLATES.TestEmail,
