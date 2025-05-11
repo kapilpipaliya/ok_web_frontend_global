@@ -7,23 +7,13 @@ import type {
   PageRenderObject,
   PageRenderStore,
 } from "~/features/page_attr_render/context/PageRenderContext";
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 
 import type { FormStoreObject } from "../context/FormContext";
 
 import type { ThemeContext } from "~/lib/styles/types/types";
-
-export type ComponentNameType = (options: FunctionArgumentType) => string;
-
-// CSS-in-JS type definitions
-export type CssStringType = string | string[];
-export type CssFunctionType = (options: FunctionArgumentType) => CssStringType;
-export type CssType =
-  | CssStringType
-  | CssFunctionType
-  | Array<CssStringType | CssFunctionType>;
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
@@ -91,10 +81,6 @@ export interface FunctionArgumentType extends FunctionArgumentBaseType {
   // projections: (number | string)[];
   value: unknown;
 }
-
-export type HiddenFnType =
-  | ((options: FunctionArgumentType) => boolean)
-  | boolean;
 
 export interface RegexValidation {
   enabled: boolean;

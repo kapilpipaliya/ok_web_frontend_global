@@ -1,11 +1,11 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction } from "solid-js/store";
 import type { Navigator } from "@solidjs/router";
 
 import { formSubmit } from "~/components/form/functions/formSubmit";
 import { capturePreview } from "~/lib/playwright/capturePreview";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 /**
  * Saves a form and captures a preview

@@ -3,8 +3,6 @@ import type { SetStoreFunction } from "solid-js/store";
 import { batch } from "solid-js";
 
 import type { GraphData } from "~/cypher/types/ServerResult";
-import type { Edge, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
@@ -14,6 +12,9 @@ import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceV
 import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { replaceEdgeProperties } from "~/lib/graph/mutate/core/edge/replaceEdgeProperties";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function setGraphDataWithTransaction(
   txnId: number,

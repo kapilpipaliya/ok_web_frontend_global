@@ -1,7 +1,6 @@
 import type { Accessor } from "solid-js";
 
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
@@ -9,6 +8,7 @@ import FileManager from "~/features/file_manager/FileManager";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function FilePickerModal(props: {
   onFileSelected: (selectedFile: Vertex) => void;

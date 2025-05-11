@@ -2,9 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { createSignal, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
-import { useGraph } from "~/lib/graph/GraphContext";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
@@ -14,6 +12,8 @@ import { As } from "~/components/As";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { VariantsModal } from "../../variants/VariantsModal";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function Variants() {
   const [graph, setGraph] = useGraph();

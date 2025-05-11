@@ -2,7 +2,6 @@ import { createAsync } from "@solidjs/router";
 import { createEffect, createSignal, For, Match, Switch } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
@@ -11,12 +10,13 @@ import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 import { DataInternal } from "./DataInternal";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const DataField = (props: {
   data: (() => any[]) | any[];

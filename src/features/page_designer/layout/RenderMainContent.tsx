@@ -1,7 +1,6 @@
 import { type Component, createSignal, For, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { ResizeOverlay } from "~/components/styled/ResizeOverlay";
 import {
@@ -9,7 +8,6 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 import { SettingTabs } from "~/features/page_designer/settings/SettingTabs";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { GraphView } from "~/pages/debug/GraphView";
 import { STYLES } from "~/pages/settings/constants";
 
@@ -25,6 +23,8 @@ import { TabBar } from "./main_content/TabBar";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface ResizeHandleProps {
   activeResizeKey: null | string;

@@ -1,8 +1,7 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { validatePassword } from "~/lib/validation/validatePassword";
 import { validateUsername } from "~/lib/validation/validateUsername";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 type ShowErrorToast = (message: string) => void;
 type ValidationOptions = {

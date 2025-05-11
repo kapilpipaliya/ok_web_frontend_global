@@ -1,10 +1,10 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function DefaultValueContent(
   props: Readonly<{

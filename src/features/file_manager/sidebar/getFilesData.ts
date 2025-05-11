@@ -1,8 +1,7 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { fetchAndSetGraphData } from "../../../lib/graph/mutate/data/fetchAndSetGraphData";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getExpressionForFilesData(
   toParentEdgeType: string,

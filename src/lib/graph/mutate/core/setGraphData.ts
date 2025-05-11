@@ -2,12 +2,15 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { Edge, EdgeMap, Id, Vertex, VertexMap } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import type { Id } from "~/lib/graph/type/id";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { EdgeMap } from "~/lib/graph/type/edgeMap";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { VertexMap } from "~/lib/graph/type/vertexMap";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export interface UpdateOptions {
   skipExisting?: boolean;

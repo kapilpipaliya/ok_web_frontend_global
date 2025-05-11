@@ -1,5 +1,5 @@
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function nameExpr(
   v: Vertex,

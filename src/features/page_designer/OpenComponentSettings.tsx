@@ -2,8 +2,8 @@ import { Icon } from "@iconify-icon/solid";
 import { Style } from "@solidjs/meta";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 
-import type { Id } from "~/lib/graph/graph";
 import { css } from "~/lib/styles";
+import type { Id } from "~/lib/graph/type/id";
 
 export function OpenComponentSettings(
   props: Readonly<{ css?: string; id: Id }>,

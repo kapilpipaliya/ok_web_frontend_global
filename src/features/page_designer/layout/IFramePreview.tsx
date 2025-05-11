@@ -1,10 +1,9 @@
 import { onCleanup, onMount } from "solid-js";
 
-import { useGraph } from "~/lib/graph/GraphContext";
-
 import { useDesignerLayoutStore } from "../context/LayoutContext";
 import { getChannel } from "~/lib/graph/mutate/core/channel/getChannel";
 import { handleChannelMessage } from "~/lib/graph/mutate/core/channel/handleChannelMessage";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const IFramePreview = (props: {
   formStoreId: string;

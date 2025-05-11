@@ -3,13 +3,10 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { onCleanup } from "solid-js";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type {
-  GlobalProperties,
-  GraphInterface,
-} from "~/lib/graph/GraphContext";
-
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function createActiveClickOutside(
   graph: Store<GraphInterface>,

@@ -1,4 +1,4 @@
-import type { Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/type/id";
 
 export function fillOldIdToNewIdMap(
   idMap: [Id, Id][],

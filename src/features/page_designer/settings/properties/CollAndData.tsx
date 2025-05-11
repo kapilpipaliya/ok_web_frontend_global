@@ -3,14 +3,12 @@ import type { SetStoreFunction } from "solid-js/store";
 import { type Accessor, onCleanup } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { SelectField } from "~/components/fields/select/SelectField";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { evalExpression } from "~/lib/expression_eval";
-import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -22,6 +20,9 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // Deprecated
 export function CollAndData() {

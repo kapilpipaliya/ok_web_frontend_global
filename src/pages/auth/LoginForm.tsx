@@ -3,7 +3,6 @@ import { onMount } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
@@ -19,6 +18,7 @@ import { css } from "~/lib/styles";
 import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
 import { createPasswordField } from "~/pages/auth/functions/schema/createPasswordField";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 // Import all utilities from the index file
 

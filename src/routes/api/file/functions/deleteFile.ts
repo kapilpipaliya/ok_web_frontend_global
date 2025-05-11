@@ -2,11 +2,10 @@ import type { Session } from "neo4j-driver";
 
 import fs from "node:fs/promises";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { deleteFileMetadata } from "~/routes/api/file/functions/functions/deleteFileMetadata";
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function deleteFile(
   fileId: string,

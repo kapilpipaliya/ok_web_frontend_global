@@ -3,13 +3,11 @@ import { createSignal, onCleanup } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { useZIndex } from "~/components/fields/ZIndex";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { generateTableInputMeta } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/generateTableInputMeta";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
@@ -19,6 +17,8 @@ import { Overlay } from "../settings/properties/formgroup/permission_field/Overl
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 const getMetaAttributes = (selectedVariant?: null | Vertex) => {
   let metaAttribute = klona(

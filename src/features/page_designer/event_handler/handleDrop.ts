@@ -2,14 +2,14 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
 import { loadPageData } from "~/features/page_designer/functions/fetch/loadPageData";
 
 import { onLayoutItemClick } from "./onLayoutItemClick";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function handleDrop(
   e: DragEvent,

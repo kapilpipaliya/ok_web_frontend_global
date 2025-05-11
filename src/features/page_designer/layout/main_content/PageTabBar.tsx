@@ -1,7 +1,5 @@
 import { Show } from "solid-js";
 
-import type { Id } from "~/lib/graph/graph";
-
 import { IconButton } from "~/components/styled/IconButton";
 import { headerIconButtonCss, toolBarCss } from "~/pages/settings/constants";
 
@@ -13,6 +11,7 @@ import { ShareButton } from "../page_tabbar/ShareButton";
 import { UndoRedoIcons } from "../page_tabbar/UndoRedoIcons";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Id } from "~/lib/graph/type/id";
 
 export function PageTabBar(props: {
   formStoreId: Id;

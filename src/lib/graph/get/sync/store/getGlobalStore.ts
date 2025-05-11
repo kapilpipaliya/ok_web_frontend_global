@@ -1,8 +1,7 @@
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type {
-  GlobalProperties,
-  GraphInterface,
-} from "~/lib/graph/GraphContext";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getEdgeOldIdToNewIdMap(graph: GraphInterface) {
   const vertex = graph.vertexes.edgeOldIdToNewIdMap as Vertex<Record<Id, Id>>;

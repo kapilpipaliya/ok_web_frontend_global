@@ -11,14 +11,11 @@ import { mergeRefs } from "@solid-primitives/refs";
 import { useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { isAnyFieldInvalid } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { resetTransaction } from "~/lib/graph/transaction/revert/resetTransaction";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
@@ -31,6 +28,8 @@ import {
   useFormContext,
 } from "../form/context/FormContext";
 import { useToast } from "../styled/modal/Toast";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface ButtonProps
   extends GenericComponentProps,

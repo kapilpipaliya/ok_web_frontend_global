@@ -1,12 +1,12 @@
 // make sure to use klona to avoid cant mutate vertex issues
-import type { Vertex } from "~/lib/graph/graph";
 import type { Store } from "solid-js/store";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { untrack } from "solid-js";
 import {
   getEdgeOldIdToNewIdMap,
   getVertexOldIdToNewIdMap,
 } from "~/lib/graph/get/sync/store/getGlobalStore";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function updateVertexIdsToNew(
   vertex: Vertex,

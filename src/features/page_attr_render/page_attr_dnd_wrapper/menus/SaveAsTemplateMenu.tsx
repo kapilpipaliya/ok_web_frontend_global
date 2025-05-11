@@ -1,7 +1,6 @@
 import { createSignal, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
@@ -13,7 +12,6 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layout/cloneLayoutAndChildren";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
@@ -26,6 +24,8 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 function TemplateNameInput(props: {
   label: string;

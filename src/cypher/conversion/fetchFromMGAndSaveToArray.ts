@@ -1,14 +1,14 @@
 import type { Session } from "neo4j-driver";
 import { types } from "neo4j-driver";
 
-import type { Edge, Vertex } from "~/lib/graph/graph";
-
 import {
   convertNodeToJson,
   convertRelationshipToJson,
 } from "~/cypher/conversion/convertNodeToJson";
 
 import { updateNodeRelations } from "./updateRelations";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function fetchFromMGAndSaveToArray(
   dbSession: Session,

@@ -1,16 +1,16 @@
 import { createSignal, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
 import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
   const [graph, setGraph] = useGraph();

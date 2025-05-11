@@ -1,11 +1,10 @@
 import type { Navigator } from "@solidjs/router";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { useToast } from "~/components/styled/modal/Toast";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { handleLoginRedirect } from "./handleLoginRedirect";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 type SubmitOptions = {
   apiCall: (formData: any) => Promise<any>;

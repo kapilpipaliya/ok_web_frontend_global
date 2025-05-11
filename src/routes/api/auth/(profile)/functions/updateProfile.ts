@@ -2,7 +2,6 @@ import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
@@ -13,6 +12,7 @@ import { getSubdomainsForAccount } from "~/cypher/session/getSubdomainsForAccoun
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import { validateUniqueFields } from "~/routes/api/auth/(profile)/functions/validateField";
 import { updateSession } from "~/server/auth/session/updateSession";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 type ProfilePayload = {
   email?: string;

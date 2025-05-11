@@ -10,13 +10,12 @@ import {
   Switch,
 } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { runEvent } from "../solid_blocks/tools";
 import { css } from "~/lib/styles";
 import { As } from "../As";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export type FileUploaderProps = JSX.HTMLAttributes<HTMLInputElement> & {
   data?: Vertex;

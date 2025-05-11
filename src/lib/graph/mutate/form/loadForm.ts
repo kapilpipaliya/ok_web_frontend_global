@@ -1,7 +1,8 @@
 import type { Store } from "solid-js/store";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function loadForm(
   graph: Store<GraphInterface>,

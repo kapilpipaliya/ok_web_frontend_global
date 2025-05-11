@@ -3,17 +3,17 @@ import type { CellContext } from "@tanstack/solid-table";
 import { For } from "solid-js";
 
 import type { DataGridStore } from "~/features/grid/context/DataGridContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { DataGrid } from "~/features/grid/DataGrid";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { getSupportTicketFormSchema } from "./functions/supportTicketFormSchema";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function SupportTickets() {
   const [graph, setGraph] = useGraph();

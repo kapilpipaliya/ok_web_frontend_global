@@ -1,8 +1,5 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
-import type { Edge, Vertex } from "../../graph";
 import type { TransactionValue } from "../types/TransactionType";
 
 import {
@@ -18,6 +15,9 @@ import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { replaceEdgeProperties } from "~/lib/graph/mutate/core/edge/replaceEdgeProperties";
 import { updateEdgeIdsToNew } from "~/lib/graph/mutate/core/edge/updateEdgeIdsToNew";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 /**
  * Reapplies a previously undone transaction step to the graph.

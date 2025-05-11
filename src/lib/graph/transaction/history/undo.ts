@@ -1,7 +1,5 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import type { TransactionDetail } from "../types/TransactionDetail";
 
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
@@ -11,6 +9,7 @@ import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { determineTransactionStatus } from "../types/TransactionDetail";
 import { undoTxn } from "./undoTxn";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 /**
  * Performs an undo operation on a transaction, reverting changes up to a specified point.

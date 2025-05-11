@@ -2,7 +2,6 @@ import { createMemo, Match, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { getComponentDefaultValues } from "~/components/fields/component/functions/getComponentDefaultValues";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
@@ -12,7 +11,6 @@ import {
   type PreviewStoreObject,
 } from "~/features/page_designer/context/PreviewContext";
 import { deNullify } from "~/lib/data_structure/object/deNullify";
-import { useGraph } from "~/lib/graph/GraphContext";
 import {
   DataContext,
   useDataContext,
@@ -23,6 +21,9 @@ import {
 } from "./context/PageRenderContext";
 import { createFunctionProxy } from "~/components/form/createFunctionProxy";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function PageView(
   props: Readonly<{

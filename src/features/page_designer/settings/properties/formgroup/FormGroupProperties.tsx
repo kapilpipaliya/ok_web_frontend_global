@@ -12,7 +12,6 @@ import {
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
@@ -21,7 +20,6 @@ import { isObject } from "~/lib/data_structure/object/isObject";
 import { htmlTagsTree } from "~/lib/dom/htmlTags";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/expression/getPropsFromMetaExpression";
-import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
@@ -44,6 +42,9 @@ import { isPermissionsConfigurable } from "../../utils/permissionUtils";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];

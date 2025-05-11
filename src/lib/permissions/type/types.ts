@@ -1,7 +1,7 @@
 // Permission types for URL access control
 import type { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 
-import type { Vertex } from "../../graph/graph";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 // Define permission levels
 export enum PermissionLevel {

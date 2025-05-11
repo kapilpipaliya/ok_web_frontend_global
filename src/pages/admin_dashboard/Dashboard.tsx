@@ -7,7 +7,8 @@ import {
 } from "~/components/styled/SimpleTabs";
 import { DataGrid } from "~/features/grid/DataGrid";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
-import { useGraph } from "~/lib/graph/GraphContext";
+
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export default function AdminDashboard() {
   const [graph] = useGraph();

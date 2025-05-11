@@ -1,9 +1,8 @@
 import type { Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import type { TransactionDetail } from "../types/TransactionDetail";
 import { hasChangesToCommit } from "../types/TransactionDetail";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function isDisabledTxn(
   txnId: number,

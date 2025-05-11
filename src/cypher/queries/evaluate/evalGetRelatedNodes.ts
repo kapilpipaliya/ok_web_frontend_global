@@ -1,13 +1,12 @@
 import type { Session, Transaction } from "neo4j-driver";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import type { EvalExpressionContext } from "../../types/EvalExpressionContext";
 
 import { processResult } from "../../conversion/processResult";
 import { getDBSessionForSubdomain } from "../../session/getSessionForSubdomain";
 import { getLabelFilterSkipLimit } from "./getLabelFilterSkipLimit";
 import { mongoToCypher } from "./mongoToCypher";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function evalGetRelatedNodes(
   vertexes: Vertex[],

@@ -1,9 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { type JSXElement, Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
-import { useGraph } from "~/lib/graph/GraphContext";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { useToast } from "../styled/modal/Toast";
@@ -12,6 +9,8 @@ import { formCancel } from "./functions/formCancel";
 import { formSubmit } from "./functions/formSubmit";
 import { css } from "~/lib/styles";
 import { As } from "../As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function SaveCancelButton(
   props: Readonly<{

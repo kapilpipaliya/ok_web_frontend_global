@@ -20,13 +20,14 @@ import { mergeRefs, type Ref } from "@solid-primitives/refs";
 
 import { STYLES } from "~/pages/settings/constants";
 import { As } from "../../As";
-import type { CssType } from "../../form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { css } from "~/lib/styles";
 import type { SetStoreFunction } from "solid-js/store";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { CssType } from "~/components/form/type/CssType";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 // Type for tooltip registry in the globalStoreId vertex
 type TooltipRegistry = {
   [key: string]: string[]; // Group name -> Array of tooltip IDs

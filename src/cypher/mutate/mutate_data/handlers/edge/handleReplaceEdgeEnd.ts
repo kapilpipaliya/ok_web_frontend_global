@@ -1,8 +1,9 @@
 import type { Transaction } from "neo4j-driver";
 
-import type { Edge, EdgeMap, Id } from "~/lib/graph/graph";
-
 import { convertRelationshipToJson } from "~/cypher/conversion/convertNodeToJson";
+import type { Id } from "~/lib/graph/type/id";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { EdgeMap } from "~/lib/graph/type/edgeMap";
 
 // deprecated
 export async function handleReplaceEdgeEnd(

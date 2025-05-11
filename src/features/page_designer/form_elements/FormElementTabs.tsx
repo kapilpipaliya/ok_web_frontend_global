@@ -11,14 +11,12 @@ import {
 import { Icon } from "@iconify-icon/solid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { PlusIconButton } from "~/components/styled/PlusIconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
 import { STYLES } from "~/pages/settings/constants";
 
@@ -36,6 +34,8 @@ import { TabsContainer } from "./TabsContainer";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { Divider } from "../../../components/styled/Divider";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const UlContainer = (props: ParentProps) => (
   <As

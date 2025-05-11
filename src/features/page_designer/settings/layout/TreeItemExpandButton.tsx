@@ -1,9 +1,8 @@
 import { Show } from "solid-js";
 
-import type { Id } from "~/lib/graph/graph";
-
 import { IconButton } from "~/components/styled/IconButton";
 import { css } from "~/lib/styles";
+import type { Id } from "~/lib/graph/type/id";
 
 export function TreeItemExpandButton(
   props: Readonly<{

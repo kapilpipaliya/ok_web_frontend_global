@@ -1,10 +1,10 @@
 // update vertex id when we receive new id from api response
-import type { Id } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { untrack } from "solid-js";
 
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function updateVertexId(
   oldVertexId: Id,

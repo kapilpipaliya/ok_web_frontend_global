@@ -1,13 +1,13 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import { componentDrop } from "../drag_drop/core/componentDrop";
 import { sortChildren } from "../drag_drop/hierachy/sortChildren";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function onClickAddComponent(
   graph: Store<GraphInterface>,

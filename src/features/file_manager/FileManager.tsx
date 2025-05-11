@@ -1,7 +1,6 @@
 import type { RowSelectionOptions } from "@tanstack/solid-table";
 
 import type { MongoFilter } from "~/cypher/queries/evaluate/mongoToCypher";
-import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import {
@@ -12,6 +11,7 @@ import { FileManagerMainContent } from "./main_content/FileManagerMainContent";
 import { Sidebar } from "./sidebar/FileManagerSideBar";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export default function FileManager(
   props: Readonly<{

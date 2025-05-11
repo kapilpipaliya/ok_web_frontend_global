@@ -1,7 +1,6 @@
 import { createMemo, createSignal } from "solid-js";
 
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import {
   type FormStoreObject,
@@ -10,11 +9,12 @@ import {
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { css } from "~/lib/styles";
 
 import { FilePickerModal } from "./FilePickerModal";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface FilePickerButtonProps {
   handleChange: (value: string) => void;

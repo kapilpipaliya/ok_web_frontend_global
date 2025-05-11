@@ -1,4 +1,4 @@
-import type { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function sortVertexesByPosition(vertexes: Vertex[]): Vertex[] {
   return vertexes.sort(

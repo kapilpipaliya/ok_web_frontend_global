@@ -1,8 +1,6 @@
 import { createMemo, Show } from "solid-js";
 import { createAsync } from "@solidjs/router";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
 import { fetchComponentData } from "~/cypher/get/fetchComponentData";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
@@ -13,7 +11,6 @@ import {
 } from "~/features/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { GenericComponentProps } from "../type/FieldType";
 
@@ -23,6 +20,8 @@ import {
   useDataContext,
 } from "~/features/page_attr_render/context/DataContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function ComponentField(
   props: Readonly<GenericComponentProps & { componentId?: string }>,

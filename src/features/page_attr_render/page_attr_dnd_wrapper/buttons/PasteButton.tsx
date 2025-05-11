@@ -1,5 +1,4 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 import { Show } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
@@ -8,12 +7,13 @@ import {
   useDesignerLayoutStore,
   type PageLayoutObject,
 } from "~/features/page_designer/context/LayoutContext";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import type { CssType } from "~/components/form/type/FieldSchemaType";
 import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layout/cloneLayoutAndChildren";
+import type { CssType } from "~/components/form/type/CssType";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface PasteButtonProps {
   css?: CssType;

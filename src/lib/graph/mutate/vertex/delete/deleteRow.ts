@@ -2,13 +2,12 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { batch } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { commitTxn } from "../../../transaction/core/commitTxn";
 import { generateNewTxnId } from "../../../transaction/core/generateNewTxnId";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function deleteRow(
   vertex: Vertex,

@@ -3,9 +3,6 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { klona } from "klona";
 import { batch } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drag_drop/attributes/createAttrCompMetaVertex";
 import { createAttrMetaVertex } from "~/features/page_designer/functions/drag_drop/attributes/createAttrMetaVertex";
@@ -18,6 +15,8 @@ import { getUniqueName } from "../../form/generateFormMetaAttributes";
 import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
 import { getCompPropsObj } from "../attributes/getCompPropsObj";
 import { getComponentFromLayoutRow } from "../ui/getComponentFromLayoutRow";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 // @Note:
 // From Component To Layout drag:

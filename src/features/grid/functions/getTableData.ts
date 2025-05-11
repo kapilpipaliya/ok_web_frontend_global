@@ -1,11 +1,11 @@
 import type { Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function getTableData(
   graph: Store<GraphInterface>,

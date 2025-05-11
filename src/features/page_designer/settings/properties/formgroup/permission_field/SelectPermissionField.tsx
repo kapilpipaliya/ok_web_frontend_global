@@ -1,11 +1,11 @@
 import { klona } from "klona";
-import type { Vertex } from "~/lib/graph/graph";
 
-import { useGraph } from "~/lib/graph/GraphContext";
 import { pageAttr } from "~/lib/meta/page/pageAttr";
 import { PermissionPanel } from "~/features/page_designer/settings/components/PermissionPanel";
 
 import { generateTableInputMeta } from "./functions/generateTableInputMeta";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface SelectPermissionFieldProps {
   meta: Vertex;

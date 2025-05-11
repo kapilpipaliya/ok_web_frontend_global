@@ -1,10 +1,10 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Id } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormData } from "~/components/form/functions/getFormData";
 import { fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export interface FetchFormDataResult {
   componentData?: null | ServerResult;

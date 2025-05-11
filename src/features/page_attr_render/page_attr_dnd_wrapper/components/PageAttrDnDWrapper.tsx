@@ -8,7 +8,6 @@ import {
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import {
@@ -24,12 +23,13 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { BorderOverlay } from "../overlays/BorderOverlay";
 import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
 import { useDataContext } from "../../context/DataContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface PageAttrDnDWrapperProps {
   children: JSX.Element;

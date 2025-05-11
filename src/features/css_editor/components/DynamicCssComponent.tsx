@@ -13,7 +13,6 @@ import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { NotFoundComponent } from "~/components/fields/NotFoundComponent";
 import {
@@ -21,7 +20,6 @@ import {
   useFormContext,
 } from "~/components/form/context/FormContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import type { FormField, GenericField } from "../constants/FieldSchemaType";
@@ -41,6 +39,8 @@ import { LabelWrapper } from "./fields/LabelWrapper";
 import { RenderChildren } from "./RenderChildren";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // similar to DynamicComponent in Seller Dorsey
 export function DynamicCSSComponent(

@@ -1,8 +1,6 @@
 import { createSelector, createSignal, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { IconButton } from "~/components/styled/IconButton";
@@ -11,7 +9,6 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { QuickEditModal } from "~/features/grid/cell/QuickEditModal";
 import { CommonAddComponent } from "~/features/page_designer/settings/variants/header/CommonAddComponent";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
@@ -20,6 +17,8 @@ import { useFileManagerStore } from "../FileManagerContext";
 import { getDownloadLink, openInNewTab } from "./getDownloadLink";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function FileManagerConfigIcons(
   props: Readonly<{ getChildrenItems?: () => void; metaVertex: Vertex }>,

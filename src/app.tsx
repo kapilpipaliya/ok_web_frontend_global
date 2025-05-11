@@ -12,8 +12,8 @@ import { createAppState } from "~/createAppState";
 import { ThemeProvider } from "./lib/context/ThemeProvider";
 import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
-import { GraphContext } from "./lib/graph/GraphContext";
 import { toastValue } from "./toastValue";
+import { GraphContext } from "~/lib/graph/context/GraphContext";
 
 // Create a generic error fallback component
 const ErrorFallback = (props: {

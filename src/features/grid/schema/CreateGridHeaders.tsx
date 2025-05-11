@@ -3,8 +3,6 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { Match, Show, Switch } from "solid-js";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -27,6 +25,9 @@ import { selectedValue } from "../../../lib/graph/get/sync/edge/selectedValue";
 import { ModifyJsonButton } from "../cell/ModifyJsonButton";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 function ImageWrapper(props: { alt?: string; css?: string; src: string }) {
   return (

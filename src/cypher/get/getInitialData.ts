@@ -1,8 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
-import type { Edge, Vertex } from "~/lib/graph/graph";
-
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
@@ -11,6 +9,8 @@ import type { ServerResult } from "../types/ServerResult";
 
 import { fetchFromMGAndSaveToArray } from "../conversion/fetchFromMGAndSaveToArray";
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function getInitialData(request?: APIEvent["request"]) {
   "use server";

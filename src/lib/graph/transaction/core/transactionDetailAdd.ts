@@ -2,14 +2,13 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { untrack } from "solid-js";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import type { TransactionDetail } from "../types/TransactionDetail";
 import type { TransactionValue } from "../types/TransactionType";
 import { determineTransactionStatus } from "../types/TransactionDetail";
 
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 /**
  * Adds a new transaction step to the transaction history while managing undo/redo state.

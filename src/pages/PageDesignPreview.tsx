@@ -1,7 +1,6 @@
 import { createSignal, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { PageView } from "~/features/page_attr_render/PageView";
 import {
@@ -12,12 +11,13 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { getChannel } from "~/lib/graph/mutate/core/channel/getChannel";
 import { handleChannelMessage } from "~/lib/graph/mutate/core/channel/handleChannelMessage";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export default function PageShareView() {
   const queryParams = new URLSearchParams(window.location.search);

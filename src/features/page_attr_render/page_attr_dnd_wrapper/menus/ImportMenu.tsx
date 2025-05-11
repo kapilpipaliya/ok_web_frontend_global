@@ -1,14 +1,12 @@
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
@@ -18,6 +16,8 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function ImportMenu(
   props: Readonly<{

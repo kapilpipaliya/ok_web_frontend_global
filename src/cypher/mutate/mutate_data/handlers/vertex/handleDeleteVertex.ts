@@ -1,6 +1,7 @@
 import type { Transaction } from "neo4j-driver";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 type VertexResult = {
   deleteVertex: {

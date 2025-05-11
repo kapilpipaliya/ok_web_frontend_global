@@ -1,5 +1,4 @@
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import {
@@ -9,6 +8,7 @@ import {
 } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function ToggleButtons() {
   const [graph, setGraph] = useGraph();

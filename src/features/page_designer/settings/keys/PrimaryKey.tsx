@@ -1,14 +1,14 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { modifyFieldMetaAllFields } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/modifyFieldMetaAllFields";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function PrimaryKey() {
   const [graph, setGraph] = useGraph();

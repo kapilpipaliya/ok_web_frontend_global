@@ -1,12 +1,12 @@
 import { For } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const MiddleSectionButtons = () => {
   const layoutStoreId = useDesignerLayoutStore();

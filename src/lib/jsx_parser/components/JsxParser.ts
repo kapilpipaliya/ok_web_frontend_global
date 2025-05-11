@@ -5,9 +5,6 @@ import { untrack } from "solid-js";
 import * as Acorn from "acorn";
 import AcornJSX from "acorn-jsx";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { componentDrop } from "~/features/page_designer/functions/drag_drop/core/componentDrop";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
@@ -20,6 +17,8 @@ import { randomHash } from "~/lib/jsx_parser/helpers/hash";
 import { parseStyle } from "~/lib/jsx_parser/helpers/parseStyle";
 import { resolvePath } from "~/lib/jsx_parser/helpers/resolvePath";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export type TProps = {
   allowUnknownElements?: boolean;

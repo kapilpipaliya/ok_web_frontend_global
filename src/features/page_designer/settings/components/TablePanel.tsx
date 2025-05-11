@@ -1,11 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { PlusIconButton } from "~/components/styled/PlusIconButton";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface TablePanelProps {
   title?: string;

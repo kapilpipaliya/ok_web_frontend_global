@@ -1,7 +1,5 @@
 import { createSignal, type Setter } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
@@ -10,6 +8,7 @@ import { useDesignerLayoutStore } from "~/features/page_designer/context/LayoutC
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function PreviewCSSMenu(
   props: Readonly<{

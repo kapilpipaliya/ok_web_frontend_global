@@ -1,10 +1,7 @@
 import { createEffect, createMemo, createSignal, For } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { DataGrid } from "~/features/grid/DataGrid";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { useFileManagerStore } from "../FileManagerContext";
@@ -14,6 +11,8 @@ import { getEditFileOrFolderSchema } from "./fileFormEditSchema";
 import { getComponentFormSchema } from "./getComponentFormSchema";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
   const [graph, setGraph] = useGraph();

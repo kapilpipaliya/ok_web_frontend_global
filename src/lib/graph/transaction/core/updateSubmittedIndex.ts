@@ -1,9 +1,8 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 /**
  * Updates the transaction's submitted index after a successful commit.

@@ -3,13 +3,14 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { validateDragOver } from "~/features/page_designer/functions/drag_drop/core/validateDragOver";
 import { getIndicatorPosition } from "~/features/page_designer/functions/drag_drop/ui/getIndicatorPosition";
 
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function handleDragOverAndSetDropPosition(
   e: DragEvent,

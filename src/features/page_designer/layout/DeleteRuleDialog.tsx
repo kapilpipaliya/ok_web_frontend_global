@@ -1,15 +1,17 @@
 import { For, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { SimpleWithDismissButton } from "~/components/styled/modal/SimpleModal";
-import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../context/LayoutContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 const getAttributeNames = (
   graph: GraphInterface,

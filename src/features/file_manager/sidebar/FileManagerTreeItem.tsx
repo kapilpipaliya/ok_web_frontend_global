@@ -1,10 +1,7 @@
 import { createSelector, createSignal, For, onMount, Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { TreeItemContainer } from "~/features/page_designer/settings/layout/TreeItemContainer";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { FileManagerConfigIcons } from "./FileManagerConfigIcons";
@@ -12,6 +9,8 @@ import { FileManagerTreeItemContent } from "./FileManagerTreeItemContent";
 import { getExpressionForFilesData, getFilesData } from "./getFilesData";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
   const [children, setChildren] = createSignal<Vertex[]>([]);

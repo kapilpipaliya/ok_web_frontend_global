@@ -6,12 +6,13 @@ import type {
   OpenFormInfo,
   PageLayoutObject,
 } from "~/features/page_designer/context/LayoutContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function openInNewInternalTab(
   layoutStoreId: Id,

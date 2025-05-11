@@ -5,7 +5,6 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
 
-import { type GlobalProperties, useGraph } from "~/lib/graph/GraphContext";
 import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 
 import { getInitialData } from "./cypher/get/getInitialData";
@@ -15,6 +14,8 @@ import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;

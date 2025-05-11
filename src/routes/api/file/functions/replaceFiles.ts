@@ -3,8 +3,6 @@ import type { Session } from "neo4j-driver";
 
 import path from "node:path";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { processResult } from "~/cypher/conversion/processResult";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { calculateChecksum } from "~/lib/files/calculateChecksum";
@@ -13,6 +11,7 @@ import { getBaseDir } from "~/lib/files/getBaseDir";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function replaceFiles(
   request: Request,

@@ -1,7 +1,5 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -14,6 +12,9 @@ import { uniqueNameKey } from "../../constants/constant";
 import { getComponentLabel } from "../component/getComponentLabel";
 import { getChildrenAttrs } from "../layout/getChildrenAttrs";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export type IDToRuleMap = { [id: string]: string[] };
 type RuleToIDMap = { [RuleId: string]: Id[] };

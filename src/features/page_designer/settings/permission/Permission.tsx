@@ -1,13 +1,13 @@
 import { klona } from "klona";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { generateTableInputMeta } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/generateTableInputMeta";
 import { PermissionPanel } from "~/features/page_designer/settings/components/PermissionPanel";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function Permission() {
   const [graph] = useGraph();

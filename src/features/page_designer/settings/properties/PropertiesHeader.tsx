@@ -1,11 +1,10 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
-
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // depricated:
 export function PropertiesHeader() {

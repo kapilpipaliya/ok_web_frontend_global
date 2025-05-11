@@ -1,13 +1,13 @@
 import { createEffect, createSignal, on } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { VanilaJsonEditor } from "~/components/styled/VanilaJsonEditor";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function JsonEditorFieldComponent(props: {
   vertexId?: string;

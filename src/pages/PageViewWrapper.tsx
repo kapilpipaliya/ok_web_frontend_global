@@ -22,7 +22,6 @@ import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Id, Vertex } from "~/lib/graph/graph";
 
 import {
   FormContext,
@@ -40,7 +39,6 @@ import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesig
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
@@ -70,6 +68,9 @@ import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function PageViewWrapper(
   props: Readonly<{

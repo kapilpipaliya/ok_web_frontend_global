@@ -6,12 +6,12 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { Dynamic } from "solid-js/web";
 import { Loader } from "../Loader";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export interface MenuItem {
   adminOnly?: boolean;

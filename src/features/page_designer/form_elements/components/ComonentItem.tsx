@@ -4,13 +4,10 @@ import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { toTitle } from "case-switcher-js";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-
 import { getDynamicComponent } from "~/components/form/functions/getDynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
-import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
@@ -30,6 +27,10 @@ import {
   setupPreview,
   createOpenInNewTab,
 } from "../common/ItemStyles";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function ComponentItem(
   props: Readonly<{

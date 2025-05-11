@@ -1,13 +1,12 @@
 // Function to add edges between nodes based on certain conditions.
 import type { Session } from "neo4j-driver";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { getChildrenOrParentVertex } from "~/cypher/get/relation/getChildrenOrParentVertex";
 import { findOrCreateNodeAndUpdateProperties } from "~/cypher/mutate/sync/findOrCreateNodeAndUpdateProperties";
 
 import { globalCollections } from "./constants/globalCollections";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function addNodeEdges(
   sessionSource: Session,

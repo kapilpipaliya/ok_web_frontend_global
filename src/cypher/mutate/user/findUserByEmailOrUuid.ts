@@ -1,10 +1,9 @@
 import type { Node, Session } from "neo4j-driver";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 import { createUserSetting } from "./createUserSetting";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface UserResult {
   // globalTheme: null | Vertex;

@@ -1,10 +1,9 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { evalExpression } from "~/lib/expression_eval";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/entity/sortVertexesByPosition";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,

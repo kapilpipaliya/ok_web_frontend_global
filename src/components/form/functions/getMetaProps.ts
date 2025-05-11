@@ -1,7 +1,6 @@
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getMetaProps(
   meta: Record<string, unknown>,

@@ -15,7 +15,6 @@ import {
 import { createStore } from "solid-js/store";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
@@ -33,7 +32,6 @@ import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import { createInputFilteredFormMetaData } from "~/lib/meta/functions/createInputFilteredFormMetaData";
@@ -50,6 +48,8 @@ import { GridHeader } from "./header/GridHeader";
 import { CreateGridHeaders } from "./schema/CreateGridHeaders";
 
 import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {

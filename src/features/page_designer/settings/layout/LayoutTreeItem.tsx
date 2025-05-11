@@ -9,7 +9,6 @@ import {
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { generateBoxShadow } from "~/features/css_editor/utils/generate/generateBoxShadow";
@@ -18,7 +17,6 @@ import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import {
   createOpenInNewTab,
@@ -45,6 +43,9 @@ import { evalExpression } from "~/lib/expression_eval";
 import { getTreeItemBorder } from "./treeUtils";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function LayoutTreeItem(
   props: Readonly<{

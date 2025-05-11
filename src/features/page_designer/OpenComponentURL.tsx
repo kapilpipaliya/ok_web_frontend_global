@@ -1,11 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, Match, Switch } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function OpenComponentURL(
   props: Readonly<{ css?: string; meta: Vertex }>,

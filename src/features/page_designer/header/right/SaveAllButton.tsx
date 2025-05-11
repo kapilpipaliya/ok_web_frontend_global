@@ -1,16 +1,17 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { useNavigate } from "@solidjs/router";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 import { saveAndCaptureForm } from "~/features/page_designer/utils/saveAndCapture";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function SaveAllButton() {
   const [graph, setGraph] = useGraph();

@@ -1,8 +1,6 @@
 import { createSignal, For, onMount, Show } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
@@ -10,7 +8,6 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { getGlobalThemeVertex } from "~/lib/graph/get/sync/store/getGlobalThemeVertex";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
 import { handleDataSubmission } from "~/lib/graph/mutate/data/handleDataSubmission";
@@ -24,6 +21,9 @@ import { ThemeConfigEditButton } from "./theme_config/ThemeConfigEditButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   const [graph, setGraph] = useGraph();

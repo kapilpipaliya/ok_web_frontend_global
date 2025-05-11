@@ -10,8 +10,6 @@ import {
   Switch,
 } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import {
   CardDetailRow,
   CardDetailsContainer,
@@ -33,6 +31,7 @@ import { TableActions } from "./TableActions";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 type TableProps = {
   allConfiguredPermission: Vertex[];

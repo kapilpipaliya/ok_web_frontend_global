@@ -1,6 +1,6 @@
 import type { Store } from "solid-js/store";
 
-import type { GraphInterface } from "../../GraphContext";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getActiveUndoIndex(
   txnId: number,

@@ -3,8 +3,8 @@ import { As } from "~/components/As";
 
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { getProfileImageUrl } from "~/lib/graph/get/sync/user/getProfileImageUrl";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export interface ProfileHeaderProps {
   profileImage: string;

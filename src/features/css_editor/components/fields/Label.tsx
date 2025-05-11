@@ -7,9 +7,6 @@ import {
   Switch,
 } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
-import { useGraph } from "~/lib/graph/GraphContext";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
 
@@ -17,6 +14,8 @@ import {
   type FormStoreObject,
   useFormContext,
 } from "../../../../components/form/context/FormContext";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface LabeledFieldProps {
   children: JSX.Element;

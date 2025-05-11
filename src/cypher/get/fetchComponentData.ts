@@ -1,11 +1,10 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function fetchComponentData(
   vertexes: Vertex[],

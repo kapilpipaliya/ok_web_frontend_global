@@ -1,4 +1,5 @@
-import type { Edge, Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/type/id";
+import type { Edge } from "~/lib/graph/type/edge";
 
 export function newEdge(
   edgeId: Id,

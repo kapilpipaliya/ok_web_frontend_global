@@ -1,13 +1,13 @@
 // delete a vertex
-import type { Id } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { batch, untrack } from "solid-js";
 import { getVertexOldIdToNewIdMap } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { klona } from "klona";
 import { transactionDetailAdd } from "~/lib/graph/transaction/core/transactionDetailAdd";
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function deleteVertex(
   txnId: number,

@@ -1,5 +1,4 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
@@ -8,11 +7,12 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 import { deleteLayoutAttr } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
-import type { CssType } from "~/components/form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import type { CssType } from "~/components/form/type/CssType";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface DeleteButtonProps {
   css?: CssType;

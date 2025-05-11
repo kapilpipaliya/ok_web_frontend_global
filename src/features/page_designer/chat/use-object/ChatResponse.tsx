@@ -1,7 +1,5 @@
 import { For } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { DBMessage } from "./types";
@@ -9,6 +7,7 @@ import type { DBMessage } from "./types";
 import { Preview } from "./Preview";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface ChatResponseProps {
   message: Vertex<DBMessage>;

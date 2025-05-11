@@ -3,14 +3,15 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { uniqueNameKey } from "~/features/page_designer/constants/constant";
 import { isUniqueIdUsed } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../../../context/LayoutContext";
 import { Label } from "./Label";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function UniqueNameField(
   props: Readonly<{

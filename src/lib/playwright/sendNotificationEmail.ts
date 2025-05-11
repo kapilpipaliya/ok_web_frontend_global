@@ -1,9 +1,8 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 import { renderPageAsHtml } from "~/lib/playwright/renderPageAsHtml";
 import { sendEmail } from "~/lib/playwright/sendEmail";
 
 import { APIError } from "../api/server/apiErrorHandler";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 // New helper function for sending the email
 export async function sendNotificationEmail(

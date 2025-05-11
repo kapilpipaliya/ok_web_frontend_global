@@ -2,8 +2,6 @@ import { MultiProvider } from "@solid-primitives/context";
 import { createEffect, createSignal, on } from "solid-js";
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { isObject } from "~/lib/data_structure/object/isObject";
 
 import type { CSSStore } from "../context/CssEditorContext";
@@ -13,6 +11,7 @@ import { CssStateContext } from "../context/CssStateContext";
 import { createSearchContext, SearchContext } from "../context/SearchContext";
 import { parseAndApplyCssRules } from "../utils/parseAndApplyCssRules";
 import { CSSPropertiesEditor } from "./CSSPropertiesEditor";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function CSSPropertiesEditorWrapper(
   props: Readonly<{

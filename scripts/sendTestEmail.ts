@@ -3,11 +3,11 @@ import { encodeUserData, type UserData } from "~/lib/auth/userDataEncoder";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import type { Vertex } from "~/lib/graph/graph";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { superUserData } from "~/cypher/mutate/manage/superUserData";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
+import {Vertex} from "~/lib/graph/type/vertex";
 
 // Usage: npm run send-test-email -- <subdomain> <from_email> <to_email>
 // Example: npm run send-test-email -- decodeui.io admin@decodeui.io test@test.com

@@ -2,14 +2,14 @@
 import { createSelector, Match, Switch } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 
 import { HoverAttrConfigPopOver } from "./HoverAttrConfigPopOver";
 import { SelectedAttrConfigPopOver } from "./SelectedAttrConfigPopOver";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function AttrConfigPopOver(props: Readonly<{ item: Vertex }>) {
   const [graph] = useGraph();

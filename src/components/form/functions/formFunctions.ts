@@ -1,12 +1,13 @@
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import type { FormStoreObject } from "../context/FormContext";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import type { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function deleteTxnIdAndCreateNew(
   txnId: number,

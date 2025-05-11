@@ -1,12 +1,9 @@
 import { Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import {
   FormContext,
   type FormStoreObject,
 } from "~/components/form/context/FormContext";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import {
   DesignerFormIdContext,
@@ -23,6 +20,8 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { Divider } from "~/components/styled/Divider";
 import { isPermissionsConfigurable } from "./utils/permissionUtils";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function SettingTabs() {
   const layoutStoreId = useDesignerLayoutStore();

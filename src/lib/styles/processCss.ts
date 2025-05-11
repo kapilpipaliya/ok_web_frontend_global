@@ -1,7 +1,5 @@
-import type {
-  CssType,
-  FunctionArgumentType,
-} from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/CssType";
 
 /**
  * Processes CSS content from different formats into a single string

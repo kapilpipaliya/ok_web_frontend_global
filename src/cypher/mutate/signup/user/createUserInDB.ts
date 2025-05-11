@@ -4,7 +4,8 @@ import { v7 as uuidv7 } from "uuid";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { hashPassword } from "~/lib/auth/password";
-import type { Vertex } from "~/lib/graph/graph";
+
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 // Common interfaces
 interface BaseUserData {

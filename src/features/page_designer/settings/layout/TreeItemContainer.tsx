@@ -1,9 +1,9 @@
 import { createMemo, type JSX, splitProps } from "solid-js";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import type { CssType } from "~/components/form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getSelectedItemStyle } from "./treeUtils";
+import type { CssType } from "~/components/form/type/CssType";
 
 export interface TreeItemContainerProps {
   children: JSX.Element;

@@ -1,13 +1,13 @@
 import { Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 import type { TransactionDetail } from "~/lib/graph/transaction/types/TransactionDetail";
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function DebugInfo(props: { formStoreId: string }) {
   const [graph] = useGraph();

@@ -1,13 +1,14 @@
 import type { Transaction } from "neo4j-driver";
 
-import type { EdgeMap, Id, VertexMap } from "~/lib/graph/graph";
-
 import { mutateArgsValidation } from "~/cypher/mutate/mutate_data/functions/validation/mutateArgsValidation";
 
 import type { MutationArgs, MutationResult } from "../../types/MutationArgs";
 
 import { fillOldIdToNewIdMap } from "./functions/fillOldIdToNewIdMap";
 import { handleMutationObject } from "./handleMutationObject";
+import type { Id } from "~/lib/graph/type/id";
+import type { EdgeMap } from "~/lib/graph/type/edgeMap";
+import type { VertexMap } from "~/lib/graph/type/vertexMap";
 
 export async function mutateData(args: MutationArgs, tx: Transaction) {
   const clientToServerVertexIdMap = new Map<Id, Id>();

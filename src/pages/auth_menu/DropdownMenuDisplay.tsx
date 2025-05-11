@@ -3,12 +3,12 @@ import { createSignal, type JSX, Show } from "solid-js";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { getProfileImageUrl } from "~/lib/graph/get/sync/user/getProfileImageUrl";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function UserDropdownMenuDisplay(): JSX.Element {
   const [graph] = useGraph();

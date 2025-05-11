@@ -5,7 +5,6 @@ import { createSignal, type JSX, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 import { mergeRefs, type Ref } from "@solid-primitives/refs";
 
-import { useGraph } from "~/lib/graph/GraphContext";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { As } from "~/components/As";
 
@@ -13,6 +12,7 @@ import { useZIndex } from "../../fields/ZIndex";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { css } from "~/lib/styles";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function DropdownMenu(
   props: JSX.HTMLAttributes<HTMLDivElement> & {

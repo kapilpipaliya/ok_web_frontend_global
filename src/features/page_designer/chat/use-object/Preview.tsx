@@ -3,12 +3,10 @@ import type { z } from "zod";
 import { createSignal, For, onCleanup, Show } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
-import type { Vertex } from "~/lib/graph/graph";
 import type { graphInterfaceSchema } from "~/routes/api/use-object/schema";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
@@ -29,6 +27,8 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function Preview(props: {
   message: Vertex;

@@ -1,12 +1,11 @@
 import { createSignal, Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { IconButton } from "~/components/styled/IconButton";
 
 import { ModifyJsonMenu } from "./ModifyJsonMenu";
 import { css } from "~/lib/styles";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function ModifyJsonButton(props: {
   css?: string;

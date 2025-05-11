@@ -3,11 +3,11 @@ import type { SetStoreFunction } from "solid-js/store";
 import { createContext, useContext } from "solid-js";
 
 import type { IDToRuleMap } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
-import type { Id } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export type FormStoreObject = ReturnType<typeof getInitialFormStore>;
 

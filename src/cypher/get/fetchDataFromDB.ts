@@ -1,7 +1,6 @@
 import type { Session } from "neo4j-driver";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Edge, Vertex } from "~/lib/graph/graph";
 
 import { evalExpressionAsync } from "~/lib/expression_eval";
 
@@ -9,6 +8,8 @@ import type { EvalExpressionContext } from "../types/EvalExpressionContext";
 import type { NestedExpression } from "../types/NestedExpression";
 
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function fetchDataFromDB(
   expression: NestedExpression,

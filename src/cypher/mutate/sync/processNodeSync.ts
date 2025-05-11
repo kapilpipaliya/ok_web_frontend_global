@@ -1,12 +1,14 @@
 import type { Session } from "neo4j-driver";
 
 import type { NestedExpression } from "~/cypher/types/NestedExpression";
-import type { EdgeMap, Vertex, VertexMap } from "~/lib/graph/graph";
 
 import { addNodeEdges } from "~/cypher/mutate/sync/addNodeEdges";
 import { evalExpressionAsync } from "~/lib/expression_eval";
 
 import { findOrCreateNodeAndUpdateProperties } from "./findOrCreateNodeAndUpdateProperties";
+import type { EdgeMap } from "~/lib/graph/type/edgeMap";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { VertexMap } from "~/lib/graph/type/vertexMap";
 
 export async function processNodeSync(
   sessionSource: Session,

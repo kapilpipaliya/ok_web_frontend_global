@@ -4,11 +4,12 @@ import type { createStore } from "solid-js/store";
 import { type Accessor, createContext, type JSX, useContext } from "solid-js";
 
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export type DataGridState = ReturnType<typeof getInitialGridState>;
 export type DataGridStore = ReturnType<typeof createStore<DataGridState>>;

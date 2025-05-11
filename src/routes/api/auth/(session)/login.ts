@@ -1,8 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
@@ -12,6 +10,7 @@ import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { verifyPassword } from "~/lib/auth/password";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function POST({ request }: APIEvent) {
   if (!request.headers.get("content-type")?.includes("application/json")) {

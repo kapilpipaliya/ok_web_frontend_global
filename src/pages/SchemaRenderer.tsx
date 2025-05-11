@@ -1,10 +1,10 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { useGraph } from "~/lib/graph/GraphContext";
 import { createMeta } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function SchemaRenderer(props: {
   form: IFormMetaData;

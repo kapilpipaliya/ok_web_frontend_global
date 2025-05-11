@@ -19,12 +19,12 @@ import {
   useDesignerFormIdContext,
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { generateBoxShadow } from "~/features/css_editor/utils/generate/generateBoxShadow";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
-import { useGraph } from "~/lib/graph/GraphContext";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function BorderOverlay(
   props: Readonly<{ item: Vertex; reference: Accessor<HTMLElement | null> }>,

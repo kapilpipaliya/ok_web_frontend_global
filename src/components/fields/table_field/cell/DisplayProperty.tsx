@@ -18,8 +18,6 @@ import { getComponentLabel } from "~/features/page_designer/functions/component/
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { evalExpression } from "~/lib/expression_eval";
 import { getStringComponent } from "~/lib/graph/get/sync/format/getStringComponent";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import {
   type FormStoreObject,
@@ -29,6 +27,9 @@ import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const getComponentClass = (componentName: string) => {
   switch (componentName) {

@@ -2,13 +2,11 @@ import { type Component, createMemo, type JSX, splitProps } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { StyleRenderer } from "./StyleRenderer";
 
-import type {
-  CssType,
-  FunctionArgumentType,
-} from "./form/type/FieldSchemaType";
+import type { FunctionArgumentType } from "./form/type/FieldSchemaType";
 import { useTheme } from "~/lib/context/ThemeContext";
 import { processCssContent } from "~/lib/styles/processCss";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
+import type { CssType } from "~/components/form/type/CssType";
 
 type ElementProps<T extends keyof JSX.IntrinsicElements> = {
   as: T;

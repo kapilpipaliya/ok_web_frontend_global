@@ -1,10 +1,9 @@
 import { createMemo, For } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { themeConfig } from "~/lib/graph/get/sync/theme/themeConfig";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function ThemePreview(props: { item: Vertex }) {
   const themeData = createMemo(() => {

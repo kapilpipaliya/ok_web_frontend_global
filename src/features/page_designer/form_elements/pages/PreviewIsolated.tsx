@@ -1,10 +1,10 @@
 import { Suspense } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { Id } from "~/lib/graph/graph";
-
-import { GraphContext, type GraphInterface } from "~/lib/graph/GraphContext";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { GraphContext } from "~/lib/graph/context/GraphContext";
 
 export function PreviewIsolated(props: {
   formId: Id;

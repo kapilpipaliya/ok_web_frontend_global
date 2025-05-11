@@ -1,11 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createMemo } from "solid-js";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-
 import { nameExpr } from "~/features/page_designer/settings/functions/nameExpr";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import { getComponentName } from "../../functions/component/getComponentLabel";
@@ -14,6 +11,9 @@ import { TreeItemExpandButton } from "./TreeItemExpandButton";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { getTreeItemColor } from "./treeUtils";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function TreeItemContent(
   props: Readonly<{

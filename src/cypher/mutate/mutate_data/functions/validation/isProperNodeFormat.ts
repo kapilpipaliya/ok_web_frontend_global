@@ -1,4 +1,4 @@
-import type { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function isProperNodeFormat(node: Partial<Vertex>): null | string {
   if (typeof node !== "object" || node === null || Array.isArray(node)) {

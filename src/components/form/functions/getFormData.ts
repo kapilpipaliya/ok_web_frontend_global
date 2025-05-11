@@ -2,8 +2,6 @@ import type { Store } from "solid-js/store";
 
 import type { NestedExpression } from "~/cypher/types/NestedExpression";
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Id } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
@@ -12,6 +10,8 @@ import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { getEdgesFromGraph } from "~/lib/graph/get/sync/edge/getEdgesFromGraph";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export const getFormData = async (
   graph: Store<GraphInterface>,

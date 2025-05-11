@@ -1,7 +1,7 @@
 // import { Orb, OrbEventType } from '@memgraph/orb';
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
 
-import { useGraph } from "~/lib/graph/GraphContext";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface GraphViewProps {
   edges: any[];

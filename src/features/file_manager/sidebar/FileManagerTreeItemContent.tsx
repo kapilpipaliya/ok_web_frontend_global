@@ -1,11 +1,11 @@
-import type { Id, Vertex } from "~/lib/graph/graph";
-
 import { IconButton } from "~/components/styled/IconButton";
 import { TreeItemExpandButton } from "~/features/page_designer/settings/layout/TreeItemExpandButton";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function FileManagerTreeItemContent(
   props: Readonly<{

@@ -2,7 +2,6 @@ import { createMemo, createSignal } from "solid-js";
 
 import type { TextFieldOptionsField } from "~/features/css_editor/constants/FieldSchemaType";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import {
   type FormStoreObject,
@@ -16,11 +15,12 @@ import { useRenderContext } from "~/features/css_editor/context/RenderContext";
 import { getCssSelectedFileEdgeName } from "~/features/css_editor/utils/getCssSelectedFileEdgeName";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { css } from "~/lib/styles";
 
 import { FilePickerModal } from "./FilePickerModal";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface FilePickerButtonProps {
   handleChange: (event: Event) => void;

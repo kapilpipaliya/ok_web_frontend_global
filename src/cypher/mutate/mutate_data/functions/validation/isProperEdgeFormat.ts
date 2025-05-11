@@ -1,4 +1,4 @@
-import type { Edge } from "~/lib/graph/graph";
+import type { Edge } from "~/lib/graph/type/edge";
 
 export function isProperEdgeFormat(edge: Partial<Edge>): string {
   if (typeof edge !== "object" || edge === null || Array.isArray(edge)) {

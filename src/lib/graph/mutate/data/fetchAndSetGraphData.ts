@@ -1,7 +1,5 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import {
@@ -10,6 +8,7 @@ import {
 } from "~/lib/graph/mutate/core/setGraphData";
 
 import { getGlobalStore } from "../../get/sync/store/getGlobalStore";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function fetchAndSetGraphData(
   graph: GraphInterface,

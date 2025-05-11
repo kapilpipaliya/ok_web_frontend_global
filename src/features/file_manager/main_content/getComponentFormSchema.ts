@@ -1,7 +1,6 @@
 import { createStore as createSolidJsStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -21,6 +20,7 @@ import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSc
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export const getComponentFormSchema = (
   onSuccess: () => void,

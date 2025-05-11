@@ -1,5 +1,5 @@
-import type { Vertex } from "~/lib/graph/graph";
 import { TablePanel } from "./TablePanel";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface PermissionPanelProps {
   title?: string;

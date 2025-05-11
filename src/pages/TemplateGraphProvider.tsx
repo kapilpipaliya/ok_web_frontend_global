@@ -9,13 +9,11 @@ import {
 
 import { createAppState } from "~/createAppState";
 import { GetInitialData } from "~/GetInitialData";
-import {
-  type GlobalProperties,
-  GraphContext,
-  type GraphInterface,
-} from "~/lib/graph/GraphContext";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { GraphContext } from "~/lib/graph/context/GraphContext";
 
 export const TemplateGraphProvider = (props: ParentProps) => {
   const graph = createAppState();

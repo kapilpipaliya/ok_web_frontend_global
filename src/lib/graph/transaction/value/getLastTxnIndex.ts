@@ -1,4 +1,4 @@
-import type { GraphInterface } from "~/lib/graph/GraphContext";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getLastTxnIndex(txnId: number, graph: GraphInterface): number {
   const txnVertex = graph.vertexes[`txn${txnId}`];

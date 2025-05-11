@@ -1,9 +1,8 @@
 import { Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // Component to display the default value
 

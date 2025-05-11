@@ -3,8 +3,8 @@ import type { JSX } from "solid-js";
 import { STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "../As";
-import type { CssType } from "../form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import type { CssType } from "~/components/form/type/CssType";
 
 export function Table(
   props: Readonly<{ children: JSX.Element; css?: string; headers: number }>,

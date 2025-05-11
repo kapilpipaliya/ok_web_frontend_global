@@ -1,8 +1,5 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { handlePageDrag } from "~/features/page_designer/functions/drag_drop/core/handlePageDrag";
 import { validateDragOver } from "~/features/page_designer/functions/drag_drop/core/validateDragOver";
@@ -12,6 +9,8 @@ import { evalExpression } from "~/lib/expression_eval";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import { componentDrop } from "./componentDrop";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function handleDropAtPosition(
   graph: Store<GraphInterface>,

@@ -1,8 +1,9 @@
 import { css } from "~/lib/styles";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction } from "solid-js/store";
 import { openInNewInternalTab } from "../pages/functions/openInNewInternalTab";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 // Common styles for items in the designer
 export const baseItemStyle = css`

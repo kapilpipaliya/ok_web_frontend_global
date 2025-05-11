@@ -3,7 +3,6 @@ import type { SetStoreFunction } from "solid-js/store";
 import { batch } from "solid-js";
 
 import type { MutationResult } from "~/cypher/types/MutationArgs";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
@@ -11,6 +10,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import { updateVertexId } from "~/lib/graph/mutate/core/vertex/updateVertexId";
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { updateEdgeId } from "~/lib/graph/mutate/core/edge/updateEdgeId";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function onMutatDataGet(
   graph: GraphInterface,

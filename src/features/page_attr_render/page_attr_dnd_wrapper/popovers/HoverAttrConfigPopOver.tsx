@@ -1,16 +1,15 @@
 import { Icon } from "@iconify-icon/solid";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { useZIndex } from "~/components/fields/ZIndex";
 import { getComponentLabel } from "~/features/page_designer/functions/component/getComponentLabel";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { iconMap } from "~/lib/ui/iconMap";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { ComponentName } from "../components/ComponentName";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   const zIndex = useZIndex();

@@ -1,14 +1,14 @@
 import { createMemo, createSignal, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { TabsWithUnderline } from "~/components/styled/SimpleTabs";
 import { CSSPropertiesEditorWrapper } from "~/features/css_editor/CSSEditor/CSSPropertiesEditorWrapper";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import type { createVertexIds } from "./FormGroupProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface ClassesComponentProps {
   metaAttributes: Vertex[];

@@ -10,8 +10,6 @@ import {
   Show,
 } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
 import { STYLES } from "~/pages/settings/constants";
@@ -23,7 +21,9 @@ import { useToast } from "./modal/Toast";
 import { css } from "~/lib/styles";
 import { As } from "../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import type { CssType } from "../form/type/FieldSchemaType";
+
+import type { CssType } from "~/components/form/type/CssType";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export type Option =
   | string

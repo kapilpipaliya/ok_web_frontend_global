@@ -1,10 +1,10 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function handleDragStart(
   e: DragEvent,

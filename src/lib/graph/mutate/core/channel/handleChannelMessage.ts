@@ -1,5 +1,4 @@
 //  currently we assume that each iframe has unique channel ID
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { reconcile, type SetStoreFunction } from "solid-js/store";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
@@ -11,6 +10,7 @@ import { replaceEdgeProperties } from "~/lib/graph/mutate/core/edge/replaceEdgeP
 import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { updateEdgeId } from "~/lib/graph/mutate/core/edge/updateEdgeId";
 import { updateEdge, updateVertex } from "~/lib/graph/mutate/core/setGraphData";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function handleChannelMessage(
   msg: any,

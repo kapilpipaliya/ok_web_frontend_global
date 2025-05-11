@@ -1,7 +1,6 @@
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -14,6 +13,7 @@ import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { addEditButtonSchema } from "./addEditButtonSchema";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();

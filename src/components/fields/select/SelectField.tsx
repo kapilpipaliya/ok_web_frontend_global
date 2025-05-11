@@ -22,8 +22,6 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
 import { selectedValue } from "~/lib/graph/get/sync/edge/selectedValue";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { setSelectValueHelper } from "~/lib/graph/mutate/selection/setSelectValueHelper";
@@ -32,6 +30,9 @@ import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId"
 
 import { useFormContext } from "../../form/context/FormContext";
 import { isStaticOptions } from "./functions/isStaticOptions";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(

@@ -1,21 +1,20 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { createSignal, onMount, Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { DialogFooter } from "~/components/styled/dialog/DialogFooter";
 import { DialogHeader } from "~/components/styled/dialog/DialogHeader";
 import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useToast } from "~/components/styled/modal/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function ModifyJsonMenu(props: {
   item: Vertex;

@@ -2,16 +2,16 @@ import { toTitle } from "case-switcher-js";
 import { createEffect, createSignal } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DIMENSIONS } from "~/components/styled/ResizableDivView";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 type DimensionType = {
   height: string;

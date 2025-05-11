@@ -3,10 +3,10 @@ import { useNavigate } from "@solidjs/router";
 import { IconButton } from "~/components/styled/IconButton";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { getHomeUrl } from "~/lib/urls/getHomeUrl";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const HomeIcon = () => {
   const [graph] = useGraph();

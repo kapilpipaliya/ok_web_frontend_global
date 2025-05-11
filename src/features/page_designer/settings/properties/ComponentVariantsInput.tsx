@@ -1,17 +1,17 @@
 import { createMemo, For, Match, Show, Switch } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { PROPERTIES } from "~/pages/settings/constants";
 import { TextInputField } from "~/components/fields/TextInputField";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function ComponentVariantsInput(props: {
   compVertex: Vertex;

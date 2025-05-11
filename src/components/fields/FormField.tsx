@@ -7,8 +7,6 @@ import { usePageRenderContext } from "~/features/page_attr_render/context/PageRe
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
@@ -23,6 +21,9 @@ import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // TODO: make this update when props.id and props.label changes
 export function FormField(

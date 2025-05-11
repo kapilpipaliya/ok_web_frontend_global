@@ -1,16 +1,16 @@
 import { createMemo } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { formSubmit } from "~/components/form/functions/formSubmit";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { capturePreview } from "~/lib/playwright/capturePreview";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function SaveIconButton(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();

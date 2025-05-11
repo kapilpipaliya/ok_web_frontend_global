@@ -2,12 +2,10 @@ import { useChat } from "@ai-sdk/solid";
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { insertNewRow } from "~/components/fields/table_field/functions/insertNewRow";
 import { getGlobalThemeVertex } from "~/lib/graph/get/sync/store/getGlobalThemeVertex";
 import { themeConfig } from "~/lib/graph/get/sync/theme/themeConfig";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { deleteRow } from "~/lib/graph/mutate/vertex/delete/deleteRow";
 import { STYLES } from "~/pages/settings/constants";
 
@@ -24,6 +22,8 @@ import { EXAMPLE_PROMPTS } from "./constants/EXAMPLE_PROMPTS";
 import { getChatHistory } from "./functions/getChatHistory";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function UseObjectAIPanel() {
   const [graph, setGraph] = useGraph();

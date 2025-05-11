@@ -3,8 +3,6 @@ import type { SetStoreFunction } from "solid-js/store";
 import { batch } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { deleteNestedLayout } from "~/lib/graph/mutate/vertex/delete/deleteNestedLayout";
 import { evalExpression } from "~/lib/expression_eval";
@@ -20,6 +18,9 @@ import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayo
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { getChildrenAttrs } from "./getChildrenAttrs";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 /**
  * Find the parent vertex of a given layout vertex

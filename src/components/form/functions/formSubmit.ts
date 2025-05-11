@@ -1,8 +1,6 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { checkUniqueConstrains } from "~/cypher/mutate/validations/checkUniqueConstrains";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
@@ -11,6 +9,8 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function formSubmit(
   formStoreVertex: () => Vertex<FormStoreObject>,

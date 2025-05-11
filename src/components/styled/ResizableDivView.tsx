@@ -1,7 +1,5 @@
 import { createEffect, createSignal, type JSX, Show } from "solid-js";
 
-import type { Id, Vertex } from "~/lib/graph/graph";
-
 import {
   type PageLayoutObject,
   useDesignerFormIdContext,
@@ -9,7 +7,6 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { STYLES } from "~/pages/settings/constants";
 
 import type { FormStoreObject } from "../form/context/FormContext";
@@ -20,6 +17,9 @@ import { css } from "~/lib/styles";
 import { As } from "../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const DIMENSIONS = {
   desktop: {

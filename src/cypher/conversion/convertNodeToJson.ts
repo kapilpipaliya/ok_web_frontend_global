@@ -2,7 +2,8 @@ import type { Node, Relationship } from "neo4j-driver";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { types } from "neo4j-driver";
 
-import type { Edge, Vertex } from "~/lib/graph/graph";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 // typed-neo4j/src/convert.ts
 export const convert = {

@@ -1,8 +1,8 @@
-import type { Edge, Vertex } from "~/lib/graph/graph";
-
 import { evalExpressionAsync } from "~/lib/expression_eval";
 
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface TreeNode {
   children?: TreeNode[];

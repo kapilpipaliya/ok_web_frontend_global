@@ -1,12 +1,12 @@
 import { Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { headerIconButtonCss } from "~/pages/settings/constants";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function ShareButton(props: { formStoreId: string }) {
   const [graph] = useGraph();

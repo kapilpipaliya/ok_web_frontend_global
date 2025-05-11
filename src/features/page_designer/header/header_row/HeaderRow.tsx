@@ -10,7 +10,8 @@ import { ToggleButtons } from "../right/ToggleButtons";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import type { CssType } from "~/components/form/type/FieldSchemaType";
+
+import type { CssType } from "~/components/form/type/CssType";
 
 interface HeaderProps {
   children?: JSX.Element;

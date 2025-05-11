@@ -1,8 +1,8 @@
 import type { Transaction } from "neo4j-driver";
 
-import type { Vertex, VertexMap } from "~/lib/graph/graph";
-
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { VertexMap } from "~/lib/graph/type/vertexMap";
 
 export async function handleInsert(
   insert: Vertex | Vertex[],

@@ -1,11 +1,11 @@
 import type { SetStoreFunction } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { deleteTxnId } from "~/lib/graph/transaction/core/deleteTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function formCancel(
   formStoreVertex: () => Vertex<FormStoreObject>,

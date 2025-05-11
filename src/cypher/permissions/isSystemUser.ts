@@ -1,8 +1,7 @@
 import type { Session } from "neo4j-driver";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function isSystemUser(
   dbSession: Session,

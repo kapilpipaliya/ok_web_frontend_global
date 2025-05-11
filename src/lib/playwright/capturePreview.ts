@@ -3,8 +3,6 @@ import type { SetStoreFunction } from "solid-js/store";
 import { domToPng } from "modern-screenshot";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
@@ -19,6 +17,8 @@ import { setGraphData } from "../graph/mutate/core/setGraphData";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function capturePreview(
   formStoreVertex: () => Vertex<FormStoreObject>,

@@ -1,13 +1,13 @@
 import { createSignal, Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { IconButton } from "~/components/styled/IconButton";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { getThemeFormSchema } from "./schema/themeFormSchema";
 import { css } from "~/lib/styles";
-import type { CssType } from "~/components/form/type/FieldSchemaType";
+
+import type { CssType } from "~/components/form/type/CssType";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function ThemeConfigEditButton(props: {
   css?: CssType;

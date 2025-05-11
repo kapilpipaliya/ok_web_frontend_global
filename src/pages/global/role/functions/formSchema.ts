@@ -2,7 +2,6 @@ import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { MutationResult } from "~/cypher/types/MutationArgs";
-import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -20,6 +19,7 @@ import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSc
 
 import { loadingIconSchema } from "../../../../lib/schema/loadingIconSchema";
 import { css } from "~/lib/styles";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export const permissionsTableSchema = (label: string) =>
   ({

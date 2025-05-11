@@ -1,12 +1,9 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 import { FileUploader } from "~/components/styled/FileUploader";
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { uploadFile } from "~/lib/api/uploadFile";
 import { evalExpression } from "~/lib/expression_eval";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
@@ -18,6 +15,8 @@ import { useFileManagerStore } from "../FileManagerContext";
 import { getFolderFormSchema } from "./folderFormSchema";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface UploadResponse {
   result: Array<{

@@ -1,7 +1,5 @@
 // replace a vertex properties
-import type { Id } from "~/lib/graph/graph";
 import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { untrack } from "solid-js";
 import { getVertexOldIdToNewIdMap } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { klona } from "klona";
@@ -10,6 +8,8 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 import { updateVertexIdsToNew } from "~/lib/graph/mutate/core/vertex/updateVertexIdsToNew";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function replaceVertexProperties<T extends { [key: string]: any }>(
   txnId: number,

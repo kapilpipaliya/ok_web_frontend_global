@@ -1,7 +1,5 @@
 import { createSignal, Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
@@ -10,7 +8,9 @@ import { SaveAsTemplateMenu } from "../menus/SaveAsTemplateMenu";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import type { CssType } from "~/components/form/type/FieldSchemaType";
+
+import type { CssType } from "~/components/form/type/CssType";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface SaveAsTemplateButtonProps {
   css?: CssType;

@@ -1,7 +1,6 @@
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -19,6 +18,7 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 const folderFormSchema = {
   as: "div",

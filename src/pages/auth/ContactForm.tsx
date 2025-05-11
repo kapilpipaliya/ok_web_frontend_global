@@ -2,7 +2,6 @@ import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -17,6 +16,7 @@ import { createFormSubmitButton } from "~/pages/auth/functions/schema/createForm
 import { createLinkButton } from "~/pages/auth/functions/schema/createLinkButton";
 import { createTextAreaField } from "~/pages/auth/functions/schema/createTextAreaField";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function ContactForm() {
   const navigate = useNavigate();

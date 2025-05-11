@@ -1,7 +1,6 @@
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -15,6 +14,7 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 import { validateUsername } from "~/lib/validation/validateUsername";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export const userFormSchema = {
   as: "div",

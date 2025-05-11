@@ -8,9 +8,9 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export interface AuthenticatedMenuProps {
   onClose: () => void;

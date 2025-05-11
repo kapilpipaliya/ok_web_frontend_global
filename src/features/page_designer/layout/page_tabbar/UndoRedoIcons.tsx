@@ -1,15 +1,15 @@
 import { For, createMemo } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { redo, redoAllowed } from "~/lib/graph/transaction/history/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/history/undo";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function UndoRedoIcons(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();

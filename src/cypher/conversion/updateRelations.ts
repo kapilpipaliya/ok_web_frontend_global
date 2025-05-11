@@ -1,4 +1,5 @@
-import type { Edge, Vertex } from "~/lib/graph/graph";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 /**
  * Updates the IN and OUT properties of nodes when a relationship is processed

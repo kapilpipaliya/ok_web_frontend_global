@@ -1,13 +1,12 @@
 import { Icon } from "@iconify-icon/solid";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { IconButton } from "~/components/styled/IconButton";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import type { DBMessage } from "./types";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface ChatMessageProps {
   index: number;

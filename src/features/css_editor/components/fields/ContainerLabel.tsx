@@ -1,14 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
 import { STYLES } from "~/pages/settings/constants";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 /*
 ┌───────────┐

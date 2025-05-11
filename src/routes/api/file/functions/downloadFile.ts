@@ -2,7 +2,8 @@ import type { Session } from "neo4j-driver";
 import fs from "node:fs/promises";
 import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
-import type { Vertex } from "~/lib/graph/graph";
+
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface FileMetadata {
   filePath: string;

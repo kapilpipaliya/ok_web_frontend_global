@@ -1,4 +1,4 @@
-import type { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function isStaticOptions(meta: Vertex) {
   return (

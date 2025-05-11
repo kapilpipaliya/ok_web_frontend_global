@@ -21,8 +21,6 @@ import { getDataVertex } from "~/features/page_attr_render/functions/getDataVert
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { evalExpression } from "~/lib/expression_eval";
 import { sortVertexesByPosition } from "~/lib/graph/get/sync/entity/sortVertexesByPosition";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
@@ -36,6 +34,9 @@ import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function TableInputField(
   props: Readonly<

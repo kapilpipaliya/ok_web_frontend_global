@@ -4,7 +4,6 @@ import { createEffect, createSignal, on, Show } from "solid-js";
 import type { JSX } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
@@ -14,10 +13,11 @@ import {
   formatCSSCode,
   formatJavaScriptCode,
 } from "~/lib/data_structure/string/formatUtils";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { validateFunction } from "~/lib/validation/validateFunction";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 

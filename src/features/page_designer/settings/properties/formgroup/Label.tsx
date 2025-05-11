@@ -1,6 +1,7 @@
 import { toTitle } from "case-switcher-js";
 
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function Label(props: Readonly<{ meta: Vertex }>) {
   return (

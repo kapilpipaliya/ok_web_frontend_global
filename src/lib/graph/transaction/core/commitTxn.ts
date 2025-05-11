@@ -3,11 +3,9 @@ import type { Store } from "solid-js/store";
 import { klona } from "klona";
 
 import type { MutationArgs } from "~/cypher/types/MutationArgs";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
-import type { Edge, Vertex } from "../../graph";
 import type { InsertFnKey, TransactionValue } from "../types/TransactionType";
 import type { TransactionDetail } from "../types/TransactionDetail";
 import {
@@ -22,6 +20,9 @@ import {
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 import { updateVertexIdsToNew } from "~/lib/graph/mutate/core/vertex/updateVertexIdsToNew";
 import { updateEdgeIdsToNew } from "~/lib/graph/mutate/core/edge/updateEdgeIdsToNew";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 type ResultStep = {
   [key in InsertFnKey]?: Edge | Vertex;

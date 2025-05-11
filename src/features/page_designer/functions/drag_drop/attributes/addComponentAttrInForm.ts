@@ -1,9 +1,8 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { componentDrop } from "~/features/page_designer/functions/drag_drop/core/componentDrop";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 // import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 // import { IdAttr } from "~/lib/graph/graph";
 

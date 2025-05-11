@@ -1,11 +1,11 @@
 // no transaction detail add
-import type { Id } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { untrack } from "solid-js";
 import { klona } from "klona";
 
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function updateEdgeId(
   oldEdgeId: Id,

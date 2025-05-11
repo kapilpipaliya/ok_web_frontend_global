@@ -5,17 +5,16 @@ import { getFloatingStyle } from "@corvu/utils/floating";
 import { type Accessor, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { ZIndex } from "~/components/fields/ZIndex";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import createFloating from "~/lib/dom/createFloating";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { AttrConfigPopOver } from "./AttrConfigPopOver";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function AttrConfigPopOverWrapper(
   props: Readonly<{

@@ -1,8 +1,8 @@
 import { type JSX, Show, splitProps } from "solid-js";
 import { As } from "~/components/As";
-import type { CssType } from "~/components/form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { css } from "~/lib/styles";
+import type { CssType } from "~/components/form/type/CssType";
 
 // TODO: Depricate this component
 export function DialogFooter(

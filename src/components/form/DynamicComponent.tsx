@@ -41,8 +41,6 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { ifNotNull } from "~/lib/data_structure/ifNotNull";
 import { evalExpression } from "~/lib/expression_eval";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
@@ -68,6 +66,9 @@ import { createFunctionProxy } from "./createFunctionProxy";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function DynamicComponent(
   props: Readonly<{

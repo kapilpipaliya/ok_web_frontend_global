@@ -1,4 +1,6 @@
-import type { EdgeMap, Id, VertexMap } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/type/id";
+import type { EdgeMap } from "~/lib/graph/type/edgeMap";
+import type { VertexMap } from "~/lib/graph/type/vertexMap";
 
 export interface GraphData {
   deleted_edges?: Id[];

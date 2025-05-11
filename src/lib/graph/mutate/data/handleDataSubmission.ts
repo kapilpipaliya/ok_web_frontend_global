@@ -1,10 +1,9 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 
 import { commitTxn } from "../../transaction/core/commitTxn";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function handleDataSubmission(
   newFormTxnId: number,

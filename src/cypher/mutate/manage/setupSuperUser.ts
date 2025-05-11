@@ -1,5 +1,3 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
@@ -8,6 +6,7 @@ import { createDatabaseConstraints } from "~/cypher/mutate/signup/seed/createDat
 import { signupAdmin } from "../signup/signupAdmin";
 import { getAllDatabases } from "./getAllDatabases";
 import { superUserData } from "~/cypher/mutate/manage/superUserData";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function setupSuperUser(): Promise<{
   error?: string;

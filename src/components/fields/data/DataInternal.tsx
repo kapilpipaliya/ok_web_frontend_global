@@ -1,5 +1,3 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 import {
   DataContext,
   useDataContext,
@@ -7,6 +5,7 @@ import {
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 
 import { isVertex } from "~/lib/graph/mutate/core/vertex/isVertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function DataInternal(props: {
   data: any;

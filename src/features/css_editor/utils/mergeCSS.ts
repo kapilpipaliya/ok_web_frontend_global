@@ -1,12 +1,11 @@
 import { recursive } from "merge";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import type { CSSStore } from "../context/CssEditorContext";
 
 import { cssStateToString } from "./cssStateToString";
 import { parseAndApplyCssRules } from "./parseAndApplyCssRules";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 // deprecated
 export function mergeCSS(

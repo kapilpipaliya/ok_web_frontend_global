@@ -1,7 +1,6 @@
 import { createSelector, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Vertex } from "~/lib/graph/graph";
 
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { DeleteButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/DeleteButton";
@@ -11,7 +10,6 @@ import { SaveAsTemplateButton } from "~/features/page_attr_render/page_attr_dnd_
 import { CopyButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/CopyButton";
 import { PasteButton } from "~/features/page_attr_render/page_attr_dnd_wrapper/buttons/PasteButton";
 import { InsertButtons } from "~/features/page_attr_render/page_attr_dnd_wrapper/menus/InsertButtons";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentLabel } from "../../functions/component/getComponentLabel";
@@ -19,6 +17,8 @@ import { HideShowIcon } from "./HideShowIcon";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function AttrConfigIcons(
   props: Readonly<{ metaVertex: Vertex; parentRef: HTMLElement }>,

@@ -1,11 +1,10 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import type { TransactionValue } from "../types/TransactionType";
 
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 const MAX_HISTORY_SIZE = 100; // Maximum number of steps to keep in history
 const CLEANUP_THRESHOLD = 80; // When to trigger cleanup (80% of max)

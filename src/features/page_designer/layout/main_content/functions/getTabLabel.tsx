@@ -1,5 +1,5 @@
-import type { Id } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
+import type { Id } from "~/lib/graph/type/id";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getTabLabel(openedFormId: Id, graph: GraphInterface) {
   let baseLabel = graph.vertexes[openedFormId]?.P.label || "";

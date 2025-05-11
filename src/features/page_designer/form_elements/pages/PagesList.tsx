@@ -10,7 +10,6 @@ import {
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/modal/Toast";
@@ -18,7 +17,6 @@ import { createAppState } from "~/createAppState";
 import { getTreeDataAPICall } from "~/cypher/get/getTreeDataAPICall";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { GetInitialData } from "~/GetInitialData";
-import { GraphContext, useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { STYLES } from "~/pages/settings/constants";
 
@@ -27,6 +25,10 @@ import { getTreeData, type NavItem } from "../functions/getTreeData";
 import { PageItem } from "./PageItem";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
+import { GraphContext } from "~/lib/graph/context/GraphContext";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();

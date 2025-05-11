@@ -1,10 +1,9 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { getDefaultTxnValue } from "../value/getDefaultTxnValue";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function generateNewTxnId(
   graph: GraphInterface,

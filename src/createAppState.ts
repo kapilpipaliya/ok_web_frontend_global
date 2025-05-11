@@ -1,12 +1,11 @@
 import { createStore } from "solid-js/store";
 
-import type { EdgeMap, Id, VertexMap } from "~/lib/graph/graph";
-import type {
-  GlobalProperties,
-  GraphInterface,
-} from "~/lib/graph/GraphContext";
-
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import type { Id } from "~/lib/graph/type/id";
+import type { EdgeMap } from "~/lib/graph/type/edgeMap";
+import type { VertexMap } from "~/lib/graph/type/vertexMap";
+import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function createAppState() {
   const graph = createGraph();

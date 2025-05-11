@@ -4,7 +4,8 @@ import { Link } from "@solidjs/meta";
 
 import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
-import { useGraph } from "~/lib/graph/GraphContext";
+
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export default function AuthLayout(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();

@@ -1,9 +1,8 @@
 import type { Store } from "solid-js/store";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/entity/getNameKeyForCollection";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 // so in future can use more operators.
 

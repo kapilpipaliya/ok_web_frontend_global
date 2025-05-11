@@ -3,10 +3,8 @@ import type { SetStoreFunction } from "solid-js/store";
 import { createSignal, For, onCleanup, Show } from "solid-js";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 
-import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
@@ -15,6 +13,9 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();

@@ -9,13 +9,13 @@ import {
 import { Portal } from "solid-js/web";
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { STYLES } from "~/pages/settings/constants";
 
 import { useZIndex } from "../../fields/ZIndex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface DrawerProps {
   children: JSX.Element;

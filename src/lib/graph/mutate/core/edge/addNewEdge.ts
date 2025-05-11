@@ -1,7 +1,5 @@
 // TODO: is error is handle in all functions?
-import type { Edge } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { batch, untrack } from "solid-js";
 import {
   getEdgeOldIdToNewIdMap,
@@ -13,6 +11,8 @@ import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 
 import { updateEdgeIdsToNew } from "~/lib/graph/mutate/core/edge/updateEdgeIdsToNew";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function addNewEdge(
   txnId: number,

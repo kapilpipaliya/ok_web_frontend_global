@@ -1,4 +1,4 @@
-import type { CssType } from "~/components/form/type/FieldSchemaType";
+import type { CssType } from "~/components/form/type/CssType";
 
 export interface FieldAttribute {
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void

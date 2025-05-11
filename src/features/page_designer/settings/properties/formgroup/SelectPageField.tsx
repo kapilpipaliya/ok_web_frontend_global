@@ -3,13 +3,14 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { IdAttr, type Vertex } from "~/lib/graph/graph";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import { Label } from "./Label";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function SelectPageField(
   props: Readonly<{

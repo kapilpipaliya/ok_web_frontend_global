@@ -4,12 +4,10 @@ import { toTitle } from "case-switcher-js";
 import { createSignal, onCleanup, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { onClickAddComponent } from "~/features/page_designer/functions/component/onClickAddComponent";
-import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
 
 import type { NavItem } from "../functions/getTreeData";
 import {
@@ -28,6 +26,10 @@ import { PreviewIsolated } from "./PreviewIsolated";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function PageItem(
   props: Readonly<{

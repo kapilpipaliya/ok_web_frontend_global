@@ -3,14 +3,12 @@ import { createStore } from "solid-js/store";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/modal/Toast";
 import { createAppState } from "~/createAppState";
 import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";
 import { STYLES } from "~/pages/settings/constants";
@@ -23,6 +21,9 @@ import { ComponentItem } from "./ComonentItem";
 import { getCompChildren } from "./functions/getCompChildren";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function ComponentList(props: {
   edgeName: string;

@@ -1,7 +1,5 @@
 import type { Record } from "neo4j-driver";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import {
   convertNodeToJson,
   convertRelationshipToJson,
@@ -10,6 +8,7 @@ import {
 import type { EvalExpressionContext } from "../types/EvalExpressionContext";
 
 import { updateNodeRelations } from "./updateRelations";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function processResult(
   records: Record[],

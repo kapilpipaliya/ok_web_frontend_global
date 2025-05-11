@@ -2,7 +2,6 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { klona } from "klona/json";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -10,12 +9,12 @@ import type {
 
 import { useToast } from "~/components/styled/modal/Toast";
 
-import type { Vertex } from "../../graph";
-
 import { generateNewVertexId } from "../core/generateNewVertexId";
 import { newRow } from "./addNewRow";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function addMetaVertexes(
   graph: Store<GraphInterface>,

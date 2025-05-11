@@ -6,7 +6,8 @@ import { css } from "~/lib/styles";
 import { As } from "../As";
 import { TooltipWrapper } from "./modal/TooltipWrapper";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import type { CssType } from "~/components/form/type/FieldSchemaType";
+
+import type { CssType } from "~/components/form/type/CssType";
 
 export type IconButtonProps = {
   href?: string;

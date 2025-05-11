@@ -1,5 +1,6 @@
 import type { ServerResult } from "~/cypher/types/ServerResult";
-import type { Id } from "~/lib/graph/graph";
+
+import type { Id } from "~/lib/graph/type/id";
 
 export interface MutationArgs {
   edgeIdMap: [Id, Id][];

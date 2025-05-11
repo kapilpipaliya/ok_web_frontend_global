@@ -1,7 +1,6 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { MutationArgs } from "~/cypher/types/MutationArgs";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
@@ -9,6 +8,7 @@ import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
 import { updateSubmittedIndex } from "~/lib/graph/transaction/core/updateSubmittedIndex";
 import type { TransactionDetail } from "~/lib/graph/transaction/types/TransactionDetail";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 // Submit generic data to the server
 export async function submitDataCall(

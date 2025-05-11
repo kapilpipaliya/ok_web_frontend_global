@@ -2,15 +2,13 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { untrack } from "solid-js";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
-import type { Vertex } from "../../../graph";
-
 import { generateNewVertexId } from "../../../mutate/core/generateNewVertexId";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function cloneVertexWithEdges(
   txnId: number,

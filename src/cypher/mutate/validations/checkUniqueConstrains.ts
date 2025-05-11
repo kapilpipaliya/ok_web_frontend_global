@@ -1,10 +1,9 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 import { evalExpressionAsync } from "~/lib/expression_eval";
 
 import { isReservedKeyword } from "../../constants/reservedKeywords";
 import { getDBSessionForSubdomain } from "../../session/getSessionForSubdomain";
 import type { Session } from "neo4j-driver";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function checkUniqueConstrains(vertex: Vertex) {
   "use server";

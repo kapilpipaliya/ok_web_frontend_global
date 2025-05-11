@@ -8,7 +8,6 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { getAPI } from "~/lib/api/general/getApi";
 import { postAPI } from "~/lib/api/general/postApi";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
@@ -17,6 +16,7 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function GeneralSettings() {
   const [graph, setGraph] = useGraph();

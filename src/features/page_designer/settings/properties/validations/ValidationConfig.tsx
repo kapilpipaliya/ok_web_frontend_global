@@ -1,11 +1,10 @@
 import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { validateInput } from "./validateInput";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface ValidationProps {
   componentName: string;

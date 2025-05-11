@@ -1,10 +1,9 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { componentDrop } from "~/features/page_designer/functions/drag_drop/core/componentDrop";
 import { sortChildren } from "~/features/page_designer/functions/drag_drop/hierachy/sortChildren";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function handlePageDrag(
   graph: GraphInterface,

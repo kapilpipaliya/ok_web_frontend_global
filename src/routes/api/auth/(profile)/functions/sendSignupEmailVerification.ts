@@ -1,12 +1,11 @@
 import type { APIEvent } from "@solidjs/start/server";
 import type { Session, Transaction } from "neo4j-driver";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function sendSignupEmailVerification(
   request: APIEvent["request"],

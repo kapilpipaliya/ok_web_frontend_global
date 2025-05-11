@@ -4,7 +4,6 @@ import { Link } from "@solidjs/meta";
 
 import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
@@ -12,6 +11,7 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export default function Admin() {
   return (

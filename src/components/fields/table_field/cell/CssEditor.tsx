@@ -1,15 +1,14 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, type Setter, Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { ZIndex } from "~/components/fields/ZIndex";
 import { Drawer } from "~/components/styled/modal/Drawer";
 import { CSSPropertiesEditorWrapper } from "~/features/css_editor/CSSEditor/CSSPropertiesEditorWrapper";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // Component for handling the CSS Editor
 export function CssEditor(

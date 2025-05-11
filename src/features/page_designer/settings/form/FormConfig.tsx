@@ -1,13 +1,12 @@
 import { createMemo, For, Suspense } from "solid-js";
 
-import type { Id } from "~/lib/graph/graph";
-
-import { useGraph } from "~/lib/graph/GraphContext";
 import { getExistingOrDefaultTxnValue } from "~/lib/graph/transaction/value/getExistingOrDefaultTxnValue";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { useDesignerLayoutStore } from "../../context/LayoutContext";
+import type { Id } from "~/lib/graph/type/id";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function FormConfig() {
   const [graph] = useGraph();

@@ -1,4 +1,6 @@
-import type { Edge, Id, Vertex } from "../../graph";
+import type { Id } from "~/lib/graph/type/id";
+import type { Edge } from "~/lib/graph/type/edge";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export type InsertFn = {
   [key in InsertFnKey]?: string;

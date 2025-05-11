@@ -21,7 +21,6 @@ import {
   getAnimationDefinition,
 } from "../styles/mediaUtils";
 import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
-import { useGraph } from "../graph/GraphContext";
 import type {
   Breakpoint,
   ColorAdjustments,
@@ -29,6 +28,7 @@ import type {
   ColorScheme,
   ThemeContext as ThemeContextType,
 } from "~/lib/styles/types/types";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export interface ThemeProviderProps {
   children: JSX.Element;

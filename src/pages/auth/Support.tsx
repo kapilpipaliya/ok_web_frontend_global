@@ -3,8 +3,6 @@ import type { SetStoreFunction } from "solid-js/store";
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, For, type JSX, Show } from "solid-js";
 
-import type { Id } from "~/lib/graph/graph";
-
 import { ChipDropDown } from "~/components/styled/Chip";
 import { IconButton } from "~/components/styled/IconButton";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
@@ -19,6 +17,7 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import type { Id } from "~/lib/graph/type/id";
 
 interface SupportTicket {
   id: string;

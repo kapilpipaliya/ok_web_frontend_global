@@ -7,8 +7,6 @@ import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import { MetaTitle } from "~/components/fields/MetaTitle";
 import { ZIndex } from "~/components/fields/ZIndex";
 import {
@@ -16,11 +14,12 @@ import {
   getInitialDesignerLayoutStore,
   type PageLayoutObject,
 } from "~/features/page_designer/context/LayoutContext";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 

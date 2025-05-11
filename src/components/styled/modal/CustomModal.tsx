@@ -7,7 +7,6 @@ import {
 } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { useGraph } from "~/lib/graph/GraphContext";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { SETTINGS_CONSTANTS, STYLES } from "~/pages/settings/constants";
 
@@ -15,6 +14,7 @@ import { useZIndex } from "../../fields/ZIndex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 interface CustomModalProps {
   bodyCss?: string | string[];

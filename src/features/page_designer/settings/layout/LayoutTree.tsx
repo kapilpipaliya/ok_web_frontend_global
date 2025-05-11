@@ -4,10 +4,7 @@ import { Icon } from "@iconify-icon/solid";
 import { debounce } from "@solid-primitives/scheduled";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import type { Id, Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { evalExpression } from "~/lib/expression_eval";
@@ -34,6 +31,10 @@ import { toggleHidden } from "./HideShowIcon";
 import { sortChildren } from "../../functions/drag_drop/hierachy/sortChildren";
 import { useNavigate } from "@solidjs/router";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { Id } from "~/lib/graph/type/id";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // ---- Utility Functions ----
 

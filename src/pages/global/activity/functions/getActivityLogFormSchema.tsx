@@ -1,7 +1,6 @@
 import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import type { Vertex } from "~/lib/graph/graph";
 import type {
   FieldAttribute,
   IFormMetaData,
@@ -12,6 +11,7 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function getActivityLogFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();

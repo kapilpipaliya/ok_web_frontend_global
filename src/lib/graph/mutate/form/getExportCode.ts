@@ -2,9 +2,6 @@ import type { Store } from "solid-js/store";
 
 import { klona } from "klona/json";
 
-import type { Vertex } from "~/lib/graph/graph";
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { useToast } from "~/components/styled/modal/Toast";
 import { FormMetaData } from "~/lib/meta/formMetaData";
 
@@ -12,6 +9,8 @@ import { getToEdge } from "../../get/sync/edge/getToEdge";
 import { findVertexByLabelAndUniqueId } from "../../get/sync/entity/findVertex";
 import { getPkForCollection } from "../../get/sync/entity/getPkForCollection";
 import { getSublistRows, getSublistRowsForType } from "./addNewRow";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getExportCode(
   graph: Store<GraphInterface>,

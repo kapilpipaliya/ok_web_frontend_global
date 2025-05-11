@@ -1,19 +1,18 @@
 import { Show } from "solid-js";
 
-import type { Vertex } from "~/lib/graph/graph";
-
 import {
   FormContext,
   type FormStoreObject,
 } from "~/components/form/context/FormContext";
 import { PropertiesBody } from "~/features/page_designer/settings/properties/PropertiesBody";
-import { useGraph } from "~/lib/graph/GraphContext";
 
 import {
   DesignerFormIdContext,
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function PropertiesContent() {
   const [graph] = useGraph();

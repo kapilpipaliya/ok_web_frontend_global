@@ -3,7 +3,6 @@ import { createStore } from "solid-js/store";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { MutationResult } from "~/cypher/types/MutationArgs";
-import type { Vertex } from "~/lib/graph/graph";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { API } from "~/lib/api/endpoints";
@@ -18,6 +17,7 @@ import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSc
 
 import { loadingIconSchema } from "../../../../lib/schema/loadingIconSchema";
 import { css } from "~/lib/styles";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   const actionButtonsSchema = {

@@ -1,6 +1,5 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 import { API } from "~/lib/api/endpoints";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export const getDownloadLink = (metaVertex?: Vertex) => {
   if (!metaVertex) {

@@ -2,13 +2,14 @@ import type { Store } from "solid-js/store";
 
 import { untrack } from "solid-js";
 
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
 import { isStaticOptions } from "~/components/fields/select/functions/isStaticOptions";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getParentVertexValue } from "~/lib/graph/get/sync/edge/getParentVertexValue";
 import { getSelectedVertexValue } from "~/lib/graph/get/sync/edge/getSelectedVertexValue";
-import { type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/type/id";
+import { IdAttr } from "~/lib/graph/type/idAttr";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function selectedValue(
   meta: Vertex,

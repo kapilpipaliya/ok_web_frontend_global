@@ -4,7 +4,6 @@ import jsep from "jsep";
 import { path } from "rambda";
 
 //import { eval as eval1} from 'expression-eval';
-import type { Vertex } from "~/lib/graph/graph";
 
 import {
   evalGetChildren,
@@ -18,6 +17,7 @@ import { jsonata } from "~/lib/jsonata/jsonata";
 
 import { isObject } from "./data_structure/object/isObject";
 import { getTextValue } from "./graph/get/sync/format/getTextValue";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

@@ -1,5 +1,3 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 import type { EmailProvider } from "./useEmail/src/types/email-options";
 import type { EmailService } from "./useEmail/src/types/email-service";
 
@@ -8,6 +6,7 @@ import { PlunkService } from "./useEmail/src/services/plunk";
 import { PostmarkService } from "./useEmail/src/services/postmark";
 import { ResendService } from "./useEmail/src/services/resend";
 import { SendGridService } from "./useEmail/src/services/sendgrid";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 /**
  * Factory function to get the email service based on the provider
