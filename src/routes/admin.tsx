@@ -33,7 +33,6 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
             <UserDropdownMenuDisplay />
           </As>
         </As>
-        aa
         <EmailConfirmationBanner />
         {props.children}
       </GetInitialData>

@@ -108,6 +108,7 @@
     "@types/node": "^22.15.17",
     "@types/nodemailer": "^6.4.17",
     "@types/uuid": "^10.0.0",
+    "dependency-cruiser": "^16.10.2",
     "eslint": "^9.26.0",
     "eslint-plugin-perfectionist": "^4.12.3",
     "globals": "^16.1.0",

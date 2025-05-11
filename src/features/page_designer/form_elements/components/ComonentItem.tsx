@@ -159,6 +159,7 @@ export function ComponentItem(
           <Icon
             height={22}
             icon={
+              props.child.P.icon ??
               iconMap[props.child?.P.key as keyof typeof iconMap] ??
               "ph:cube-duotone"
             }
@@ -172,7 +173,7 @@ export function ComponentItem(
           css={css`
             font-size: 14px;
             font-weight: normal;
-            ${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? `color: var(--color-error);` : ""}
+            ${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? `color: \${args.theme.var.color.error};` : ""}
           `}
         >
           {getDisplayName()}
