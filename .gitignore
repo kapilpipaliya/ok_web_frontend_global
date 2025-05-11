@@ -38,3 +38,4 @@ beep
 /playwright/.cache/
 
 /temp
+**/.claude/settings.local.json
