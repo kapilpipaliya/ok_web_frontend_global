@@ -6,9 +6,11 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import type { Vertex } from "../../../graph";
 
-import { addNewEdge, newEdge } from "../../../mutate/core/edge";
 import { generateNewVertexId } from "../../../mutate/core/generateNewVertexId";
-import { addNewVertex, newVertex } from "../../../mutate/core/vertex";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
+import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
+import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 
 export function cloneVertexWithEdges(
   txnId: number,

@@ -10,7 +10,6 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { SettingTabs } from "~/features/page_designer/settings/SettingTabs";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { GraphView } from "~/pages/debug/GraphView";
 import { STYLES } from "~/pages/settings/constants";
 
@@ -25,6 +24,7 @@ import { PropertiesContent } from "./main_content/PropertiesContent";
 import { TabBar } from "./main_content/TabBar";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 interface ResizeHandleProps {
   activeResizeKey: null | string;

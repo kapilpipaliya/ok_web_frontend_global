@@ -25,11 +25,11 @@ import { resetDragDropState } from "~/features/page_designer/event_handler/reset
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { BorderOverlay } from "../overlays/BorderOverlay";
 import { AttrConfigPopOverWrapper } from "../popovers/AttrConfigPopOverWrapper";
 import { useDataContext } from "../../context/DataContext";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 interface PageAttrDnDWrapperProps {
   children: JSX.Element;

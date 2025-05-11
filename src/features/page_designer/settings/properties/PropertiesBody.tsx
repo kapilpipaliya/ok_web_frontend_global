@@ -7,13 +7,13 @@ import type { Vertex } from "~/lib/graph/graph";
 import { FunctionEditor } from "~/features/page_designer/settings/properties/FunctionEditor";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { ComponentVariantsInput } from "./ComponentVariantsInput";
 import { FormGroupProperties } from "./formgroup/FormGroupProperties";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();

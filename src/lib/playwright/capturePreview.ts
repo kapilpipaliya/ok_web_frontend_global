@@ -11,13 +11,14 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { uploadFile } from "~/lib/api/uploadFile";
 import { evalExpression } from "~/lib/expression_eval";
 import { getToEdge } from "~/lib/graph/get/sync/edge/getToEdge";
-import { addNewEdge, newEdge } from "~/lib/graph/mutate/core/edge";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 import { setGraphData } from "../graph/mutate/core/setGraphData";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
+import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 
 export async function capturePreview(
   formStoreVertex: () => Vertex<FormStoreObject>,

@@ -7,11 +7,11 @@ import type { Vertex } from "~/lib/graph/graph";
 import { IconButton } from "~/components/styled/IconButton";
 import { DIMENSIONS } from "~/components/styled/ResizableDivView";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { headerIconButtonCss } from "~/pages/settings/constants";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 type DimensionType = {
   height: string;

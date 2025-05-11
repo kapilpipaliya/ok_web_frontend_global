@@ -17,12 +17,12 @@ import {
   getProfileImageVertex,
 } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { profileImage, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { css } from "~/lib/styles";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 
 export function ProfileImageSettings() {
   const [openDialog, setOpenDialog] = createSignal(false);

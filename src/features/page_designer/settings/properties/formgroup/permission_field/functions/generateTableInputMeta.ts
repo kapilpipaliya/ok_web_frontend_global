@@ -4,10 +4,11 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useGraph } from "~/lib/graph/GraphContext";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 
 export function generateTableInputMeta(metaAttribute: FieldAttribute) {
   const [graph, setGraph] = useGraph();

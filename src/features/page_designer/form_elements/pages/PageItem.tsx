@@ -10,7 +10,6 @@ import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { onClickAddComponent } from "~/features/page_designer/functions/component/onClickAddComponent";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import type { NavItem } from "../functions/getTreeData";
 import {
@@ -28,6 +27,7 @@ import {
 import { PreviewIsolated } from "./PreviewIsolated";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function PageItem(
   props: Readonly<{

@@ -6,10 +6,6 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { useGraph } from "~/lib/graph/GraphContext";
-import {
-  deleteVertex,
-  mergeVertexProperties,
-} from "~/lib/graph/mutate/core/vertex";
 import { createViewVertex } from "~/lib/graph/mutate/vertex/createViewVertex";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 
@@ -20,6 +16,8 @@ import {
 import { getTabLabel } from "./functions/getTabLabel";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function TabBar(props: { mainPanel: Id }) {
   const [graph, setGraph] = useGraph();

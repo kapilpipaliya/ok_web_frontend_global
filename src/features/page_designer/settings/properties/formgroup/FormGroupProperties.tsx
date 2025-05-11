@@ -22,11 +22,6 @@ import { htmlTagsTree } from "~/lib/dom/htmlTags";
 import { cloneVertexWithEdges } from "~/lib/graph/get/sync/entity/cloneVertexWithEdges";
 import { getPropsFromMetaExpression } from "~/lib/graph/get/sync/expression/getPropsFromMetaExpression";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
-import {
-  addNewVertex,
-  mergeVertexProperties,
-  newVertex,
-} from "~/lib/graph/mutate/core/vertex";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
@@ -46,6 +41,9 @@ import { SelectPageField } from "./SelectPageField";
 import { UniqueNameField } from "./UniqueNameField";
 import { FunctionEditor } from "../FunctionEditor";
 import { isPermissionsConfigurable } from "../../utils/permissionUtils";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];

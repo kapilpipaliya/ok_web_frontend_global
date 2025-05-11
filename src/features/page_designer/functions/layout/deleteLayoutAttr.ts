@@ -6,7 +6,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Id, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { deleteNestedLayout } from "~/lib/graph/mutate/vertex/delete/deleteNestedLayout";
 import { evalExpression } from "~/lib/expression_eval";
 
@@ -20,6 +19,7 @@ import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import type { PageLayoutObject } from "../../context/LayoutContext";
 import { getChildrenAttrs } from "./getChildrenAttrs";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 /**
  * Find the parent vertex of a given layout vertex

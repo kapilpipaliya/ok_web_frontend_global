@@ -10,7 +10,6 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { evalExpression } from "~/lib/expression_eval";
 import { undo, undoAllowed } from "~/lib/graph/transaction/history/undo";
 import { redo, redoAllowed } from "~/lib/graph/transaction/history/redo";
@@ -34,6 +33,7 @@ import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { toggleHidden } from "./HideShowIcon";
 import { sortChildren } from "../../functions/drag_drop/hierachy/sortChildren";
 import { useNavigate } from "@solidjs/router";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 // ---- Utility Functions ----
 

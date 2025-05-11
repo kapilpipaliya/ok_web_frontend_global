@@ -12,13 +12,13 @@ import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { formatJavaScriptCode } from "~/lib/data_structure/string/formatUtils";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { validateFunction } from "~/lib/validation/validateFunction";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export const themeFormSchema = {
   as: "div",

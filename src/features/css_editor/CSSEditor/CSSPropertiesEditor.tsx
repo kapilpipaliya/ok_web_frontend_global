@@ -10,7 +10,6 @@ import { TextEditor } from "~/features/css_editor/CSSEditor/TextEditor";
 import { StyleEditor } from "~/features/css_editor/StyleEditor/StyleEditor";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { deleteEdge } from "~/lib/graph/mutate/core/edge";
 
 import type { CSSStore } from "../context/CssEditorContext";
 import { useCssEditor } from "../context/CssEditorContext";
@@ -29,6 +28,7 @@ import { AddNewCssState } from "./AddNewCssState";
 import { ResetButton } from "./ResetButton";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 
 const defaultStateLabel = "Default";
 

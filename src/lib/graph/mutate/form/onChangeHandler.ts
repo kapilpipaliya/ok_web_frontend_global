@@ -7,8 +7,8 @@ import { getId } from "~/lib/data_structure/string/getId";
 import { getLabel } from "~/lib/data_structure/string/getLabel";
 import { evalExpression } from "~/lib/expression_eval";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 // Select On Change Handler
 export function onChangeHandler(

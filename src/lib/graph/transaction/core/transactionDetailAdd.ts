@@ -8,8 +8,8 @@ import type { TransactionDetail } from "../types/TransactionDetail";
 import type { TransactionValue } from "../types/TransactionType";
 import { determineTransactionStatus } from "../types/TransactionDetail";
 
-import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 
 /**
  * Adds a new transaction step to the transaction history while managing undo/redo state.

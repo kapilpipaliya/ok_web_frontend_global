@@ -6,7 +6,7 @@ import type { PageLayoutObject } from "~/features/page_designer/context/LayoutCo
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function resetDragDropState(
   layoutStoreVertex: Vertex<PageLayoutObject>,

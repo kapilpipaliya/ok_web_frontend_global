@@ -13,8 +13,9 @@ import { useToast } from "~/components/styled/modal/Toast";
 import type { Vertex } from "../../graph";
 
 import { generateNewVertexId } from "../core/generateNewVertexId";
-import { addNewVertex, newVertex } from "../core/vertex";
 import { newRow } from "./addNewRow";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 
 export function addMetaVertexes(
   graph: Store<GraphInterface>,

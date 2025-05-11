@@ -4,12 +4,12 @@ import { ZIndex } from "~/components/fields/ZIndex";
 import { Drawer } from "~/components/styled/modal/Drawer";
 import { FormElementTabs } from "~/features/page_designer/form_elements/FormElementTabs";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function FormElements() {
   const [graph, setGraph] = useGraph();

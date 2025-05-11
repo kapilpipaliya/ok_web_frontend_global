@@ -4,10 +4,10 @@ import { onMount } from "solid-js";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { Loader } from "~/components/Loader";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 
 export default function Logout() {
   const navigate = useNavigate();

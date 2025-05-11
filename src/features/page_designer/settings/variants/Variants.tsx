@@ -5,7 +5,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { Vertex } from "~/lib/graph/graph";
 
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
@@ -14,6 +13,7 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { VariantsModal } from "../../variants/VariantsModal";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function Variants() {
   const [graph, setGraph] = useGraph();

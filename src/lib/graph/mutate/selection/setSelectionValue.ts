@@ -5,10 +5,12 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { useToast } from "~/components/styled/modal/Toast";
-import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/core/edge";
 
 import { getToEdge } from "../../get/sync/edge/getToEdge";
 import { generateNewVertexId } from "../core/generateNewVertexId";
+import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
+import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setSelectionValue(

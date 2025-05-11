@@ -5,11 +5,11 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function HideShowIcon(props: { iconSize: number; metaVertex: Vertex }) {
   const [graph, setGraph] = useGraph();

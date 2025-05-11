@@ -2,7 +2,7 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { mergeVertexProperties } from "./vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function generateNewVertexId(
   graph: GraphInterface,

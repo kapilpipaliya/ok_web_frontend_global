@@ -10,7 +10,6 @@ import {
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { STYLES } from "~/pages/settings/constants";
 
 import type { FormStoreObject } from "../form/context/FormContext";
@@ -20,6 +19,7 @@ import { ResizeOverlay } from "./ResizeOverlay";
 import { css } from "~/lib/styles";
 import { As } from "../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export const DIMENSIONS = {
   desktop: {

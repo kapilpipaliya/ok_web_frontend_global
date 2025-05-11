@@ -11,8 +11,8 @@ import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import type { CssType } from "~/components/form/type/FieldSchemaType";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layout/cloneLayoutAndChildren";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 interface CopyButtonProps {
   css?: CssType;

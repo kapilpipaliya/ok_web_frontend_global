@@ -2,12 +2,12 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { determineTransactionStatus } from "../types/TransactionDetail";
 import { redoTxn } from "./redoTxn";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 
 /**
  * Performs a redo operation on a transaction, restoring previously undone changes.

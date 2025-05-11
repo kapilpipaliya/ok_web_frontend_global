@@ -1,47 +1,17 @@
-import { BroadcastChannel } from "broadcast-channel";
-import { reconcile, type SetStoreFunction } from "solid-js/store";
-
-import type { GraphInterface } from "~/lib/graph/GraphContext";
-
-import {
-  addNewEdge,
-  deleteEdge,
-  replaceEdgeProperties,
-  updateEdgeId,
-} from "~/lib/graph/mutate/core/edge";
-import { updateEdge, updateVertex } from "~/lib/graph/mutate/core/setGraphData";
-import {
-  addNewVertex,
-  deleteVertex,
-  mergeVertexProperties,
-  replaceVertexProperties,
-  updateVertexId,
-} from "~/lib/graph/mutate/core/vertex";
-
-const channels = new Map<string, BroadcastChannel>();
-
-export function broadcastToAllChannels(
-  channels: string[],
-  skipChannel: string,
-  message: any,
-) {
-  const messageString = JSON.stringify(message);
-  for (const channelName of channels) {
-    if (channelName !== skipChannel) {
-      const channel = getChannel(channelName);
-      channel.postMessage(messageString);
-    }
-  }
-}
-
-export function getChannel(name: string): BroadcastChannel {
-  if (!channels.has(name)) {
-    channels.set(name, new BroadcastChannel(name));
-  }
-  return channels.get(name)!;
-}
-
 //  currently we assume that each iframe has unique channel ID
+import type { GraphInterface } from "~/lib/graph/GraphContext";
+import { reconcile, type SetStoreFunction } from "solid-js/store";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { updateVertexId } from "~/lib/graph/mutate/core/vertex/updateVertexId";
+import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
+import { replaceEdgeProperties } from "~/lib/graph/mutate/core/edge/replaceEdgeProperties";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
+import { updateEdgeId } from "~/lib/graph/mutate/core/edge/updateEdgeId";
+import { updateEdge, updateVertex } from "~/lib/graph/mutate/core/setGraphData";
+
 export function handleChannelMessage(
   msg: any,
   graph: GraphInterface,

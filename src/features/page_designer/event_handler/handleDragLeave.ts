@@ -3,7 +3,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { PageLayoutObject } from "~/features/page_designer/context/LayoutContext";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function handleDragLeave(
   graph: Store<GraphInterface>,

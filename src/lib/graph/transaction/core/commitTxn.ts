@@ -19,9 +19,9 @@ import {
   getEdgeOldIdToNewIdMap,
   getVertexOldIdToNewIdMap,
 } from "../../get/sync/store/getGlobalStore";
-import { updateEdgeIdsToNew } from "../../mutate/core/edge";
-import { updateVertexIdsToNew } from "../../mutate/core/vertex";
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
+import { updateVertexIdsToNew } from "~/lib/graph/mutate/core/vertex/updateVertexIdsToNew";
+import { updateEdgeIdsToNew } from "~/lib/graph/mutate/core/edge/updateEdgeIdsToNew";
 
 type ResultStep = {
   [key in InsertFnKey]?: Edge | Vertex;

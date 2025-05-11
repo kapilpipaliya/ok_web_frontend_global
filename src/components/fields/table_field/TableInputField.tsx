@@ -24,11 +24,6 @@ import { sortVertexesByPosition } from "~/lib/graph/get/sync/entity/sortVertexes
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
-import {
-  addNewVertex,
-  mergeVertexProperties,
-  newVertex,
-} from "~/lib/graph/mutate/core/vertex";
 import { getSublistRows } from "~/lib/graph/mutate/form/addNewRow";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
@@ -38,6 +33,9 @@ import { insertNewRow } from "./functions/insertNewRow";
 import { SortableRow } from "./row/SortableRow";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 
 export function TableInputField(
   props: Readonly<

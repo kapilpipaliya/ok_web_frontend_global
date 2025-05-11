@@ -3,11 +3,11 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
-
 import { commitTxn } from "../../transaction/core/commitTxn";
 import { generateNewTxnId } from "../../transaction/core/generateNewTxnId";
 import { generateNewVertexId } from "../core/generateNewVertexId";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 
 export function createFormVertex(
   graph: Store<GraphInterface>,

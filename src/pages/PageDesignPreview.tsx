@@ -13,13 +13,11 @@ import {
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
 import { useGraph } from "~/lib/graph/GraphContext";
-import {
-  getChannel,
-  handleChannelMessage,
-} from "~/lib/graph/mutate/core/channel";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { getChannel } from "~/lib/graph/mutate/core/channel/getChannel";
+import { handleChannelMessage } from "~/lib/graph/mutate/core/channel/handleChannelMessage";
 
 export default function PageShareView() {
   const queryParams = new URLSearchParams(window.location.search);

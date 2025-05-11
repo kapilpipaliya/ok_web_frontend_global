@@ -7,13 +7,14 @@ import type { Vertex } from "~/lib/graph/graph";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/core/vertex";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/createMeta";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PROPERTIES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 
 export function FormStatus() {
   const [graph, setGraph] = useGraph();

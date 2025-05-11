@@ -8,11 +8,11 @@ import { postAPI } from "~/lib/api/general/postApi";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
-import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
 import type { DataGridState } from "../context/DataGridContext";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 
 export function useDeleteRowConfirm(
   gridState: DataGridState,

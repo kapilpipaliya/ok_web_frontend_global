@@ -14,8 +14,8 @@ import {
   GraphContext,
   type GraphInterface,
 } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export const TemplateGraphProvider = (props: ParentProps) => {
   const graph = createAppState();

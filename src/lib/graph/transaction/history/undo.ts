@@ -4,13 +4,13 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import type { TransactionDetail } from "../types/TransactionDetail";
 
-import { replaceVertexProperties } from "../../mutate/core/vertex";
 import { getActiveUndoIndex } from "../steps/getActiveUndoIndex";
 import { saveUndoPoint } from "../steps/saveUndoPoint";
 import { getExistingOrDefaultTxnValue } from "../value/getExistingOrDefaultTxnValue";
 import { getLastTxnIndex } from "../value/getLastTxnIndex";
 import { determineTransactionStatus } from "../types/TransactionDetail";
 import { undoTxn } from "./undoTxn";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 
 /**
  * Performs an undo operation on a transaction, reverting changes up to a specified point.

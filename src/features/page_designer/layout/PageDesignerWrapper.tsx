@@ -17,12 +17,10 @@ import {
   type PageLayoutObject,
 } from "~/features/page_designer/context/LayoutContext";
 import { useGraph } from "~/lib/graph/GraphContext";
-import {
-  addNewVertex,
-  deleteVertex,
-  mergeVertexProperties,
-  newVertex,
-} from "~/lib/graph/mutate/core/vertex";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 

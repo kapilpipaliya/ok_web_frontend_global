@@ -7,8 +7,8 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { onMutatDataGet } from "~/lib/graph/mutate/data/onMutatDataGet";
 import { updateSubmittedIndex } from "~/lib/graph/transaction/core/updateSubmittedIndex";
-import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import type { TransactionDetail } from "~/lib/graph/transaction/types/TransactionDetail";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 
 // Submit generic data to the server
 export async function submitDataCall(

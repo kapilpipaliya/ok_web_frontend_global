@@ -11,10 +11,10 @@ import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 import { getInitialData } from "./cypher/get/getInitialData";
 import { getGlobalStore } from "./lib/graph/get/sync/store/getGlobalStore";
 import { setGraphData } from "./lib/graph/mutate/core/setGraphData";
-import { mergeVertexProperties } from "./lib/graph/mutate/core/vertex";
 import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;

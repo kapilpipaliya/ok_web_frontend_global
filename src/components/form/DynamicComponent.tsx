@@ -43,10 +43,6 @@ import { evalExpression } from "~/lib/expression_eval";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";
-import {
-  mergeVertexProperties,
-  replaceVertexProperties,
-} from "~/lib/graph/mutate/core/vertex";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
@@ -70,6 +66,8 @@ import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 import { createFunctionProxy } from "./createFunctionProxy";
 import { PermissionLevel } from "~/pages/PageViewWrapper";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 
 export function DynamicComponent(
   props: Readonly<{

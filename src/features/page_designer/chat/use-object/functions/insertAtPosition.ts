@@ -10,9 +10,9 @@ import { openInNewInternalTab } from "~/features/page_designer/form_elements/pag
 import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
 import { evalExpression } from "~/lib/expression_eval";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
-import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { setPreventUndoAtOrBeforeIndex } from "~/lib/graph/transaction/steps/setPreventUndoAtOrBeforeIndex";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 
 export function insertAtPosition(
   fromStoreVertex: Vertex,

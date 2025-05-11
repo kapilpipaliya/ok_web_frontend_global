@@ -9,19 +9,15 @@ import {
   getEdgeOldIdToNewIdMap,
   getVertexOldIdToNewIdMap,
 } from "../../get/sync/store/getGlobalStore";
-import {
-  addNewEdge,
-  deleteEdge,
-  replaceEdgeProperties,
-  updateEdgeIdsToNew,
-} from "../../mutate/core/edge";
-import {
-  addNewVertex,
-  deleteVertex,
-  mergeVertexProperties,
-  replaceVertexProperties,
-  updateVertexIdsToNew,
-} from "../../mutate/core/vertex";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import { updateVertexIdsToNew } from "~/lib/graph/mutate/core/vertex/updateVertexIdsToNew";
+import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
+import { replaceEdgeProperties } from "~/lib/graph/mutate/core/edge/replaceEdgeProperties";
+import { updateEdgeIdsToNew } from "~/lib/graph/mutate/core/edge/updateEdgeIdsToNew";
 
 /**
  * Reverts a transaction step by applying its inverse operation to the graph.

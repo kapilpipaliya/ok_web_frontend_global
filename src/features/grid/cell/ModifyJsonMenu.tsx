@@ -10,12 +10,12 @@ import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useToast } from "~/components/styled/modal/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 
 export function ModifyJsonMenu(props: {
   item: Vertex;

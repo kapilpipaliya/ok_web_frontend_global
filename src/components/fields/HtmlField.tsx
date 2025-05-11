@@ -15,11 +15,11 @@ import {
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import type { FormStoreObject } from "../form/context/FormContext";
 import type { GenericComponentProps } from "./type/FieldType";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 // HtmlField
 export function HtmlField(

@@ -1,11 +1,9 @@
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
-import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/entity/findVertex";
-import { useGraph } from "~/lib/graph/GraphContext";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 import { binopsInitial, unaryOperatorsInitial } from "../../expression_eval";
-import { FormMetaData } from "../formMetaData";
+// import { FormMetaData } from "../formMetaData";
 import { collectionAttr } from "./collectionAttr";
 
 export const Coll: (key: string) => IFormMetaData = (key) => {
@@ -28,23 +26,23 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
             ignoreEmptyValue: true,
             message: "This ID is already taken",
             type: "custom",
-            validationCallback: (options: any) => {
-              const { formData } =
-                (options.validator.context as IFormContext) ||
-                ({} as IFormContext);
-              const [graph, _setGraph] = useGraph();
-              const val = options.value;
-              if (Object.keys(FormMetaData).includes(val)) {
-                return false;
-              }
-              return !findVertexByLabelAndUniqueIdWithSkip(
-                "Page",
-                "id",
-                val,
-                formData.id,
-                graph,
-              );
-            },
+            // validationCallback: (options: any) => {
+            //   const { formData } =
+            //     (options.validator.context as IFormContext) ||
+            //     ({} as IFormContext);
+            //   const [graph, _setGraph] = useGraph();
+            //   const val = options.value;
+            //   if (Object.keys(FormMetaData).includes(val)) {
+            //     return false;
+            //   }
+            //   return !findVertexByLabelAndUniqueIdWithSkip(
+            //     "Page",
+            //     "id",
+            //     val,
+            //     formData.id,
+            //     graph,
+            //   );
+            // },
           },
           // , {
           //   type: 'email',

@@ -8,13 +8,13 @@ import type {
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 const editFormSchema = {
   as: "div",

@@ -3,10 +3,10 @@ import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { getGlobalStore } from "../graph/get/sync/store/getGlobalStore";
-import { mergeVertexProperties } from "../graph/mutate/core/vertex";
 import { commitTxn } from "../graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "../graph/transaction/core/generateNewTxnId";
 import { submitDataCall } from "./service/data/submitDataCall";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function saveUserSetting(
   properties: { [key: string]: any },

@@ -11,7 +11,6 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { checkUniqueConstrains } from "~/cypher/mutate/validations/checkUniqueConstrains";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
@@ -21,6 +20,7 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { useFileManagerStore } from "../FileManagerContext";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export const getComponentFormSchema = (
   onSuccess: () => void,

@@ -9,9 +9,7 @@ import type { graphInterfaceSchema } from "~/routes/api/use-object/schema";
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { addNewEdge } from "~/lib/graph/mutate/core/edge";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
-import { addNewVertex } from "~/lib/graph/mutate/core/vertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
@@ -29,6 +27,8 @@ import {
 } from "./functions/insertAtPosition";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 
 export function Preview(props: {
   message: Vertex;

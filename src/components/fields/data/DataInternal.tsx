@@ -5,7 +5,8 @@ import {
   useDataContext,
 } from "~/features/page_attr_render/context/DataContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
-import { isVertex } from "~/lib/graph/mutate/core/vertex";
+
+import { isVertex } from "~/lib/graph/mutate/core/vertex/isVertex";
 
 export function DataInternal(props: {
   data: any;

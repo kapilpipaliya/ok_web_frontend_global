@@ -9,11 +9,11 @@ import type {
 
 import { validateInput } from "~/features/page_designer/settings/properties/validations/validateInput";
 import { evalExpression } from "~/lib/expression_eval";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { uniqueNameKey } from "../../constants/constant";
 import { getComponentLabel } from "../component/getComponentLabel";
 import { getChildrenAttrs } from "../layout/getChildrenAttrs";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export type IDToRuleMap = { [id: string]: string[] };
 type RuleToIDMap = { [RuleId: string]: Id[] };

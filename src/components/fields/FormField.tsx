@@ -10,12 +10,6 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useGraph } from "~/lib/graph/GraphContext";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
-import {
-  addNewVertex,
-  deleteVertex,
-  mergeVertexProperties,
-  newVertex,
-} from "~/lib/graph/mutate/core/vertex";
 import { createFormVertex } from "~/lib/graph/mutate/form/createForm";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 
@@ -25,6 +19,10 @@ import {
   useFormContext,
 } from "../form/context/FormContext";
 import { getFormData } from "../form/functions/getFormData";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 
 // TODO: make this update when props.id and props.label changes
 export function FormField(

@@ -5,11 +5,10 @@ import { batch } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
-import { deleteEdge } from "~/lib/graph/mutate/core/edge";
-import { deleteVertex } from "~/lib/graph/mutate/core/vertex";
-
 import { commitTxn } from "../../../transaction/core/commitTxn";
 import { generateNewTxnId } from "../../../transaction/core/generateNewTxnId";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 
 export function deleteRow(
   vertex: Vertex,

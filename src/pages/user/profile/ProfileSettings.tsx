@@ -12,10 +12,6 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { useGraph } from "~/lib/graph/GraphContext";
-import {
-  addNewVertex,
-  replaceVertexProperties,
-} from "~/lib/graph/mutate/core/vertex";
 import { validateEmail } from "~/lib/validation/validateEmail";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { getUserRPC } from "~/routes/api/auth/(user)/getUserRPC";
@@ -24,6 +20,8 @@ import { SchemaRenderer } from "../../SchemaRenderer";
 import { ProfileImageSettings } from "./ProfileImageSettings";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
+import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 
 // Define a type for the save state
 type SaveState = {

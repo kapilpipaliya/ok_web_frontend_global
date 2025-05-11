@@ -12,10 +12,10 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import createFloating from "~/lib/dom/createFloating";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { AttrConfigPopOver } from "./AttrConfigPopOver";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function AttrConfigPopOverWrapper(
   props: Readonly<{

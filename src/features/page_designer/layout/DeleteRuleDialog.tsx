@@ -5,11 +5,11 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { SimpleWithDismissButton } from "~/components/styled/modal/SimpleModal";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import { useDesignerFormIdContext } from "../context/LayoutContext";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 const getAttributeNames = (
   graph: GraphInterface,

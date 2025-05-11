@@ -5,7 +5,6 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 
 import { ResizableContainer } from "~/components/styled/ResizableDivView";
 import { useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 
 import {
   type PageLayoutObject,
@@ -15,6 +14,7 @@ import { IFramePreview } from "../IFramePreview";
 import { PageTabBar } from "./PageTabBar";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export function PageViewComponent(props: { mainPanel: Id }) {
   const [graph, setGraph] = useGraph();

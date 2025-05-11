@@ -10,7 +10,6 @@ import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { componentDrop } from "~/features/page_designer/functions/drag_drop/core/componentDrop";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
 import {
   canHaveChildren,
@@ -20,6 +19,7 @@ import {
 import { randomHash } from "~/lib/jsx_parser/helpers/hash";
 import { parseStyle } from "~/lib/jsx_parser/helpers/parseStyle";
 import { resolvePath } from "~/lib/jsx_parser/helpers/resolvePath";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 
 export type TProps = {
   allowUnknownElements?: boolean;

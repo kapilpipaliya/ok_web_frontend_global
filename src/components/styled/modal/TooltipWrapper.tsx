@@ -23,10 +23,10 @@ import { As } from "../../As";
 import type { CssType } from "../../form/type/FieldSchemaType";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { type GraphInterface, useGraph } from "~/lib/graph/GraphContext";
-import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { css } from "~/lib/styles";
 import type { SetStoreFunction } from "solid-js/store";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 // Type for tooltip registry in the globalStoreId vertex
 type TooltipRegistry = {
   [key: string]: string[]; // Group name -> Array of tooltip IDs
