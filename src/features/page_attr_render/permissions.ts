@@ -2,7 +2,8 @@ import type { Id, Vertex } from "~/lib/graph/graph";
 import type { GraphInterface } from "~/lib/graph/GraphContext";
 
 import { evalExpression } from "~/lib/expression_eval";
-import { PermissionLevel } from "~/pages/PageViewWrapper";
+
+import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
 
 export function getConfiguredPermissions(
   currentUserRoleId: Id[],

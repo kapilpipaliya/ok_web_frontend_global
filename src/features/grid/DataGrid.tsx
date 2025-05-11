@@ -48,7 +48,8 @@ import { getTableData as defaultGetTableData } from "./functions/getTableData";
 import { useDeleteRowConfirm } from "./functions/useDeleteRowConfirm";
 import { GridHeader } from "./header/GridHeader";
 import { CreateGridHeaders } from "./schema/CreateGridHeaders";
-import { PermissionLevel } from "~/pages/PageViewWrapper";
+
+import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {

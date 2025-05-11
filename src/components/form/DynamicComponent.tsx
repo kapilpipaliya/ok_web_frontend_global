@@ -65,9 +65,9 @@ import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDat
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 import { createFunctionProxy } from "./createFunctionProxy";
-import { PermissionLevel } from "~/pages/PageViewWrapper";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
+import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
 
 export function DynamicComponent(
   props: Readonly<{

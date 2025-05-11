@@ -69,15 +69,7 @@ import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
-
-// Permission levels
-export enum PermissionLevel {
-  NONE = "NONE",
-  VIEW = "VIEW",
-  CREATE = "CREATE",
-  EDIT = "EDIT",
-  FULL = "FULL",
-}
+import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
 
 export function PageViewWrapper(
   props: Readonly<{
