@@ -1,6 +1,7 @@
 import { ShadeGenerator } from "./shadeGenerator";
 import { formatHex, interpolate, oklch } from "culori";
-import type { ColorPalette, ShadeNumber } from "~/lib/styles";
+
+import type { ColorPalette, ShadeNumber } from "~/lib/styles/types/types";
 
 /**
  * Generates a color palette from a base color using OKLCH color space

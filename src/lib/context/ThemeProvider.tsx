@@ -3,13 +3,6 @@ import { type Component, createMemo, type JSX } from "solid-js";
 import { StyleRenderer } from "~/components/StyleRenderer";
 import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
 import { themeConfig } from "../graph/get/sync/theme/themeConfig";
-import type {
-  ThemeContext as ThemeContextType,
-  ColorMode,
-  ColorAdjustments,
-  ColorScheme,
-  Breakpoint,
-} from "../styles";
 import {
   getColorShade,
   createColorScheme,
@@ -29,6 +22,13 @@ import {
 } from "../styles/mediaUtils";
 import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
 import { useGraph } from "../graph/GraphContext";
+import type {
+  Breakpoint,
+  ColorAdjustments,
+  ColorMode,
+  ColorScheme,
+  ThemeContext as ThemeContextType,
+} from "~/lib/styles/types/types";
 
 export interface ThemeProviderProps {
   children: JSX.Element;

@@ -6,7 +6,12 @@ import {
   wcagContrast,
   wcagLuminance,
 } from "culori";
-import type { ColorAdjustments, ColorScheme, ShadeNumber } from "~/lib/styles";
+
+import type {
+  ColorAdjustments,
+  ColorScheme,
+  ShadeNumber,
+} from "~/lib/styles/types/types";
 
 /**
  * Format an OKLCH color object as a string

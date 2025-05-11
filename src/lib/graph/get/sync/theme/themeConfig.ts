@@ -1,7 +1,8 @@
 import type { Vertex } from "../../../graph";
 import { DEFAULT_THEME } from "../../../../styles/constants";
 import { deepMerge } from "../../../../context/deepMerge";
-import type { ThemeContext } from "../../../../styles";
+
+import type { ThemeContext } from "~/lib/styles/types/types";
 
 export function themeConfig(themeVertex?: Vertex): Partial<ThemeContext> {
   // Start with a base theme object with the default theme

@@ -1,4 +1,5 @@
-import { type Breakpoint, DEFAULT_BREAKPOINTS } from "~/lib/styles";
+import { DEFAULT_BREAKPOINTS } from "~/lib/styles";
+import type { Breakpoint } from "~/lib/styles/types/types";
 
 /**
  * Get media query for a specific breakpoint

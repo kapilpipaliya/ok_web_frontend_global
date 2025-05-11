@@ -1,9 +1,4 @@
 import { createContext, useContext } from "solid-js";
-import type {
-  ColorMode,
-  ShadeNumber,
-  ThemeContext as ThemeContextType,
-} from "~/lib/styles";
 
 // Moving constants and utility functions to separate modules
 import {
@@ -22,6 +17,11 @@ import {
   getHslComponents,
   parseColorName,
 } from "~/lib/styles/colorUtils";
+import type {
+  ColorMode,
+  ShadeNumber,
+  ThemeContext as ThemeContextType,
+} from "~/lib/styles/types/types";
 
 export const ThemeContext = createContext<ThemeContextType>();
 

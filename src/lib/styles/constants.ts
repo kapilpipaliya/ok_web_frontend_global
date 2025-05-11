@@ -1,4 +1,8 @@
-import type { ColorMode, EasingPreset, SpacingScale } from "~/lib/styles";
+import type {
+  ColorMode,
+  EasingPreset,
+  SpacingScale,
+} from "~/lib/styles/types/types";
 
 // Default color constants
 export const DEFAULT_PRIMARY = "oklch(0.57 0.19 250)"; // Blue
