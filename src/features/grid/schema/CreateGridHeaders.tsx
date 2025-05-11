@@ -217,7 +217,21 @@ export function CreateGridHeaders(
                   align-items: center;
                 `}
                 >
-                  {info.getValue<string>()}
+                  <As
+                    as="a"
+                    href={getDownloadLink(info.row.original)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    css={css`
+                      color: \${args.theme.var.color.primary};
+                      text-decoration: none;
+                      &:hover {
+                        text-decoration: underline;
+                      }
+                    `}
+                  >
+                    {info.getValue<string>()}
+                  </As>
                 </As>
               </TooltipWrapper>
             </Match>

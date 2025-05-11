@@ -15,20 +15,19 @@ type ElementProps<T extends keyof JSX.IntrinsicElements> = {
   asProp?: string;
 } & Omit<JSX.IntrinsicElements[T], "as" | "css" | "class">;
 
-type CustomComponentProps<T extends Record<string, unknown>> = {
-  as: Component<T>;
+// Allow any component props
+type CustomComponentProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  as: Component<any>;
   css?: CssType;
   class?: string;
   asProp?: string;
-} & T;
+  [key: string]: unknown;
+};
 
 type AsProps<T> = T extends keyof JSX.IntrinsicElements
   ? ElementProps<T>
-  : T extends Component<infer P>
-    ? P extends Record<string, unknown>
-      ? CustomComponentProps<P>
-      : never
-    : never;
+  : CustomComponentProps;
 
 /**
  * A component that wraps any HTML element or custom component and applies CSS styles.
@@ -54,9 +53,10 @@ type AsProps<T> = T extends keyof JSX.IntrinsicElements
  * />
  * ```
  */
-export function As<
-  T extends keyof JSX.IntrinsicElements | Component<Record<string, unknown>>,
->(props: AsProps<T>): JSX.Element {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function As<T extends keyof JSX.IntrinsicElements | Component<any>>(
+  props: AsProps<T>,
+): JSX.Element {
   const theme = useTheme();
   const [local, rest] = splitProps(props, ["as", "css", "class", "asProp"]);
   const uniqueId = createUniqueId();

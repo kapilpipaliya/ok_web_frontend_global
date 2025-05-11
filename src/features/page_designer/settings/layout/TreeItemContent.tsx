@@ -57,9 +57,10 @@ export function TreeItemContent(
       <Icon
         height={17}
         icon={
-          componentVertex()?.P.icon ??
-          iconMap[componentVertex()?.L[0] as keyof typeof iconMap] ??
-          iconMap[componentName() as keyof typeof iconMap] ??
+          props.metaVertex.P.icon ||
+          componentVertex()?.P.icon ||
+          iconMap[componentVertex()?.L[0] as keyof typeof iconMap] ||
+          iconMap[componentName() as keyof typeof iconMap] ||
           "ph:circle"
         }
         style={{ color: getTreeItemColor(props.parentIndex) }}

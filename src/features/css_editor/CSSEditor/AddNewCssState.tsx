@@ -25,7 +25,7 @@ export function AddNewCssState(props: Readonly<{ onClose: () => void }>) {
     }
     setSelectedAllState([]);
     setState(stateName());
-    props.onClose;
+    props.onClose();
   };
 
   return (

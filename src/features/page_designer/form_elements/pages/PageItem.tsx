@@ -30,6 +30,7 @@ import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { Icon } from "@iconify-icon/solid";
 
 export function PageItem(
   props: Readonly<{
@@ -159,12 +160,9 @@ export function PageItem(
         onMouseLeave={(e) => handleMouseLeave(e)}
         ref={(el) => (menuRef = el)}
       >
-        {/* <Icon
-          height={22}
-          icon={"iconoir:multiple-pages"}
-          noobserver
-          width={22}
-        /> */}
+        <Show when={props.child.P.icon}>
+          <Icon height={20} icon={props.child.P.icon} noobserver width={20} />
+        </Show>
         <As as="div" css={css`font-size: 14px;`}>
           {toTitle(props.child.key)}
         </As>

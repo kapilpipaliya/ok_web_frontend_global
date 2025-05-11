@@ -110,13 +110,6 @@ export function ComponentItem(
     setGraph,
   );
 
-  // Check if component should show an icon (not from Component or Templates)
-  const shouldShowIcon = () => {
-    return (
-      props.child.L[0] !== "Component" && props.child.L[0] !== "TemplatePage"
-    );
-  };
-
   // Get display name for the component
   const getDisplayName = () => {
     const rawName = props.child?.P.label || props.child?.P.key;
@@ -156,12 +149,12 @@ export function ComponentItem(
           />
         </Show>
 
-        <Show when={shouldShowIcon()}>
+        <Show when={props.child.P.icon || props.child.L[0] !== "Component"}>
           <Icon
             height={22}
             icon={
-              props.child.P.icon ??
-              iconMap[props.child?.P.key as keyof typeof iconMap] ??
+              props.child.P.icon ||
+              iconMap[props.child?.P.key as keyof typeof iconMap] ||
               "ph:cube-duotone"
             }
             noobserver

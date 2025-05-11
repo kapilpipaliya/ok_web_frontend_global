@@ -1,4 +1,9 @@
-import { createSignal, For, Show, onMount, onCleanup } from "solid-js";
+import {
+  createSignal,
+  For,
+  Show,
+  onCleanup,
+} from "solid-js";
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 import { Icon } from "@iconify-icon/solid";
 import { debounce } from "@solid-primitives/scheduled";
@@ -638,15 +643,6 @@ export function LayoutTree() {
     }
   };
 
-  // Register and clean up event listeners - now for global keyboard shortcuts
-  onMount(() => {
-    document.addEventListener("keydown", handleKeyDown);
-  });
-
-  onCleanup(() => {
-    document.removeEventListener("keydown", handleKeyDown);
-  });
-
   // Create a debounced function using Solid's primitive
   const debouncedSearch = debounce((value: string) => {
     setDebouncedSearchQuery(value);
@@ -697,6 +693,7 @@ export function LayoutTree() {
         overflow: hidden;
       `}
       tabIndex={0}
+      onKeyDown={handleKeyDown}
     >
       <As
         as="div"

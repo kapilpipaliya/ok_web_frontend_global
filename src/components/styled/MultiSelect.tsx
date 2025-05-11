@@ -32,222 +32,132 @@ export type Option =
       children?: Option[];
       id: string;
       label: string;
+      [key: string]: unknown;
     };
 
-// similar like this: https://www.npmjs.com/package/druthers?activeTab=code
-export function MultiSelectField(
-  props: Readonly<{
-    childrenKey?: string;
-    class?: string;
-    css?: CssType;
-    disable?: boolean;
-    displayValueKey?: string;
-    error?: string;
-    isLoadingOptions?: boolean;
-    loadOptions?: () => Promise<void>;
-    onRemove: (newSelected: Option[], value: Option) => void;
-    onSelect: (newSelected: Option[], value: Option) => void;
-    options: Option[];
-    optionValueKey?: string;
-    placeholder?: string;
-    ref?: Ref<HTMLDivElement>;
-    renderLabel?: (option: Option, isSelected: boolean) => JSX.Element;
-    selectedValues: () => Option[];
-    selectionLimit?: number;
-  }>,
-) {
-  const { showErrorToast } = useToast();
-  let inputRef: HTMLInputElement | undefined;
-  let optionTimeout: NodeJS.Timeout | undefined;
-  const owner = getOwner();
+type MultiSelectFieldProps = Readonly<{
+  childrenKey?: string;
+  class?: string;
+  css?: CssType;
+  disable?: boolean;
+  displayValueKey?: string;
+  error?: string;
+  isLoadingOptions?: boolean;
+  loadOptions?: () => Promise<void>;
+  onRemove: (newSelected: Option[], value: Option) => void;
+  onSelect: (newSelected: Option[], value: Option) => void;
+  options: Option[];
+  optionValueKey?: string;
+  placeholder?: string;
+  ref?: Ref<HTMLDivElement>;
+  renderLabel?: (option: Option, isSelected: boolean) => JSX.Element;
+  selectedValues: () => Option[];
+  selectionLimit?: number;
+}>;
 
-  const [isReFetchSelectedValues, setIsReFetchSelectedValues] = createSignal(1);
+const getOptionValue = (option: Option, optionValueKey?: string): unknown => {
+  if (!isObject(option)) {
+    return option;
+  }
+  if (optionValueKey) {
+    return option[optionValueKey as keyof Option];
+  }
+  return (option as { id: string }).id;
+};
 
-  // Define signals for managing state
-  const selectedValue = createMemo(
-    () =>
-      (isReFetchSelectedValues() && props.selectedValues()) || ([] as Option[]),
+const getOptionLabel = (option: Option, displayValueKey?: string): string => {
+  if (isObject(option) && displayValueKey) {
+    if (displayValueKey.includes("::")) {
+      return String(evalExpression(displayValueKey, option) || "");
+    }
+    return String(option[displayValueKey as keyof Option] || "");
+  }
+  return isObject(option)
+    ? String((option as { label?: string }).label || "")
+    : String(option);
+};
+
+function SelectedTag(props: {
+  tag: Option;
+  displayValueKey?: string;
+  renderLabel?: (option: Option, isSelected: boolean) => JSX.Element;
+  onRemove: (value: Option) => void;
+}) {
+  return (
+    <As
+      as="div"
+      css={css`
+  align-items: center;
+  background-color: \${args.theme.var.color.primary};
+  cursor: default;
+  display: flex;
+  font-size: 14px;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+`}
+    >
+      <As
+        as="span"
+        css={css`
+  white-space: nowrap;
+`}
+      >
+        {props.renderLabel
+          ? props.renderLabel(props.tag, true)
+          : getOptionLabel(props.tag, props.displayValueKey)}
+      </As>
+      <IconButton
+        icon="ph:x"
+        css={css`
+    background-color: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border-radius: 50%;
+    color: white;
+    transition: all 0.2s ease;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  `}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          return props.onRemove(props.tag);
+        }}
+        size={14}
+      />
+    </As>
   );
+}
 
-  const [inputValue, setInputValue] = createSignal("");
-  const [dropdownVisible, setDropdownVisible] = createSignal(false);
+type SingleOptionProps = {
+  option: Option;
+  isSelected: boolean;
+  hasChildren: boolean;
+  isExpanded: boolean;
+  childrenKey: string;
+  renderLabel?: (option: Option, isSelected: boolean) => JSX.Element;
+  displayValueKey?: string;
+  onSelect: (option: Option) => void;
+  onToggleExpand: (option: Option) => void;
+  hiddenOptions?: () => Set<Option>;
+};
 
-  const getOptionValue = (option: Option) => {
-    if (!isObject(option)) {
-      return option;
-    }
-    if (props.optionValueKey) {
-      return option[props.optionValueKey as keyof Option];
-    }
-    return (option as { id: string }).id;
-  };
-
-  const getOptionLabel = (option: Option) => {
-    if (isObject(option) && props.displayValueKey) {
-      if (props.displayValueKey.includes("::")) {
-        return String(evalExpression(props.displayValueKey, option) || "");
-      }
-      return String(option[props.displayValueKey as keyof Option] || "");
-    }
-    // @ts-expect-error ignore
-    return isObject(option) ? String(option.label || "") : String(option);
-  };
-
-  // Remove tag from selected values
-  const handleRemoveTag = (option: Option) => {
-    runWithOwner(owner, () => {
-      const newSelected = selectedValue().filter(
-        (item) => getOptionValue(item) !== option,
-      );
-
-      props.onRemove?.(newSelected, option);
-    });
-  };
-
-  // Filter options based on input value
-  const filterOptions = (options: Option[], inputValue: string) => {
-    return options.filter((option) => {
-      if (!option) {
-        return false;
-      }
-      if (!isObject(option)) {
-        return option.toLowerCase().includes(inputValue.toLowerCase());
-      }
-      const label = getOptionLabel(option)?.toLowerCase();
-      const matches = label?.includes(inputValue.toLowerCase());
-
-      const childrenKey = props.childrenKey || "children";
-      // @ts-expect-error ignore
-      if (option[childrenKey] && option[childrenKey].length > 0) {
-        // @ts-expect-error ignore
-        const originalOptions = JSON.parse(JSON.stringify(option[childrenKey]));
-        // @ts-expect-error ignore
-        const filteredChildren = filterOptions(option[childrenKey], inputValue);
-
-        if (matches && filteredChildren.length === 0) {
-          // If the parent matches and no children match, include all children
-          // @ts-expect-error ignore
-          option[childrenKey] = originalOptions;
-          return true;
-        }
-        // Otherwise, filter the children
-        // @ts-expect-error ignore
-        option[childrenKey] = filteredChildren;
-        // Include the parent if it matches or any children match
-        // @ts-expect-error ignore
-        return matches || option[childrenKey].length > 0;
-      }
-
-      // Return true if the parent matches and there are no children
-      return matches;
-    });
-  };
-
-  const handleInputFocus = () => {
-    runWithOwner(owner, () => {
-      if (dropdownVisible()) {
-        clearTimeout(optionTimeout);
-      } else {
-        setDropdownVisible(true);
-        if (!props.isLoadingOptions) {
-          props.loadOptions?.();
-        }
-      }
-    });
-  };
-
-  const [reference, setReference] = createSignal<HTMLElement | null>(null);
-
-  const Options = () => {
-    const zIndex = useZIndex();
-    const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(
-      new Set(),
-    );
-
-    // Handle changes in selection
-    const handleSelectChange = (option: Option) => {
-      runWithOwner(owner, () => {
-        const value = getOptionValue(option);
-        let newSelected: Option[];
-        if (selectedValue().some((item) => getOptionValue(item) === value)) {
-          newSelected = selectedValue().filter(
-            (item) => getOptionValue(item) !== value,
-          );
-
-          props.onRemove?.(newSelected, value);
-        } else {
-          if (
-            props.selectionLimit &&
-            props.selectionLimit > 1 &&
-            selectedValue().length >= props.selectionLimit
-          ) {
-            showErrorToast("Selection limit reached");
-            setDropdownVisible(false);
-            return; // Exit if selection limit is reached
-          }
-          if (props.selectionLimit === 1) {
-            newSelected = [option];
-          } else {
-            newSelected = [...selectedValue(), option];
-          }
-
-          props.onSelect?.(newSelected, value);
-        }
-
-        if (props.selectionLimit === 1) {
-          setDropdownVisible(false);
-        }
-        setInputValue(""); // mostimes user wants to clear the input after selecting an option
-        if (props.selectionLimit !== 1) {
-          // if we don't focus options list will be closed.
-          inputRef?.focus();
-        }
-
-        setIsReFetchSelectedValues((v) => v + 1);
-      });
-    };
-
-    const toggleExpandOption = (option: Option) => {
-      runWithOwner(owner, () => {
-        const newHiddenOptions = new Set(hiddenOptions());
-        if (newHiddenOptions.has(option)) {
-          newHiddenOptions.delete(option);
-        } else {
-          newHiddenOptions.add(option);
-        }
-        setHiddenOptions(newHiddenOptions);
-        // if we don't focus options list will be closed.
-        inputRef?.focus();
-      });
-    };
-
-    const filteredOptions = createMemo(() => {
-      return filterOptions(
-        JSON.parse(JSON.stringify(props.options || [])),
-        inputValue(),
-      );
-    });
-
-    const Option = (p: { option: Option }) => {
-      const isExpanded = () => !hiddenOptions().has(p.option);
-      const childrenKey = () => props.childrenKey || "children";
-      const hasChildren = () => {
-        const option = p.option as { [key: string]: unknown };
-        const children = option[childrenKey()];
-        return Array.isArray(children) && children.length > 0;
-      };
-
-      const isSelected = () =>
-        selectedValue().some(
-          (item) => getOptionValue(item) === getOptionValue(p.option),
-        );
-
-      return (
-        <Show
-          fallback={
-            <As
-              as="div"
-              css={({ theme }) => css`
+function SingleOption(props: SingleOptionProps) {
+  return (
+    <Show
+      fallback={
+        <As
+          as="div"
+          css={({ theme }) => css`
   cursor: pointer;
   font-size: 14px;
   margin: 2px 3px;
@@ -255,7 +165,7 @@ export function MultiSelectField(
   border-radius: 5px;
   transition: background-color 0.2s ease;
   ${
-    isSelected()
+    props.isSelected
       ? `background-color: ${theme.var.color.primary_80};
          color: white;`
       : ""
@@ -265,26 +175,19 @@ export function MultiSelectField(
     color: white;
   }
 `}
-              onClick={() =>
-                runWithOwner(owner, () => {
-                  if (!hasChildren()) {
-                    handleSelectChange(p.option);
-                  }
-                })
-              }
-            >
-              {" "}
-              {props.renderLabel
-                ? props.renderLabel(p.option, false)
-                : getOptionLabel(p.option)}
-            </As>
-          }
-          when={hasChildren()}
+          onClick={() => props.onSelect(props.option)}
         >
-          <div>
-            <As
-              as="div"
-              css={({ theme }) => css`
+          {props.renderLabel
+            ? props.renderLabel(props.option, false)
+            : getOptionLabel(props.option, props.displayValueKey)}
+        </As>
+      }
+      when={props.hasChildren}
+    >
+      <div>
+        <As
+          as="div"
+          css={({ theme }) => css`
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -293,61 +196,256 @@ export function MultiSelectField(
   margin: 3px;
   padding: 8px;
   border-radius: 5px;
-  ${isSelected() ? `background-color: ${theme.var.color.primary_80};` : ""}
+  ${props.isSelected ? `background-color: ${theme.var.color.primary_80};` : ""}
   &:hover {
     background-color: ${theme.var.color.primary_40};
   }
 `}
-              onClick={() => toggleExpandOption(p.option)}
-            >
-              <Icon
-                icon={
-                  isExpanded() ? "ph:caret-down-bold" : "ph:caret-right-bold"
-                }
-                noobserver
-              />
-              <span>
-                {props.renderLabel
-                  ? props.renderLabel(p.option, false)
-                  : getOptionLabel(p.option)}
-              </span>
-            </As>
-            <Show when={isExpanded()}>
-              <As
-                as="div"
-                css={css`
+          onClick={() => props.onToggleExpand(props.option)}
+        >
+          <Icon
+            icon={
+              props.isExpanded ? "ph:caret-down-bold" : "ph:caret-right-bold"
+            }
+            noobserver
+          />
+          <span>
+            {props.renderLabel
+              ? props.renderLabel(props.option, false)
+              : getOptionLabel(props.option, props.displayValueKey)}
+          </span>
+        </As>
+        <Show when={props.isExpanded}>
+          <As
+            as="div"
+            css={css`
   padding-left: 20px;
 `}
-              >
-                {/* @ts-expect-error ignore */}
-                <For each={p.option[childrenKey()]}>
-                  {(childOption) => Option({ option: childOption })}
-                </For>
-              </As>
-            </Show>
-          </div>
+          >
+            <For
+              each={
+                (props.option as Record<string, Option[]>)[props.childrenKey] ||
+                []
+              }
+            >
+              {(childOption) => (
+                <OptionItem
+                  option={childOption}
+                  childrenKey={props.childrenKey}
+                  displayValueKey={props.displayValueKey}
+                  renderLabel={props.renderLabel}
+                  isSelected={() => props.isSelected}
+                  onSelect={props.onSelect}
+                  onToggleExpand={props.onToggleExpand}
+                  hiddenOptions={props.hiddenOptions || (() => new Set())}
+                />
+              )}
+            </For>
+          </As>
         </Show>
-      );
-    };
+      </div>
+    </Show>
+  );
+}
 
-    return (
-      <As
-        as="div"
-        css={[
-          STYLES.overflowCss,
-          ({ theme }) => css`
-              border-radius: 8px;
-              display: flex;
-              background-color: ${theme.var.color.base_10};
-              flex-direction: column;
-              max-height: 250px;
-              width: 100%;
-              z-index: ${zIndex};
-              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          `,
-        ]}
+function OptionItem(props: {
+  option: Option;
+  childrenKey: string;
+  displayValueKey?: string;
+  renderLabel?: (option: Option, isSelected: boolean) => JSX.Element;
+  isSelected: () => boolean;
+  onSelect: (option: Option) => void;
+  onToggleExpand: (option: Option) => void;
+  hiddenOptions: () => Set<Option>;
+}) {
+  const isExpanded = () => !props.hiddenOptions().has(props.option);
+  const hasChildren = () => {
+    const option = props.option as Record<string, unknown>;
+    const children = option[props.childrenKey];
+    return Array.isArray(children) && children.length > 0;
+  };
+
+  return (
+    <SingleOption
+      option={props.option}
+      isSelected={props.isSelected()}
+      hasChildren={hasChildren()}
+      isExpanded={isExpanded()}
+      childrenKey={props.childrenKey}
+      renderLabel={props.renderLabel}
+      displayValueKey={props.displayValueKey}
+      onSelect={props.onSelect}
+      onToggleExpand={props.onToggleExpand}
+      hiddenOptions={props.hiddenOptions}
+    />
+  );
+}
+
+type OptionsListProps = {
+  options: Option[];
+  selectedValues: Option[];
+  selectionLimit?: number;
+  childrenKey: string;
+  displayValueKey?: string;
+  optionValueKey?: string;
+  renderLabel?: (option: Option, isSelected: boolean) => JSX.Element;
+  onSelect: (newSelected: Option[], value: Option) => void;
+  onRemove: (newSelected: Option[], value: Option) => void;
+  isLoadingOptions?: boolean;
+  inputValue: string;
+};
+
+// Filter options based on input value
+const filterOptions = (
+  options: Option[],
+  inputValue: string,
+  displayValueKey?: string,
+  childrenKey = "children",
+): Option[] => {
+  return options.filter((option): boolean => {
+    if (!option) {
+      return false;
+    }
+    if (!isObject(option)) {
+      return String(option).toLowerCase().includes(inputValue.toLowerCase());
+    }
+    const label = getOptionLabel(option, displayValueKey)?.toLowerCase();
+    const matches = Boolean(label?.includes(inputValue.toLowerCase()));
+
+    const optionRecord = option as Record<string, unknown>;
+    if (
+      optionRecord[childrenKey] &&
+      Array.isArray(optionRecord[childrenKey]) &&
+      (optionRecord[childrenKey] as unknown[]).length > 0
+    ) {
+      const originalOptions = JSON.parse(
+        JSON.stringify(optionRecord[childrenKey]),
+      );
+      const filteredChildren = filterOptions(
+        optionRecord[childrenKey] as Option[],
+        inputValue,
+        displayValueKey,
+        childrenKey,
+      );
+
+      if (matches && filteredChildren.length === 0) {
+        // If the parent matches and no children match, include all children
+        optionRecord[childrenKey] = originalOptions;
+        return true;
+      }
+      // Otherwise, filter the children
+      optionRecord[childrenKey] = filteredChildren;
+      // Include the parent if it matches or any children match
+      return matches || filteredChildren.length > 0;
+    }
+
+    // Return true if the parent matches and there are no children
+    return matches;
+  });
+};
+
+function OptionsList(props: OptionsListProps) {
+  const zIndex = useZIndex();
+  const [hiddenOptions, setHiddenOptions] = createSignal<Set<Option>>(
+    new Set(),
+  );
+  const { showErrorToast } = useToast();
+  const owner = getOwner();
+
+  const handleSelectChange = (option: Option) => {
+    runWithOwner(owner, () => {
+      const value = getOptionValue(option, props.optionValueKey);
+      let newSelected: Option[];
+      if (
+        props.selectedValues.some(
+          (item) => getOptionValue(item, props.optionValueKey) === value,
+        )
+      ) {
+        newSelected = props.selectedValues.filter(
+          (item) => getOptionValue(item, props.optionValueKey) !== value,
+        );
+
+        props.onRemove?.(newSelected, value as Option);
+      } else {
+        if (
+          props.selectionLimit &&
+          props.selectionLimit > 1 &&
+          props.selectedValues.length >= props.selectionLimit
+        ) {
+          showErrorToast("Selection limit reached");
+          return; // Exit if selection limit is reached
+        }
+        if (props.selectionLimit === 1) {
+          newSelected = [option];
+        } else {
+          newSelected = [...props.selectedValues, option];
+        }
+
+        props.onSelect?.(newSelected, value as Option);
+      }
+    });
+  };
+
+  const toggleExpandOption = (option: Option) => {
+    runWithOwner(owner, () => {
+      const newHiddenOptions = new Set(hiddenOptions());
+      if (newHiddenOptions.has(option)) {
+        newHiddenOptions.delete(option);
+      } else {
+        newHiddenOptions.add(option);
+      }
+      setHiddenOptions(newHiddenOptions);
+    });
+  };
+
+  const filteredOptions = createMemo(() => {
+    return filterOptions(
+      JSON.parse(JSON.stringify(props.options || [])),
+      props.inputValue,
+      props.displayValueKey,
+      props.childrenKey,
+    );
+  });
+
+  return (
+    <As
+      as="div"
+      css={[
+        STYLES.overflowCss,
+        ({ theme }) => css`
+          border-radius: 8px;
+          display: flex;
+          background-color: ${theme.var.color.base_10};
+          flex-direction: column;
+          max-height: 250px;
+          width: 100%;
+          z-index: ${zIndex};
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        `,
+      ]}
+    >
+      <Show
+        fallback={
+          <As
+            as="div"
+            css={css`
+  cursor: pointer;
+  padding: 12px 8px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: \${args.theme.var.color.base_80};
+  font-style: italic;
+`}
+          >
+            Loading...
+          </As>
+        }
+        when={!props.isLoadingOptions}
       >
-        <Show
+        <For
+          each={filteredOptions()}
           fallback={
             <As
               as="div"
@@ -362,36 +460,73 @@ export function MultiSelectField(
   font-style: italic;
 `}
             >
-              Loading...
+              No item found{" "}
             </As>
           }
-          when={!props.isLoadingOptions}
         >
-          <For
-            each={filteredOptions()}
-            fallback={
-              <As
-                as="div"
-                css={css`
-  cursor: pointer;
-  padding: 12px 8px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: \${args.theme.var.color.base_80};
-  font-style: italic;
-`}
-              >
-                No item found{" "}
-              </As>
-            }
-          >
-            {(option) => <Option option={option} />}
-          </For>
-        </Show>
-      </As>
-    );
+          {(option) => (
+            <OptionItem
+              option={option}
+              childrenKey={props.childrenKey}
+              displayValueKey={props.displayValueKey}
+              renderLabel={props.renderLabel}
+              isSelected={() =>
+                props.selectedValues.some(
+                  (item) =>
+                    getOptionValue(item, props.optionValueKey) ===
+                    getOptionValue(option, props.optionValueKey),
+                )
+              }
+              onSelect={handleSelectChange}
+              onToggleExpand={toggleExpandOption}
+              hiddenOptions={hiddenOptions}
+            />
+          )}
+        </For>
+      </Show>
+    </As>
+  );
+}
+
+export function MultiSelectField(props: MultiSelectFieldProps) {
+  let inputRef: HTMLInputElement | undefined;
+  let optionTimeout: NodeJS.Timeout | undefined;
+  const owner = getOwner();
+
+  const [isReFetchSelectedValues, setIsReFetchSelectedValues] = createSignal(1);
+
+  // Define signals for managing state
+  const selectedValue = createMemo(
+    () =>
+      (isReFetchSelectedValues() && props.selectedValues()) || ([] as Option[]),
+  );
+
+  const [inputValue, setInputValue] = createSignal("");
+  const [dropdownVisible, setDropdownVisible] = createSignal(false);
+  const [reference, setReference] = createSignal<HTMLElement | null>(null);
+
+  // Remove tag from selected values
+  const handleRemoveTag = (option: Option) => {
+    runWithOwner(owner, () => {
+      const newSelected = selectedValue().filter(
+        (item) => getOptionValue(item, props.optionValueKey) !== option,
+      );
+
+      props.onRemove?.(newSelected, option);
+    });
+  };
+
+  const handleInputFocus = () => {
+    runWithOwner(owner, () => {
+      if (dropdownVisible()) {
+        clearTimeout(optionTimeout);
+      } else {
+        setDropdownVisible(true);
+        if (!props.isLoadingOptions) {
+          props.loadOptions?.();
+        }
+      }
+    });
   };
 
   return (
@@ -450,57 +585,12 @@ export function MultiSelectField(
           >
             <For each={selectedValue()}>
               {(tag) => (
-                <As
-                  as="div"
-                  css={css`
-  align-items: center;
-  background-color: \${args.theme.var.color.primary};
-  cursor: default;
-  display: flex;
-  font-size: 14px;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 4px;
-  color: white;
-  font-weight: 500;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-`}
-                >
-                  <As
-                    as="span"
-                    css={css`
-  white-space: nowrap;
-`}
-                  >
-                    {props.renderLabel
-                      ? props.renderLabel(tag, true)
-                      : getOptionLabel(tag)}
-                  </As>
-                  <IconButton
-                    icon="ph:x"
-                    css={css`
-    background-color: transparent;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px;
-    border-radius: 50%;
-    color: white;
-    transition: all 0.2s ease;
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-  `}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopImmediatePropagation();
-                      return handleRemoveTag(getOptionValue(tag));
-                    }}
-                    size={14}
-                  />
-                </As>
+                <SelectedTag
+                  tag={tag}
+                  displayValueKey={props.displayValueKey}
+                  renderLabel={props.renderLabel}
+                  onRemove={handleRemoveTag}
+                />
               )}
             </For>
           </As>
@@ -552,8 +642,8 @@ export function MultiSelectField(
         >
           <As
             as={Icon}
-            css={({ theme }) => css`
-  color: ${theme.var.color.base};
+            css={css`
+  color: \${args.theme.var.color.base};
   cursor: pointer;
   transition: transform 0.2s ease;
   transform: rotate(${dropdownVisible() ? "180deg" : "0deg"});
@@ -598,7 +688,32 @@ export function MultiSelectField(
             onClickOutside={() => setDropdownVisible(false)}
             parentRef={reference()!}
           >
-            <Options />
+            <OptionsList
+              options={props.options}
+              selectedValues={selectedValue()}
+              selectionLimit={props.selectionLimit}
+              childrenKey={props.childrenKey || "children"}
+              displayValueKey={props.displayValueKey}
+              optionValueKey={props.optionValueKey}
+              renderLabel={props.renderLabel}
+              onSelect={(newSelected, value) => {
+                props.onSelect(newSelected, value);
+
+                if (props.selectionLimit === 1) {
+                  setDropdownVisible(false);
+                }
+                setInputValue(""); // Most times user wants to clear the input after selecting an option
+                if (props.selectionLimit !== 1) {
+                  // If we don't focus, options list will be closed
+                  inputRef?.focus();
+                }
+
+                setIsReFetchSelectedValues((v) => v + 1);
+              }}
+              onRemove={props.onRemove}
+              isLoadingOptions={props.isLoadingOptions}
+              inputValue={inputValue()}
+            />
           </DropdownMenu>
         </ZIndex>
       </Show>

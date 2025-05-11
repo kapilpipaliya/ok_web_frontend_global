@@ -21,6 +21,7 @@ https://dear-caravan-605.notion.site/Solid-FAQ-b5ae5a47f2ec47c8a78bc5671180845d#
 Check for circular dependencies:
 ```
 npx madge --circular --extensions ts,tsx src
+npx depcruise src --validate
 ```
 
 ### Find Large Files

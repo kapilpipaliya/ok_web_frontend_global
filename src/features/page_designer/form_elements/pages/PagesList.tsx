@@ -74,7 +74,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
         if (result.graph.vertexes[formStoreVertex()?.P.formDataId!]) {
           delete result.graph.vertexes[formStoreVertex()?.P.formDataId!];
         }
-        setGraphData(graph, setGraph, result.graph);
+        setGraphData(graph, setGraph, result.graph, { skipExisting: true });
 
         const data2 = getTreeData(graph, setGraph, {
           collection: `g:'${props.coll}'`,
