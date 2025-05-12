@@ -436,7 +436,7 @@ export function PageViewWrapper(
     }
     if (form) {
       let formToUse = form;
-      // improve performance
+      // improve performance only
       if (PageDesignerLabels.includes(form.key!) || form.key === "Component") {
         formToUse = {
           ...form,

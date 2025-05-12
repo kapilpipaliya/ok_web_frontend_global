@@ -101,7 +101,7 @@ export function componentDrop(
     delete p.key;
     props = { ...props, ...p };
   } else if (fromVertex.L[0] === "Component") {
-    props = { ...props, componentName: "Component" };
+    props = { ...props, componentName: fromVertex.P.key };
   }
   batch(() => {
     rowResult = addNewRow(

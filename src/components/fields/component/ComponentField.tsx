@@ -22,6 +22,7 @@ import {
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 
 export function ComponentField(
   props: Readonly<GenericComponentProps & { componentId?: string }>,
@@ -36,21 +37,17 @@ export function ComponentField(
 
   const getCompVertex = createMemo(() =>
     meta()
-      ? (evalExpression("->$0Comp", {
-          graph,
-          setGraph,
-          vertexes: [meta()],
-        }) as Vertex[]) || ([] as Vertex[])
-      : [],
+      ? findVertexByLabelAndUniqueId(graph, 'Component', "key", meta()!.P.componentName)
+      : undefined,
   );
 
   const componentData = createAsync(
     async () => {
-      const vertices = getCompVertex();
-      if (!vertices.length) {
+      const vertex = getCompVertex();
+      if (vertex) {
         return null;
       }
-      return await fetchComponentData([vertices[0]], graph, setGraph);
+      return await fetchComponentData([meta()!.P.componentName]);
     },
     { deferStream: true },
   );
@@ -93,7 +90,7 @@ export function ComponentField(
             return propValue;
           }
           const defaultValues = getComponentDefaultValues(
-            getCompVertex()[0],
+            getCompVertex()!,
             graph,
             setGraph,
           );
@@ -115,7 +112,7 @@ export function ComponentField(
       <DataContext.Provider value={newDataContext}>
         <PageAttrRender
           data={data()}
-          metaVertex={getCompVertex()[0] as Vertex}
+          metaVertex={getCompVertex() as Vertex}
           isNoPermissionCheck={
             parentRenderContext()?.context.isNoPermissionCheck
           }
@@ -155,7 +152,7 @@ export function ComponentField(
       });
     }
     return (
-      <Show when={getCompVertex().length} fallback={<div>Error</div>}>
+      <Show when={getCompVertex()} fallback={<div>Error</div>}>
         <SlotContext.Provider value={Children}>
           <ComponentWrapper />
         </SlotContext.Provider>

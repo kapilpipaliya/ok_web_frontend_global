@@ -7,11 +7,9 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export async function fetchComponentData(
-  vertexes: Vertex[],
-  graph: GraphInterface,
-  setGraph: SetStoreFunction<GraphInterface>,
+  componentNames: string[],
 ) {
-  const componentData = await fetchComponentDataPure(vertexes);
+  const componentData = await fetchComponentDataPure(componentNames);
   if (componentData?.graph) {
     // skip existing because we not want to modify existing component data
     // setGraphData(graph, setGraph, componentData.graph, { skipExisting: true });
@@ -20,16 +18,21 @@ export async function fetchComponentData(
 }
 
 export async function fetchComponentDataPure(
-  vertexes: Vertex[],
+  componentNames: string[],
   // graph: GraphInterface,
 ) {
   const { incoming, outgoing } = getEdgesFromRowsAttr(
     FormMetaData.Component.attributes,
   );
   return await fetchDataFromDB({
-    expression: `id:'${vertexes.map((v) => v.id).join("|")}'`,
+    expression: `g:'Component[$initial]'`,
     // [getGlobalStore(graph).P.url]: true,
     incoming,
     outgoing,
+  }, {
+    nodes: {},
+    relationships: {},
+    // @ts-expect-error ignore error
+    $initial: { filter: { key: {$in: componentNames}}}
   });
 }

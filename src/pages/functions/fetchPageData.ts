@@ -33,6 +33,7 @@ export async function fetchFormData(
   hasRequiredPermissions?: boolean,
   pageVertexName?: string,
 ): Promise<FetchFormDataResult> {
+  "use server";
   if (formDataId) {
     return { formDataIdOverride: formDataId };
   }
@@ -56,15 +57,28 @@ export async function fetchFormData(
       return { error: `No ${pageVertexName} found` };
     }
 
-    // Find all Component vertices from the loaded data
-    const componentVertices = Object.values(
-      formDataResult.data!.graph!.vertexes,
-    ).filter((v) => v.L.includes("Component"));
+    // // Find all Component vertices from the loaded data
+    // const componentVertices = Object.values(
+    //   formDataResult.data!.graph!.vertexes,
+    // ).filter((v) => v.L.includes("Component"));
+
+    // Create a set of component names from Attr vertices
+    const componentNames = new Set<string>();
+    
+    // Find all Attr vertices that define componentName
+    for (const vertex of Object.values(formDataResult.data!.graph!.vertexes)) {
+      if (vertex.L.includes('Attr') && vertex.P.componentName) {
+        // Skip "Html", "Data" and "Slot" components
+        if (!['Html', 'Data', 'Slot'].includes(vertex.P.componentName)) {
+          componentNames.add(vertex.P.componentName);
+        }
+      }
+    }
 
     // Fetch data for all components if needed
     let componentData: null | ServerResult = null;
-    if (componentVertices.length > 0) {
-      componentData = await fetchComponentDataPure(componentVertices);
+    if (componentNames.size > 0) {
+      componentData = await fetchComponentDataPure(Array.from(componentNames));
     }
 
     return { componentData, data: formDataResult.data };

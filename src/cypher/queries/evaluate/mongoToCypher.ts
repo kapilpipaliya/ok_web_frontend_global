@@ -1,20 +1,24 @@
 export interface CypherQueryResult {
-  params: { [key: string]: any };
+  params: { [key: string]: MongoValue };
   query: string;
 }
+
+// Define a type to replace 'any'
+export type MongoValue = string | number | boolean | null | Date | MongoValue[] | { [key: string]: MongoValue };
 
 export type MongoFilter =
   | { $and?: MongoFilter[] }
   | { $not?: MongoFilter }
   | { $or?: MongoFilter[] }
-  | { [key: string]: any }
+  | { [key: string]: MongoValue }
   | {
       [key: string]: {
-        $gt?: any;
-        $gte?: any;
-        $lt?: any;
-        $lte?: any;
-        $ne?: any;
+        $gt?: MongoValue;
+        $gte?: MongoValue;
+        $lt?: MongoValue;
+        $lte?: MongoValue;
+        $ne?: MongoValue;
+        $in?: MongoValue[];
       };
     };
 
@@ -26,23 +30,23 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
     };
   }
 
-  const params: { [key: string]: any } = {};
+  const params: { [key: string]: MongoValue } = {};
   let paramIndex = 0;
 
   const translateFilter = (filter: MongoFilter): string => {
     return Object.entries(filter)
       .map(([key, value]) => {
         if (key === "$and" && Array.isArray(value)) {
-          return "(" + value.map(translateFilter).join(" AND ") + ")";
+          return "(" + value.map((item) => translateFilter(item as MongoFilter)).join(" AND ") + ")";
         }
         if (key === "$or" && Array.isArray(value)) {
-          return "(" + value.map(translateFilter).join(" OR ") + ")";
+          return "(" + value.map((item) => translateFilter(item as MongoFilter)).join(" OR ") + ")";
         }
         if (key === "$not" && typeof value === "object") {
           return "NOT (" + translateFilter(value as MongoFilter) + ")";
         }
-        if (typeof value === "object" && !Array.isArray(value)) {
-          return handleOperators(key, value);
+        if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+          return handleOperators(key, value as { [operator: string]: MongoValue });
         }
         // Direct equality
         const paramName = `param${paramIndex++}`;
@@ -54,7 +58,7 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
 
   const handleOperators = (
     field: string,
-    conditions: { [operator: string]: any },
+    conditions: { [operator: string]: MongoValue },
   ): string => {
     return Object.entries(conditions)
       .map(([operator, value]) => {
@@ -71,6 +75,11 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
             return `n.${field} <= $${paramName}`;
           case "$ne":
             return `n.${field} <> $${paramName}`;
+          case "$in":
+            if (Array.isArray(value)) {
+              return `n.${field} IN $${paramName}`;
+            }
+            throw new Error("$in operator requires an array value");
           default:
             throw new Error(`Unsupported operator: ${operator}`);
         }
