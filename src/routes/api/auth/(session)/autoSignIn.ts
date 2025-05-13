@@ -39,7 +39,7 @@ export async function GET({ request }: APIEvent) {
     if (!userData) {
       // "Invalid or expired token"
       return new Response(null, {
-        headers: { Location: API.urls.admin.login },
+        headers: { Location: API.urls.admin.signIn },
         status: 302,
       });
     }
@@ -49,7 +49,7 @@ export async function GET({ request }: APIEvent) {
 
     if (!existingUser) {
       return new Response(null, {
-        headers: { Location: API.urls.admin.login },
+        headers: { Location: API.urls.admin.signIn },
         status: 302,
       });
     }

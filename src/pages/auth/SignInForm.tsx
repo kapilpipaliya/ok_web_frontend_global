@@ -22,7 +22,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 
 // Import all utilities from the index file
 
-export function LoginForm() {
+export function SignInForm() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -51,7 +51,7 @@ export function LoginForm() {
   const handleSubmit = async (formData: Vertex) => {
     await submitForm(formData, {
       apiCall: (data) =>
-        postAPI(API.auth.loginUrl, {
+        postAPI(API.auth.signInUrl, {
           email: data.P.email.toLowerCase(),
           password: data.P.password,
         }),
@@ -88,7 +88,10 @@ export function LoginForm() {
     as: "div",
     attributes: [
       // Use our utility for form header
-      ...createFormHeader("Login"),
+      ...createFormHeader(
+        "Sign in to DecodeUI",
+        "Welcome back! Please sign in to continue",
+      ),
       {
         attributes: [
           {
@@ -193,6 +196,8 @@ export function LoginForm() {
             css: css`
   white-space: center;
   margin-top: 16px;
+  border-top: 1px solid \${args.theme.var.color.base_20};
+  padding-top: 16px;
 `,
             componentName: "Html",
           },

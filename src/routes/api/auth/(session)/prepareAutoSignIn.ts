@@ -21,7 +21,7 @@ export async function GET({ request }: APIEvent) {
 
     if (subDomain !== SYSTEM_DB_NAME) {
       throw new APIError(
-        "Only system database can be used for auto login",
+        "Only system database can be used for auto signIn",
         400,
       );
     }
@@ -42,7 +42,7 @@ export async function GET({ request }: APIEvent) {
 
     // Generate the target URL with the token
     const host = request.headers.get("host") || "";
-    const autoLoginUrl = buildAutoLoginUrl(
+    const autoSignInUrl = buildautoSignInUrl(
       url.protocol,
       host,
       targetDomain,
@@ -51,7 +51,7 @@ export async function GET({ request }: APIEvent) {
     );
 
     return new Response(null, {
-      headers: { Location: autoLoginUrl },
+      headers: { Location: autoSignInUrl },
       status: 302,
     });
   } catch (error) {
@@ -59,7 +59,7 @@ export async function GET({ request }: APIEvent) {
   }
 }
 
-function buildAutoLoginUrl(
+function buildautoSignInUrl(
   protocol: string,
   host: string,
   targetDomain: null | string,
@@ -69,16 +69,16 @@ function buildAutoLoginUrl(
   if (host.includes("localhost")) {
     // For localhost, use port if present
     const port = host.split(":")[1] ? `:${host.split(":")[1]}` : "";
-    return `${protocol}//localhost${port}${API.auth.autoLoginUrl}?token=${secureToken}`;
+    return `${protocol}//localhost${port}${API.auth.autoSignInUrl}?token=${secureToken}`;
   }
 
   const parsedDomain = parse(host);
   const baseDomain = parsedDomain.domain;
 
   if (targetDomain) {
-    return `${protocol}//${targetDomain}${API.auth.autoLoginUrl}?token=${secureToken}`;
+    return `${protocol}//${targetDomain}${API.auth.autoSignInUrl}?token=${secureToken}`;
   }
-  return `${protocol}//${targetSubdomain}.${baseDomain}${API.auth.autoLoginUrl}?token=${secureToken}`;
+  return `${protocol}//${targetSubdomain}.${baseDomain}${API.auth.autoSignInUrl}?token=${secureToken}`;
 }
 
 function validateRequest(url: URL) {

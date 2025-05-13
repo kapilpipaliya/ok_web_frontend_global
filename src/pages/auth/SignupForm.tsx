@@ -325,6 +325,8 @@ export function SignupForm() {
             css: css`
   white-space: center;
   margin-top: 16px;
+  border-top: 1px solid \${args.theme.var.color.base_20};
+  padding-top: 16px;
 `,
             componentName: "Html",
           },

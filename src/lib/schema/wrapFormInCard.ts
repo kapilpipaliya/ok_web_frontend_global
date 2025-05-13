@@ -25,6 +25,7 @@ export const wrapFormInCard = (formSchema: FieldAttribute) => {
   padding: 32px;
   border-radius: 8px;
   box-shadow: 1px 2px 3px \${args.theme.var.color.primary};
+  max-width: 450px;
 `, // max-width:700px width:90%
         componentName: "Html",
       },
