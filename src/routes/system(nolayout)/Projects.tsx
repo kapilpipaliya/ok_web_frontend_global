@@ -43,8 +43,8 @@ export default function Projects() {
             administrators (users with <b>Admin</b> role) can create and manage
             projects.
             <br />
-            Click on Subdomain Name or Custom Domain Name to login to that
-            project in new tab.
+            Click on Subdomain Name or Custom Domain Name to sign in to that
+            project in a new tab.
           </>
         }
         title="Projects"

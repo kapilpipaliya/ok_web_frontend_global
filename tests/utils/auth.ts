@@ -1,21 +1,22 @@
 import { Page, expect } from '@playwright/test';
+import { API } from '~/lib/api/endpoints';
 
 /**
  * Login to the application
  * @param page Playwright page
  * @param email User email
  * @param password User password
- * @param redirectUrl URL to redirect after login (optional)
+ * @param redirectUrl URL to redirect after signIn (optional)
  */
-export async function login(
+export async function signIn(
   page: Page, 
   email: string = 'admin', 
   password: string = 'kK11235813@',
   redirectUrl?: string
 ) {
   const loginUrl = redirectUrl 
-    ? `http://localhost:3001/auth/login?redirectUrl=${encodeURIComponent(redirectUrl)}`
-    : 'http://localhost:3001/auth/login';
+    ? `http://localhost:3001/${API.urls.admin.signIn}?redirectUrl=${encodeURIComponent(redirectUrl)}`
+    : `http://localhost:3001/${API.urls.admin.signIn}`;
     
   await page.goto(loginUrl);
 
@@ -41,7 +42,7 @@ export async function login(
   if (redirectUrl) {
     await expect(page).toHaveURL(new RegExp('.*' + redirectUrl));
   } else {
-    // Wait for login to complete (adjust based on your app's behavior)
-    await expect(page).not.toHaveURL(/.*\/auth\/login.*/);
+    // Wait for signIn to complete (adjust based on your app's behavior)
+    await expect(page).not.toHaveURL(/.*\/auth\/signIn.*/);
   }
 } 

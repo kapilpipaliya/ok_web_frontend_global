@@ -33,7 +33,7 @@ export function PermissionGuard(props: {
   // Handle unauthorized access
   const handleUnauthorized = () => {
     if (permissionResult()?.redirectUrl) {
-      navigate(permissionResult()?.redirectUrl || API.urls.admin.login);
+      navigate(permissionResult()?.redirectUrl || API.urls.admin.signIn);
     }
   };
 
@@ -49,7 +49,7 @@ export function PermissionGuard(props: {
                   {permissionResult()?.message ||
                     "You don't have permission to access this content"}
                 </p>
-                <button onClick={handleUnauthorized}>Go to login</button>
+                <button onClick={handleUnauthorized}>Go to Sign In</button>
               </div>
             )}
           </div>

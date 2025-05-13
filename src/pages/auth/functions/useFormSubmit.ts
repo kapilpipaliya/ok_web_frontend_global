@@ -2,7 +2,7 @@ import type { Navigator } from "@solidjs/router";
 
 import { useToast } from "~/components/styled/modal/Toast";
 
-import { handleLoginRedirect } from "./handleLoginRedirect";
+import { handleSignInRedirect } from "./handleSignInRedirect";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -36,10 +36,10 @@ export function useFormSubmit() {
       return;
     }
 
-    // Default success handler that handles login redirect if needed
+    // Default success handler that handles signIn redirect if needed
     const defaultSuccessHandler = (value: any) => {
       if (options.shouldRedirect && options.navigate) {
-        handleLoginRedirect(value?.result, graph, options.navigate);
+        handleSignInRedirect(value?.result, graph, options.navigate);
       }
 
       // Call custom success handler if provided

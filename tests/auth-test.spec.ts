@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { login } from './utils/auth';
+import { signIn } from './utils/auth';
 
 test('test', async ({ page }) => {
-  await login(page, 'admin', 'kK11235813@', '/admin/Page/new');
+  await signIn(page, 'admin', 'kK11235813@', '/admin/Page/new');
   
-  // Add assertion to verify successful login
+  // Add assertion to verify successful signIn
   await expect(page).toHaveURL(/.*\/admin\/Page\/new/);
 });

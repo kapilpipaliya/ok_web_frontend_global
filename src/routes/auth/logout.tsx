@@ -24,12 +24,12 @@ export default function Logout() {
       // Delete member vertex from the graph
       deleteVertex(0, "member", graph, setGraph);
 
-      // Navigate to login page with replaced history
-      navigate(API.urls.admin.login, { replace: true });
+      // Navigate to signIn page with replaced history
+      navigate(API.urls.admin.signIn, { replace: true });
     } catch (error) {
       console.error("Logout failed:", error);
-      // Even if there's an error, navigate to login
-      navigate(API.urls.admin.login, { replace: true });
+      // Even if there's an error, navigate to signIn
+      navigate(API.urls.admin.signIn, { replace: true });
     }
   });
 
@@ -77,7 +77,7 @@ export default function Logout() {
       loadMessage: "Logging Out...",
       onSuccess: (value) => {
         if (value?.message != null) {
-          navigate(API.urls.admin.login);
+          navigate(API.urls.admin.signIn);
         }
       },
       promise: postAPI(API.auth.logOutUrl, {}),

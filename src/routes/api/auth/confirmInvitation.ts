@@ -1,6 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
+import { API } from "~/lib/api/endpoints";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { validateAndConsumeToken } from "~/lib/auth/secureToken";
 import { decodeUserData } from "~/lib/auth/userDataEncoder";
@@ -20,7 +21,7 @@ export async function GET({ request }: APIEvent) {
     const userData = await validateAndConsumeToken(token, dbSession);
     if (!userData) {
       return new Response(null, {
-        headers: { Location: "/auth/login?error=invalid_token" },
+        headers: { Location: `${API.urls.admin.signIn}?error=invalid_token` },
         status: 302,
       });
     }
@@ -37,7 +38,9 @@ export async function GET({ request }: APIEvent) {
 
     if (result.records.length === 0) {
       return new Response(null, {
-        headers: { Location: "/auth/login?error=invalid_invitation" },
+        headers: {
+          Location: `${API.urls.admin.signIn}?error=invalid_invitation`,
+        },
         status: 302,
       });
     }

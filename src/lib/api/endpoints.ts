@@ -1,16 +1,16 @@
 export const API = {
   auth: {
-    autoLoginUrl: "/api/auth/autoLogin",
+    autoSignInUrl: "/api/auth/autoSignIn",
     changePasswordUrl: "/api/auth/changePassword",
     // getUserUrl: "/api/auth/getUserRPC",
-    loginUrl: "/api/auth/login",
+    signInUrl: "/api/auth/signin",
     logOutUrl: "/api/auth/logout",
     passwordReset: {
       completeUrl: "/api/auth/password-reset/complete",
       requestUrl: "/api/auth/password-reset/request",
       verifyOtpUrl: "/api/auth/password-reset/verifyOtp",
     },
-    prepareAutoLoginUrl: "/api/auth/prepareAutoLogin",
+    prepareAutoSignInUrl: "/api/auth/prepareAutoSignIn",
     profileUrl: "/api/auth/updateProfile",
     resendEmailConfirmationUrl: "/api/auth/resendEmailConfirmation",
     signUpUrl: "/api/auth/signup",
@@ -84,7 +84,7 @@ export const API = {
     admin: {
       contact: "/support/contact",
       globalSettings: "/admin/GlobalSettings",
-      login: "/auth/login",
+      signIn: "/auth/signin",
       // it's name is admin, but its for subdomains
       root: "/admin/",
       support: "/admin/support",
@@ -99,6 +99,7 @@ export const API = {
     user: {
       forgotPassword: "/auth/forgotPassword",
       logout: "/auth/logout",
+      signUp: "/auth/signup",
     },
   },
   user: {
@@ -111,5 +112,5 @@ export const API = {
 } as const;
 
 export function generate401RedirectUrl(pathname: string): string {
-  return `/auth/login?redirectUrl=${encodeURIComponent(pathname)}`;
+  return `${API.urls.user.signUp}?redirectUrl=${encodeURIComponent(pathname)}`;
 }

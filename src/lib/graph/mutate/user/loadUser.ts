@@ -4,6 +4,7 @@ import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { API } from "~/lib/api/endpoints";
 
 // Type for the user data response
 export interface UserData {
@@ -19,8 +20,8 @@ export function handleUserNavigation(
   navigate?: (path: string) => void,
 ) {
   if (!userData?.user) {
-    // TODO: add support for redirect to same page after login
-    navigate?.("/auth/login");
+    // TODO: add support for redirect to same page after signIn
+    navigate?.(API.urls.admin.signIn);
     return false;
   }
   return true;

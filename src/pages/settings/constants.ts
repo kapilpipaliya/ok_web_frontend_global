@@ -266,6 +266,8 @@ export const PROPERTIES = {
         border: 1px solid \${args.theme.var.color.base};
         padding: 7px;
         border-radius: 6px;
+        width: 20px;
+        height: 20px;
       }
     `,
     RadioButtonCss: `

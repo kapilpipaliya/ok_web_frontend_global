@@ -38,11 +38,11 @@ export const SubDomainGrid = () => {
   };
 
   const getSubdomainUrl = (key: string) => {
-    return `${API.auth.prepareAutoLoginUrl}?subdomain=${key}`;
+    return `${API.auth.prepareAutoSignInUrl}?subdomain=${key}`;
   };
 
   const getDomainUrl = (domain: string) => {
-    return `${API.auth.prepareAutoLoginUrl}?domain=${domain}`;
+    return `${API.auth.prepareAutoSignInUrl}?domain=${domain}`;
   };
 
   const SubDomain: IFormMetaData = {

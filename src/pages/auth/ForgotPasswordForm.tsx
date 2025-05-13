@@ -175,9 +175,9 @@ export function ForgotPasswordForm() {
 
       showSuccessToast("Password has been reset successfully");
 
-      // Redirect to login page after successful reset
+      // Redirect to signIn page after successful reset
       setTimeout(() => {
-        navigate("/auth/login");
+        navigate(API.urls.admin.signIn);
       }, 3000);
 
       return true;
@@ -218,9 +218,9 @@ export function ForgotPasswordForm() {
             },
           ),
           createLinkButton(
-            () => "Back to Login",
+            () => "Back to Sign In",
             () => {
-              navigate("/auth/login");
+              navigate(API.urls.admin.signIn);
             },
           ),
         ],

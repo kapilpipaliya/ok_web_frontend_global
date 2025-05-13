@@ -82,8 +82,8 @@ export function PasswordChangeForm() {
                           showErrorToast,
                           showSuccessToast,
                         );
-                        // Redirect to login page as session is expired
-                        navigate?.("/auth/login");
+                        // Redirect to signIn page as session is expired
+                        navigate(API.urls.admin.signIn);
                       } finally {
                         options.contextData.saveState[1]("isLoading", false);
                       }

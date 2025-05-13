@@ -1,5 +1,6 @@
 import type { JSX } from "solid-js";
 import { As } from "~/components/As";
+import { API } from "~/lib/api/endpoints";
 import { css } from "~/lib/styles";
 
 interface UnauthenticatedMenuProps {
@@ -31,7 +32,7 @@ export function UnauthenticatedMenu(
     background-color: rgb(241,241,241);
   }
 `}
-          href="/auth/login"
+          href={API.urls.admin.signIn}
           onclick={props.onClose}
           replace={true}
         >
@@ -58,7 +59,7 @@ export function UnauthenticatedMenu(
     background-color: rgb(241,241,241);
   }
 `}
-          href="/auth/signup"
+          href={API.urls.user.signUp}
           onclick={props.onClose}
           replace={true}
         >

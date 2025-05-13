@@ -22,7 +22,7 @@ export const routePermissions: RoutePermission[] = [
   { path: "/api/error/logError", requiredPermission: PermissionLevel.PUBLIC },
   { path: "/internal/*", requiredPermission: PermissionLevel.PUBLIC },
 
-  // Authenticated routes - require login
+  // Authenticated routes - require signIn
   { path: "/dashboard", requiredPermission: PermissionLevel.AUTHENTICATED },
   { path: "/profile", requiredPermission: PermissionLevel.AUTHENTICATED },
   { path: "/settings", requiredPermission: PermissionLevel.AUTHENTICATED },

@@ -9,7 +9,7 @@
 - http://localhost:3001/admin/Page
 
 ### Authentication
-- http://localhost:3001/auth/login
+- http://localhost:3001/auth/signin
 
 ### Email Templates
 - http://localhost:3001/internal/page/AccountDeletionRequest

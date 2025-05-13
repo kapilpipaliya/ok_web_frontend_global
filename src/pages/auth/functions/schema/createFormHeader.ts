@@ -5,9 +5,10 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 /**
  * Creates a form header with logo and title
  * @param title - Form title
+ * @param subheader - Optional subheader text
  * @returns Form header schema
  */
-export function createFormHeader(title: string) {
+export function createFormHeader(title: string, subheader?: string) {
   return [
     getLogoSchema(
       css`display:grid; place-items:center;`,
@@ -21,5 +22,21 @@ export function createFormHeader(title: string) {
       displayOrder: 2,
       text: title,
     },
+    ...(subheader
+      ? [
+          {
+            as: "p",
+            css: css`
+        color: \${args.theme.var.color.base_60};
+        text-align: center;
+        margin-top: 8px;
+        font-size: 16px;
+      `,
+            componentName: "Html",
+            displayOrder: 3,
+            text: subheader,
+          },
+        ]
+      : []),
   ];
 }

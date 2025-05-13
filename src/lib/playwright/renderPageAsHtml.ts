@@ -233,7 +233,7 @@ async function setupBrowserAndPage(
   const queryString = searchParams.toString();
 
   const url = token
-    ? `${baseUrl}${API.auth.autoLoginUrl}?${queryString}`
+    ? `${baseUrl}${API.auth.autoSignInUrl}?${queryString}`
     : `${baseUrl}${redirectUrl}${queryString ? `?${queryString}` : ""}`;
 
   await page.goto(url);

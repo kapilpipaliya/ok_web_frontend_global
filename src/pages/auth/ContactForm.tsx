@@ -91,7 +91,7 @@ export function ContactForm() {
         }),
       loadMessage: "Sending message...",
       onSuccess: () => {
-        navigate("/auth/login");
+        navigate(API.urls.admin.signIn);
       },
       successMessage: "Support ticket created successfully",
       validateFn: validateContactForm,
@@ -147,11 +147,11 @@ export function ContactForm() {
             },
           ),
 
-          // Back to login link
+          // Back to signIn link
           createLinkButton(
-            () => "Back to Login",
+            () => "Back to Sign In",
             () => {
-              navigate("/auth/login");
+              navigate(API.urls.admin.signIn);
             },
           ),
         ],

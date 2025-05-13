@@ -21,7 +21,7 @@ import { css } from "~/lib/styles";
 import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
-
+import { validateUsername } from "~/lib/validation/validateUsername";
 export function SignupForm() {
   const navigate = useNavigate();
 
@@ -32,11 +32,18 @@ export function SignupForm() {
 
   // Validation function using our utility
   const validateSignupData = (formData: Vertex) => {
-    return validateFormData(formData, showErrorToast, {
+    const isValid = validateFormData(formData, showErrorToast, {
       requireEmail: true,
       requirePassword: true,
       requireUsername: true,
     });
+
+    if (isValid && formData.P.termsAgreement !== true) {
+      showErrorToast("You must accept the Terms of Service to continue");
+      return false;
+    }
+
+    return isValid;
   };
 
   // Submit handler using our utility
@@ -88,7 +95,10 @@ export function SignupForm() {
     as: "div",
     attributes: [
       // Use our utility for form header
-      ...createFormHeader("Sign Up"),
+      ...createFormHeader(
+        "Create your account",
+        "Welcome! Please fill in the details to get started.",
+      ),
       {
         attributes: [
           {
@@ -102,6 +112,7 @@ export function SignupForm() {
                 {
                   minLength: 4,
                   required: true,
+                  validate: validateUsername,
                 },
               ),
               ...createTextField(
@@ -191,6 +202,70 @@ export function SignupForm() {
               },
               getErrorSchema("password"),
               {
+                as: "div",
+                attributes: [
+                  {
+                    css: PROPERTIES.Css.CheckBoxCss,
+                    componentName: "TextInput",
+                    key: "termsAgreement",
+                    props: (options: FunctionArgumentType) => ({
+                      onInput: (e: Event) => {
+                        if (e.target instanceof HTMLInputElement) {
+                          options.updateValue(e.target.checked);
+                        }
+                      },
+                      type: "checkbox",
+                      validation: {
+                        required: true,
+                      },
+                    }),
+                    validation: {
+                      required: true,
+                    },
+                  },
+                  {
+                    as: "div",
+                    componentName: "Html",
+                    css: css`
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+`,
+                    attributes: [
+                      {
+                        as: "span",
+                        componentName: "Html",
+                        css: css`
+  color: \${args.theme.var.color.base};
+`,
+                        text: "I agree to the ",
+                      },
+                      {
+                        as: "a",
+                        componentName: "Html",
+                        css: css`
+  color: \${args.theme.var.color.primary};
+  cursor: pointer;
+`,
+                        props: () => ({
+                          onClick: () => {
+                            navigate("/terms");
+                          },
+                        }),
+                        text: "Terms of Service",
+                      },
+                    ],
+                  },
+                ],
+                css: css`
+  display: flex;
+  align-items: center;
+  margin: 16px 0;
+`,
+                componentName: "Html",
+              },
+              getErrorSchema("termsAgreement"),
+              {
                 as: "button",
                 css: [STYLES.button2Css, css`width:100%; margin-top:16px;`],
                 componentName: "Html",
@@ -241,10 +316,10 @@ export function SignupForm() {
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
-                    navigate("/auth/login");
+                    navigate(API.urls.admin.signIn);
                   },
                 }),
-                text: "Login",
+                text: "Sign in",
               },
             ],
             css: css`
