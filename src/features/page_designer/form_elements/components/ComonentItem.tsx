@@ -6,7 +6,6 @@ import { toTitle } from "case-switcher-js";
 
 import { getDynamicComponent } from "~/components/form/functions/getDynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
-import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { iconMap } from "~/lib/ui/iconMap";
 
@@ -15,22 +14,20 @@ import { useDesignerLayoutStore } from "../../context/LayoutContext";
 import { resetDragDropState } from "../../event_handler/resetDragDropState";
 // import { OpenComponentSettings } from "../../OpenComponentSettings";
 import { TreeItemExpandButton } from "../../settings/layout/TreeItemExpandButton";
-import { PreviewIsolated } from "../pages/PreviewIsolated";
 import { getCompChildren } from "./functions/getCompChildren";
 import { onCompDragStart } from "./functions/onCompDragStart";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import {
   baseItemStyle,
-  hoverItemStyle,
   buttonStyle,
-  setupPreview,
   createOpenInNewTab,
 } from "../common/ItemStyles";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { ComponentPreview } from "./ComponentPreview";
 
 export function ComponentItem(
   props: Readonly<{
@@ -47,8 +44,8 @@ export function ComponentItem(
 ) {
   const [graph, setGraph] = useGraph();
   const [isHovered, setIsHovered] = createSignal(false);
-  const [floating, setFloating] = createSignal<HTMLElement | null>(null);
-  const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
+  const [isMouseOverItem, setIsMouseOverItem] = createSignal(false);
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
@@ -57,42 +54,44 @@ export function ComponentItem(
     new Set<Vertex>(),
   );
 
-  let previewCSSRef: HTMLDivElement | undefined;
-  let menuRef: HTMLDivElement | undefined;
+  const handleItemMouseEnter = () => {
+    setIsHovered(true);
+    setIsMouseOverItem(true);
+  };
 
-  // Use shared preview setup with function for props
-  const { handleMouseEnter, handleMouseLeave } = setupPreview(
-    () => ({
-      previewPageId: props.previewPageId,
-      setPreviewPageId: props.setPreviewPageId,
-      itemId: props.child.id,
-    }),
-    {
-      setHoverPageId,
-      setIsHovered,
-    },
-  );
+  const handleItemMouseLeave = () => {
+    setIsMouseOverItem(false);
+    // Only change hover state if preview is not open
+    if (!isPreviewOpen()) {
+      setIsHovered(false);
+    }
+  };
+  /* Preview logic
+    When the mouse enters the item, we set isHovered to true
+    When the mouse enters the eye button, we start a timer to show the preview
+    When the preview shows, isPreviewOpen is set to true
+    As long as either isHovered or isPreviewOpen is true, the buttons remain visible
+    When the preview closes, we use a short timeout to reset the hover state if needed
+  */
+  const handlePreviewOpen = () => {
+    setIsPreviewOpen(true);
+    // Ensure item stays in hovered state
+    setIsHovered(true);
+  };
+
+  const handlePreviewClose = () => {
+    setIsPreviewOpen(false);
+
+    // Only reset hover state if mouse is not over the item
+    if (!isMouseOverItem()) {
+      setIsHovered(false);
+    }
+  };
 
   const getItemStyle = () => {
     const backgroundColor = isNegative(props.child.id) ? "#e8ffe8" : "white";
-    const baseStyle = `${baseItemStyle}; background-color: ${backgroundColor};`;
-    return hoverPageId() === props.child.id
-      ? `${baseStyle} ${hoverItemStyle}`
-      : baseStyle;
+    return `${baseItemStyle}; background-color: ${backgroundColor};`;
   };
-
-  // const handleCheckboxChange = (event: Event, id: Id) => {
-  //   const isChecked = (event.target as HTMLInputElement).checked;
-  //   if (isChecked) {
-  //     setSelectedComponents((prev) => new Set(prev).add(graph.vertexes[id]));
-  //   } else {
-  //     setSelectedComponents((prev) => {
-  //       const newSet = new Set(prev);
-  //       newSet.delete(graph.vertexes[id]);
-  //       return newSet;
-  //     });
-  //   }
-  // };
 
   const onDragEnd = () => {
     resetDragDropState(layoutStoreVertex(), graph, setGraph);
@@ -116,6 +115,9 @@ export function ComponentItem(
     return rawName ? toTitle(rawName) : "";
   };
 
+  // Should show buttons if item is hovered or preview is open
+  const shouldShowButtons = () => isHovered() || isPreviewOpen();
+
   return (
     <>
       <As
@@ -136,9 +138,8 @@ export function ComponentItem(
             setSelectedComponents,
           );
         }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={(e) => handleMouseLeave(e, floating(), previewCSSRef)}
-        ref={(el) => (menuRef = el)}
+        onMouseEnter={handleItemMouseEnter}
+        onMouseLeave={handleItemMouseLeave}
       >
         <Show when={children().length > 0}>
           <TreeItemExpandButton
@@ -173,34 +174,15 @@ export function ComponentItem(
           {getDisplayName()}
         </As>
 
-        {/* <Show when={isHovered()}>
-          <OpenComponentSettings
-            css={css`
-              cursor: pointer;
-              position: absolute;
-              right: 30px;
-              top: 8px;
-            `}
-            id={props.child.id}
-          />
-        </Show> */}
-
-        {/* <Show when={isHovered() || selectedComponents().has(graph.vertexes[props.child.id])}>
-          <As
-            as="input"
-            checked={selectedComponents().has(graph.vertexes[props.child.id])}
-            css={css`
-              position: absolute;
-              right: 55px;
-              top: 10px;
-            `}
-            onChange={(e) => handleCheckboxChange(e, props.child.id)}
-            type="checkbox"
-          />
-        </Show> */}
-
-        <Show when={props.child.L[0] !== "Comp" && isHovered()}>
-          <As as="div" css={css`margin-left: auto;`}>
+        <Show when={shouldShowButtons()}>
+          <As as="div" css={css`margin-left: auto; display: flex;`}>
+            <ComponentPreview
+              formId={props.child.id}
+              previewGraph={props.previewGraph}
+              setPreviewGraph={props.setPreviewGraph}
+              onPreviewOpen={handlePreviewOpen}
+              onPreviewClose={handlePreviewClose}
+            />
             <IconButton
               css={buttonStyle}
               icon="ph:arrow-square-out"
@@ -211,34 +193,6 @@ export function ComponentItem(
           </As>
         </Show>
       </As>
-
-      {/* Handle dropdown preview */}
-      <Show
-        when={
-          props.child.L[0] !== "Comp" &&
-          props.previewPageId === props.child.id &&
-          menuRef
-        }
-      >
-        <DropdownMenu
-          offset={{ crossAxis: 30 }}
-          onClickOutside={() => props.setPreviewPageId(null)}
-          onMouseLeave={(e) => {
-            if (menuRef && !menuRef.contains(e.relatedTarget as Node)) {
-              props.setPreviewPageId(null);
-            }
-          }}
-          parentRef={menuRef as HTMLElement}
-          ref={(el) => el && setFloating(el)}
-        >
-          {/* {toTitle(props.child.P.key)} Preview */}
-          <PreviewIsolated
-            formId={props.child.id}
-            graph={props.previewGraph}
-            setGraph={props.setPreviewGraph}
-          />
-        </DropdownMenu>
-      </Show>
 
       {/* Render children */}
       <Show
