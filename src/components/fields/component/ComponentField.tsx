@@ -10,7 +10,6 @@ import {
   usePreviewContext,
 } from "~/features/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
-import { evalExpression } from "~/lib/expression_eval";
 
 import type { GenericComponentProps } from "../type/FieldType";
 
@@ -23,6 +22,7 @@ import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
+import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 
 export function ComponentField(
   props: Readonly<GenericComponentProps & { componentId?: string }>,
@@ -37,15 +37,20 @@ export function ComponentField(
 
   const getCompVertex = createMemo(() =>
     meta()
-      ? findVertexByLabelAndUniqueId(graph, 'Component', "key", meta()!.P.componentName)
+      ? findVertexByLabelAndUniqueId(
+          graph,
+          "Component",
+          "key",
+          meta()!.P.componentName,
+        )
       : undefined,
   );
 
   const componentData = createAsync(
     async () => {
       const vertex = getCompVertex();
-      if (vertex) {
-        return null;
+      if (vertex && getChildrenAttrs(graph, setGraph, vertex).length !== 0) {
+        return {};
       }
       return await fetchComponentData([meta()!.P.componentName]);
     },
@@ -146,13 +151,13 @@ export function ComponentField(
   };
 
   const Content = () => {
-    if (componentData()) {
+    if (componentData() && componentData()?.graph) {
       setGraphData(graph, setGraph, componentData()!.graph!, {
         skipExisting: true,
       });
     }
     return (
-      <Show when={getCompVertex()} fallback={<div>Error</div>}>
+      <Show when={getCompVertex()} fallback={<div>No Component Found!</div>}>
         <SlotContext.Provider value={Children}>
           <ComponentWrapper />
         </SlotContext.Provider>

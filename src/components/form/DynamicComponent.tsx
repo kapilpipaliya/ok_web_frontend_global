@@ -45,8 +45,6 @@ import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransact
 import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/revertTransactionUpToIndex";
 
 import type { FunctionArgumentType } from "./type/FieldSchemaType";
-
-import { NotFoundComponent } from "../fields/NotFoundComponent";
 import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
@@ -69,6 +67,7 @@ import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
 import { IdAttr } from "~/lib/graph/type/idAttr";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { ComponentField } from "../fields/component/ComponentField";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -545,7 +544,7 @@ export function DynamicComponent(
   const component = createMemo(() =>
     typeof componentName() === "function"
       ? componentName()
-      : getDynamicComponent(componentName()) || NotFoundComponent,
+      : (getDynamicComponent(componentName() as string) ?? ComponentField),
   );
   const isHidden = () => {
     try {
@@ -764,7 +763,7 @@ export function DynamicComponent(
   const ContentWrapper = () => {
     return (
       <Switch>
-        <Match when={componentName() === "Component"}>
+        <Match when={component() === ComponentField}>
           <PreviewContext.Provider value={[previewStoreProxy, setPreviewStore]}>
             <Content />
           </PreviewContext.Provider>

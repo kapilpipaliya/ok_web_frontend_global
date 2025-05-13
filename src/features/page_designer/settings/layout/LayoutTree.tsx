@@ -1,9 +1,4 @@
-import {
-  createSignal,
-  For,
-  Show,
-  onCleanup,
-} from "solid-js";
+import { createSignal, For, Show, onCleanup } from "solid-js";
 import { createStore, reconcile, type SetStoreFunction } from "solid-js/store";
 import { Icon } from "@iconify-icon/solid";
 import { debounce } from "@solid-primitives/scheduled";

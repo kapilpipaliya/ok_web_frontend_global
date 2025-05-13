@@ -33,7 +33,8 @@ export async function fetchFormData(
   hasRequiredPermissions?: boolean,
   pageVertexName?: string,
 ): Promise<FetchFormDataResult> {
-  "use server";
+  // adding use server, is passing function in response when Component tab is opened, and it breaks the SSR.
+  // "use server";
   if (formDataId) {
     return { formDataIdOverride: formDataId };
   }
@@ -64,12 +65,12 @@ export async function fetchFormData(
 
     // Create a set of component names from Attr vertices
     const componentNames = new Set<string>();
-    
+
     // Find all Attr vertices that define componentName
     for (const vertex of Object.values(formDataResult.data!.graph!.vertexes)) {
-      if (vertex.L.includes('Attr') && vertex.P.componentName) {
+      if (vertex.L.includes("Attr") && vertex.P.componentName) {
         // Skip "Html", "Data" and "Slot" components
-        if (!['Html', 'Data', 'Slot'].includes(vertex.P.componentName)) {
+        if (!["Html", "Data", "Slot"].includes(vertex.P.componentName)) {
           componentNames.add(vertex.P.componentName);
         }
       }

@@ -1,14 +1,8 @@
-import type { SetStoreFunction } from "solid-js/store";
-
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRowsAttr";
 import { FormMetaData } from "~/lib/meta/formMetaData";
-import type { Vertex } from "~/lib/graph/type/vertex";
-import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
-export async function fetchComponentData(
-  componentNames: string[],
-) {
+export async function fetchComponentData(componentNames: string[]) {
   const componentData = await fetchComponentDataPure(componentNames);
   if (componentData?.graph) {
     // skip existing because we not want to modify existing component data
@@ -24,15 +18,18 @@ export async function fetchComponentDataPure(
   const { incoming, outgoing } = getEdgesFromRowsAttr(
     FormMetaData.Component.attributes,
   );
-  return await fetchDataFromDB({
-    expression: `g:'Component[$initial]'`,
-    // [getGlobalStore(graph).P.url]: true,
-    incoming,
-    outgoing,
-  }, {
-    nodes: {},
-    relationships: {},
-    // @ts-expect-error ignore error
-    $initial: { filter: { key: {$in: componentNames}}}
-  });
+  return await fetchDataFromDB(
+    {
+      expression: `g:'Component[$initial]'`,
+      // [getGlobalStore(graph).P.url]: true,
+      incoming,
+      outgoing,
+    },
+    {
+      nodes: {},
+      relationships: {},
+      // @ts-expect-error ignore error
+      $initial: { filter: { key: { $in: componentNames } } },
+    },
+  );
 }

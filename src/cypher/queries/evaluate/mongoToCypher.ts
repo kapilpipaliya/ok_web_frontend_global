@@ -4,7 +4,14 @@ export interface CypherQueryResult {
 }
 
 // Define a type to replace 'any'
-export type MongoValue = string | number | boolean | null | Date | MongoValue[] | { [key: string]: MongoValue };
+export type MongoValue =
+  | string
+  | number
+  | boolean
+  | null
+  | Date
+  | MongoValue[]
+  | { [key: string]: MongoValue };
 
 export type MongoFilter =
   | { $and?: MongoFilter[] }
@@ -37,16 +44,35 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
     return Object.entries(filter)
       .map(([key, value]) => {
         if (key === "$and" && Array.isArray(value)) {
-          return "(" + value.map((item) => translateFilter(item as MongoFilter)).join(" AND ") + ")";
+          return (
+            "(" +
+            value
+              .map((item) => translateFilter(item as MongoFilter))
+              .join(" AND ") +
+            ")"
+          );
         }
         if (key === "$or" && Array.isArray(value)) {
-          return "(" + value.map((item) => translateFilter(item as MongoFilter)).join(" OR ") + ")";
+          return (
+            "(" +
+            value
+              .map((item) => translateFilter(item as MongoFilter))
+              .join(" OR ") +
+            ")"
+          );
         }
         if (key === "$not" && typeof value === "object") {
           return "NOT (" + translateFilter(value as MongoFilter) + ")";
         }
-        if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-          return handleOperators(key, value as { [operator: string]: MongoValue });
+        if (
+          typeof value === "object" &&
+          value !== null &&
+          !Array.isArray(value)
+        ) {
+          return handleOperators(
+            key,
+            value as { [operator: string]: MongoValue },
+          );
         }
         // Direct equality
         const paramName = `param${paramIndex++}`;

@@ -589,11 +589,7 @@ export function PageViewWrapper(
 
       setFormStore("formDataId", createResult.vertex!.id);
     }
-    if (formDataId) {
-      setFormStore("formDataId", formDataId);
 
-      createErrorVertex(formDataId);
-    }
     if (!(props.parentId || props.txnId) && props.isDesignMode) {
       setPreventUndoAtOrBeforeIndex(formStore().P.txnId, graph, setGraph);
     }
@@ -608,10 +604,19 @@ export function PageViewWrapper(
       return;
     }
     if (result.data?.graph) {
-      setGraphData(graph, setGraph, result.data.graph);
+      // if we don't skip existing, if component is already added in the page, and we open in new tab, and modify it not updating existing components.
+      setGraphData(graph, setGraph, result.data.graph, { skipExisting: true });
     }
     if (result.componentData?.graph) {
-      setGraphData(graph, setGraph, result.componentData.graph!);
+      setGraphData(graph, setGraph, result.componentData.graph!, {
+        skipExisting: true,
+      });
+    }
+
+    if (formDataId) {
+      setFormStore("formDataId", formDataId);
+
+      createErrorVertex(formDataId);
     }
   }
 
