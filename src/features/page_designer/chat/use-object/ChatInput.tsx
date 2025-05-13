@@ -1,6 +1,14 @@
 import type { Message } from "ai";
 
-import { createSignal, For, type JSX, Match, Show, Switch } from "solid-js";
+import {
+  createSignal,
+  For,
+  type JSX,
+  Match,
+  Show,
+  Switch,
+  onMount,
+} from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
@@ -8,6 +16,7 @@ import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
 import { STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
+import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 
 interface ChatInputProps {
   chatMessages: Message[];
@@ -59,16 +68,6 @@ export function ChatInput(props: ChatInputProps) {
       >
         <ModelSelector
           isLoading={props.isLoading}
-          models={[
-            "o1",
-            "o1-mini",
-            "o1-preview",
-            "gpt-4o",
-            "gpt-4o-mini",
-            "gpt-4-turbo",
-            "gpt-4",
-            "gpt-3.5-turbo",
-          ]}
           selectedModel={selectedModel}
           setSelectedModel={setSelectedModel}
         />
@@ -643,40 +642,72 @@ function MessagesCount(props: {
 
 function ModelSelector(props: {
   isLoading: () => boolean;
-  models: string[];
   selectedModel: () => string;
   setSelectedModel: (model: string) => void;
 }) {
+  const [options, setOptions] = createSignal<Option[]>([]);
+  const [loading, setLoading] = createSignal(true);
+
+  const fetchModels = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/chat/models");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch models: ${response.status}`);
+      }
+      const data = await response.json();
+      setOptions([data]);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching models:", error);
+      setLoading(false);
+    }
+  };
+
+  // Fetch models on component mount
+  onMount(() => {
+    fetchModels();
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleSelect = (newSelected: Option[], _value: Option) => {
+    if (newSelected.length > 0) {
+      const selected = newSelected[0];
+      const modelId = typeof selected === "string" ? selected : selected.id;
+      props.setSelectedModel(modelId);
+    }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleRemove = (_newSelected: Option[], _value: Option) => {
+    // No additional handling needed for single select
+  };
+
+  // Convert the selected model to an Option format for MultiSelectField
+  const selectedValues = () => {
+    const currentModel = props.selectedModel();
+    if (!currentModel) return [];
+
+    return [{ id: currentModel, label: currentModel }];
+  };
+
   return (
-    <As
-      as="select"
+    <MultiSelectField
       css={css`
-  padding: 8px 12px;
-  border: 1px solid \${args.theme.var.color.base_10};
-  border-radius: 6px;
-  width: fit-content;
-  background: \${args.theme.var.color.base_2};
-  font-size: 14px;
-  cursor: pointer;
-  transition: border-color 0.2s;
-  
-  &:focus {
-    border-color: \${args.theme.var.color.base_20};
-    outline: none;
-  }
-  
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-`}
-      disabled={props.isLoading()}
-      onChange={(e) => props.setSelectedModel(e.currentTarget.value)}
-      value={props.selectedModel()}
-    >
-      <For each={props.models}>
-        {(model) => <option value={model}>{model}</option>}
-      </For>
-    </As>
+        min-width: 200px;
+      `}
+      childrenKey="children"
+      optionValueKey="id"
+      displayValueKey="label"
+      isLoadingOptions={loading()}
+      loadOptions={fetchModels}
+      onRemove={handleRemove}
+      onSelect={handleSelect}
+      options={options()}
+      placeholder="Select a model"
+      selectedValues={selectedValues}
+      selectionLimit={1}
+      disable={props.isLoading()}
+    />
   );
 }

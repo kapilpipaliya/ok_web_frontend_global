@@ -62,7 +62,8 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                     {option.tooltip ?? option.value}
                   </As>
                 }
-                contentCss={(args) => css`
+                contentCss={(args) => [
+                  css`
                   border-radius: 8px;
                   background: ${args.theme.var.color.base_10};
                   padding: 8px 12px;
@@ -73,7 +74,9 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                   &[data-state='closed'] {
                     animation: out 200ms ease-in;
                   }
-                  @keyframes in {
+                  
+                `,
+                  `@keyframes in {
                     from {
                       opacity: 0;
                       transform: translateY(4px);
@@ -92,8 +95,8 @@ export const ButtonGroups = (props: Readonly<ButtonGroupField>) => {
                       opacity: 0;
                       transform: translateY(4px);
                     }
-                  }
-                `}
+                  }`,
+                ]}
               >
                 <As
                   as="input"

@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { openai } from "@ai-sdk/openai";
+import { openrouter } from "@openrouter/ai-sdk-provider";
 import { streamText } from "ai";
 
 import { SYSTEM_PROMPT } from "./SYSTEM_PROMPT";
@@ -22,7 +22,8 @@ export const POST = async (event: APIEvent) => {
       },
       ...messages,
     ],
-    model: openai(model || "gpt-4-turbo"),
+    model: openrouter(model || "openai/gpt-4-turbo"),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async onFinish({ finishReason, text, toolCalls, toolResults, usage }) {
       // Implement custom logic for message storage and usage tracking
     },

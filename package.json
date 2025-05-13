@@ -20,6 +20,7 @@
     "@floating-ui/dom": "^1.7.0",
     "@iconify-icon/solid": "^3.0.0",
     "@microlink/react-json-view": "^1.26.1",
+    "@openrouter/ai-sdk-provider": "^0.4.5",
     "@razr/crypto": "npm:@jsr/razr__crypto@^0.0.1",
     "@solid-aria/primitives": "^0.4.0",
     "@solid-primitives/autofocus": "^0.1.1",

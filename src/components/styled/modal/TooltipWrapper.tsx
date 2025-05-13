@@ -387,7 +387,9 @@ export function TooltipWrapper(props: {
                 opacity: 1;
                 animation: tooltipFadeIn 200ms ease-out;
                 
-                @keyframes tooltipFadeIn {
+                
+              `,
+              `@keyframes tooltipFadeIn {
                   from {
                     opacity: 0;
                     transform: translate(${position().x}px, ${position().y + 5}px);
@@ -396,8 +398,7 @@ export function TooltipWrapper(props: {
                     opacity: 1;
                     transform: translate(${position().x}px, ${position().y}px);
                   }
-                }
-              `,
+                }`,
             ]}
           >
             {props.content}

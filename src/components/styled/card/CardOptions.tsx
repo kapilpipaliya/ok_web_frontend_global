@@ -57,7 +57,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
           as="div"
           aria-labelledby={`options-menu-${props.title}-button`}
           aria-orientation="vertical"
-          css={(args: FunctionArgumentType) => css`
+          css={(args: FunctionArgumentType) => [
+            css`
               background-color: ${args.theme.var.color.base_5};
               border-radius: 0.5rem;
               box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -72,8 +73,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
               width: 10rem;
               z-index: 10;
               animation: dropdown 0.2s ease forwards;
-
-              @keyframes dropdown {
+          `,
+            `@keyframes dropdown {
                   from {
                       opacity: 0;
                       transform: translateY(-8px) scale(0.96);
@@ -82,8 +83,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
                       opacity: 1;
                       transform: translateY(0) scale(1);
                   }
-              }
-          `}
+              }`,
+          ]}
           role="menu"
           tabindex="-1"
         >

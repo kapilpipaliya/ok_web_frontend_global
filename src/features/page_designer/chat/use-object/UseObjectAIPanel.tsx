@@ -323,11 +323,12 @@ Choose colors that work well for the context and maintain good contrast ratios.
   border-top-color: rgb(59,130,246);
   animation: spin 1s infinite linear;
   
-  @keyframes spin {
+
+`,
+                  `  @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-  }
-`,
+  }`,
                 ]}
               />
               <As
