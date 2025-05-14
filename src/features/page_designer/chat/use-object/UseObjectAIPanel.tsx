@@ -50,7 +50,7 @@ export function UseObjectAIPanel() {
   let examplesButtonRef: HTMLButtonElement | undefined;
   let fileInputRef: HTMLInputElement | undefined;
 
-  const globalTheme = themeConfig(getGlobalThemeVertex(graph));
+  const globalTheme = () => themeConfig(getGlobalThemeVertex(graph));
 
   // Add onMount to scroll to bottom initially
   onMount(() => {
@@ -156,11 +156,11 @@ export function UseObjectAIPanel() {
           {
             content: `
 You are a designer.
-You have access to the following theme color variables:
+You have access to the following theme variables:
 \`\`\`json
-${JSON.stringify(globalTheme)}
+${JSON.stringify(globalTheme())}
 \`\`\`
-you can use above theme variables in css properties, dont use css variables like 'var(--color-primary)'.
+you can use above theme variables in css properties, like: \`\${args.theme.var.color.base_10}\`.
 
 Choose colors that work well for the context and maintain good contrast ratios.
 `.trim(),

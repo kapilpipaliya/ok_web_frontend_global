@@ -177,7 +177,7 @@ export function ComponentItem(
         <Show when={shouldShowButtons()}>
           <As as="div" css={css`margin-left: auto; display: flex;`}>
             <ComponentPreview
-              formId={props.child.id}
+              item={props.child}
               previewGraph={props.previewGraph}
               setPreviewGraph={props.setPreviewGraph}
               onPreviewOpen={handlePreviewOpen}

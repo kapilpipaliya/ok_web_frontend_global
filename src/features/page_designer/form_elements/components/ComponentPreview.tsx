@@ -3,12 +3,12 @@ import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { PreviewIsolated } from "../pages/PreviewIsolated";
 import { buttonStyle } from "../common/ItemStyles";
-import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { SetStoreFunction } from "solid-js/store";
+import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function ComponentPreview(props: {
-  formId: Id;
+  item: Vertex;
   previewGraph: GraphInterface;
   setPreviewGraph: SetStoreFunction<GraphInterface>;
   onClick?: (e: MouseEvent) => void;
@@ -120,7 +120,7 @@ export function ComponentPreview(props: {
             onMouseLeave={(e) => e.stopPropagation()}
           >
             <PreviewIsolated
-              formId={props.formId}
+              item={props.item}
               graph={props.previewGraph}
               setGraph={props.setPreviewGraph}
             />

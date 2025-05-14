@@ -185,7 +185,8 @@ export function PageItem(
           >
             {toTitle(props.child.key)} Preview
             <PreviewIsolated
-              formId={props.child.id}
+              // TODO FIX THIS
+              item={props.child}
               graph={props.previewGraph}
               setGraph={props.setPreviewGraph}
             />
