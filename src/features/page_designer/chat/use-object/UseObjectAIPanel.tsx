@@ -17,7 +17,7 @@ import {
 } from "../../context/LayoutContext";
 import { ChatInput } from "./ChatInput";
 import { ChatMessage } from "./ChatMessage";
-import { ChatResponse } from "./ChatResponse";
+import { ChatResponse } from "./chat_response/ChatResponse";
 import { EXAMPLE_PROMPTS } from "./constants/EXAMPLE_PROMPTS";
 import { getChatHistory } from "./functions/getChatHistory";
 import { css } from "~/lib/styles";

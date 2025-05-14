@@ -309,6 +309,9 @@ export function PageViewWrapper(
       if (!metaResult) {
         return { error: "No meta data found" };
       }
+      if (metaResult.error) {
+        return metaResult;
+      }
 
       let formMetaId = constants.formMetaId;
       if (metaResult.data) {
@@ -498,14 +501,19 @@ export function PageViewWrapper(
     formMetaId?: string;
     metaResult?: FetchFormMetaDataResult;
     dataResult?: FetchFormDataResult;
+    error?: string;
   }) => {
     if (result) {
       untrack(() => {
         batch(() => {
-          setFormMetaData(result?.metaResult, result?.formMetaId);
-          const validationError = validateMetaVertex();
-          if (!validationError) {
-            handleFormData(result?.dataResult);
+          if (result.error) {
+            setFormStore("error", result.error);
+          } else {
+            setFormMetaData(result?.metaResult, result?.formMetaId);
+            const validationError = validateMetaVertex();
+            if (!validationError) {
+              handleFormData(result?.dataResult);
+            }
           }
         });
       });

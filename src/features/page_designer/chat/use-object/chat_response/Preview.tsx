@@ -1,9 +1,5 @@
-import type { z } from "zod";
-
 import { createSignal, For, onCleanup, Show } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
-
-import type { graphInterfaceSchema } from "~/routes/api/use-object/schema";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
@@ -12,17 +8,17 @@ import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValu
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
-import { toolBarCss } from "~/pages/settings/constants";
+import { headerIconButtonCss, toolBarCss } from "~/pages/settings/constants";
 
 import {
   type PageLayoutObject,
   useDesignerLayoutStore,
-} from "../../context/LayoutContext";
-import { IFramePreview } from "../../layout/IFramePreview";
+} from "../../../context/LayoutContext";
+import { IFramePreview } from "../../../layout/IFramePreview";
 import {
   insertAtPosition,
   insertComponents,
-} from "./functions/insertAtPosition";
+} from "../functions/insertAtPosition";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
@@ -32,7 +28,7 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function Preview(props: {
   message: Vertex;
-  object: z.infer<typeof graphInterfaceSchema>;
+  object: Record<string, any>;
 }) {
   const [graph, setGraph] = useGraph();
   const metaTxnId = generateNewTxnId(graph, setGraph);
@@ -163,6 +159,14 @@ export function Preview(props: {
     const formId = uuidv7();
     return (
       <Show
+        fallback={
+          <As
+            as="div"
+            css={[css`text-align: center; padding: 16px; color: #3b82f6;`]}
+          >
+            No Preview Available
+          </As>
+        }
         when={
           props.object.vertexes?.length > 0 &&
           (
@@ -184,6 +188,7 @@ export function Preview(props: {
             formDataId={parentId}
             hideSaveCancelButton
             isNoPermissionCheck={true}
+            isDesignMode={true}
             pageVertexName="Page"
             uuid={formId}
           />
@@ -195,20 +200,14 @@ export function Preview(props: {
             css={[
               toolBarCss,
               css`
-  display: none;
+
 `,
             ]}
           >
             <IconButton
-              css={css`
-  background-color: transparent;
-  padding: 4px;
-  border-radius: 4px;
-  hover: {
-    background-color: \${args.theme.var.color.neutral_20};
-  }
-`}
-              icon="ph:arrows-clockwise"
+              css={headerIconButtonCss}
+              size={18}
+              icon="ph:arrows-counter-clockwise"
               onClick={handleRefresh}
             />
           </As>

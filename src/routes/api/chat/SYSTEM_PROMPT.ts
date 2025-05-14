@@ -30,12 +30,12 @@ Attr Vertex:
 - Required Properties:
   - displayOrder: number - Determines Item order among siblings
 - Optional Properties:
-  - componentName: string - name of the component any of: 'Html', 'Data', 'Slot'
-  - fns: Function Body string - function definitions for the Item e.g. 'fns: "return {fn1: () => {}}"'. Its the place where you add javascript code to generate dynamic properties for the Item. It will be inherited to all the children of the Item.
-  - props: Function Body string - dynamic properties for the Item e.g. 'props: "return {}"'. Its the place where you add javascript code to generate dynamic properties for the Item.
+  - componentName: string - name of the component any of: 'Html', 'Data', 'Slot' or Custom Component name if specified in prompt.
+  - fns: Function Body string - function definitions for the Item e.g. "return {fn1: () => {}}". Its the place where you add javascript code to generate dynamic properties for the Item. It will be inherited to all the children of the Item.
+  - props: Function Body string - dynamic properties for the Item, it returns an object with key-value pairs e.g. "return {key: value}". Its the place where you add javascript code to generate dynamic properties for the Item.
     - Use 'props' for dynamic values. It is a Function Body string that should return an object with key-value pairs.
     - you can add props by either 'props' function body return value or directly to the vertex properties, prefer the 'props' when value is dynamic.
-  - css: Function Body string - css for the Item e.g. 'css: "return \`._id {color: \${args.theme.var.color.primary}}\`;". Its the place where you add javascript code to generate css for the Item.
+  - css: Function Body string - css for the Item e.g. "return \`._id {color: \${args.theme.var.color.primary}}\`;". Its the place where you add javascript code to generate css for the Item.
 - fns, props and css accepts javascript function body string. you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
   - export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
@@ -78,32 +78,38 @@ Attr Vertex:
     vertexId: string,
     graph: GraphInterface,
     setGraph: SetStoreFunction<GraphInterface>,
-    data: any,
-  ) => void;
-}
+      data: any,
+    ) => void;
+  }
 - if no componentName is provided, it is considered 'Html' type
-  - required properties:
-    1. as: string - specifies HTML tag (div, span, etc)
-      - If omitted, Item acts as a fragment (renders only children)
+  - when 'Html' component is used, it requires properties:
+    1. as: string - specifies HTML tag (div, span, etc), 'icon', 'portal'
+      - If 'as' is omitted, Item acts as a fragment (renders only children)
+      - if 'as' is 'icon', it requires properties:
+        - icon: string - icon name (iconify icon name e.g. ph:icon-name)
+        - height: number - height of the icon
+        - width: number - width of the icon
+  - to add text content to Html type Item:
+    - Add text via 'text' property either:
+      - Directly on vertex
+      - In 'props' function body return 'text' property
+    - Renders as: <>{text}{children}</>
+        
 - componentName must be one of:
   * 'Html' - Basic HTML elements
   * 'Data' - For repeating Item patterns
     - required properties:
       - name: string - name of the data context, must not be empty
+      - loop: boolean - set to true for duplicate repeater components
     - optional properties:
       - expression: string - expression to evaluate the data
-      - loop: boolean - whether to loop over the data
-    - 'Data' Item is used for similar repeating components in the siblings, i.e. when all properties are same, except some, use 'Data' Item and use repeated Item in the children of the 'Data' Item. in the 'Data' Item in the 'props' function body pass data key the array of values it should iterate over.
-    - Requires 'name' property in Attr vertex, In the 'Data' Item children to read the value of the context, in 'props' function body use 'args.contextData["name"]' property.
-    - use 'Data' Item whenever possible.
+    - 'Data' Item can be used for looping its children with different data. Set 'loop' to true and provide a 'name'.
+    - In the 'props' function body of the 'Data' component, pass the 'data' key with an array of values to iterate over.
+    - In child components, access the current iteration item using 'args.contextData.name' within 'props', 'fns', or 'css' function bodies.
+    - Use 'Data' Item whenever possible for repeating patterns.
   * 'Slot' - Component slots
     - optional properties:
       - name: string - name of the slot, default is 'children'
-- to add text content to Html type Item:
-  - Add text via 'text' property either:
-    - Directly on vertex
-    - In 'props' function body return object with 'text' property
-  - Renders as: <>{text}{children}</>
 
 Styling System:
 - Use the 'css' property for styling. It is a function body string that returns a morden css string or array of css strings. for current element style use ._id selector, if not used ._id selector it will be global css.
@@ -161,5 +167,5 @@ return the graph JSON.`;
 //   - Omit componentName property
 
 // other improvements can be done in next release:
-// 1. find all global and page level component from the fronentend(using local data) with its variants and add to prompt 'we have following components with variants:'.
+// 1. find all global and page level component from the frontend(using local data) with its variants and add to prompt 'we have following components with variants:'.
 //
