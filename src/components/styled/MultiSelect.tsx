@@ -149,6 +149,8 @@ type SingleOptionProps = {
   onSelect: (option: Option) => void;
   onToggleExpand: (option: Option) => void;
   hiddenOptions?: () => Set<Option>;
+  optionValueKey?: string;
+  selectedValues?: Option[];
 };
 
 function SingleOption(props: SingleOptionProps) {
@@ -178,7 +180,7 @@ function SingleOption(props: SingleOptionProps) {
           onClick={() => props.onSelect(props.option)}
         >
           {props.renderLabel
-            ? props.renderLabel(props.option, false)
+            ? props.renderLabel(props.option, props.isSelected)
             : getOptionLabel(props.option, props.displayValueKey)}
         </As>
       }
@@ -211,7 +213,7 @@ function SingleOption(props: SingleOptionProps) {
           />
           <span>
             {props.renderLabel
-              ? props.renderLabel(props.option, false)
+              ? props.renderLabel(props.option, props.isSelected)
               : getOptionLabel(props.option, props.displayValueKey)}
           </span>
         </As>
@@ -234,10 +236,21 @@ function SingleOption(props: SingleOptionProps) {
                   childrenKey={props.childrenKey}
                   displayValueKey={props.displayValueKey}
                   renderLabel={props.renderLabel}
-                  isSelected={() => props.isSelected}
+                  isSelected={() => {
+                    if (props.selectedValues && props.optionValueKey) {
+                      return props.selectedValues.some(
+                        (item) =>
+                          getOptionValue(item, props.optionValueKey) ===
+                          getOptionValue(childOption, props.optionValueKey),
+                      );
+                    }
+                    return false;
+                  }}
                   onSelect={props.onSelect}
                   onToggleExpand={props.onToggleExpand}
                   hiddenOptions={props.hiddenOptions || (() => new Set())}
+                  optionValueKey={props.optionValueKey}
+                  selectedValues={props.selectedValues}
                 />
               )}
             </For>
@@ -257,6 +270,8 @@ function OptionItem(props: {
   onSelect: (option: Option) => void;
   onToggleExpand: (option: Option) => void;
   hiddenOptions: () => Set<Option>;
+  optionValueKey?: string;
+  selectedValues?: Option[];
 }) {
   const isExpanded = () => !props.hiddenOptions().has(props.option);
   const hasChildren = () => {
@@ -277,6 +292,8 @@ function OptionItem(props: {
       onSelect={props.onSelect}
       onToggleExpand={props.onToggleExpand}
       hiddenOptions={props.hiddenOptions}
+      optionValueKey={props.optionValueKey}
+      selectedValues={props.selectedValues}
     />
   );
 }
@@ -351,6 +368,14 @@ function OptionsList(props: OptionsListProps) {
   );
   const { showErrorToast } = useToast();
   const owner = getOwner();
+
+  const isOptionSelected = (option: Option) => {
+    return props.selectedValues.some(
+      (item) =>
+        getOptionValue(item, props.optionValueKey) ===
+        getOptionValue(option, props.optionValueKey),
+    );
+  };
 
   const handleSelectChange = (option: Option) => {
     runWithOwner(owner, () => {
@@ -470,16 +495,12 @@ function OptionsList(props: OptionsListProps) {
               childrenKey={props.childrenKey}
               displayValueKey={props.displayValueKey}
               renderLabel={props.renderLabel}
-              isSelected={() =>
-                props.selectedValues.some(
-                  (item) =>
-                    getOptionValue(item, props.optionValueKey) ===
-                    getOptionValue(option, props.optionValueKey),
-                )
-              }
+              isSelected={() => isOptionSelected(option)}
               onSelect={handleSelectChange}
               onToggleExpand={toggleExpandOption}
               hiddenOptions={hiddenOptions}
+              optionValueKey={props.optionValueKey}
+              selectedValues={props.selectedValues}
             />
           )}
         </For>
@@ -621,7 +642,7 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
               disabled={props.disable}
               onFocus={handleInputFocus}
               onInput={(e) => setInputValue(e.target.value)}
-              placeholder={props.placeholder ?? "Select options"}
+              placeholder={props.placeholder}
               ref={inputRef}
               type="text"
               value={inputValue()}
