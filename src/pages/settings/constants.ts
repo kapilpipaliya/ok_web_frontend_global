@@ -214,6 +214,8 @@ export const toolBarCss = `
 `;
 
 export const profileImage = "/images/profile.png";
+export const rectangleLogoImage = "/images/logo.svg";
+export const squareLogoImage = "/images/logo_square.svg";
 
 export const EMAIL_TEMPLATES = {
   AccountDeletionRequest: "AccountDeletionRequest",

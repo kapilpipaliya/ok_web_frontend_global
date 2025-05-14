@@ -15,7 +15,11 @@ import { evalExpression } from "~/lib/expression_eval";
 import { getCompanyRectangularLogoVertex } from "~/lib/graph/get/sync/company/getCompanyRectangularLogoVertex";
 import { getCompanySquareLogoVertex } from "~/lib/graph/get/sync/company/getCompanySquareLogoVertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
-import { profileImage, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
+import {
+  rectangleLogoImage,
+  SETTINGS_CONSTANTS,
+  squareLogoImage,
+} from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { css } from "~/lib/styles";
@@ -157,7 +161,6 @@ export function CompanyLogoSettings() {
             css: css`
   cursor: pointer;
   height: 60px;
-  object-fit: cover;
 `,
             componentName: "Html",
             key: "companyLogo",
@@ -165,7 +168,7 @@ export function CompanyLogoSettings() {
               const selectedFile = rectangularCompanyLogoVertex()[0];
               return {
                 onClick: () => setOpenRectangularDialog(true),
-                src: getDownloadLink(selectedFile) || profileImage,
+                src: getDownloadLink(selectedFile) || rectangleLogoImage,
               };
             },
           },
@@ -203,7 +206,6 @@ export function CompanyLogoSettings() {
   height: 60px;
   width: 60px;
   border-radius: 50%;
-  object-fit: cover;
 `,
             componentName: "Html",
             key: "companySquareLogo",
@@ -211,7 +213,7 @@ export function CompanyLogoSettings() {
               const selectedFile = squareCompanyLogoVertex()[0];
               return {
                 onClick: () => setOpenSquareDialog(true),
-                src: getDownloadLink(selectedFile) || profileImage,
+                src: getDownloadLink(selectedFile) || squareLogoImage,
               };
             },
           },

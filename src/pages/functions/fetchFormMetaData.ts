@@ -20,7 +20,7 @@ export async function fetchFormMetaData(
     // can't return form, if it contins functions
     return { form };
   }
-  form = FormMetaData[pageVertexName ?? "Page"] || formMetaData.Page;
+  form = FormMetaData[pageVertexName ?? "Page"] || FormMetaData.Page;
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
   const data = await fetchDataFromDB({

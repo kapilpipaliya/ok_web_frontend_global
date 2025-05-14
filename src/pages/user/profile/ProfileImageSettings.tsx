@@ -105,7 +105,6 @@ export function ProfileImageSettings() {
             css: css`
   cursor: pointer;
   height: 60px;
-  object-fit: cover;
 `,
             componentName: "Html",
             key: "profileImage",
