@@ -1,15 +1,12 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { getQuery } from "vinxi/http";
-
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
-import { downloadFile } from "./functions/downloadFile";
+import { downloadFile } from "../functions/downloadFile";
 
-export async function GET({ request }: APIEvent) {
-  const query = getQuery();
-  const fileName = query.fileName;
+export async function GET({ request, params }: APIEvent) {
+  const fileName = params.fileName;
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {

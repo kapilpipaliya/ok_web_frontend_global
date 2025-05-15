@@ -1,4 +1,4 @@
-import { API } from "~/lib/api/endpoints";
+
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
 
@@ -8,6 +8,7 @@ import { arrayToString } from "./arrayToString";
 import { getCssSelectedFileEdgeName } from "./getCssSelectedFileEdgeName";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 
 export function cssStateToString(
   cssStore: CSSStore | string,
@@ -68,10 +69,6 @@ export function cssStateToString(
     .join("\n");
 }
 
-export function getUrl(data: Vertex) {
-  return `${API.file.downloadFileUrl}?fileId=${data.id}`;
-}
-
 export function replacePlaceholderWithUrl(
   value: string,
   edgeName: string,
@@ -94,5 +91,5 @@ export function replacePlaceholderWithUrl(
   }
 
   const file = files[0];
-  return value.replaceAll("$1", getUrl(file));
+  return value.replaceAll("$1", getDownloadLink(file));
 }

@@ -205,7 +205,6 @@ export function CompanyLogoSettings() {
   cursor: pointer;
   height: 60px;
   width: 60px;
-  border-radius: 50%;
 `,
             componentName: "Html",
             key: "companySquareLogo",
