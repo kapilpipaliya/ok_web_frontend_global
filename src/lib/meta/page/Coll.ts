@@ -68,7 +68,8 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
       },
       {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextArea",
+        componentName: "TextInput",
+        type: "textarea",
         key: "description",
       },
       // {         componentName: "TextInput",

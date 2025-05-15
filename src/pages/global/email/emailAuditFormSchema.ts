@@ -105,7 +105,7 @@ export const emailAuditFormSchema = {
             },
             // {
             //   css: PROPERTIES.Css.TextFieldCss,
-            //   componentName: "TextArea",
+            //   componentName: "TextInput", type: "textarea",
             //   key: "content",
             //   placeholder: "Enter email content",
             //   validation: { required: true },

@@ -61,7 +61,8 @@ export const File: IFormMetaData = {
     // A brief description or notes about the file, which can provide context or additional details.
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextArea",
+      componentName: "TextInput",
+      type: "textarea",
       displayName: "Description",
       key: "description",
     },
@@ -138,7 +139,8 @@ export const Folder: IFormMetaData = {
     // A brief description or notes about the directory.
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextArea",
+      componentName: "TextInput",
+      type: "textarea",
       displayName: "Description",
       key: "description",
     },
@@ -169,7 +171,8 @@ export const FileTag: IFormMetaData = {
     // A brief description or notes about the tag.
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextArea",
+      componentName: "TextInput",
+      type: "textarea",
       displayName: "Description",
       key: "description",
     },

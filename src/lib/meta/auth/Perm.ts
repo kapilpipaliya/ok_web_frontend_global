@@ -5,7 +5,8 @@ export const Perm = {
       key: "key",
     },
     {
-      componentName: "TextArea",
+      componentName: "TextInput",
+      type: "textarea",
       key: "description",
     },
   ],

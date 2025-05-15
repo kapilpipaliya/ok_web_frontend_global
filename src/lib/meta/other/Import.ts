@@ -4,7 +4,8 @@ export const Import = {
   attributes: [
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextArea",
+      componentName: "TextInput",
+      type: "textarea",
       height: 500,
       key: "csv",
       width: 600,
@@ -97,7 +98,8 @@ export const Import = {
         },
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextArea",
+          componentName: "TextInput",
+          type: "textarea",
           key: "skipRow",
         },
       ],

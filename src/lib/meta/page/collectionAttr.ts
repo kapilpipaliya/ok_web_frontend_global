@@ -16,7 +16,8 @@ export const collectionAttr = [
   },
   {
     css: PROPERTIES.Css.TextFieldCss,
-    componentName: "TextArea",
+    componentName: "TextInput",
+    type: "textarea",
     key: "definition",
   },
   {

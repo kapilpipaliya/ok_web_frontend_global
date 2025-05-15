@@ -87,7 +87,8 @@ export const Comp: IFormMetaData = {
     // },
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextArea",
+      componentName: "TextInput",
+      type: "textarea",
       key: "description",
     },
     parentCompAttribute,
@@ -154,7 +155,8 @@ export const Comp: IFormMetaData = {
         // },
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextArea",
+          componentName: "TextInput",
+          type: "textarea",
           key: "description",
           // autoResizeEnabled: true,
           width: "550px",
@@ -189,7 +191,8 @@ export const Comp: IFormMetaData = {
         },
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextArea",
+          componentName: "TextInput",
+          type: "textarea",
           key: "description",
 
           // autoResizeEnabled: true,

@@ -88,7 +88,8 @@ export function CompanySettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextArea",
+                componentName: "TextInput",
+                type: "textarea",
                 key: "address",
                 placeholder: "Enter company address",
               },

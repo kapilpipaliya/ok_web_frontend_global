@@ -302,7 +302,8 @@ function createVertices(
       id: vertexIds.text,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextArea",
+        componentName: "TextInput",
+        type: "textarea",
         displayName: "Text",
         key: "text",
         name: "Text",

@@ -54,7 +54,8 @@ const editFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextArea",
+              componentName: "TextInput",
+              type: "textarea",
               key: "description",
               placeholder: "Enter description",
             },

@@ -29,7 +29,8 @@ export function createTextAreaField(
       attributes: [
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextArea",
+          componentName: "TextInput",
+          type: "textarea",
           key,
           props: (options: FunctionArgumentType) => ({
             onChange: options.onChange,

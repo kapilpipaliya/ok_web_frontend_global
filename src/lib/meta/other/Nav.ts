@@ -41,7 +41,8 @@ export const Nav = {
     },
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextArea",
+      componentName: "TextInput",
+      type: "textarea",
       key: "description",
     },
     {
@@ -53,7 +54,8 @@ export const Nav = {
         },
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextArea",
+          componentName: "TextInput",
+          type: "textarea",
           key: "definition",
         },
         {
@@ -114,7 +116,8 @@ Url`,
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextArea",
+              componentName: "TextInput",
+              type: "textarea",
               key: "definition",
             },
             {
@@ -175,7 +178,8 @@ Url`,
                 },
                 {
                   css: PROPERTIES.Css.TextFieldCss,
-                  componentName: "TextArea",
+                  componentName: "TextInput",
+                  type: "textarea",
                   key: "definition",
                 },
                 {
@@ -236,7 +240,8 @@ Url`,
                     },
                     {
                       css: PROPERTIES.Css.TextFieldCss,
-                      componentName: "TextArea",
+                      componentName: "TextInput",
+                      type: "textarea",
                       key: "definition",
                     },
                     {

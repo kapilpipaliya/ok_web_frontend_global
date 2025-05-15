@@ -95,7 +95,8 @@ export function SupportTickets() {
             </div>
           );
         },
-        componentName: "TextArea",
+        componentName: "TextInput",
+        type: "textarea",
         displayName: "Replies",
         key: "replies",
       },

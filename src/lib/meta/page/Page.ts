@@ -124,7 +124,8 @@ export const Page: IFormMetaData = {
                 flex: 1;
               `,
           ],
-          componentName: "TextArea",
+          componentName: "TextInput",
+          type: "textarea",
           key: "description",
         }),
         // {
