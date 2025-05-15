@@ -1,12 +1,12 @@
 import { createLazyMemo } from "@solid-primitives/memo";
 import { Style } from "@solidjs/meta";
 import { useNavigate, useSearchParams } from "@solidjs/router";
-import { toTitle } from "case-switcher-js";
 import {
   createMemo,
   createSignal,
   ErrorBoundary,
   getOwner,
+  type JSX,
   Match,
   onCleanup,
   onMount,
@@ -20,7 +20,6 @@ import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
 import { getMetaProps } from "~/components/form/functions/getMetaProps";
-import { Label } from "~/features/css_editor/components/fields/Label";
 import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 import {
@@ -83,6 +82,7 @@ export function DynamicComponent(
     onChange?: (data: unknown) => void;
     title?: string;
     txnId?: number;
+    children?: JSX.Element;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -704,6 +704,25 @@ export function DynamicComponent(
     return classes;
   });
 
+  const processedText = createMemo(() => {
+    try {
+      if (dynamicProps().text !== undefined) {
+        return dynamicProps().text;
+      }
+
+      const text = props.meta.P.text;
+      if (text && typeof text === "string" && text.includes("${")) {
+        const functionBody = `return \`${text}\``;
+        const textFunction = new Function("args", functionBody);
+        return textFunction(getFunctionArgumentWithValue());
+      }
+      return text;
+    } catch (error) {
+      console.error("Error processing text:", error);
+      return props.meta.P.text;
+    }
+  });
+
   const Content = () => (
     <>
       <ErrorBoundary
@@ -721,6 +740,7 @@ export function DynamicComponent(
           {...mergedClasses()}
           {...permissions()}
           component={component()}
+          text={processedText()}
           disabled={
             isNoPermissionCheck()
               ? props.meta.P.disabled
@@ -749,10 +769,8 @@ export function DynamicComponent(
                 />
               </Show>
             }
-            // @ts-expect-error
             when={props.children}
           >
-            {/* @ts-expect-error */}
             {props.children}
           </Show>
         </Dynamic>
@@ -797,38 +815,13 @@ export function DynamicComponent(
       </Show> */}
       <PageRenderContextProvider store={repeterStore}>
         <Switch>
+          <Match when={isHidden()}>
+            <></>
+          </Match>
           <Match when={!component()}>
             NO INPUT {componentName() as string}
           </Match>
-          {/* @ts-ignore */}
-          <Match when={isHidden()} />
-          <Match
-            when={
-              typeof componentName() !== "function" &&
-              componentName()?.startsWith("System") &&
-              !props.noLabel &&
-              !props.meta.P.noLabel
-            }
-          >
-            <Label
-              class={cssStateToString(
-                props.meta.P.labelClass,
-                { P: { key: "labelClass" } } as unknown as Vertex,
-                props.data!,
-                graph,
-              )}
-              label={
-                // @ts-ignore
-                props.label || props.meta.P.label || toTitle(props.meta.P.key)
-              }
-              layoutClass={props.meta.P.labelLayoutClass}
-              position={props.meta.P.labelPosition}
-              required={props.meta.P.validation?.required}
-              //tooltip={(props.meta).P.tooltip}
-            >
-              <ContentWrapper />
-            </Label>
-          </Match>
+
           <Match
             keyed
             when={component() && (isNoPermissionCheck() || hasPermission())}
