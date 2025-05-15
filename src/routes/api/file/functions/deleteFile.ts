@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { deleteFileMetadata } from "~/routes/api/file/functions/functions/deleteFileMetadata";
-import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
+import { getFileMetadataById } from "~/routes/api/file/functions/functions/getFileMetadataById";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function deleteFile(
@@ -12,7 +12,7 @@ export async function deleteFile(
   neo4jSession: Session,
   user: Vertex,
 ) {
-  const fileMetadata = await getFileMetadata(neo4jSession, fileId);
+  const fileMetadata = await getFileMetadataById(neo4jSession, fileId);
 
   if (!fileMetadata) {
     return new Response(JSON.stringify({ error: "File not found" }), {
@@ -31,7 +31,9 @@ export async function deleteFile(
         try {
           await fs.access(filePath); // Check if file exists
           await fs.unlink(filePath); // Delete the file from the disk only if it exists
-        } catch (_fileError) {}
+        } catch {
+          // Silently continue if file doesn't exist
+        }
       }
 
       await createActivityLog(
@@ -44,9 +46,9 @@ export async function deleteFile(
       );
     }
     return deletedFileResult;
-  } catch (error: any) {
+  } catch (error) {
     return {
-      error: `Error deleting file ${error.message}`,
+      error: `Error deleting file ${error instanceof Error ? error.message : String(error)}`,
       success: false,
     };
   }

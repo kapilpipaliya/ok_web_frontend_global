@@ -5,13 +5,14 @@ import path from "node:path";
 
 import { processResult } from "~/cypher/conversion/processResult";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
+import type { EvalExpressionContext } from "~/cypher/types/EvalExpressionContext";
 import { calculateChecksum } from "~/lib/files/calculateChecksum";
 import { ensureDirectoryExists } from "~/lib/files/ensureDirectoryExists";
 import { getBaseDir } from "~/lib/files/getBaseDir";
 import { saveFileToDisk } from "~/lib/files/saveFileToDisk";
-import { getFileMetadata } from "~/routes/api/file/functions/functions/getFileMetadata";
-import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { getFileMetadataById } from "~/routes/api/file/functions/functions/getFileMetadataById";
+import { saveFileMetadata } from "~/routes/api/file/functions/functions/saveFileMetadata";
 
 export async function replaceFiles(
   request: Request,
@@ -36,7 +37,7 @@ export async function replaceFiles(
     return { error: "Only one file is allowed to be replaced" };
   }
 
-  const oldFileMetadata = await getFileMetadata(neo4jSession, fileId);
+  const oldFileMetadata = await getFileMetadataById(neo4jSession, fileId);
   if (!oldFileMetadata) {
     return { error: "File metadata not found for the provided fileId" };
   }
@@ -70,9 +71,9 @@ export async function replaceFiles(
     }),
   );
 
-  const context = {
-    nodes: {} as { [key: string]: any },
-    relationships: {} as { [key: string]: any },
+  const context: EvalExpressionContext = {
+    nodes: {},
+    relationships: {},
   };
   const result = processResult(
     newFileNodes.filter((node) => node !== null),

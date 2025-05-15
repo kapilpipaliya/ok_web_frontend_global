@@ -1,6 +1,6 @@
 import type { Session } from "neo4j-driver";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
-import { downloadFile } from "~/routes/api/file/functions/downloadFile";
+import { downloadFileById } from "~/routes/api/file/functions/downloadFileById";
 
 /**
  * Retrieves and downloads the company square logo
@@ -22,5 +22,5 @@ export async function downloadCompanySquareLogo(
   }
 
   const fileId = result.records[0].get("fileId");
-  return await downloadFile(fileId, dbSession);
+  return await downloadFileById(fileId, dbSession);
 }

@@ -5,7 +5,7 @@ import { redirect } from "@solidjs/router";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
-import { downloadFile } from "./functions/downloadFile";
+import { downloadFileById } from "./functions/downloadFileById";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession } = await getDBSessionForSubdomain(request);
@@ -23,7 +23,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     const fileId = result.records[0].get("fileId");
-    return await downloadFile(fileId, dbSession);
+    return await downloadFileById(fileId, dbSession);
   } catch (error) {
     return handleAPIError(error);
   } finally {

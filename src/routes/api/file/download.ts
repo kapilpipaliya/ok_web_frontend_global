@@ -9,15 +9,15 @@ import { downloadFile } from "./functions/downloadFile";
 
 export async function GET({ request }: APIEvent) {
   const query = getQuery();
-  const fileId = query.fileId;
+  const fileName = query.fileName;
   const { dbSession } = await getDBSessionForSubdomain(request);
 
   try {
-    if (!fileId) {
-      throw new APIError("File ID is required", 400);
+    if (!fileName) {
+      throw new APIError("File name is required", 400);
     }
 
-    return await downloadFile(fileId as string, dbSession);
+    return await downloadFile(fileName as string, dbSession);
   } catch (error) {
     return handleAPIError(error);
   } finally {

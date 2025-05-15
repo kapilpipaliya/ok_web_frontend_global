@@ -5,7 +5,7 @@ export const getDownloadLink = (metaVertex?: Vertex) => {
   if (!metaVertex) {
     return "";
   }
-  return `${API.file.downloadFileUrl}?fileId=${metaVertex.id}`;
+  return `${API.file.downloadFileUrl}?fileName=${metaVertex.P.fileName}`;
 };
 
 export const openInNewTab = (url: string) => {

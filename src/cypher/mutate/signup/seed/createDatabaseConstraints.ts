@@ -19,6 +19,9 @@ export async function createDatabaseConstraints(session: Session) {
 
     `CREATE CONSTRAINT unique_theme IF NOT EXISTS
      FOR (t:Theme) REQUIRE t.key IS UNIQUE`,
+
+    `CREATE CONSTRAINT unique_file_name IF NOT EXISTS
+     FOR (f:File) REQUIRE f.fileName IS UNIQUE`,
   ];
 
   try {
