@@ -33,8 +33,8 @@ Attr Vertex:
   - componentName: string - name of the component any of: 'Html', 'Data', 'Slot' or Custom Component name if specified in prompt.
   - fns: Function Body string - function definitions for the Item e.g. "return {fn1: () => {}}". Its the place where you add javascript code to generate dynamic properties for the Item. It will be inherited to all the children of the Item.
   - props: Function Body string - dynamic properties for the Item, it returns an object with key-value pairs e.g. "return {key: value}". Its the place where you add javascript code to generate dynamic properties for the Item.
-    - Use 'props' for dynamic values. It is a Function Body string that should return an object with key-value pairs.
-    - you can add props by either 'props' function body return value or directly to the vertex properties, prefer the 'props' when value is dynamic.
+    - Use 'props' for dynamic props. It is a Function Body string that should return an object with key-value pairs.
+    - you can add static props directly to the vertex properties, prefer the 'props' when value is dynamic.
   - css: Function Body string - css for the Item e.g. "return \`._id {color: \${args.theme.var.color.primary}}\`;". Its the place where you add javascript code to generate css for the Item.
 - fns, props and css accepts javascript function body string. you can use 'args' key to access the function arguments whose type is FunctionArgumentBaseType:
   - export interface FunctionArgumentBaseType {
