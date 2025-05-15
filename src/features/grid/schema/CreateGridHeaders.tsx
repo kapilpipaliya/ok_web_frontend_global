@@ -216,6 +216,7 @@ export function CreateGridHeaders(
                   display: flex;
                   align-items: center;
                 `}
+                  class="filename-container"
                 >
                   <As
                     as="a"
@@ -232,6 +233,47 @@ export function CreateGridHeaders(
                   >
                     {info.getValue<string>()}
                   </As>
+                  <IconButton
+                    icon="ph:copy"
+                    css={css`
+                      color: \${args.theme.var.color.primary};
+                      background-color: transparent;
+                      border: none;
+                      padding: 1px;
+                      margin-left: 4px;
+                      cursor: pointer;
+                      opacity: 0;
+                      transition: opacity 0.2s;
+                      .filename-container:hover & {
+                        opacity: 1;
+                      }
+                      &:hover {
+                        color: \${args.theme.var.color.primary_400};
+                      }
+                    `}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const url = getDownloadLink(info.row.original);
+                      navigator.clipboard.writeText(url);
+
+                      // Show feedback that copy was successful
+                      const button = e.currentTarget;
+                      const iconElement = button.querySelector("iconify-icon");
+                      const originalIcon = iconElement?.getAttribute("icon");
+
+                      if (iconElement) {
+                        iconElement.setAttribute("icon", "ph:check");
+
+                        setTimeout(() => {
+                          iconElement.setAttribute(
+                            "icon",
+                            originalIcon || "ph:copy",
+                          );
+                        }, 1500);
+                      }
+                    }}
+                    size={16}
+                  />
                 </As>
               </TooltipWrapper>
             </Match>

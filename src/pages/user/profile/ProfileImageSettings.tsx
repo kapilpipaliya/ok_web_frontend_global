@@ -122,7 +122,8 @@ export function ProfileImageSettings() {
           },
           {
             as: "button",
-            css: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS + " margin-right:auto",
+            css:
+              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS + css`margin-right:auto`,
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenDialog(true),
