@@ -77,6 +77,8 @@ export function DynamicComponent(
     isNoPermissionCheck?: boolean | null;
     isRealTime?: boolean;
     isTableInside?: boolean;
+    isViewMode?: boolean;
+    isReadOnly?: boolean;
     meta: Vertex;
     noLabel?: boolean;
     onChange?: (data: unknown) => void;
@@ -119,11 +121,13 @@ export function DynamicComponent(
 
   const runWithParentOwnerFunction = <T,>(fn: () => T): T | undefined => {
     try {
-      if (parentRenderContext()) {
-        return runWithOwner(parentRenderContext()?.context.owner!, () => {
+      const parentContext = parentRenderContext();
+      if (parentContext && parentContext.context.owner) {
+        return runWithOwner(parentContext.context.owner, () => {
           return fn();
         });
       }
+      return undefined;
     } catch (error) {
       console.error("Error in runWithParentOwnerFunction:", error);
       return undefined;
@@ -169,12 +173,20 @@ export function DynamicComponent(
     );
   });
 
-  const isNoPermissionCheck = () =>
-    !previewStore ||
-    props.isNoPermissionCheck ||
-    graph.vertexes[formVertex()?.P.formMetaId!]?.P.isNoPermissionCheck ||
-    previewStore.isDesignMode ||
-    previewStore.isNoPermissionCheck;
+  const isNoPermissionCheck = () => {
+    const vertex = formVertex();
+    const formMetaId = vertex?.P.formMetaId;
+
+    return (
+      !previewStore ||
+      props.isNoPermissionCheck ||
+      (formMetaId
+        ? graph.vertexes[formMetaId]?.P.isNoPermissionCheck
+        : false) ||
+      previewStore.isDesignMode ||
+      previewStore.isNoPermissionCheck
+    );
+  };
 
   const hasPermission = () => {
     // If no permission check is needed, user has permissions
@@ -327,7 +339,7 @@ export function DynamicComponent(
       showSuccessToast,
       showWarningToast,
       get txnId() {
-        return formVertex()?.P.txnId!;
+        return formVertex()?.P.txnId ?? 0;
       },
       updateValue,
       zIndex,
@@ -373,15 +385,18 @@ export function DynamicComponent(
     // logAction('modify', props.meta.P.key, value, currentUser);
 
     // TODO: if only create permission, and value is set dont display it.
-    setValueGlobal(
-      graph,
-      setGraph,
-      formVertex()?.P.txnId!,
-      props.meta,
-      props.data!,
-      newValue,
-      false,
-    );
+
+    if (props.data) {
+      setValueGlobal(
+        graph,
+        setGraph,
+        formVertex()?.P.txnId ?? 0,
+        props.meta,
+        props.data,
+        newValue,
+        false,
+      );
+    }
   }
 
   const onChange = (value: unknown) => {
@@ -475,28 +490,41 @@ export function DynamicComponent(
   });
 
   const functionProxy = createFunctionProxy(dynamicFns, parentRenderContext);
+
+  // Define a type for the props returned by dynamic props
+  type DynamicPropsType = Record<string, unknown> & {
+    beforeMount?: (arg: FunctionArgumentType) => void;
+    onMount?: () => void | (() => void);
+    onUnmount?: (arg: FunctionArgumentType) => void;
+    readOnly?: boolean;
+    componentName?: string;
+    hide?: boolean | ((arg: FunctionArgumentType) => boolean);
+    show?: boolean | ((arg: FunctionArgumentType) => boolean);
+    text?: string;
+  };
+
   const dynamicProps = createMemo(() => {
     try {
       if (typeof props.meta.P.props === "function") {
         const dynamicPropsObj =
           props.meta.P.props!(getFunctionArgumentWithValue()) || {};
-        return getMetaProps(dynamicPropsObj, [], graph);
+        return getMetaProps(dynamicPropsObj, [], graph) as DynamicPropsType;
       }
       if (typeof props.meta.P.props === "string") {
         try {
           const propsFunction = new Function("args", props.meta.P.props);
           const dynamicPropsObj =
             propsFunction(getFunctionArgumentWithValue()) || {};
-          return getMetaProps(dynamicPropsObj, [], graph);
+          return getMetaProps(dynamicPropsObj, [], graph) as DynamicPropsType;
         } catch (error) {
           console.error("Error evaluating props function:", error);
-          return {};
+          return {} as DynamicPropsType;
         }
       }
-      return {};
+      return {} as DynamicPropsType;
     } catch (error) {
       console.error("Error in dynamicProps:", error);
-      return {};
+      return {} as DynamicPropsType;
     }
   });
 
@@ -578,13 +606,11 @@ export function DynamicComponent(
   };
 
   const isViewMode = () =>
-    // @ts-ignore
     props.isViewMode ??
     props.meta.P.isViewMode ??
     parentRenderContext()?.context?.isViewMode;
 
   const isReadOnly = () =>
-    // @ts-ignore
     props.isReadOnly ??
     dynamicProps().readOnly ??
     props.meta.P.readOnly ??
@@ -599,7 +625,10 @@ export function DynamicComponent(
   if (dynamicProps().beforeMount) {
     try {
       runWithOwner(owner, () => {
-        dynamicProps().beforeMount!(getFunctionArgumentWithValue());
+        const beforeMount = dynamicProps().beforeMount;
+        if (beforeMount && typeof beforeMount === "function") {
+          beforeMount(getFunctionArgumentWithValue());
+        }
       });
     } catch (error) {
       console.error("Error in beforeMount:", error);
@@ -611,9 +640,12 @@ export function DynamicComponent(
       setMounted(true);
       // props.meta.mounted = true;
       runWithOwner(owner, () => {
-        const onMountResult = dynamicProps().onMount?.();
-        if (typeof onMountResult === "function") {
-          onCleanup(onMountResult);
+        const onMount = dynamicProps().onMount;
+        if (onMount && typeof onMount === "function") {
+          const onMountResult = onMount();
+          if (typeof onMountResult === "function") {
+            onCleanup(onMountResult);
+          }
         }
       });
     } catch (error) {
@@ -624,9 +656,10 @@ export function DynamicComponent(
   onCleanup(() => {
     try {
       setMounted(false);
-      if (dynamicProps().onUnmount) {
+      const onUnmount = dynamicProps().onUnmount;
+      if (onUnmount && typeof onUnmount === "function") {
         runWithOwner(owner, () => {
-          dynamicProps().onUnmount!(getFunctionArgumentWithValue());
+          onUnmount(getFunctionArgumentWithValue());
         });
       }
     } catch (error) {
