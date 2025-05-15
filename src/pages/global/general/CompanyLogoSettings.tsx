@@ -7,7 +7,7 @@ import type { FileManagerObject } from "~/features/file_manager/FileManagerConte
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
 import { useToast } from "~/components/styled/modal/Toast";
-import { FilePickerModal } from "~/features/css_editor/components/fields/textfield_with_unit/FilePickerModal";
+import { FilePickerModal } from "~/components/file_picker/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";

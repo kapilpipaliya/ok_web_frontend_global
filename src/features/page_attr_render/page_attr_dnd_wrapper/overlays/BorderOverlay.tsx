@@ -20,7 +20,7 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 
-import { generateBoxShadow } from "~/features/css_editor/utils/generate/generateBoxShadow";
+import { generateBoxShadow } from "~/lib/css/generateBoxShadow";
 import { getBoundingRectChildren } from "~/features/page_designer/functions/drag_drop/ui/getBoundingRectChildren";
 import { getDnDBoxShadowArgs } from "~/features/page_designer/functions/drag_drop/ui/getDnDBoxShadowArgs";
 import type { Vertex } from "~/lib/graph/type/vertex";

@@ -23,7 +23,6 @@ import {
   type FormStoreObject,
   useFormContext,
 } from "../../../form/context/FormContext";
-import { CssEditor } from "./CssEditor";
 import { DefaultValue } from "./DefaultValue";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
@@ -169,35 +168,6 @@ export function DisplayProperty(
             <DefaultValue
               joinVertex={props.joinVertex}
               metaVertex={metaVertex()}
-            />
-          </As>
-        </As>
-      </Match>
-      <Match
-        when={
-          metaVertex().P.key === "value" &&
-          ((props.joinVertex?.P.key ?? "").endsWith("Class") ||
-            (props.joinVertex?.P.key ?? "") === "class")
-        }
-      >
-        <As
-          as="td"
-          css={css`
-  align-content: center;
-`}
-        >
-          <As
-            as="div"
-            css={css`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`}
-          >
-            <CssEditor
-              joinVertex={props.joinVertex}
-              metaVertex={metaVertex()}
-              txnId={props.txnId}
             />
           </As>
         </As>

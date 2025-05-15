@@ -15,7 +15,7 @@ import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/modal/Toast";
 import { createAppState } from "~/createAppState";
 import { getTreeDataAPICall } from "~/cypher/get/getTreeDataAPICall";
-import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
+import { SearchBar } from "~/components/styled/SearchBar";
 import { GetInitialData } from "~/GetInitialData";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { STYLES } from "~/pages/settings/constants";

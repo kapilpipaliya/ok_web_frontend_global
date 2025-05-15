@@ -15,7 +15,7 @@ import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { addComponentAttrInPage } from "~/features/page_designer/functions/drag_drop/attributes/addComponentAttrInForm";
 import { saveAndCaptureForm } from "~/features/page_designer/utils/saveAndCapture";
 import { deleteLayoutAttr } from "~/features/page_designer/functions/layout/deleteLayoutAttr";
-import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
+import { SearchBar } from "~/components/styled/SearchBar";
 
 import {
   useDesignerFormIdContext,

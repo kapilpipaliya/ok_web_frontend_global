@@ -4,7 +4,6 @@ import { untrack } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Link, Meta, Title, Base, Style } from "@solidjs/meta";
 
-import { replacePlaceholderWithUrl } from "~/features/css_editor/utils/cssStateToString";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import {
   useDesignerFormIdContext,
@@ -19,6 +18,34 @@ import type { GenericComponentProps } from "./type/FieldType";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { evalExpression } from "~/lib/expression_eval";
+import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
+
+export function replacePlaceholderWithUrl(
+  value: string,
+  edgeName: string,
+  data: Vertex,
+  graph: GraphInterface,
+): string {
+  if (!value.includes("$1")) {
+    return value;
+  }
+
+  const files =
+    evalExpression(`->${edgeName}`, {
+      graph,
+      setGraph: () => {},
+      vertexes: [data],
+    }) || [];
+
+  if (files.length === 0) {
+    return value;
+  }
+
+  const file = files[0];
+  return value.replaceAll("$1", getDownloadLink(file));
+}
 
 // HtmlField
 export function HtmlField(
@@ -36,7 +63,7 @@ export function HtmlField(
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
-  const meta = () => parentRenderContext()?.context.meta!;
+  const meta = () => parentRenderContext()?.context.meta;
   const layoutStoreId = useDesignerLayoutStore();
   const formStoreId = useDesignerFormIdContext();
   const [previewStore] = usePreviewContext();

@@ -7,7 +7,7 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/modal/Toast";
 import { createAppState } from "~/createAppState";
-import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
+import { SearchBar } from "~/components/styled/SearchBar";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { fetchAndSetGraphData } from "~/lib/graph/mutate/data/fetchAndSetGraphData";

@@ -5,7 +5,7 @@ import { Dynamic } from "solid-js/web";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
-import { SearchBar } from "~/features/css_editor/StyleEditor/SearchBar";
+import { SearchBar } from "~/components/styled/SearchBar";
 import {
   headerIconButtonCss,
   PROPERTIES,

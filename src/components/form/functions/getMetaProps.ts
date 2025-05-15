@@ -1,5 +1,3 @@
-import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
-import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function getMetaProps(
@@ -18,13 +16,6 @@ export function getMetaProps(
       const value = meta[key];
       if (typeof value === "function") {
         result[key] = value;
-      } else if (key.toLowerCase().endsWith("class")) {
-        result[key] = cssStateToString(
-          value as string,
-          { P: { key: key } } as unknown as Vertex,
-          { P: meta } as unknown as Vertex,
-          graph,
-        );
       } else if (value !== null) {
         result[key] = value;
       }

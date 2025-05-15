@@ -20,7 +20,6 @@ import { createStore } from "solid-js/store";
 import { Dynamic } from "solid-js/web";
 
 import { getMetaProps } from "~/components/form/functions/getMetaProps";
-import { cssStateToString } from "~/features/css_editor/utils/cssStateToString";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 import {
   PageRenderContextProvider,
@@ -713,14 +712,7 @@ export function DynamicComponent(
           return acc;
         }
         const cssValue = props.meta.P[key];
-        acc[key] = `${
-          cssStateToString(
-            cssValue,
-            { P: { key: key } } as unknown as Vertex,
-            props.meta,
-            graph,
-          ) || ""
-        } ${dynamicPropsValue[key] || ""}`.trim();
+        acc[key] = `${cssValue || ""} ${dynamicPropsValue[key] || ""}`.trim();
         return acc;
       },
       {} as Record<string, string>,
