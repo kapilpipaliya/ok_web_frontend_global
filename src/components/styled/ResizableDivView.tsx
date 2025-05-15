@@ -20,6 +20,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import type { CssType } from "../form/type/CssType";
 
 export const DIMENSIONS = {
   desktop: {
@@ -45,7 +46,7 @@ export const DIMENSIONS = {
 export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
-    css?: string;
+    css?: CssType;
     view: Id;
   }>,
 ) {

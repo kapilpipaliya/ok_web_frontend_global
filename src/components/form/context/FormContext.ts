@@ -40,6 +40,7 @@ export function getInitialFormStore(
     usedAttrsInNameKeys: [] as Array<Id | number>,
     usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
+    lastAddedViewId: null as Id | null,
   };
 }
 

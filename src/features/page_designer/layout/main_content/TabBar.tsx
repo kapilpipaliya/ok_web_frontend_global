@@ -161,7 +161,13 @@ export function TabBar(props: { mainPanel: Id }) {
   display: flex;
   gap: 5px;
   padding: 5px;
-  ${layoutStore()[`mainPanel${props.mainPanel}Tab`] === graph.vertexes[openedFormId].P.formId ? "background-color: ${args.theme.var.color.primary_35};" : "background-color: ${args.theme.var.color.base_15};"}
+  ${(() => {
+    const key = `mainPanel${props.mainPanel}Tab` as keyof PageLayoutObject;
+    const layoutStoreValue = layoutStore() as Record<string, unknown>;
+    return layoutStoreValue[key] === graph.vertexes[openedFormId].P.formId
+      ? `background-color: \${args.theme.var.color.primary_35};`
+      : `background-color: \${args.theme.var.color.base_15};`;
+  })()}
   ${layoutStore().formId === graph.vertexes[openedFormId].P.formId ? "border-bottom: 2px solid red;" : ""}
   cursor: move;
   flex-shrink: 0;
@@ -218,17 +224,19 @@ export function TabBar(props: { mainPanel: Id }) {
                     graph,
                     setGraph,
                   );
+                  const formId = graph.vertexes[openedFormId].P.formId;
+                  const currentVertexProps = graph.vertexes[formId]
+                    ?.P as FormStoreObject;
+                  const currentViews = currentVertexProps?.openedViews || [];
+
                   mergeVertexProperties<FormStoreObject>(
                     0,
-                    graph.vertexes[openedFormId].P.formId,
+                    formId,
                     graph,
                     setGraph,
                     {
-                      openedViews: [
-                        ...graph.vertexes[graph.vertexes[openedFormId].P.formId]
-                          ?.P.openedViews,
-                        newView.id,
-                      ],
+                      openedViews: [...currentViews, newView.id],
+                      lastAddedViewId: newView.id,
                     },
                   );
                 }}

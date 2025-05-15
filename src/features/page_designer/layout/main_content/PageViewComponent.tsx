@@ -1,4 +1,4 @@
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, For, Show, createEffect } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -23,6 +23,9 @@ export function PageViewComponent(props: { mainPanel: Id }) {
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
   const [isPreview, setIsPreview] = createSignal(true);
+  const [highlightedViewId, setHighlightedViewId] = createSignal<Id | null>(
+    null,
+  );
 
   const handleRefresh = () => {
     // Toggle isPreview to force iframe refresh
@@ -57,6 +60,42 @@ export function PageViewComponent(props: { mainPanel: Id }) {
     // deleteVertex(0, openedFormId, graph, setGraph);
   };
 
+  // Check for newly added views and highlight them
+  createEffect(() => {
+    const openedFormIds = layoutStore().openedFormIds.filter(
+      (id) => graph.vertexes[id].P.mainPanel === props.mainPanel,
+    );
+
+    for (const openedFormId of openedFormIds) {
+      const formStoreVertex = graph.vertexes[
+        graph.vertexes[openedFormId].P.formId
+      ] as Vertex<FormStoreObject>;
+
+      if (formStoreVertex?.P.lastAddedViewId) {
+        setHighlightedViewId(formStoreVertex.P.lastAddedViewId);
+
+        // Reset the lastAddedViewId after a short delay
+        setTimeout(() => {
+          mergeVertexProperties<FormStoreObject>(
+            0,
+            formStoreVertex.id,
+            graph,
+            setGraph,
+            {
+              lastAddedViewId: null,
+            },
+          );
+          // Keep highlight effect a bit longer than tracking
+          setTimeout(() => {
+            setHighlightedViewId(null);
+          }, 2000);
+        }, 500);
+
+        break;
+      }
+    }
+  });
+
   return (
     <As
       as="div"
@@ -72,9 +111,16 @@ export function PageViewComponent(props: { mainPanel: Id }) {
         )}
       >
         {(openedFormId) => {
-          const isActive = () =>
-            layoutStore()[`mainPanel${props.mainPanel}Tab`] ===
-            graph.vertexes[openedFormId].P.formId;
+          const isActive = () => {
+            // Type assertion for dynamic property access
+            const key =
+              `mainPanel${props.mainPanel}Tab` as keyof PageLayoutObject;
+            // Using type assertion as a workaround for the dynamic property access
+            const layoutStoreValue = layoutStore() as Record<string, unknown>;
+            return (
+              layoutStoreValue[key] === graph.vertexes[openedFormId].P.formId
+            );
+          };
           const formStoreVertex = () =>
             graph.vertexes[
               graph.vertexes[openedFormId].P.formId
@@ -83,29 +129,75 @@ export function PageViewComponent(props: { mainPanel: Id }) {
           return (
             <Show when={formStoreVertex()?.id}>
               <For each={formStoreVertex()?.P.openedViews}>
-                {(openedViewId, index) => (
-                  <As as="div" css={isActive() ? "" : css`display: none;`}>
-                    <PageTabBar
-                      formStoreId={graph.vertexes[openedFormId].P.formId}
-                      handleRefresh={handleRefresh}
-                      onClose={() => handleClose(openedFormId, openedViewId)}
-                      openIndex={index()}
-                      previewsLength={formStoreVertex()?.P.openedViews.length}
-                    />
-                    <ResizableContainer view={openedViewId}>
-                      <Show when={isPreview()}>
-                        <IFramePreview
-                          formStoreId={graph.vertexes[openedFormId].P.formId}
-                        />
-                      </Show>
-                      {/* <PageView
+                {(openedViewId, index) => {
+                  const isHighlighted = () =>
+                    highlightedViewId() === openedViewId;
+
+                  // Create a reference to scroll to the highlighted view
+                  let viewRef: HTMLDivElement | undefined;
+
+                  createEffect(() => {
+                    if (isHighlighted() && viewRef) {
+                      viewRef.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest",
+                      });
+                      // When a view is highlighted, also scroll its parent container to the top
+                      // to ensure the view is fully visible
+                      if (
+                        viewRef &&
+                        viewRef.parentElement &&
+                        viewRef.parentElement.parentElement
+                      ) {
+                        viewRef.parentElement.parentElement.scrollTop = 0;
+                      }
+                    }
+                  });
+
+                  return (
+                    <As
+                      as="div"
+                      css={isActive() ? "" : css`display: none;`}
+                      ref={viewRef}
+                    >
+                      <PageTabBar
+                        formStoreId={graph.vertexes[openedFormId].P.formId}
+                        handleRefresh={handleRefresh}
+                        onClose={() => handleClose(openedFormId, openedViewId)}
+                        openIndex={index()}
+                        previewsLength={formStoreVertex()?.P.openedViews.length}
+                      />
+                      <ResizableContainer
+                        view={openedViewId}
+                        css={
+                          isHighlighted()
+                            ? [
+                                css`
+                          border: 3px solid #4285f4;
+                          animation: borderPulse 1.5s infinite alternate;
+                        `,
+                                `@keyframes borderPulse {
+                            from { border-color: rgba(66, 133, 244, 0.5); }
+                            to { border-color: rgba(66, 133, 244, 1); }
+                          }`,
+                              ]
+                            : ""
+                        }
+                      >
+                        <Show when={isPreview()}>
+                          <IFramePreview
+                            formStoreId={graph.vertexes[openedFormId].P.formId}
+                          />
+                        </Show>
+                        {/* <PageView
                                   isDesignMode={true}
                                   isNoPermissionCheck={true}
                                   metaVertex={graph.vertexes[vertex()?.P.formDataId!]}
                                 /> */}
-                    </ResizableContainer>
-                  </As>
-                )}
+                      </ResizableContainer>
+                    </As>
+                  );
+                }}
               </For>
             </Show>
           );
