@@ -18,7 +18,6 @@ import {
 import { ChatInput } from "./ChatInput";
 import { ChatMessage } from "./ChatMessage";
 import { ChatResponse } from "./chat_response/ChatResponse";
-import { EXAMPLE_PROMPTS } from "./constants/EXAMPLE_PROMPTS";
 import { getChatHistory } from "./functions/getChatHistory";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
@@ -367,7 +366,6 @@ Choose colors that work well for the context and maintain good contrast ratios.
 
       <ChatInput
         chatMessages={chatMessages()}
-        examples={EXAMPLE_PROMPTS}
         examplesButtonRef={examplesButtonRef}
         fileInputRef={fileInputRef}
         files={files}

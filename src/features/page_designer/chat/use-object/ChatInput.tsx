@@ -17,10 +17,10 @@ import { STYLES } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
+import { PromptsMenu } from "./PromptsMenu";
 
 interface ChatInputProps {
   chatMessages: Message[];
-  examples: string[];
   examplesButtonRef: HTMLButtonElement | undefined;
   fileInputRef: HTMLInputElement | undefined;
   files: () => FileList | undefined;
@@ -180,66 +180,12 @@ export function ChatInput(props: ChatInputProps) {
           ref={props.fileInputRef}
         />
         <Show when={props.showExamples()}>
-          <DropdownMenu
+          <PromptsMenu
+            examplesButtonRef={props.examplesButtonRef!}
             onClickOutside={() => props.onExamplesToggle(false)}
             onMouseLeave={() => props.onExamplesToggle(false)}
-            parentRef={props.examplesButtonRef!}
-          >
-            <As
-              as="div"
-              css={css`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  max-height: 320px;
-  overflow-y: auto;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  width: 420px;
-  min-width: 420px;
-`}
-            >
-              <As
-                as="div"
-                css={css`
-                  font-weight: 600;
-                  padding-bottom: 4px;
-                  border-bottom: 1px solid \${args.theme.var.color.base_10};
-                  margin-bottom: 4px;
-                `}
-              >
-                Prompt Examples
-              </As>
-              <For each={props.examples}>
-                {(example) => (
-                  <As
-                    as="button"
-                    css={css`
-  text-align: left;
-  padding: 10px 12px;
-  background: \${args.theme.var.color.base_2};
-  border-radius: 6px;
-  border: 1px solid \${args.theme.var.color.base_10};
-  transition: all 0.2s;
-  font-size: 13px;
-  width: 100%;
-  
-  &:hover {
-    background: \${args.theme.var.color.base_5};
-    border-color: \${args.theme.var.color.base_15};
-  }
-`}
-                    onClick={() => props.onExampleClick(example)}
-                    type="button"
-                  >
-                    {example}
-                  </As>
-                )}
-              </For>
-            </As>
-          </DropdownMenu>
+            onExampleClick={props.onExampleClick}
+          />
         </Show>
       </As>
     </As>
