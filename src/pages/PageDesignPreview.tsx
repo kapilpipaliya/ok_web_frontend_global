@@ -18,6 +18,8 @@ import { getChannel } from "~/lib/graph/mutate/core/channel/getChannel";
 import { handleChannelMessage } from "~/lib/graph/mutate/core/channel/handleChannelMessage";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
+import type { Id } from "~/lib/graph/type/id";
 
 export default function PageShareView() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -78,6 +80,15 @@ function DroppableWrapper(props: { children: any; formStoreId: string }) {
         ${noMinHeight ? "" : "min-height: 300px;"}
         ${isDraggingOver() ? "background-color: #f3f3f4;" : ""}
       `}
+      onClick={() => {
+        onLayoutItemClick(
+          layoutStoreVertex(),
+          formStoreVertex(),
+          undefined as unknown as Id,
+          graph,
+          setGraph,
+        );
+      }}
       onDragLeave={() => {
         setIsDraggingOver(false);
       }}

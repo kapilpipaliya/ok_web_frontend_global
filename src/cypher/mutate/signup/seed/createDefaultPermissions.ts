@@ -3,19 +3,19 @@ import type { Session, Transaction } from "neo4j-driver";
 
 export async function createDefaultPermissions(tx: Session | Transaction) {
   return;
-  const query = `
-    MERGE (insert:Perm {key: 'insert'})
-    MERGE (edit:Perm {key: 'edit'}) 
-    MERGE (view:Perm {key: 'view'})
-    MERGE (delete:Perm {key: 'delete'})
-  `;
-
-  try {
-    await tx.run(query);
-  } catch (error) {
-    console.error("Error creating default permissions:", error);
-    throw error;
-  }
+  // const query = `
+  //   MERGE (insert:Perm {key: 'insert'})
+  //   MERGE (edit:Perm {key: 'edit'})
+  //   MERGE (view:Perm {key: 'view'})
+  //   MERGE (delete:Perm {key: 'delete'})
+  // `;
+  //
+  // try {
+  //   await tx.run(query);
+  // } catch (error) {
+  //   console.error("Error creating default permissions:", error);
+  //   throw error;
+  // }
 }
 
 /*
