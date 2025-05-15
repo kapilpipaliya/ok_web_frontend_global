@@ -5,7 +5,6 @@ import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
-import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { headerIconButtonCss, toolBarCss } from "~/pages/settings/constants";
@@ -22,67 +21,30 @@ import {
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
-import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import type { Edge } from "~/lib/graph/type/edge";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
 
 export function Preview(props: {
   message: Vertex;
-  object: Record<string, any>;
+  object: {
+    vertexes: Array<Vertex>;
+    edges: Array<Edge>;
+    [key: string]: any;
+  };
 }) {
   const [graph, setGraph] = useGraph();
-  const metaTxnId = generateNewTxnId(graph, setGraph);
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
-  // Store vertex IDs with no parents
-  const [rootVertexIds, setRootVertexIds] = createSignal<string[]>([]);
-  // Add all vertices with new IDs
-  const vertexIdMap = new Map<string, string>();
-  for (const vertex of props.object.vertexes || []) {
-    const newId = generateNewVertexId(graph, setGraph);
-    vertexIdMap.set(vertex.id, newId);
-    const newVertex = {
-      id: newId,
-      IN: {},
-      L: Array.isArray(vertex.L) ? vertex.L : [vertex.L],
-      OUT: {},
-      P: {
-        ...vertex.P,
-      },
-    };
 
-    addNewVertex(metaTxnId, newVertex, graph, setGraph);
-  }
-
-  // Add all edges with new IDs
-  for (const edge of props.object.edges || []) {
-    const newId = generateNewVertexId(graph, setGraph);
-    const startId = vertexIdMap.get(edge.S)!;
-    const endId = vertexIdMap.get(edge.E)!;
-
-    const newEdge = {
-      E: endId,
-      id: newId,
-      P: {},
-      S: startId,
-      T: edge.T,
-    };
-
-    addNewEdge(metaTxnId, newEdge, graph, setGraph);
-  }
-
-  // Find vertices with no parents
-  const parentMap = new Map<string, boolean>();
-
-  for (const edge of props.object.edges || []) {
-    parentMap.set(vertexIdMap.get(edge.E)!, true);
-  }
-
-  const noParentIds = Array.from(vertexIdMap.values()).filter(
-    (id) => !parentMap.has(id),
+  // Import the graph structure using the utility function
+  const { metaTxnId, rootVertexIds } = importGraphStructure(
+    props.object,
+    graph,
+    setGraph,
   );
-  setRootVertexIds(noParentIds);
 
   // Create parent vertex and link children
   const parentId = generateNewVertexId(graph, setGraph);
@@ -98,7 +60,7 @@ export function Preview(props: {
 
   // Link parent to root vertices
   // First handle vertices with Label "Attr"
-  const attrRootIds = rootVertexIds().filter((id) =>
+  const attrRootIds = rootVertexIds.filter((id) =>
     graph.vertexes[id].L.includes("Attr"),
   );
   if (attrRootIds.length > 0) {
@@ -113,7 +75,7 @@ export function Preview(props: {
   }
 
   // Then handle remaining vertices grouped by their labels
-  const remainingRootIds = rootVertexIds().filter(
+  const remainingRootIds = rootVertexIds.filter(
     (id) => !graph.vertexes[id].L.includes("Attr"),
   );
 
@@ -242,7 +204,11 @@ export function Preview(props: {
   border: 1px solid \${args.theme.var.color.base};
   border-radius: 6px;
 `}
-                onChange={(e) => setInsertMode(e.currentTarget.value as any)}
+                onChange={(e) =>
+                  setInsertMode(
+                    e.currentTarget.value as "after" | "before" | "center",
+                  )
+                }
                 value={insertMode()}
               >
                 <option value="before">Insert Before</option>
@@ -263,8 +229,8 @@ export function Preview(props: {
                   layoutStoreVertex()?.P.formId === formId ||
                   !layoutStoreVertex()?.P.formId ||
                   !graph.vertexes[
-                    graph.vertexes[layoutStoreVertex()?.P.formId!]?.P
-                      .selectedId!
+                    graph.vertexes[layoutStoreVertex()?.P.formId]?.P
+                      ?.selectedId || ""
                   ]
                 }
                 icon="ph:plus-circle"
