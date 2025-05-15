@@ -32,7 +32,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
-    const { domain, id, key, status } = await request.json();
+    const { domain, id, key, status, description } = await request.json();
 
     if (!id) {
       throw new APIError("Subdomain key required", 400);
@@ -59,9 +59,10 @@ export async function POST({ request }: APIEvent) {
     const updatedSubdomain = await updateSubdomain(
       dbSession,
       id,
-      domain,
       key,
+      domain,
       status,
+      description,
     );
 
     await createActivityLog(
@@ -70,7 +71,7 @@ export async function POST({ request }: APIEvent) {
       "SubDomain",
       updatedSubdomain.id,
       user.P.email,
-      `Updated subdomain ${key} with domain ${domain}`,
+      `Updated subdomain ${key} with domain ${domain}${description ? ` and description "${description}"` : ""}`,
     );
 
     return {
@@ -90,18 +91,25 @@ export async function POST({ request }: APIEvent) {
 async function updateSubdomain(
   dbSession: Session,
   id: string,
-  domain: string,
   key: string,
+  domain?: string,
   status?: string,
+  description?: string,
 ) {
   const result = await dbSession.run(
     `MATCH (s:SubDomain) where elementId(s) = $id
      SET s.domain = $domain,
+     s.description = $description,
      s.status = $status,
      s.lastModified = datetime()
      RETURN s`,
-    // s.key = $key,
-    { domain, id, key, status: status || "active" },
+    {
+      id,
+      key,
+      domain: domain || "",
+      description: description || "",
+      status: status || "active",
+    },
   );
 
   if (!result.records[0]) {

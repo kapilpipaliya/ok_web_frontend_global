@@ -41,9 +41,15 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
       const url = formData.id.startsWith("-")
         ? API.subdomain.createUrl
         : API.subdomain.updateUrl;
-      const payload = {
-        domain: formData.P.domain,
+      const payload: {
+        key: string;
+        domain: string;
+        description: string;
+        id?: string;
+      } = {
         key: formData.P.key,
+        domain: formData.P.domain || "",
+        description: formData.P.description || "",
       };
 
       if (!formData.id.startsWith("-")) {
@@ -53,10 +59,10 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
       const response = await postAPI(url, payload);
 
       if (response.error) {
-        showErrorToast(response.error);
+        showErrorToast(response.error as string);
       } else {
         options.removeTxnIdAndCreateNew(options.txnId);
-        options.ensureData;
+        options.ensureData();
         showSuccessToast(
           formData.id.startsWith("-")
             ? "Subdomain created successfully"
@@ -117,6 +123,26 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 componentName: "TextInput",
                 key: "domain",
                 placeholder: "Enter domain (Optional) eg: example.com",
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+          },
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Description",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "TextInput",
+                type: "textarea",
+                key: "description",
+                placeholder: "Enter description (Optional)",
               },
             ],
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,

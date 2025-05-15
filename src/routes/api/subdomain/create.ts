@@ -60,7 +60,7 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
-    const { domain, key } = await request.json();
+    const { domain, key, description } = await request.json();
 
     // Get the user's account
     const accountResult = await dbSession.run(
@@ -87,7 +87,12 @@ export async function POST({ request }: APIEvent) {
     if (databases.includes(key)) {
       throw new APIError("Subdomain with this key already exists", 400);
     }
-    const newSubdomain = await createSubdomain(dbSession, key, domain);
+    const newSubdomain = await createSubdomain(
+      dbSession,
+      key,
+      domain,
+      description,
+    );
 
     // Create AccountSubdomain relationship
     await createAccountSubdomainRelation(
@@ -102,7 +107,7 @@ export async function POST({ request }: APIEvent) {
       "SubDomain",
       newSubdomain.id,
       user.P.email,
-      `Created subdomain ${key} with domain ${domain}`,
+      `Created subdomain ${key} with domain ${domain}${description ? ` and description "${description}"` : ""}`,
     );
 
     // @ts-expect-error ignore
@@ -147,17 +152,23 @@ async function createAccountSubdomainRelation(
 async function createSubdomain(
   dbSession: Session,
   key: string,
-  domain: string,
+  domain?: string,
+  description?: string,
 ) {
   const result = await dbSession.run(
     `CREATE (s:SubDomain {
       key: $key,
       domain: $domain,
+      description: $description,
       status: "active",
       createdAt: datetime(),
       lastModified: datetime()
     }) RETURN s`,
-    { domain: domain ?? "", key },
+    {
+      key,
+      domain: domain || "",
+      description: description || "",
+    },
   );
   return convertNodeToJson(result.records[0]?.get("s"));
 }

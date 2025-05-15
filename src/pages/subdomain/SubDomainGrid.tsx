@@ -18,6 +18,7 @@ export interface SubDomain {
   domain: string;
   key: string;
   name: string;
+  description: string;
   recentActivities: Vertex<{
     action: string;
     details: string;
@@ -92,6 +93,12 @@ export const SubDomainGrid = () => {
         componentName: "Html",
         displayName: "Domain",
         key: "domain",
+      },
+      {
+        as: "span",
+        componentName: "Html",
+        displayName: "Description",
+        key: "description",
       },
       {
         as: "span",

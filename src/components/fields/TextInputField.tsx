@@ -57,11 +57,12 @@ export interface TextInputFieldMeta extends FormInputField {
   hide?: boolean;
   required?: boolean;
   onChange?: (value: string | number | FileList | boolean) => void;
+  rows?: number;
 }
 
 interface TextInputFieldProps extends TextInputFieldMeta {
   class?: string;
-  ref?: (element: HTMLInputElement) => void;
+  ref?: (element: HTMLInputElement | HTMLTextAreaElement) => void;
   onViewClick?: () => void;
 }
 
@@ -80,9 +81,12 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
     "hide",
     "required",
     "unitOptions",
+    "rows",
   ]);
 
-  const [reference, setReference] = createSignal<HTMLInputElement | null>(null);
+  const [reference, setReference] = createSignal<
+    HTMLInputElement | HTMLTextAreaElement | null
+  >(null);
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
@@ -186,6 +190,26 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
             onChange={handleChange}
             ref={mergeRefs(setReference, props.ref)}
             checked={!!local.value}
+          />
+        </Match>
+        <Match when={props.type === "textarea"}>
+          <textarea
+            {...otherProps}
+            {...(local.inputProps as JSX.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+            autocomplete="off"
+            class={`${props.class || ""} ${
+              props.disabled || props.readOnly
+                ? ` opacity-80 !bg-base-200 `
+                : ""
+            } ${local.error && local.errorClass ? local.errorClass : ""}`}
+            onChange={handleChange}
+            ref={mergeRefs(setReference, props.ref)}
+            rows={props.rows || 3}
+            value={
+              local.value ??
+              (parentRenderContext()?.context.value as string) ??
+              ""
+            }
           />
         </Match>
         <Match when={true}>
