@@ -25,7 +25,7 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 const buttonStyles = (color: string) => css`
   padding: 1px 4px;
   background-color: ${color};
-  color: $\{args.theme.var.color.base_10};
+  color: \${args.theme.var.color.base_10};
   border-radius: 1px;
   border: none;
 `;
@@ -186,65 +186,146 @@ export function FunctionEditor(props: {
   };
 
   // UI Components
-  const EditorContent = (p: { height?: string }) => (
-    <>
-      <MonacoEditorWrapper
-        error={!isFunctionValid()}
-        height={p.height}
-        language={props.language || "javascript"}
-        onChange={handleEditorChange}
-        onMount={(_monaco, editor) => (editorRef = editor)}
-        showMinimap={false}
-        value={editorValue()}
-      />
+  const EditorContent = (p: { height?: string }) => {
+    const [initialHeight] = createSignal(p.height ?? "200px");
+    const [editorHeight, setEditorHeight] = createSignal(initialHeight());
+    let resizableEditorAreaRef: HTMLDivElement | undefined; // Ref for the area containing editor + handle
+    let dragStartEditorHeight = 0;
+    let dragStartY = 0;
+
+    createEffect(() => {
+      const newInitialHeight = p.height ?? "200px";
+      setEditorHeight(newInitialHeight);
+    });
+
+    const onMouseDownResize = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragStartEditorHeight = Number.parseFloat(editorHeight().replace("px", ""));
+      dragStartY = e.clientY;
+
+      const onMouseMoveResize = (moveEvent: MouseEvent) => {
+        const deltaY = moveEvent.clientY - dragStartY;
+        const newHeight = dragStartEditorHeight + deltaY;
+        setEditorHeight(`${Math.max(100, newHeight)}px`); // Minimum height 100px
+      };
+
+      const onMouseUpResize = () => {
+        document.removeEventListener("mousemove", onMouseMoveResize);
+        document.removeEventListener("mouseup", onMouseUpResize);
+      };
+
+      document.addEventListener("mousemove", onMouseMoveResize);
+      document.addEventListener("mouseup", onMouseUpResize);
+    };
+
+    return (
+      // Main container for all parts of EditorContent (editor, buttons, messages)
       <As
         as="div"
         css={css`
           display: flex;
-          gap: 4px;
-          margin-top: 4px;
+          flex-direction: column;
+          gap: 8px; /* Gap between resizable editor area and buttons below */
         `}
       >
-        <EditorButton
-          color={"${args.theme.var.color.primary}"}
-          onClick={handleSave}
-          disabled={!hasChanges()}
+        {/* Wrapper for the resizable editor and its handle */}
+        <As
+          as="div"
+          ref={resizableEditorAreaRef}
+          css={css`
+            position: relative;
+            padding-bottom: 10px; /* Space FOR the resize handle */
+          `}
         >
-          Submit
-        </EditorButton>
+          <MonacoEditorWrapper
+            error={!isFunctionValid()}
+            height={editorHeight()}
+            language={props.language || "javascript"}
+            onChange={handleEditorChange}
+            onMount={(_monaco, editor) => (editorRef = editor)}
+            showMinimap={false}
+            value={editorValue()}
+          />
+          {/* Resize Handle - positioned absolutely to resizableEditorAreaRef */}
+          <As
+            as="div"
+            onMouseDown={onMouseDownResize}
+            css={css`
+              width: 100%;
+              height: 10px; /* Height of the handle itself */
+              cursor: ns-resize;
+              background-color: \${args.theme.var.color.border};
+              position: absolute;
+              bottom: 0; /* Sticks to the bottom of resizableEditorAreaRef */
+              left: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              user-select: none; 
+              z-index: 10;
+              &::after {
+                content: "";
+                width: 30px;
+                height: 2px;
+                background-color: \${args.theme.var.color.textWeak};
+                border-radius: 1px;
+              }
+            `}
+          />
+        </As>
 
-        <EditorButton
-          color={"${args.theme.var.color.secondary_70}"}
-          onClick={formatCode}
-          title="Format Code with Prettier"
+        {/* Buttons container - now follows the resizable editor area */}
+        <As
+          as="div"
+          css={css`
+            display: flex;
+            gap: 4px;
+          `}
         >
-          Format
-        </EditorButton>
+          <EditorButton
+            color={`\${args.theme.var.color.primary}`}
+            onClick={handleSave}
+            disabled={!hasChanges()}
+          >
+            Submit
+          </EditorButton>
 
-        <Show when={isModalOpen()}>
-          <As as="div" css={css`margin-left: auto;`}>
-            <EditorButton
-              color={"${args.theme.var.color.error_200}"}
-              onClick={() => setIsModalOpen(false)}
-            >
-              Cancel
-            </EditorButton>
+          <EditorButton
+            color={`\${args.theme.var.color.secondary_70}`}
+            onClick={formatCode}
+            title="Format Code with Prettier"
+          >
+            Format
+          </EditorButton>
+
+          <Show when={isModalOpen()}>
+            <As as="div" css={css`margin-left: auto;`}>
+              <EditorButton
+                color={`\${args.theme.var.color.error_200}`}
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </EditorButton>
+            </As>
+          </Show>
+        </As>
+
+        {/* Invalid Function message - also follows buttons */}
+        <Show when={!isFunctionValid()}>
+          <As
+            as="span"
+            css={css`
+              color: \${args.theme.var.color.error};
+              margin-top: 4px; 
+            `}
+          >
+            Invalid Function
           </As>
         </Show>
       </As>
-
-      <Show when={!isFunctionValid()}>
-        <As
-          as="span"
-          css={css`
-  color: \${args.theme.var.color.error};
-`}
-        >
-          Invalid Function
-        </As>
-      </Show>
-    </>
-  );
+    );
+  };
 
   return (
     <>
