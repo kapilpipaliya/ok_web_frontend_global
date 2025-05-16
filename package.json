@@ -69,6 +69,7 @@
     "solid-collapse": "^1.1.0",
     "solid-colorful": "^0.0.2",
     "solid-error-overlay": "^0.2.1",
+    "solid-focus-trap": "^0.1.9",
     "solid-forms": "^0.5.2",
     "solid-headless": "^0.13.1",
     "solid-hot-toast": "^2.4.5",

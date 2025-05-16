@@ -174,6 +174,7 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
             onChange={local.onChange}
             ref={setReference}
             value={local.value ?? ""}
+            tabIndex={props.disabled ? -1 : undefined}
           /> */}
         </Match>
         <Match when={props.type === "checkbox"}>
@@ -190,6 +191,7 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
             onChange={handleChange}
             ref={mergeRefs(setReference, props.ref)}
             checked={!!local.value}
+            tabIndex={props.disabled ? -1 : undefined}
           />
         </Match>
         <Match when={props.type === "textarea"}>
@@ -210,6 +212,7 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
               (parentRenderContext()?.context.value as string) ??
               ""
             }
+            tabIndex={props.disabled ? -1 : undefined}
           />
         </Match>
         <Match when={true}>
@@ -229,6 +232,7 @@ export function TextInputField(props: Readonly<TextInputFieldProps>) {
               (parentRenderContext()?.context.value as string) ??
               ""
             }
+            tabIndex={props.disabled ? -1 : undefined}
           />
         </Match>
       </Switch>

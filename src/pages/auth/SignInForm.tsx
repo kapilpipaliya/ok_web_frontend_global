@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from "@solidjs/router";
 import { onMount } from "solid-js";
 import { createStore } from "solid-js/store";
+import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
@@ -215,7 +216,25 @@ export function SignInForm() {
 
   return (
     <SchemaRenderer
-      form={{ attributes: [wrapFormInCard(form)], key: "Login" }}
+      form={{
+        attributes: [
+          {
+            ...wrapFormInCard(form),
+            props: (options: FunctionArgumentType) => ({
+              beforeMount: () => {
+                createFocusTrap({
+                  element: options.ref,
+                  observeChanges: true,
+                  restoreFocus: true,
+                  initialFocusElement: () =>
+                    document.getElementsByTagName("input")[0],
+                });
+              },
+            }),
+          },
+        ],
+        key: "Login",
+      }}
     />
   );
 }

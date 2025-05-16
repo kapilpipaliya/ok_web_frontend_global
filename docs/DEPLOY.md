@@ -31,6 +31,7 @@ after email setup we need to setup app server:
    sudo apt install git -y
    authenticate git, create a new ssh key in .ssh folder and upload public key to git
 4. clone project, create .env file, update .env file for email and db, install packages (npm i --force),  install playwright (npx playwright install), build,  install dotenv globally (npm install -g dotenv-cli) and start
+5. go do to admin subdomain, login and create www subdomain.
 ## SSL Setup
 - even if we don't use domain without subdomain, we still need certificate for it, else redirect from https://decodeui.io to htts://www.decodeui.io will not work.
 - Setup a wildcard domain including free SSL | Let's Encrypt: [YouTube Tutorial](https://www.youtube.com/watch?v=oJ_sP9y9KWo)

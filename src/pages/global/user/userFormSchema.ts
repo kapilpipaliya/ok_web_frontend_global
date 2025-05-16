@@ -1,4 +1,5 @@
 import { createStore } from "solid-js/store";
+import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
@@ -310,6 +311,16 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                     props: (options: FunctionArgumentType) => ({
                       style: {
                         "z-index": options.zIndex + 1,
+                      },
+                      beforeMount: () => {
+                        // Create focus trap
+                        createFocusTrap({
+                          element: options.ref,
+                          enabled: () =>
+                            options.contextData.modalState[0]?.showModal,
+                          observeChanges: true,
+                          restoreFocus: true,
+                        });
                       },
                     }),
                   },

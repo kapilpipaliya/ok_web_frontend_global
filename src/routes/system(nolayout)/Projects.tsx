@@ -9,6 +9,7 @@ import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import type { JSX } from "solid-js";
 
 export default function Projects() {
   return (

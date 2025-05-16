@@ -1,4 +1,5 @@
-import { createStore } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
+import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
@@ -15,11 +16,19 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { addEditButtonSchema } from "./addEditButtonSchema";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
+// Define the type for modalState
+type ModalState = {
+  isLoading: boolean;
+  showModal: boolean;
+};
+
+type ModalStateStore = [ModalState, SetStoreFunction<ModalState>];
+
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();
   const validateForm = (formData: Vertex) => {
     if (!formData.P.key?.trim()) {
-      showErrorToast("Please enter subdomain name");
+      showErrorToast("Please enter Project name");
       return false;
     }
     const databaseNameError = validateDatabaseName(formData.P.key);
@@ -37,7 +46,8 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     }
 
     try {
-      options.contextData.modalState[1]("isLoading", true);
+      const modalState = options.contextData.modalState as ModalStateStore;
+      modalState[1]("isLoading", true);
       const url = formData.id.startsWith("-")
         ? API.subdomain.createUrl
         : API.subdomain.updateUrl;
@@ -65,16 +75,17 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         options.ensureData();
         showSuccessToast(
           formData.id.startsWith("-")
-            ? "Subdomain created successfully"
-            : "Subdomain updated successfully",
+            ? "Project created successfully"
+            : "Project updated successfully",
         );
-        options.contextData.modalState[1]("showModal", false);
+        modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      options.contextData.modalState[1]("isLoading", false);
+      const modalState = options.contextData.modalState as ModalStateStore;
+      modalState[1]("isLoading", false);
     }
   };
 
@@ -98,7 +109,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "key",
-                placeholder: "Enter subdomain name",
+                placeholder: "Enter Project / SubDomain name",
                 props: (options: FunctionArgumentType) => ({
                   disabled: !options.data?.id.startsWith("-"),
                 }),
@@ -163,7 +174,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         as: "span",
         css: SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS,
         componentName: "Html",
-        text: "Add New SubDomain",
+        text: "Add New Project",
       },
     ],
     css: SETTINGS_CONSTANTS.MODAL.HEADER.CSS,
@@ -177,27 +188,31 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
-          disabled: options.contextData.modalState[0]?.isLoading,
-          onClick: () => handleSave(options),
-          text: options.contextData.modalState[0]?.isLoading
-            ? "Saving..."
-            : "Save",
-        }),
+        props: (options: FunctionArgumentType) => {
+          const modalState = options.contextData.modalState as ModalStateStore;
+          return {
+            disabled: modalState[0]?.isLoading,
+            onClick: () => handleSave(options),
+            text: modalState[0]?.isLoading ? "Saving..." : "Save",
+          };
+        },
         type: "button",
       },
       {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
-          onClick: () => {
-            options.contextData.modalState[1]("showModal", false);
-            options.revertTransactionUpToIndex(options.txnId, -1);
-            options.ensureData();
-          },
-          text: "Cancel",
-        }),
+        props: (options: FunctionArgumentType) => {
+          const modalState = options.contextData.modalState as ModalStateStore;
+          return {
+            onClick: () => {
+              modalState[1]("showModal", false);
+              options.revertTransactionUpToIndex(options.txnId, -1);
+              options.ensureData();
+            },
+            text: "Cancel",
+          };
+        },
         type: "button",
       },
     ],
@@ -210,15 +225,19 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
       {
         as: "div",
         attributes: [
-          addEditButtonSchema("SubDomain"),
+          addEditButtonSchema("Project"),
           {
             as: "div",
             attributes: [],
             css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              hide: !options.contextData.modalState[0]?.showModal,
-            }),
+            props: (options: FunctionArgumentType) => {
+              const modalState = options.contextData
+                .modalState as ModalStateStore;
+              return {
+                hide: !modalState[0]?.showModal,
+              };
+            },
           },
           {
             attributes: [
@@ -242,19 +261,37 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
-                    props: (options: FunctionArgumentType) => ({
-                      hide: !options.contextData.modalState[0]?.showModal,
-                      style: {
-                        "z-index": options.zIndex + 1,
-                      },
-                    }),
+                    props: (options: FunctionArgumentType) => {
+                      const modalState = options.contextData
+                        .modalState as ModalStateStore;
+
+                      return {
+                        hide: !modalState[0]?.showModal,
+                        style: {
+                          "z-index": options.zIndex + 1,
+                        },
+                        beforeMount: () => {
+                          // Create focus trap
+                          createFocusTrap({
+                            element: options.ref,
+                            enabled: () => modalState[0]?.showModal,
+                            observeChanges: true,
+                            restoreFocus: true,
+                          });
+                        },
+                      };
+                    },
                   },
                 ],
                 componentName: "Html",
                 as: "portal",
-                props: (options: FunctionArgumentType) => ({
-                  hide: !options.contextData.modalState[0]?.showModal,
-                }),
+                props: (options: FunctionArgumentType) => {
+                  const modalState = options.contextData
+                    .modalState as ModalStateStore;
+                  return {
+                    hide: !modalState[0]?.showModal,
+                  };
+                },
               },
             ],
             componentName: "ZIndex",

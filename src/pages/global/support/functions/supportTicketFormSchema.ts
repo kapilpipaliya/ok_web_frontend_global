@@ -546,6 +546,16 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                       style: {
                         "z-index": options.zIndex + 1,
                       },
+                      onMount: () => {
+                        const textareas =
+                          document.getElementsByTagName("textarea");
+                        for (let i = 0; i < textareas.length; i++) {
+                          if (textareas[i].tabIndex !== -1) {
+                            textareas[i].focus();
+                            break;
+                          }
+                        }
+                      },
                     }),
                   },
                 ],

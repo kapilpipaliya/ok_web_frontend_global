@@ -623,12 +623,10 @@ export function DynamicComponent(
 
   if (dynamicProps().beforeMount) {
     try {
-      runWithOwner(owner, () => {
-        const beforeMount = dynamicProps().beforeMount;
-        if (beforeMount && typeof beforeMount === "function") {
-          beforeMount(getFunctionArgumentWithValue());
-        }
-      });
+      const beforeMount = dynamicProps().beforeMount;
+      if (beforeMount && typeof beforeMount === "function") {
+        beforeMount(getFunctionArgumentWithValue());
+      }
     } catch (error) {
       console.error("Error in beforeMount:", error);
     }

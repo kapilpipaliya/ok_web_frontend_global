@@ -1,5 +1,6 @@
 import { useNavigate } from "@solidjs/router";
 import { createStore } from "solid-js/store";
+import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
@@ -516,7 +517,25 @@ export function ForgotPasswordForm() {
 
   return (
     <SchemaRenderer
-      form={{ attributes: [wrapFormInCard(form)], key: "ForgotPassword" }}
+      form={{
+        attributes: [
+          {
+            ...wrapFormInCard(form),
+            props: (options: FunctionArgumentType) => ({
+              beforeMount: () => {
+                createFocusTrap({
+                  element: options.ref,
+                  observeChanges: true,
+                  restoreFocus: true,
+                  initialFocusElement: () =>
+                    document.getElementsByTagName("input")[0],
+                });
+              },
+            }),
+          },
+        ],
+        key: "ForgotPassword",
+      }}
     />
   );
 }

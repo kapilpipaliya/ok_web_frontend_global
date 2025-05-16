@@ -1,5 +1,6 @@
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
+import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
@@ -325,6 +326,15 @@ export const getThemeFormSchema = (
                       },
                       style: {
                         "z-index": options.zIndex + 1,
+                      },
+                      beforeMount: () => {
+                        createFocusTrap({
+                          element: options.ref,
+                          observeChanges: true,
+                          restoreFocus: true,
+                          initialFocusElement: () =>
+                            document.getElementsByTagName("input")[0],
+                        });
                       },
                     }),
                   },
