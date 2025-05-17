@@ -37,12 +37,12 @@ const ErrorMessage = (props: { message: string }) => (
   <As
     as="div"
     css={(args) => css`
-      background-color: ${args.theme.var.color.error_20};
-      color: ${args.theme.var.color.error};
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      text-align: center;
-      margin-bottom: 1rem;
+        background-color: ${args.theme.var.color.error_20};
+        color: ${args.theme.var.color.error};
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        text-align: center;
+        margin-bottom: 1rem;
     `}
   >
     {props.message}
@@ -100,7 +100,7 @@ export function GetInitialData(props: GetInitialDataProps) {
           />
         </Match>
         <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
-          <RenderContent />
+          {props.children}
         </Match>
       </Switch>
     );
