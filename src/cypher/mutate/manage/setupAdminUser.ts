@@ -22,6 +22,16 @@ export async function setupAdminUser(): Promise<{
     if (adminDatabaseExists) {
       return { error: "Admin user already exists", status: 400, user: null };
     }
+
+    // Check if password exists in adminUserData
+    if (!adminUserData.password) {
+      return {
+        error: "Admin user password is required",
+        status: 400,
+        user: null,
+      };
+    }
+
     await createDatabase(SYSTEM_DB_NAME);
 
     const driver = await getDriver();

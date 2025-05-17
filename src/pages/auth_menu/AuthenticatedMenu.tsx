@@ -2,7 +2,7 @@ import type { JSX } from "solid-js";
 import { For } from "solid-js";
 
 import { Icon } from "@iconify-icon/solid";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -22,6 +22,7 @@ export function AuthenticatedMenu(
   const [graph, _setGraph] = useGraph();
   const _navigate = useNavigate();
   const { showLoadingToast } = useToast();
+  const location = useLocation();
 
   const isSystemSubDomain = () =>
     getMemberVertex(graph).P.subDomain === "admin";
@@ -89,46 +90,53 @@ export function AuthenticatedMenu(
 `}
     >
       <For each={getMenuItems()}>
-        {(item) => (
-          <As
-            as="li"
-            css={css`
+        {(item) => {
+          const isActive =
+            location.pathname ===
+            new URL(item.href, window.location.origin).pathname;
+          return (
+            <As
+              as="li"
+              css={css`
   margin-bottom: 8px;
   &:last-child {
     margin-bottom: 0;
   }
 `}
-          >
-            <As
-              as="a"
-              css={(args) => css`
+            >
+              <As
+                as="a"
+                css={(args) => css`
   display: flex;
   align-items: center;
   color: ${args.theme.var.color.base};
   padding: 8px 12px;
   border-radius: 6px;
   text-decoration: none;
+  background-color: ${isActive ? args.theme.var.color.primary_30 : "transparent"};
+  font-weight: ${isActive ? "bold" : "normal"};
   &:hover {
     background-color: ${args.theme.var.color.primary_30};
   }
 `}
-              href={item.href}
-              onclick={props.onClose}
-              target={item.target}
-            >
-              <As
-                as={Icon}
-                css={(args) => css`
+                href={item.href}
+                onclick={props.onClose}
+                target={item.target}
+              >
+                <As
+                  as={Icon}
+                  css={(args) => css`
   margin-right: 10px;
   color: ${args.theme.var.color.primary};
 `}
-                icon={item.icon}
-                width="20"
-              />
-              {item.label}
+                  icon={item.icon}
+                  width="20"
+                />
+                {item.label}
+              </As>
             </As>
-          </As>
-        )}
+          );
+        }}
       </For>
       <As
         as="hr"

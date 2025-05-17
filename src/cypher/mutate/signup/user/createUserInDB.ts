@@ -50,18 +50,17 @@ export async function createUserInAdminDB(
 export async function createUserInUserDB(
   sessionOrTx: Session | Transaction,
   params: Record<string, unknown> & UserDataWithPassword,
-  isSystemUser?: boolean,
+  isAdminUser?: boolean,
 ): Promise<Vertex> {
   const uuid = (params.uuid as string) || uuidv7();
   const { hashedPassword, processedData, salt } = await processUserData(
     params,
-    isSystemUser,
+    isAdminUser,
   );
 
   const queryParams = {
     ...processedData,
     hashedPassword,
-    isSystemUser: isSystemUser ?? null,
     salt,
     uuid,
   };
@@ -94,16 +93,11 @@ function buildUserCreationQuery(
   ];
 
   // Add database-specific fields or conditionally include fields
-  const dbSpecificFields = [];
-
-  if (dbType === "UserDB" || additionalFields.isSystemUser) {
-    dbSpecificFields.push("isSystemUser: $isSystemUser");
-  }
+  const dbSpecificFields: string[] = [];
 
   // Add any additional custom fields defined in additionalFields
   Object.entries(additionalFields).forEach(([field, include]) => {
-    if (include && field !== "isSystemUser") {
-      // isSystemUser already handled above
+    if (include) {
       dbSpecificFields.push(`${field}: $${field}`);
     }
   });
@@ -151,7 +145,7 @@ async function executeUserCreationQuery(
  */
 async function processUserData(
   userData: UserDataWithPassword,
-  isSystemUser?: boolean,
+  isAdminUser?: boolean,
 ): Promise<{
   hashedPassword: null | string;
   processedData: Record<string, unknown>;
@@ -161,11 +155,7 @@ async function processUserData(
   let salt = null;
 
   // Only hash password for non-system users
-  if (
-    userData.password &&
-    typeof userData.password === "string" &&
-    !isSystemUser
-  ) {
+  if (userData.password && !isAdminUser) {
     const hashResult = await hashPassword(userData.password);
     hashedPassword = hashResult.hashedPassword;
     salt = hashResult.salt;

@@ -7,7 +7,6 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
-import { isSystemUser } from "~/cypher/permissions/isSystemUser";
 import { getSubdomainsForAccount } from "~/cypher/session/getSubdomainsForAccount";
 import { sendEmailConfirmation } from "~/routes/api/auth/(profile)/functions/sendEmailConfirmation";
 import { validateUniqueFields } from "~/routes/api/auth/(profile)/functions/validateField";
@@ -29,15 +28,14 @@ export async function updateProfile(
 ): Promise<ServerResult | { error: string; status: number }> {
   const { email, username, uuid } = payload;
 
-  const isSystemUserResult = await isSystemUser(dbSession, currentUser.P.uuid);
-  if (isSystemUserResult.isSystemUser) {
+  if (!currentUser.P.password) {
     return {
       error: "Administrator cannot update profile in subdomain",
       status: 404,
     };
   }
 
-  const oldUser = isSystemUserResult.user!;
+  const oldUser = currentUser;
   const isEmailChanged = !!email && email !== oldUser.P.email;
   const isUsernameChanged = !!username && username !== oldUser.P.username;
 

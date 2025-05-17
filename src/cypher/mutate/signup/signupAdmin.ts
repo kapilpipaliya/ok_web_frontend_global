@@ -17,14 +17,14 @@ import { createUserInAdminDB } from "./user/createUserInDB";
 export async function signupAdmin(
   tx: Transaction,
   data: SignupRequestData,
-  isSystemUser = false,
+  isAdmin = false,
 ) {
   // Check if the user already exists
   await newAdminValidations(tx, data.username, data.email);
 
   const user = await createUserInAdminDB(tx, {
     email: data.email,
-    emailConfirmed: isSystemUser,
+    emailConfirmed: isAdmin,
     password: data.password,
     username: data.username,
   });
@@ -35,12 +35,12 @@ export async function signupAdmin(
   await createAccountUserRelation(tx, accountId, user.P.uuid);
   await addAdminRoleToUser(tx, user.P.uuid);
 
-  if (isSystemUser) {
+  if (isAdmin) {
     await addSystemAdminRoleToUser(tx, user.P.uuid);
   }
 
   // Create SubDomain and link with Account if it's system user
-  if (isSystemUser) {
+  if (isAdmin) {
     await createSystemSubdomain(tx, accountId);
     await createRootFolder(tx);
 

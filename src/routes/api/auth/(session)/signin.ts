@@ -60,7 +60,7 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
-async function authenticateAdminUser(adminUser: Vertex, password: string) {
+async function authenticateAdminUser(dbUser: Vertex, password: string) {
   const adminDbSession = (await getDriver()).session({
     database: SYSTEM_DB_NAME,
   });
@@ -68,17 +68,17 @@ async function authenticateAdminUser(adminUser: Vertex, password: string) {
   try {
     const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
     const adminDbResult = await adminDbSession.run(query, {
-      uuid: adminUser.P.uuid,
+      uuid: dbUser.P.uuid,
     });
 
     if (adminDbResult.records.length === 0) {
       throw new APIError(
-        `Not Authorized Email or Username for UUID: ${adminUser.P.uuid}. Please contact customer support.`,
+        `Not Authorized Email or Username for UUID: ${dbUser.P.uuid}. Please contact customer support.`,
         401,
       );
     }
-    const user = convertNodeToJson(adminDbResult.records[0].get("u"));
-    return comparePassword(user, password);
+    const adminUser = convertNodeToJson(adminDbResult.records[0].get("u"));
+    return comparePassword(adminUser, password);
   } finally {
     await adminDbSession.close();
   }
@@ -116,7 +116,7 @@ async function authenticateUser(
   }
 
   // when system user, check password from system db
-  if (user.P.isSystemUser) {
+  if (!user.P.password) {
     return await authenticateAdminUser(user, password);
   }
   return comparePassword(user, password);

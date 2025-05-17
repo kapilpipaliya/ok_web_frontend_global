@@ -55,7 +55,9 @@ export async function GET({ request }: APIEvent) {
     }
 
     updateRedirectUrl(existingUser, subDomain, redirectUrl, queryParams);
-    if (existingUser.P.isSystemUser) {
+    if (existingUser.P.password) {
+      await updateSession(existingUser);
+    } else {
       const adminUser = await findUserByEmailSimple(
         adminDbSession,
         existingUser.P.email,
@@ -63,8 +65,6 @@ export async function GET({ request }: APIEvent) {
       if (adminUser) {
         await updateSession(adminUser);
       }
-    } else {
-      await updateSession(existingUser);
     }
 
     return new Response(null, {

@@ -1,11 +1,12 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
-import { getDriver } from "~/cypher/core/driver";
+import { getSystemUser } from "~/cypher/permissions/utils/checkSystemUser";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getHttpsSession } from "~/server/auth/session/getHttpsSession";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { getDriver } from "~/cypher/core/driver";
+import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 
 export async function getUserFromSession(
   request?: APIEvent["request"],
@@ -24,6 +25,7 @@ export async function getUserFromSession(
     // Get user password from database
     const sessionData = await getDBSessionForSubdomain(request);
     dbSession = sessionData.dbSession;
+    const subDomain = sessionData.subDomain;
     const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u as u";
     const result = await dbSession.run(query, { uuid: sessionUser.P.uuid });
 
@@ -33,30 +35,34 @@ export async function getUserFromSession(
 
     const userFromDb = convertNodeToJson(result.records[0].get("u"));
 
-    if (userFromDb?.P.isSystemUser) {
-      adminDbSession = (await getDriver()).session({
-        database: SYSTEM_DB_NAME,
-      });
-      const adminDbResult = await adminDbSession.run(query, {
-        uuid: sessionUser.P.uuid,
-      });
+    if (!sessionUser.P.password) {
+      // Create admin session
+      const driver = await getDriver();
+      adminDbSession = driver.session({ database: SYSTEM_DB_NAME });
 
-      if (adminDbResult.records.length === 0) {
+      // Check if user is a system user and get the user data
+      const { exists, user: systemUser } = await getSystemUser(
+        sessionUser.P.uuid,
+        subDomain,
+        adminDbSession,
+      );
+
+      if (exists && systemUser) {
+        if (systemUser.P.password === sessionUser.P.password) {
+          return systemUser;
+        }
         return;
       }
-      const adminUser = convertNodeToJson(adminDbResult.records[0].get("u"));
-      if (adminUser.P.password === sessionUser.P.password) {
-        return adminUser;
-      }
-      return;
     }
+
     // Return undefined if passwords don't match
     if (!userFromDb || userFromDb.P.password !== sessionUser.P.password) {
       return;
     }
 
     return sessionUser;
-  } catch {
+  } catch (error) {
+    console.error("Error in getUserFromSession:", error);
     // Handle the error silently, returning undefined
     return;
   } finally {

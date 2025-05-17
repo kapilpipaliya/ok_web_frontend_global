@@ -3,7 +3,6 @@ import type { APIEvent } from "@solidjs/start/server";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { isSystemUser } from "~/cypher/permissions/isSystemUser";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { sendEmailConfirmation } from "./functions/sendEmailConfirmation";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -16,7 +15,9 @@ export async function POST(event: APIEvent): Promise<Response> {
         status: 401,
       });
     }
-    const { dbSession } = await getDBSessionForSubdomain(event.request);
+    const { dbSession, subDomain } = await getDBSessionForSubdomain(
+      event.request,
+    );
 
     try {
       // Get current user
@@ -32,10 +33,16 @@ export async function POST(event: APIEvent): Promise<Response> {
       }
 
       const currentUser = convertNodeToJson(userResult.records[0].get("u"));
-      const isSystemUserResult = await isSystemUser(
-        dbSession,
-        currentUser.P.uuid,
-      );
+      if (!currentUser.P.password) {
+        return new Response(
+          JSON.stringify({
+            error: "Administrator cannot resend email confirmation",
+          }),
+          {
+            status: 404,
+          },
+        );
+      }
 
       if (!currentUser.P.pendingEmail) {
         return new Response(
@@ -47,7 +54,7 @@ export async function POST(event: APIEvent): Promise<Response> {
       // Resend email confirmation
       await sendEmailConfirmation(
         event.request,
-        isSystemUserResult.user!,
+        currentUser,
         currentUser.P.pendingEmail,
         currentUser,
         event.params.tenant || "admin",
