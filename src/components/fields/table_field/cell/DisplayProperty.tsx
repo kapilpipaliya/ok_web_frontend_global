@@ -17,7 +17,6 @@ import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
 import { getComponentLabel } from "~/features/page_designer/functions/component/getComponentLabel";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { evalExpression } from "~/lib/expression_eval";
-import { getStringComponent } from "~/lib/graph/get/sync/format/getStringComponent";
 
 import {
   type FormStoreObject,
@@ -84,7 +83,7 @@ export function DisplayProperty(
             // to avoid error:  ReferenceError: Cannot access 'setComponentName' before initialization
             setTimeout(() => {
               runWithOwner(outerOwner, () => {
-                setComponentName(value || getStringComponent());
+                setComponentName(value || "TextInput");
               });
             });
             let componentNameNew = "";
@@ -106,7 +105,7 @@ export function DisplayProperty(
               componentNameNew = value;
             }
             if (!componentNameNew) {
-              componentNameNew = getStringComponent();
+              componentNameNew = "TextInput";
             }
             setTimeout(() => {
               runWithOwner(outerOwner, () => {

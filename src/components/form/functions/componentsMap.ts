@@ -36,10 +36,3 @@ export const componentsMap: Record<string, any> = {
   TransitionGroup,
   ZIndex,
 };
-
-export function getDynamicComponent(component: string) {
-  if (!component) {
-    return;
-  }
-  return componentsMap[component];
-}

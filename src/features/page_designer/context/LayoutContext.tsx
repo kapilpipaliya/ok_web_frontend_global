@@ -61,8 +61,6 @@ export function getInitialDesignerLayoutStore() {
       | "left"
       | "right"
       | null,
-    selectedSection: "build",
-    selectedTab: "settings",
   };
 }
 

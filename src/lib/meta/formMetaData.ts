@@ -6,15 +6,11 @@ import { User } from "./auth/User";
 import { Comp } from "./base/Comp";
 import { GlobalSetting } from "./base/GlobalSetting";
 import { File, FileTag, Folder } from "./file/File";
-import { Import } from "./other/Import";
-import { Nav } from "./other/Nav";
 import { Coll } from "./page/Coll";
 import { Page, variantAttributes } from "./page/Page";
 import { PROPERTIES } from "~/pages/settings/constants";
 
 const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
-  Import: Import,
-  Nav: Nav,
   Perm: Perm,
   Role: Role,
   User: User,

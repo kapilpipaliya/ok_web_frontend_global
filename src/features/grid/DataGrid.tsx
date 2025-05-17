@@ -21,10 +21,6 @@ import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
 import { CommonTable } from "~/components/styled/table/Table";
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
-import {
-  getConfiguredPermissions,
-  hasPermissions,
-} from "~/features/page_attr_render/permissions";
 import { generateFormMetaAttributes } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
@@ -50,6 +46,8 @@ import { CreateGridHeaders } from "./schema/CreateGridHeaders";
 import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { getConfiguredPermissions } from "~/features/page_attr_render/getConfiguredPermissions";
+import { hasPermissions } from "~/features/page_attr_render/hasPermissions";
 
 interface DataGridProps {
   CustomAddNewButton?: (props: {

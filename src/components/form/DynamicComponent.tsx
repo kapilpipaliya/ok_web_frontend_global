@@ -27,10 +27,6 @@ import {
 } from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
-  getConfiguredPermissions,
-  hasPermissions,
-} from "~/features/page_attr_render/permissions";
-import {
   PreviewContext,
   usePreviewContext,
 } from "~/features/page_designer/context/PreviewContext";
@@ -46,15 +42,9 @@ import type { FunctionArgumentType } from "./type/FieldSchemaType";
 import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
-import { getDynamicComponent } from "./functions/getDynamicComponent";
+import { componentsMap } from "./functions/componentsMap";
 import { useTheme } from "~/lib/context/ThemeContext";
 import { processCssContent } from "~/lib/styles/processCss";
-import {
-  deleteTxnIdAndCreateNew,
-  ensureData,
-  removeTxnIdAndCreateNew,
-  setError,
-} from "./functions/formFunctions";
 import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDataWithTransaction";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
@@ -66,6 +56,12 @@ import { IdAttr } from "~/lib/graph/type/idAttr";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { ComponentField } from "../fields/component/ComponentField";
+import { deleteTxnIdAndCreateNew } from "~/components/form/functions/deleteTxnIdAndCreateNew";
+import { ensureData } from "~/components/form/functions/ensureData";
+import { removeTxnIdAndCreateNew } from "~/components/form/functions/removeTxnIdAndCreateNew";
+import { setError } from "~/components/form/functions/setError";
+import { getConfiguredPermissions } from "~/features/page_attr_render/getConfiguredPermissions";
+import { hasPermissions } from "~/features/page_attr_render/hasPermissions";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -571,7 +567,7 @@ export function DynamicComponent(
   const component = createMemo(() =>
     typeof componentName() === "function"
       ? componentName()
-      : (getDynamicComponent(componentName() as string) ?? ComponentField),
+      : (componentsMap[componentName() as string] ?? ComponentField),
   );
   const isHidden = () => {
     try {

@@ -31,10 +31,6 @@ import {
 import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
 import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
 import { PageView } from "~/features/page_attr_render/PageView";
-import {
-  getConfiguredPermissions,
-  hasPermissions,
-} from "~/features/page_attr_render/permissions";
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { isObject } from "~/lib/data_structure/object/isObject";
@@ -71,6 +67,8 @@ import { PermissionLevel } from "~/features/page_attr_render/PermissionLevel";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { getConfiguredPermissions } from "~/features/page_attr_render/getConfiguredPermissions";
+import { hasPermissions } from "~/features/page_attr_render/hasPermissions";
 
 export function PageViewWrapper(
   props: Readonly<{

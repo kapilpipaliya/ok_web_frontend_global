@@ -11,12 +11,12 @@ import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { uniqueNameKey } from "../../../constants/constant";
-import { getUniqueName } from "../../form/generateFormMetaAttributes";
 import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
 import { getCompPropsObj } from "../attributes/getCompPropsObj";
 import { getComponentFromLayoutRow } from "../ui/getComponentFromLayoutRow";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { getUniqueName } from "~/features/page_designer/functions/form/getUniqueName";
 
 // @Note:
 // From Component To Layout drag:

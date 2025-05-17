@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
 
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { PlusIconButton } from "~/components/styled/PlusIconButton";
+import { PlusIconButton } from "~/components/styled/buttons/PlusIconButton";
 import { As } from "~/components/As";
 import { css } from "~/lib/styles";
 import type { Vertex } from "~/lib/graph/type/vertex";

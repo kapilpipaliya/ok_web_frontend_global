@@ -1,5 +1,5 @@
 import {
-  formatHex,
+  formatCss,
   formatRgb,
   interpolate,
   oklch,
@@ -49,7 +49,7 @@ export function getColorShade(baseColor: string, shade: number): string {
 
   if (safeShade === 50) {
     // Return the base color at 50% shade
-    return formatHex(baseOklch) || baseColor;
+    return formatCss(baseOklch) || baseColor;
   }
   if (safeShade < 50) {
     // For lighter shades (0-49)
@@ -61,7 +61,7 @@ export function getColorShade(baseColor: string, shade: number): string {
     }
 
     const interpolated = interpolate([white, baseOklch])(ratio);
-    return formatHex(interpolated) || baseColor;
+    return formatCss(interpolated) || baseColor;
   }
   // For darker shades (51-100)
   // Linearly interpolate from base color (50) to black (100)
@@ -72,7 +72,7 @@ export function getColorShade(baseColor: string, shade: number): string {
   }
 
   const interpolated = interpolate([baseOklch, black])(ratio);
-  return formatHex(interpolated) || baseColor;
+  return formatCss(interpolated) || baseColor;
 }
 
 // Helper to create CSS with ._id selector
@@ -134,7 +134,7 @@ export const colors = {
     }
 
     c.l = Math.min(1, (c.l || 0) + amount / 200); // Smaller steps for OKLCH lightness
-    return formatHex(c) || color;
+    return formatCss(c) || color;
   },
 
   darken: (color: string, amount: number) => {
@@ -144,7 +144,7 @@ export const colors = {
     }
 
     c.l = Math.max(0, (c.l || 0) - amount / 200); // Smaller steps for OKLCH lightness
-    return formatHex(c) || color;
+    return formatCss(c) || color;
   },
 
   setAlpha: (color: string, alpha: number) => {
@@ -167,7 +167,7 @@ export const colors = {
     if (c.h < 0) {
       c.h += 360;
     }
-    return formatHex(c) || color;
+    return formatCss(c) || color;
   },
 
   complement: (color: string) => {
@@ -177,7 +177,7 @@ export const colors = {
     }
 
     c.h = ((c.h || 0) + 180) % 360;
-    return formatHex(c) || color;
+    return formatCss(c) || color;
   },
 
   mix: (color1: string, color2: string, amount = 50) => {
@@ -190,7 +190,7 @@ export const colors = {
     // Convert amount from percentage to 0-1 range
     const ratio = amount / 100;
     const mixed = interpolate([c1, c2])(ratio);
-    return formatHex(mixed) || color1;
+    return formatCss(mixed) || color1;
   },
 
   mostReadable: (color: string, options: string[] = ["#fff", "#000"]) => {

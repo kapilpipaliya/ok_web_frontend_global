@@ -7,7 +7,6 @@ import { createEffect, type JSX, onCleanup, onMount } from "solid-js";
 import { isServer } from "solid-js/web";
 import { v7 as uuidv7 } from "uuid";
 
-import { MetaTitle } from "~/components/fields/MetaTitle";
 import { ZIndex } from "~/components/fields/ZIndex";
 import {
   DesignerLayoutStoreContext,
@@ -20,6 +19,8 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { getTitle } from "~/lib/graph/get/sync/theme/getTitle";
+import { Title } from "@solidjs/meta";
 
 const RenderMainContent = clientOnly(() => import("./RenderMainContent"));
 
@@ -171,14 +172,8 @@ export function PageDesignerWrapper(): JSX.Element {
   return (
     <ZIndex>
       <DesignerLayoutStoreContext.Provider value={initialStore.id}>
-        <MetaTitle text={`${params.entity} Builder`} />
-        {/* <div
-          classList={{
-            "display:none": layoutStore().selectedSection === "setting",
-          }}
-        > */}
+        <Title>{getTitle(`${params.entity} Builder`, graph)}</Title>
         <RenderMainContent />
-        {/* </div> */}
       </DesignerLayoutStoreContext.Provider>
     </ZIndex>
   );

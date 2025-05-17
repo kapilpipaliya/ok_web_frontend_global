@@ -11,11 +11,10 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 export const HomeIcon = () => {
   const [graph] = useGraph();
   const navigate = useNavigate();
-  const isSystemSubDomain = () =>
-    getMemberVertex(graph).P.subDomain === "admin";
+  const isAdminSubDomain = () => getMemberVertex(graph).P.subDomain === "admin";
 
   const context = () => {
-    if (isSystemSubDomain()) {
+    if (isAdminSubDomain()) {
       return "system";
     }
     if (isAdminRole(graph)) {

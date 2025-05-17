@@ -490,7 +490,6 @@ function main() {
   console.log('1. Review changes in key files like:');
   console.log('   - src/lib/styles/index.ts (ShadeNumber type)');
   console.log('   - src/lib/styles/colorUtils.ts (getColorShade and generateColorPalette functions)');
-  console.log('   - src/lib/shade-generator/shadeGenerator.ts (shades configuration)');
   console.log('2. Update any UI components that display color shades to use the new scale');
   console.log('3. Run tests to ensure color functionality still works correctly');
   console.log('4. Visually check your application to ensure colors appear as expected');

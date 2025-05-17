@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js";
+import { Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -65,17 +65,12 @@ export function DeleteAttributeDialog() {
     mergeVertexProperties<FormStoreObject>(0, formStoreId!, graph, setGraph, {
       shouldContainAtLeastOneForm: false,
       usedAttrsInNameKeys: [],
-      usedAttrsInRules: {},
       usedAttrsInUniqueConstraints: [],
     });
   };
 
   const descriptionParts = [
     "The attribute or its children are used in the following rules or constraints.",
-    formStoreVertex()?.P.usedAttrsInRules &&
-    Object.keys(formStoreVertex()?.P.usedAttrsInRules ?? {}).length > 0
-      ? "Please delete them from the rules before deleting the attribute."
-      : "",
     formStoreVertex()?.P.usedAttrsInNameKeys &&
     formStoreVertex()?.P.usedAttrsInNameKeys.length > 0
       ? "Please delete them from the key keys before deleting the attribute."
@@ -104,37 +99,6 @@ export function DeleteAttributeDialog() {
   margin-top: 1rem;
 `}
       >
-        <For each={Object.keys(formStoreVertex()?.P.usedAttrsInRules)}>
-          {(attr) => (
-            <As
-              as="div"
-              css={css`
-  color: rgb(185,28,28);
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-`}
-            >
-              <As
-                as="ul"
-                css={css`
-  list-style-type: disc;
-  padding-left: 1.25rem;
-`}
-              >
-                <li>
-                  The attribute {graph.vertexes[attr]?.P.key} is used in the
-                  following rules:{" "}
-                  {formStoreVertex()
-                    ?.P.usedAttrsInRules[attr].map(
-                      (rule) => graph.vertexes[rule]?.P.key,
-                    )
-                    .join(", ")}
-                  .
-                </li>
-              </As>
-            </As>
-          )}
-        </For>
         <AttributeList
           attributes={nameKeyAttributes()}
           title="The following attributes are used in key keys:"

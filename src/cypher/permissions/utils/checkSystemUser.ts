@@ -40,21 +40,8 @@ export async function getSystemUser(
 ): Promise<{ exists: boolean; user?: Vertex }> {
   // If subDomain is the system database, user is automatically a system user
   if (subDomain === SYSTEM_DB_NAME) {
-    // We still need to get the user from the admin database
-    try {
-      const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u as u";
-      const result = await adminDbSession.run(query, { uuid });
-
-      if (result.records.length > 0) {
-        const user = convertNodeToJson(result.records[0].get("u"));
-        return { exists: true, user };
-      } else {
-        return { exists: false };
-      }
-    } catch (error) {
-      console.error("Error getting system user:", error);
-      return { exists: false };
-    }
+    // Use checkUserExists to get the user from the admin database
+    return await checkUserExists(adminDbSession, uuid);
   }
 
   // Check if user exists in admin database with the same SubDomain

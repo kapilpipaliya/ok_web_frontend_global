@@ -7,12 +7,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { deleteNestedLayout } from "~/lib/graph/mutate/vertex/delete/deleteNestedLayout";
 import { evalExpression } from "~/lib/expression_eval";
 
-import {
-  allFormAttrsInPageFromLevel,
-  getAllFieldsUsedInAllRules,
-  getAllFieldsUsedInRootLevelSetting,
-  isAttrUsedInRules,
-} from "../form/generateFormMetaAttributes";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import type { PageLayoutObject } from "../../context/LayoutContext";
@@ -21,6 +15,8 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { allFormAttrsInPageFromLevel } from "~/features/page_designer/functions/form/allFormAttrsInPageFromLevel";
+import { getAllFieldsUsedInRootLevelSetting } from "~/features/page_designer/functions/form/getAllFieldsUsedInRootLevelSetting";
 
 /**
  * Find the parent vertex of a given layout vertex
@@ -226,24 +222,6 @@ function validateLayoutDeletion(
   const formDataId = formStoreVertex?.P.formDataId;
   if (!formDataId || !graph.vertexes[formDataId]) {
     return false;
-  }
-
-  const usedAttrs = getAllFieldsUsedInAllRules(
-    graph,
-    setGraph,
-    graph.vertexes[formDataId],
-  );
-  const usedAttrsInRules = isAttrUsedInRules(layoutVertex, usedAttrs, graph);
-
-  if (Object.keys(usedAttrsInRules).length > 0) {
-    mergeVertexProperties<FormStoreObject>(
-      0,
-      formStoreVertex.id!,
-      graph,
-      setGraph,
-      { usedAttrsInRules },
-    );
-    return true;
   }
 
   const usedAttrsInUniqueConstraints = getAllFieldsUsedInRootLevelSetting(

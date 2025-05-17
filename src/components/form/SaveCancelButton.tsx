@@ -12,6 +12,7 @@ import { As } from "../As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
+// Deprecated - just added for submit button reference
 export function SaveCancelButton(
   props: Readonly<{
     buttonAlign?: string;

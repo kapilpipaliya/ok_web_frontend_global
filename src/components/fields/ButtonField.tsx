@@ -1,19 +1,15 @@
 import type { JSX } from "solid-js";
 import {
-  createSignal,
   getOwner,
   runWithOwner,
   Show,
   splitProps,
 } from "solid-js";
-
-import { mergeRefs } from "@solid-primitives/refs";
 import { useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
 
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
-import { isAnyFieldInvalid } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
 import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
@@ -30,6 +26,7 @@ import {
 import { useToast } from "../styled/modal/Toast";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { isAnyFieldInvalid } from "~/features/page_designer/functions/form/isAnyFieldInvalid";
 
 interface ButtonProps
   extends GenericComponentProps,
@@ -42,22 +39,18 @@ interface ButtonProps
   text?: string;
 }
 
-// Deprecated
+// Deprecated - Just keep for reference of submit and reset button logic.
 export function ButtonField(props: Readonly<ButtonProps>) {
   const owner = getOwner();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
-  const meta = () => parentRenderContext()?.context.meta!;
-  const _data = () => parentRenderContext()?.context.data!;
+  const meta = () => parentRenderContext()?.context.meta;
   const [graph, setGraph] = useGraph();
   const { showLoadingToast } = useToast();
   const formId = useFormContext();
   const formVertex = () => graph.vertexes[formId!] as Vertex<FormStoreObject>;
   const navigate = useNavigate();
   const [previewStore] = usePreviewContext();
-  const [_internalRef, setInternalRef] = createSignal<HTMLButtonElement | null>(
-    null,
-  );
 
   const [local, others] = splitProps(props, [
     "as",
@@ -81,7 +74,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
       isAnyFieldInvalid(
         graph,
         setGraph,
-        meta(),
+        meta()!,
         graph.vertexes[formVertex()!.P.formDataId!],
       )
     ) {
@@ -93,7 +86,7 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     }
     await showLoadingToast({
       loadMessage: "Submitting Data...",
-      onSuccess: (_data) => {
+      onSuccess: () => {
         // setTimeout(() => navigate(-1), 0);
       },
       promise: submitDataCall(data, graph, setGraph, formVertex()!.P.txnId),
@@ -137,7 +130,6 @@ export function ButtonField(props: Readonly<ButtonProps>) {
       fallback={
         <Dynamic
           component={local.as ?? (others.href ? "a" : "button")}
-          ref={mergeRefs(props.ref, setInternalRef)}
           tabIndex={props.disabled ? -1 : undefined}
           {...others}
           onClick={onClick}
@@ -156,7 +148,6 @@ export function ButtonField(props: Readonly<ButtonProps>) {
     >
       <Dynamic
         component={local.as ?? (others.href ? "a" : "button")}
-        ref={mergeRefs(props.ref, setInternalRef)}
         tabIndex={props.disabled ? -1 : undefined}
         {...others}
         onClick={onClick}

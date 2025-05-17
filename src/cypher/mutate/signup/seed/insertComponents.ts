@@ -1,7 +1,7 @@
 import type { Session, Transaction } from "neo4j-driver";
 
-import { getComponentTree } from "~/cypher/mutate/seed/component_tree/getComponentTree";
-import { insertComponentTree } from "~/cypher/mutate/seed/component_tree/insertComonentTree";
+import { getComponentTree } from "~/cypher/mutate/signup/seed/component_tree/getComponentTree";
+import { insertComponentTree } from "~/cypher/mutate/signup/seed/component_tree/insertComonentTree";
 
 export async function insertComponents(adminTx: Session | Transaction) {
   const response = await insertComponentTree(adminTx, getComponentTree());

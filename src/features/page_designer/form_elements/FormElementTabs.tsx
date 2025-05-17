@@ -12,7 +12,7 @@ import { Icon } from "@iconify-icon/solid";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { PlusIconButton } from "~/components/styled/PlusIconButton";
+import { PlusIconButton } from "~/components/styled/buttons/PlusIconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { isNegative } from "~/lib/data_structure/number/isNegative";

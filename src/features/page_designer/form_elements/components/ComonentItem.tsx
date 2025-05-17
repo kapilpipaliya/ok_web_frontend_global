@@ -4,7 +4,7 @@ import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { toTitle } from "case-switcher-js";
 
-import { getDynamicComponent } from "~/components/form/functions/getDynamicComponent";
+import { componentsMap } from "~/components/form/functions/componentsMap";
 import { IconButton } from "~/components/styled/IconButton";
 import { isNegative } from "~/lib/data_structure/number/isNegative";
 import { iconMap } from "~/lib/ui/iconMap";
@@ -168,7 +168,7 @@ export function ComponentItem(
           css={css`
             font-size: 14px;
             font-weight: normal;
-            ${props.child?.L[0] === "Comp" && !getDynamicComponent(props.child?.P.key) ? `color: \${args.theme.var.color.error};` : ""}
+            ${props.child?.L[0] === "Comp" && !componentsMap[props.child?.P.key] ? `color: \${args.theme.var.color.error};` : ""}
           `}
         >
           {getDisplayName()}

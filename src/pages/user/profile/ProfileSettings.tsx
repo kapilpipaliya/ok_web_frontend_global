@@ -38,8 +38,7 @@ export function ProfileSettings() {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const isSystemSubDomain = () =>
-    getMemberVertex(graph).P.subDomain === "admin";
+  const isAdminSubDomain = () => getMemberVertex(graph).P.subDomain === "admin";
 
   const formDataId = uuidv7();
   addNewVertex(
@@ -415,7 +414,7 @@ margin-bottom: 24px;
 `,
             componentName: "Html",
             props: () => ({
-              hide: !isSystemSubDomain(),
+              hide: !isAdminSubDomain(),
             }),
           },
           pendingEmailBanner,
@@ -464,7 +463,7 @@ margin-bottom: 24px;
         form={{ attributes: [form], key: "Profile" }}
         formDataId={formDataId}
       />
-      <Show when={!isSystemSubDomain()}>
+      <Show when={!isAdminSubDomain()}>
         <As as="hr" css={SETTINGS_CONSTANTS.SECTION_DIVIDER_CSS} />
         <ProfileImageSettings />
       </Show>

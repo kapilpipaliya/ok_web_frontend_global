@@ -2,8 +2,6 @@ import type { SetStoreFunction } from "solid-js/store";
 
 import { createContext, useContext } from "solid-js";
 
-import type { IDToRuleMap } from "~/features/page_designer/functions/form/generateFormMetaAttributes";
-
 import { InitialPermissions } from "~/features/page_attr_render/InitialPermissions";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import type { Id } from "~/lib/graph/type/id";
@@ -38,7 +36,6 @@ export function getInitialFormStore(
     shouldContainAtLeastOneForm: false,
     txnId: generateNewTxnId(graph, setGraph),
     usedAttrsInNameKeys: [] as Array<Id | number>,
-    usedAttrsInRules: {} as IDToRuleMap,
     usedAttrsInUniqueConstraints: [] as Array<Id | number>,
     lastAddedViewId: null as Id | null,
   };

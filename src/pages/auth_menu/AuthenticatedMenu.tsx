@@ -24,22 +24,21 @@ export function AuthenticatedMenu(
   const { showLoadingToast } = useToast();
   const location = useLocation();
 
-  const isSystemSubDomain = () =>
-    getMemberVertex(graph).P.subDomain === "admin";
+  const isAdminSubDomain = () => getMemberVertex(graph).P.subDomain === "admin";
 
   const getMenuItems = () => {
     const commonItems = [
       // { href: API.urls.admin.contact, icon: "ph:question", label: "Help" },
     ] as { href: string; icon: string; label: string; target?: string }[];
 
-    if (!(isSystemSubDomain() || isAdminRole(graph))) {
+    if (!(isAdminSubDomain() || isAdminRole(graph))) {
       commonItems.push({
         href: API.urls.admin.support,
         icon: "ph:question",
         label: "Support",
         target: "_blank",
       });
-    } else if (isSystemSubDomain()) {
+    } else if (isAdminSubDomain()) {
       commonItems.push({
         href: `${window.location.origin.replace(`${getMemberVertex(graph).P.subDomain}.`, "")}/support/contact`,
         icon: "ph:question",
@@ -48,7 +47,7 @@ export function AuthenticatedMenu(
       });
     }
 
-    return isSystemSubDomain()
+    return isAdminSubDomain()
       ? [
           {
             href: API.urls.system.projects,

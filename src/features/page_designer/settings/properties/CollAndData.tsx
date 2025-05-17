@@ -24,7 +24,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
-// Deprecated
+// Deprecated - In future It can be used, so kept file
 export function CollAndData() {
   const [graph, setGraph] = useGraph();
   const formStoreId = useDesignerFormIdContext();

@@ -17,7 +17,6 @@ export function DeleteConfirmation() {
   return (
     <Show
       when={
-        Object.keys(formStoreVertex()?.P.usedAttrsInRules ?? {}).length > 0 ||
         formStoreVertex()?.P.usedAttrsInUniqueConstraints.length > 0 ||
         formStoreVertex()?.P.usedAttrsInNameKeys.length > 0 ||
         formStoreVertex()?.P.shouldContainAtLeastOneForm

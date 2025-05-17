@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { As } from "../As";
 import { css, withStates } from "~/lib/styles";
 import { useTheme } from "~/lib/context/ThemeContext";
-import { formatHex, formatRgb, hsl, rgb, wcagContrast } from "culori";
+import { wcagContrast } from "culori";
 
 // CSS generation functions using the new approach with ThemeContext
 const containerCss = () => css`
@@ -28,21 +28,11 @@ const headerCss = () => {
 };
 
 const buttonCss = () => {
-  const theme = useTheme();
-  const baseColor = theme.primaryColor;
-
   // Darken color for hover/active states
-  const hslColor = hsl(baseColor);
-  const hoverColor = formatHex(
-    hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.1) }),
-  );
-  const activeColor = formatHex(
-    hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.15) }),
-  );
 
   return withStates(
     `
-      background-color: ${baseColor};
+      background-color: \${args.theme.var.colors.primary};
       color: white;
       border: none;
       padding: 0.5rem 1rem;
@@ -51,40 +41,7 @@ const buttonCss = () => {
       cursor: pointer;
       transition: background-color 0.2s ease;
     `,
-    `background-color: ${hoverColor};`,
-    undefined,
-    `background-color: ${activeColor};`,
-  );
-};
-
-const secondaryButtonCss = () => {
-  const theme = useTheme();
-  const baseColor = theme.secondaryColor;
-
-  // Darken color for hover/active states
-  const hslColor = hsl(baseColor);
-  const _hoverColor = formatHex(
-    hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.1) }),
-  );
-  const _activeColor = formatHex(
-    hsl({ ...hslColor, l: Math.max(0, (hslColor.l || 0) - 0.15) }),
-  );
-
-  return withStates(
-    `
-      background-color: transparent;
-      color: ${baseColor};
-      border: 1px solid ${baseColor};
-      padding: 0.5rem 1rem;
-      border-radius: 0.25rem;
-      font-weight: 500;
-      cursor: pointer;
-      margin-left: 1rem;
-      transition: all 0.2s ease;
-    `,
-    `background-color: ${formatRgb(rgb({ ...rgb(baseColor), alpha: 0.1 }))};`,
-    undefined,
-    `background-color: ${formatRgb(rgb({ ...rgb(baseColor), alpha: 0.2 }))};`,
+    `background-color: \${args.theme.var.colors.primary_40};`,
   );
 };
 
@@ -94,12 +51,10 @@ const sectionCss = () => css`
 
 const inputCss = () => {
   const theme = useTheme();
-  const baseColor = theme.baseColor;
   const primaryColor = theme.primaryColor;
 
   return withStates(
     `
-      border: 1px solid ${formatRgb(rgb({ ...rgb(baseColor), alpha: 0.2 }))};
       padding: 0.5rem;
       border-radius: 0.25rem;
       width: 100%;
@@ -108,7 +63,6 @@ const inputCss = () => {
     `,
     undefined,
     `
-      outline: 2px solid ${formatRgb(rgb({ ...rgb(primaryColor), alpha: 0.5 }))};
       border-color: ${primaryColor};
     `,
   );
@@ -193,11 +147,7 @@ export function ThemeExample() {
             Count: {count()}
           </As>
 
-          <As
-            as="button"
-            css={secondaryButtonCss()}
-            onClick={() => setCount(0)}
-          >
+          <As as="button" onClick={() => setCount(0)}>
             Reset
           </As>
         </As>
@@ -259,11 +209,7 @@ export function ThemeExample() {
             Toggle {theme.colorMode === "dark" ? "Light" : "Dark"} Mode
           </As>
 
-          <As
-            as="button"
-            css={secondaryButtonCss()}
-            onClick={() => theme.resetTheme?.()}
-          >
+          <As as="button" onClick={() => theme.resetTheme?.()}>
             Reset Theme
           </As>
         </As>

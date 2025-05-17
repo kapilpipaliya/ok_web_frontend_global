@@ -7,11 +7,11 @@ import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { uniqueNameKey } from "../../../constants/constant";
-import { getUniqueName } from "../../form/generateFormMetaAttributes";
 import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
 import { sortChildren } from "./sortChildren";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { getUniqueName } from "~/features/page_designer/functions/form/getUniqueName";
 
 export function getRowProps(
   fromVertex: Vertex,
