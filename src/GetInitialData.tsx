@@ -27,13 +27,27 @@ const fetchData = query(async (authenticate?: boolean) => {
   const [initialData, userData] = await Promise.all([
     getInitialData(),
     // authenticate ?
-    getUserRPC().catch(() => {
-      return null; // Return null to avoid further processing
-    }),
+    getUserRPC().catch(() => null),
     // : Promise.resolve(null),
   ]);
   return { initialData, userData };
 }, "initialData");
+
+const ErrorMessage = (props: { message: string }) => (
+  <As
+    as="div"
+    css={(args) => css`
+      background-color: ${args.theme.var.color.error_20};
+      color: ${args.theme.var.color.error};
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    `}
+  >
+    {props.message}
+  </As>
+);
 
 export function GetInitialData(props: GetInitialDataProps) {
   const graph = useGraph();
@@ -50,7 +64,7 @@ export function GetInitialData(props: GetInitialDataProps) {
           initialDataFetchError: `Failed to load initial data: ${initialData.error}`,
         },
       );
-      return; // Exit early if there's an error
+      return;
     }
 
     setGraphData(graph[0], graph[1], initialData.graph!);
@@ -63,6 +77,7 @@ export function GetInitialData(props: GetInitialDataProps) {
       );
     }
   };
+
   const data = createAsync(
     async () => {
       return await fetchData(props.authenticate);
@@ -70,39 +85,22 @@ export function GetInitialData(props: GetInitialDataProps) {
     { deferStream: true },
   );
 
-  const Content = () => {
+  const RenderContent = () => {
     setData(data()!.initialData, data()!.userData as UserData);
     return (
       <Switch>
-        {/* <Match when={!data()}>
-      <LoaderNew />
-    </Match> */}
         <Match
           when={props.authenticate && !(data()?.userData as UserData)?.user}
         >
-          <As
-            as={"div"}
-            css={css`
-background-color: red;
-padding: 1px;
-`}
-          >
-            Not Authorized
-          </As>
+          <ErrorMessage message="Not Authorized" />
         </Match>
         <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-          <As
-            as="div"
-            css={css`
-background-color: red;
-padding: 1px;
-`}
-          >
-            {getGlobalStore(graph[0]).P.initialDataFetchError}
-          </As>
+          <ErrorMessage
+            message={getGlobalStore(graph[0]).P.initialDataFetchError}
+          />
         </Match>
         <Match when={!getGlobalStore(graph[0]).P.initialDataFetchError}>
-          <Content />
+          <RenderContent />
         </Match>
       </Switch>
     );
@@ -110,7 +108,7 @@ padding: 1px;
 
   return (
     <Show when={data()}>
-      <Content />
+      <RenderContent />
     </Show>
   );
 }
