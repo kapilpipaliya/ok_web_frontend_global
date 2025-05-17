@@ -201,7 +201,9 @@ export function FunctionEditor(props: {
     const onMouseDownResize = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      dragStartEditorHeight = Number.parseFloat(editorHeight().replace("px", ""));
+      dragStartEditorHeight = Number.parseFloat(
+        editorHeight().replace("px", ""),
+      );
       dragStartY = e.clientY;
 
       const onMouseMoveResize = (moveEvent: MouseEvent) => {

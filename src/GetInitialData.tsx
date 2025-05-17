@@ -72,23 +72,19 @@ export function GetInitialData(props: GetInitialDataProps) {
 
   const Content = () => {
     setData(data()!.initialData, data()!.userData as UserData);
-    return props.children;
-  };
-
-  return (
-    <Show when={data()}>
+    return (
       <Switch>
         {/* <Match when={!data()}>
-          <LoaderNew />
-        </Match> */}
+      <LoaderNew />
+    </Match> */}
         <Match
           when={props.authenticate && !(data()?.userData as UserData)?.user}
         >
           <As
             as={"div"}
             css={css`
-  background-color: red;
-  padding: 1px;
+background-color: red;
+padding: 1px;
 `}
           >
             Not Authorized
@@ -98,8 +94,8 @@ export function GetInitialData(props: GetInitialDataProps) {
           <As
             as="div"
             css={css`
-  background-color: red;
-  padding: 1px;
+background-color: red;
+padding: 1px;
 `}
           >
             {getGlobalStore(graph[0]).P.initialDataFetchError}
@@ -109,6 +105,12 @@ export function GetInitialData(props: GetInitialDataProps) {
           <Content />
         </Match>
       </Switch>
+    );
+  };
+
+  return (
+    <Show when={data()}>
+      <Content />
     </Show>
   );
 }
