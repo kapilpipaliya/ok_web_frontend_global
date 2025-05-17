@@ -17,6 +17,7 @@ export interface PermissionCheckResult {
   hasPermission: boolean;
   message?: string;
   redirectUrl?: string;
+  redirectLinkText?: string;
 }
 
 // Interface for route permission configuration

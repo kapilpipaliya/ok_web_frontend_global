@@ -42,6 +42,14 @@ export function validateUrlAccess(
   // Find the route permission configuration for this path
   const routePermission = findRoutePermission(path);
 
+  // Prevent access to admin routes when on system subdomain
+  if (isSuperSubDomain && (path === "/admin" || path.startsWith("/admin/"))) {
+    return {
+      hasPermission: false,
+      message: "Admin routes are not accessible from the system subdomain",
+    };
+  }
+
   // If no specific permission is defined, default to authenticated
   if (!routePermission) {
     const hasPermission = !!user;
@@ -49,6 +57,7 @@ export function validateUrlAccess(
       hasPermission,
       message: hasPermission ? undefined : "Authentication required",
       redirectUrl: hasPermission ? undefined : generate401RedirectUrl(path),
+      redirectLinkText: hasPermission ? undefined : "Go to Sign In",
     };
   }
 
@@ -63,6 +72,7 @@ export function validateUrlAccess(
       hasPermission: false,
       message: "Authentication required",
       redirectUrl: generate401RedirectUrl(path),
+      redirectLinkText: "Go to Sign In",
     };
   }
 

@@ -1,7 +1,8 @@
-import { createAsync, useLocation, useNavigate } from "@solidjs/router";
+import { createAsync, useLocation, } from "@solidjs/router";
 import { type JSX, Show } from "solid-js";
 
 import { API } from "~/lib/api/endpoints";
+import { ErrorMessage } from "~/components/ErrorMessage";
 
 import { checkRoutePermission } from "../checkRoutePermissionRPC";
 
@@ -16,7 +17,6 @@ export function PermissionGuard(props: {
   path?: string;
 }) {
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Path to check - use provided path or current location
   const pathToCheck = () => props.path || location.pathname;
@@ -30,27 +30,24 @@ export function PermissionGuard(props: {
     { deferStream: true },
   ); // required for server side rendering
 
-  // Handle unauthorized access
-  const handleUnauthorized = () => {
-    if (permissionResult()?.redirectUrl) {
-      navigate(permissionResult()?.redirectUrl || API.urls.admin.signIn);
-    }
-  };
-
   return (
     <Show when={permissionResult()}>
       <Show
         fallback={
           <div>
             {props.fallback || (
-              <div class="unauthorized-message">
-                <h3>Access Denied</h3>
-                <p>
-                  {permissionResult()?.message ||
-                    "You don't have permission to access this content"}
-                </p>
-                <button onClick={handleUnauthorized}>Go to Sign In</button>
-              </div>
+              <ErrorMessage
+                message={
+                  permissionResult()?.message ||
+                  "You don't have permission to access this content"
+                }
+                linkText={
+                  permissionResult()?.redirectLinkText || "Go to Sign In"
+                }
+                linkUrl={
+                  permissionResult()?.redirectUrl || API.urls.admin.signIn
+                }
+              />
             )}
           </div>
         }

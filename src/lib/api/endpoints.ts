@@ -112,5 +112,5 @@ export const API = {
 } as const;
 
 export function generate401RedirectUrl(pathname: string): string {
-  return `${API.urls.user.signUp}?redirectUrl=${encodeURIComponent(pathname)}`;
+  return `${API.urls.admin.signIn}?redirectUrl=${encodeURIComponent(pathname)}`;
 }

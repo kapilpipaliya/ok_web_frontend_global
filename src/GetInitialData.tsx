@@ -4,6 +4,7 @@ import { Match, type ParentProps, Show, Switch } from "solid-js";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
+import { API } from "~/lib/api/endpoints";
 
 import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 
@@ -11,11 +12,10 @@ import { getInitialData } from "./cypher/get/getInitialData";
 import { getGlobalStore } from "./lib/graph/get/sync/store/getGlobalStore";
 import { setGraphData } from "./lib/graph/mutate/core/setGraphData";
 import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
-import { css } from "~/lib/styles";
-import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { ErrorMessage } from "~/components/ErrorMessage";
 
 interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;
@@ -32,22 +32,6 @@ const fetchData = query(async (authenticate?: boolean) => {
   ]);
   return { initialData, userData };
 }, "initialData");
-
-const ErrorMessage = (props: { message: string }) => (
-  <As
-    as="div"
-    css={(args) => css`
-        background-color: ${args.theme.var.color.error_20};
-        color: ${args.theme.var.color.error};
-        padding: 0.5rem 1rem;
-        border-radius: 0.25rem;
-        text-align: center;
-        margin-bottom: 1rem;
-    `}
-  >
-    {props.message}
-  </As>
-);
 
 export function GetInitialData(props: GetInitialDataProps) {
   const graph = useGraph();
@@ -92,7 +76,11 @@ export function GetInitialData(props: GetInitialDataProps) {
         <Match
           when={props.authenticate && !(data()?.userData as UserData)?.user}
         >
-          <ErrorMessage message="Not Authorized" />
+          <ErrorMessage
+            message="Not Authorized"
+            linkText="Go to Sign In"
+            linkUrl={API.urls.admin.signIn}
+          />
         </Match>
         <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
           <ErrorMessage
