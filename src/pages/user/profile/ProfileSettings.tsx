@@ -39,7 +39,7 @@ export function ProfileSettings() {
   const { showErrorToast, showSuccessToast } = useToast();
 
   const isSystemSubDomain = () =>
-    getMemberVertex(graph).P.subDomain === "super";
+    getMemberVertex(graph).P.subDomain === "admin";
 
   const formDataId = uuidv7();
   addNewVertex(

@@ -31,19 +31,19 @@ const rolePermissionMap: Record<SystemRoleType, PermissionLevel[]> = {
  * Validates if a user has permission to access a specific URL path based on their roles
  * @param user The user with permissions
  * @param path The URL path to check
- * @param isSuperSubDomain Whether the request is on the system subdomain
+ * @param isAdminSubDomain Whether the request is on the system subdomain
  * @returns Permission check result
  */
 export function validateUrlAccess(
   user: undefined | UserWithPermissions,
   path: string,
-  isSuperSubDomain = false,
+  isAdminSubDomain = false,
 ): PermissionCheckResult {
   // Find the route permission configuration for this path
   const routePermission = findRoutePermission(path);
 
   // Prevent access to admin routes when on system subdomain
-  if (isSuperSubDomain && (path === "/admin" || path.startsWith("/admin/"))) {
+  if (isAdminSubDomain && (path === "/admin" || path.startsWith("/admin/"))) {
     return {
       hasPermission: false,
       message: "Admin routes are not accessible from the system subdomain",
@@ -79,7 +79,7 @@ export function validateUrlAccess(
   // For system routes, check if on system subdomain
   if (
     routePermission.requiredPermission === PermissionLevel.SYSTEM &&
-    !isSuperSubDomain
+    !isAdminSubDomain
   ) {
     return {
       hasPermission: false,

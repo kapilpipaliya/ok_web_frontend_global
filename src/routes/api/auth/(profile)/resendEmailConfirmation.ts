@@ -50,7 +50,7 @@ export async function POST(event: APIEvent): Promise<Response> {
         isSystemUserResult.user!,
         currentUser.P.pendingEmail,
         currentUser,
-        event.params.tenant || "super",
+        event.params.tenant || "admin",
         dbSession,
       );
 

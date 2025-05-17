@@ -40,7 +40,7 @@ export async function fetchDataFromDB(
   }
 
   // if (permissionCheck) {
-  //   const authorizationError = await checkSuperUserAuthorization(
+  //   const authorizationError = await checkAdminUserAuthorization(
   //     subDomain,
   //     dbSession,
   //   );

@@ -4,7 +4,7 @@ import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { superUserData } from "~/cypher/mutate/manage/superUserData";
+import { adminUserData } from "~/cypher/mutate/manage/adminUserData";
 import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import {Vertex} from "~/lib/graph/type/vertex";
@@ -32,15 +32,15 @@ async function sendTestEmail() {
   try {
     console.log(`Sending test email from ${fromEmail} to ${toEmail} via subdomain ${subdomain}...`);
     
-    // Get the superuser instead of creating a mock user
-    const user = await findAndUseSuperUser();
+    // Get the adminuser instead of creating a mock user
+    const user = await findAndUseAdminUser();
     
     if (!user) {
-      console.error("Super user not found. Cannot send test email.");
+      console.error("Admin user not found. Cannot send test email.");
       process.exit(1);
     }
     
-    // Create user data from the super user
+    // Create user data from the admin user
     const userData: UserData = {
       email: user.P.email,
       uuid: user.P.uuid,
@@ -72,8 +72,8 @@ async function sendTestEmail() {
   }
 }
 
-async function findAndUseSuperUser(): Promise<null | Vertex> {
-  const superDbSession = (await getDriver()).session({
+async function findAndUseAdminUser(): Promise<null | Vertex> {
+  const adminDbSession = (await getDriver()).session({
     database: SYSTEM_DB_NAME,
   });
   
@@ -85,9 +85,9 @@ async function findAndUseSuperUser(): Promise<null | Vertex> {
       RETURN u
     `;
     
-    const result = await superDbSession.run(query, { 
-      email: superUserData.email,
-      username: superUserData.username
+    const result = await adminDbSession.run(query, { 
+      email: adminUserData.email,
+      username: adminUserData.username
     });
     
     if (result.records.length === 0) {
@@ -97,10 +97,10 @@ async function findAndUseSuperUser(): Promise<null | Vertex> {
     // Convert the user node to a Vertex object
     return convertNodeToJson(result.records[0].get("u"));
   } catch (error) {
-    console.error("Error finding super user:", error);
+    console.error("Error finding admin user:", error);
     return null;
   } finally {
-    await superDbSession.close();
+    await adminDbSession.close();
   }
 }
 

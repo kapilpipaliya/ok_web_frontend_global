@@ -12,7 +12,7 @@ import { addSystemAdminRoleToUser } from "./admin/addSystemAdminRoleToUser";
 import { newAdminValidations } from "./admin/newAdminValidations";
 import { createRootFolder } from "./seed/createRootFolder";
 import { insertComponents } from "./seed/insertComponents";
-import { createUserInSuperDB } from "./user/createUserInDB";
+import { createUserInAdminDB } from "./user/createUserInDB";
 
 export async function signupAdmin(
   tx: Transaction,
@@ -22,7 +22,7 @@ export async function signupAdmin(
   // Check if the user already exists
   await newAdminValidations(tx, data.username, data.email);
 
-  const user = await createUserInSuperDB(tx, {
+  const user = await createUserInAdminDB(tx, {
     email: data.email,
     emailConfirmed: isSystemUser,
     password: data.password,

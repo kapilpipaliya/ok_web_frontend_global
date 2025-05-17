@@ -11,7 +11,7 @@ export async function getUserFromSession(
   request?: APIEvent["request"],
 ): Promise<undefined | Vertex> {
   let dbSession = null;
-  let superDbSession = null;
+  let adminDbSession = null;
 
   try {
     const httpSession = await getHttpsSession();
@@ -34,19 +34,19 @@ export async function getUserFromSession(
     const userFromDb = convertNodeToJson(result.records[0].get("u"));
 
     if (userFromDb?.P.isSystemUser) {
-      superDbSession = (await getDriver()).session({
+      adminDbSession = (await getDriver()).session({
         database: SYSTEM_DB_NAME,
       });
-      const superDbResult = await superDbSession.run(query, {
+      const adminDbResult = await adminDbSession.run(query, {
         uuid: sessionUser.P.uuid,
       });
 
-      if (superDbResult.records.length === 0) {
+      if (adminDbResult.records.length === 0) {
         return;
       }
-      const superUser = convertNodeToJson(superDbResult.records[0].get("u"));
-      if (superUser.P.password === sessionUser.P.password) {
-        return superUser;
+      const adminUser = convertNodeToJson(adminDbResult.records[0].get("u"));
+      if (adminUser.P.password === sessionUser.P.password) {
+        return adminUser;
       }
       return;
     }
@@ -64,8 +64,8 @@ export async function getUserFromSession(
     if (dbSession) {
       await dbSession.close();
     }
-    if (superDbSession) {
-      await superDbSession.close();
+    if (adminDbSession) {
+      await adminDbSession.close();
     }
   }
 }

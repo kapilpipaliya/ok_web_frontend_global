@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { getDriver } from "~/cypher/core/driver";
-import { checkSuperUserAuthorization } from "~/cypher/permissions/isSystemAdminRole";
+import { checkAdminUserAuthorization } from "~/cypher/permissions/isSystemAdminRole";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
@@ -12,8 +12,8 @@ import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
-    // Validate that the request is from a super user
-    const isValid = await checkSuperUserAuthorization(
+    // Validate that the request is from a admin user
+    const isValid = await checkAdminUserAuthorization(
       request,
       subDomain,
       dbSession,

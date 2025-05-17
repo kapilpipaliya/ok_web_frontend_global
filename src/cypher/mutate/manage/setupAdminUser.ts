@@ -5,10 +5,10 @@ import { createDatabaseConstraints } from "~/cypher/mutate/signup/seed/createDat
 
 import { signupAdmin } from "../signup/signupAdmin";
 import { getAllDatabases } from "./getAllDatabases";
-import { superUserData } from "~/cypher/mutate/manage/superUserData";
+import { adminUserData } from "~/cypher/mutate/manage/adminUserData";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-export async function setupSuperUser(): Promise<{
+export async function setupAdminUser(): Promise<{
   error?: string;
   status: number;
   user?: null | Vertex;
@@ -17,10 +17,10 @@ export async function setupSuperUser(): Promise<{
   const systemDbSession = driver.session();
   try {
     const databases = await getAllDatabases();
-    const superDatabaseExists = databases.includes(SYSTEM_DB_NAME);
+    const adminDatabaseExists = databases.includes(SYSTEM_DB_NAME);
 
-    if (superDatabaseExists) {
-      return { error: "Super user already exists", status: 400, user: null };
+    if (adminDatabaseExists) {
+      return { error: "Admin user already exists", status: 400, user: null };
     }
     await createDatabase(SYSTEM_DB_NAME);
 
@@ -35,7 +35,7 @@ export async function setupSuperUser(): Promise<{
         RETURN u
       `;
       const checkUserResult = await tx.run(checkUserQuery, {
-        username: superUserData.username,
+        username: adminUserData.username,
       });
 
       if (checkUserResult.records.length > 0) {
@@ -46,7 +46,7 @@ export async function setupSuperUser(): Promise<{
         };
       }
 
-      const result = await signupAdmin(tx, superUserData, true);
+      const result = await signupAdmin(tx, adminUserData, true);
 
       await tx.commit();
       return { status: 200, user: result.user };

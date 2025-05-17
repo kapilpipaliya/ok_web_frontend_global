@@ -8,7 +8,7 @@ export async function getSubDomain(host: string) {
   const { domain, subdomain, hostname } = result;
 
   if (hostname === "localhost") {
-    return { domain, subdomain: "super" };
+    return { domain, subdomain: "admin" };
   }
 
   const effectiveDomain = domain || hostname;

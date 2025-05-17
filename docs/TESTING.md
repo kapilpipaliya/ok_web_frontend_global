@@ -31,7 +31,7 @@ npx playwright codegen
 
 ### Specific Test Examples
 
-Super User Setup:
+Admin User Setup:
 ```bash
-npx playwright test tests/auth/superuser/super_user_setup.spec.ts --project=chromium
+npx playwright test tests/auth/adminuser/admin_user_setup.spec.ts --project=chromium
 ```

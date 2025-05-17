@@ -60,27 +60,27 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
-async function authenticateSuperUser(superUser: Vertex, password: string) {
-  const superDbSession = (await getDriver()).session({
+async function authenticateAdminUser(adminUser: Vertex, password: string) {
+  const adminDbSession = (await getDriver()).session({
     database: SYSTEM_DB_NAME,
   });
 
   try {
     const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
-    const superDbResult = await superDbSession.run(query, {
-      uuid: superUser.P.uuid,
+    const adminDbResult = await adminDbSession.run(query, {
+      uuid: adminUser.P.uuid,
     });
 
-    if (superDbResult.records.length === 0) {
+    if (adminDbResult.records.length === 0) {
       throw new APIError(
-        `Not Authorized Email or Username for UUID: ${superUser.P.uuid}. Please contact customer support.`,
+        `Not Authorized Email or Username for UUID: ${adminUser.P.uuid}. Please contact customer support.`,
         401,
       );
     }
-    const user = convertNodeToJson(superDbResult.records[0].get("u"));
+    const user = convertNodeToJson(adminDbResult.records[0].get("u"));
     return comparePassword(user, password);
   } finally {
-    await superDbSession.close();
+    await adminDbSession.close();
   }
 }
 
@@ -117,7 +117,7 @@ async function authenticateUser(
 
   // when system user, check password from system db
   if (user.P.isSystemUser) {
-    return await authenticateSuperUser(user, password);
+    return await authenticateAdminUser(user, password);
   }
   return comparePassword(user, password);
 }

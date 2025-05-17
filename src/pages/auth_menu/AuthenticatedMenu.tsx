@@ -24,7 +24,7 @@ export function AuthenticatedMenu(
   const { showLoadingToast } = useToast();
 
   const isSystemSubDomain = () =>
-    getMemberVertex(graph).P.subDomain === "super";
+    getMemberVertex(graph).P.subDomain === "admin";
 
   const getMenuItems = () => {
     const commonItems = [

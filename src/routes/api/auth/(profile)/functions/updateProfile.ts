@@ -32,7 +32,7 @@ export async function updateProfile(
   const isSystemUserResult = await isSystemUser(dbSession, currentUser.P.uuid);
   if (isSystemUserResult.isSystemUser) {
     return {
-      error: "Super Admin cannot update profile in subdomain",
+      error: "Administrator cannot update profile in subdomain",
       status: 404,
     };
   }

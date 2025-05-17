@@ -14,7 +14,7 @@ export async function POST({ request }: APIEvent) {
 
   // - Authorization -
   try {
-    // const authorizationError = await checkSuperUserAuthorization(
+    // const authorizationError = await checkAdminUserAuthorization(
     //   subDomain,
     //   dbSession,
     //   true,

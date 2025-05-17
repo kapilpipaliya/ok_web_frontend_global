@@ -12,7 +12,7 @@ export async function addNodeEdges(
   sessionSource: Session,
   sessionTarget: Session,
   parentVertex: Vertex,
-  superChildrenVertexes: Vertex[],
+  adminChildrenVertexes: Vertex[],
   type: string,
   outLabel: string,
   inward: boolean,
@@ -28,9 +28,9 @@ export async function addNodeEdges(
 
   const results: Vertex[] = [];
 
-  for (const superVertex of superChildrenVertexes) {
+  for (const adminVertex of adminChildrenVertexes) {
     const existingChild = userChildrenVertexes.find(
-      (childVertex) => superVertex.P.key === childVertex.P.key,
+      (childVertex) => adminVertex.P.key === childVertex.P.key,
     );
 
     if (existingChild) {
@@ -41,19 +41,19 @@ export async function addNodeEdges(
       `;
       const result = await sessionTarget.run(query, {
         childId: existingChild.id,
-        props: superVertex.P,
+        props: adminVertex.P,
       });
       for (const v of result.records) {
         results.push(convertNodeToJson(v.get("a")));
       }
     } else {
-      const isGlobalCollection = globalCollections.includes(superVertex.L[0]);
+      const isGlobalCollection = globalCollections.includes(adminVertex.L[0]);
       const targetNode = isGlobalCollection
         ? await findOrCreateNodeAndUpdateProperties(
             sessionSource,
             sessionTarget,
-            superVertex,
-            superVertex.L[0],
+            adminVertex,
+            adminVertex.L[0],
           )
         : null;
 
@@ -66,7 +66,7 @@ export async function addNodeEdges(
         `
         : `
           MATCH (a) WHERE elementId(a) = $parentNodeId
-          CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b:${superVertex.L[0]})
+          CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b:${adminVertex.L[0]})
           SET b = $props, b.createdAt = localDateTime()
           RETURN b;
         `;
@@ -78,7 +78,7 @@ export async function addNodeEdges(
           }
         : {
             parentNodeId: parentVertex.id,
-            props: superVertex.P,
+            props: adminVertex.P,
           };
 
       const result = await sessionTarget.run(query, params);

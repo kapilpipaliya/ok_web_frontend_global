@@ -36,7 +36,7 @@ export const routePermissions: RoutePermission[] = [
   { path: "/system/*", requiredPermission: PermissionLevel.SYSTEM },
   { path: "/api/system/*", requiredPermission: PermissionLevel.SYSTEM },
   {
-    path: "/api/setup/superUserSetup",
+    path: "/api/setup/adminUserSetup",
     requiredPermission: PermissionLevel.PUBLIC,
   }, // Special case
   { path: "/*", requiredPermission: PermissionLevel.PUBLIC },

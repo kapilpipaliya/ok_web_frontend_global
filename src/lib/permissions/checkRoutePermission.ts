@@ -29,14 +29,14 @@ export async function checkRoutePermissionBase(
     }
 
     // Special case for setup endpoint
-    if (path === "/api/setup/superUserSetup") {
+    if (path === "/api/setup/adminUserSetup") {
       return { hasPermission: true };
     }
 
     // Get subdomain information
     const hostValue = host || getURL(request).host || "";
     const { subdomain } = await getSubDomain(hostValue);
-    const isSuperSubDomain = subdomain === SYSTEM_DB_NAME;
+    const isAdminSubDomain = subdomain === SYSTEM_DB_NAME;
 
     // Get user from session
     const sessionUser = await getUserFromSession(request);
@@ -51,7 +51,7 @@ export async function checkRoutePermissionBase(
     }
 
     // Validate if the user has permission to access this URL
-    return validateUrlAccess(userWithPermissions, path, isSuperSubDomain);
+    return validateUrlAccess(userWithPermissions, path, isAdminSubDomain);
   } catch (error) {
     console.error("Error checking route permission:", error);
     return {

@@ -226,7 +226,7 @@ async function setupBrowserAndPage(
     : "";
   const isDomainLocalhost = process.env.DOMAIN === "localhost";
   const subDomainPart =
-    subDomain && subDomain !== "super"
+    subDomain && subDomain !== "admin"
       ? `${subDomain}.`
       : isDomainLocalhost
         ? ""

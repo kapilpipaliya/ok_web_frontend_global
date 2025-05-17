@@ -30,5 +30,5 @@
 
 
 ### System Setup and Cleanup
-- Super User Setup: http://localhost:3001/api/setup/superUserSetup
+- Admin User Setup: http://localhost:3001/api/setup/adminUserSetup
 - System Cleanup: http://localhost:3001/api/setup/systemCleanup

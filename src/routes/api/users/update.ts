@@ -33,7 +33,7 @@ export async function POST({ request }: APIEvent) {
     const userValidation = await isSystemUser(dbSession, uuid);
     if (userValidation.isSystemUser) {
       return {
-        error: "Super Admin cannot update profile in subdomain",
+        error: "Admin Admin cannot update profile in subdomain",
         status: 404,
       };
     }

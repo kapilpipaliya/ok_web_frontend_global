@@ -1,11 +1,11 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { setupSuperUser } from "~/cypher/mutate/manage/setupSuperUser";
+import { setupAdminUser } from "~/cypher/mutate/manage/setupAdminUser";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 
 export async function GET({ request }: APIEvent) {
   try {
-    const { error, status, user } = await setupSuperUser();
+    const { error, status, user } = await setupAdminUser();
 
     if (error) {
       throw new APIError(error, status);

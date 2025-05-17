@@ -1,4 +1,4 @@
-import { createAsync, useLocation, } from "@solidjs/router";
+import { createAsync, useLocation } from "@solidjs/router";
 import { type JSX, Show } from "solid-js";
 
 import { API } from "~/lib/api/endpoints";

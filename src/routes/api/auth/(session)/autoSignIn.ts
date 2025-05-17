@@ -13,7 +13,7 @@ import { updateSession } from "~/server/auth/session/updateSession";
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
-  const superDbSession = (await getDriver()).session({
+  const adminDbSession = (await getDriver()).session({
     database: SYSTEM_DB_NAME,
   });
 
@@ -35,7 +35,7 @@ export async function GET({ request }: APIEvent) {
     }
 
     // Validate and consume the token
-    const userData = await validateAndConsumeToken(token, superDbSession);
+    const userData = await validateAndConsumeToken(token, adminDbSession);
     if (!userData) {
       // "Invalid or expired token"
       return new Response(null, {
@@ -56,12 +56,12 @@ export async function GET({ request }: APIEvent) {
 
     updateRedirectUrl(existingUser, subDomain, redirectUrl, queryParams);
     if (existingUser.P.isSystemUser) {
-      const superUser = await findUserByEmailSimple(
-        superDbSession,
+      const adminUser = await findUserByEmailSimple(
+        adminDbSession,
         existingUser.P.email,
       );
-      if (superUser) {
-        await updateSession(superUser);
+      if (adminUser) {
+        await updateSession(adminUser);
       }
     } else {
       await updateSession(existingUser);
@@ -75,6 +75,6 @@ export async function GET({ request }: APIEvent) {
     return handleAPIError(error);
   } finally {
     await dbSession.close();
-    await superDbSession.close();
+    await adminDbSession.close();
   }
 }

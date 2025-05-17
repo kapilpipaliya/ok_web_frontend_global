@@ -21,5 +21,5 @@ export async function isSystemUser(
     user,
   };
 
-  // TODO: also check if same url is in super then also its not allowed.
+  // TODO: also check if same url is in admin then also its not allowed.
 }

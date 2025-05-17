@@ -41,9 +41,9 @@ To start the Web Server, open Mac terminal and run:
 sudo apachectl start
 ```
 
-## Super User Setup
-When resetting a new super user:
-1. Create a super user
+## Admin User Setup
+When resetting a new admin user:
+1. Create a admin user
 2. Sync components
 3. Add component properties manually
 4. Add essential pages

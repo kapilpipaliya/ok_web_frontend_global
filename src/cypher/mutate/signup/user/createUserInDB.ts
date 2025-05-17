@@ -19,10 +19,10 @@ interface UserDataWithPassword extends BaseUserData {
 }
 
 /**
- * Create a user in the super database
+ * Create a user in the admin database
  */
-export async function createUserInSuperDB(
-  superTx: Session | Transaction,
+export async function createUserInAdminDB(
+  adminTx: Session | Transaction,
   userData: UserDataWithPassword,
 ): Promise<Vertex> {
   const uuid = uuidv7();
@@ -37,10 +37,10 @@ export async function createUserInSuperDB(
   };
 
   return executeUserCreationQuery(
-    superTx,
-    buildUserCreationQuery("SuperDB"),
+    adminTx,
+    buildUserCreationQuery("AdminDB"),
     createUserParams,
-    "SuperDB",
+    "AdminDB",
   );
 }
 
@@ -76,11 +76,11 @@ export async function createUserInUserDB(
 
 /**
  * Build a Neo4j query for user creation
- * @param dbType The type of database (SuperDB or UserDB)
+ * @param dbType The type of database (AdminDB or UserDB)
  * @param additionalFields Additional fields to include in the query
  */
 function buildUserCreationQuery(
-  dbType: "SuperDB" | "UserDB",
+  dbType: "AdminDB" | "UserDB",
   additionalFields: Record<string, boolean> = {},
 ): string {
   // Start with the common fields all user creations need

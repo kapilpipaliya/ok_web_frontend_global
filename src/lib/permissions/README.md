@@ -133,7 +133,7 @@ function:
 import { validateUrlAccess } from "~/lib/permissions/isPermission";
 
 // Validate if a user has access to a specific URL path
-const result = validateUrlAccess(userWithPermissions, '/admin/dashboard', isSuperSubDomain);
+const result = validateUrlAccess(userWithPermissions, '/admin/dashboard', isAdminSubDomain);
 
 if (result.hasPermission) {
   // User has permission to access the URL

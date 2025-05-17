@@ -6,7 +6,7 @@ import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { checkRole } from "./isPermission";
 import { SYSTEM_ROLES } from "./type/types";
 
-export async function checkSuperUserAuthorization(
+export async function checkAdminUserAuthorization(
   request: Request,
   subDomain: string,
   dbSession: Session,
@@ -30,7 +30,7 @@ export async function checkSuperUserAuthorization(
   );
   if (!isSystemUser) {
     return {
-      error: `Access Denied: Super User privileges required to ${isMutate ? "make changes" : "view information"} in this area.`,
+      error: `Access Denied: Admin User privileges required to ${isMutate ? "make changes" : "view information"} in this area.`,
     };
   }
 

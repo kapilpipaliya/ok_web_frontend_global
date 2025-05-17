@@ -12,7 +12,7 @@ export const HomeIcon = () => {
   const [graph] = useGraph();
   const navigate = useNavigate();
   const isSystemSubDomain = () =>
-    getMemberVertex(graph).P.subDomain === "super";
+    getMemberVertex(graph).P.subDomain === "admin";
 
   const context = () => {
     if (isSystemSubDomain()) {
