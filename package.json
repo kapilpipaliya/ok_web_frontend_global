@@ -44,6 +44,7 @@
     "broadcast-channel": "^7.1.0",
     "case-switcher-js": "^1.1.10",
     "culori": "^4.0.1",
+    "date-fns": "^4.1.0",
     "idb": "^8.0.3",
     "isows": "^1.0.6",
     "jsep": "^1.4.0",

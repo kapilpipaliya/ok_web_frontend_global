@@ -1,5 +1,6 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+import type { ModalStateStore } from "~/lib/types/ModalStateStore";
 
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
 import { css } from "~/lib/styles";
@@ -16,7 +17,9 @@ export function addEditButtonSchema(label: string) {
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {
-                options.contextData.modalState[1]("showModal", true);
+                const modalState = options.contextData
+                  .modalState as ModalStateStore;
+                modalState[1]("showModal", true);
               },
               text: `Add New ${label}`,
             }),
@@ -54,7 +57,9 @@ export function addEditButtonSchema(label: string) {
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {
-                options.contextData.modalState[1]("showModal", true);
+                const modalState = options.contextData
+                  .modalState as ModalStateStore;
+                modalState[1]("showModal", true);
               },
             }),
             type: "button",

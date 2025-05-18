@@ -16,6 +16,7 @@ import { validateUsername } from "~/lib/validation/validateUsername";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import type { ModalStateStore } from "~/lib/types/ModalStateStore";
 
 export const userFormSchema = {
   as: "div",
@@ -177,7 +178,8 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     const formData = options.data;
 
     try {
-      options.contextData.modalState[1]("isLoading", true);
+      const modalState = options.contextData.modalState as ModalStateStore;
+      modalState[1]("isLoading", true);
 
       const roles =
         (evalExpression("->$0Role", {
@@ -209,13 +211,15 @@ export const getUserFormSchema = (onSuccess: () => void) => {
             ? "User invited successfully"
             : "User updated successfully",
         );
-        options.contextData.modalState[1]("showModal", false);
+        const modalState = options.contextData.modalState as ModalStateStore;
+        modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      options.contextData.modalState[1]("isLoading", false);
+      const modalState = options.contextData.modalState as ModalStateStore;
+      modalState[1]("isLoading", false);
     }
   };
 
@@ -242,9 +246,11 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          disabled: options.contextData.modalState[0]?.isLoading,
+          disabled: (options.contextData.modalState as ModalStateStore)[0]
+            ?.isLoading,
           onClick: () => handleSave(options),
-          text: options.contextData.modalState[0]?.isLoading
+          text: (options.contextData.modalState as ModalStateStore)[0]
+            ?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -256,7 +262,9 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            options.contextData.modalState[1]("showModal", false);
+            const modalState = options.contextData
+              .modalState as ModalStateStore;
+            modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
             options.ensureData();
           },
@@ -285,7 +293,9 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                     css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     componentName: "Html",
                     props: (options: FunctionArgumentType) => ({
-                      hide: !options.contextData.modalState[0]?.showModal,
+                      hide: !(
+                        options.contextData.modalState as ModalStateStore
+                      )[0]?.showModal,
                       style: {
                         "z-index": options.zIndex,
                       },
@@ -318,7 +328,9 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                         createFocusTrap({
                           element: options.ref,
                           enabled: () =>
-                            options.contextData.modalState[0]?.showModal,
+                            (
+                              options.contextData.modalState as ModalStateStore
+                            )[0]?.showModal,
                           observeChanges: true,
                           restoreFocus: true,
                         });
@@ -329,7 +341,8 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                 componentName: "Html",
                 as: "portal",
                 props: (options: FunctionArgumentType) => ({
-                  hide: !options.contextData.modalState[0]?.showModal,
+                  hide: !(options.contextData.modalState as ModalStateStore)[0]
+                    ?.showModal,
                 }),
               },
             ],

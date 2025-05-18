@@ -1,4 +1,4 @@
-import { createStore, type SetStoreFunction } from "solid-js/store";
+import { createStore } from "solid-js/store";
 import createFocusTrap from "solid-focus-trap";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
@@ -6,6 +6,7 @@ import type {
   FieldAttribute,
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
+import type { ModalStateStore } from "~/lib/types/ModalStateStore";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -15,14 +16,6 @@ import { validateDatabaseName } from "~/lib/validation/validateDatabaseName";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { addEditButtonSchema } from "./addEditButtonSchema";
 import type { Vertex } from "~/lib/graph/type/vertex";
-
-// Define the type for modalState
-type ModalState = {
-  isLoading: boolean;
-  showModal: boolean;
-};
-
-type ModalStateStore = [ModalState, SetStoreFunction<ModalState>];
 
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();

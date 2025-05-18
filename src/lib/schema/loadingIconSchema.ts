@@ -1,4 +1,5 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { ModalStateStore } from "~/lib/types/ModalStateStore";
 import { css } from "../styles";
 
 export function loadingIconSchema() {
@@ -17,7 +18,7 @@ export function loadingIconSchema() {
     ],
     componentName: "Show",
     props: (options: FunctionArgumentType) => ({
-      when: options.contextData.modalState[0]?.isLoading,
+      when: (options.contextData.modalState as ModalStateStore)[0]?.isLoading,
     }),
   };
 }
