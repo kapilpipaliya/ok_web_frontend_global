@@ -120,7 +120,7 @@ export function TestDynamicClasses() {
         Dynamic class with template literal
       </div>
       {/* TODO: Manually convert this dynamic class */}
-      <div className={`flex ${count > 3 ? 'jc:flex-end;' : 'jc:flex-start;'}`}>
+      <div class={`flex ${count > 3 ? 'jc:flex-end;' : 'jc:flex-start;'}`}>
         Dynamic className with template literal
       </div>
       <As as="button" css={css`

@@ -6,7 +6,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "outDir": "./dist",
-    "rootDir": "../src" // Set this to the project root
+    "rootDir": "../src", // Set this to the project root
+    "jsx": "react-jsx",
+    "jsxImportSource": "solid-js"
   },
-  "include": ["../**/*.ts"]
+  "include": ["../**/*.ts", "../**/*.tsx"]
 }

@@ -1,10 +1,14 @@
 import { createMemo, createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+
+type SaveState = {
+  isLoading: boolean;
+};
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { FilePickerModal } from "~/components/file_picker/FilePickerModal";
@@ -136,7 +140,13 @@ export function ProfileImageSettings() {
                 as: "button",
                 css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
+                props: (
+                  options: FunctionArgumentType & {
+                    contextData: {
+                      saveState: [SaveState, SetStoreFunction<SaveState>];
+                    };
+                  },
+                ) => ({
                   disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
                     const selectedFile = profileImageVertex()[0];
@@ -185,7 +195,13 @@ export function ProfileImageSettings() {
         ],
         css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
+        props: (
+          options: FunctionArgumentType & {
+            contextData: {
+              saveState: [SaveState, SetStoreFunction<SaveState>];
+            };
+          },
+        ) => ({
           onUnmount: () => {
             options.revertTransactionUpToIndex(options.txnId, -1);
           },

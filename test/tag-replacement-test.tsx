@@ -43,7 +43,7 @@ export function TestDynamicClasses() {
       <div class={`p:10 ${isActive ? 'bg:primary-50' : 'bg:base-10'}`}>
         Dynamic class with template literal
       </div>
-      <div className={`flex ${count > 3 ? 'jc:flex-end' : 'jc:flex-start'}`}>
+      <div class={`flex ${count > 3 ? 'jc:flex-end' : 'jc:flex-start'}`}>
         Dynamic className with template literal
       </div>
       <button class="bg:primary-50 fg:base-5 p:8|16 r:4 cursor:pointer border:none mr:8">

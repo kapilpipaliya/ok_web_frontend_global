@@ -13,7 +13,9 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function fetchDataFromDB(
   expression: NestedExpression,
-  context: EvalExpressionContext & { adminui?: boolean } = {
+  context: EvalExpressionContext & { adminui?: boolean } & {
+    [key: `$${string}`]: any;
+  } = {
     nodes: {} as { [key: string]: Vertex },
     relationships: {} as { [key: string]: Edge },
     vertexes: undefined as any,

@@ -19,6 +19,10 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
+type SaveState = {
+  isLoading: boolean;
+};
+
 export function PasswordChangeForm() {
   const [graph] = useGraph();
   const navigate = useNavigate();
@@ -69,7 +73,13 @@ export function PasswordChangeForm() {
   margin-right: 8px;
 `,
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
+                props: (
+                  options: FunctionArgumentType & {
+                    contextData: {
+                      saveState: [SaveState, SetStoreFunction<SaveState>];
+                    };
+                  },
+                ) => ({
                   disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
                     const formData = options.data;
