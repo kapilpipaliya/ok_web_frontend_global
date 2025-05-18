@@ -1,26 +1,23 @@
-import { oklch, formatHex } from "culori";
-import { type Component, createMemo, type JSX } from "solid-js";
-import { StyleRenderer } from "~/components/StyleRenderer";
-import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
-import { themeConfig } from "../graph/get/sync/theme/themeConfig";
+import {formatHex, oklch} from "culori";
+import {type Component, createMemo, type JSX} from "solid-js";
+import {StyleRenderer} from "~/components/StyleRenderer";
+import {getGlobalThemeVertex} from "../graph/get/sync/store/getGlobalThemeVertex";
+import {getGlobalStore} from "../graph/get/sync/store/getGlobalStore";
+import {themeConfig} from "../graph/get/sync/theme/themeConfig";
 import {
-  getColorShade,
   createColorScheme,
-  getContrastColor,
-  mixColors,
   createGradient,
-  getHslComponents,
   findAccessibleColor,
+  getColorShade,
+  getContrastColor,
   getContrastRatio,
+  getHslComponents,
   meetsAccessibilityStandards,
+  mixColors,
 } from "../styles/colorUtils";
-import { DEFAULT_THEME, CSS_RESET, FONT_PRESETS } from "../styles/constants";
-import {
-  getMediaQuery,
-  getPrefersColorSchemeQuery,
-  getAnimationDefinition,
-} from "../styles/mediaUtils";
-import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
+import {CSS_RESET, DEFAULT_THEME, FONT_PRESETS} from "../styles/constants";
+import {getAnimationDefinition, getMediaQuery, getPrefersColorSchemeQuery,} from "../styles/mediaUtils";
+import {createSafeThemeProxy, ThemeContext} from "./ThemeContext";
 import type {
   Breakpoint,
   ColorAdjustments,
@@ -28,13 +25,21 @@ import type {
   ColorScheme,
   ThemeContext as ThemeContextType,
 } from "~/lib/styles/types/types";
-import { useGraph } from "~/lib/graph/context/UseGraph";
+import {useGraph} from "~/lib/graph/context/UseGraph";
 
 export interface ThemeProviderProps {
   children: JSX.Element;
 }
 export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
   const [graph] = useGraph();
+
+  const currentMode = createMemo(() => {
+    const globalStore = getGlobalStore(graph);
+    const userSettingId = globalStore?.P?.userSettingId;
+    const userThemeColorMode =
+      userSettingId && graph.vertexes[userSettingId]?.P?.themeColorMode;
+    return (userThemeColorMode || "light") as ColorMode;
+  });
 
   const themeMemo = createMemo(() => {
     return themeConfig(getGlobalThemeVertex(graph));
@@ -55,16 +60,16 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
   // Generate CSS styles based on the theme
   const themeCssVars = createMemo(() => {
     const safeThemeVars = createSafeThemeProxy(themeMemo().var || {});
-    const colorMode = themeProxy.var?.colorMode || "light";
-    const baseColor = themeProxy.var?.color?.base || DEFAULT_THEME.color.base;
+    // Ensure we have fallbacks for these critical values
+    const baseColor = safeThemeVars.color?.base || DEFAULT_THEME.color.base;
 
     return `
       ${CSS_RESET}
       
       /* Apply base styles to body */
       body {
-        background-color: ${colorMode === "dark" ? getColorShade(baseColor, 820) : getColorShade(baseColor, 1)};
-        color: ${colorMode === "dark" ? getColorShade(baseColor, 1) : getColorShade(baseColor, 820)};
+        background-color: ${currentMode() === "dark" ? getColorShade(baseColor, 820) : getColorShade(baseColor, 1)};
+        color: ${currentMode() === "dark" ? getColorShade(baseColor, 1) : getColorShade(baseColor, 820)};
         font-family: ${safeThemeVars.fontFamily || FONT_PRESETS.system};
         font-size: ${safeThemeVars.fontSizeBase || "1rem"};
         line-height: ${safeThemeVars.lineHeightBase || 1.5};
@@ -125,28 +130,29 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
     getSemanticColor: (
       context: "text" | "background" | "border" | "surface" | "muted",
     ): string => {
-      const colorMode = themeProxy.var?.colorMode as ColorMode;
-      const baseColor = themeProxy.var?.color?.base || DEFAULT_THEME.color.base;
+      // Get values from themeMemo which should always be safely initialized
+      const safeTheme = themeMemo();
+      const baseColor = safeTheme.var?.color?.base || DEFAULT_THEME.color.base;
 
       switch (context) {
         case "text":
-          return colorMode === "dark"
+          return currentMode() === "dark"
             ? getColorShade(baseColor, 20)
             : getColorShade(baseColor, 820);
         case "background":
-          return colorMode === "dark"
+          return currentMode() === "dark"
             ? getColorShade(baseColor, 820)
             : getColorShade(baseColor, 20);
         case "surface":
-          return colorMode === "dark"
+          return currentMode() === "dark"
             ? getColorShade(baseColor, 640)
             : "#ffffff";
         case "border":
-          return colorMode === "dark"
+          return currentMode() === "dark"
             ? getColorShade(baseColor, 460)
             : getColorShade(baseColor, 40);
         case "muted":
-          return colorMode === "dark"
+          return currentMode() === "dark"
             ? getColorShade(baseColor, 280)
             : getColorShade(baseColor, 80);
         default:
