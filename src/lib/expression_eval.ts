@@ -13,7 +13,6 @@ import {
 } from "~/cypher/queries/evaluate/evalFunctions";
 import { getLabelFilterSkipLimit } from "~/cypher/queries/evaluate/getLabelFilterSkipLimit";
 import { findVertexIdsByLabel } from "~/lib/graph/get/sync/entity/findVertex";
-import { jsonata } from "~/lib/jsonata/jsonata";
 
 import { isObject } from "./data_structure/object/isObject";
 import { getTextValue } from "./graph/get/sync/format/getTextValue";
@@ -361,17 +360,6 @@ async function evaluateMemberAsync(
 addUnaryOp("->", getChildrenUnaray, getChildrenUnarayAsync);
 // Projection Operator
 addBinaryOp("::", 11, false, projectedValueBinOps);
-// Filter Operator
-addBinaryOp(":-", 11, false, (vertexes1, projection, context) => {
-  if (!vertexes1) {
-    return;
-  }
-  try {
-    return jsonata(projection).evaluate(vertexes1, context);
-  } catch (_e) {
-    return;
-  }
-});
 
 addBinaryOp(
   "->",

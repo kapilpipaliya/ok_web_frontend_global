@@ -1,10 +1,5 @@
 import type { JSX } from "solid-js";
-import {
-  getOwner,
-  runWithOwner,
-  Show,
-  splitProps,
-} from "solid-js";
+import { getOwner, runWithOwner, Show, splitProps } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
 
