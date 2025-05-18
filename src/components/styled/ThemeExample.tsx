@@ -92,25 +92,18 @@ const colorBoxCss = (color: string | undefined, name: string) => {
   }
 
   return css`
-    height: 80px;
+    width: 70px;
+    height: 70px;
     background-color: ${color};
     border-radius: 0.25rem;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
-    padding: 0.5rem;
     color: ${textColor};
-    font-size: 0.75rem;
     font-weight: bold;
     position: relative;
-    
-    &::before {
-      content: "${name}";
-      position: absolute;
-      top: 0.5rem;
-      left: 0.5rem;
-      font-size: 0.75rem;
-    }
+    overflow: visible;
+    font-size: 0.85rem;
   `;
 };
 
@@ -183,26 +176,63 @@ export function ThemeExample() {
         <As as="h1" css={headerCss()}>
           Color Shades
         </As>
-        <As as="div" css={colorPaletteCss()}>
-          {[10, 20, 30, 40, 50, 60, 70, 80, 90, 200, 400, 600, 800, 1000].map(
-            (shade) => {
-              // Get the color from theme
-              const colorKey = `primary_${shade}`;
-              const shadeColor = theme.var?.color?.[colorKey];
-
-              // Only render boxes for colors that exist
-              if (!shadeColor) return null;
-
-              return (
+        <As
+          as="div"
+          css={css`display: flex; flex-direction: column; gap: 2rem;`}
+        >
+          {themeColorEntries.map(([colorName]) => (
+            <As as="div">
+              <As as="h2" css={css`font-size: 1.2rem; margin: 0.5rem 0;`}>
+                {colorName} Shades
+              </As>
+              <As
+                as="div"
+                css={css`display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 1.5rem;`}
+              >
+                {/* First row: 0-100 */}
                 <As
                   as="div"
-                  css={colorBoxCss(shadeColor as string, `primary-${shade}`)}
+                  css={css`display: flex; gap: 1.25rem; overflow-x: auto; padding-bottom: 0.5rem; min-width: 100%;`}
                 >
-                  {shade}
+                  {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((shade) => {
+                    const colorKey = `${colorName}_${shade}`;
+                    const shadeColor = theme.var?.color?.[colorKey];
+                    if (!shadeColor) return null;
+                    return (
+                      <As
+                        as="div"
+                        css={colorBoxCss(shadeColor as string, `${shade}`)}
+                      >
+                        {shade}
+                      </As>
+                    );
+                  })}
                 </As>
-              );
-            },
-          )}
+
+                {/* Second row: 200-1000 */}
+                <As
+                  as="div"
+                  css={css`display: flex; gap: 1.25rem; overflow-x: auto; padding-bottom: 0.5rem; min-width: 100%;`}
+                >
+                  {[200, 300, 400, 500, 600, 700, 800, 900, 1000].map(
+                    (shade) => {
+                      const colorKey = `${colorName}_${shade}`;
+                      const shadeColor = theme.var?.color?.[colorKey];
+                      if (!shadeColor) return null;
+                      return (
+                        <As
+                          as="div"
+                          css={colorBoxCss(shadeColor as string, `${shade}`)}
+                        >
+                          {shade}
+                        </As>
+                      );
+                    },
+                  )}
+                </As>
+              </As>
+            </As>
+          ))}
         </As>
       </As>
 

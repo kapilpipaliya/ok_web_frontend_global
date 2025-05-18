@@ -1,4 +1,3 @@
-
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 export default function HomePage() {
