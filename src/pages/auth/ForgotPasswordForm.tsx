@@ -22,6 +22,50 @@ import { createFormSubmitButton } from "~/pages/auth/functions/schema/createForm
 import { createLinkButton } from "~/pages/auth/functions/schema/createLinkButton";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 
+// Define interfaces for API responses
+interface PasswordResetRequestResponse {
+  success: boolean;
+  message?: string;
+  email?: string;
+  userUuid?: string;
+  resetSessionToken?: string;
+  error?: string;
+}
+
+interface PasswordResetVerifyResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+interface PasswordResetCompleteResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+// Define types for the state stores
+type StageDataStore = ReturnType<
+  typeof createStore<{
+    name: number;
+  }>
+>;
+
+type SubmitStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+  }>
+>;
+
+// Define a type for function arguments with contextData
+interface ForgotPasswordFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    stageData: StageDataStore;
+    submitState: SubmitStateStore;
+    [key: string]: unknown;
+  };
+}
+
 export function ForgotPasswordForm() {
   const navigate = useNavigate();
   const { showErrorToast, showSuccessToast } = useToast();
@@ -38,8 +82,10 @@ export function ForgotPasswordForm() {
     userUuid: "", // Store UUID instead of relying on email for identification
   });
 
-  const handleIdentifierSubmit = async (options: FunctionArgumentType) => {
-    const { identifier } = options.data?.P;
+  const handleIdentifierSubmit = async (
+    options: ForgotPasswordFunctionArgumentType,
+  ) => {
+    const identifier = options.data?.P?.identifier;
     if (!identifier?.trim()) {
       showErrorToast("Enter email or username");
       return;
@@ -47,9 +93,9 @@ export function ForgotPasswordForm() {
 
     try {
       // Send password reset request
-      const result = await postAPI(API.auth.passwordReset.requestUrl, {
+      const result = (await postAPI(API.auth.passwordReset.requestUrl, {
         identifier,
-      });
+      })) as PasswordResetRequestResponse;
 
       if (!result.success) {
         showErrorToast(result.message || "Failed to send reset email");
@@ -86,8 +132,10 @@ export function ForgotPasswordForm() {
     }
   };
 
-  const handleOtpSubmit = async (options: FunctionArgumentType) => {
-    const { otp } = options.data?.P;
+  const handleOtpSubmit = async (
+    options: ForgotPasswordFunctionArgumentType,
+  ) => {
+    const otp = options.data?.P?.otp;
     if (!otp?.trim()) {
       showErrorToast("Please enter OTP");
       return;
@@ -109,11 +157,11 @@ export function ForgotPasswordForm() {
 
     try {
       // Verify the OTP
-      const result = await postAPI(API.auth.passwordReset.verifyOtpUrl, {
+      const result = (await postAPI(API.auth.passwordReset.verifyOtpUrl, {
         otp,
         resetSessionToken,
         userUuid,
-      });
+      })) as PasswordResetVerifyResponse;
 
       if (!result.success) {
         showErrorToast(result.message || "Invalid or expired OTP");
@@ -129,15 +177,18 @@ export function ForgotPasswordForm() {
     }
   };
 
-  const handlePasswordResetSubmit = async (options: FunctionArgumentType) => {
-    const { confirmPassword, newPassword } = options.data?.P;
+  const handlePasswordResetSubmit = async (
+    options: ForgotPasswordFunctionArgumentType,
+  ) => {
+    const newPassword = options.data?.P?.newPassword;
+    const confirmPassword = options.data?.P?.confirmPassword;
 
     if (newPassword !== confirmPassword) {
       showErrorToast("Passwords do not match");
       return false;
     }
 
-    const passwordError = validatePassword(newPassword);
+    const passwordError = validatePassword(newPassword as string);
     if (passwordError) {
       showErrorToast(passwordError);
       return false;
@@ -159,11 +210,11 @@ export function ForgotPasswordForm() {
 
     try {
       // Reset the password
-      const result = await postAPI(API.auth.passwordReset.completeUrl, {
+      const result = (await postAPI(API.auth.passwordReset.completeUrl, {
         newPassword,
         resetSessionToken,
         userUuid,
-      });
+      })) as PasswordResetCompleteResponse;
 
       if (!result.success) {
         showErrorToast(result.message || "Failed to reset password");
@@ -200,7 +251,7 @@ export function ForgotPasswordForm() {
           ...createTextField(
             "identifier",
             "Email or Username",
-            async (options: FunctionArgumentType) => {
+            async (options: ForgotPasswordFunctionArgumentType) => {
               try {
                 options.contextData.submitState[1]("isLoading", true);
                 await handleIdentifierSubmit(options);
@@ -210,11 +261,11 @@ export function ForgotPasswordForm() {
             },
           ),
           createFormSubmitButton(
-            (options) =>
+            (options: ForgotPasswordFunctionArgumentType) =>
               options.contextData.submitState[0]?.isLoading
                 ? "Sending..."
                 : "Confirm",
-            async (options) => {
+            async (options: ForgotPasswordFunctionArgumentType) => {
               await handleIdentifierSubmit(options);
             },
           ),
@@ -241,7 +292,7 @@ export function ForgotPasswordForm() {
           {
             as: "div",
             css: css`
-  white-space: center;
+  text-align: center;
   margin-bottom: 16px;
 `,
             componentName: "Html",
@@ -250,7 +301,7 @@ export function ForgotPasswordForm() {
           ...createTextField(
             "otp",
             "One Time Password (OTP)",
-            async (options: FunctionArgumentType) => {
+            async (options: ForgotPasswordFunctionArgumentType) => {
               try {
                 options.contextData.submitState[1]("isLoading", true);
                 await handleOtpSubmit(options);
@@ -266,17 +317,17 @@ export function ForgotPasswordForm() {
             },
           ),
           createFormSubmitButton(
-            (options) =>
+            (options: ForgotPasswordFunctionArgumentType) =>
               options.contextData.submitState[0]?.isLoading
                 ? "Verifying..."
                 : "Submit",
-            async (options) => {
+            async (options: ForgotPasswordFunctionArgumentType) => {
               await handleOtpSubmit(options);
             },
           ),
           createLinkButton(
             () => "Back to Previous Step",
-            () => {
+            (options: ForgotPasswordFunctionArgumentType) => {
               options.contextData.stageData[1]("name", 0);
             },
           ),
@@ -305,7 +356,7 @@ export function ForgotPasswordForm() {
                 css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "newPassword",
-                props: (options: FunctionArgumentType) => ({
+                props: (options: ForgotPasswordFunctionArgumentType) => ({
                   onInput: (e: Event) => {
                     if (e.target instanceof HTMLInputElement) {
                       options.updateValue(e.target.value);
@@ -373,7 +424,7 @@ export function ForgotPasswordForm() {
                 css: PROPERTIES.Css.TextFieldCss,
                 componentName: "TextInput",
                 key: "confirmPassword",
-                props: (options: FunctionArgumentType) => ({
+                props: (options: ForgotPasswordFunctionArgumentType) => ({
                   onInput: (e: Event) => {
                     if (e.target instanceof HTMLInputElement) {
                       options.updateValue(e.target.value);
@@ -433,17 +484,17 @@ export function ForgotPasswordForm() {
           getErrorSchema("confirmPassword"),
 
           createFormSubmitButton(
-            (options) =>
+            (options: ForgotPasswordFunctionArgumentType) =>
               options.contextData.submitState[0]?.isLoading
                 ? "Resetting..."
                 : "Reset Password",
-            async (options) => {
+            async (options: ForgotPasswordFunctionArgumentType) => {
               await handlePasswordResetSubmit(options);
             },
           ),
           createLinkButton(
             () => "Back to Previous Step",
-            (options) => {
+            (options: ForgotPasswordFunctionArgumentType) => {
               options.contextData.stageData[1]("name", 1);
             },
           ),
@@ -466,24 +517,24 @@ export function ForgotPasswordForm() {
                 as: "",
                 attributes: [stepUserNameSchema],
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
-                  hide: options.contextData.stageData?.[0]?.name !== 0,
+                props: (options: ForgotPasswordFunctionArgumentType) => ({
+                  hide: options.contextData.stageData[0]?.name !== 0,
                 }),
               },
               {
                 as: "",
                 attributes: [stepOTPSchema],
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
-                  hide: options.contextData.stageData?.[0]?.name !== 1,
+                props: (options: ForgotPasswordFunctionArgumentType) => ({
+                  hide: options.contextData.stageData[0]?.name !== 1,
                 }),
               },
               {
                 as: "",
                 attributes: [stepNewPasswordSchema],
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
-                  hide: options.contextData.stageData?.[0]?.name !== 2,
+                props: (options: ForgotPasswordFunctionArgumentType) => ({
+                  hide: options.contextData.stageData[0]?.name !== 2,
                 }),
               },
             ],

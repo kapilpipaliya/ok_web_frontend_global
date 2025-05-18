@@ -13,6 +13,43 @@ import {
 import { popoverWrapperSchema } from "./popoverWrapperSchema";
 import { css } from "../styles";
 
+// Type for password condition
+interface PasswordCondition {
+  isValid: boolean;
+  message: string;
+}
+
+// Define types for the state stores
+type ValidationStateStore = ReturnType<
+  typeof createStore<{
+    conditions: PasswordCondition[];
+    isValid: boolean;
+  }>
+>;
+
+type HelpIconStateStore = ReturnType<
+  typeof createStore<{
+    hasContent: boolean;
+    isValid: boolean;
+  }>
+>;
+
+// Define interfaces for different function argument types
+interface ValidationStateFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    validationState: ValidationStateStore;
+    helpIconState?: HelpIconStateStore;
+    [key: string]: unknown;
+  };
+}
+
+interface HelpIconStateFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    helpIconState: HelpIconStateStore;
+    [key: string]: unknown;
+  };
+}
+
 /**
  * Creates a popover content component that dynamically shows password validation status
  * @param passwordFieldKey The key of the password field to validate
@@ -43,10 +80,10 @@ export function createPasswordHintPopoverContent(
             {
               componentName: "Html",
               as: "icon",
-              css: (options: FunctionArgumentType) => {
+              css: (options: ValidationStateFunctionArgumentType) => {
                 const validationState = options.contextData.validationState;
                 const isValid =
-                  validationState?.[0]?.conditions?.[index]?.isValid;
+                  validationState[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
                 const iconColor = fieldValue
                   ? isValid
@@ -57,10 +94,10 @@ export function createPasswordHintPopoverContent(
   color: \${args.theme.var.color.${iconColor}};
 `;
               },
-              props: (options: FunctionArgumentType) => {
+              props: (options: ValidationStateFunctionArgumentType) => {
                 const validationState = options.contextData.validationState;
                 const isValid =
-                  validationState?.[0]?.conditions?.[index]?.isValid;
+                  validationState[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
                 const iconName = fieldValue
                   ? isValid
@@ -76,10 +113,10 @@ export function createPasswordHintPopoverContent(
             {
               as: "span",
               componentName: "Html",
-              css: (options: FunctionArgumentType) => {
+              css: (options: ValidationStateFunctionArgumentType) => {
                 const validationState = options.contextData.validationState;
                 const isValid =
-                  validationState?.[0]?.conditions?.[index]?.isValid;
+                  validationState[0]?.conditions?.[index]?.isValid;
                 const fieldValue = options.data?.P?.[passwordFieldKey];
                 const textColor = fieldValue
                   ? isValid
@@ -91,7 +128,7 @@ export function createPasswordHintPopoverContent(
   color: \${args.theme.var.color.${textColor}};
 `;
               },
-              props: (_options: FunctionArgumentType) => {
+              props: () => {
                 return {
                   text: condition.message,
                 };
@@ -113,7 +150,7 @@ export function createPasswordHintPopoverContent(
   list-style: none;
 `,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => {
+        props: (options: ValidationStateFunctionArgumentType) => {
           createEffect(() => {
             const password = options.data?.P?.[passwordFieldKey] || "";
             const conditions = validatePasswordConditions(password);
@@ -165,22 +202,22 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
           {
             componentName: "Html",
             as: "icon",
-            css: (options: FunctionArgumentType) => {
+            css: (options: HelpIconStateFunctionArgumentType) => {
               const helpIconState = options.contextData.helpIconState;
-              const iconColor = helpIconState?.[0]?.isValid
+              const iconColor = helpIconState[0]?.isValid
                 ? "success"
-                : helpIconState?.[0]?.hasContent
+                : helpIconState[0]?.hasContent
                   ? "warning"
                   : "grey";
               return css`
   color: \${args.theme.var.color.${iconColor}};
 `;
             },
-            props: (options: FunctionArgumentType) => {
+            props: (options: HelpIconStateFunctionArgumentType) => {
               const helpIconState = options.contextData.helpIconState;
-              const iconName = helpIconState?.[0]?.isValid
+              const iconName = helpIconState[0]?.isValid
                 ? "ph:check-circle"
-                : helpIconState?.[0]?.hasContent
+                : helpIconState[0]?.hasContent
                   ? "ph:warning-circle"
                   : "ph:question-circle";
 
@@ -202,7 +239,10 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
     name: "helpIconState",
 
     props: () => ({
-      data: createStore({
+      data: createStore<{
+        hasContent: boolean;
+        isValid: boolean;
+      }>({
         hasContent: false,
         isValid: false,
       }),
@@ -232,7 +272,10 @@ export function getPasswordLabelWithHintSchema(
         name: "validationState",
 
         props: () => ({
-          data: createStore({
+          data: createStore<{
+            conditions: PasswordCondition[];
+            isValid: boolean;
+          }>({
             conditions: PASSWORD_CONDITIONS.map((condition) => ({
               isValid: false,
               message: condition.message,

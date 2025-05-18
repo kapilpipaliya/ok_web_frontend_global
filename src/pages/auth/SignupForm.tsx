@@ -23,6 +23,22 @@ import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { validateUsername } from "~/lib/validation/validateUsername";
+
+// Define type for submitState store
+type SubmitStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+  }>
+>;
+
+// Define a type for function arguments with submitState in contextData
+interface SignupFormFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    submitState: SubmitStateStore;
+    [key: string]: unknown;
+  };
+}
+
 export function SignupForm() {
   const navigate = useNavigate();
 
@@ -66,7 +82,9 @@ export function SignupForm() {
   };
 
   // Password field enter key handler
-  const handlePasswordEnter = async (options: FunctionArgumentType) => {
+  const handlePasswordEnter = async (
+    options: SignupFormFunctionArgumentType,
+  ) => {
     try {
       options.contextData.submitState[1]("isLoading", true);
       const formData = options.data;
@@ -135,7 +153,7 @@ export function SignupForm() {
                     css: PROPERTIES.Css.TextFieldCss,
                     componentName: "TextInput",
                     key: "password",
-                    props: (options: FunctionArgumentType) => ({
+                    props: (options: SignupFormFunctionArgumentType) => ({
                       onInput: (e: Event) => {
                         if (e.target instanceof HTMLInputElement) {
                           options.updateValue(e.target.value);
@@ -152,13 +170,8 @@ export function SignupForm() {
                           handlePasswordEnter(options);
                         }
                       },
-                      onMount: () => {
-                        if (
-                          options.ref &&
-                          options.ref() instanceof HTMLInputElement
-                        ) {
-                          setRef("passwordRef", options.ref());
-                        }
+                      onMount: (ref: HTMLInputElement) => {
+                        setRef("passwordRef", ref);
                       },
                       ref: (el: HTMLInputElement) => {
                         setRef("passwordRef", el);
@@ -270,7 +283,7 @@ export function SignupForm() {
                 as: "button",
                 css: [STYLES.button2Css, css`width:100%; margin-top:16px;`],
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
+                props: (options: SignupFormFunctionArgumentType) => ({
                   disabled: options.contextData.submitState[0]?.isLoading,
                   onClick: async () => {
                     try {
@@ -291,7 +304,7 @@ export function SignupForm() {
             name: "submitState",
 
             props: () => ({
-              data: createStore({
+              data: createStore<{ isLoading: boolean }>({
                 isLoading: false,
               }),
             }),
@@ -324,7 +337,7 @@ export function SignupForm() {
               },
             ],
             css: css`
-  white-space: center;
+  text-align: center;
   margin-top: 16px;
   border-top: 1px solid \${args.theme.var.color.base_20};
   padding-top: 16px;

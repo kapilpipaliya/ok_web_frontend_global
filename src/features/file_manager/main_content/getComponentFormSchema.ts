@@ -24,6 +24,14 @@ import { useFileManagerStore } from "../FileManagerContext";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
+// Define a type for function arguments with modalState in contextData
+interface ComponentFormFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    modalState: ModalStateStore;
+    [key: string]: unknown;
+  };
+}
+
 export const getComponentFormSchema = (
   onSuccess: () => void,
   onClose: () => void,
@@ -41,7 +49,7 @@ export const getComponentFormSchema = (
     return true;
   };
 
-  const handleSave = async (options: FunctionArgumentType) => {
+  const handleSave = async (options: ComponentFormFunctionArgumentType) => {
     const formData = options.data;
     if (!validateForm(formData)) {
       return;
@@ -53,12 +61,16 @@ export const getComponentFormSchema = (
       id: formData.id,
     } as unknown as Vertex);
     if (res.error) {
-      showErrorToast(res.error);
+      showErrorToast(
+        typeof res.error === "string"
+          ? res.error
+          : "Unique constraint validation failed",
+      );
       return;
     }
 
     try {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
 
       const newFormTxnId = generateNewTxnId(options.graph, options.setGraph);
@@ -133,7 +145,7 @@ export const getComponentFormSchema = (
         options.revertTransactionUpToIndex(options.txnId, -1);
         options.ensureData();
         showSuccessToast(`${label()} created successfully`);
-        const modalState = options.contextData.modalState as ModalStateStore;
+        const modalState = options.contextData.modalState;
         modalState[1]("showModal", false);
         fileManagerStore.gridStore?.[0].fetchTableData();
         onSuccess();
@@ -141,7 +153,7 @@ export const getComponentFormSchema = (
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", false);
     }
   };
@@ -222,12 +234,10 @@ export const getComponentFormSchema = (
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
-          disabled: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading,
+        props: (options: ComponentFormFunctionArgumentType) => ({
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -237,12 +247,10 @@ export const getComponentFormSchema = (
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
-          disabled: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading,
+        props: (options: ComponentFormFunctionArgumentType) => ({
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
             options.ensureData();
@@ -272,10 +280,8 @@ export const getComponentFormSchema = (
                     attributes: [],
                     css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     componentName: "Html",
-                    props: (options: FunctionArgumentType) => ({
-                      hide: !(
-                        options.contextData.modalState as ModalStateStore
-                      )[0]?.showModal,
+                    props: (options: ComponentFormFunctionArgumentType) => ({
+                      hide: !options.contextData.modalState[0]?.showModal,
                       style: {
                         "z-index": options.zIndex,
                       },
@@ -299,9 +305,9 @@ export const getComponentFormSchema = (
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
-                    props: (options: FunctionArgumentType) => ({
+                    props: (options: ComponentFormFunctionArgumentType) => ({
                       onClick: (event: MouseEvent) => {
-                        event.stopPropagation;
+                        event.stopPropagation();
                       },
                       style: {
                         "z-index": options.zIndex + 1,
@@ -311,9 +317,7 @@ export const getComponentFormSchema = (
                         createFocusTrap({
                           element: options.ref,
                           enabled: () =>
-                            (
-                              options.contextData.modalState as ModalStateStore
-                            )[0]?.showModal,
+                            options.contextData.modalState[0]?.showModal,
                           observeChanges: true,
                           restoreFocus: true,
                         });
@@ -323,9 +327,8 @@ export const getComponentFormSchema = (
                 ],
                 componentName: "Html",
                 as: "portal",
-                props: (options: FunctionArgumentType) => ({
-                  hide: !(options.contextData.modalState as ModalStateStore)[0]
-                    ?.showModal,
+                props: (options: ComponentFormFunctionArgumentType) => ({
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],

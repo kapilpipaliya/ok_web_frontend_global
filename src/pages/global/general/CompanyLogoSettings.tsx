@@ -1,10 +1,22 @@
 import { createMemo, createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FileManagerObject } from "~/features/file_manager/FileManagerContext";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
+
+type SaveState = {
+  isLoading: boolean;
+};
+
+// Define a type for function arguments with saveState in contextData
+interface SaveStateFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    saveState: [SaveState, SetStoreFunction<SaveState>];
+    [key: string]: unknown;
+  };
+}
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { FilePickerModal } from "~/components/file_picker/FilePickerModal";
@@ -243,7 +255,7 @@ export function CompanyLogoSettings() {
                 as: "button",
                 css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
+                props: (options: SaveStateFunctionArgumentType) => ({
                   disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
                     const rectangularLogo = rectangularCompanyLogoVertex()[0];
@@ -265,7 +277,7 @@ export function CompanyLogoSettings() {
                       );
 
                       if (response.error) {
-                        showErrorToast(response.error);
+                        showErrorToast(response.error as string);
                       } else {
                         showSuccessToast("Company logos updated successfully");
                       }
@@ -285,7 +297,7 @@ export function CompanyLogoSettings() {
             name: "saveState",
 
             props: () => ({
-              data: createStore({
+              data: createStore<SaveState>({
                 isLoading: false,
               }),
             }),

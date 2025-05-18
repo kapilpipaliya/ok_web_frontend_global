@@ -35,7 +35,7 @@ export function AccountDeletionForm() {
     options.contextData.deleteState[1]("showConfirmDialog", false);
 
     try {
-      const response = await postAPI(API.user.selfDeleteUrl, {} as any);
+      const response = await postAPI(API.user.selfDeleteUrl, {});
 
       if (response.success) {
         options.contextData.deleteState[1](

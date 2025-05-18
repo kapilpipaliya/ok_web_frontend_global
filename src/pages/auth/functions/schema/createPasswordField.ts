@@ -2,6 +2,22 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
+import type { createStore } from "solid-js/store";
+
+// Define type for submitState store
+type SubmitStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+  }>
+>;
+
+// Define a type for function arguments with submitState in contextData
+interface PasswordFieldFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    submitState: SubmitStateStore;
+    [key: string]: unknown;
+  };
+}
 
 /**
  * Creates a password field with visibility toggle
@@ -18,7 +34,7 @@ export function createPasswordField(
   label: string,
   showPassword: Record<string, boolean>,
   toggleVisibility: (field: string) => void,
-  onEnterKeyHandler?: (options: FunctionArgumentType) => void,
+  onEnterKeyHandler?: (options: PasswordFieldFunctionArgumentType) => void,
   setRef?: (ref: HTMLInputElement) => void,
 ) {
   return [
@@ -36,7 +52,7 @@ export function createPasswordField(
           componentName: "TextInput",
           key,
           name: key,
-          props: (options: FunctionArgumentType) => ({
+          props: (options: PasswordFieldFunctionArgumentType) => ({
             onInput: (e: Event) => {
               if (e.target instanceof HTMLInputElement) {
                 options.updateValue(e.target.value);
@@ -57,13 +73,9 @@ export function createPasswordField(
                 }
               }
             },
-            onMount: () => {
-              if (
-                options.ref &&
-                options.ref() instanceof HTMLInputElement &&
-                setRef
-              ) {
-                setRef(options.ref());
+            onMount: (ref: HTMLInputElement) => {
+              if (setRef) {
+                setRef(ref);
               }
             },
             ref: setRef,

@@ -131,7 +131,7 @@ export function ComponentVariantsInput(props: {
   border: 1px solid #ccc;
   border-radius: 4px;
 `}
-                      onChange={(value) =>
+                      onChange={(value: any) =>
                         props.setPropertyValue(variant, value)
                       }
                       type={

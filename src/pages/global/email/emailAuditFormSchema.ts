@@ -1,5 +1,4 @@
 import { createStore } from "solid-js/store";
-import xss, { type IFilterXSSOptions } from "xss";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
@@ -15,22 +14,13 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-const whiteList = xss.whiteList;
-whiteList.html = [];
-whiteList.head = [];
-whiteList.body = [];
-whiteList.style = [];
-const _xssOptions: IFilterXSSOptions = {
-  onTagAttr: (_tag, name, value, _isWhiteAttr) => {
-    if (name === "style") {
-      // Allow the style attribute
-      return `${name}="${xss.escapeAttrValue(value)}"`;
-    }
-  },
-  stripIgnoreTag: true, // Filter out tags not in the whitelist. Ignore tags like "BASE", "meta" etc. stripIgnoreTagBody: ["script"],
-  stripIgnoreTagBody: ["script"],
-  whiteList,
-};
+// Define interface for email audit function arguments
+interface EmailAuditFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    modalState: ModalStateStore;
+    [key: string]: unknown;
+  };
+}
 
 export const emailAuditFormSchema = {
   as: "div",
@@ -104,20 +94,13 @@ export const emailAuditFormSchema = {
               text: "Content",
               validation: { required: true },
             },
-            // {
-            //   css: PROPERTIES.Css.TextFieldCss,
-            //   componentName: "TextInput", type: "textarea",
-            //   key: "content",
-            //   placeholder: "Enter email content",
-            //   validation: { required: true },
-            // },
+            // Using iframe to display content
             {
               as: "iframe",
               css: PROPERTIES.Css.TextFieldCss,
               componentName: "Html",
               key: "content",
               props: (options: FunctionArgumentType) => ({
-                // srcdoc: xss(options.data?.P.content, xssOptions),
                 srcdoc: options.data?.P.content,
               }),
               validation: {
@@ -230,7 +213,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
         componentName: "Html",
         text: "Add New Email Audit",
         props: (options: FunctionArgumentType) => ({
-          text: options.data.id.startsWith("-")
+          text: options.data?.id?.startsWith("-")
             ? "Add New Email Audit"
             : "View Email Audit",
         }),
@@ -243,27 +226,13 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
   const modalFooterSchema = {
     as: "div",
     attributes: [
-      // {
-      //   as: "button",
-      //   css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
-      //   componentName: "Html",
-      //   props: (options: FunctionArgumentType) => ({
-      //     disabled: (options.contextData.modalState as ModalStateStore)[0]?.isLoading,
-      //     onClick: () => handleSave(options),
-      //     text: (options.contextData.modalState as ModalStateStore)[0]?.isLoading
-      //       ? "Saving..."
-      //       : "Save",
-      //   }),
-      //   type: "button",
-      // },
       {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
+        props: (options: EmailAuditFunctionArgumentType) => ({
           onClick: () => {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
@@ -287,9 +256,8 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
             attributes: [],
             css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              hide: !(options.contextData.modalState as ModalStateStore)[0]
-                ?.showModal,
+            props: (options: EmailAuditFunctionArgumentType) => ({
+              hide: !options.contextData.modalState[0]?.showModal,
             }),
           },
           {
@@ -306,7 +274,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
-                    props: (options: FunctionArgumentType) => ({
+                    props: (options: EmailAuditFunctionArgumentType) => ({
                       style: {
                         "z-index": options.zIndex + 1,
                       },
@@ -315,9 +283,8 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Html",
                 as: "portal",
-                props: (options: FunctionArgumentType) => ({
-                  hide: !(options.contextData.modalState as ModalStateStore)[0]
-                    ?.showModal,
+                props: (options: EmailAuditFunctionArgumentType) => ({
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],
@@ -331,7 +298,10 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
     name: "modalState",
 
     props: () => ({
-      data: createStore({
+      data: createStore<{
+        isLoading: boolean;
+        showModal: boolean;
+      }>({
         isLoading: false,
         showModal: false,
       }),

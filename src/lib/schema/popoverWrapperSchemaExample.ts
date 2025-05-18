@@ -1,7 +1,23 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { createStore } from "solid-js/store";
 
 import { popoverWrapperSchema } from "./popoverWrapperSchema";
 import { css } from "../styles";
+
+// Define type for popover state store
+type PopoverStateStore = ReturnType<
+  typeof createStore<{
+    isVisible: boolean;
+  }>
+>;
+
+// Define a type for function arguments with popoverState in contextData
+interface PopoverFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    popoverState: PopoverStateStore;
+    [key: string]: unknown;
+  };
+}
 
 /**
  * Example of how to use the popoverWrapperSchema function
@@ -101,7 +117,7 @@ export const dynamicPopoverExample = () => {
   margin: 0px;
 `,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
+        props: (options: PopoverFunctionArgumentType) => ({
           text: `This popover uses data from context: ${options.contextData.popoverState[0]?.isVisible ? "Visible" : "Hidden"}`,
         }),
       },

@@ -2,6 +2,37 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
+import type { createStore } from "solid-js/store";
+
+// Define type for submitState store
+type SubmitStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+  }>
+>;
+
+// Define a type for function arguments with submitState in contextData
+interface TextFieldFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    submitState: SubmitStateStore;
+    [key: string]: unknown;
+  };
+}
+
+// Define a more specific type for validation options
+interface ValidationOptions {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  email?: boolean;
+  regex?: {
+    enabled: boolean;
+    message: string;
+    value: string;
+  };
+  validate?: (value: string) => string | undefined;
+  [key: string]: unknown;
+}
 
 /**
  * Creates a text input field
@@ -15,9 +46,9 @@ import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 export function createTextField(
   key: string,
   label: string,
-  onEnterKeyHandler?: (options: FunctionArgumentType) => void,
+  onEnterKeyHandler?: (options: TextFieldFunctionArgumentType) => void,
   setRef?: (ref: HTMLInputElement) => void,
-  validation: Record<string, any> = { required: true },
+  validation: ValidationOptions = { required: true },
 ) {
   return [
     {
@@ -34,7 +65,7 @@ export function createTextField(
           componentName: "TextInput",
           key,
           name: key,
-          props: (options: FunctionArgumentType) => ({
+          props: (options: TextFieldFunctionArgumentType) => ({
             onKeyDown: async (e: KeyboardEvent) => {
               if (e.key === "Enter") {
                 if (e.target instanceof HTMLInputElement) {
@@ -50,13 +81,9 @@ export function createTextField(
                 }
               }
             },
-            onMount: () => {
-              if (
-                options.ref &&
-                options.ref() instanceof HTMLInputElement &&
-                setRef
-              ) {
-                setRef(options.ref());
+            onMount: (ref: HTMLInputElement) => {
+              if (setRef) {
+                setRef(ref);
               }
             },
             ref: setRef,

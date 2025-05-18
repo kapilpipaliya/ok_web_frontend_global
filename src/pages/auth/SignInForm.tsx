@@ -21,7 +21,20 @@ import { createPasswordField } from "~/pages/auth/functions/schema/createPasswor
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-// Import all utilities from the index file
+// Define type for submitState store
+type SubmitStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+  }>
+>;
+
+// Define a type for function arguments with submitState in contextData
+interface SignInFormFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    submitState: SubmitStateStore;
+    [key: string]: unknown;
+  };
+}
 
 export function SignInForm() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,7 +78,9 @@ export function SignInForm() {
   };
 
   // Password field enter key handler
-  const handlePasswordEnter = async (options: FunctionArgumentType) => {
+  const handlePasswordEnter = async (
+    options: SignInFormFunctionArgumentType,
+  ) => {
     try {
       options.contextData.submitState[1]("isLoading", true);
       const formData = options.data;
@@ -76,7 +91,7 @@ export function SignInForm() {
   };
 
   // Email field enter key handler
-  const handleEmailEnter = (options: FunctionArgumentType) => {
+  const handleEmailEnter = (options: SignInFormFunctionArgumentType) => {
     // Focus password field if empty
     if (!options.data?.P.password && formRefs.passwordRef) {
       formRefs.passwordRef.focus();
@@ -142,7 +157,7 @@ export function SignInForm() {
                 as: "button",
                 css: [STYLES.button2Css, css`width:100%`],
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
+                props: (options: SignInFormFunctionArgumentType) => ({
                   disabled: options.contextData.submitState[0]?.isLoading,
                   onClick: async () => {
                     try {
@@ -163,7 +178,7 @@ export function SignInForm() {
             name: "submitState",
 
             props: () => ({
-              data: createStore({
+              data: createStore<{ isLoading: boolean }>({
                 isLoading: false,
               }),
             }),
@@ -195,7 +210,7 @@ export function SignInForm() {
               },
             ],
             css: css`
-  white-space: center;
+  text-align: center;
   margin-top: 16px;
   border-top: 1px solid \${args.theme.var.color.base_20};
   padding-top: 16px;

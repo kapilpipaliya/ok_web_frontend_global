@@ -14,6 +14,24 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
+// Define a type for function arguments with modalState in contextData
+interface ActivityLogFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    modalState: ModalStateStore;
+    [key: string]: unknown;
+  };
+}
+
+// Define type for payload
+interface ActivityLogPayload {
+  action: string;
+  description: string | undefined;
+  entityId: string;
+  entityType: string;
+  user: string | undefined;
+  id?: string;
+}
+
 export function getActivityLogFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();
   const validateForm = (formData: Vertex) => {
@@ -32,54 +50,55 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
     return true;
   };
 
-  const handleSave = async (options: FunctionArgumentType) => {
+  const handleSave = async (options: ActivityLogFunctionArgumentType) => {
     const formData = options.data;
     if (!validateForm(formData)) {
       return;
     }
 
     try {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
-      const url = formData.id.startsWith("-")
-        ? // @ts-expect-error ignore error
-          API.settings.activity.createUrl
-        : // @ts-expect-error ignore error
-          API.settings.activity.updateUrl;
-      const payload = {
-        action: formData.P.action,
-        description: formData.P.description,
-        entityId: formData.P.entityId,
-        entityType: formData.P.entityType,
-        user: formData.P.user,
+      const url =
+        formData.id && formData.id.startsWith("-")
+          ? // @ts-expect-error ignore error
+            API.settings.activity.createUrl
+          : // @ts-expect-error ignore error
+            API.settings.activity.updateUrl;
+      const payload: ActivityLogPayload = {
+        action: formData.P.action as string,
+        description: formData.P.description as string | undefined,
+        entityId: formData.P.entityId as string,
+        entityType: formData.P.entityType as string,
+        user: formData.P.user as string | undefined,
       };
 
-      if (!formData.id.startsWith("-")) {
+      if (formData.id && !formData.id.startsWith("-")) {
         payload.id = formData.id;
       }
 
       const response = await postAPI(url, payload);
 
       if (response.error) {
-        showErrorToast(response.error);
+        showErrorToast(response.error as string);
       } else {
         // options.removeTxnIdAndCreateNew(options.txnId);
         // as we are creating new transaction, we need to revert to previous state
         options.revertTransactionUpToIndex(options.txnId, -1);
         options.ensureData();
         showSuccessToast(
-          formData.id.startsWith("-")
+          formData.id && formData.id.startsWith("-")
             ? "Activity log created successfully"
             : "Activity log updated successfully",
         );
-        const modalState = options.contextData.modalState as ModalStateStore;
+        const modalState = options.contextData.modalState;
         modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", false);
     }
   };
@@ -220,12 +239,10 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
-          disabled: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading,
+        props: (options: ActivityLogFunctionArgumentType) => ({
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -235,10 +252,9 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
+        props: (options: ActivityLogFunctionArgumentType) => ({
           onClick: () => {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
@@ -262,9 +278,8 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             attributes: [],
             css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              hide: !(options.contextData.modalState as ModalStateStore)[0]
-                ?.showModal,
+            props: (options: ActivityLogFunctionArgumentType) => ({
+              hide: !options.contextData.modalState[0]?.showModal,
             }),
           },
           {
@@ -287,9 +302,8 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
                 css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                 componentName: "Html",
                 open: true,
-                props: (options: FunctionArgumentType) => ({
-                  hide: !(options.contextData.modalState as ModalStateStore)[0]
-                    ?.showModal,
+                props: (options: ActivityLogFunctionArgumentType) => ({
+                  hide: !options.contextData.modalState[0]?.showModal,
                   style: {
                     "z-index": options.zIndex + 1,
                   },
@@ -298,9 +312,8 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
             ],
             componentName: "Html",
             as: "portal",
-            props: (options: FunctionArgumentType) => ({
-              hide: !(options.contextData.modalState as ModalStateStore)[0]
-                ?.showModal,
+            props: (options: ActivityLogFunctionArgumentType) => ({
+              hide: !options.contextData.modalState[0]?.showModal,
             }),
           },
         ],

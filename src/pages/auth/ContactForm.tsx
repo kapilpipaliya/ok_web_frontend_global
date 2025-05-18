@@ -19,6 +19,21 @@ import { createTextAreaField } from "~/pages/auth/functions/schema/createTextAre
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
+// Define type for submitState store
+type SubmitStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+  }>
+>;
+
+// Define a type for function arguments with submitState in contextData
+interface ContactFormFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    submitState: SubmitStateStore;
+    [key: string]: unknown;
+  };
+}
+
 export function ContactForm() {
   const navigate = useNavigate();
   const { showErrorToast } = useToast();
@@ -139,11 +154,11 @@ export function ContactForm() {
 
           // Submit button
           createFormSubmitButton(
-            (options) =>
+            (options: ContactFormFunctionArgumentType) =>
               options.contextData.submitState[0]?.isLoading
                 ? "Sending..."
                 : "Send Message",
-            async (options) => {
+            async (options: ContactFormFunctionArgumentType) => {
               await handleSubmit(options.data);
             },
           ),
@@ -159,7 +174,7 @@ export function ContactForm() {
         componentName: "Data",
         name: "submitState",
         props: () => ({
-          data: createStore({
+          data: createStore<{ isLoading: boolean }>({
             isLoading: false,
           }),
         }),

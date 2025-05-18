@@ -83,7 +83,7 @@ export const themeFormSchema = {
             {
               key: "data",
               props: (options: ThemeFunctionArgumentType) => ({
-                componentName: (props: any) => (
+                componentName: (props: Record<string, unknown>) => (
                   <MonacoEditorWrapper
                     height="400px"
                     language="javascript"
