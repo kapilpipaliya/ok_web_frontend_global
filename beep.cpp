@@ -25,8 +25,9 @@ void beepEveryInterval() {
 }
 
 int main() {
-    std::cout << "Program will beep every " << beepIntervalSeconds << " seconds." << std::endl;
-    beepEveryInterval();
+    // std::cout << "Program will beep every " << beepIntervalSeconds << " seconds." << std::endl;
+    // beepEveryInterval();
+    playBeepSound();
     return 0;
 }
 // compile
