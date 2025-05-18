@@ -98,5 +98,3 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
     />
   );
 }
-
-export default MonacoEditorWrapper;

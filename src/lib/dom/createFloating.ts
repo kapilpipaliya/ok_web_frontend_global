@@ -51,7 +51,7 @@ export type FloatingState = {
   y: number;
 };
 
-const createFloating = (props: {
+export const createFloating = (props: {
   arrow?: MaybeAccessor<HTMLElement | null>;
   enabled?: MaybeAccessor<boolean>;
   floating: MaybeAccessor<HTMLElement | null>;
@@ -254,5 +254,3 @@ const floatingStatesMatch = (a: FloatingState, b: Partial<FloatingState>) => {
     (b.arrowY === undefined || a.arrowY === b.arrowY)
   );
 };
-
-export default createFloating;

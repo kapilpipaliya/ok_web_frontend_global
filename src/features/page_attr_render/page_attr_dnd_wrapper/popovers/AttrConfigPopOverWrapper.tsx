@@ -1,6 +1,5 @@
 import type { Strategy } from "@floating-ui/dom";
 
-// import createFloating from "@corvu/functions/create/floating";
 import { getFloatingStyle } from "@corvu/utils/floating";
 import { type Accessor, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
@@ -8,7 +7,7 @@ import { Portal } from "solid-js/web";
 import { ZIndex } from "~/components/fields/ZIndex";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import createFloating from "~/lib/dom/createFloating";
+import { createFloating } from "~/lib/dom/createFloating";
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 
 import { AttrConfigPopOver } from "./AttrConfigPopOver";
