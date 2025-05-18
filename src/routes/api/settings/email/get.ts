@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { processResult } from "~/cypher/conversion/processResult";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -30,7 +30,7 @@ export async function GET({ request }: APIEvent) {
     const relationships: { [key: string]: Edge } = {};
 
     let result;
-    if (subDomain === SYSTEM_DB_NAME) {
+    if (subDomain === ADMIN_DB_NAME) {
       // Get account-specific email settings
       const user = await getUserFromSession(request);
       result = await dbSession.run(

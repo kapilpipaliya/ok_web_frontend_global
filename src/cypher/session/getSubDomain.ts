@@ -1,6 +1,6 @@
 import { parse } from "tldts";
 
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 
 export async function getSubDomain(host: string) {
@@ -16,7 +16,7 @@ export async function getSubDomain(host: string) {
   const effectiveSubdomain = subdomain || "www";
 
   if (effectiveSubdomain === "system" || effectiveSubdomain === "admin") {
-    return { domain, subdomain: SYSTEM_DB_NAME };
+    return { domain, subdomain: ADMIN_DB_NAME };
   }
   // If it matches the current domain from env, use system subdomain
   if (effectiveDomain === process.env.DOMAIN) {
@@ -25,7 +25,7 @@ export async function getSubDomain(host: string) {
 
   // Otherwise look up the domain in SubDomain vertex
   const driver = await getDriver();
-  const dbSession = driver.session({ database: SYSTEM_DB_NAME });
+  const dbSession = driver.session({ database: ADMIN_DB_NAME });
   if (dbSession) {
     try {
       const query = `

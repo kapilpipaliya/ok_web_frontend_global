@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 
 import { parse } from "tldts";
 
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { findUserByEmailSimple } from "~/cypher/mutate/user/findUserByEmailOrUuid";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { API } from "~/lib/api/endpoints";
@@ -19,7 +19,7 @@ export async function GET({ request }: APIEvent) {
 
     const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
-    if (subDomain !== SYSTEM_DB_NAME) {
+    if (subDomain !== ADMIN_DB_NAME) {
       throw new APIError(
         "Only system database can be used for auto signIn",
         400,

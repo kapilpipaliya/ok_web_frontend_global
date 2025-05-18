@@ -2,7 +2,7 @@ import type { Session, Transaction } from "neo4j-driver";
 
 import { v7 as uuidv7 } from "uuid";
 
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 
 import type { SignupRequestData } from "./type/SignupRequestData";
 
@@ -122,6 +122,6 @@ async function createSystemSubdomain(
 
   return await tx.run(query, {
     accountId,
-    systemDbName: SYSTEM_DB_NAME,
+    systemDbName: ADMIN_DB_NAME,
   });
 }

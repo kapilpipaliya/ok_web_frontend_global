@@ -1,4 +1,4 @@
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createDatabase } from "~/cypher/mutate/signup/database/createDatabase";
 import { createDatabaseConstraints } from "~/cypher/mutate/signup/seed/createDatabaseConstraints";
@@ -17,7 +17,7 @@ export async function setupAdminUser(): Promise<{
   const systemDbSession = driver.session();
   try {
     const databases = await getAllDatabases();
-    const adminDatabaseExists = databases.includes(SYSTEM_DB_NAME);
+    const adminDatabaseExists = databases.includes(ADMIN_DB_NAME);
 
     if (adminDatabaseExists) {
       return { error: "Admin user already exists", status: 400, user: null };
@@ -32,10 +32,10 @@ export async function setupAdminUser(): Promise<{
       };
     }
 
-    await createDatabase(SYSTEM_DB_NAME);
+    await createDatabase(ADMIN_DB_NAME);
 
     const driver = await getDriver();
-    const dbSession = driver.session({ database: SYSTEM_DB_NAME });
+    const dbSession = driver.session({ database: ADMIN_DB_NAME });
     await createDatabaseConstraints(dbSession);
     const tx = dbSession.beginTransaction();
     try {
@@ -62,9 +62,9 @@ export async function setupAdminUser(): Promise<{
       return { status: 200, user: result.user };
     } catch (error) {
       await tx.rollback();
-      console.error(`Error creating ${SYSTEM_DB_NAME} user:`, error);
+      console.error(`Error creating ${ADMIN_DB_NAME} user:`, error);
       return {
-        error: `Failed to create ${SYSTEM_DB_NAME} user`,
+        error: `Failed to create ${ADMIN_DB_NAME} user`,
         status: 500,
         user: null,
       };
@@ -73,9 +73,9 @@ export async function setupAdminUser(): Promise<{
       await dbSession.close();
     }
   } catch (error) {
-    console.error(`Error setting up ${SYSTEM_DB_NAME} user:`, error);
+    console.error(`Error setting up ${ADMIN_DB_NAME} user:`, error);
     return {
-      error: `Failed to setup ${SYSTEM_DB_NAME} user: ${(error as Error).message}`,
+      error: `Failed to setup ${ADMIN_DB_NAME} user: ${(error as Error).message}`,
       status: 500,
       user: null,
     };

@@ -1,5 +1,5 @@
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { checkRole } from "~/cypher/permissions/isPermission";
@@ -10,7 +10,7 @@ export async function getSubDomains(request?: Request) {
   "use server";
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
-    if (subDomain !== SYSTEM_DB_NAME) {
+    if (subDomain !== ADMIN_DB_NAME) {
       throw new APIError(
         "Unauthorized. System subdomain access required.",
         403,

@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { createOrUpdateAccountEmailSettings } from "~/cypher/mutate/email/createOrUpdateAccountEmailSettings";
 import { checkRole } from "~/cypher/permissions/isPermission";
@@ -39,7 +39,7 @@ export async function POST({ request }: APIEvent) {
     //   subject: "Test Email Settings"
     // });
     let settingsKey;
-    if (subDomain === SYSTEM_DB_NAME) {
+    if (subDomain === ADMIN_DB_NAME) {
       // Get account ID for the current user
       const accountResult = await dbSession.run(
         `MATCH (a:Account)-[:AccountUser]->(u:User {uuid: $uuid})

@@ -1,6 +1,6 @@
 import { transferNodeTypes } from "~/cypher/mutate/sync/transferNodeTypes";
 
-import { SYSTEM_DB_NAME } from "../core/boltConstant";
+import { ADMIN_DB_NAME } from "../core/boltConstant";
 import { getDriver } from "../core/driver";
 
 // Main function to initiate the migration process.
@@ -12,7 +12,7 @@ export async function syncNodesAPICall(args: {
 
   const nodesToTransfer = args.nodesToTransfer;
   const driver = await getDriver();
-  const dbSessionSource = driver.session({ database: SYSTEM_DB_NAME });
+  const dbSessionSource = driver.session({ database: ADMIN_DB_NAME });
   const dbSessionTarget = driver.session({ database: args.subDomain });
 
   try {

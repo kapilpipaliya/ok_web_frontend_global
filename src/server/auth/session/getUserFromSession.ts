@@ -6,7 +6,7 @@ import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomai
 import { getHttpsSession } from "~/server/auth/session/getHttpsSession";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { getDriver } from "~/cypher/core/driver";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 
 export async function getUserFromSession(
   request?: APIEvent["request"],
@@ -38,7 +38,7 @@ export async function getUserFromSession(
     if (!sessionUser.P.password) {
       // Create admin session
       const driver = await getDriver();
-      adminDbSession = driver.session({ database: SYSTEM_DB_NAME });
+      adminDbSession = driver.session({ database: ADMIN_DB_NAME });
 
       // Check if user is a system user and get the user data
       const { exists, user: systemUser } = await getSystemUser(

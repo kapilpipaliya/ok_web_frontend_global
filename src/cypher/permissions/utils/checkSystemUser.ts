@@ -1,7 +1,7 @@
 import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 /**
@@ -39,7 +39,7 @@ export async function getSystemUser(
   adminDbSession: Session,
 ): Promise<{ exists: boolean; user?: Vertex }> {
   // If subDomain is the system database, user is automatically a system user
-  if (subDomain === SYSTEM_DB_NAME) {
+  if (subDomain === ADMIN_DB_NAME) {
     // Use checkUserExists to get the user from the admin database
     return await checkUserExists(adminDbSession, uuid);
   }

@@ -1,4 +1,4 @@
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getUserPermissionsByUuid } from "~/cypher/permissions/getUserPermissionsByUuid";
 import { getURL } from "~/cypher/session/getSessionForSubdomain";
 import { getSubDomain } from "~/cypher/session/getSubDomain";
@@ -36,7 +36,7 @@ export async function checkRoutePermissionBase(
     // Get subdomain information
     const hostValue = host || getURL(request).host || "";
     const { subdomain } = await getSubDomain(hostValue);
-    const isAdminSubDomain = subdomain === SYSTEM_DB_NAME;
+    const isAdminSubDomain = subdomain === ADMIN_DB_NAME;
 
     // Get user from session
     const sessionUser = await getUserFromSession(request);

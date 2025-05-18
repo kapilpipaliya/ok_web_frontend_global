@@ -4,7 +4,7 @@ import juice from "juice";
 import nodemailer from "nodemailer";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 
 import { useEmail } from "./functions/getEmailService";
@@ -118,7 +118,7 @@ async function getEmailSettingVertex(
   subDomain: string,
   dbSession: Session,
 ): Promise<null | Vertex> {
-  if (subDomain === SYSTEM_DB_NAME) {
+  if (subDomain === ADMIN_DB_NAME) {
     return await getSystemEmailSettings(subDomain, dbSession);
   }
 
@@ -162,7 +162,7 @@ async function getParentAccountEmailSettings(
   subDomain: string,
 ): Promise<null | Vertex> {
   const driver = await getDriver();
-  const systemSession = driver.session({ database: SYSTEM_DB_NAME });
+  const systemSession = driver.session({ database: ADMIN_DB_NAME });
 
   try {
     return await getSystemEmailSettings(subDomain, systemSession);

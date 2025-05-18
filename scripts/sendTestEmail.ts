@@ -5,7 +5,7 @@ import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { adminUserData } from "~/cypher/mutate/manage/adminUserData";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import {Vertex} from "~/lib/graph/type/vertex";
 
@@ -74,7 +74,7 @@ async function sendTestEmail() {
 
 async function findAndUseAdminUser(): Promise<null | Vertex> {
   const adminDbSession = (await getDriver()).session({
-    database: SYSTEM_DB_NAME,
+    database: ADMIN_DB_NAME,
   });
   
   try {

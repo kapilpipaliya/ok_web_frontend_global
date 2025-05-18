@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getAllDatabases } from "~/cypher/mutate/manage/getAllDatabases";
 import { subdomainRegister } from "~/cypher/mutate/signup/subdomainRegister";
@@ -41,7 +41,7 @@ const RESERVED_SUBDOMAINS = new Set([
 export async function POST({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
   try {
-    if (subDomain !== SYSTEM_DB_NAME) {
+    if (subDomain !== ADMIN_DB_NAME) {
       throw new APIError(
         "Unauthorized. System subdomain access required.",
         403,

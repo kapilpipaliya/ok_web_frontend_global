@@ -3,7 +3,7 @@ import type { Transaction } from "neo4j-driver";
 
 import type { SignupRequestData } from "~/cypher/mutate/signup/type/SignupRequestData";
 
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { signupAdmin } from "~/cypher/mutate/signup/signupAdmin";
 import { signupUser } from "~/cypher/mutate/signup/signupUser";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -55,7 +55,7 @@ async function handleSignup(
   try {
     let user;
 
-    if (subDomain === SYSTEM_DB_NAME) {
+    if (subDomain === ADMIN_DB_NAME) {
       const result = await signupAdmin(tx, data);
       if (result.error) {
         return {

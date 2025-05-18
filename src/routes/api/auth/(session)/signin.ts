@@ -2,7 +2,7 @@ import type { APIEvent } from "@solidjs/start/server";
 import type { Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { SYSTEM_DB_NAME } from "~/cypher/core/boltConstant";
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
@@ -62,7 +62,7 @@ export async function POST({ request }: APIEvent) {
 
 async function authenticateAdminUser(dbUser: Vertex, password: string) {
   const adminDbSession = (await getDriver()).session({
-    database: SYSTEM_DB_NAME,
+    database: ADMIN_DB_NAME,
   });
 
   try {
