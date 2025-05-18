@@ -2,7 +2,7 @@ import type { RouteSectionProps } from "@solidjs/router";
 
 import { Link } from "@solidjs/meta";
 
-import { HomeIcon } from "~/features/page_designer/header/left/HomeIcon";
+import { HomeIconButton } from "~/components/styled/buttons/HomeIconButton";
 import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
@@ -19,7 +19,7 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
       <PermissionGuard>
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
-          <HomeIcon />
+          <HomeIconButton />
           <As
             as="div"
             css={css`

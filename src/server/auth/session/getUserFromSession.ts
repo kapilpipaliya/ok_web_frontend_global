@@ -1,12 +1,12 @@
 import type { APIEvent } from "@solidjs/start/server";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { getSystemUser } from "~/cypher/permissions/utils/checkSystemUser";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { getHttpsSession } from "~/server/auth/session/getHttpsSession";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { getDriver } from "~/cypher/core/driver";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
+import { getAdminUser } from "~/cypher/permissions/utils/getAdminUser";
 
 export async function getUserFromSession(
   request?: APIEvent["request"],
@@ -41,7 +41,7 @@ export async function getUserFromSession(
       adminDbSession = driver.session({ database: ADMIN_DB_NAME });
 
       // Check if user is a system user and get the user data
-      const { exists, user: systemUser } = await getSystemUser(
+      const { exists, user: systemUser } = await getAdminUser(
         sessionUser.P.uuid,
         subDomain,
         adminDbSession,

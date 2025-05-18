@@ -1,39 +1,14 @@
 import type { Session } from "neo4j-driver";
-
-import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
-import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import type { Vertex } from "~/lib/graph/type/vertex";
-
-/**
- * Checks if a user exists in the current database
- */
-export async function checkUserExists(
-  dbSession: Session,
-  uuid: string,
-): Promise<{ exists: boolean; user?: Vertex }> {
-  try {
-    const userExists = await dbSession.run(
-      "MATCH (u:User) WHERE u.uuid = $uuid RETURN u;",
-      { uuid },
-    );
-
-    if (userExists.records.length > 0) {
-      const user = convertNodeToJson(userExists.records[0].get("u"));
-      return { exists: true, user };
-    } else {
-      return { exists: false };
-    }
-  } catch (error) {
-    console.error("Error checking if user exists:", error);
-    return { exists: false };
-  }
-}
+import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
+import { checkUserExists } from "~/cypher/permissions/utils/checkUserExists";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 
 /**
  * Gets a user from the system if they are a system user for the given subdomain
  * Returns { exists: boolean, user?: Vertex } where exists indicates if the user is a system user
  */
-export async function getSystemUser(
+export async function getAdminUser(
   uuid: string,
   subDomain: string,
   adminDbSession: Session,

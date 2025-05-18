@@ -110,7 +110,7 @@ async function createSystemSubdomain(
 ) {
   const query = `
     CREATE (s:SubDomain {
-      key: $systemDbName,
+      key: $adminDbName,
       createdAt: datetime(),
       lastModified: datetime()
     })
@@ -122,6 +122,6 @@ async function createSystemSubdomain(
 
   return await tx.run(query, {
     accountId,
-    systemDbName: ADMIN_DB_NAME,
+    adminDbName: ADMIN_DB_NAME,
   });
 }

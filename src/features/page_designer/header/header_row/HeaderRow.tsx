@@ -4,7 +4,7 @@ import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 
-import { HomeIcon } from "../left/HomeIcon";
+import { HomeIconButton } from "../../../../components/styled/buttons/HomeIconButton";
 import { SaveAllButton } from "../right/SaveAllButton";
 import { ToggleButtons } from "../right/ToggleButtons";
 import { css } from "~/lib/styles";
@@ -52,7 +52,7 @@ export function Header(props: HeaderProps) {
 export function HeaderRow(props: HeaderProps) {
   return (
     <Header css={props.css} style={props.style}>
-      <HomeIcon />
+      <HomeIconButton />
       <RightSection />
     </Header>
   );

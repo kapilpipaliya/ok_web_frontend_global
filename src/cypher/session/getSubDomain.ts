@@ -15,10 +15,9 @@ export async function getSubDomain(host: string) {
   // If domain is null, set it to "www"
   const effectiveSubdomain = subdomain || "www";
 
-  if (effectiveSubdomain === "system" || effectiveSubdomain === "admin") {
+  if (effectiveSubdomain === "admin") {
     return { domain, subdomain: ADMIN_DB_NAME };
   }
-  // If it matches the current domain from env, use system subdomain
   if (effectiveDomain === process.env.DOMAIN) {
     return { domain, subdomain: effectiveSubdomain };
   }
@@ -43,6 +42,5 @@ export async function getSubDomain(host: string) {
     }
   }
 
-  // Default to system if no match found
   throw "Error looking up domain";
 }

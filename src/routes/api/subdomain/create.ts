@@ -16,7 +16,7 @@ import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 // Reserved subdomain keys that cannot be used
 const RESERVED_SUBDOMAINS = new Set([
   "admin",
-  "system",
+  "system", // 'system' database name is not available in neo4j
   "api",
   // "www",
   "app",
@@ -36,6 +36,7 @@ const RESERVED_SUBDOMAINS = new Set([
   "test",
   "dev",
   "staging",
+  "neo4j",
 ]);
 
 export async function POST({ request }: APIEvent) {

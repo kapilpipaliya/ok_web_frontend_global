@@ -8,7 +8,7 @@ import { headerIconButtonCss } from "~/pages/settings/constants";
 import { css } from "~/lib/styles";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
-export const HomeIcon = () => {
+export const HomeIconButton = () => {
   const [graph] = useGraph();
   const navigate = useNavigate();
   const isAdminSubDomain = () => getMemberVertex(graph).P.subDomain === "admin";

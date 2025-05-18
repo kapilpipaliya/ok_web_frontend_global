@@ -13,8 +13,6 @@ export async function setupAdminUser(): Promise<{
   status: number;
   user?: null | Vertex;
 }> {
-  const driver = await getDriver();
-  const systemDbSession = driver.session();
   try {
     const databases = await getAllDatabases();
     const adminDatabaseExists = databases.includes(ADMIN_DB_NAME);
@@ -79,7 +77,5 @@ export async function setupAdminUser(): Promise<{
       status: 500,
       user: null,
     };
-  } finally {
-    await systemDbSession.close();
   }
 }

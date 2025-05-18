@@ -29,6 +29,5 @@
 - http://localhost:3001/support/contact
 
 
-### System Setup and Cleanup
-- Admin User Setup: http://localhost:3001/api/setup/adminUserSetup
-- System Cleanup: http://localhost:3001/api/setup/systemCleanup
+### Admin DB Setup
+- Admin DB Setup: http://localhost:3001/api/setup/adminUserSetup
