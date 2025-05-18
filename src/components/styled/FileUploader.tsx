@@ -12,7 +12,6 @@ import {
 
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-import { runEvent } from "../solid_blocks/tools";
 import { css } from "~/lib/styles";
 import { As } from "../As";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -109,7 +108,7 @@ export function FileUploader(props: FileUploaderProps) {
         accept="image/*, video/*"
         multiple={localProps.multiple}
         onChange={(event) => {
-          runEvent(event, handleInputChange);
+          handleInputChange(event);
         }}
         ref={inputRef}
         style={{ display: "none" }}
