@@ -3,7 +3,6 @@ import type { RouteSectionProps } from "@solidjs/router";
 import { Link } from "@solidjs/meta";
 
 import { HomeIconButton } from "~/components/styled/buttons/HomeIconButton";
-import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
@@ -12,10 +11,11 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { AuthRequired } from "~/components/auth/AuthRequired";
 export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
   const [graph] = useGraph();
   return (
-    <GetInitialData authenticate>
+    <AuthRequired>
       <PermissionGuard>
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
@@ -34,6 +34,6 @@ export default function SystemLayoutRoute(props: Readonly<RouteSectionProps>) {
         <EmailConfirmationBanner />
         {props.children}
       </PermissionGuard>
-    </GetInitialData>
+    </AuthRequired>
   );
 }

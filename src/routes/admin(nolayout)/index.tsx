@@ -1,8 +1,6 @@
 import type { JSX } from "solid-js";
 
 import { Link } from "@solidjs/meta";
-
-import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
@@ -12,6 +10,7 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { AuthRequired } from "~/components/auth/AuthRequired";
 
 export default function Admin() {
   return (
@@ -25,7 +24,7 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
   const [graph] = useGraph();
   return (
     <PermissionGuard>
-      <GetInitialData authenticate>
+      <AuthRequired>
         <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <As
@@ -47,7 +46,7 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
         </As>
         <EmailConfirmationBanner />
         {props.children}
-      </GetInitialData>
+      </AuthRequired>
     </PermissionGuard>
   );
 }

@@ -1,7 +1,6 @@
 import { Link, Title } from "@solidjs/meta";
 
 import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription";
-import { GetInitialData } from "~/GetInitialData";
 import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompanySquareLogoUrl";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
@@ -10,6 +9,7 @@ import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import type { JSX } from "solid-js";
+import { AuthRequired } from "~/components/auth/AuthRequired";
 
 export default function Projects() {
   return (
@@ -66,9 +66,9 @@ export default function Projects() {
 function SystemLayoutRoute(props: { children: JSX.Element }) {
   const [graph] = useGraph();
   return (
-    <GetInitialData authenticate>
+    <AuthRequired>
       <Link href={getCompanySquareLogoUrl(graph) || ""} rel="icon" />
       {props.children}
-    </GetInitialData>
+    </AuthRequired>
   );
 }

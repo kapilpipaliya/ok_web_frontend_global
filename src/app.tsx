@@ -14,6 +14,7 @@ import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
 import { toastValue } from "./toastValue";
 import { GraphContext } from "~/lib/graph/context/GraphContext";
+import { GetInitialData } from "./GetInitialData";
 
 // Create a generic error fallback component
 const ErrorFallback = (props: {
@@ -68,7 +69,9 @@ export default function App() {
                   }}
                 >
                   <Suspense>
-                    <ThemeProvider>{props.children}</ThemeProvider>
+                    <GetInitialData dontRedirectToLogin={true}>
+                      <ThemeProvider>{props.children}</ThemeProvider>
+                    </GetInitialData>
                   </Suspense>
                 </ErrorBoundary>
                 <Show when={isHydrated()}>

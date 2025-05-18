@@ -1,9 +1,9 @@
-import {formatHex, oklch} from "culori";
-import {type Component, createMemo, type JSX} from "solid-js";
-import {StyleRenderer} from "~/components/StyleRenderer";
-import {getGlobalThemeVertex} from "../graph/get/sync/store/getGlobalThemeVertex";
-import {getGlobalStore} from "../graph/get/sync/store/getGlobalStore";
-import {themeConfig} from "../graph/get/sync/theme/themeConfig";
+import { formatHex, oklch } from "culori";
+import { type Component, createMemo, type JSX } from "solid-js";
+import { StyleRenderer } from "~/components/StyleRenderer";
+import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
+import { getGlobalStore } from "../graph/get/sync/store/getGlobalStore";
+import { themeConfig } from "../graph/get/sync/theme/themeConfig";
 import {
   createColorScheme,
   createGradient,
@@ -15,9 +15,13 @@ import {
   meetsAccessibilityStandards,
   mixColors,
 } from "../styles/colorUtils";
-import {CSS_RESET, DEFAULT_THEME, FONT_PRESETS} from "../styles/constants";
-import {getAnimationDefinition, getMediaQuery, getPrefersColorSchemeQuery,} from "../styles/mediaUtils";
-import {createSafeThemeProxy, ThemeContext} from "./ThemeContext";
+import { CSS_RESET, DEFAULT_THEME, FONT_PRESETS } from "../styles/constants";
+import {
+  getAnimationDefinition,
+  getMediaQuery,
+  getPrefersColorSchemeQuery,
+} from "../styles/mediaUtils";
+import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
 import type {
   Breakpoint,
   ColorAdjustments,
@@ -25,7 +29,7 @@ import type {
   ColorScheme,
   ThemeContext as ThemeContextType,
 } from "~/lib/styles/types/types";
-import {useGraph} from "~/lib/graph/context/UseGraph";
+import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export interface ThemeProviderProps {
   children: JSX.Element;
