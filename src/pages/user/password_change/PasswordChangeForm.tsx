@@ -23,6 +23,14 @@ type SaveState = {
   isLoading: boolean;
 };
 
+// Define a type for function arguments with saveState in contextData
+interface SaveStateFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    saveState: [SaveState, SetStoreFunction<SaveState>];
+    [key: string]: unknown;
+  };
+}
+
 export function PasswordChangeForm() {
   const [graph] = useGraph();
   const navigate = useNavigate();
@@ -73,13 +81,7 @@ export function PasswordChangeForm() {
   margin-right: 8px;
 `,
                 componentName: "Html",
-                props: (
-                  options: FunctionArgumentType & {
-                    contextData: {
-                      saveState: [SaveState, SetStoreFunction<SaveState>];
-                    };
-                  },
-                ) => ({
+                props: (options: SaveStateFunctionArgumentType) => ({
                   disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
                     const formData = options.data;
@@ -109,7 +111,7 @@ export function PasswordChangeForm() {
             name: "saveState",
 
             props: () => ({
-              data: createStore({
+              data: createStore<SaveState>({
                 isLoading: false,
               }),
             }),
@@ -211,7 +213,7 @@ async function handlePasswordChange(
     });
 
     if (response.error) {
-      showErrorToast(response.error);
+      showErrorToast(response.error as string);
     } else {
       showSuccessToast("Password changed successfully");
     }

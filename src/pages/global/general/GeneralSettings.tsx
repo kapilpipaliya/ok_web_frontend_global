@@ -18,6 +18,20 @@ import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
+// Define the type for saveState store
+type SaveStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+  }>
+>;
+
+// Extend FunctionArgumentType to include our contextData
+interface GeneralSettingsFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    saveState: SaveStateStore;
+  };
+}
+
 export function GeneralSettings() {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
@@ -92,7 +106,7 @@ export function GeneralSettings() {
                 as: "button",
                 css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => ({
+                props: (options: GeneralSettingsFunctionArgumentType) => ({
                   disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
                     try {
@@ -103,7 +117,7 @@ export function GeneralSettings() {
                         settings.P,
                       );
                       if (response.error) {
-                        showErrorToast(response.error);
+                        showErrorToast(String(response.error));
                       } else {
                         showSuccessToast("Settings updated successfully");
                       }

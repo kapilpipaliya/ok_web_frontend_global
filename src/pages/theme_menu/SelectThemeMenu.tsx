@@ -6,6 +6,7 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
+import type { GraphData } from "~/lib/types/GraphData";
 import { getGlobalSettingVertex } from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 import { getGlobalThemeVertex } from "~/lib/graph/get/sync/store/getGlobalThemeVertex";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
@@ -111,7 +112,9 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
         "DELETE",
       );
       if (result.success) {
-        setGraphData(graph, setGraph, result.graph);
+        if (result.graph) {
+          setGraphData(graph, setGraph, result.graph as GraphData);
+        }
         showSuccessToast("Theme deleted successfully");
         loadThemes(); // Reload themes after deletion
       }

@@ -17,13 +17,17 @@ type DeleteState = {
   successMessage: string;
 };
 
+// Define a type for function arguments with deleteState in contextData
+interface DeleteStateFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    deleteState: [DeleteState, SetStoreFunction<DeleteState>];
+    [key: string]: unknown;
+  };
+}
+
 export function AccountDeletionForm() {
   const handleDeleteAccount = async (
-    options: FunctionArgumentType & {
-      contextData: {
-        deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-      };
-    },
+    options: DeleteStateFunctionArgumentType,
   ) => {
     options.contextData.deleteState[1]("isLoading", true);
     options.contextData.deleteState[1]("errorMessage", "");
@@ -36,7 +40,7 @@ export function AccountDeletionForm() {
       if (response.success) {
         options.contextData.deleteState[1](
           "successMessage",
-          response.message ||
+          (response.message as string) ||
             "Account scheduled for deletion. It will be permanently removed after 48 hours.",
         );
         // Redirect to logout after successful deletion request
@@ -46,7 +50,7 @@ export function AccountDeletionForm() {
       } else {
         options.contextData.deleteState[1](
           "errorMessage",
-          response.error ||
+          (response.error as string) ||
             "Failed to schedule account for deletion. Please try again.",
         );
       }
@@ -81,13 +85,7 @@ export function AccountDeletionForm() {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
-        props: (
-          options: FunctionArgumentType & {
-            contextData: {
-              deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-            };
-          },
-        ) => ({
+        props: (options: DeleteStateFunctionArgumentType) => ({
           onClick: () => {
             options.contextData.deleteState[1]("showConfirmDialog", false);
           },
@@ -106,13 +104,7 @@ export function AccountDeletionForm() {
   cursor: pointer;
 `,
         componentName: "Html",
-        props: (
-          options: FunctionArgumentType & {
-            contextData: {
-              deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-            };
-          },
-        ) => ({
+        props: (options: DeleteStateFunctionArgumentType) => ({
           disabled: options.contextData.deleteState[0]?.isLoading,
           onClick: () => handleDeleteAccount(options),
           text: options.contextData.deleteState[0]?.isLoading
@@ -173,13 +165,7 @@ export function AccountDeletionForm() {
           {
             as: "span",
             componentName: "Html",
-            props: (
-              options: FunctionArgumentType & {
-                contextData: {
-                  deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-                };
-              },
-            ) => ({
+            props: (options: DeleteStateFunctionArgumentType) => ({
               text: options.contextData.deleteState[0]?.errorMessage,
             }),
           },
@@ -193,13 +179,7 @@ export function AccountDeletionForm() {
   border-radius: 8px;
 `,
         componentName: "Html",
-        props: (
-          options: FunctionArgumentType & {
-            contextData: {
-              deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-            };
-          },
-        ) => ({
+        props: (options: DeleteStateFunctionArgumentType) => ({
           hide: !options.contextData.deleteState[0]?.errorMessage,
         }),
       },
@@ -209,13 +189,7 @@ export function AccountDeletionForm() {
           {
             as: "span",
             componentName: "Html",
-            props: (
-              options: FunctionArgumentType & {
-                contextData: {
-                  deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-                };
-              },
-            ) => ({
+            props: (options: DeleteStateFunctionArgumentType) => ({
               text: options.contextData.deleteState[0]?.successMessage,
             }),
           },
@@ -229,13 +203,7 @@ export function AccountDeletionForm() {
   border-radius: 8px;
 `,
         componentName: "Html",
-        props: (
-          options: FunctionArgumentType & {
-            contextData: {
-              deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-            };
-          },
-        ) => ({
+        props: (options: DeleteStateFunctionArgumentType) => ({
           hide: !options.contextData.deleteState[0]?.successMessage,
         }),
       },
@@ -253,13 +221,7 @@ export function AccountDeletionForm() {
   cursor: pointer;
 `,
             componentName: "Html",
-            props: (
-              options: FunctionArgumentType & {
-                contextData: {
-                  deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-                };
-              },
-            ) => ({
+            props: (options: DeleteStateFunctionArgumentType) => ({
               disabled: options.contextData.deleteState[0]?.isLoading,
               onClick: () => {
                 options.contextData.deleteState[1]("showConfirmDialog", true);
@@ -322,16 +284,7 @@ export function AccountDeletionForm() {
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
-                    props: (
-                      options: FunctionArgumentType & {
-                        contextData: {
-                          deleteState: [
-                            DeleteState,
-                            SetStoreFunction<DeleteState>,
-                          ];
-                        };
-                      },
-                    ) => ({
+                    props: (options: DeleteStateFunctionArgumentType) => ({
                       style: {
                         "z-index": options.zIndex + 1,
                       },
@@ -346,13 +299,7 @@ export function AccountDeletionForm() {
           },
         ],
         componentName: "Html",
-        props: (
-          options: FunctionArgumentType & {
-            contextData: {
-              deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-            };
-          },
-        ) => ({
+        props: (options: DeleteStateFunctionArgumentType) => ({
           hide: !options.contextData.deleteState[0]?.showConfirmDialog,
         }),
       },
@@ -372,14 +319,8 @@ export function AccountDeletionForm() {
     componentName: "Data",
     name: "deleteState",
 
-    props: (
-      options: FunctionArgumentType & {
-        contextData: {
-          deleteState: [DeleteState, SetStoreFunction<DeleteState>];
-        };
-      },
-    ) => ({
-      data: createStore({
+    props: (options: FunctionArgumentType) => ({
+      data: createStore<DeleteState>({
         errorMessage: "",
         isLoading: false,
         showConfirmDialog: false,

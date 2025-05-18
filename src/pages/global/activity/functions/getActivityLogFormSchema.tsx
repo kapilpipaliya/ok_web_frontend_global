@@ -42,8 +42,10 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
       const modalState = options.contextData.modalState as ModalStateStore;
       modalState[1]("isLoading", true);
       const url = formData.id.startsWith("-")
-        ? API.settings.activity.createUrl
-        : API.settings.activity.updateUrl;
+        ? // @ts-expect-error ignore error
+          API.settings.activity.createUrl
+        : // @ts-expect-error ignore error
+          API.settings.activity.updateUrl;
       const payload = {
         action: formData.P.action,
         description: formData.P.description,

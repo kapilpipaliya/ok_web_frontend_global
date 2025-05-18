@@ -17,6 +17,14 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { addEditButtonSchema } from "./addEditButtonSchema";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
+// Define extended function argument type that includes modalState
+interface SubDomainFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    modalState: ModalStateStore;
+    [key: string]: unknown;
+  };
+}
+
 export function getSubDomainFormSchema(onSuccess: () => void) {
   const { showErrorToast, showSuccessToast } = useToast();
   const validateForm = (formData: Vertex) => {
@@ -32,30 +40,31 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     return true;
   };
 
-  const handleSave = async (options: FunctionArgumentType) => {
+  const handleSave = async (options: SubDomainFunctionArgumentType) => {
     const formData = options.data;
     if (!validateForm(formData)) {
       return;
     }
 
     try {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
-      const url = formData.id.startsWith("-")
-        ? API.subdomain.createUrl
-        : API.subdomain.updateUrl;
+      const url =
+        formData.id && formData.id.startsWith("-")
+          ? API.subdomain.createUrl
+          : API.subdomain.updateUrl;
       const payload: {
         key: string;
         domain: string;
         description: string;
         id?: string;
       } = {
-        key: formData.P.key,
-        domain: formData.P.domain || "",
-        description: formData.P.description || "",
+        key: formData.P.key as string,
+        domain: (formData.P.domain as string) || "",
+        description: (formData.P.description as string) || "",
       };
 
-      if (!formData.id.startsWith("-")) {
+      if (formData.id && !formData.id.startsWith("-")) {
         payload.id = formData.id;
       }
 
@@ -67,7 +76,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         options.removeTxnIdAndCreateNew(options.txnId);
         options.ensureData();
         showSuccessToast(
-          formData.id.startsWith("-")
+          formData.id && formData.id.startsWith("-")
             ? "Project created successfully"
             : "Project updated successfully",
         );
@@ -77,7 +86,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", false);
     }
   };
@@ -103,8 +112,9 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 componentName: "TextInput",
                 key: "key",
                 placeholder: "Enter Project / SubDomain name",
-                props: (options: FunctionArgumentType) => ({
-                  disabled: !options.data?.id.startsWith("-"),
+                props: (options: SubDomainFunctionArgumentType) => ({
+                  disabled:
+                    options.data?.id && !options.data.id.startsWith("-"),
                 }),
                 validation: { required: true },
               },
@@ -181,8 +191,8 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => {
-          const modalState = options.contextData.modalState as ModalStateStore;
+        props: (options: SubDomainFunctionArgumentType) => {
+          const modalState = options.contextData.modalState;
           return {
             disabled: modalState[0]?.isLoading,
             onClick: () => handleSave(options),
@@ -195,8 +205,8 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => {
-          const modalState = options.contextData.modalState as ModalStateStore;
+        props: (options: SubDomainFunctionArgumentType) => {
+          const modalState = options.contextData.modalState;
           return {
             onClick: () => {
               modalState[1]("showModal", false);
@@ -224,9 +234,8 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
             attributes: [],
             css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
-            props: (options: FunctionArgumentType) => {
-              const modalState = options.contextData
-                .modalState as ModalStateStore;
+            props: (options: SubDomainFunctionArgumentType) => {
+              const modalState = options.contextData.modalState;
               return {
                 hide: !modalState[0]?.showModal,
               };
@@ -254,9 +263,8 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
-                    props: (options: FunctionArgumentType) => {
-                      const modalState = options.contextData
-                        .modalState as ModalStateStore;
+                    props: (options: SubDomainFunctionArgumentType) => {
+                      const modalState = options.contextData.modalState;
 
                       return {
                         hide: !modalState[0]?.showModal,
@@ -278,9 +286,8 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
                 ],
                 componentName: "Html",
                 as: "portal",
-                props: (options: FunctionArgumentType) => {
-                  const modalState = options.contextData
-                    .modalState as ModalStateStore;
+                props: (options: SubDomainFunctionArgumentType) => {
+                  const modalState = options.contextData.modalState;
                   return {
                     hide: !modalState[0]?.showModal,
                   };

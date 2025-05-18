@@ -18,6 +18,14 @@ import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSc
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { ModalStateStore } from "~/lib/types/ModalStateStore";
 
+// Extend FunctionArgumentType to include our contextData
+interface UserFormFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    modalState: ModalStateStore;
+    [key: string]: unknown;
+  };
+}
+
 export const userFormSchema = {
   as: "div",
   attributes: [
@@ -132,7 +140,7 @@ export const userFormSchema = {
 export const getUserFormSchema = (onSuccess: () => void) => {
   const { showErrorToast, showSuccessToast } = useToast();
 
-  const validateForm = (options: FunctionArgumentType) => {
+  const validateForm = (options: UserFormFunctionArgumentType) => {
     const formData = options.data;
     if (!formData.P.email?.trim()) {
       showErrorToast("Please enter email");
@@ -171,14 +179,14 @@ export const getUserFormSchema = (onSuccess: () => void) => {
     return true;
   };
 
-  const handleSave = async (options: FunctionArgumentType) => {
+  const handleSave = async (options: UserFormFunctionArgumentType) => {
     if (!validateForm(options)) {
       return;
     }
     const formData = options.data;
 
     try {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
 
       const roles =
@@ -200,7 +208,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
       });
 
       if (response.error) {
-        showErrorToast(response.error);
+        showErrorToast(String(response.error));
       } else {
         // options.removeTxnIdAndCreateNew(options.txnId);
         // as we are creating new transaction, we need to revert to previous state
@@ -211,14 +219,14 @@ export const getUserFormSchema = (onSuccess: () => void) => {
             ? "User invited successfully"
             : "User updated successfully",
         );
-        const modalState = options.contextData.modalState as ModalStateStore;
+        const modalState = options.contextData.modalState;
         modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", false);
     }
   };
@@ -245,12 +253,10 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
-          disabled: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading,
+        props: (options: UserFormFunctionArgumentType) => ({
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -260,10 +266,9 @@ export const getUserFormSchema = (onSuccess: () => void) => {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
+        props: (options: UserFormFunctionArgumentType) => ({
           onClick: () => {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
             options.ensureData();
@@ -292,10 +297,8 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                     attributes: [],
                     css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
                     componentName: "Html",
-                    props: (options: FunctionArgumentType) => ({
-                      hide: !(
-                        options.contextData.modalState as ModalStateStore
-                      )[0]?.showModal,
+                    props: (options: UserFormFunctionArgumentType) => ({
+                      hide: !options.contextData.modalState[0]?.showModal,
                       style: {
                         "z-index": options.zIndex,
                       },
@@ -319,7 +322,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
-                    props: (options: FunctionArgumentType) => ({
+                    props: (options: UserFormFunctionArgumentType) => ({
                       style: {
                         "z-index": options.zIndex + 1,
                       },
@@ -328,9 +331,7 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                         createFocusTrap({
                           element: options.ref,
                           enabled: () =>
-                            (
-                              options.contextData.modalState as ModalStateStore
-                            )[0]?.showModal,
+                            options.contextData.modalState[0]?.showModal,
                           observeChanges: true,
                           restoreFocus: true,
                         });
@@ -340,9 +341,8 @@ export const getUserFormSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Html",
                 as: "portal",
-                props: (options: FunctionArgumentType) => ({
-                  hide: !(options.contextData.modalState as ModalStateStore)[0]
-                    ?.showModal,
+                props: (options: UserFormFunctionArgumentType) => ({
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],

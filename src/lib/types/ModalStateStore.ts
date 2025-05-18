@@ -1,10 +1,8 @@
-import type { SetStoreFunction } from "solid-js/store";
+import type { createStore } from "solid-js/store";
 
-// Base modal state type
-export type ModalState = {
-  isLoading: boolean;
-  showModal: boolean;
-};
-
-// Store type for modal state, combining the state and its setter function
-export type ModalStateStore = [ModalState, SetStoreFunction<ModalState>];
+export type ModalStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+    showModal: boolean;
+  }>
+>;

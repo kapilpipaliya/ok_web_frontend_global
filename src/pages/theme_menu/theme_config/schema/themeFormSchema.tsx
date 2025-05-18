@@ -1,13 +1,14 @@
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import createFocusTrap from "solid-focus-trap";
+import type * as Monaco from "monaco-editor";
 
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type {
   FieldAttribute,
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
-import type { ModalStateStore } from "~/lib/types/ModalStateStore";
+
 import { useToast } from "~/components/styled/modal/Toast";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
@@ -21,6 +22,26 @@ import { validateFunction } from "~/lib/validation/validateFunction";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+
+type EditorState = ReturnType<
+  typeof createSignal<Monaco.editor.IStandaloneCodeEditor>
+>;
+type ModalStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+    showModal: boolean;
+    editorData?: string;
+  }>
+>;
+
+// Define a type for the function argument with proper contextData typing
+interface ThemeFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    modalState: ModalStateStore;
+    editorState?: EditorState;
+    [key: string]: unknown;
+  };
+}
 
 export const themeFormSchema = {
   as: "div",
@@ -61,25 +82,21 @@ export const themeFormSchema = {
             },
             {
               key: "data",
-              props: (options: FunctionArgumentType) => ({
+              props: (options: ThemeFunctionArgumentType) => ({
                 componentName: (props: any) => (
                   <MonacoEditorWrapper
                     height="400px"
                     language="javascript"
                     {...props}
                     onChange={(value) =>
-                      (options.contextData.modalState as ModalStateStore)[1](
-                        "editorData",
-                        value,
-                      )
+                      options.contextData.modalState[1]("editorData", value)
                     }
-                    onMount={(_monaco, editor) =>
-                      options.contextData.editorState[1](editor)
-                    }
-                    value={
-                      (options.contextData.modalState as ModalStateStore)[0]
-                        ?.editorData
-                    }
+                    onMount={(_monaco, editor) => {
+                      if (options.contextData.editorState) {
+                        options.contextData.editorState[1](editor);
+                      }
+                    }}
+                    value={options.contextData.modalState[0]?.editorData}
                   />
                 ),
               }),
@@ -98,18 +115,22 @@ export const themeFormSchema = {
                       border-radius: 5px;
                     }
                   `,
-                  props: (options: FunctionArgumentType) => ({
+                  props: (options: ThemeFunctionArgumentType) => ({
                     onClick: async () => {
-                      const editor = options.contextData?.editorState[0]();
-                      if (editor) {
-                        try {
-                          const formatted = await formatJavaScriptCode(
-                            editor.getValue(),
-                          );
-                          editor.setValue(formatted);
-                        } catch (err) {
-                          console.error("Formatting failed:", err);
-                          options.showWarningToast("Failed to format code");
+                      if (options.contextData.editorState) {
+                        const editor = options.contextData.editorState[0]();
+                        if (editor) {
+                          try {
+                            const formatted = await formatJavaScriptCode(
+                              editor.getValue(),
+                            );
+                            editor.setValue(formatted);
+                          } catch (err) {
+                            console.error("Formatting failed:", err);
+                            if (options.showWarningToast) {
+                              options.showWarningToast("Failed to format code");
+                            }
+                          }
                         }
                       }
                     },
@@ -148,16 +169,15 @@ export const getThemeFormSchema = (
 
   createActiveClickOutside(graph, setGraph);
 
-  const validateForm = (options: FunctionArgumentType) => {
+  const validateForm = (options: ThemeFunctionArgumentType) => {
     const formData = options.data;
     if (!formData.P.key?.trim() && formData.id.startsWith("-")) {
       showErrorToast("Please enter theme name");
       return false;
     }
 
-    const editorData = (
-      options.contextData.modalState as ModalStateStore
-    )[0]?.editorData?.trim();
+    const modalState = options.contextData.modalState;
+    const editorData = modalState[0]?.editorData?.trim();
     if (!editorData) {
       showErrorToast("Please enter theme configuration");
       return false;
@@ -172,7 +192,7 @@ export const getThemeFormSchema = (
     return true;
   };
 
-  const handleSave = async (options: FunctionArgumentType) => {
+  const handleSave = async (options: ThemeFunctionArgumentType) => {
     if (!validateForm(options)) {
       return;
     }
@@ -180,7 +200,7 @@ export const getThemeFormSchema = (
     const formDataId = formData.id;
 
     try {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
 
       const newFormTxnId = generateNewTxnId(graph, setGraph);
@@ -189,8 +209,7 @@ export const getThemeFormSchema = (
       if (formDataId.startsWith("-")) {
         // Create new theme
         result = createFormVertex(graph, setGraph, newFormTxnId, "Theme", {
-          data: (options.contextData.modalState as ModalStateStore)[0]
-            ?.editorData,
+          data: options.contextData.modalState[0]?.editorData || "",
           key: formData.P.key,
         });
       } else {
@@ -201,8 +220,7 @@ export const getThemeFormSchema = (
           graph,
           setGraph,
           {
-            data: (options.contextData.modalState as ModalStateStore)[0]
-              ?.editorData,
+            data: options.contextData.modalState[0]?.editorData || "",
           },
         );
       }
@@ -225,7 +243,7 @@ export const getThemeFormSchema = (
           options.revertTransactionUpToIndex(options.txnId, -1);
         }
         showSuccessToast("Theme Saved Successfully");
-        const modalState = options.contextData.modalState as ModalStateStore;
+        const modalState = options.contextData.modalState;
         modalState[1]("showModal", false);
         onSuccess();
       } catch (er) {
@@ -234,7 +252,7 @@ export const getThemeFormSchema = (
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", false);
     }
   };
@@ -268,12 +286,10 @@ export const getThemeFormSchema = (
         as: "button",
         componentName: "Html",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
-        props: (options: FunctionArgumentType) => ({
-          disabled: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading,
+        props: (options: ThemeFunctionArgumentType) => ({
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -283,12 +299,10 @@ export const getThemeFormSchema = (
         as: "button",
         componentName: "Html",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
-        props: (options: FunctionArgumentType) => ({
-          disabled: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading,
+        props: (options: ThemeFunctionArgumentType) => ({
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
             onClose();
@@ -316,10 +330,8 @@ export const getThemeFormSchema = (
                     attributes: [],
                     componentName: "Html",
                     css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
-                    props: (options: FunctionArgumentType) => ({
-                      hide: !(
-                        options.contextData.modalState as ModalStateStore
-                      )[0]?.showModal,
+                    props: (options: ThemeFunctionArgumentType) => ({
+                      hide: !options.contextData.modalState[0]?.showModal,
                       style: {
                         "z-index": options.zIndex,
                       },
@@ -343,7 +355,7 @@ export const getThemeFormSchema = (
                     componentName: "Html",
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     open: true,
-                    props: (options: FunctionArgumentType) => ({
+                    props: (options: ThemeFunctionArgumentType) => ({
                       onClick: (event: MouseEvent) => {
                         event.stopPropagation();
                       },
@@ -364,9 +376,8 @@ export const getThemeFormSchema = (
                 ],
                 componentName: "Html",
                 as: "portal",
-                props: (options: FunctionArgumentType) => ({
-                  hide: !(options.contextData.modalState as ModalStateStore)[0]
-                    ?.showModal,
+                props: (options: ThemeFunctionArgumentType) => ({
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],
@@ -396,7 +407,7 @@ export const getThemeFormSchema = (
         name: "editorState",
 
         props: () => ({
-          data: createSignal(),
+          data: createSignal<Monaco.editor.IStandaloneCodeEditor>(),
         }),
       },
     ],

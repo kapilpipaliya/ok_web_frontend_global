@@ -14,6 +14,21 @@ import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
 import { css } from "~/lib/styles";
 
+// Define the type for saveState store
+type SaveStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+  }>
+>;
+
+// Extend FunctionArgumentType to include our contextData
+interface CompanySettingsFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    saveState: SaveStateStore;
+    [key: string]: unknown;
+  };
+}
+
 // Validation functions
 const validateRequired = (value: string) => {
   if (!value || value.trim() === "") {
@@ -150,7 +165,7 @@ export function CompanySettings() {
                     as: "button",
                     css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                     componentName: "Html",
-                    props: (options: FunctionArgumentType) => ({
+                    props: (options: CompanySettingsFunctionArgumentType) => ({
                       disabled: options.contextData.saveState[0]?.isLoading,
                       onClick: async () => {
                         // Validate form data

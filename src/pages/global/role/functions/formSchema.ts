@@ -8,6 +8,7 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 import type { ModalStateStore } from "~/lib/types/ModalStateStore";
+import type { GraphData } from "~/lib/types/GraphData";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
@@ -19,9 +20,25 @@ import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
-import { loadingIconSchema } from "../../../../lib/schema/loadingIconSchema";
+import { loadingIconSchema } from "~/lib/schema/loadingIconSchema";
 import { css } from "~/lib/styles";
 import type { Vertex } from "~/lib/graph/type/vertex";
+
+// Define the type for tabState store
+type TabStateStore = ReturnType<
+  typeof createStore<{
+    activeTab: string;
+  }>
+>;
+
+// Extend FunctionArgumentType to include our contextData
+interface RoleFormFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    modalState: ModalStateStore;
+    tabState: TabStateStore;
+    [key: string]: unknown;
+  };
+}
 
 export const permissionsTableSchema = (label: string) =>
   ({
@@ -115,7 +132,7 @@ export const roleFormSchema = {
             {
               as: "button",
               componentName: "Html",
-              css: (args: FunctionArgumentType) => {
+              css: (args: RoleFormFunctionArgumentType) => {
                 return [
                   css`
                 cursor: pointer;
@@ -130,7 +147,7 @@ export const roleFormSchema = {
                     : css`border-bottom: 2px solid transparent;`,
                 ];
               },
-              props: (options: FunctionArgumentType) => {
+              props: (options: RoleFormFunctionArgumentType) => {
                 const permissions = evalExpression("->RolePerm", {
                   graph: options.graph,
                   setGraph: options.setGraph,
@@ -139,7 +156,7 @@ export const roleFormSchema = {
                 return {
                   onClick: () =>
                     options.contextData.tabState[1]("activeTab", "Perm"),
-                  text: `Permissions ${(options.contextData.modalState as ModalStateStore)[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
+                  text: `Permissions ${options.contextData.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
                 };
               },
               type: "button",
@@ -147,7 +164,7 @@ export const roleFormSchema = {
             {
               as: "button",
               componentName: "Html",
-              css: (options: FunctionArgumentType) => [
+              css: (options: RoleFormFunctionArgumentType) => [
                 css`
                 cursor: pointer;
                 padding: 8px 16px;
@@ -160,7 +177,7 @@ export const roleFormSchema = {
                   ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
                   : css`border-bottom: 2px solid transparent;`,
               ],
-              props: (options: FunctionArgumentType) => {
+              props: (options: RoleFormFunctionArgumentType) => {
                 const permissions = evalExpression("->RolePage", {
                   graph: options.graph,
                   setGraph: options.setGraph,
@@ -169,7 +186,7 @@ export const roleFormSchema = {
                 return {
                   onClick: () =>
                     options.contextData.tabState[1]("activeTab", "Page"),
-                  text: `Pages ${(options.contextData.modalState as ModalStateStore)[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
+                  text: `Pages ${options.contextData.modalState[0]?.isLoading ? "" : `(${(permissions || []).length})`}`,
                 };
               },
               type: "button",
@@ -188,7 +205,7 @@ export const roleFormSchema = {
               as: "div",
               attributes: [permissionsTableSchema("Perm")],
               componentName: "Html",
-              css: (options: FunctionArgumentType) =>
+              css: (options: RoleFormFunctionArgumentType) =>
                 options.contextData.tabState[0]?.activeTab === "Perm"
                   ? ""
                   : css`display:none`,
@@ -197,7 +214,7 @@ export const roleFormSchema = {
               as: "div",
               attributes: [permissionsTableSchema("Page")],
               componentName: "Html",
-              css: (options: FunctionArgumentType) =>
+              css: (options: RoleFormFunctionArgumentType) =>
                 options.contextData.tabState[0]?.activeTab === "Page"
                   ? ""
                   : css`display:none`,
@@ -221,26 +238,24 @@ export const roleFormSchema = {
     },
   ],
   componentName: "Html",
-  props: (options: FunctionArgumentType) => {
+  props: (options: RoleFormFunctionArgumentType) => {
     return {
       onMount: async () => {
         if (!options.data?.id.startsWith("-")) {
           try {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("isLoading", true);
             const response = await postAPI(API.role.getRoleUrl, {
               id: options.data?.id,
             });
             if (response.error) {
-              throw new Error(response.error);
+              throw new Error(String(response.error));
             }
-            options.setGraphData(0, response.graph, {});
+            options.setGraphData(0, response.graph as GraphData, {});
           } catch (error) {
             options.showErrorToast((error as Error).message);
           } finally {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("isLoading", false);
           }
         }
@@ -260,14 +275,14 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
     return true;
   };
 
-  const handleSave = async (options: FunctionArgumentType) => {
+  const handleSave = async (options: RoleFormFunctionArgumentType) => {
     const formData = options.data;
     if (!validateForm(formData)) {
       return;
     }
 
     try {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
       const data = commitTxn(options.txnId, options.graph);
       if (!data) {
@@ -279,24 +294,22 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
       });
 
       if (response.error) {
-        showErrorToast(response.error);
+        showErrorToast(String(response.error));
       } else {
-        onMutatDataGet(
-          options.graph,
-          options.setGraph,
-          response as MutationResult,
-        );
+        // First convert to unknown, then to MutationResult to satisfy TypeScript
+        const typedResponse = response as unknown as MutationResult;
+        onMutatDataGet(options.graph, options.setGraph, typedResponse);
         options.removeTxnIdAndCreateNew(options.txnId);
         options.ensureData();
         showSuccessToast("Role created successfully");
-        const modalState = options.contextData.modalState as ModalStateStore;
+        const modalState = options.contextData.modalState;
         modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       showErrorToast((error as Error).message);
     } finally {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", false);
     }
   };
@@ -323,12 +336,10 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
-          disabled: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading,
+        props: (options: RoleFormFunctionArgumentType) => ({
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -338,10 +349,9 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
         as: "button",
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
         componentName: "Html",
-        props: (options: FunctionArgumentType) => ({
+        props: (options: RoleFormFunctionArgumentType) => ({
           onClick: () => {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
             options.ensureData();
@@ -366,9 +376,8 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
             attributes: [],
             css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
-            props: (options: FunctionArgumentType) => ({
-              hide: !(options.contextData.modalState as ModalStateStore)[0]
-                ?.showModal,
+            props: (options: RoleFormFunctionArgumentType) => ({
+              hide: !options.contextData.modalState[0]?.showModal,
             }),
           },
           {
@@ -393,7 +402,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                     css: SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
                     componentName: "Html",
                     open: true,
-                    props: (options: FunctionArgumentType) => ({
+                    props: (options: RoleFormFunctionArgumentType) => ({
                       style: {
                         "z-index": options.zIndex + 1,
                       },
@@ -402,9 +411,7 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                         createFocusTrap({
                           element: options.ref,
                           enabled: () =>
-                            (
-                              options.contextData.modalState as ModalStateStore
-                            )[0]?.showModal,
+                            options.contextData.modalState[0]?.showModal,
                           observeChanges: true,
                           restoreFocus: true,
                         });
@@ -414,9 +421,8 @@ export const getRoleFormSchema = (onSuccess: () => void) => {
                 ],
                 componentName: "Html",
                 as: "portal",
-                props: (options: FunctionArgumentType) => ({
-                  hide: !(options.contextData.modalState as ModalStateStore)[0]
-                    ?.showModal,
+                props: (options: RoleFormFunctionArgumentType) => ({
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],

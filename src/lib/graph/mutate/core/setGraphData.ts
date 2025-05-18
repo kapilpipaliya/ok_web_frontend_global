@@ -7,10 +7,9 @@ import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import { broadcastToAllChannels } from "~/lib/graph/mutate/core/channel/broadcastToAllChannels";
 import type { Id } from "~/lib/graph/type/id";
 import type { Edge } from "~/lib/graph/type/edge";
-import type { EdgeMap } from "~/lib/graph/type/edgeMap";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import type { VertexMap } from "~/lib/graph/type/vertexMap";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import type { GraphData } from "~/lib/types/GraphData";
 
 export interface UpdateOptions {
   skipExisting?: boolean;
@@ -21,14 +20,7 @@ export interface UpdateOptions {
 export function setGraphData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
-  args: {
-    deleted_edges?: string[];
-    deleted_vertexes?: string[];
-    edges: EdgeMap;
-    timestamp?: number;
-    vertexes: VertexMap;
-    vertexLabelIdMap?: { [key: string]: Id[] };
-  },
+  args: GraphData,
   options: UpdateOptions = {},
 ) {
   batch(() => {

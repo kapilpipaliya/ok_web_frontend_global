@@ -10,6 +10,14 @@ type SaveState = {
   isLoading: boolean;
 };
 
+// Define a type for function arguments with saveState in contextData
+interface SaveStateFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    saveState: [SaveState, SetStoreFunction<SaveState>];
+    [key: string]: unknown;
+  };
+}
+
 import { useToast } from "~/components/styled/modal/Toast";
 import { FilePickerModal } from "~/components/file_picker/FilePickerModal";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
@@ -140,13 +148,7 @@ export function ProfileImageSettings() {
                 as: "button",
                 css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                 componentName: "Html",
-                props: (
-                  options: FunctionArgumentType & {
-                    contextData: {
-                      saveState: [SaveState, SetStoreFunction<SaveState>];
-                    };
-                  },
-                ) => ({
+                props: (options: SaveStateFunctionArgumentType) => ({
                   disabled: options.contextData.saveState[0]?.isLoading,
                   onClick: async () => {
                     const selectedFile = profileImageVertex()[0];
@@ -167,7 +169,7 @@ export function ProfileImageSettings() {
                       );
 
                       if (response.error) {
-                        showErrorToast(response.error);
+                        showErrorToast(response.error as string);
                       } else {
                         showSuccessToast("Profile image updated successfully");
                       }
@@ -187,7 +189,7 @@ export function ProfileImageSettings() {
             name: "saveState",
 
             props: () => ({
-              data: createStore({
+              data: createStore<SaveState>({
                 isLoading: false,
               }),
             }),
@@ -195,13 +197,7 @@ export function ProfileImageSettings() {
         ],
         css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
         componentName: "Html",
-        props: (
-          options: FunctionArgumentType & {
-            contextData: {
-              saveState: [SaveState, SetStoreFunction<SaveState>];
-            };
-          },
-        ) => ({
+        props: (options: SaveStateFunctionArgumentType) => ({
           onUnmount: () => {
             options.revertTransactionUpToIndex(options.txnId, -1);
           },

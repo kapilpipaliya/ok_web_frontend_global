@@ -29,10 +29,13 @@ type SaveState = {
   isSuccess: boolean;
 };
 
-// Define a type for the save state context data
-type SaveStateContextData = {
-  saveState: [SaveState, SetStoreFunction<SaveState>];
-};
+// Define a type for function arguments with saveState in contextData
+interface SaveStateFunctionArgumentType extends FunctionArgumentType {
+  contextData: {
+    saveState: [SaveState, SetStoreFunction<SaveState>];
+    [key: string]: unknown;
+  };
+}
 
 export function ProfileSettings() {
   const [graph, setGraph] = useGraph();
@@ -284,8 +287,8 @@ align-items: flex-start;
           {
             as: "button",
             componentName: "Html",
-            props: (options: FunctionArgumentType) => {
-              const { saveState } = options.contextData as SaveStateContextData;
+            props: (options: SaveStateFunctionArgumentType) => {
+              const { saveState } = options.contextData;
               return {
                 disabled: saveState[0]?.isLoading,
                 onClick: async () => {
@@ -294,19 +297,19 @@ align-items: flex-start;
 
                   // Form validation and submission
                   const user = graph.vertexes[formDataId];
-                  if (!user.P.username.trim) {
+                  if (!user.P.username?.trim()) {
                     showErrorToast("Please enter username");
                     saveState[1]("isLoading", false);
                     return;
                   }
 
-                  if (!user.P.email.trim) {
+                  if (!user.P.email?.trim()) {
                     showErrorToast("Please enter email");
                     saveState[1]("isLoading", false);
                     return;
                   }
 
-                  if (validateEmail(user.P.email)) {
+                  if (validateEmail(user.P.email as string)) {
                     showErrorToast("Please enter a valid email");
                     saveState[1]("isLoading", false);
                     return;
@@ -349,9 +352,8 @@ font-size: 20px;
 margin-right: 8px;
 `,
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => {
-                  const { saveState } =
-                    options.contextData as SaveStateContextData;
+                props: (options: SaveStateFunctionArgumentType) => {
+                  const { saveState } = options.contextData;
                   return {
                     hide: !saveState[0]?.isSuccess,
                   };
@@ -360,9 +362,8 @@ margin-right: 8px;
               {
                 as: "span",
                 componentName: "Html",
-                props: (options: FunctionArgumentType) => {
-                  const { saveState } =
-                    options.contextData as SaveStateContextData;
+                props: (options: SaveStateFunctionArgumentType) => {
+                  const { saveState } = options.contextData;
                   return {
                     text: saveState[0]?.isLoading
                       ? "Saving..."

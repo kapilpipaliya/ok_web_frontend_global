@@ -201,7 +201,7 @@ export const getEmailAuditFormSchema = (onSuccess: () => void) => {
       });
 
       if (response.error) {
-        showErrorToast(response.error);
+        showErrorToast((response.error as string) || "An error occurred");
       } else {
         // options.removeTxnIdAndCreateNew(options.txnId);
         // as we are creating new transaction, we need to revert to previous state

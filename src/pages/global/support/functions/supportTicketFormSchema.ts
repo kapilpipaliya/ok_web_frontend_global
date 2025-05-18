@@ -1,10 +1,33 @@
 import animateScrollTo from "animated-scroll-to";
 import { createStore } from "solid-js/store";
 
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import type { FunctionArgumentType as BaseArgType } from "~/components/form/type/FieldSchemaType";
 import type { MutationResult } from "~/cypher/types/MutationArgs";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
-import type { ModalStateStore } from "~/lib/types/ModalStateStore";
+import type { GraphData } from "~/lib/types/GraphData";
+import type { Vertex } from "~/lib/graph/type/vertex";
+
+type ModalStateStore = ReturnType<
+  typeof createStore<{
+    isLoading: boolean;
+    showModal: boolean;
+  }>
+>;
+
+type ReplyStateStore = ReturnType<
+  typeof createStore<{
+    replyText: string;
+  }>
+>;
+
+interface FunctionArgumentType extends BaseArgType {
+  contextData: {
+    modalState: ModalStateStore;
+    replyState?: ReplyStateStore;
+    history?: Vertex;
+    [key: string]: unknown;
+  };
+}
 
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
@@ -16,9 +39,8 @@ import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
-import { loadingIconSchema } from "../../../../lib/schema/loadingIconSchema";
+import { loadingIconSchema } from "~/lib/schema/loadingIconSchema";
 import { css } from "~/lib/styles";
-import type { Vertex } from "~/lib/graph/type/vertex";
 
 export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   const actionButtonsSchema = {
@@ -29,11 +51,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         css: SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          disabled: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading,
+          disabled: options.contextData.modalState[0]?.isLoading,
           onClick: () => handleSave(options),
-          text: (options.contextData.modalState as ModalStateStore)[0]
-            ?.isLoading
+          text: options.contextData.modalState[0]?.isLoading
             ? "Saving..."
             : "Save",
         }),
@@ -45,8 +65,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
@@ -109,7 +128,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
                                       text:
-                                        options.contextData.history?.P.email ||
+                                        options.contextData.history?.P?.email ||
                                         "Anonymous",
                                     }),
                                   },
@@ -117,8 +136,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                                     as: "div",
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
-                                      text: options.contextData.history?.P
-                                        .message,
+                                      text:
+                                        options.contextData.history?.P
+                                          ?.message || "",
                                     }),
                                   },
                                   {
@@ -129,10 +149,13 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
 `,
                                     componentName: "Html",
                                     props: (options: FunctionArgumentType) => ({
-                                      text: new Date(
-                                        options.contextData.history?.P
-                                          .createdAt,
-                                      ).toLocaleString(),
+                                      text: options.contextData.history?.P
+                                        ?.createdAt
+                                        ? new Date(
+                                            options.contextData.history.P
+                                              .createdAt,
+                                          ).toLocaleString()
+                                        : "",
                                     }),
                                   },
                                 ],
@@ -215,13 +238,14 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         placeholder: "Type your reply here...",
                         props: (options: FunctionArgumentType) => ({
                           onInput: (e: { target: HTMLTextAreaElement }) => {
-                            options.contextData.replyState[1](
+                            options.contextData.replyState?.[1]?.(
                               "replyText",
                               e.target.value,
                             );
                           },
                           value:
-                            options.contextData.replyState[0]?.replyText || "",
+                            options.contextData.replyState?.[0]?.replyText ||
+                            "",
                         }),
                       },
                       {
@@ -236,17 +260,17 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         componentName: "Html",
                         props: (options: FunctionArgumentType) => ({
                           disabled:
-                            !options.contextData.replyState[0]?.replyText?.trim(),
+                            !options.contextData.replyState?.[0]?.replyText?.trim(),
                           onClick: async () => {
+                            if (!options.contextData.replyState?.[0]) return;
                             const replyText =
-                              options.contextData.replyState[0]?.replyText;
+                              options.contextData.replyState[0].replyText;
                             if (!replyText?.trim()) {
                               return;
                             }
 
                             try {
-                              const modalState = options.contextData
-                                .modalState as ModalStateStore;
+                              const modalState = options.contextData.modalState;
                               modalState[1]("isLoading", true);
 
                               // Add reply to the ticket
@@ -259,18 +283,21 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                               );
 
                               if (response.error) {
-                                throw new Error(response.error);
+                                throw new Error(response.error as string);
                               }
 
                               // Update the graph with the new data
-                              setGraphData(
-                                options.graph,
-                                options.setGraph,
-                                response.graph,
-                                { skipExisting: true },
-                              );
+                              if (response.graph) {
+                                setGraphData(
+                                  options.graph,
+                                  options.setGraph,
+                                  response.graph as GraphData,
+                                  { skipExisting: true },
+                                );
+                              }
 
                               // Clear the input field
+
                               options.contextData.replyState[1](
                                 "replyText",
                                 "",
@@ -295,8 +322,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                             } catch (error) {
                               options.showErrorToast((error as Error).message);
                             } finally {
-                              const modalState = options.contextData
-                                .modalState as ModalStateStore;
+                              const modalState = options.contextData.modalState;
                               modalState[1]("isLoading", false);
                             }
                           },
@@ -396,21 +422,21 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
       return {
         onMount: async () => {
           try {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("isLoading", true);
             const response = await postAPI(API.support.getTicketUrl, {
               id: options.data?.id,
             });
             if (response.error) {
-              throw new Error(response.error);
+              throw new Error(response.error as string);
             }
-            options.setGraphData(0, response.graph, {});
+            if (response.graph) {
+              options.setGraphData(0, response.graph as GraphData, {});
+            }
           } catch (error) {
             options.showErrorToast((error as Error).message);
           } finally {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("isLoading", false);
             // Scroll chat history to the bottom on mount
             setTimeout(() => {
@@ -434,7 +460,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
 
   const handleSave = async (options: FunctionArgumentType) => {
     try {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
       const data = commitTxn(options.txnId, options.graph);
       if (!data) {
@@ -453,17 +479,17 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         onMutatDataGet(
           options.graph,
           options.setGraph,
-          response as MutationResult,
+          response as unknown as MutationResult,
         );
         options.showSuccessToast("Support ticket updated successfully");
-        const modalState = options.contextData.modalState as ModalStateStore;
+        const modalState = options.contextData.modalState;
         modalState[1]("showModal", false);
         onSuccess();
       }
     } catch (error) {
       options.showErrorToast((error as Error).message);
     } finally {
-      const modalState = options.contextData.modalState as ModalStateStore;
+      const modalState = options.contextData.modalState;
       modalState[1]("isLoading", false);
     }
   };
@@ -499,8 +525,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
         componentName: "Html",
         props: (options: FunctionArgumentType) => ({
           onClick: () => {
-            const modalState = options.contextData
-              .modalState as ModalStateStore;
+            const modalState = options.contextData.modalState;
             modalState[1]("showModal", false);
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
@@ -530,8 +555,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             css: SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
-              hide: !(options.contextData.modalState as ModalStateStore)[0]
-                ?.showModal,
+              hide: !options.contextData.modalState[0]?.showModal,
             }),
           },
           {
@@ -575,8 +599,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                 componentName: "Html",
                 as: "portal",
                 props: (options: FunctionArgumentType) => ({
-                  hide: !(options.contextData.modalState as ModalStateStore)[0]
-                    ?.showModal,
+                  hide: !options.contextData.modalState[0]?.showModal,
                 }),
               },
             ],
