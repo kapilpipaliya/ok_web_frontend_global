@@ -92,8 +92,9 @@ const colorBoxCss = (color: string | undefined, name: string) => {
   }
 
   return css`
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
     background-color: ${color};
     border-radius: 0.25rem;
     display: flex;
@@ -102,8 +103,8 @@ const colorBoxCss = (color: string | undefined, name: string) => {
     color: ${textColor};
     font-weight: bold;
     position: relative;
-    overflow: visible;
     font-size: 0.85rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
   `;
 };
 
@@ -192,7 +193,7 @@ export function ThemeExample() {
                 {/* First row: 0-100 */}
                 <As
                   as="div"
-                  css={css`display: flex; gap: 1.25rem; overflow-x: auto; padding-bottom: 0.5rem; min-width: 100%;`}
+                  css={css`display: flex; gap: 0.5rem; overflow-x: auto; white-space: nowrap; scrollbar-width: thin;`}
                 >
                   {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((shade) => {
                     const colorKey = `${colorName}_${shade}`;
@@ -212,7 +213,7 @@ export function ThemeExample() {
                 {/* Second row: 200-1000 */}
                 <As
                   as="div"
-                  css={css`display: flex; gap: 1.25rem; overflow-x: auto; padding-bottom: 0.5rem; min-width: 100%;`}
+                  css={css`display: flex; gap: 0.5rem; overflow-x: auto; white-space: nowrap; scrollbar-width: thin;`}
                 >
                   {[200, 300, 400, 500, 600, 700, 800, 900, 1000].map(
                     (shade) => {
