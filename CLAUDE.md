@@ -117,10 +117,85 @@ The application implements a role-based access control system:
 - `/src` - Main application code
   - `/components` - Reusable UI components
   - `/cypher` - Neo4j database operations
+    - `/constants` - Reserved keywords for Cypher queries
+    - `/conversion` - Utilities for converting between Neo4j and JSON formats
+    - `/core` - Core Neo4j connection handling and driver setup
+    - `/get` - Data retrieval functions
+    - `/mutate` - Database mutation operations
+    - `/permissions` - Permission checking and management
+    - `/queries` - Query construction and evaluation
+    - `/session` - Session management for subdomains
+    - `/types` - Type definitions
   - `/features` - Feature-specific implementations
+    - `/file_manager` - File management system
+    - `/grid` - Data grid components
+    - `/page_attr_render` - Page attribute rendering
+    - `/page_designer` - Page design interface
   - `/lib` - Utility functions and core libraries
+    - `/api` - API communication
+    - `/auth` - Authentication utilities
+    - `/context` - Context providers
+    - `/data_structure` - Data structure helpers
+    - `/graph` - Graph data handling
+      - `/context` - Graph context providers
+        - `GlobalProperties.ts` - Global property definitions
+        - `GraphContext.ts` - Graph context implementation
+        - `GraphInterface.ts` - Interface definitions
+        - `UseGraph.ts` - Graph hook utilities
+      - `/get` - Data retrieval
+        - `/sync` - Synchronous data retrieval
+          - `/auth` - Authentication-related queries
+          - `/company` - Company data queries
+          - `/edge` - Edge retrieval functions
+          - `/entity` - Entity management functions
+          - `/expression` - Expression evaluation
+          - `/format` - Formatting utilities
+          - `/store` - Global store access
+          - `/theme` - Theme-related queries
+          - `/user` - User data retrieval
+      - `/import` - Data import
+        - `importGraphStructure.ts` - Graph data import
+      - `/mutate` - Graph mutation operations
+        - `/core` - Core mutation functions
+          - `/channel` - Broadcast channel handling
+          - `/edge` - Edge mutation operations
+          - `/vertex` - Vertex mutation operations
+        - `/data` - Data mutation handling
+        - `/form` - Form-related mutations
+        - `/selection` - Selection value mutations
+        - `/user` - User data mutations
+        - `/vertex` - Vertex-specific operations
+      - `/transaction` - Transaction management
+        - `/core` - Core transaction functions
+        - `/history` - Undo/redo functionality
+        - `/revert` - Transaction reverting
+        - `/steps` - Transaction step management
+        - `/types` - Transaction type definitions
+        - `/value` - Transaction value utilities
+      - `/type` - Graph type definitions
+        - `edge.ts` - Edge type definitions
+        - `edgeMap.ts` - Edge mapping types
+        - `vertex.ts` - Vertex type definitions
+        - `vertexMap.ts` - Vertex mapping types
+    - `/meta` - Metadata types and utilities
+    - `/permissions` - Permission management
+    - `/styles` - Styling system
+    - `/validation` - Validation functions
   - `/pages` - Page components
+    - `/admin_dashboard` - Admin dashboard components
+    - `/auth` - Authentication pages
+    - `/global` - Global settings pages
+    - `/subdomain` - Subdomain management
+    - `/theme_menu` - Theme selection components
+    - `/user` - User settings
   - `/routes` - Route definitions (file-based routing)
+    - `/admin` - Admin routes
+    - `/api` - API endpoints
+    - `/auth` - Authentication routes
+    - `/internal` - Internal routes
+    - `/support` - Support routes
+    - `/system` - System routes
+    - `/view` - View routes
 - `/docs` - Documentation files
 - `/scripts` - Utility scripts
 - `/public` - Static assets
