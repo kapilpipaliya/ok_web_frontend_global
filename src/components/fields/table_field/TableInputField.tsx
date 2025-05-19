@@ -12,7 +12,6 @@ import {
   Switch,
 } from "solid-js";
 
-import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { useFormContext } from "~/components/form/context/FormContext";
 import { AddNewButton } from "~/features/grid/header/AddNewButton";
@@ -39,18 +38,16 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function TableInputField(
-  props: Readonly<
-    GenericComponentProps & {
-      addNewButtonText?: string;
-      data?: Vertex;
-      hideAddButton?: boolean;
-      isNoPermissionCheck?: boolean;
-      isRealTime?: boolean;
-      isTableInside?: boolean;
-      meta?: Vertex;
-      onAddRef?: (addRowFn: () => void) => void;
-    }
-  >,
+  props: Readonly<{
+    addNewButtonText?: string;
+    data?: Vertex;
+    hideAddButton?: boolean;
+    isNoPermissionCheck?: boolean;
+    isRealTime?: boolean;
+    isTableInside?: boolean;
+    meta?: Vertex;
+    onAddRef?: (addRowFn: () => void) => void;
+  }>,
 ) {
   const [graph, setGraph] = useGraph();
   const formId = useFormContext();

@@ -14,7 +14,6 @@ import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { saveUndoPoint } from "~/lib/graph/transaction/steps/saveUndoPoint";
 
 import type { FormStoreObject } from "../form/context/FormContext";
-import type { GenericComponentProps } from "./type/FieldType";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -49,16 +48,15 @@ export function replacePlaceholderWithUrl(
 
 // HtmlField
 export function HtmlField(
-  props: JSX.HTMLAttributes<HTMLDivElement> &
-    Readonly<GenericComponentProps> & {
-      as?: string;
-      childrenBefore?: JSX.Element;
-      class?: string;
-      longPressDuration?: number;
-      onLongPress?: (event: Event) => void;
-      src?: string;
-      text?: string;
-    },
+  props: JSX.HTMLAttributes<HTMLDivElement> & {
+    as?: string;
+    childrenBefore?: JSX.Element;
+    class?: string;
+    longPressDuration?: number;
+    onLongPress?: (event: Event) => void;
+    src?: string;
+    text?: string;
+  },
 ) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();

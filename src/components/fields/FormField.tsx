@@ -1,8 +1,6 @@
 import { createMemo, onCleanup } from "solid-js";
 import { v7 as uuidv7 } from "uuid";
 
-import type { GenericComponentProps } from "~/components/fields/type/FieldType";
-
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
@@ -27,16 +25,14 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // TODO: make this update when props.id and props.label changes
 export function FormField(
-  props: Readonly<
-    GenericComponentProps & {
-      formDataId?: string;
-      id?: string;
-      isNoPermissionCheck?: boolean;
-      // For Root Level Forms we use Parent vertex label as form key
-      label?: string;
-      submitButton?: any;
-    }
-  >,
+  props: Readonly<{
+    formDataId?: string;
+    id?: string;
+    isNoPermissionCheck?: boolean;
+    // For Root Level Forms we use Parent vertex label as form key
+    label?: string;
+    submitButton?: any;
+  }>,
 ) {
   const [graph, setGraph] = useGraph();
   const [previewStore] = usePreviewContext();

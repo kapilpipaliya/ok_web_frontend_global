@@ -9,7 +9,6 @@ import {
   Show,
 } from "solid-js";
 
-import type { GenericComponentProps } from "~/components/fields/type/FieldType";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
@@ -36,18 +35,16 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectField(
-  props: Readonly<
-    GenericComponentProps & {
-      css?: string;
-      data?: Vertex;
-      isRealTime?: boolean;
-      meta?: Vertex;
-      onChange?: (value: string) => void;
-      placeholder?: string;
-      title: string;
-      txnId?: number;
-    }
-  >,
+  props: Readonly<{
+    css?: string;
+    data?: Vertex;
+    isRealTime?: boolean;
+    meta?: Vertex;
+    onChange?: (value: string) => void;
+    placeholder?: string;
+    title: string;
+    txnId?: number;
+  }>,
 ) {
   const [graph, setGraph] = useGraph();
   const formId = useFormContext();

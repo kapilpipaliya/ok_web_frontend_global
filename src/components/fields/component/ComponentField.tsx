@@ -11,8 +11,6 @@ import {
 } from "~/features/page_designer/context/PreviewContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
-import type { GenericComponentProps } from "../type/FieldType";
-
 import { getComponentDefaultValues } from "./functions/getComponentDefaultValues";
 import {
   DataContext,
@@ -24,9 +22,7 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 
-export function ComponentField(
-  props: Readonly<GenericComponentProps & { componentId?: string }>,
-) {
+export function ComponentField(props: Readonly<{ componentId?: string }>) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];

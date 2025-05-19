@@ -1,7 +1,5 @@
 import { type Accessor, createMemo, createSignal, For, Show } from "solid-js";
 
-import type { GenericComponentProps } from "~/components/fields/type/FieldType";
-
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { IconButton } from "~/components/styled/IconButton";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
@@ -18,23 +16,21 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const SortableRow = (
-  props: Readonly<
-    GenericComponentProps & {
-      dragFromIndex: Accessor<null | number>;
-      dragToIndex: Accessor<null | number>;
-      handleDrop: (event: DragEvent) => void;
-      isNoPermissionCheck?: boolean | null;
-      isRealTime: boolean;
-      joinVertex: Vertex;
-      meta: Vertex;
-      metaInstance: Vertex;
-      rowIndex: number;
-      setDragFromIndex: (index: number) => void;
-      setDragToIndex: (index: number) => void;
-      tableColumnsTemplate: Accessor<Vertex[]>;
-      txnId: number;
-    }
-  >,
+  props: Readonly<{
+    dragFromIndex: Accessor<null | number>;
+    dragToIndex: Accessor<null | number>;
+    handleDrop: (event: DragEvent) => void;
+    isNoPermissionCheck?: boolean | null;
+    isRealTime: boolean;
+    joinVertex: Vertex;
+    meta: Vertex;
+    metaInstance: Vertex;
+    rowIndex: number;
+    setDragFromIndex: (index: number) => void;
+    setDragToIndex: (index: number) => void;
+    tableColumnsTemplate: Accessor<Vertex[]>;
+    txnId: number;
+  }>,
 ) => {
   const [graph, setGraph] = useGraph();
   // if there is no parent FormContext, it should still work.
