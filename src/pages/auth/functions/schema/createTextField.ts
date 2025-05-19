@@ -62,7 +62,7 @@ export function createTextField(
       attributes: [
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           key,
           name: key,
           props: (options: TextFieldFunctionArgumentType) => ({

@@ -13,6 +13,7 @@ import {
   runWithOwner,
   Show,
   splitProps,
+  Suspense,
   Switch,
   untrack,
 } from "solid-js";
@@ -62,6 +63,7 @@ import { removeTxnIdAndCreateNew } from "~/components/form/functions/removeTxnId
 import { setError } from "~/components/form/functions/setError";
 import { getConfiguredPermissions } from "~/features/page_attr_render/getConfiguredPermissions";
 import { hasPermissions } from "~/features/page_attr_render/hasPermissions";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 
 export function DynamicComponent(
   props: Readonly<{
@@ -450,34 +452,27 @@ export function DynamicComponent(
       };
 
       // For Component type, merge fns from component vertex and meta
-      if (props.meta.P.componentName === "Component") {
-        const componentVertex = (
-          evalExpression("->$0Comp", {
-            graph,
-            setGraph,
-            vertexes: [props.meta],
-          }) as Vertex[]
-        )?.[0];
+      const componentVertex = findVertexByLabelAndUniqueId(
+        graph,
+        "Component",
+        "key",
+        // TODO: Fix this, this is not working.
+        props.meta.P.componentName,
+      );
 
-        return new Proxy(
-          {},
-          {
-            get(_, key: string) {
-              const metaFns = evaluateFns(props.meta.P.fns);
-              if (metaFns && key in metaFns) return metaFns[key];
+      return new Proxy(
+        {},
+        {
+          get(_, key: string) {
+            const metaFns = evaluateFns(props.meta.P.fns);
+            if (metaFns && key in metaFns) return metaFns[key];
+            if (componentVertex) {
               const componentFns = evaluateFns(componentVertex.P.fns);
               if (componentFns && key in componentFns) return componentFns[key];
-              return parentRenderContext()?.context?.fns?.[key];
-            },
+            }
+            return parentRenderContext()?.context?.fns?.[key];
           },
-        );
-      }
-
-      // For other components, just use meta fns
-      return (
-        evaluateFns(props.meta.P.fns) ??
-        parentRenderContext()?.context?.fns ??
-        {}
+        },
       );
     } catch (error) {
       console.error("Error in dynamicFns:", error);
@@ -561,15 +556,20 @@ export function DynamicComponent(
       return componentLabel;
     } catch (error) {
       console.error("Error in componentName:", error);
-      return "NotFoundComponent";
+      return ComponentField;
     }
   });
 
-  const component = createMemo(() =>
-    typeof componentName() === "function"
-      ? componentName()
-      : (componentsMap[componentName() as string] ?? ComponentField),
-  );
+  const component = createMemo(() => {
+    const name = componentName();
+    if (typeof name === "string" && name.startsWith("System")) {
+      return ComponentField;
+    }
+    return typeof name === "function"
+      ? name
+      : (componentsMap[name as string] ?? ComponentField);
+  });
+
   const isHidden = () => {
     try {
       // Check for hide property
@@ -814,7 +814,7 @@ export function DynamicComponent(
   };
 
   return (
-    <>
+    <Suspense>
       <Show when={cssStyle()}>
         <Style>{cssStyle()}</Style>
       </Show>
@@ -853,6 +853,6 @@ export function DynamicComponent(
           </Match>
         </Switch>
       </PageRenderContextProvider>
-    </>
+    </Suspense>
   );
 }

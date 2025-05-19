@@ -75,7 +75,7 @@ export const Page: IFormMetaData = {
                 flex: 1;
               `,
           ],
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           key: "title",
           // onchange: '{"new": ["key","id"]}', // TODO: Fix this, it's not working with kobalte
         }),
@@ -124,7 +124,7 @@ export const Page: IFormMetaData = {
                 flex: 1;
               `,
           ],
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           type: "textarea",
           key: "description",
         }),
@@ -136,13 +136,13 @@ export const Page: IFormMetaData = {
         //   parentLabel: "Dashboard",
         // },
         // wrapWithTitle("Public", false, {
-        //   componentName: "TextInput",
+        //   componentName: "SystemTextInput",
         //   css: [PROPERTIES.Css.CheckBoxCss],
         //   type: "checkbox",
         //   hideInGrid: true,
         //   key: "public",
         // }),
-        /*{         componentName: "TextInput",
+        /*{         componentName: "SystemTextInput",
         css: [PROPERTIES.Css.CheckBoxCss],
         type: "checkbox", key: "isRealTime" },
         {
@@ -214,7 +214,7 @@ export const variantAttributes = {
   attributes: [
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       displayName: "Variant Name",
       key: "key",
     },
@@ -235,10 +235,11 @@ date`,
         {
           displayName: "Default Value",
           key: "defValue",
+          // componentName: "SystemTextInput",
           // componentName: "::'P.type'",
           css: css`${PROPERTIES.Css.TextFieldCss}`,
           props: `return {
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               type: args.data?.P.type === "number" ? "number" : 
                    args.data?.P.type === "boolean" ? "checkbox" :
                    args.data?.P.type === "date" ? "date" : "text",
@@ -309,7 +310,7 @@ date`,
       attributes: [
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           displayName: "Property Name",
           key: "key",
         },
@@ -323,7 +324,7 @@ date`,
               vertexes: [args.data],
             });
             return {
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               type: type === "number" ? "number" : 
                    type === "boolean" ? "checkbox" :
                    type === "date" ? "date" : "text",

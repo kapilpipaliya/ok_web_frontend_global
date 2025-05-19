@@ -59,7 +59,7 @@ EDIT
 FULL`,
       },
       // {
-      //   componentName: "TextInput",
+      //   componentName: "SystemTextInput",
       //   key: "scope",
       // },
     ],
@@ -86,7 +86,7 @@ export const roleFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "key",
               placeholder: "Enter role name",
               props: (options: FunctionArgumentType) => ({
@@ -112,7 +112,7 @@ export const roleFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "description",
               placeholder: "Enter role description",
             },

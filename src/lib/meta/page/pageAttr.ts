@@ -17,7 +17,7 @@ export const pageAttr = [
     key: "data",
   },
   {
-    componentName: "TextInput",
+    componentName: "SystemTextInput",
     displayName: "ID",
     key: "key",
   },
@@ -91,7 +91,7 @@ EDIT
 FULL`,
       },
       // {
-      //   componentName: "TextInput",
+      //   componentName: "SystemTextInput",
       //   key: "scope",
       // },
     ],

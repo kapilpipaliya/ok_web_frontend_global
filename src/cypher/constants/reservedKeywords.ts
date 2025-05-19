@@ -65,7 +65,17 @@ export const reservedKeywords = {
     "REQUIRE",
     "SCALAR",
   ],
-  added: ["key", "id", "type", "label", "Form"],
+  added: [
+    "key",
+    "id",
+    "type",
+    "label",
+    "Form",
+    "Component",
+    "Html",
+    "Data",
+    "Slot",
+  ],
 };
 
 export function isReservedKeyword(key: string) {

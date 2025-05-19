@@ -151,7 +151,7 @@ export function SignupForm() {
                 attributes: [
                   {
                     css: PROPERTIES.Css.TextFieldCss,
-                    componentName: "TextInput",
+                    componentName: "SystemTextInput",
                     key: "password",
                     props: (options: SignupFormFunctionArgumentType) => ({
                       onInput: (e: Event) => {
@@ -220,7 +220,7 @@ export function SignupForm() {
                 attributes: [
                   {
                     css: PROPERTIES.Css.CheckBoxCss,
-                    componentName: "TextInput",
+                    componentName: "SystemTextInput",
                     key: "termsAgreement",
                     props: (options: FunctionArgumentType) => ({
                       onInput: (e: Event) => {

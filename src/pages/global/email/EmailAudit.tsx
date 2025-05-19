@@ -15,32 +15,32 @@ export function EmailAudit() {
   const EmailAuditSchema = {
     attributes: [
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "From",
         key: "from",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "To",
         key: "to",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Subject",
         key: "subject",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Status",
         key: "status",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Sent At",
         key: "sentAt",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Message ID",
         key: "messageId",
       },

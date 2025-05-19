@@ -31,25 +31,24 @@ export function ComponentField(props: Readonly<{}>) {
 
   const meta = () => parentRenderContext()?.context.meta;
   const data = () => parentRenderContext()?.context.data as Vertex | undefined;
+  const componentName = () => parentRenderContext()!.context.componentName;
 
   const getCompVertex = createMemo(() =>
     meta()
-      ? findVertexByLabelAndUniqueId(
-          graph,
-          "Component",
-          "key",
-          meta()!.P.componentName,
-        )
+      ? findVertexByLabelAndUniqueId(graph, "Component", "key", componentName())
       : undefined,
   );
 
   const componentData = createAsync(
     async () => {
+      if (meta()?.P?.componentName?.startsWith("System")) {
+        return {};
+      }
       const vertex = getCompVertex();
       if (vertex && getChildrenAttrs(graph, setGraph, vertex).length !== 0) {
         return {};
       }
-      return await fetchComponentData([meta()!.P.componentName]);
+      return await fetchComponentData([componentName()]);
     },
     { deferStream: true },
   );
@@ -186,7 +185,10 @@ export function ComponentField(props: Readonly<{}>) {
       });
     }
     return (
-      <Show when={getCompVertex()} fallback={<div>No Component Found!</div>}>
+      <Show
+        when={getCompVertex()}
+        fallback={<div>No Component Found: {componentName()}</div>}
+      >
         <SlotContext.Provider value={Children}>
           <ComponentWrapper />
         </SlotContext.Provider>

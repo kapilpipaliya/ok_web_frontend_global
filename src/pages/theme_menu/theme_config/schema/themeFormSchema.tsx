@@ -60,7 +60,7 @@ export const themeFormSchema = {
               validation: { required: true },
             },
             {
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               css: PROPERTIES.Css.TextFieldCss,
               key: "key",
               placeholder: "Enter theme name",

@@ -1,7 +1,7 @@
 export const Role = {
   attributes: [
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       key: "key",
     },
   ],

@@ -65,7 +65,7 @@ export function GeneralSettings() {
           },
           {
             css: PROPERTIES.Css.TextFieldCss,
-            componentName: "TextInput",
+            componentName: "SystemTextInput",
             key: "appName",
             placeholder: "Enter application name",
           },

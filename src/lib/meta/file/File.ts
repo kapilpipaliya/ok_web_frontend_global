@@ -19,7 +19,7 @@ export const File: IFormMetaData = {
   attributes: [
     // The key of the file as it was uploaded, including the file extension (e.g., document.pdf).
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       displayName: "File Name",
       key: "fileName",
     },
@@ -32,7 +32,7 @@ export const File: IFormMetaData = {
     },
     // The MIME type of the file (e.g., image/jpeg, application/pdf). This helps in identifying the file format and handling it appropriately.
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       disabled: true,
       displayName: "File Type",
       key: "fileType",
@@ -46,14 +46,14 @@ export const File: IFormMetaData = {
     },
     // Information about the user who uploaded the file, such as a user ID or username.
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       disabled: true,
       displayName: "Uploader",
       key: "uploader",
     },
     // The location of the file in your storage system, which could be a file path (for on-premises storage) or a URL (for cloud storage).
     // {
-    //   componentName: "TextInput",
+    //   componentName: "SystemTextInput",
     //   disabled: true,
     //   displayName: "File Path",
     //   key: "filePath",
@@ -61,14 +61,14 @@ export const File: IFormMetaData = {
     // A brief description or notes about the file, which can provide context or additional details.
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       type: "textarea",
       displayName: "Description",
       key: "description",
     },
     // A checksum or hash value (e.g., MD5, SHA-256) for verifying the file's integrity. This can ensure the file hasn't been altered or corrupted.
     // {
-    //   componentName: "TextInput",
+    //   componentName: "SystemTextInput",
     //   disabled: true,
     //   displayName: "Checksum",
     //   key: "checksum",
@@ -89,7 +89,7 @@ export const File: IFormMetaData = {
     },
     // A URL to a thumbnail image for visual files (e.g., images, videos). This can be used for quick previews.
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       disabled: true,
       displayName: "Thumbnail URL",
       key: "thumbnailUrl",
@@ -111,7 +111,7 @@ export const Folder: IFormMetaData = {
   attributes: [
     // The key of the directory.
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       displayName: "Directory Name",
       key: "key",
     },
@@ -124,14 +124,14 @@ export const Folder: IFormMetaData = {
     },
     // Information about the user who created the directory.
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       disabled: true,
       displayName: "Creator",
       key: "creator",
     },
     // The location of the directory in your storage system.
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       disabled: true,
       displayName: "Directory Path",
       key: "directoryPath",
@@ -139,7 +139,7 @@ export const Folder: IFormMetaData = {
     // A brief description or notes about the directory.
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       type: "textarea",
       displayName: "Description",
       key: "description",
@@ -164,14 +164,14 @@ export const FileTag: IFormMetaData = {
   attributes: [
     // The key of the tag.
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       displayName: "Tag Name",
       key: "key",
     },
     // A brief description or notes about the tag.
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       type: "textarea",
       displayName: "Description",
       key: "description",
@@ -185,7 +185,7 @@ export const FileTag: IFormMetaData = {
     },
     // Information about the user who created the tag.
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       disabled: true,
       displayName: "Creator",
       key: "creator",

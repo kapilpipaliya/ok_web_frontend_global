@@ -232,7 +232,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     attributes: [
                       {
                         css: PROPERTIES.Css.TextFieldCss + " flex-grow:1 mr:8",
-                        componentName: "TextInput",
+                        componentName: "SystemTextInput",
                         type: "textarea",
                         key: "newReply",
                         placeholder: "Type your reply here...",
@@ -399,7 +399,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 type: "textarea",
                 key: "message",
                 props: (options: FunctionArgumentType) => ({

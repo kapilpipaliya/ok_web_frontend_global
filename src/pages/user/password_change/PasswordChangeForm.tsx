@@ -153,7 +153,7 @@ function createPasswordFieldWithHint(
         attributes: [
           {
             css: PROPERTIES.Css.TextFieldCss,
-            componentName: "TextInput",
+            componentName: "SystemTextInput",
             key,
             placeholder: placeholder || `Enter ${label.toLowerCase()}`,
             props: (options: FunctionArgumentType) => ({

@@ -140,7 +140,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
           />
         )}
       </For>
-      <Show when={selectedAttr()?.P.componentName === "Html" || isHtmlIcon()}>
+      <Show when={selectedAttr()?.P.componentName !== "Data"}>
         <FunctionEditor
           keyName="css"
           label="CSS"
@@ -180,7 +180,6 @@ function clonePropAttributes(
     );
   });
 }
-
 function createVertices(
   vertexIds: ReturnType<typeof createVertexIds>,
   txnId: number,
@@ -194,7 +193,7 @@ function createVertices(
       id: vertexIds.key,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Unique Key",
         key: uniqueNameKey,
       },
@@ -212,49 +211,90 @@ function createVertices(
     },
     {
       id: vertexIds.perm,
-      P: { displayName: "Permission", key: "perm" },
+      P: {
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
+        displayName: "Permission",
+        key: "perm",
+      },
     },
     {
       id: vertexIds.calculatedValue,
       P: {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
         displayName: "Calculated Value Expr",
         key: "calculatedValue",
       },
     },
     {
       id: vertexIds.class,
-      P: { displayName: "Class", key: "class" },
+      P: {
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
+        displayName: "Class",
+        key: "class",
+      },
     },
     {
       id: vertexIds.errorClass,
-      P: { displayName: "Error Class", key: "errorClass" },
+      P: {
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
+        displayName: "Error Class",
+        key: "errorClass",
+      },
     },
     {
       id: vertexIds.defaultValue,
-      P: { displayName: "Default Value", key: "defaultValue" },
+      P: {
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
+        displayName: "Default Value",
+        key: "defaultValue",
+      },
     },
     {
       id: vertexIds.required,
-      P: { displayName: "Required Expr", key: "required" },
+      P: {
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
+        displayName: "Required Expr",
+        key: "required",
+      },
     },
     {
       id: vertexIds.hide,
-      P: { displayName: "Hidden Expr", key: "hide" },
+      P: {
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
+        displayName: "Hidden Expr",
+        key: "hide",
+      },
     },
     {
       id: vertexIds.disabled,
-      P: { displayName: "Disabled Expr", key: "disabled" },
+      P: {
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
+        displayName: "Disabled Expr",
+        key: "disabled",
+      },
     },
     {
       id: vertexIds.thankYouPage,
-      P: { displayName: "Thank You Page", key: "thankYouPage" },
+      P: {
+        componentName: "SystemTextInput",
+        css: PROPERTIES.Css.TextFieldCss,
+        displayName: "Thank You Page",
+        key: "thankYouPage",
+      },
     },
     {
       id: vertexIds.src,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Source",
         key: "src",
       },
@@ -264,7 +304,7 @@ function createVertices(
       id: vertexIds.icon,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Icon",
         key: "icon",
       },
@@ -273,7 +313,7 @@ function createVertices(
       id: vertexIds.width,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Width",
         key: "width",
         type: "number",
@@ -283,7 +323,7 @@ function createVertices(
       id: vertexIds.height,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Height",
         key: "height",
         type: "number",
@@ -293,7 +333,7 @@ function createVertices(
       id: vertexIds.layerName,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Layer Name",
         key: "layerName",
       },
@@ -302,7 +342,7 @@ function createVertices(
       id: vertexIds.text,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         type: "textarea",
         displayName: "Text",
         key: "text",
@@ -313,7 +353,7 @@ function createVertices(
       id: vertexIds.slot,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Slot Name",
         key: "slot",
       },
@@ -322,7 +362,7 @@ function createVertices(
       id: vertexIds.name,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Name",
         key: "name",
       },
@@ -330,7 +370,7 @@ function createVertices(
     {
       id: vertexIds.loop,
       P: {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         css: [PROPERTIES.Css.CheckBoxCss],
         type: "checkbox",
         displayName: "Loop",
@@ -341,7 +381,7 @@ function createVertices(
       id: vertexIds.expression,
       P: {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Expression",
         key: "expression",
       },
@@ -379,7 +419,7 @@ function getMetaVertexes(
     (isPage && selectedAttr()?.P.as === "input") ||
     selectedAttr()?.P.as === "textarea" ||
     selectedAttr()?.P.as === "select" ||
-    ["MultiSelect", "Select", "TextInput"].includes(componentName);
+    ["MultiSelect", "Select", "SystemTextInput"].includes(componentName);
   const isHtmlIcon =
     componentName === "Html" && selectedAttr()?.P.as === "icon";
   const isDataComponent = componentName === "Data";

@@ -7,7 +7,6 @@ import { DataField } from "~/components/fields/data/DataField";
 // import { RadioGroupField } from "~/components/fields/RadioGroupField";
 import { SelectField } from "~/components/fields/select/SelectField";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
-import { TextInputField } from "~/components/fields/TextInputField";
 import { ZIndex } from "~/components/fields/ZIndex";
 
 // import { ButtonField } from "../../fields/ButtonField";
@@ -30,7 +29,6 @@ export const componentsMap: Record<string, any> = {
   Select: SelectField,
   Show,
   Table: TableInputField,
-  TextInput: TextInputField,
   // Title: MetaTitle,
   Transition,
   TransitionGroup,

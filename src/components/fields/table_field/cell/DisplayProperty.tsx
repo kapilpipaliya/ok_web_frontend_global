@@ -83,7 +83,7 @@ export function DisplayProperty(
             // to avoid error:  ReferenceError: Cannot access 'setComponentName' before initialization
             setTimeout(() => {
               runWithOwner(outerOwner, () => {
-                setComponentName(value || "TextInput");
+                setComponentName(value || "SystemTextInput");
               });
             });
             let componentNameNew = "";
@@ -105,7 +105,7 @@ export function DisplayProperty(
               componentNameNew = value;
             }
             if (!componentNameNew) {
-              componentNameNew = "TextInput";
+              componentNameNew = "SystemTextInput";
             }
             setTimeout(() => {
               runWithOwner(outerOwner, () => {

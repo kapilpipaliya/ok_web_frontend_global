@@ -164,7 +164,7 @@ export function EmailSettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "smtpHost",
                 placeholder: "Enter SMTP host",
                 validate: (value: string, data: Record<string, unknown>) =>
@@ -191,7 +191,7 @@ export function EmailSettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "smtpPort",
                 placeholder: "Enter SMTP port",
                 type: "number",
@@ -219,7 +219,7 @@ export function EmailSettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "smtpUsername",
                 placeholder: "Enter SMTP username",
                 validate: (value: string, data: Record<string, unknown>) =>
@@ -246,7 +246,7 @@ export function EmailSettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "smtpPassword",
                 placeholder: "Enter SMTP password",
                 type: "password",
@@ -274,7 +274,7 @@ export function EmailSettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "sendGridApiKey",
                 placeholder: "Enter SendGrid API key",
                 type: "password",
@@ -302,7 +302,7 @@ export function EmailSettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "fromEmail",
                 placeholder: "Enter from email address",
                 type: "email",
@@ -334,7 +334,7 @@ export function EmailSettings() {
                 text: "Use Secure Connection",
               },
               {
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 css: [PROPERTIES.Css.CheckBoxCss],
                 type: "checkbox",
                 key: "secure",

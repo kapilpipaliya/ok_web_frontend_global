@@ -26,22 +26,22 @@ export function SupportTickets() {
   const SupportTicketSchema = {
     attributes: [
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Name",
         key: "name",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Email",
         key: "email",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Subject",
         key: "subject",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Message",
         key: "message",
       },
@@ -53,7 +53,7 @@ export function SupportTickets() {
         labelKey: "::'P.name'",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Created At",
         key: "createdAt",
       },
@@ -95,7 +95,7 @@ export function SupportTickets() {
             </div>
           );
         },
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         type: "textarea",
         displayName: "Replies",
         key: "replies",

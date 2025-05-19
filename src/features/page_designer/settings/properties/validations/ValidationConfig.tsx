@@ -15,7 +15,7 @@ interface ValidationProps {
 }
 
 export const validations = {
-  TextInputField: "required|email|minLength|maxLength|regex",
+  SystemTextInput: "required|email|minLength|maxLength|regex",
 };
 
 export type ValidateFunction = (value: string) => string | undefined;

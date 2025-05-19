@@ -41,11 +41,12 @@ type AsProps<T> = T extends keyof JSX.IntrinsicElements
  * <As as="button" onClick={handleClick} css={buttonCss}>Click me</As>
  * ```
  *
- * @example Using with custom components like TextInputField
+ * @example Using with custom components like DynamicComponent
  * ```tsx
- * // All TextInputField props are properly typed and passed through
+ * // All component props are properly typed and passed through
  * <As
- *   as={TextInputField}
+ *   as={DynamicComponent}
+ *   componentName="SystemTextInput"
  *   name="username"
  *   label="Username"
  *   onChange={(value) => console.log(value)}

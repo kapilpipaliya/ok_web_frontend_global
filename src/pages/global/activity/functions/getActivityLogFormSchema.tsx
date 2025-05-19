@@ -121,7 +121,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "action",
                 placeholder: "Enter action",
                 validation: { required: true },
@@ -142,7 +142,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "entityType",
                 placeholder: "Enter entity type",
                 validation: { required: true },
@@ -163,7 +163,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "entityId",
                 placeholder: "Enter entity ID",
                 validation: { required: true },
@@ -183,7 +183,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "user",
                 placeholder: "Enter user",
               },
@@ -202,7 +202,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "description",
                 placeholder: "Enter description",
               },

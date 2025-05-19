@@ -190,7 +190,7 @@ export const getComponentFormSchema = (
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "key",
                 placeholder: `Enter ${label().toLowerCase()} name`,
                 validation: { required: true },
@@ -210,7 +210,7 @@ export const getComponentFormSchema = (
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 type: "textarea",
                 key: "description",
                 placeholder: "Enter description",

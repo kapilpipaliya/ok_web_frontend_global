@@ -15,32 +15,32 @@ export function ActivityLog() {
   const ActivityLogSchema = {
     attributes: [
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Action",
         key: "action",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Entity Type",
         key: "entityType",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Entity ID",
         key: "entityId",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "User",
         key: "user",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Description",
         key: "description",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Created At",
         key: "createdAt",
       },

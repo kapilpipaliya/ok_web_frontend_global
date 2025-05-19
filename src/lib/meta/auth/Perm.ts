@@ -1,11 +1,11 @@
 export const Perm = {
   attributes: [
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       key: "key",
     },
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       type: "textarea",
       key: "description",
     },

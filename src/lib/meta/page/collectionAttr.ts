@@ -5,18 +5,18 @@ import { PROPERTIES } from "~/pages/settings/constants";
 
 export const collectionAttr = [
   {
-    componentName: "TextInput",
+    componentName: "SystemTextInput",
     key: "displayName",
     onchange: '{"new": ["key","id"], "edit": ["key","id"]}',
   },
   {
-    componentName: "TextInput",
+    componentName: "SystemTextInput",
     displayName: "ID",
     key: "key",
   },
   {
     css: PROPERTIES.Css.TextFieldCss,
-    componentName: "TextInput",
+    componentName: "SystemTextInput",
     type: "textarea",
     key: "definition",
   },
@@ -41,13 +41,13 @@ export const collectionAttr = [
     key: "coll",
   },
   {
-    componentName: "TextInput",
+    componentName: "SystemTextInput",
     css: [PROPERTIES.Css.CheckBoxCss],
     type: "checkbox",
     key: "required",
   },
   {
-    componentName: "TextInput",
+    componentName: "SystemTextInput",
     css: [PROPERTIES.Css.CheckBoxCss],
     type: "checkbox",
     key: "disabled",
@@ -97,7 +97,7 @@ export const collectionAttr = [
             key: "perm",
           },
           {
-            componentName: "TextInput",
+            componentName: "SystemTextInput",
             key: "scope",
             attributes: [
               TextInput

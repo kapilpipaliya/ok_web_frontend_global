@@ -5,7 +5,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
 import { PROPERTIES } from "~/pages/settings/constants";
-import { TextInputField } from "~/components/fields/TextInputField";
+import { DynamicComponent } from "~/components/form/DynamicComponent";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { css } from "~/lib/styles";
@@ -120,30 +120,32 @@ export function ComponentVariantsInput(props: {
                     </As>
                   </Match>
                   <Match when={!options() || options().length === 0}>
-                    <As
-                      as={TextInputField}
-                      css={css`
-  flex: 1;
-  padding-left: 2px;
-  padding-right: 2px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-`}
-                      onChange={(value: any) =>
-                        props.setPropertyValue(variant, value)
+                    <DynamicComponent
+                      componentName={"SystemTextInput"}
+                      data={props.dataVertex}
+                      isNoPermissionCheck={true}
+                      meta={
+                        {
+                          P: {
+                            css: css`
+                              flex: 1;
+                              padding: 1px 2px;
+                              border: 1px solid #ccc;
+                              border-radius: 4px;
+                            `,
+                            onChange: (value: any) =>
+                              props.setPropertyValue(variant, value),
+                            type:
+                              variant.P.type === "boolean"
+                                ? "checkbox"
+                                : variant.P.type === "number"
+                                  ? "number"
+                                  : variant.P.type === "date"
+                                    ? "date"
+                                    : "text",
+                          },
+                        } as unknown as Vertex
                       }
-                      type={
-                        variant.P.type === "boolean"
-                          ? "checkbox"
-                          : variant.P.type === "number"
-                            ? "number"
-                            : variant.P.type === "date"
-                              ? "date"
-                              : "text"
-                      }
-                      value={props.dataVertex.P[variant.P.key] || ""}
                     />
                   </Match>
                 </Switch>

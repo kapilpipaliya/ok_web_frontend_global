@@ -39,7 +39,7 @@ const folderFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "key",
               placeholder: "Enter folder name",
               validation: { required: true },
@@ -59,7 +59,7 @@ const folderFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               type: "textarea",
               key: "description",
               placeholder: "Enter description",

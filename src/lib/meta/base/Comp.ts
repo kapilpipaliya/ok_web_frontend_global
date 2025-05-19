@@ -45,11 +45,11 @@ export const Comp: IFormMetaData = {
       parentLabel: "CompCategory",
     },
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       key: "key",
     },
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       key: "label",
     },
     {
@@ -72,14 +72,14 @@ export const Comp: IFormMetaData = {
       parentLabel: "DataType",
     },
     {
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       css: [PROPERTIES.Css.CheckBoxCss],
       type: "checkbox",
       displayName: "Children",
       key: "child",
     },
     // {
-    //   componentName: "TextInput",
+    //   componentName: "SystemTextInput",
     //   css: [PROPERTIES.Css.CheckBoxCss],
     //   type: "checkbox",
     //   displayName: "Hidden",
@@ -87,7 +87,7 @@ export const Comp: IFormMetaData = {
     // },
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       type: "textarea",
       key: "description",
     },
@@ -96,15 +96,15 @@ export const Comp: IFormMetaData = {
     {
       attributes: [
         {
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           key: "key",
         },
         {
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           key: "type",
         },
         {
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           key: "default",
         },
         // {
@@ -155,7 +155,7 @@ export const Comp: IFormMetaData = {
         // },
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           type: "textarea",
           key: "description",
           // autoResizeEnabled: true,
@@ -182,16 +182,16 @@ export const Comp: IFormMetaData = {
     {
       attributes: [
         {
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           key: "key",
         },
         {
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           key: "label",
         },
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           type: "textarea",
           key: "description",
 

@@ -82,7 +82,7 @@ export function CompanySettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "companyName",
                 placeholder: "Enter company name",
                 validate: (value: string) => validateRequired(value),
@@ -103,7 +103,7 @@ export function CompanySettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 type: "textarea",
                 key: "address",
                 placeholder: "Enter company address",
@@ -124,7 +124,7 @@ export function CompanySettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "contactEmail",
                 placeholder: "Enter contact email",
                 type: "email",
@@ -147,7 +147,7 @@ export function CompanySettings() {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "phone",
                 placeholder: "Enter phone number",
               },

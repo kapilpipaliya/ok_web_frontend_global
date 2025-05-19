@@ -45,7 +45,7 @@ FormMetaData.Page.attributes.push({
   attributes: [
     {
       // componentName: "MultiSelect", // MultiSelect also supported
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       css: PROPERTIES.Css.TextFieldCss,
       key: "key",
     },

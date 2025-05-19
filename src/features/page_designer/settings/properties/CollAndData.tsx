@@ -177,7 +177,7 @@ function createFieldAttributes(
     },
     {
       css: PROPERTIES.Css.TextFieldCss,
-      componentName: "TextInput",
+      componentName: "SystemTextInput",
       key: "expression",
     },
   ];

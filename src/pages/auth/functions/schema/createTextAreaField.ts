@@ -29,7 +29,7 @@ export function createTextAreaField(
       attributes: [
         {
           css: PROPERTIES.Css.TextFieldCss,
-          componentName: "TextInput",
+          componentName: "SystemTextInput",
           type: "textarea",
           key,
           props: (options: FunctionArgumentType) => ({

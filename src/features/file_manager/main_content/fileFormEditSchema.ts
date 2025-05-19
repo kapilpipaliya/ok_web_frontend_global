@@ -35,7 +35,7 @@ const editFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "fileName",
               placeholder: "Enter name",
               validation: { required: true },
@@ -55,7 +55,7 @@ const editFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               type: "textarea",
               key: "description",
               placeholder: "Enter description",

@@ -244,7 +244,7 @@ align-items: flex-start;
       },
       {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         key: "username",
         placeholder: "Username",
         validation: { required: true },
@@ -266,7 +266,7 @@ align-items: flex-start;
       },
       {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         key: "email",
         placeholder: "Email Address",
         type: "email",

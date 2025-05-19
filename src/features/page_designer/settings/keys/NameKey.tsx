@@ -45,7 +45,7 @@ export function NameKey() {
 `}
       >
         <DynamicComponent
-          componentName={"TextInput"}
+          componentName={"SystemTextInput"}
           data={
             formStoreVertex()?.P.formDataId
               ? graph.vertexes[formStoreVertex()?.P.formDataId]
@@ -60,6 +60,7 @@ export function NameKey() {
                 {
                   key: "nameKey",
                   css: PROPERTIES.Css.TextFieldCss,
+                  componentName: "SystemTextInput",
                 } as FieldAttribute,
                 graph,
                 setGraph,

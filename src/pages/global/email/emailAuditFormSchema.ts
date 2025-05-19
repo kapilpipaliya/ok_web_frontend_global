@@ -40,7 +40,7 @@ export const emailAuditFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "subject",
               placeholder: "Enter email subject",
               validation: {
@@ -68,7 +68,7 @@ export const emailAuditFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "recipients",
               placeholder: "Enter recipients",
               validation: {

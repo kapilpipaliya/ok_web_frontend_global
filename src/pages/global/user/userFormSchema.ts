@@ -44,7 +44,7 @@ export const userFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "email",
               placeholder: "Enter email",
               validation: {
@@ -67,7 +67,7 @@ export const userFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "name",
               placeholder: "Enter name",
               validation: {
@@ -97,7 +97,7 @@ export const userFormSchema = {
             },
             {
               css: PROPERTIES.Css.TextFieldCss,
-              componentName: "TextInput",
+              componentName: "SystemTextInput",
               key: "username",
               placeholder: "Enter username",
               validation: {

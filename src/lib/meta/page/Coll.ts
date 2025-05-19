@@ -10,12 +10,12 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
   return {
     attributes: [
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         key: "title",
         // onchange: '{"new": ["key","id"]}', // TODO: fix now its giving error Error: Failed to execute 'addEventListener' on 'EventTarget': parameter 2 is not of type 'Object'.
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         key: "key",
         validationRules: [
           {
@@ -68,26 +68,26 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
       },
       {
         css: PROPERTIES.Css.TextFieldCss,
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         type: "textarea",
         key: "description",
       },
-      // {         componentName: "TextInput",
+      // {         componentName: "SystemTextInput",
       // css: [PROPERTIES.Css.CheckBoxCss],
       // type: "checkbox", key: "public" },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         css: [PROPERTIES.Css.CheckBoxCss],
         type: "checkbox",
         key: "isInlineEditable",
       },
-      // { key: "supportCustomFields",         componentName: "TextInput",
+      // { key: "supportCustomFields",         componentName: "SystemTextInput",
       //   css: [PROPERTIES.Css.CheckBoxCss],
       //   type: "checkbox", },
-      // { key: "searchOnly",         componentName: "TextInput",
+      // { key: "searchOnly",         componentName: "SystemTextInput",
       //   css: [PROPERTIES.Css.CheckBoxCss],
       //   type: "checkbox", },
-      // { key: "supportDeletedRecordSearch",         componentName: "TextInput",
+      // { key: "supportDeletedRecordSearch",         componentName: "SystemTextInput",
       //   css: [PROPERTIES.Css.CheckBoxCss],
       //   type: "checkbox", },
       {
@@ -123,11 +123,11 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
       {
         attributes: [
           {
-            componentName: "TextInput",
+            componentName: "SystemTextInput",
             key: "key",
           },
           // {
-          //   componentName: "TextInput",
+          //   componentName: "SystemTextInput",
           //   key: "label",
           // },
           {
@@ -148,7 +148,7 @@ export const Coll: (key: string) => IFormMetaData = (key) => {
                 // collection: "g:'DataType'",
               },
               // {
-              //   componentName: "TextInput",
+              //   componentName: "SystemTextInput",
               //   displayName: "Value",
               //   key: "leftValue",
               // },
@@ -166,7 +166,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
                 // collection: "g:'DataType'",
               },
               /*{
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 displayName: "Value",
                 key: "rightValue",
               },
@@ -238,14 +238,14 @@ ${Object.keys(binopsInitial).join("\n")}`,
                       },
                       {
                         key: "displayName",
-                        componentName: "TextInput",
+                        componentName: "SystemTextInput",
                         
                           onchange: '{"new": ["key","id"], "edit": ["key","id"]}',
                         
                       },
                       {
                         key: "key",
-                        componentName: "TextInput",
+                        componentName: "SystemTextInput",
                       },
                       {
                         key: "tab",
@@ -294,11 +294,11 @@ ${Object.keys(binopsInitial).join("\n")}`,
             key: "coll",
           },
           {
-            componentName: "TextInput",
+            componentName: "SystemTextInput",
             key: "displayName",
           },
           {
-            componentName: "TextInput",
+            componentName: "SystemTextInput",
             key: "fieldDefaults",
           },
           {
@@ -329,7 +329,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
       {
         attributes: [
           // {
-          //   componentName: "TextInput",
+          //   componentName: "SystemTextInput",
           //   key: "key",
           //   validation: { required: true },
           // },
@@ -360,7 +360,7 @@ ${Object.keys(binopsInitial).join("\n")}`,
           },
           // {
           //   css: PROPERTIES.Css.TextFieldCss,
-          //   componentName: "TextInput",
+          //   componentName: "SystemTextInput",
           //   key: "scope",
           // },
         ],

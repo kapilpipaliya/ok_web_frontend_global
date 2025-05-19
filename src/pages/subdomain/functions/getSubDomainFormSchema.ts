@@ -109,7 +109,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "key",
                 placeholder: "Enter Project / SubDomain name",
                 props: (options: SubDomainFunctionArgumentType) => ({
@@ -134,7 +134,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "domain",
                 placeholder: "Enter domain (Optional) eg: example.com",
               },
@@ -153,7 +153,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
               },
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 type: "textarea",
                 key: "description",
                 placeholder: "Enter description (Optional)",

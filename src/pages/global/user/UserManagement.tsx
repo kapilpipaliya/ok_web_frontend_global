@@ -19,17 +19,17 @@ export function UserManagement() {
   const UserSchema = {
     attributes: [
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Username",
         key: "username",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Email",
         key: "email",
       },
       {
-        componentName: "TextInput",
+        componentName: "SystemTextInput",
         displayName: "Name",
         key: "name",
       },

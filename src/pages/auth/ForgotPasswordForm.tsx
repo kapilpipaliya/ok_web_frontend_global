@@ -354,7 +354,7 @@ export function ForgotPasswordForm() {
             attributes: [
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "newPassword",
                 props: (options: ForgotPasswordFunctionArgumentType) => ({
                   onInput: (e: Event) => {
@@ -422,7 +422,7 @@ export function ForgotPasswordForm() {
             attributes: [
               {
                 css: PROPERTIES.Css.TextFieldCss,
-                componentName: "TextInput",
+                componentName: "SystemTextInput",
                 key: "confirmPassword",
                 props: (options: ForgotPasswordFunctionArgumentType) => ({
                   onInput: (e: Event) => {
