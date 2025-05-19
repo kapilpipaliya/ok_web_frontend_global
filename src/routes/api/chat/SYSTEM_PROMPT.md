@@ -169,7 +169,7 @@ To make a Component with variants (if asked):
 
 ### Attr Vertex
 1. "Attr" vertex join with Component using "Attr" edge
-2. Read Component variant value from the Item tree using 'props' property in the function body with 'args.contextData.props["key"]' property
+2. Read Component props by using 'props' property in the function body with 'args.contextData.props["key"]' property
 3. When using component in the Item tree, in the direct children of the component use 'Slot' key to specify the slot name. If not specified, it will render all unnamed slots.
 
 ## Important Guidelines

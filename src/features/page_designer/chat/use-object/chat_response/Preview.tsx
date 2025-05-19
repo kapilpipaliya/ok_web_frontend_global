@@ -3,8 +3,6 @@ import { v7 as uuidv7 } from "uuid";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { evalExpression } from "~/lib/expression_eval";
-import { generateNewVertexId } from "~/lib/graph/mutate/core/generateNewVertexId";
-import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { headerIconButtonCss, toolBarCss } from "~/pages/settings/constants";
@@ -20,11 +18,11 @@ import {
 } from "../functions/insertAtPosition";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Edge } from "~/lib/graph/type/edge";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
+import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 
 export function Preview(props: {
   message: Vertex;
@@ -40,66 +38,14 @@ export function Preview(props: {
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
 
   // Import the graph structure using the utility function
-  const { metaTxnId, rootVertexIds } = importGraphStructure(
-    props.object,
+  const importResult = importGraphStructure(props.object, graph, setGraph);
+
+  // Process the imported graph to create parent vertex and organize vertices
+  const { metaTxnId, parentId, labelGroups } = processImportedGraph(
+    importResult,
     graph,
     setGraph,
   );
-
-  // Create parent vertex and link children
-  const parentId = generateNewVertexId(graph, setGraph);
-  const parentVertex = {
-    id: parentId,
-    IN: {},
-    L: ["Page"],
-    OUT: {},
-    P: { key: "Page" },
-  };
-
-  addNewVertex(metaTxnId, parentVertex, graph, setGraph);
-
-  // Link parent to root vertices
-  // First handle vertices with Label "Attr"
-  const attrRootIds = rootVertexIds.filter((id) =>
-    graph.vertexes[id].L.includes("Attr"),
-  );
-  if (attrRootIds.length > 0) {
-    setSelectionValue(
-      metaTxnId,
-      graph.vertexes[parentId],
-      graph,
-      setGraph,
-      { P: { type: "Attr" } } as unknown as Vertex,
-      attrRootIds,
-    );
-  }
-
-  // Then handle remaining vertices grouped by their labels
-  const remainingRootIds = rootVertexIds.filter(
-    (id) => !graph.vertexes[id].L.includes("Attr"),
-  );
-
-  // Group remaining vertices by their first label
-  const labelGroups = new Map<string, string[]>();
-  for (const id of remainingRootIds) {
-    const label = graph.vertexes[id].L[0];
-    if (!labelGroups.has(label)) {
-      labelGroups.set(label, []);
-    }
-    labelGroups.get(label)!.push(id);
-  }
-
-  // Set selection for each label group
-  for (const [label, ids] of labelGroups) {
-    setSelectionValue(
-      metaTxnId,
-      graph.vertexes[parentId],
-      graph,
-      setGraph,
-      { P: { type: label } } as unknown as Vertex,
-      ids,
-    );
-  }
 
   onCleanup(() => {
     revertTransaction(metaTxnId, graph, setGraph);

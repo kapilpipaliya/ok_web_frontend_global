@@ -87,7 +87,7 @@ export function DynamicComponent(
   const formVertex = () =>
     formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
   const { showErrorToast, showSuccessToast, showWarningToast } = useToast();
-  const [ref, setRef] = createSignal(null);
+  const [ref, setRef] = createSignal<HTMLElement | null>(null);
   const [mounted, setMounted] = createSignal(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const zIndex = useZIndex();
@@ -299,6 +299,7 @@ export function DynamicComponent(
       },
       theme,
       ref,
+      setRef,
       removeTxnIdAndCreateNew: (txnId: number) => {
         return removeTxnIdAndCreateNew(txnId, formId!, graph, setGraph);
       },
@@ -683,7 +684,7 @@ export function DynamicComponent(
     "class",
     "validation",
     "labelClass",
-    "key",
+    // "key", // we can't remove key, because it's used in the component field
     "displayOrder",
     "isNoPermissionCheck",
     "css",

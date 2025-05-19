@@ -21,8 +21,9 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
+import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
 
-export function ComponentField(props: Readonly<{ componentId?: string }>) {
+export function ComponentField(props: Readonly<{}>) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
@@ -82,10 +83,29 @@ export function ComponentField(props: Readonly<{ componentId?: string }>) {
   const ComponentWrapper = () => {
     const contextData = useDataContext() || {};
 
+    const propsMemo = createMemo(() => {
+      const defaultValues = getComponentDefaultValues(
+        getCompVertex()!,
+        graph,
+        setGraph,
+      );
+      return { ...defaultValues, ...removeUndefinedProperties(props) };
+    });
+
     const valuesProxy = new Proxy(
       {},
       {
         get(_, key) {
+          if (
+            key === Symbol.toPrimitive ||
+            key === "toString" ||
+            key === "valueOf"
+          ) {
+            return () => JSON.stringify(propsMemo());
+          }
+          if (key === "context") {
+            return parentRenderContext()?.context;
+          }
           const propValue = props[key as keyof typeof props];
           if (propValue !== undefined && propValue !== null) {
             return propValue;
@@ -96,6 +116,19 @@ export function ComponentField(props: Readonly<{ componentId?: string }>) {
             setGraph,
           );
           return defaultValues[key as keyof typeof defaultValues];
+        },
+        ownKeys() {
+          return Reflect.ownKeys(propsMemo());
+        },
+        getOwnPropertyDescriptor(_, prop) {
+          const value = propsMemo()[prop as keyof ReturnType<typeof propsMemo>];
+          return value !== undefined
+            ? {
+                enumerable: true,
+                configurable: true,
+                value,
+              }
+            : undefined;
         },
       },
     );
