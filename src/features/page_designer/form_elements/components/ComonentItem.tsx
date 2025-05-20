@@ -168,6 +168,9 @@ export function ComponentItem(
           css={css`
             font-size: 14px;
             font-weight: normal;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             ${props.child?.L[0] === "Comp" && !componentsMap[props.child?.P.key] ? `color: \${args.theme.var.color.error};` : ""}
           `}
         >

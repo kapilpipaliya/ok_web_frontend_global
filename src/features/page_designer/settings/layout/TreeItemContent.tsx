@@ -67,7 +67,16 @@ export function TreeItemContent(
         noobserver
         width={17}
       />
-      {nameExpr(props.metaVertex, componentName(), graph)}
+      <As
+        as="span"
+        css={css`
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        `}
+      >
+        {nameExpr(props.metaVertex, componentName(), graph)}
+      </As>
     </As>
   );
 }
