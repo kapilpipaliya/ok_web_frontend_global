@@ -1,23 +1,12 @@
-import type { Vertex } from "~/lib/graph/type/vertex";
-import type { Edge } from "~/lib/graph/type/edge";
-
-/**
- * Generates a schema for a text input field
- * The function reads all props from args.contextData.props
- *
- * @param id - Optional ID for the vertex, defaults to "root"
- * @returns A graph JSON structure representing the text input component
- */
-export function getTextInputSchema(id = "root") {
-  return {
+{
     vertexes: [
       {
-        id,
+        id: "root",
         L: "Attr",
         P: {
           displayOrder: 1,
           componentName: "Html",
-          props: `
+          props: '''
 // Access component props from args.contextData.props
 const props = args.contextData.props || {};
 
@@ -112,31 +101,10 @@ return {
   error,
   errorClass,
   onChange
-};`,
+};
+''',
         },
       },
     ],
     edges: [],
-  };
-}
-
-/**
- * Returns a more complex schema for a text input field with label and error message
- * The function reads all props from args.contextData.props
- *
- * @returns A graph JSON structure representing the complete text input component with label and error
- */
-export function getTextInputWithLabelSchema() {
-  // Get the base text input schema with the input ID
-  const textInputSchema = getTextInputSchema("inputId");
-  const inputVertex = textInputSchema.vertexes[0];
-
-  // Create a complete schema with label and error
-  return {
-    vertexes: [inputVertex],
-    edges: [],
-  } as unknown as {
-    vertexes: Vertex[];
-    edges: Edge[];
-  };
-}
+  }

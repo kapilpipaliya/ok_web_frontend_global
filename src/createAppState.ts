@@ -6,9 +6,9 @@ import type { EdgeMap } from "~/lib/graph/type/edgeMap";
 import type { VertexMap } from "~/lib/graph/type/vertexMap";
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-import { getTextInputWithLabelSchema } from "~/components/fields/getTextInputSchema";
 import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
 import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
+import { componentSchemas } from "~/components/fields/components";
 
 export function createAppState() {
   const graph = createGraph();
@@ -62,18 +62,18 @@ export function createAppState() {
     graph[0],
     graph[1],
   );
-
-  const schema = getTextInputWithLabelSchema();
-
-  // Import and process the schema into the graph structure
-  const importResult = importGraphStructure(schema, graph[0], graph[1]);
-  const { metaTxnId, parentId } = processImportedGraph(
-    importResult,
-    graph[0],
-    graph[1],
-    "Component", // Parent label
-    "SystemTextInput", // Parent key
-  );
+  // Loop through all component schemas and process them into the graph
+  for (const [key, schema] of Object.entries(componentSchemas)) {
+    // Import and process each schema into the graph structure
+    const importResult = importGraphStructure(schema, graph[0], graph[1]);
+    processImportedGraph(
+      importResult,
+      graph[0],
+      graph[1],
+      "Component", // Parent label
+      key, // Use the schema key as the parent key
+    );
+  }
 
   return graph;
 }
