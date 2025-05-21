@@ -1,15 +1,10 @@
-import { Show } from "solid-js/web";
 import { Transition, TransitionGroup } from "solid-transition-group";
-
 import { SlotField } from "~/components/fields/component/SlotField";
 import { ComponentField } from "~/components/fields/component/ComponentField";
 import { DataField } from "~/components/fields/data/DataField";
-// import { RadioGroupField } from "~/components/fields/RadioGroupField";
 import { SelectField } from "~/components/fields/select/SelectField";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { ZIndex } from "~/components/fields/ZIndex";
-
-// import { ButtonField } from "../../fields/ButtonField";
 import { FormField } from "../../fields/FormField";
 import { HtmlField } from "../../fields/HtmlField";
 import { FileUploader } from "../../styled/FileUploader";
@@ -27,7 +22,6 @@ export const componentsMap: Record<string, any> = {
   MultiSelect: SelectField,
   // Page: PageField,
   Select: SelectField,
-  Show,
   Table: TableInputField,
   // Title: MetaTitle,
   Transition,
