@@ -26,9 +26,9 @@ export function addEditButtonSchema(label: string) {
             type: "button",
           },
         ],
-        componentName: "Show",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          when: options.data?.id?.startsWith("-"),
+          show: options.data?.id?.startsWith("-"),
         }),
       },
       {
@@ -65,9 +65,9 @@ export function addEditButtonSchema(label: string) {
             type: "button",
           },
         ],
-        componentName: "Show",
+        componentName: "Html",
         props: (options: FunctionArgumentType) => ({
-          when: !options.data?.id?.startsWith("-"),
+          show: !options.data?.id?.startsWith("-"),
         }),
       },
     ],

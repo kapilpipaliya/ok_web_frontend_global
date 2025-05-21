@@ -16,9 +16,9 @@ export function loadingIconSchema() {
         width: 32,
       },
     ],
-    componentName: "Show",
+    componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      when: (options.contextData.modalState as ModalStateStore)[0]?.isLoading,
+      show: (options.contextData.modalState as ModalStateStore)[0]?.isLoading,
     }),
   };
 }
