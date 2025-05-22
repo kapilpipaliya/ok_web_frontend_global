@@ -162,9 +162,9 @@ export function TabsWithUnderline(
                         border-color: transparent;
                         &:hover {
                           border-color: ${args.theme.var.color.base_60};
-                          color: ${args.theme.var.color.secondary_460};
+                          color: ${args.theme.var.color.primary_460};
                         }
-                        color: ${args.theme.var.color.secondary};
+                        color: ${args.theme.var.color.primary};
                       `
                     }
                     background-color: transparent;

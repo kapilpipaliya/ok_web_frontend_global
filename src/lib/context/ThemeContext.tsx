@@ -2,7 +2,7 @@ import { createContext, useContext } from "solid-js";
 
 // Moving constants and utility functions to separate modules
 import {
-  DEFAULT_BASE,
+  DEFAULT_BACKGROUND,
   DEFAULT_PRIMARY,
   EASING_PRESETS,
   FONT_PRESETS,
@@ -31,8 +31,7 @@ export const ThemeContext = createContext<ThemeContextType>();
 type ThemeObject = Record<string, unknown>;
 type ColorTarget = {
   [key: string]: string | number | boolean | ColorDefinition | undefined;
-  baseColor?: ColorDefinition;
-  primaryColor?: ColorDefinition;
+  primary?: ColorDefinition;
   fontFamily?: string;
   spacingScale?: string;
   borderRadius?: string;
@@ -44,7 +43,7 @@ type ColorTarget = {
 const colorHandlers = {
   /**
    * Handles dynamic color shade access in the theme proxy.
-   * Pattern: primaryColor_640, errorColor_820, etc. or direct colors like gray_280, blue_50, etc.
+   * Pattern: primary_640, error_820, etc. or direct colors like gray_280, blue_50, etc.
    */
   handleShadeAccess: (
     target: ColorTarget,
@@ -104,7 +103,7 @@ const colorHandlers = {
 
   /**
    * Handles color scheme access in the theme proxy.
-   * Pattern: primaryScheme, accentScheme, etc.
+   * Pattern: primaryScheme, infoScheme, etc.
    */
   handleSchemeAccess: (
     target: ColorTarget,
@@ -136,7 +135,7 @@ const colorHandlers = {
 
   /**
    * Handles contrast ratio access in the theme proxy.
-   * Pattern: primaryContrastRatio, accentContrastRatio, etc.
+   * Pattern: primaryContrastRatio, infoContrastRatio, etc.
    */
   handleContrastRatioAccess: (
     target: ColorTarget,
@@ -174,8 +173,8 @@ const colorHandlers = {
       return resolveColorForMode(target[prop] as ColorDefinition, mode);
     }
 
-    // Fall back to computed semantic colors based on base color
-    const baseColorDef = target.baseColor || DEFAULT_BASE;
+    // Fall back to computed semantic colors based on primary color
+    const baseColorDef = target.backgroundColor || DEFAULT_BACKGROUND;
     const resolvedBaseColor = resolveColorForMode(
       baseColorDef as ColorDefinition,
       mode,

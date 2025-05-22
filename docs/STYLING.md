@@ -81,28 +81,6 @@ function MyPage() {
 }
 ```
 
-### Dynamic Styles with Props
-
-```tsx
-import { css, themedCss } from "~/lib/styles";
-import { colors } from "~/lib/styles/createCss";
-
-// Create theme-aware styles
-const themedButton = themedCss((theme) => css`
-  background-color: ${theme.primaryColor || "#3b82f6"};
-  color: ${colors.mostReadable(theme.primaryColor || "#3b82f6", ["#fff", "#000"])};
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-`);
-
-// Use with theme context
-function ThemedButton(props) {
-  return (
-    <As as="button" css={themedButton({ theme: { primaryColor: props.color } })} {...props} />
-  );
-}
-```
-
 ## Color Utilities
 
 The `colors` object provides various color manipulation functions:

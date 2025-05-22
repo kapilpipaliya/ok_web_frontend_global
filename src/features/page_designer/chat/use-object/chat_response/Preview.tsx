@@ -168,7 +168,7 @@ export function Preview(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.neutral_20};
+    background-color: \${args.theme.var.color.primary_20};
   }
 `}
                 disabled={
@@ -253,7 +253,7 @@ export function Preview(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.neutral_20};
+    background-color: \${args.theme.var.color.primary_20};
   }
 `}
                     icon="ph:arrows-clockwise"
@@ -284,7 +284,7 @@ export function Preview(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.neutral_20};
+    background-color: \${args.theme.var.color.primary_20};
   }
 `}
                     disabled={

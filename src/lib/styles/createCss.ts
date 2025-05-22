@@ -11,10 +11,6 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 // Theme color palette type
 export interface ThemeColors {
   primary: string;
-  secondary: string;
-  accent: string;
-  neutral: string;
-  base: string;
   info: string;
   success: string;
   warning: string;
@@ -26,10 +22,6 @@ export interface ThemeColors {
 // Default theme colors (for reference only, actual defaults are in ThemeContext)
 export const defaultColors: ThemeColors = {
   primary: "#3b82f6", // Blue
-  secondary: "#64748b", // Slate
-  accent: "#f59e0b", // Amber
-  neutral: "#a3e635", // Lime
-  base: "#1e293b", // Dark slate
   info: "#0ea5e9", // Sky blue
   success: "#10b981", // Emerald
   warning: "#f97316", // Orange

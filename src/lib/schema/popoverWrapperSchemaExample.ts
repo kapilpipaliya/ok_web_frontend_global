@@ -85,7 +85,7 @@ export const dynamicPopoverExample = () => {
     as: "button",
     css: css`
   padding: 8px 16px;
-  background-color: \${args.theme.var.color.secondary};
+  background-color: \${args.theme.var.color.primary};
   color: white;
   border-radius: 4px;
   cursor: pointer;
@@ -102,7 +102,7 @@ export const dynamicPopoverExample = () => {
         as: "h3",
         css: css`
   font-size: 18px;
-  color: \${args.theme.var.color.secondary};
+  color: \${args.theme.var.color.primary};
   margin: 0px;
   margin-bottom: 8px;
 `,

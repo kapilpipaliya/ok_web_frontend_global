@@ -1,42 +1,46 @@
-import type {
-  EasingPreset,
-  SpacingScale,
-} from "~/lib/styles/types/types";
+import type { EasingPreset, SpacingScale } from "~/lib/styles/types/types";
 
 // Default color constants - Light mode
 export const DEFAULT_PRIMARY = "oklch(0.57 0.19 250)"; // Blue
-export const DEFAULT_SECONDARY = "oklch(0.55 0.05 250)"; // Slate
-export const DEFAULT_ACCENT = "oklch(0.75 0.18 80)"; // Amber
-export const DEFAULT_NEUTRAL = "oklch(0.85 0.15 120)"; // Lime
-export const DEFAULT_BASE = "oklch(0.25 0.03 250)"; // Dark slate
 export const DEFAULT_INFO = "oklch(0.65 0.15 220)"; // Sky blue
 export const DEFAULT_SUCCESS = "oklch(0.7 0.15 160)"; // Emerald
 export const DEFAULT_WARNING = "oklch(0.7 0.2 60)"; // Orange
 export const DEFAULT_ERROR = "oklch(0.65 0.25 25)"; // Red
 
+// Default semantic colors - Light mode
+export const DEFAULT_TEXT = "oklch(0.2 0.02 250)"; // Dark text
+export const DEFAULT_BACKGROUND = "oklch(0.98 0.01 250)"; // Light background
+export const DEFAULT_SURFACE = "oklch(1 0 0)"; // White surface
+export const DEFAULT_BORDER = "oklch(0.85 0.02 250)"; // Light border
+export const DEFAULT_MUTED = "oklch(0.6 0.03 250)"; // Muted text
+
 // Default color constants - Dark mode
 export const DEFAULT_PRIMARY_DARK = "oklch(0.7 0.15 250)"; // Brighter blue
-export const DEFAULT_SECONDARY_DARK = "oklch(0.65 0.08 250)"; // Brighter slate
-export const DEFAULT_ACCENT_DARK = "oklch(0.8 0.15 80)"; // Brighter amber
-export const DEFAULT_NEUTRAL_DARK = "oklch(0.75 0.12 120)"; // Less saturated lime
-export const DEFAULT_BASE_DARK = "oklch(0.15 0.05 250)"; // Dark gray
 export const DEFAULT_INFO_DARK = "oklch(0.75 0.12 220)"; // Brighter sky blue
 export const DEFAULT_SUCCESS_DARK = "oklch(0.75 0.12 160)"; // Brighter emerald
 export const DEFAULT_WARNING_DARK = "oklch(0.8 0.18 60)"; // Brighter orange
 export const DEFAULT_ERROR_DARK = "oklch(0.75 0.22 25)"; // Brighter red
 
+// Default semantic colors - Dark mode
+export const DEFAULT_TEXT_DARK = "oklch(0.9 0.02 250)"; // Light text
+export const DEFAULT_BACKGROUND_DARK = "oklch(0.1 0.02 250)"; // Dark background
+export const DEFAULT_SURFACE_DARK = "oklch(0.15 0.02 250)"; // Dark surface
+export const DEFAULT_BORDER_DARK = "oklch(0.3 0.03 250)"; // Dark border
+export const DEFAULT_MUTED_DARK = "oklch(0.6 0.03 250)"; // Muted text
+
 // Default theme values
 export const DEFAULT_THEME = {
   color: {
     primary: DEFAULT_PRIMARY,
-    secondary: DEFAULT_SECONDARY,
-    accent: DEFAULT_ACCENT,
-    neutral: DEFAULT_NEUTRAL,
-    base: DEFAULT_BASE,
     info: DEFAULT_INFO,
     success: DEFAULT_SUCCESS,
     warning: DEFAULT_WARNING,
     error: DEFAULT_ERROR,
+    text: DEFAULT_TEXT,
+    background: DEFAULT_BACKGROUND,
+    surface: DEFAULT_SURFACE,
+    border: DEFAULT_BORDER,
+    muted: DEFAULT_MUTED,
   },
   fontFamily: "system-ui, sans-serif",
   fontSizeBase: "1rem",

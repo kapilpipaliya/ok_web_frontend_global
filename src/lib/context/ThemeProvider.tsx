@@ -68,34 +68,19 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
   // Generate CSS styles based on the theme
   const themeCssVars = createMemo(() => {
     const safeTheme = themeMemo();
-    const themeVar = safeTheme.var || {};
-    const safeThemeVars = createSafeThemeProxy(themeVar, [], currentMode);
-
-    // Resolve colors for current mode
-    const baseColorDef = safeThemeVars.color?.base || DEFAULT_THEME.color.base;
-    const resolvedBaseColor = resolveColorForMode(
-      baseColorDef as ColorDefinition,
-      currentMode(),
-    );
-    // Get semantic colors (either defined or computed)
-    const backgroundColor =
-      safeThemeVars.color?.backgroundColor ||
-      (currentMode() === "dark"
-        ? getColorShade(resolvedBaseColor, 820)
-        : getColorShade(resolvedBaseColor, 20));
-    const textColor =
-      safeThemeVars.color?.textColor ||
-      (currentMode() === "dark"
-        ? getColorShade(resolvedBaseColor, 20)
-        : getColorShade(resolvedBaseColor, 820));
+    const themeVar = safeTheme.var || ({} as ThemeContextType["var"]);
+    const safeThemeVars = createSafeThemeProxy(
+      themeVar,
+      [],
+      currentMode,
+    ) as ThemeContextType["var"];
 
     return `
       ${CSS_RESET}
-      
-      /* Apply base styles to body */
+
       body {
-        background-color: ${backgroundColor};
-        color: ${textColor};
+        background-color: ${safeThemeVars.color?.backgroundColor};
+        color: ${safeThemeVars.color?.textColor};
         font-family: ${safeThemeVars.fontFamily || FONT_PRESETS.system};
         font-size: ${safeThemeVars.fontSizeBase || "1rem"};
         line-height: ${safeThemeVars.lineHeightBase || 1.5};
@@ -158,12 +143,16 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
     ): string => {
       // Get values from themeMemo which should always be safely initialized
       const safeTheme = themeMemo();
-      const themeVar = safeTheme.var || {};
-      const safeThemeVars = createSafeThemeProxy(themeVar, [], currentMode);
+      const themeVar = safeTheme.var || ({} as ThemeContextType["var"]);
+      const safeThemeVars = createSafeThemeProxy(
+        themeVar,
+        [],
+        currentMode,
+      ) as ThemeContextType["var"];
 
       // Check if semantic color is explicitly defined
-      const semanticColorKey = `${context}Color`;
-      const explicitSemanticColor = safeThemeVars.color?.[semanticColorKey];
+      const explicitSemanticColor =
+        safeThemeVars.color?.[context as keyof typeof safeThemeVars.color];
       if (explicitSemanticColor) {
         return resolveColorForMode(
           explicitSemanticColor as ColorDefinition,
@@ -171,37 +160,37 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
         );
       }
 
-      // Fall back to computed semantic colors
-      const baseColorDef =
-        safeTheme.var?.color?.base || DEFAULT_THEME.color.base;
-      const resolvedBaseColor = resolveColorForMode(
-        baseColorDef as ColorDefinition,
+      // Fall back to computed semantic colors based on primary
+      const backgroundRef =
+        safeTheme.var?.color?.background || DEFAULT_THEME.color.background;
+      const resolvedBackground = resolveColorForMode(
+        backgroundRef as ColorDefinition,
         currentMode(),
       );
 
       switch (context) {
         case "text":
           return currentMode() === "dark"
-            ? getColorShade(resolvedBaseColor, 20)
-            : getColorShade(resolvedBaseColor, 820);
+            ? getColorShade(resolvedBackground, 20)
+            : getColorShade(resolvedBackground, 820);
         case "background":
           return currentMode() === "dark"
-            ? getColorShade(resolvedBaseColor, 820)
-            : getColorShade(resolvedBaseColor, 20);
+            ? getColorShade(resolvedBackground, 820)
+            : getColorShade(resolvedBackground, 20);
         case "surface":
           return currentMode() === "dark"
-            ? getColorShade(resolvedBaseColor, 640)
+            ? getColorShade(resolvedBackground, 640)
             : "#ffffff";
         case "border":
           return currentMode() === "dark"
-            ? getColorShade(resolvedBaseColor, 460)
-            : getColorShade(resolvedBaseColor, 40);
+            ? getColorShade(resolvedBackground, 460)
+            : getColorShade(resolvedBackground, 40);
         case "muted":
           return currentMode() === "dark"
-            ? getColorShade(resolvedBaseColor, 280)
-            : getColorShade(resolvedBaseColor, 80);
+            ? getColorShade(resolvedBackground, 280)
+            : getColorShade(resolvedBackground, 80);
         default:
-          return resolvedBaseColor;
+          return resolvedBackground;
       }
     },
 

@@ -1,14 +1,15 @@
 // Define color properties that can have shades
 export type ThemeColorKey =
   | "primary"
-  | "secondary"
-  | "accent"
-  | "neutral"
-  | "base"
   | "info"
   | "success"
   | "warning"
-  | "error";
+  | "error"
+  | "text"
+  | "background"
+  | "surface"
+  | "border"
+  | "muted";
 // Space scale options
 export type SpacingScale = "compact" | "default" | "loose";
 // Border radius size options
@@ -122,17 +123,13 @@ export interface ThemeContext {
     // Color settings (base colors) - now support mode-specific colors
     color: {
       primary: ColorDefinition;
-      secondary: ColorDefinition;
-      accent: ColorDefinition;
-      neutral: ColorDefinition;
-      base: ColorDefinition;
       info: ColorDefinition;
       success: ColorDefinition;
       warning: ColorDefinition;
       error: ColorDefinition;
 
       // Semantic colors
-      // Always use semantic tokens in components (text, background, border, etc.). Under the hood, map them to primary, neutral, etc.
+      // Always use semantic tokens in components (text, background, border, etc.). Under the hood, map them to primary, etc.
       text?: ColorDefinition;
       background?: ColorDefinition;
       surface?: ColorDefinition;
@@ -173,14 +170,13 @@ export interface ThemeContext {
   // ===========================================
   // These are implemented via proxy-based accessors
   // Examples:
-  // - Color shades: theme.primaryColor_10, theme.errorColor_90
-  // - Color palettes: theme.primaryPalette, theme.accentPalette
-  // - Color schemes: theme.primaryScheme, theme.accentScheme
+  // - Color shades: theme.primary_10, theme.error_90
+  // - Color palettes: theme.primaryPalette, theme.infoPalette
+  // - Color schemes: theme.primaryScheme, theme.infoScheme
   // - Font presets: theme.fontSystem, theme.fontSans, theme.fontSerif
   // - Spacing scales: theme.spacingXs, theme.spacingMd, theme.spacing2xl
   // - Border radius: theme.radiusNone, theme.radiusMd, theme.radiusFull
   // - Semantic colors: theme.textColor, theme.surfaceColor, theme.borderColor
-  // - Dynamic HSL variants: theme.primaryColorH, theme.primaryColorS, theme.primaryColorL
 
   // ===========================================
   // = THEME MODIFICATION FUNCTIONS

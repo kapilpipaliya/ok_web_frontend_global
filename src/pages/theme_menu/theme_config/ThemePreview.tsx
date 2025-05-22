@@ -4,21 +4,26 @@ import { themeConfig } from "~/lib/graph/get/sync/theme/themeConfig";
 import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { resolveColorForMode } from "~/lib/styles/colorUtils";
+import type { ColorDefinition } from "~/lib/styles/types/types";
 
 export function ThemePreview(props: { item: Vertex }) {
   const themeData = createMemo(() => {
     return themeConfig(props.item);
   });
 
-  const getColorClass = (color?: string | { "@light": string }) => {
-    return typeof color === "string"
-      ? `background-color:${color};`
-      : color
-        ? `background-color:${color["@light"] || ""};`
-        : "";
+  const getColorClass = (color?: ColorDefinition) => {
+    if (!color) return "";
+    return `background-color:${resolveColorForMode(color, "light")};`;
   };
 
-  const colorVariables = ["primary", "secondary", "accent", "neutral"];
+  const colorVariables = [
+    "primary",
+    "background",
+    "surface",
+    "border",
+    "muted",
+  ];
 
   return (
     <As

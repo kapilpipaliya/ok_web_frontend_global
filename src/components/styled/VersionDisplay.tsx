@@ -8,7 +8,7 @@ export function VersionDisplay() {
       as="div"
       css={[
         css`
-  color: \${args.theme.var.color.secondary};
+  color: \${args.theme.var.color.primary};
   font-size: 12px;
   opacity: 0.8;
 `,

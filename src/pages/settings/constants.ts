@@ -160,7 +160,7 @@ export const SETTINGS_CONSTANTS = {
   `,
   SECONDARY_BUTTON_CSS: `
     ._id {
-      background-color: \${args.theme.var.color.secondary};
+      background-color: \${args.theme.var.color.primary_50};
       color: \${args.theme.var.color.base_10};
       padding: 8px 16px;
       border-radius: 4px;

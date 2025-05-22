@@ -32,7 +32,7 @@ export function ThemeSettings() {
         <As
           as="p"
           css={css`
-  color: \${args.theme.var.color.neutral_400};
+  color: \${args.theme.var.color.primary_400};
 `}
         >
           Customize the look and feel of your application by managing themes.

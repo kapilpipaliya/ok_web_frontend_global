@@ -294,7 +294,7 @@ export function FunctionEditor(props: {
           </EditorButton>
 
           <EditorButton
-            color={`\${args.theme.var.color.secondary_70}`}
+            color={`\${args.theme.var.color.primary_70}`}
             onClick={formatCode}
             title="Format Code with Prettier"
           >

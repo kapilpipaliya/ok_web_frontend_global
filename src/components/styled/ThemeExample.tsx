@@ -58,7 +58,7 @@ const mainHeaderStyles = () => {
   return css`
     font-size: 2.5rem;
     font-weight: 800;
-    background: linear-gradient(135deg, ${theme.var?.color?.primary} 0%, ${theme.var?.color?.accent || theme.var?.color?.secondary} 100%);
+    background: linear-gradient(135deg, ${theme.var?.color?.primary} 0%, ${theme.var?.color?.info} 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -251,10 +251,6 @@ const arrowStyles = () => css`
 // Utility functions
 const getThemeColors = (theme: any): ThemeColorEntries => [
   ["primary", theme.var?.color?.primary],
-  ["secondary", theme.var?.color?.secondary],
-  ["accent", theme.var?.color?.accent],
-  ["neutral", theme.var?.color?.neutral],
-  ["base", theme.var?.color?.base],
   ["info", theme.var?.color?.info],
   ["success", theme.var?.color?.success],
   ["warning", theme.var?.color?.warning],

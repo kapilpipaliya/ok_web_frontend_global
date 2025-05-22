@@ -124,9 +124,6 @@ The `colors` object provides common colors and utility functions:
 // Static colors
 colors.primary    // '#3b82f6'
 colors.secondary  // '#64748b'
-colors.accent     // '#f59e0b'
-colors.neutral    // '#a3e635'
-colors.base       // '#1e293b'
 colors.info       // '#0ea5e9'
 colors.success    // '#10b981'
 colors.warning    // '#f97316'
