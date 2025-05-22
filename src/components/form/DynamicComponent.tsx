@@ -27,9 +27,9 @@ import { ContentWrapper } from "~/components/form/dynamic_component/components/D
 
 import { useComponentPermissions } from "~/components/form/dynamic_component/hooks/useComponentPermissions";
 import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
+import { useComponentName } from "~/components/form/dynamic_component/hooks/useComponentName";
 
 import type { Vertex } from "~/lib/graph/type/vertex";
-import { createComponentNameMemo } from "~/components/form/dynamic_component/functions/component/createComponentNameMemo";
 import { createComponentMemo } from "~/components/form/dynamic_component/functions/component/createComponentMemo";
 import { isComponentHidden } from "~/components/form/dynamic_component/functions/component/isComponentHidden";
 import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
@@ -73,6 +73,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
     formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
   const [ref, setRef] = createSignal<HTMLElement | null>(null);
   const [mounted, setMounted] = createSignal(false);
+  const [componentName, setComponentName] = createSignal<string>("Html");
 
   // Context hooks
   const parentItems = usePageRenderContext();
@@ -122,6 +123,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
     props.meta,
     () => getFunctionArgumentWithValue(),
     parentRenderContext,
+    componentName,
   );
 
   // Create function arguments
@@ -176,9 +178,13 @@ export function DynamicComponent(props: DynamicComponentProps) {
     props.meta.P.readOnly ??
     parentRenderContext()?.context?.readOnly;
 
-  const componentName = createComponentNameMemo(props, {
+  useComponentName({
+    props,
+    componentName,
+    setComponentName,
     graph,
     dynamicProps,
+    meta: props.meta,
   });
 
   const component = createComponentMemo(componentName);

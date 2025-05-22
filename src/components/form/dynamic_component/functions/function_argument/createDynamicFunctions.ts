@@ -2,6 +2,7 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
+import type { Accessor } from "solid-js";
 
 /**
  * Creates dynamic functions for the component
@@ -11,6 +12,7 @@ export function createDynamicFunctions(
   meta: Vertex,
   getFunctionArgumentWithValue: () => FunctionArgumentType,
   parentRenderContext: () => { context: FunctionArgumentType } | undefined,
+  componentName: Accessor<string>,
 ): Record<string, unknown> {
   try {
     // Helper to evaluate fns from a vertex
@@ -24,7 +26,7 @@ export function createDynamicFunctions(
       if (typeof fns === "function") {
         return fns(getFunctionArgumentWithValue());
       }
-      if (typeof fns === "string") {
+      if (typeof fns === "string" && fns.trim() !== "") {
         try {
           return new Function("args", fns)(getFunctionArgumentWithValue());
         } catch (error) {
@@ -35,21 +37,19 @@ export function createDynamicFunctions(
       return undefined;
     };
 
-    // For Component type, merge fns from component vertex and meta
-    const componentVertex = findVertexByLabelAndUniqueId(
-      graph,
-      "Component",
-      "key",
-      // This might need to be fixed in the implementation
-      meta.P.componentName,
-    );
-
     return new Proxy(
       {},
       {
         get(_, key: string) {
           const metaFns = evaluateFns(meta.P.fns);
           if (metaFns && key in metaFns) return metaFns[key];
+          // For Component type, merge fns from component vertex and meta
+          const componentVertex = findVertexByLabelAndUniqueId(
+            graph,
+            "Component",
+            "key",
+            componentName(),
+          );
           if (componentVertex) {
             const componentFns = evaluateFns(componentVertex.P.fns);
             if (componentFns && key in componentFns) return componentFns[key];

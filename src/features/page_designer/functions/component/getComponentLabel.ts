@@ -2,6 +2,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
+// Deprecated in favor of getComponentName, Delete this function
 export function getComponentLabel(
   graph: GraphInterface,
   vertex: Vertex,
