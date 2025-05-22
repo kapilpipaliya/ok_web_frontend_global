@@ -14,10 +14,12 @@ import {
   createColorScheme,
   getColorShade,
   getContrastRatio,
-  getHslComponents,
   parseColorName,
+  resolveColorForMode,
+  isModeSpecificColor,
 } from "~/lib/styles/colorUtils";
 import type {
+  ColorDefinition,
   ColorMode,
   ShadeNumber,
   ThemeContext as ThemeContextType,
@@ -25,12 +27,12 @@ import type {
 
 export const ThemeContext = createContext<ThemeContextType>();
 
-// Define a proper type for the target object in handler functions
+// Types
+type ThemeObject = Record<string, unknown>;
 type ColorTarget = {
-  [key: string]: string | number | boolean | undefined;
-  colorMode?: ColorMode;
-  baseColor?: string;
-  primaryColor?: string;
+  [key: string]: string | number | boolean | ColorDefinition | undefined;
+  baseColor?: ColorDefinition;
+  primaryColor?: ColorDefinition;
   fontFamily?: string;
   spacingScale?: string;
   borderRadius?: string;
@@ -38,236 +40,286 @@ type ColorTarget = {
   lineHeightBase?: number;
 };
 
-/**
- * Handles dynamic color shade access in the theme proxy.
- * Pattern: primaryColor_640, errorColor_820, etc. or direct colors like gray_280, blue_50, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The color shade value or undefined
- */
-const handleColorShadeAccess = (target: ColorTarget, prop: string) => {
-  const shadeMatch = prop.match(/(.+)_(\d+)$/);
-  if (shadeMatch) {
-    const [, baseProp, shadeValue] = shadeMatch;
-    const shade = Number.parseInt(shadeValue, 10);
-    let baseColor = target[baseProp];
+// Color handlers
+const colorHandlers = {
+  /**
+   * Handles dynamic color shade access in the theme proxy.
+   * Pattern: primaryColor_640, errorColor_820, etc. or direct colors like gray_280, blue_50, etc.
+   */
+  handleShadeAccess: (
+    target: ColorTarget,
+    prop: string,
+    getColorMode?: () => ColorMode,
+  ) => {
+    const shadeMatch = prop.match(/(.+)_(\d+)$/);
+    if (shadeMatch) {
+      const [, baseProp, shadeValue] = shadeMatch;
+      const shade = Number.parseInt(shadeValue, 10);
+      let baseColorDef = target[baseProp];
 
-    // If base color doesn't exist in the target, try these approaches
-    if (baseColor === undefined) {
-      // check if it's a color name that culori can parse
-      baseColor = parseColorName(baseProp);
+      // If base color doesn't exist in the target, try parsing as color name
+      if (baseColorDef === undefined) {
+        const parsedColor = parseColorName(baseProp);
+        if (parsedColor) {
+          baseColorDef = parsedColor;
+        }
+      }
+
+      // Resolve the color for the current mode
+      if (baseColorDef !== undefined) {
+        const mode = getColorMode ? getColorMode() : "light";
+
+        if (typeof baseColorDef === "string") {
+          return getColorShade(baseColorDef, shade as ShadeNumber);
+        } else if (typeof baseColorDef === "object" && baseColorDef !== null) {
+          const resolvedColor = resolveColorForMode(
+            baseColorDef as ColorDefinition,
+            mode,
+          );
+          if (typeof resolvedColor === "string") {
+            return getColorShade(resolvedColor, shade as ShadeNumber);
+          }
+        }
+      }
+    } else if (target[prop]) {
+      // Handle direct color access with mode resolution
+      const colorDef = target[prop];
+      const mode = getColorMode ? getColorMode() : "light";
+
+      if (typeof colorDef === "string") {
+        return colorDef;
+      } else if (
+        typeof colorDef === "object" &&
+        colorDef !== null &&
+        isModeSpecificColor(colorDef as ColorDefinition)
+      ) {
+        return resolveColorForMode(colorDef as ColorDefinition, mode);
+      }
+      return colorDef;
+    } else if (parseColorName(prop)) {
+      return prop;
     }
+    return undefined;
+  },
 
-    // Additional handling for color strings
-    if (typeof baseColor === "string") {
-      // Handle direct color values or attempt to parse as a color name
-      return getColorShade(baseColor, shade as ShadeNumber);
-    }
-  } else if (target[prop]) {
-    return target[prop];
-  } else if (parseColorName(prop)) {
-    return prop;
-  }
-  return undefined;
-};
+  /**
+   * Handles color scheme access in the theme proxy.
+   * Pattern: primaryScheme, accentScheme, etc.
+   */
+  handleSchemeAccess: (
+    target: ColorTarget,
+    prop: string,
+    getColorMode?: () => ColorMode,
+  ) => {
+    const schemeMatch = prop.match(/(.+?)Scheme$/);
+    if (schemeMatch) {
+      const [, baseProp] = schemeMatch;
+      const baseColorDef = target[`${baseProp}Color`];
+      const mode = getColorMode ? getColorMode() : "light";
 
-/**
- * Handles color component (HSLA) access in the theme proxy.
- * Pattern: primaryColorH, primaryColorS, primaryColorL, primaryColorA
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The color component value or undefined
- */
-const handleColorComponentAccess = (target: ColorTarget, prop: string) => {
-  const colorComponentMatch = prop.match(/(.+)([HSLA])$/);
-  if (colorComponentMatch) {
-    const [, baseProp, component] = colorComponentMatch;
-    const baseColor = target[baseProp];
-    if (typeof baseColor === "string" && baseColor.match(/^#|rgb|hsl|oklch/)) {
-      const hsl = getHslComponents(baseColor);
-      switch (component) {
-        case "H":
-          return hsl.h;
-        case "S":
-          return hsl.s;
-        case "L":
-          return hsl.l;
-        case "A":
-          return hsl.a;
+      if (baseColorDef !== undefined) {
+        const resolvedColor = resolveColorForMode(
+          baseColorDef as ColorDefinition,
+          mode,
+        );
+
+        if (
+          typeof resolvedColor === "string" &&
+          resolvedColor.match(/^#|rgb|hsl|oklch/)
+        ) {
+          return createColorScheme(resolvedColor);
+        }
       }
     }
-  }
-  return undefined;
-};
+    return undefined;
+  },
 
-/**
- * Handles color scheme access in the theme proxy.
- * Pattern: primaryScheme, accentScheme, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The color scheme or undefined
- */
-const handleColorSchemeAccess = (target: ColorTarget, prop: string) => {
-  const schemeMatch = prop.match(/(.+?)Scheme$/);
-  if (schemeMatch) {
-    const [, baseProp] = schemeMatch;
-    const baseColor = target[`${baseProp}Color`];
-    if (typeof baseColor === "string" && baseColor.match(/^#|rgb|hsl|oklch/)) {
-      return createColorScheme(baseColor);
+  /**
+   * Handles contrast ratio access in the theme proxy.
+   * Pattern: primaryContrastRatio, accentContrastRatio, etc.
+   */
+  handleContrastRatioAccess: (
+    target: ColorTarget,
+    prop: string,
+    getColorMode?: () => ColorMode,
+  ) => {
+    const contrastMatch = prop.match(/(.+?)ContrastRatio$/);
+    if (contrastMatch) {
+      const [, baseProp] = contrastMatch;
+      const baseColorDef = target[`${baseProp}Color`] || DEFAULT_PRIMARY;
+      const mode = getColorMode ? getColorMode() : "light";
+      const resolvedColor = resolveColorForMode(
+        baseColorDef as ColorDefinition,
+        mode,
+      );
+      const backgroundColor = mode === "dark" ? "#ffffff" : "#000000";
+      return getContrastRatio(resolvedColor, backgroundColor);
     }
-  }
-  return undefined;
-};
+    return undefined;
+  },
 
-/**
- * Handles contrast ratio access in the theme proxy.
- * Pattern: primaryContrastRatio, accentContrastRatio, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The contrast ratio or undefined
- */
-const handleContrastRatioAccess = (target: ColorTarget, prop: string) => {
-  const contrastMatch = prop.match(/(.+?)ContrastRatio$/);
-  if (contrastMatch) {
-    const [, baseProp] = contrastMatch;
-    const baseColor = target[`${baseProp}Color`] || DEFAULT_PRIMARY;
-    const backgroundColor = target.colorMode === "dark" ? "#ffffff" : "#000000";
-    return getContrastRatio(baseColor as string, backgroundColor);
-  }
-  return undefined;
-};
+  /**
+   * Handles semantic color access in the theme proxy.
+   * Pattern: textColor, backgroundColor, surfaceColor, etc.
+   */
+  handleSemanticColorAccess: (
+    target: ColorTarget,
+    prop: string,
+    getColorMode?: () => ColorMode,
+  ) => {
+    const mode = getColorMode ? getColorMode() : "light";
 
-/**
- * Handles semantic color access in the theme proxy.
- * Pattern: textColor, backgroundColor, surfaceColor, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The semantic color value or undefined
- */
-const handleSemanticColorAccess = (target: ColorTarget, prop: string) => {
-  const baseColor = target.baseColor || DEFAULT_BASE;
-  switch (prop) {
-    case "textColor":
-      return target.colorMode === "dark"
-        ? getColorShade(baseColor, 20)
-        : getColorShade(baseColor, 820);
-    case "backgroundColor":
-      return target.colorMode === "dark"
-        ? getColorShade(baseColor, 820)
-        : getColorShade(baseColor, 20);
-    case "surfaceColor":
-      return target.colorMode === "dark"
-        ? getColorShade(baseColor, 640)
-        : "#ffffff";
-    case "borderColor":
-      return target.colorMode === "dark"
-        ? getColorShade(baseColor, 460)
-        : getColorShade(baseColor, 40);
-    case "mutedColor":
-      return target.colorMode === "dark"
-        ? getColorShade(baseColor, 280)
-        : getColorShade(baseColor, 80);
-    default:
-      return undefined;
-  }
-};
+    // First check if there's a specific semantic color defined
+    if (target[prop] !== undefined) {
+      return resolveColorForMode(target[prop] as ColorDefinition, mode);
+    }
 
-/**
- * Handles font preset access in the theme proxy.
- * Pattern: fontSystem, fontSans, fontSerif, fontMono, fontHeading, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The font preset value or undefined
- */
-const handleFontPresetAccess = (target: ColorTarget, prop: string) => {
-  if (
-    prop.startsWith("font") &&
-    ![
-      "fontFamily",
-      "fontSizeBase",
-      "fontWeightBase",
-      "fontHeading",
-      "fontMono",
-    ].includes(prop)
-  ) {
-    const presetName = prop.replace(/^font/, "").toLowerCase();
-    return (
-      FONT_PRESETS[presetName as keyof typeof FONT_PRESETS] || target.fontFamily
+    // Fall back to computed semantic colors based on base color
+    const baseColorDef = target.baseColor || DEFAULT_BASE;
+    const resolvedBaseColor = resolveColorForMode(
+      baseColorDef as ColorDefinition,
+      mode,
     );
-  }
-  return undefined;
-};
 
-/**
- * Handles spacing scale access in the theme proxy.
- * Pattern: spacingXs, spacingSm, spacingMd, spacingLg, spacingXl, spacing2xl, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The spacing scale value or undefined
- */
-const handleSpacingScaleAccess = (target: ColorTarget, prop: string) => {
-  if (prop.startsWith("spacing") && prop !== "spacingScale") {
-    const scaleName = target.spacingScale || "default";
-    const scale =
-      SPACING_SCALES[scaleName as keyof typeof SPACING_SCALES] ||
-      SPACING_SCALES.default;
-
-    const sizeMatch = prop.match(/^spacing(.+)$/);
-    if (sizeMatch) {
-      const size = sizeMatch[1].toLowerCase();
-      return scale[size as keyof typeof scale] || scale.md;
+    switch (prop) {
+      case "textColor":
+        return mode === "dark"
+          ? getColorShade(resolvedBaseColor, 20)
+          : getColorShade(resolvedBaseColor, 820);
+      case "backgroundColor":
+        return mode === "dark"
+          ? getColorShade(resolvedBaseColor, 820)
+          : getColorShade(resolvedBaseColor, 20);
+      case "surfaceColor":
+        return mode === "dark"
+          ? getColorShade(resolvedBaseColor, 640)
+          : "#ffffff";
+      case "borderColor":
+        return mode === "dark"
+          ? getColorShade(resolvedBaseColor, 460)
+          : getColorShade(resolvedBaseColor, 40);
+      case "mutedColor":
+        return mode === "dark"
+          ? getColorShade(resolvedBaseColor, 280)
+          : getColorShade(resolvedBaseColor, 80);
+      default:
+        return undefined;
     }
-    return scale;
-  }
-  return undefined;
+  },
+
+  /**
+   * Handle direct color access with mode resolution
+   */
+  handleDirectColorAccess: (
+    target: ColorTarget,
+    prop: string,
+    getColorMode?: () => ColorMode,
+  ) => {
+    if (target[prop] !== undefined) {
+      const colorDef = target[prop];
+      const mode = getColorMode ? getColorMode() : "light";
+
+      if (typeof colorDef === "string") {
+        return colorDef;
+      } else if (
+        typeof colorDef === "object" &&
+        colorDef !== null &&
+        isModeSpecificColor(colorDef as ColorDefinition)
+      ) {
+        return resolveColorForMode(colorDef as ColorDefinition, mode);
+      }
+      return colorDef;
+    }
+    return undefined;
+  },
 };
 
-/**
- * Handles border radius access in the theme proxy.
- * Pattern: radiusNone, radiusSm, radiusMd, radiusLg, radiusXl, radiusFull, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The border radius value or undefined
- */
-const handleBorderRadiusAccess = (target: ColorTarget, prop: string) => {
-  if (prop.startsWith("radius") && prop !== "borderRadius") {
-    const sizeMatch = prop.match(/^radius(.+)$/);
-    if (sizeMatch) {
-      const size = sizeMatch[1].toLowerCase();
+// Non-color handlers
+const styleHandlers = {
+  /**
+   * Handles font preset access in the theme proxy.
+   * Pattern: fontSystem, fontSans, fontSerif, fontMono, fontHeading, etc.
+   */
+  handleFontPresetAccess: (target: ColorTarget, prop: string) => {
+    if (
+      prop.startsWith("font") &&
+      ![
+        "fontFamily",
+        "fontSizeBase",
+        "fontWeightBase",
+        "fontHeading",
+        "fontMono",
+      ].includes(prop)
+    ) {
+      const presetName = prop.replace(/^font/, "").toLowerCase();
       return (
-        RADIUS_PRESETS[size as keyof typeof RADIUS_PRESETS] ||
-        target.borderRadius
+        FONT_PRESETS[presetName as keyof typeof FONT_PRESETS] ||
+        target.fontFamily
       );
     }
-    return target.borderRadius;
-  }
-  return undefined;
+    return undefined;
+  },
+
+  /**
+   * Handles spacing scale access in the theme proxy.
+   * Pattern: spacingXs, spacingSm, spacingMd, spacingLg, spacingXl, spacing2xl, etc.
+   */
+  handleSpacingScaleAccess: (target: ColorTarget, prop: string) => {
+    if (prop.startsWith("spacing") && prop !== "spacingScale") {
+      const scaleName = target.spacingScale || "default";
+      const scale =
+        SPACING_SCALES[scaleName as keyof typeof SPACING_SCALES] ||
+        SPACING_SCALES.default;
+
+      const sizeMatch = prop.match(/^spacing(.+)$/);
+      if (sizeMatch) {
+        const size = sizeMatch[1].toLowerCase();
+        return scale[size as keyof typeof scale] || scale.md;
+      }
+      return scale;
+    }
+    return undefined;
+  },
+
+  /**
+   * Handles border radius access in the theme proxy.
+   * Pattern: radiusNone, radiusSm, radiusMd, radiusLg, radiusXl, radiusFull, etc.
+   */
+  handleBorderRadiusAccess: (target: ColorTarget, prop: string) => {
+    if (prop.startsWith("radius") && prop !== "borderRadius") {
+      const sizeMatch = prop.match(/^radius(.+)$/);
+      if (sizeMatch) {
+        const size = sizeMatch[1].toLowerCase();
+        return (
+          RADIUS_PRESETS[size as keyof typeof RADIUS_PRESETS] ||
+          target.borderRadius
+        );
+      }
+      return target.borderRadius;
+    }
+    return undefined;
+  },
+
+  /**
+   * Handles easing preset access in the theme proxy.
+   * Pattern: easingLinear, easingEaseInOut, etc.
+   */
+  handleEasingPresetAccess: (_target: ColorTarget, prop: string) => {
+    if (prop.startsWith("easing") && prop !== "defaultEasing") {
+      const presetName = prop.replace(/^easing/, "");
+      const presetKey = (presetName.charAt(0).toLowerCase() +
+        presetName.slice(1)) as keyof typeof EASING_PRESETS;
+      return EASING_PRESETS[presetKey] || EASING_PRESETS.ease;
+    }
+    return undefined;
+  },
 };
 
-/**
- * Handles easing preset access in the theme proxy.
- * Pattern: easingLinear, easingEaseInOut, etc.
- * @param target The target object being accessed
- * @param prop The property name being accessed
- * @returns The easing preset value or undefined
- */
-const handleEasingPresetAccess = (_target: ColorTarget, prop: string) => {
-  if (prop.startsWith("easing") && prop !== "defaultEasing") {
-    const presetName = prop.replace(/^easing/, "");
-    const presetKey = (presetName.charAt(0).toLowerCase() +
-      presetName.slice(1)) as keyof typeof EASING_PRESETS;
-    return EASING_PRESETS[presetKey] || EASING_PRESETS.ease;
-  }
-  return undefined;
-};
-
-// Create a proper type for the theme object
-type ThemeObject = Record<string, unknown>;
-
-// Create a safe proxy that handles deep property access, dynamic colors, and helper functions
+// Main proxy creation function
 export const createSafeThemeProxy = (
   obj: ThemeObject,
   path: string[] = [],
+  getColorMode?: () => ColorMode,
 ): ThemeObject => {
   const handler = {
     get(target: ThemeObject, prop: string | symbol) {
@@ -275,81 +327,129 @@ export const createSafeThemeProxy = (
         const currentPath = [...path, prop];
         const pathStr = currentPath.join(".");
 
-        // If we're accessing a color value under var.color.*
+        // Handle color-related properties
         if (pathStr.startsWith("color.")) {
-          //  && typeof target[prop] === 'string' &&  target[prop].match(/^#|rgb|hsl|oklch/)
-          // Try each color-related handler in sequence
-          const colorHandlers = [
-            handleColorShadeAccess,
-            handleColorComponentAccess,
-            handleColorSchemeAccess,
-            handleContrastRatioAccess,
-          ];
-
-          for (const handler of colorHandlers) {
-            const result = handler(target as ColorTarget, prop);
-            if (result !== undefined) {
-              return result;
-            }
-          }
-        }
-
-        // Handle semantic colors if we're directly under var.color
-        if (pathStr.startsWith("color.") && currentPath.length === 2) {
-          const semanticResult = handleSemanticColorAccess(
+          return handleColorProperties(
             target as ColorTarget,
             prop,
+            currentPath,
+            getColorMode,
           );
-          if (semanticResult !== undefined) {
-            return semanticResult;
-          }
         }
 
-        // Additional handlers that can be used if needed
-        const additionalHandlers: Record<
-          string,
-          (target: ColorTarget, prop: string) => unknown
-        > = {
-          font: handleFontPresetAccess,
-          spacing: handleSpacingScaleAccess,
-          radius: handleBorderRadiusAccess,
-          easing: handleEasingPresetAccess,
-        };
-
-        // Check if the property starts with any of the handler keys
-        for (const [prefix, handler] of Object.entries(additionalHandlers)) {
-          if (prop.startsWith(prefix)) {
-            const result = handler(target as ColorTarget, prop);
-            if (result !== undefined) {
-              return result;
-            }
-          }
+        // Handle style-related properties
+        const styleResult = handleStyleProperties(target as ColorTarget, prop);
+        if (styleResult !== undefined) {
+          return styleResult;
         }
 
-        // Return undefined for undefined or null targets
-        if (target === undefined || target === null) {
-          return undefined;
-        }
-
-        const value = target[prop];
-
-        // Return undefined for undefined or null properties
-        if (value === undefined || value === null) {
-          return undefined;
-        }
-
-        // Wrap objects in proxy with updated path
-        if (typeof value === "object") {
-          return createSafeThemeProxy(value as ThemeObject, currentPath);
-        }
-
-        return value;
+        // Handle nested objects and default values
+        return handleDefaultAccess(target, prop, currentPath, getColorMode);
       }
     },
   };
 
   return new Proxy(obj || {}, handler);
 };
+
+// Helper functions for proxy handling
+function handleColorProperties(
+  target: ColorTarget,
+  prop: string,
+  currentPath: string[],
+  getColorMode?: () => ColorMode,
+) {
+  // Try specialized color handlers first
+  const colorHandlerFunctions = [
+    colorHandlers.handleShadeAccess,
+    colorHandlers.handleSchemeAccess,
+    colorHandlers.handleContrastRatioAccess,
+  ];
+
+  for (const handler of colorHandlerFunctions) {
+    const result = handler(target, prop, getColorMode);
+    if (result !== undefined) {
+      return result;
+    }
+  }
+
+  // Handle direct color access for properties at color level (e.g., color.primary)
+  if (currentPath.length === 2) {
+    const directResult = colorHandlers.handleDirectColorAccess(
+      target,
+      prop,
+      getColorMode,
+    );
+    if (directResult !== undefined) {
+      return directResult;
+    }
+
+    // Handle semantic colors
+    const semanticResult = colorHandlers.handleSemanticColorAccess(
+      target,
+      prop,
+      getColorMode,
+    );
+    if (semanticResult !== undefined) {
+      return semanticResult;
+    }
+  }
+
+  return undefined;
+}
+
+function handleStyleProperties(target: ColorTarget, prop: string) {
+  const styleHandlerMap: Record<
+    string,
+    (target: ColorTarget, prop: string) => unknown
+  > = {
+    font: styleHandlers.handleFontPresetAccess,
+    spacing: styleHandlers.handleSpacingScaleAccess,
+    radius: styleHandlers.handleBorderRadiusAccess,
+    easing: styleHandlers.handleEasingPresetAccess,
+  };
+
+  for (const [prefix, handler] of Object.entries(styleHandlerMap)) {
+    if (prop.startsWith(prefix)) {
+      const result = handler(target, prop);
+      if (result !== undefined) {
+        return result;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function handleDefaultAccess(
+  target: ThemeObject,
+  prop: string,
+  currentPath: string[],
+  getColorMode?: () => ColorMode,
+) {
+  // Return undefined for undefined or null targets
+  if (target === undefined || target === null) {
+    return undefined;
+  }
+
+  const value = target[prop];
+
+  // Return undefined for undefined or null properties
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  // Wrap objects in proxy with updated path
+  if (typeof value === "object") {
+    return createSafeThemeProxy(
+      value as ThemeObject,
+      currentPath,
+      getColorMode,
+    );
+  }
+
+  return value;
+}
 
 export function useTheme(): ThemeContextType {
   const context = useContext(ThemeContext);

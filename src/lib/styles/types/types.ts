@@ -27,6 +27,15 @@ export type EasingPreset =
 export type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
 // Color modes
 export type ColorMode = "light" | "dark" | "system";
+
+// Mode-specific color definition
+export type ModeSpecificColor = {
+  light: string;
+  dark: string;
+};
+
+// Color definition can be either unified or mode-specific
+export type ColorDefinition = string | ModeSpecificColor;
 // Color shade range (5% increments from 0-100)
 export type ShadeNumber =
   | 0
@@ -110,21 +119,27 @@ export interface CssContext {
 // Define the comprehensive theme context type
 export interface ThemeContext {
   var: {
-    // Base theme settings
-    colorMode?: ColorMode;
-
-    // Color settings (base colors)
+    // Color settings (base colors) - now support mode-specific colors
     color: {
-      primary: string;
-      secondary: string;
-      accent: string;
-      neutral: string;
-      base: string;
-      info: string;
-      success: string;
-      warning: string;
-      error: string;
-      [key: string]: string;
+      primary: ColorDefinition;
+      secondary: ColorDefinition;
+      accent: ColorDefinition;
+      neutral: ColorDefinition;
+      base: ColorDefinition;
+      info: ColorDefinition;
+      success: ColorDefinition;
+      warning: ColorDefinition;
+      error: ColorDefinition;
+
+      // Semantic colors
+      // Always use semantic tokens in components (text, background, border, etc.). Under the hood, map them to primary, neutral, etc.
+      text?: ColorDefinition;
+      background?: ColorDefinition;
+      surface?: ColorDefinition;
+      border?: ColorDefinition;
+      muted?: ColorDefinition;
+
+      [key: string]: ColorDefinition | undefined;
     };
 
     // Typography settings

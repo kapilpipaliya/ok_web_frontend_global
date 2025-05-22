@@ -9,7 +9,10 @@ import {
 
 import type {
   ColorAdjustments,
+  ColorDefinition,
+  ColorMode,
   ColorScheme,
+  ModeSpecificColor,
   ShadeNumber,
 } from "~/lib/styles/types/types";
 
@@ -23,6 +26,38 @@ export function formatOklchString(
     return undefined;
   }
   return formatCss(oklchColor);
+}
+
+/**
+ * Checks if a color definition is mode-specific
+ */
+export function isModeSpecificColor(
+  color: ColorDefinition,
+): color is ModeSpecificColor {
+  return (
+    typeof color === "object" &&
+    color !== null &&
+    "light" in color &&
+    "dark" in color
+  );
+}
+
+/**
+ * Resolves a color definition to a specific color string based on the current mode
+ */
+export function resolveColorForMode(
+  colorDef: ColorDefinition,
+  mode: ColorMode,
+): string {
+  // Handle system mode by defaulting to light
+  const resolvedMode = mode === "system" ? "light" : mode;
+
+  if (isModeSpecificColor(colorDef)) {
+    return colorDef[resolvedMode];
+  }
+
+  // If it's a unified color, return it as-is
+  return colorDef as string;
 }
 
 /**

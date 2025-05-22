@@ -1,10 +1,9 @@
 import type {
-  ColorMode,
   EasingPreset,
   SpacingScale,
 } from "~/lib/styles/types/types";
 
-// Default color constants
+// Default color constants - Light mode
 export const DEFAULT_PRIMARY = "oklch(0.57 0.19 250)"; // Blue
 export const DEFAULT_SECONDARY = "oklch(0.55 0.05 250)"; // Slate
 export const DEFAULT_ACCENT = "oklch(0.75 0.18 80)"; // Amber
@@ -15,9 +14,19 @@ export const DEFAULT_SUCCESS = "oklch(0.7 0.15 160)"; // Emerald
 export const DEFAULT_WARNING = "oklch(0.7 0.2 60)"; // Orange
 export const DEFAULT_ERROR = "oklch(0.65 0.25 25)"; // Red
 
+// Default color constants - Dark mode
+export const DEFAULT_PRIMARY_DARK = "oklch(0.7 0.15 250)"; // Brighter blue
+export const DEFAULT_SECONDARY_DARK = "oklch(0.65 0.08 250)"; // Brighter slate
+export const DEFAULT_ACCENT_DARK = "oklch(0.8 0.15 80)"; // Brighter amber
+export const DEFAULT_NEUTRAL_DARK = "oklch(0.75 0.12 120)"; // Less saturated lime
+export const DEFAULT_BASE_DARK = "oklch(0.15 0.05 250)"; // Dark gray
+export const DEFAULT_INFO_DARK = "oklch(0.75 0.12 220)"; // Brighter sky blue
+export const DEFAULT_SUCCESS_DARK = "oklch(0.75 0.12 160)"; // Brighter emerald
+export const DEFAULT_WARNING_DARK = "oklch(0.8 0.18 60)"; // Brighter orange
+export const DEFAULT_ERROR_DARK = "oklch(0.75 0.22 25)"; // Brighter red
+
 // Default theme values
 export const DEFAULT_THEME = {
-  colorMode: "light" as ColorMode,
   color: {
     primary: DEFAULT_PRIMARY,
     secondary: DEFAULT_SECONDARY,
