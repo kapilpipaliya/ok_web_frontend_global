@@ -105,7 +105,8 @@ export function PageView(
       get(target, key) {
         if (key === "props") {
           return values();
-        } else if (key === "index") {
+        }
+        if (key === "index") {
           return 0;
         }
         return target[key];

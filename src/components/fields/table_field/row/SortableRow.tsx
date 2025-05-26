@@ -10,7 +10,6 @@ import {
   useFormContext,
 } from "../../../form/context/FormContext";
 import { DisplayProperty } from "../cell/DisplayProperty";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -71,7 +70,7 @@ export const SortableRow = (
     <>
       <As
         as="tr"
-        css={css`
+        css={`return \`._id {
         border-bottom: 1px solid #dddddd;
         border-radius: 10px;
         text-align: center;
@@ -89,7 +88,7 @@ export const SortableRow = (
             ? "2px solid green"
             : "1px solid #ddd"
         };
-      `}
+      }\`;`}
         draggable={true}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -99,55 +98,55 @@ export const SortableRow = (
         <td>
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   display: flex;
   align-items: center;
   justify-content: center;
-`}
+}\`;`}
           >
             <IconButton
-              css={css`
+              css={`return \`._id {
   cursor: grab;
   background-color: transparent;
   border: none;
-`}
+}\`;`}
               icon="material-symbols:drag-indicator"
-              iconCss={css`transition: transform 2s ease-in-out`}
+              iconCss={`return \`._id {transition: transform 2s ease-in-out}\`;`}
               size={20}
             />
             <Show when={expandVertex()}>
               <IconButton
-                css={css`
+                css={`return \`._id {
   cursor: pointer;
   background-color: transparent;
   border: none;
-`}
+}\`;`}
                 icon={expanded() ? "ph:caret-right" : "ph:caret-down"}
-                iconCss={css`transition: transform 2s ease-in-out`}
+                iconCss={`return \`._id {transition: transform 2s ease-in-out}\`;`}
                 onClick={toggleExpanded}
                 size={20}
               />
             </Show>
             <IconButton
-              css={css`
+              css={`return \`._id {
   color: \${args.theme.var.color.error};
   cursor: pointer;
   margin: 5px;
   background-color: transparent;
   border: none;
-`}
+}\`;`}
               icon="mingcute:delete-line"
               onClick={handleDeleteRow}
               size={20}
             />
             <Show when={expandVertex()}>
               <IconButton
-                css={css`
+                css={`return \`._id {
   color: green;
   cursor: pointer;
   background-color: transparent;
   border: none;
-`}
+}\`;`}
                 icon="icon-park-outline:plus"
                 onClick={handleAddNewRow}
                 size={20}
@@ -180,16 +179,16 @@ export const SortableRow = (
       <Show when={expandVertex() && expanded()}>
         <As
           as="tr"
-          css={css`
+          css={`return \`._id {
   border-bottom: 1px solid #dddddd;
   border-radius: 10px;
-`}
+}\`;`}
         >
           <As
             as="td"
-            css={css`
+            css={`return \`._id {
   padding-left: 15px;
-`}
+}\`;`}
             colspan={rowColumnsMetaAttrs().length + 2}
           >
             <DynamicComponent

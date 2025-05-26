@@ -8,7 +8,6 @@ import { HeaderWithDescription } from "~/components/styled/HeaderWithDescription
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import { STYLES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { Dynamic } from "solid-js/web";
 import { Loader } from "../Loader";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -76,9 +75,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
             }),
           },
           {
-            css: css`
+            css: `return \`._id {
   flex: 1;
-`,
+}\`;`,
             // @ts-expect-error - HeaderWithDescription is a function component
             componentName: HeaderWithDescription,
             props: () => ({
@@ -102,12 +101,12 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             attributes: [
                               {
                                 as: "div",
-                                css: css`
+                                css: `return \`._id {
   font-size: 14px;
-  color: #6B7280;
+  color: \${args.theme.var.color.text_l300};
   font-weight: 500;
   margin-bottom: 8px;
-`,
+}\`;`,
                                 componentName: "Html",
                                 props: (args: FunctionArgumentType) => ({
                                   text: (
@@ -128,29 +127,29 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                               {
                                 as: "div",
                                 componentName: "Html",
-                                css: (args) => css`
-                                padding: 12px;
-                                cursor: pointer;
-                                border-radius: 4px;
-                                margin-bottom: 8px;
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                                ${
+                                css: (args) => [
+                                  `return \`._id {
+                                    padding: 12px;
+                                    cursor: pointer;
+                                    border-radius: 4px;
+                                    margin-bottom: 8px;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 8px;
+                                  }\`;`,
                                   selectedMenu() ===
                                   (args.contextData.menuItems as MenuItem).id
-                                    ? `
-                                      background-color: ${args.theme.var.color.primary};
-                                      color: ${args.theme.var.color.base_10};
-                                    `
-                                    : `
-                                      color: ${args.theme.var.color.base_820};
-                                      &:hover {
-                                        background-color: ${args.theme.var.color.primary_20};
-                                      }
-                                    `
-                                }
-                              `,
+                                    ? `return \`._id {
+                                        background-color: \${args.theme.var.color.primary};
+                                        color: \${args.theme.var.color.primary_text};
+                                      }\`;`
+                                    : `return \`._id {
+                                        color: \${args.theme.var.color.text_d700};
+                                        &:hover {
+                                          background-color: \${args.theme.var.color.primary_l800};
+                                        }
+                                      }\`;`,
+                                ],
                                 props: (args: FunctionArgumentType) => ({
                                   hide:
                                     (args.contextData.menuItems as MenuItem)
@@ -195,9 +194,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                             }),
                           },
                         ],
-                        css: css`
+                        css: `return \`._id {
   margin-bottom: 16px;
-`,
+}\`;`,
                         componentName: "Html",
                         props: (args: FunctionArgumentType) => ({
                           show: (
@@ -219,10 +218,10 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                 ],
                 css: [
                   STYLES.overflowCss,
-                  css`
+                  `return \`._id {
   height:calc(100vh - 140px);
-  border-right:1px solid #eee;
-`,
+  border-right:1px solid \${args.theme.var.color.border};
+}\`;`,
                 ],
                 componentName: "Html",
               },
@@ -248,18 +247,18 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                     }),
                   },
                 ],
-                css: css`
+                css: `return \`._id {
   flex: 1;
   padding: 6px;
-`,
+}\`;`,
                 componentName: "Html",
               },
             ],
-            css: css`
+            css: `return \`._id {
   display: grid;
   grid-template-columns: 250px 1fr;
   padding: 6px;
-`,
+}\`;`,
             componentName: "Html",
           },
         ],

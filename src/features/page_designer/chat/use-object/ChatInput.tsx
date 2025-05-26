@@ -14,7 +14,6 @@ import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
 import { STYLES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { MultiSelectField, type Option } from "~/components/styled/MultiSelect";
 import { PromptsMenu } from "./PromptsMenu";
@@ -49,22 +48,22 @@ export function ChatInput(props: ChatInputProps) {
   return (
     <As
       as="form"
-      css={css`
-  background: white;
-  border-top: 1px solid \${args.theme.var.color.base_10};
+      css={`return \`._id {
+  background: \${args.theme.var.color.background_l100};
+  border-top: 1px solid \${args.theme.var.color.border};
   padding: 12px;
   margin-bottom: 4px;
   border-radius: 0 0 8px 8px;
-`}
+}\`;`}
       onSubmit={handleSubmit}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   flex-direction: column;
   gap: 12px;
-`}
+}\`;`}
       >
         <ModelSelector
           isLoading={props.isLoading}
@@ -77,32 +76,36 @@ export function ChatInput(props: ChatInputProps) {
         />
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   display: flex;
   gap: 8px;
-`}
+}\`;`}
         >
           <As
             as="textarea"
-            css={css`
+            css={`return \`._id {
   display: flex;
   padding: 12px;
-  border: 1px solid \${args.theme.var.color.base_10};
+  border: 1px solid \${args.theme.var.color.border};
   border-radius: 8px;
-  disabled: opacity;
-  disabled: cursor;
+  color: \${args.theme.var.color.text};
   min-height: 48px;
   resize: vertical;
   width: 100%;
   font-size: 14px;
-  background: \${args.theme.var.color.base_2};
+  background: \${args.theme.var.color.background_l100};
   transition: border-color 0.2s;
   
   &:focus {
-    border-color: \${args.theme.var.color.base_20};
+    border-color: \${args.theme.var.color.primary};
     outline: none;
   }
-`}
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}\`;`}
             disabled={props.isLoading()}
             onChange={props.onInputChange}
             onKeyDown={(e) => {
@@ -130,23 +133,23 @@ export function ChatInput(props: ChatInputProps) {
           />
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
               display: flex;
               gap: 8px;
-            `}
+            }\`;`}
           >
             <IconButton
               disabled={props.isLoading()}
-              css={css`
+              css={`return \`._id {
                 background-color: transparent;
                 border: none;
                 transition: color 0.2s;
-                color: \${args.theme.var.color.base_30};
+                color: \${args.theme.var.color.text_l700};
                 
                 &:hover:not(:disabled) {
-                  color: \${args.theme.var.color.base_50};
+                  color: \${args.theme.var.color.text_l500};
                 }
-              `}
+              }\`;`}
               icon="ph:list"
               onClick={() => props.onExamplesToggle(!props.showExamples())}
               ref={props.examplesButtonRef}
@@ -154,17 +157,17 @@ export function ChatInput(props: ChatInputProps) {
               title="Show Examples"
             />
             <IconButton
-              css={css`
+              css={`return \`._id {
                 background-color: transparent;
                 border: none;
                 cursor: pointer;
                 transition: color 0.2s;
-                color: \${args.theme.var.color.base_30};
+                color: \${args.theme.var.color.text_l700};
                 
                 &:hover:not(:disabled) {
-                  color: \${args.theme.var.color.base_50};
+                  color: \${args.theme.var.color.text_l500};
                 }
-              `}
+              }\`;`}
               disabled={props.isLoading()}
               icon="ph:paper-plane-right"
               onClick={(e) => handleSubmit(e as unknown as SubmitEvent)}
@@ -200,23 +203,23 @@ function FileInput(props: {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   gap: 8px;
-`}
+}\`;`}
     >
       <IconButton
-        css={css`
+        css={`return \`._id {
           cursor: pointer;
           background-color: transparent;
           border: none;
           transition: color 0.2s;
-          color: \${args.theme.var.color.base_40};
+          color: \${args.theme.var.color.text_d600};
           
           &:hover {
-            color: \${args.theme.var.color.base_60};
+            color: \${args.theme.var.color.text_l400};
           }
-        `}
+        }\`;`}
         icon="ph:paperclip"
         onClick={() => props.ref?.click()}
         size={22}
@@ -224,9 +227,9 @@ function FileInput(props: {
       />
       <As
         as="input"
-        css={css`
+        css={`return \`._id {
   display: none;
-`}
+}\`;`}
         multiple
         onChange={(e) =>
           props.onFilesChange(e.currentTarget.files ?? undefined)
@@ -237,47 +240,47 @@ function FileInput(props: {
       <Show when={props.files()}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 8px;
-`}
+}\`;`}
         >
           <For each={Array.from(props.files()!)}>
             {(file) => (
               <As
                 as="div"
-                css={css`
+                css={`return \`._id {
   position: relative;
   transition: transform 0.2s;
   
   &:hover {
     transform: scale(1.05);
   }
-`}
+}\`;`}
               >
                 <Switch
                   fallback={
                     <As
                       as="div"
-                      css={css`
+                      css={`return \`._id {
   width: 54px;
   height: 54px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: \${args.theme.var.color.base_8};
+  background: \${args.theme.var.color.background_l100};
   border-radius: 6px;
-  border: 1px solid \${args.theme.var.color.base_16};
+  border: 1px solid \${args.theme.var.color.border};
   overflow: hidden;
-`}
+}\`;`}
                     >
                       <As
                         as="span"
-                        css={css`
+                        css={`return \`._id {
   font-size: 24px;
-`}
+}\`;`}
                       >
                         📄
                       </As>
@@ -288,48 +291,48 @@ function FileInput(props: {
                     <As
                       as="img"
                       alt={file.name}
-                      css={css`
+                      css={`return \`._id {
   width: 54px;
   height: 54px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid \${args.theme.var.color.base_16};
-`}
+  border: 1px solid \${args.theme.var.color.border};
+}\`;`}
                       src={URL.createObjectURL(file)}
                     />
                   </Match>
                   <Match when={file.type.startsWith("video/")}>
                     <As
                       as="video"
-                      css={css`
+                      css={`return \`._id {
   width: 54px;
   height: 54px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid \${args.theme.var.color.base_16};
-`}
+  border: 1px solid \${args.theme.var.color.border};
+}\`;`}
                       src={URL.createObjectURL(file)}
                     />
                   </Match>
                   <Match when={file.type.startsWith("audio/")}>
                     <As
                       as="div"
-                      css={css`
+                      css={`return \`._id {
   width: 54px;
   height: 54px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: \${args.theme.var.color.base_8};
+  background: \${args.theme.var.color.background_l100};
   border-radius: 6px;
-  border: 1px solid \${args.theme.var.color.base_16};
-`}
+  border: 1px solid \${args.theme.var.color.border};
+}\`;`}
                     >
                       <As
                         as="span"
-                        css={css`
+                        css={`return \`._id {
   font-size: 24px;
-`}
+}\`;`}
                       >
                         🎵
                       </As>
@@ -338,12 +341,12 @@ function FileInput(props: {
                 </Switch>
                 <IconButton
                   icon="ph:x-circle"
-                  css={css`
+                  css={`return \`._id {
                     position: absolute;
                     top: -6px;
                     right: -6px;
-                    background-color: \${args.theme.var.color.base_30};
-                    color: white;
+                    background-color: \${args.theme.var.color.text_l900};
+                    color: \${args.theme.var.color.background_l100};
                     border: none;
                     border-radius: 50%;
                     width: 20px;
@@ -353,9 +356,9 @@ function FileInput(props: {
                     justify-content: center;
                     
                     &:hover {
-                      background-color: \${args.theme.var.color.base_50};
+                      background-color: \${args.theme.var.color.text_l300};
                     }
-                  `}
+                  }\`;`}
                   onClick={() => {
                     const currentFiles = props.files();
                     if (currentFiles) {
@@ -399,14 +402,14 @@ function MessagesCount(props: {
     <Show when={props.chatMessages.length > 0}>
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 6px 10px;
-  background: \${args.theme.var.color.base_2};
+  background: \${args.theme.var.color.background_l100};
   border-radius: 6px;
-`}
+}\`;`}
       >
         <TooltipWrapper
           arrowCss={STYLES.tooltip.arrowCss}
@@ -416,7 +419,7 @@ function MessagesCount(props: {
               css={[
                 STYLES.overflowCss,
                 STYLES.tooltip.contentCss,
-                css`
+                `return \`._id {
   max-height: 600px;
   display: grid;
   grid-template-columns: auto 1fr;
@@ -424,7 +427,7 @@ function MessagesCount(props: {
   padding: 12px;
   min-width: 400px;
   width: 400px;
-`,
+}\`;`,
               ]}
             >
               <For each={props.chatMessages}>
@@ -432,18 +435,18 @@ function MessagesCount(props: {
                   <>
                     <As
                       as="span"
-                      css={css`
+                      css={`return \`._id {
   font-weight: bold;
-  color: \${args.theme.var.color.base_60};
-`}
+  color: \${args.theme.var.color.background_l400};
+}\`;`}
                     >
                       {msg.role}:
                     </As>
                     <As
                       as="span"
-                      css={css`
+                      css={`return \`._id {
   white-space: pre-wrap;
-`}
+}\`;`}
                     >
                       {msg.content}
                     </As>
@@ -452,50 +455,50 @@ function MessagesCount(props: {
               </For>
             </As>
           }
-          triggerCss={css`
-            color: \${args.theme.var.color.base_40};
+          triggerCss={`return \`._id {
+            color: \${args.theme.var.color.text_l200};
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 6px;
-          `}
+          }\`;`}
         >
           <As
             as="span"
-            css={css`
+            css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 6px;
-`}
+}\`;`}
           >
             <As
               as="span"
-              css={css`
+              css={`return \`._id {
                 font-size: 18px;
-              `}
+              }\`;`}
             >
               💬
             </As>
             <As
               as="span"
-              css={css`
+              css={`return \`._id {
                 font-weight: 500;
-              `}
+              }\`;`}
             >
               {props.chatMessages.length}
             </As>
           </As>
         </TooltipWrapper>
         <IconButton
-          css={css`
+          css={`return \`._id {
             background-color: transparent;
             border: none;
-            color: \${args.theme.var.color.base_30};
+            color: \${args.theme.var.color.text_l900};
             
             &:hover {
-              color: \${args.theme.var.color.base_50};
+              color: \${args.theme.var.color.text_l300};
             }
-          `}
+          }\`;`}
           icon="ph:trash"
           onClick={() => setShowDeleteConfirm(true)}
           ref={deleteButtonRef!}
@@ -509,48 +512,49 @@ function MessagesCount(props: {
           >
             <As
               as="div"
-              css={css`
+              css={`return \`._id {
   padding: 12px;
-  background: white;
+  background: \${args.theme.var.color.background_l100};
+  border: 1px solid \${args.theme.var.color.border};
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 280px;
-`}
+}\`;`}
             >
               <As
                 as="div"
-                css={css`
+                css={`return \`._id {
   display: flex;
   flex-direction: column;
   gap: 10px;
-`}
+}\`;`}
               >
                 <As
                   as="div"
-                  css={css`
+                  css={`return \`._id {
   padding: 4px;
   font-weight: 600;
   text-align: center;
-`}
+}\`;`}
                 >
                   Clear all messages?
                 </As>
                 <As
                   as="button"
-                  css={css`
+                  css={`return \`._id {
   text-align: center;
   padding: 8px;
-  background: #ef4444;
-  color: white;
+  background: \${args.theme.var.color.error};
+  color: \${args.theme.var.color.error_text};
   border-radius: 6px;
   transition: background 0.2s;
   border: none;
   font-weight: 500;
   
   &:hover {
-    background: #dc2626;
+    background: \${args.theme.var.color.error_l200};
   }
-`}
+}\`;`}
                   onClick={() => {
                     props.onClearMessages();
                     setShowDeleteConfirm(false);
@@ -560,19 +564,19 @@ function MessagesCount(props: {
                 </As>
                 <As
                   as="button"
-                  css={css`
+                  css={`return \`._id {
   text-align: center;
   padding: 8px;
-  background: \${args.theme.var.color.base_5};
+  background: \${args.theme.var.color.background_l100};
   border-radius: 6px;
-  border: 1px solid \${args.theme.var.color.base_10};
+  border: 1px solid \${args.theme.var.color.border};
   transition: background 0.2s;
   font-weight: 500;
   
   &:hover {
-    background: \${args.theme.var.color.base_10};
+    background: \${args.theme.var.color.border};
   }
-`}
+}\`;`}
                   onClick={() => setShowDeleteConfirm(false)}
                 >
                   Cancel
@@ -632,16 +636,18 @@ function ModelSelector(props: {
   // Convert the selected model to an Option format for MultiSelectField
   const selectedValues = () => {
     const currentModel = props.selectedModel();
-    if (!currentModel) return [];
+    if (!currentModel) {
+      return [];
+    }
 
     return [{ id: currentModel, label: currentModel }];
   };
 
   return (
     <MultiSelectField
-      css={css`
+      css={`return \`._id {
         min-width: 200px;
-      `}
+      }\`;`}
       childrenKey="children"
       optionValueKey="id"
       displayValueKey="label"

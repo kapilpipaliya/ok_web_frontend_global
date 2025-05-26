@@ -14,9 +14,7 @@ import { InsertButtons } from "~/features/page_attr_render/page_attr_dnd_wrapper
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getComponentLabel } from "../../functions/component/getComponentLabel";
 import { HideShowIcon } from "./HideShowIcon";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -51,12 +49,12 @@ export function AttrConfigIcons(
     >
       <As
         as="div"
-        css={(args: FunctionArgumentType) => css`
+        css={`return \`._id {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: ${args.theme.var.color.base_10};
-`}
+  background-color: \${args.theme.var.color.background_l100};
+}\`;`}
       >
         <Show when={isSelectedLayoutId(props.metaVertex.id)}>
           <InsertButtons item={props.metaVertex} size={iconSize} />

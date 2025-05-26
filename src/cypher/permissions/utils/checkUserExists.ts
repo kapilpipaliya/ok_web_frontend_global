@@ -18,9 +18,8 @@ export async function checkUserExists(
     if (userExists.records.length > 0) {
       const user = convertNodeToJson(userExists.records[0].get("u"));
       return { exists: true, user };
-    } else {
-      return { exists: false };
     }
+    return { exists: false };
   } catch (error) {
     console.error("Error checking if user exists:", error);
     return { exists: false };

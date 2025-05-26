@@ -12,7 +12,6 @@ import {
 
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
-import { css } from "~/lib/styles";
 import { As } from "../As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
@@ -123,7 +122,7 @@ export function FileUploader(props: FileUploaderProps) {
       >
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   background-position: center;
   background-size: cover;
   ${previewUrls().length === 0 ? "border:2px dashed #ccc" : ""}
@@ -132,7 +131,7 @@ export function FileUploader(props: FileUploaderProps) {
   min-height: 200px;
   position: relative;
   text-align: center;
-`}
+}\`;`}
           draggable={false}
           onClick={handleFullBoxClick}
           onDragOver={handleDragOver}
@@ -142,45 +141,45 @@ export function FileUploader(props: FileUploaderProps) {
             <Match when={files().length > 0 || previewUrls().length > 0}>
               <As
                 as="div"
-                css={css`
+                css={`return \`._id {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
   padding: 10px;
-`}
+}\`;`}
               >
                 <For each={files().length > 0 ? files() : [null]}>
                   {(file, index) => (
                     <As
                       as="div"
-                      css={css`
+                      css={`return \`._id {
   max-width: 200px;
   max-height: 200px;
   margin: 5px;
-`}
+}\`;`}
                     >
                       <Switch>
                         <Match when={file?.type.startsWith("image/")}>
                           <As
                             as="img"
                             alt="Media"
-                            css={css`
+                            css={`return \`._id {
   border-radius: 10px;
   max-height: 100%;
   max-width: 100%;
-`}
+}\`;`}
                             src={previewUrls()[index()]}
                           />
                         </Match>
                         <Match when={file?.type.startsWith("video/")}>
                           <As
                             as="video"
-                            css={css`
+                            css={`return \`._id {
   border-radius: 10px;
   max-height: 100%;
   max-width: 100%;
-`}
+}\`;`}
                             controls
                             src={previewUrls()[index()]}
                           />
@@ -189,11 +188,11 @@ export function FileUploader(props: FileUploaderProps) {
                           <As
                             as="img"
                             alt="Media"
-                            css={css`
+                            css={`return \`._id {
   border-radius: 10px;
   max-height: 100%;
   max-width: 100%;
-`}
+}\`;`}
                             src={previewUrls()[index()]}
                           />
                         </Match>

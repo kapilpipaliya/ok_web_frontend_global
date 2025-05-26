@@ -1,6 +1,5 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 import type { createStore } from "solid-js/store";
 
@@ -53,7 +52,7 @@ export function createTextField(
   return [
     {
       as: "div",
-      css: [SETTINGS_CONSTANTS.LABEL_CSS, css`margin-top:5px;`],
+      css: [SETTINGS_CONSTANTS.LABEL_CSS, "._id {margin-top:5px;"],
       componentName: "Html",
       text: label,
     },

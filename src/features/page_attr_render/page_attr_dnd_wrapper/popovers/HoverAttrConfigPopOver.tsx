@@ -6,7 +6,6 @@ import { iconMap } from "~/lib/ui/iconMap";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { ComponentName } from "../components/ComponentName";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -19,25 +18,25 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
     <As
       as="span"
       css={[
-        css`
+        `return \`._id {
   position: relative;
-`,
+}\`;`,
       ]}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
   background-color: \${args.theme.var.color.primary};
   bottom: 100%;
-  color: \${args.theme.var.color.base_5};
+  color: \${args.theme.var.color.text_l100};
   padding: 0.25rem;
   position: absolute;
   border-radius: 5px 5px 0px 0px;
   right: 0px;
   z-index: ${zIndex};
-`}
+}\`;`}
       >
         <As
           as={Icon}

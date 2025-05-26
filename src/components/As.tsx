@@ -3,7 +3,7 @@ import { Dynamic } from "solid-js/web";
 import { StyleRenderer } from "./StyleRenderer";
 
 import type { FunctionArgumentType } from "./form/type/FieldSchemaType";
-import { useTheme } from "~/lib/context/ThemeContext";
+import { useTheme } from "~/lib/theme/ThemeContext";
 import { processCssContent } from "~/lib/styles/processCss";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 import type { CssType } from "~/components/form/type/CssType";

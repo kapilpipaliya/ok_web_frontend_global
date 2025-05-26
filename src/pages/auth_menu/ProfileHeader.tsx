@@ -3,7 +3,6 @@ import { As } from "~/components/As";
 
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
 import { getProfileImageUrl } from "~/lib/graph/get/sync/user/getProfileImageUrl";
-import { css } from "~/lib/styles";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export interface ProfileHeaderProps {
@@ -20,42 +19,42 @@ export function ProfileHeader(): JSX.Element {
   return (
     <As
       as="li"
-      css={css`
+      css={`return \`._id {
   display: flex;
   margin-bottom: 5px;
   padding: 10px;
-`}
+}\`;`}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   height: 45px;
   width: 45px;
-`}
-        style={`background-size:cover; background-image: url(${getProfileImageUrl(graph)})`}
+}\`;`}
+        style={`background-size:cover; background-image: url(${getProfileImageUrl(graph)});`}
       />
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   margin-left: 10px;
   margin-right: 1rem;
-`}
+}\`;`}
       >
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   font-weight: bold;
   text-align: start;
-`}
+}\`;`}
         >
           {displayName()}
         </As>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   font-size: 14px;
   text-align: start;
-`}
+}\`;`}
         >
           {displayEmail()}
         </As>

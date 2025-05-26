@@ -1,43 +1,42 @@
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
-import { returnCSS } from "~/lib/styles";
 
 const content = [
   {
     as: "h1",
-    css: returnCSS`
+    css: `return \`._id {
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 1,
     text: "Email Change Successful",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 2,
     text: "Your email address has been successfully updated. This is now your primary email for account notifications and communications.",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 3,
     text: "If you need to make any additional changes to your account, please visit your account settings.",
   },
   {
     as: "a",
-    css: returnCSS`
+    css: `return \`._id {
       background-color: \${args.theme.var.color.primary};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.base_10};
+      color: \${args.theme.var.color.text_l900};
       cursor: pointer;
       display: inline-block;
       padding: 8px 16px;
@@ -45,7 +44,7 @@ const content = [
       &:hover {
         opacity: 0.9;
       }
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 4,
     props: `return {

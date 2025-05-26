@@ -16,7 +16,6 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 import { SchemaRenderer } from "../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../settings/constants";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
-import { css } from "~/lib/styles";
 import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
 import { createFormSubmitButton } from "~/pages/auth/functions/schema/createFormSubmitButton";
 import { createLinkButton } from "~/pages/auth/functions/schema/createLinkButton";
@@ -291,10 +290,10 @@ export function ForgotPasswordForm() {
         attributes: [
           {
             as: "div",
-            css: css`
+            css: `return \`._id {
   text-align: center;
   margin-bottom: 16px;
-`,
+}\`;`,
             componentName: "Html",
             text: `We've sent a verification code to ${userState.email || "your email"}. Please enter it below.`,
           },
@@ -398,19 +397,19 @@ export function ForgotPasswordForm() {
                     }),
                   },
                 ],
-                css: css`
+                css: `return \`._id {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-`,
+}\`;`,
                 componentName: "Html",
               },
             ],
-            css: css`
+            css: `return \`._id {
   position: relative;
-`,
+}\`;`,
             componentName: "Html",
           },
           getErrorSchema("newPassword"),
@@ -466,19 +465,19 @@ export function ForgotPasswordForm() {
                     }),
                   },
                 ],
-                css: css`
+                css: `return \`._id {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-`,
+}\`;`,
                 componentName: "Html",
               },
             ],
-            css: css`
+            css: `return \`._id {
   position: relative;
-`,
+}\`;`,
             componentName: "Html",
           },
           getErrorSchema("confirmPassword"),

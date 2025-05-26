@@ -14,8 +14,8 @@ import type { Edge } from "~/lib/graph/type/edge";
  */
 export function importGraphStructure(
   graphData: {
-    vertexes: Record<string, Vertex> | Array<Vertex>;
-    edges: Record<string, Edge> | Array<Edge>;
+    vertexes: Record<string, Vertex> | Vertex[];
+    edges: Record<string, Edge> | Edge[];
   },
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -62,7 +62,9 @@ export function importGraphStructure(
     const endId = vertexIdMap.get(edge.E);
 
     // Skip if we can't find the mapped IDs
-    if (!startId || !endId) continue;
+    if (!(startId && endId)) {
+      continue;
+    }
 
     const newEdge = {
       E: endId,

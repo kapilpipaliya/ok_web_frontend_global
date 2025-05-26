@@ -1,52 +1,51 @@
-import { returnCSS } from "~/lib/styles";
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 const content = [
   {
     as: "h1",
-    css: returnCSS`
+    css: `return \`._id {
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 1,
     text: "Account Deletion Request",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 2,
     text: "We've received a request to delete your account. Your account will be scheduled for deletion and will be permanently removed after 48 hours from now.",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 3,
     text: "During this 48-hour period, you will no longer be able to log in to your account. If you change your mind, please contact our support team immediately to cancel the deletion process.",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 4,
     text: "Please note that once your account is deleted, all your data will be permanently removed and cannot be recovered.",
   },
   {
     as: "a",
-    css: returnCSS`
+    css: `return \`._id {
       background-color: \${args.theme.var.color.primary};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.base_10};
+      color: \${args.theme.var.color.text_l900};
       cursor: pointer;
       display: inline-block;
       margin-top: 16px;
@@ -55,7 +54,7 @@ const content = [
       &:hover {
         opacity: 0.9;
       }
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 5,
     props: `return {

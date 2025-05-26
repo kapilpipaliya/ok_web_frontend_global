@@ -34,7 +34,6 @@ import { AttrConfigIcons } from "./AttrConfigIcons";
 import { HideShowIcon } from "./HideShowIcon";
 import { TreeItemContainer } from "./TreeItemContainer";
 import { TreeItemContent } from "./TreeItemContent";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { JsonEditorFieldComponent } from "../properties/JsonEditorField";
 import { IconButton } from "~/components/styled/IconButton";
@@ -64,6 +63,7 @@ export function LayoutTreeItem(
   }>,
 ) {
   const [graph, setGraph] = useGraph();
+
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
@@ -90,7 +90,7 @@ export function LayoutTreeItem(
   // Determine if this item should be shown based on search - optimized
   const shouldShowItem = createMemo(() => {
     // Always show if no search is active
-    if (!props.searchActive || !props.filterTree) {
+    if (!(props.searchActive && props.filterTree)) {
       return true;
     }
 
@@ -101,7 +101,7 @@ export function LayoutTreeItem(
 
   // Determine if this item is directly matched by the search - optimized
   const isDirectMatch = createMemo(() => {
-    if (!props.searchActive || !props.filterTree) {
+    if (!(props.searchActive && props.filterTree)) {
       return false;
     }
 
@@ -208,16 +208,16 @@ export function LayoutTreeItem(
       if (layoutStoreVertex()?.P.dragPosition !== "after") {
         const boxShadowProps = getDnDBoxShadowArgs(
           layoutStoreVertex()?.P.dragPosition,
-          "green",
+          "${args.theme.var.color.success}",
         );
         boxShadow = `box-shadow:${generateBoxShadow([boxShadowProps])};`;
       }
     }
 
     if (isSelectedLayoutId(props.metaVertex.id)) {
-      boxShadow += " background-color:rgb(197,221,255);";
+      boxShadow += ` background-color:\${args.theme.var.color.primary_l150};`;
     } else if (isSelectedHoverId(props.metaVertex.id)) {
-      boxShadow += " background-color:#F2EDED;";
+      boxShadow += ` background-color:\${args.theme.var.color.background_l150};`;
     }
 
     return boxShadow;
@@ -337,10 +337,10 @@ export function LayoutTreeItem(
   // Add search highlight styles
   const getHighlightStyle = createMemo(() => {
     if (isDirectMatch()) {
-      return css`
+      return `return \`._id {
         font-weight: bold;
-        background-color: rgba(237, 245, 255, 0.7);
-      `;
+        background-color: \${args.theme.var.color.primary_l100};
+      }\`;`;
     }
     return "";
   });
@@ -348,7 +348,7 @@ export function LayoutTreeItem(
   return (
     <Show when={shouldShowItem()}>
       <TreeItemContainer
-        css={[css`${getBorder()}`, getHighlightStyle()]}
+        css={[`return \`._id { ${getBorder()} }\`;`, getHighlightStyle()]}
         draggable={"true"}
         hasChildren={!!children().length}
         isDragOver={isActiveTargetItem()}
@@ -397,11 +397,11 @@ export function LayoutTreeItem(
               ICON_BUTTON_STYLES.baseCss,
               ICON_BUTTON_STYLES.defaultCss,
               ICON_BUTTON_STYLES.spacingCss,
-              css`
+              `return \`._id {
                 background-color: transparent;
                 border: none;
                 ${showJsonEditor() ? "color: ${args.theme.var.color.primary};" : ""}
-              `,
+              }\`;`,
             ]}
             icon="tabler:json"
             size={16}
@@ -438,13 +438,13 @@ export function LayoutTreeItem(
       <Show when={showJsonEditor()}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
             margin-left: 24px;
             margin-bottom: 8px;
             width: calc(100% - 24px);
             height: auto;
             overflow: visible;
-          `}
+          }\`;`}
         >
           <JsonEditorFieldComponent
             vertexId={props.metaVertex.id}
@@ -457,13 +457,13 @@ export function LayoutTreeItem(
       <Show when={isExpanded() && children().length > 0}>
         <As
           as="ul"
-          css={css`
+          css={`return \`._id {
               padding-left: 6px;
               padding-top: 5px;
               list-style: none;
               border-left: 1px ${getTreeItemBorder(props.parentIndex).style} ${getTreeItemBorder(props.parentIndex).color};
               margin: 0 0 0 4px;
-          `}
+          }\`;`}
         >
           <For each={children()}>
             {(vertex) => (
@@ -487,9 +487,9 @@ export function LayoutTreeItem(
       <Show when={isAfter()}>
         <As
           as="div"
-          css={css`
-  border: 1px solid #3b82f6;
-`}
+          css={`return \`._id {
+  border: 1px solid \${args.theme.var.color.primary};
+}\`;`}
         />
       </Show>
     </Show>

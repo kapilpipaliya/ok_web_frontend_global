@@ -9,7 +9,7 @@ import { ErrorBoundary, onMount, Suspense, createSignal, Show } from "solid-js";
 import { isServer } from "solid-js/web";
 
 import { createAppState } from "~/createAppState";
-import { ThemeProvider } from "./lib/context/ThemeProvider";
+import { ThemeProvider } from "./lib/theme/ThemeProvider";
 import { logError } from "./lib/error/errorLogger";
 import { setupGlobalErrorHandlers } from "./lib/error/globalErrorHandler";
 import { toastValue } from "./toastValue";

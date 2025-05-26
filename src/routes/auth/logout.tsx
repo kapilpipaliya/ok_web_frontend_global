@@ -3,7 +3,6 @@ import { onMount } from "solid-js";
 
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { Loader } from "~/components/Loader";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
@@ -37,31 +36,31 @@ export default function Logout() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
         min-height: 100vh;
-        background-color: \${args.theme.var.color.base_20};
+        background-color: \${args.theme.var.color.background};
         padding: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
-      `}
+      }\`;`}
     >
       <As
         as="div"
-        css={css`
-          background-color: \${args.theme.var.color.base_10};
+        css={`return \`._id {
+          background-color: \${args.theme.var.color.background_l100};
           padding: 32px;
           border-radius: 8px;
           box-shadow: 1px 2px 3px \${args.theme.var.color.primary};
           text-align: center;
-        `}
+        }\`;`}
       >
         <As
           as="h2"
-          css={css`
+          css={`return \`._id {
             margin-bottom: 16px;
-            color: \${args.theme.var.color.base};
-          `}
+            color: \${args.theme.var.color.text};
+          }\`;`}
         >
           Logging out...
         </As>

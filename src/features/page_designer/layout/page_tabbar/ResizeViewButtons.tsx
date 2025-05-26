@@ -5,9 +5,7 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { IconButton } from "~/components/styled/IconButton";
 import { DIMENSIONS } from "~/components/styled/ResizableDivView";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { headerIconButtonCss } from "~/pages/settings/constants";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -133,35 +131,36 @@ export const ResizeViewButtons = (props: {
     }
   };
 
-  const commonInputCss = (args: FunctionArgumentType) => css`
-    border: 1px solid ${args.theme.var.color.base_40};
+  const commonInputCss = `return \`._id {
+    border: 1px solid \${args.theme.var.color.border};
     border-radius: 5px;
     padding: 0.15rem;
     width: 4.5rem;
     height: 28px;
-    background-color: ${args.theme.var.color.base_2};
-  `;
+    background-color: \${args.theme.var.color.background_l100};
+    color: \${args.theme.var.color.text};
+  }\`;`;
 
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   gap: 2px;
   align-items: center;
   font-size: 0.8rem;
-`}
+}\`;`}
     >
       <As
         as="select"
-        css={(args: FunctionArgumentType) => css`
-  border: 1px solid ${args.theme.var.color.base_40};
+        css={`return \`._id {
+  border: 1px solid \${args.theme.var.color.border};
   border-radius: 5px;
   padding: 0.15rem;
   height: 28px;
-  background-color: ${args.theme.var.color.base_2};
-  color: ${args.theme.var.color.base};
-`}
+  background-color: \${args.theme.var.color.background_l100};
+  color: \${args.theme.var.color.text};
+}\`;`}
         onChange={(e) => handleDimensionSelect(e.target.value)}
         title="Select size"
         value={viewVertex()?.P.view?.toLowerCase()}
@@ -174,11 +173,11 @@ export const ResizeViewButtons = (props: {
 
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   gap: 0.25rem;
   align-items: center;
-`}
+}\`;`}
       >
         <As
           as="input"
@@ -193,10 +192,10 @@ export const ResizeViewButtons = (props: {
         />
         <As
           as="span"
-          css={css`
+          css={`return \`._id {
   display: flex;
   align-items: center;
-`}
+}\`;`}
         >
           ×
         </As>
@@ -216,7 +215,7 @@ export const ResizeViewButtons = (props: {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:device-mobile-speaker"
-        iconCss={css`transition:transform 0.2s; ${isLandscape() ? "transform: rotate(90deg);" : ""}`}
+        iconCss={`return \`._id {transition:transform 0.2s; ${isLandscape() ? "transform: rotate(90deg);" : ""}}\`;`}
         onClick={toggleOrientation}
         size={18}
         title={isLandscape() ? "Switch to Portrait" : "Switch to Landscape"}

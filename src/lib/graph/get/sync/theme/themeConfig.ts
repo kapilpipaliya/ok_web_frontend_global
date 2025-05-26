@@ -1,5 +1,5 @@
-import { DEFAULT_THEME } from "../../../../styles/constants";
-import { deepMerge } from "../../../../context/deepMerge";
+import { DEFAULT_THEME } from "~/lib/styles/constants";
+import { deepMerge } from "~/lib/theme/deepMerge";
 
 import type { ThemeContext } from "~/lib/styles/types/types";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -7,12 +7,12 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 export function themeConfig(themeVertex?: Vertex): Partial<ThemeContext> {
   // Start with a base theme object with the default theme
   const result: Partial<ThemeContext> = {
-    var: deepMerge({}, DEFAULT_THEME),
+    var: deepMerge({}, DEFAULT_THEME) as ThemeContext["var"],
   };
 
   // Get config from themeVertex
   const vertexData = themeVertex?.P?.data;
-  if (!vertexData || !vertexData.trim()) {
+  if (!vertexData?.trim()) {
     return result;
   }
 
@@ -42,9 +42,9 @@ export function themeConfig(themeVertex?: Vertex): Partial<ThemeContext> {
   // Handle properties inside the "var" key using deep merge
   if (graphConfig.var) {
     result.var = deepMerge(
-      result.var || {},
-      graphConfig.var as Record<string, unknown>,
-    );
+      result.var || ({} as ThemeContext["var"]),
+      graphConfig.var as ThemeContext["var"],
+    ) as ThemeContext["var"];
   }
 
   // Keep non-var properties at the root level

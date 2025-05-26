@@ -7,13 +7,14 @@ import {
   wcagLuminance,
 } from "culori";
 
+// https://github.com/color-js/
+
 import type {
   ColorAdjustments,
   ColorDefinition,
   ColorMode,
   ColorScheme,
   ModeSpecificColor,
-  ShadeNumber,
 } from "~/lib/styles/types/types";
 
 /**
@@ -113,15 +114,12 @@ export function parseColorName(colorName: string): string | undefined {
 }
 
 /**
- * Returns the color at the specified shade level (0-1000) in OKLCH format
- * 0 = white, 100 = base color, 1000 = black
+ * Returns a light shade of the color (1-1000)
+ * l1 = very close to base color, l1000 = white
  */
-export function getColorShade(
-  baseColor: string,
-  shade: ShadeNumber | number,
-): string {
-  // Ensure shade is between 0 and 1000
-  const safeShade = Math.max(0, Math.min(1000, shade));
+export function getLightShade(baseColor: string, shade: number): string {
+  // Ensure shade is between 1 and 1000
+  const safeShade = Math.max(1, Math.min(1000, shade));
 
   // Get the base color in OKLCH
   const baseOklch = oklch(baseColor);
@@ -129,36 +127,40 @@ export function getColorShade(
     return baseColor;
   }
 
-  if (safeShade === 100) {
-    // Return the base color if shade is 100
-    return formatOklchString(baseOklch) || baseColor;
+  // Linearly interpolate from base color to white
+  const ratio = safeShade / 1000;
+  const white = oklch("white");
+  if (!white) {
+    return baseColor;
   }
-  if (safeShade < 100) {
-    // For shades lighter than the base color (0-99)
-    // Linearly interpolate from white (0) to base color (100)
-    const ratio = safeShade / 100;
-    const white = oklch("white");
-    if (!white) {
-      return baseColor;
-    }
 
-    const interpolated = interpolate([white, baseOklch])(ratio);
-    // Make sure we convert to OKLCH if not already
-    const oklchInterpolated = oklch(interpolated);
-    return formatOklchString(oklchInterpolated) || baseColor;
+  const interpolated = interpolate([baseOklch, white], "oklch")(ratio);
+  return formatOklchString(interpolated) || baseColor;
+}
+
+/**
+ * Returns a dark shade of the color (1-1000)
+ * d1 = very close to base color, d1000 = black
+ */
+export function getDarkShade(baseColor: string, shade: number): string {
+  // Ensure shade is between 1 and 1000
+  const safeShade = Math.max(1, Math.min(1000, shade));
+
+  // Get the base color in OKLCH
+  const baseOklch = oklch(baseColor);
+  if (!baseOklch) {
+    return baseColor;
   }
-  // For shades darker than the base color (101-1000)
-  // Linearly interpolate from base color (100) to black (1000)
-  const ratio = (safeShade - 100) / 900;
+
+  // Linearly interpolate from base color to black
+  const ratio = safeShade / 1000;
   const black = oklch("black");
   if (!black) {
     return baseColor;
   }
 
-  const interpolated = interpolate([baseOklch, black])(ratio);
-  // Make sure we convert to OKLCH if not already
-  const oklchInterpolated = oklch(interpolated);
-  return formatOklchString(oklchInterpolated) || baseColor;
+  const interpolated = interpolate([baseOklch, black], "oklch")(ratio);
+  return formatOklchString(interpolated) || baseColor;
 }
 
 /**
@@ -304,6 +306,7 @@ export function meetsAccessibilityStandards(
 
 /**
  * Get the most readable color from a list of options against a background
+ * mostReadable
  */
 export function getContrastColor(
   bgColor: string,

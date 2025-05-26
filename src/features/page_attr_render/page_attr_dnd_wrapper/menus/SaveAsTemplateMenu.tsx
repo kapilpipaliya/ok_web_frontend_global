@@ -21,7 +21,6 @@ import {
   parentTemplateAttribute,
 } from "~/lib/meta/base/Comp";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -37,35 +36,34 @@ function TemplateNameInput(props: {
     <div>
       <As
         as="label"
-        css={css`
-  color: #3b82f6;
+        css={`return \`._id {
+  color: \${args.theme.var.color.primary};
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-`}
+}\`;`}
         for="templateName"
       >
         {props.label} Name
       </As>
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   margin-top: 2px;
-`}
+}\`;`}
       >
         <As
           as="input"
-          css={css`
-  border-radius: 0.375rem;
-  border-width: 0;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  color: #3b82f6;
-  display: block;
-  font-size: 0.875rem;
-  padding-left: 0.75rem; padding-right: 0.75rem;
-  padding-top: 0.375rem; padding-bottom: 0.375rem;
-  width: 100%;
-`}
+          css={`return \`._id {
+              border-radius: 0.375rem;
+              border-width: 0;
+              box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+              color: \${args.theme.var.color.primary};
+              display: block;
+              font-size: 0.875rem;
+              padding: 0.375rem 0.75rem;
+              width: 100%;
+          }\`;`}
           id="templateName"
           onChange={(e) => props.onInput(e.target.value)}
           placeholder={`New ${props.label} Name`}
@@ -85,17 +83,17 @@ function SaveInCurrentPageCheckbox(props: {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   margin-top: 2px;
-`}
+}\`;`}
     >
       <As
         as="label"
-        css={css`
+        css={`return \`._id {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-`}
+}\`;`}
       >
         <As
           as="input"
@@ -105,9 +103,9 @@ function SaveInCurrentPageCheckbox(props: {
         />
         <As
           as="span"
-          css={css`
+          css={`return \`._id {
   font-size: 0.875rem;
-`}
+}\`;`}
         >
           Save in current page
         </As>
@@ -130,7 +128,7 @@ export function SaveAsTemplateMenu(
   const [graph, setGraph] = useGraph();
   const [templateName, setTemplateName] = createSignal("");
   const [error, setError] = createSignal("");
-  const [saveInCurrentPage, setSaveInCurrentPage] = createSignal(false);
+  const [saveInCurrentPage, _setSaveInCurrentPage] = createSignal(false);
   const { showSuccessToast, showWarningToast } = useToast();
   const label = () => props.saveAsLabel.replace(/Page$/, "");
 
@@ -216,9 +214,9 @@ export function SaveAsTemplateMenu(
 
   return (
     <DropdownMenu
-      css={css`
+      css={`return \`._id {
   padding: 0.50rem;
-`}
+}\`;`}
       onClickOutside={props.onClickOutside}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
@@ -247,9 +245,9 @@ export function SaveAsTemplateMenu(
       <Show when={error()}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   color: \${args.theme.var.color.error};
-`}
+}\`;`}
         >
           {error()}
         </As>

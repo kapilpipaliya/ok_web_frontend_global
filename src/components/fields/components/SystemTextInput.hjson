@@ -14,18 +14,17 @@ const props = args.contextData.props || {};
 const as = props.type === "textarea" ? "textarea" : "input";
 const type = props.type === "textarea" ? undefined : (props.type || "text");
 const placeholder = props.placeholder || "";
-const disabled = props.disabled || false;
-const readOnly = props.readOnly || false;
+const disabled = props.disabled;
+const readOnly = props.readOnly;
 const originalValue =args.data?.P[args.contextData.props.key];
 const value = props.type === "checkbox" 
   ? { checked: !!originalValue } 
   : { value: originalValue !== undefined ? originalValue : "" };
 const maxLength = props.maxLength;
 const minLength = props.minLength;
-const required = props.required || false;
+const required = props.required;
 const rows = props.rows || (props.type === "textarea" ? 3 : undefined);
 const error = props.error;
-const errorClass = props.errorClass;
 
 // Define the onChange handler
 const onChange = (event) => {
@@ -99,7 +98,6 @@ return {
   required,
   rows,
   error,
-  errorClass,
   onChange
 };
 ''',

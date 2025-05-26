@@ -18,7 +18,6 @@ import { useFormRefs } from "./functions/useFormRefs";
 import { useFormSubmit } from "./functions/useFormSubmit";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { validateFormData } from "./functions/validateFormData";
-import { css } from "~/lib/styles";
 import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -199,19 +198,19 @@ export function SignupForm() {
                         }),
                       },
                     ],
-                    css: css`
+                    css: `return \`._id {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-`,
+}\`;`,
                     componentName: "Html",
                   },
                 ],
-                css: css`
+                css: `return \`._id {
   position: relative;
-`,
+}\`;`,
                 componentName: "Html",
               },
               getErrorSchema("password"),
@@ -240,27 +239,27 @@ export function SignupForm() {
                   {
                     as: "div",
                     componentName: "Html",
-                    css: css`
+                    css: `return \`._id {
   margin-left: 8px;
   display: flex;
   align-items: center;
-`,
+}\`;`,
                     attributes: [
                       {
                         as: "span",
                         componentName: "Html",
-                        css: css`
-  color: \${args.theme.var.color.base};
-`,
+                        css: `return \`._id {
+  color: \${args.theme.var.color.text};
+}\`;`,
                         text: "I agree to the ",
                       },
                       {
                         as: "a",
                         componentName: "Html",
-                        css: css`
+                        css: `return \`._id {
   color: \${args.theme.var.color.primary};
   cursor: pointer;
-`,
+}\`;`,
                         props: () => ({
                           onClick: () => {
                             navigate("/terms");
@@ -271,17 +270,17 @@ export function SignupForm() {
                     ],
                   },
                 ],
-                css: css`
+                css: `return \`._id {
   display: flex;
   align-items: center;
   margin: 16px 0;
-`,
+}\`;`,
                 componentName: "Html",
               },
               getErrorSchema("termsAgreement"),
               {
                 as: "button",
-                css: [STYLES.button2Css, css`width:100%; margin-top:16px;`],
+                css: [STYLES.button2Css, "._id {width:100%; margin-top:16px;"],
                 componentName: "Html",
                 props: (options: SignupFormFunctionArgumentType) => ({
                   disabled: options.contextData.submitState[0]?.isLoading,
@@ -315,18 +314,18 @@ export function SignupForm() {
             attributes: [
               {
                 as: "span",
-                css: css`
-  color: \${args.theme.var.color.base};
-`,
+                css: `return \`._id {
+  color: \${args.theme.var.color.text};
+}\`;`,
                 componentName: "Html",
                 text: "Already have an account? ",
               },
               {
                 as: "a",
-                css: css`
+                css: `return \`._id {
   color: \${args.theme.var.color.primary};
   cursor: pointer;
-`,
+}\`;`,
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
@@ -336,12 +335,12 @@ export function SignupForm() {
                 text: "Sign in",
               },
             ],
-            css: css`
+            css: `return \`._id {
   text-align: center;
   margin-top: 16px;
-  border-top: 1px solid \${args.theme.var.color.base_20};
+  border-top: 1px solid \${args.theme.var.color.border};
   padding-top: 16px;
-`,
+}\`;`,
             componentName: "Html",
           },
         ],

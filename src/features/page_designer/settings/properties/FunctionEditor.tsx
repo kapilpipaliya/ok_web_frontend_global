@@ -14,7 +14,6 @@ import {
   formatJavaScriptCode,
 } from "~/lib/data_structure/string/formatUtils";
 import { validateFunction } from "~/lib/validation/validateFunction";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -22,13 +21,13 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 
 // Shared button styles
-const buttonStyles = (color: string) => css`
+const buttonStyles = (color: string) => `return \`._id {
   padding: 1px 4px;
   background-color: ${color};
-  color: \${args.theme.var.color.base_10};
+  color: \${args.theme.var.color.primary_text};
   border-radius: 1px;
   border: none;
-`;
+}\`;`;
 
 // Button components
 const EditorButton = (props: {
@@ -42,10 +41,10 @@ const EditorButton = (props: {
     as="button"
     css={[
       buttonStyles(props.color),
-      css`
+      `return \`._id {
       opacity: ${props.disabled ? "0.5" : "1"};
       cursor: ${props.disabled ? "not-allowed" : "pointer"};
-    `,
+    }\`;`,
     ]}
     onClick={props.onClick}
     title={props.title}
@@ -86,8 +85,9 @@ export function FunctionEditor(props: {
 
     // Default values based on keyName
     if (propertyKey() === "css") {
-      return `return \`._id {\n  \n}\`;`;
-    } else if (propertyKey() === "fns" || propertyKey() === "props") {
+      return "return `._id {\n  \n}`;";
+    }
+    if (propertyKey() === "fns" || propertyKey() === "props") {
       return "return {\n  \n}";
     }
 
@@ -153,10 +153,14 @@ export function FunctionEditor(props: {
   };
 
   const formatCode = async () => {
-    if (!editorRef) return;
+    if (!editorRef) {
+      return;
+    }
 
     const model = editorRef.getModel();
-    if (!model) return;
+    if (!model) {
+      return;
+    }
 
     try {
       const language = props.language?.toLowerCase() || "javascript";
@@ -225,20 +229,20 @@ export function FunctionEditor(props: {
       // Main container for all parts of EditorContent (editor, buttons, messages)
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
           display: flex;
           flex-direction: column;
           gap: 8px; /* Gap between resizable editor area and buttons below */
-        `}
+        }\`;`}
       >
         {/* Wrapper for the resizable editor and its handle */}
         <As
           as="div"
           ref={resizableEditorAreaRef}
-          css={css`
+          css={`return \`._id {
             position: relative;
             padding-bottom: 10px; /* Space FOR the resize handle */
-          `}
+          }\`;`}
         >
           <MonacoEditorWrapper
             error={!isFunctionValid()}
@@ -253,7 +257,7 @@ export function FunctionEditor(props: {
           <As
             as="div"
             onMouseDown={onMouseDownResize}
-            css={css`
+            css={`return \`._id {
               width: 100%;
               height: 10px; /* Height of the handle itself */
               cursor: ns-resize;
@@ -273,20 +277,20 @@ export function FunctionEditor(props: {
                 background-color: \${args.theme.var.color.textWeak};
                 border-radius: 1px;
               }
-            `}
+            }\`;`}
           />
         </As>
 
         {/* Buttons container - now follows the resizable editor area */}
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
             display: flex;
             gap: 4px;
-          `}
+          }\`;`}
         >
           <EditorButton
-            color={`\${args.theme.var.color.primary}`}
+            color={"${args.theme.var.color.primary}"}
             onClick={handleSave}
             disabled={!hasChanges()}
           >
@@ -294,7 +298,7 @@ export function FunctionEditor(props: {
           </EditorButton>
 
           <EditorButton
-            color={`\${args.theme.var.color.primary_70}`}
+            color={"${args.theme.var.color.primary_l300}"}
             onClick={formatCode}
             title="Format Code with Prettier"
           >
@@ -302,9 +306,9 @@ export function FunctionEditor(props: {
           </EditorButton>
 
           <Show when={isModalOpen()}>
-            <As as="div" css={css`margin-left: auto;`}>
+            <As as="div" css={`return \`._id { margin-left: auto; }\`;`}>
               <EditorButton
-                color={`\${args.theme.var.color.error_200}`}
+                color={"${args.theme.var.color.error_l800}"}
                 onClick={() => setIsModalOpen(false)}
               >
                 Cancel
@@ -317,10 +321,10 @@ export function FunctionEditor(props: {
         <Show when={!isFunctionValid()}>
           <As
             as="span"
-            css={css`
+            css={`return \`._id {
               color: \${args.theme.var.color.error};
               margin-top: 4px; 
-            `}
+            }\`;`}
           >
             Invalid Function
           </As>
@@ -331,15 +335,18 @@ export function FunctionEditor(props: {
 
   return (
     <>
-      <As as="div" css={css`margin-top: 5px;`}>
-        <As as="span" css={css`display: flex; align-items: center;`}>
+      <As as="div" css={`return \`._id { margin-top: 5px; }\`;`}>
+        <As
+          as="span"
+          css={`return \`._id { display: flex; align-items: center; }\`;`}
+        >
           {props.label}
           <IconButton
-            css={css`
+            css={`return \`._id {
               margin-left: 6px;
               background-color: transparent;
               border: none;
-            `}
+            }\`;`}
             icon="ph:arrow-square-out"
             onClick={(e) => {
               e.stopPropagation();
@@ -358,11 +365,11 @@ export function FunctionEditor(props: {
       >
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
             padding: 3px;
             width: 600px;
             height: 600px;
-          `}
+          }\`;`}
         >
           <EditorContent height="560px" />
         </As>

@@ -6,7 +6,6 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { headerIconButtonCss } from "~/pages/settings/constants";
 
 import { Label } from "./Label";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { IdAttr } from "~/lib/graph/type/idAttr";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -31,11 +30,11 @@ export function SelectPageField(
     return (
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 4px;
-`}
+}\`;`}
       >
         <span>{option.P.key}</span>
         <IconButton
@@ -53,9 +52,9 @@ export function SelectPageField(
 
   const meta = {
     P: {
-      css: css`
+      css: `return \`._id {
   display: flex;
-`,
+}\`;`,
       collection: `g:'Page'`,
       componentName: "Select",
       displayName: props.meta.P.displayName,
@@ -98,39 +97,39 @@ export function SelectPageField(
       css={`${
         props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined &&
         props.selectedLayout?.P[props.meta.P[IdAttr]] !== null
-          ? css`
+          ? `return \`._id {
   border: 2px solid #008000;
   border-bottom: none;
   border-top: none;
   padding: 2px 3px;
   border-radius: 5px;
-`
+}\`;`
           : ""
-      } ${css`
+      } ._id {
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}`}
+}`}
     >
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
   font-size: 15px;
   flex: 0.5;
-`}
+}\`;`}
       >
         {/* Show Page After Submission */}
         <Label meta={props.meta} />
       </As>
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   font-size: 15px;
   flex: 1;
-`}
+}\`;`}
         ref={buttonRef!}
       >
         <SelectThankYouPage />

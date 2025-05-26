@@ -8,7 +8,6 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import { capturePreview } from "~/lib/playwright/capturePreview";
 import { headerIconButtonCss } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -61,15 +60,16 @@ export function SaveIconButton(props: { formStoreId: string }) {
         title: "Save changes (Ctrl+S)",
         css: [
           headerIconButtonCss,
-          css`
-            color: \${args.theme.var.color.orange_600};
+          `return \`._id {
+            color: \${args.theme.var.color.orange_d600};
             &:hover {
-              color: \${args.theme.var.color.orange_500};
+              color: \${args.theme.var.color.orange_d500};
             }
-          `,
+          }\`;`,
         ],
       };
-    } else if (status === "reverted") {
+    }
+    if (status === "reverted") {
       return {
         // icon: "ph:arrow-clockwise-bold",
         // title: "Restore changes (Ctrl+S)",
@@ -77,36 +77,36 @@ export function SaveIconButton(props: { formStoreId: string }) {
         title: "Save changes (Ctrl+S)",
         css: [
           headerIconButtonCss,
-          css`
-            color: \${args.theme.var.color.blue_600};
+          `return \`._id {
+            color: \${args.theme.var.color.blue_d600};
             &:hover {
-              color: \${args.theme.var.color.blue_500};
+              color: \${args.theme.var.color.blue_d500};
             }
-          `,
+          }\`;`,
         ],
       };
-    } else if (status === "error") {
+    }
+    if (status === "error") {
       return {
         icon: "ph:warning-circle",
         title: "Error occurred",
         css: [
           headerIconButtonCss,
-          css`
-            color: \${args.theme.var.color.red_600};
+          `return \`._id {
+            color: \${args.theme.var.color.red_d600};
             &:hover {
-              color: \${args.theme.var.color.red_500};
+              color: \${args.theme.var.color.red_d500};
             }
-          `,
+          }\`;`,
         ],
       };
-    } else {
-      // Default for committed/idle states
-      return {
-        icon: "ph:floppy-disk",
-        title: "Save (Ctrl+S)",
-        css: headerIconButtonCss,
-      };
     }
+    // Default for committed/idle states
+    return {
+      icon: "ph:floppy-disk",
+      title: "Save (Ctrl+S)",
+      css: headerIconButtonCss,
+    };
   });
 
   return (

@@ -23,7 +23,6 @@ import { STYLES } from "~/pages/settings/constants";
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
 import { getTreeData, type NavItem } from "../functions/getTreeData";
 import { PageItem } from "./PageItem";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -122,9 +121,9 @@ export function PagesList(props: Readonly<{ coll: string }>) {
               as="div"
               css={[
                 STYLES.overflowCss,
-                css`
+                `return \`._id {
   display: grid;
-`,
+}\`;`,
               ]}
             >
               <For
@@ -132,11 +131,11 @@ export function PagesList(props: Readonly<{ coll: string }>) {
                 //                 fallback={
                 //                   <As
                 //                     as="div"
-                //                     css={css`
+                //                     css={`return \`._id {
                 //   margin: 20px 0px;
                 //   padding: 3px;
                 //   text-align: center;
-                // `}
+                // }\`;`}
                 //                   >
                 //                     No {props.coll !== "Page" ? props.coll.replace(/Page$/, '') : props.coll} Found!
                 //                   </As>

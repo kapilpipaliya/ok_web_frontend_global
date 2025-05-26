@@ -5,7 +5,6 @@ import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { SaveAsTemplateMenu } from "../menus/SaveAsTemplateMenu";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
@@ -41,10 +40,10 @@ export function SaveAsTemplateButton(
           ICON_BUTTON_STYLES.baseCss,
           ICON_BUTTON_STYLES.defaultCss,
           ...ensureArray(props.css),
-          css`
+          `return \`._id {
             background-color: transparent;
             border: none;
-          `,
+          }\`;`,
         ]}
         icon="ph:floppy-disk"
         onClick={(e) => {
@@ -57,41 +56,41 @@ export function SaveAsTemplateButton(
       />
       <Show when={showModal()}>
         <DropdownMenu
-          css={css`
+          css={`return \`._id {
   padding: 0.50rem;
-`}
+}\`;`}
           onClickOutside={() => setShowModal(false)}
           // onMouseLeave={() => setShowModal(false)}
           parentRef={saveAsTemplateRef!}
         >
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-`}
+}\`;`}
           >
             <As
               as="button"
-              css={css`
+              css={`return \`._id {
   text-align: left;
   padding-left: 1rem; padding-right: 1rem;
   padding-top: 0.5rem; padding-bottom: 0.5rem;
   /* hover: bg; */
-`}
+}\`;`}
               onClick={() => handleMenuSelect("Template")}
             >
               Save as Template
             </As>
             <As
               as="button"
-              css={css`
+              css={`return \`._id {
   text-align: left;
   padding-left: 1rem; padding-right: 1rem;
   padding-top: 0.5rem; padding-bottom: 0.5rem;
   /* hover: bg; */
-`}
+}\`;`}
               onClick={() => handleMenuSelect("Component")}
             >
               Save as Component

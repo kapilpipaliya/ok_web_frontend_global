@@ -8,7 +8,6 @@ import { PROPERTIES } from "~/pages/settings/constants";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -48,33 +47,34 @@ export function ComponentVariantsInput(props: {
               vertexes: [variant],
             }) as Vertex[];
           });
+
           return (
             <As
               as="div"
-              css={css`
+              css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}
+}\`;`}
             >
               <As
                 as="span"
-                css={css`
+                css={`return \`._id {
   font-size: 15px;
   flex: 0.5;
-`}
+}\`;`}
               >
                 {variant.P.label || variant.P.key}
                 {variant.P.defValue !== undefined &&
                   variant.P.defValue !== null && (
                     <As
                       as="span"
-                      css={css`
-                    color: #888;
+                      css={`return \`._id {
+                    color: \${args.theme.var.color.text_l300};
                     font-size: 13px;
-                  `}
+                  }\`;`}
                     >
                       {" "}
                       ({String(variant.P.defValue)})
@@ -83,12 +83,12 @@ export function ComponentVariantsInput(props: {
               </As>
               <As
                 as="div"
-                css={css`
+                css={`return \`._id {
   display: flex;
   font-size: 15px;
   flex: 1;
   gap: 1px;
-`}
+}\`;`}
               >
                 <Switch>
                   <Match when={options() && options().length > 0}>
@@ -96,15 +96,15 @@ export function ComponentVariantsInput(props: {
                       as="select"
                       css={[
                         PROPERTIES.Css.TextFieldCss,
-                        css`
+                        `return \`._id {
   flex: 1;
   padding-left: 2px;
   padding-right: 2px;
   padding-top: 1px;
   padding-bottom: 1px;
-  border: 1px solid #ccc;
+  border: 1px solid \${args.theme.var.color.border};
   border-radius: 4px;
-`,
+}\`;`,
                       ]}
                       onChange={(e) =>
                         props.setPropertyValue(variant, e.currentTarget.value)
@@ -127,12 +127,12 @@ export function ComponentVariantsInput(props: {
                       meta={
                         {
                           P: {
-                            css: css`
+                            css: `return \`._id {
                               flex: 1;
                               padding: 1px 2px;
-                              border: 1px solid #ccc;
+                              border: 1px solid \${args.theme.var.color.border};
                               border-radius: 4px;
-                            `,
+                            }\`;`,
                             onChange: (value: any) =>
                               props.setPropertyValue(variant, value),
                             type:
@@ -156,11 +156,11 @@ export function ComponentVariantsInput(props: {
                   }
                 >
                   <IconButton
-                    css={css`
+                    css={`return \`._id {
   color: \${args.theme.var.color.error};
   border: none;
   background-color: transparent;
-`}
+}\`;`}
                     icon="ph:x"
                     onClick={() => props.setPropertyValue(variant, null)}
                     size={16}

@@ -3,7 +3,6 @@ import { createSignal, Show } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 
 import { ModifyJsonMenu } from "./ModifyJsonMenu";
-import { css } from "~/lib/styles";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
@@ -20,11 +19,11 @@ export function ModifyJsonButton(props: {
       <IconButton
         css={[
           ...ensureArray(props.css),
-          css`
+          `return \`._id {
   cursor: pointer;
   background-color: transparent;
   border: none;
-`,
+}\`;`,
         ]}
         icon="ph:note-pencil"
         onClick={() => setShowModal(true)}

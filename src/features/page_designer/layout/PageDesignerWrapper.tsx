@@ -117,7 +117,7 @@ export function PageDesignerWrapper(): JSX.Element {
     const layoutVertex = graph.vertexes[
       initialStore.id
     ] as Vertex<PageLayoutObject>;
-    if (!layoutVertex || !dbPromise) {
+    if (!(layoutVertex && dbPromise)) {
       return;
     }
 

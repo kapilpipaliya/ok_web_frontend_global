@@ -79,7 +79,7 @@ export async function createUserInUserDB(
  * @param additionalFields Additional fields to include in the query
  */
 function buildUserCreationQuery(
-  dbType: "AdminDB" | "UserDB",
+  _dbType: "AdminDB" | "UserDB",
   additionalFields: Record<string, boolean> = {},
 ): string {
   // Start with the common fields all user creations need

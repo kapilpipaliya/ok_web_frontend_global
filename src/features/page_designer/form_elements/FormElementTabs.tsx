@@ -31,7 +31,6 @@ import { ComponentList } from "./components/ComponentList";
 import { openInNewInternalTab } from "./pages/functions/openInNewInternalTab";
 import { PagesList } from "./pages/PagesList";
 import { TabsContainer } from "./TabsContainer";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { Divider } from "../../../components/styled/Divider";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -42,14 +41,14 @@ export const UlContainer = (props: ParentProps) => (
     as="ul"
     css={[
       STYLES.overflowCss,
-      css`
+      `return \`._id {
   display: flex;
   gap: 5px;
   margin-bottom: -1px;
   flex-wrap: nowrap;
   list-style: none;
   padding: 0;
-`,
+}\`;`,
     ]}
   >
     {props.children}
@@ -66,29 +65,29 @@ const SectionHeader = (props: SectionHeaderProps) => (
   <As
     as="div"
     css={[
-      css`
+      `return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
   position: sticky;
   top: 0;
   z-index: 1;
-  background-color: \${args.theme.var.color.base_3};
+  background-color: \${args.theme.var.color.background_l150};
   padding: 4px 0;
-`,
+}\`;`,
     ]}
   >
     <As
       as="div"
       css={[
-        css`
+        `return \`._id {
   padding: 6px;
   font-weight: 500;
   font-size: 0.82rem;
   display: flex;
   align-items: center;
   gap: 4px;
-`,
+}\`;`,
       ]}
     >
       {props.icon && <Icon icon={props.icon} width="18" height="18" />}
@@ -224,20 +223,20 @@ export function FormElementTabs() {
     <As
       as="div"
       css={[
-        css`
+        `return \`._id {
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
   height: 100%;
-`,
+}\`;`,
       ]}
     >
       <As
         as="div"
-        css={css`
-  background-color: \${args.theme.var.color.base_10};
+        css={`return \`._id {
+  background-color: \${args.theme.var.color.background_l100};
   overflow-x: auto;
-`}
+}\`;`}
       >
         <TabsContainer>
           <TabList
@@ -252,8 +251,8 @@ export function FormElementTabs() {
         as="div"
         css={[
           STYLES.overflowCss,
-          css`
-`,
+          `return \`._id {
+}\`;`,
         ]}
       >
         <Switch>
@@ -276,9 +275,9 @@ export function FormElementTabs() {
             <As
               as="div"
               css={[
-                css`
+                `return \`._id {
   margin-top: 4px;
-`,
+}\`;`,
               ]}
             >
               <Show keyed when={formStoreVertex()?.id}>

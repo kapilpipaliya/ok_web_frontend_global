@@ -5,7 +5,6 @@ import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { modifyFieldMetaAllFields } from "~/features/page_designer/settings/properties/formgroup/permission_field/functions/modifyFieldMetaAllFields";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { PROPERTIES } from "~/pages/settings/constants";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -20,29 +19,29 @@ export function NameKey() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}
+}\`;`}
     >
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
   font-size: 15px;
   flex: 0.5;
-`}
+}\`;`}
       >
         Name Key
       </As>
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
   font-size: 15px;
   flex: 1;
-`}
+}\`;`}
       >
         <DynamicComponent
           componentName={"SystemTextInput"}

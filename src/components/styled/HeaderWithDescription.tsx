@@ -1,6 +1,5 @@
 import type { JSX } from "solid-js";
 import { As } from "../As";
-import { css } from "~/lib/styles";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 interface WithDescriptionProps {
@@ -24,20 +23,30 @@ export function HeaderWithDescription(
       as="div"
       css={[
         ...ensureArray(props.css),
-        css`background-color: ${props.backgroundColor || "rgb(255,255,255)"};
-        border-color: ${props.borderColor || "rgb(229,231,235)"};
-        border-bottom-width: 1px;
-        padding: ${props.paddingY || "1.25rem"} ${props.paddingX || "1rem"};`,
-        css`@media (min-width: 640px) { padding: ${props.paddingY || "1.25rem"}; ${props.paddingXSm || "1.5rem"}; }`,
+        `return \`._id {
+          border-bottom-width: 1px;
+        }\`;`,
+        props.backgroundColor
+          ? `return \`._id { background-color: ${props.backgroundColor}; }\`;`
+          : `return \`._id { background-color: \${args.theme.var.color.background_l50}; }\`;`,
+        props.borderColor
+          ? `return \`._id { border-color: ${props.borderColor}; }\`;`
+          : `return \`._id { border-color: \${args.theme.var.color.border}; }\`;`,
+        `return \`._id { padding: ${props.paddingY || "1.25rem"} ${props.paddingX || "1rem"}; }\`;`,
+        `return \`@media (min-width: 640px) { ._id { padding: ${props.paddingY || "1.25rem"} ${props.paddingXSm || "1.5rem"}; } }\`;`,
       ]}
     >
       <As
         as="h3"
         css={[
-          css`color: ${props.titleColor || "rgb(17,24,39)"};
-          font-size: 1rem;
-          font-weight: 600;
-          line-height: 1.5rem;`,
+          `return \`._id {
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.5rem;
+          }\`;`,
+          props.titleColor
+            ? `return \`._id { color: ${props.titleColor}; }\`;`
+            : `return \`._id { color: \${args.theme.var.color.text}; }\`;`,
         ]}
       >
         {props.title || ""}
@@ -45,10 +54,14 @@ export function HeaderWithDescription(
       <As
         as="p"
         css={[
-          css`color: ${props.descriptionColor || "rgb(107,114,128)"};
-          font-size: 0.875rem;
-          line-height: 1.25rem;
-          margin-top: 0.25rem;`,
+          `return \`._id {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            margin-top: 0.25rem;
+          }\`;`,
+          props.descriptionColor
+            ? `return \`._id { color: ${props.descriptionColor}; }\`;`
+            : `return \`._id { color: \${args.theme.var.color.text_l200}; }\`;`,
         ]}
       >
         {props.description || ""}

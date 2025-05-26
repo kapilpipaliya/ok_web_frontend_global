@@ -28,7 +28,6 @@ import { STYLES } from "~/pages/settings/constants";
 
 import { insertNewRow } from "./functions/insertNewRow";
 import { SortableRow } from "./row/SortableRow";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -164,48 +163,48 @@ export function TableInputField(
         <As
           as="div"
           css={[
-            css`
+            `return \`._id {
   margin: 2px;
   border-radius: 10px;
   ${sortedVertexes().length > 0 ? "border: 1px solid #37c;" : ""}
-`,
+}\`;`,
             STYLES.overflowCss,
           ]}
         >
           <As
             as="table"
-            css={css`
+            css={`return \`._id {
   border: none;
   border-collapse: collapse;
   border-radius: 0.4rem;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
   font-size: 0.9em;
   ${props.isTableInside ? "width: -webkit-fill-available;" : ""}
-`}
+}\`;`}
           >
             <Show when={sortedVertexes().length}>
               <thead>
                 <As
                   as="tr"
-                  css={css`
-  background-color: #37c;
-  color: #ffffff;
+                  css={`return \`._id {
+  background-color: \${args.theme.var.color.primary};
+  color: \${args.theme.var.color.primary_text};
   height: 35px;
   text-align: center;
   width: max-content;
-`}
+}\`;`}
                 >
                   <As
                     as="td"
-                    css={css`
+                    css={`return \`._id {
   text-align: center;
   align-content: center;
   align-items: center;
-  color: #ffffff;
+  color: \${args.theme.var.color.primary_text};
   font-weight: 500;
   padding: 0 10px;
   text-align: left;
-`}
+}\`;`}
                   >
                     &nbsp;Actions
                   </As>
@@ -221,11 +220,11 @@ export function TableInputField(
                         >
                           <As
                             as="th"
-                            css={css`
+                            css={`return \`._id {
   font-weight: 500;
   justify-content: center;
   padding: 0 10px;
-`}
+}\`;`}
                           >
                             {toTitle(
                               attribute.P.label ||
@@ -237,9 +236,9 @@ export function TableInputField(
                             {attribute.P.validation?.required && (
                               <As
                                 as="span"
-                                css={css`
+                                css={`return \`._id {
   color: \${args.theme.var.color.error};
-`}
+}\`;`}
                               >
                                 {" "}
                                 *

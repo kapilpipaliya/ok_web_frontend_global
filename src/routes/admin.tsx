@@ -7,7 +7,6 @@ import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompany
 import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -24,11 +23,11 @@ export default function AdminLayoutRoute(props: Readonly<RouteSectionProps>) {
           <HomeIconButton />
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   margin-left: auto;
   display: flex;
   gap: 4px;
-`}
+}\`;`}
           >
             <UserDropdownMenuDisplay />
           </As>

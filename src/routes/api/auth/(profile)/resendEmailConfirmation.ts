@@ -22,7 +22,7 @@ export async function POST(event: APIEvent): Promise<Response> {
     try {
       // Get current user
       const userResult = await dbSession.run(
-        `MATCH (u:User {uuid: $uuid}) RETURN u`,
+        "MATCH (u:User {uuid: $uuid}) RETURN u",
         { uuid: user.P.uuid },
       );
 

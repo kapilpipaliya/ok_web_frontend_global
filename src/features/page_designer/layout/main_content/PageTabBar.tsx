@@ -9,7 +9,6 @@ import { ResizeViewButtons } from "../page_tabbar/ResizeViewButtons";
 import { SaveIconButton } from "../page_tabbar/SaveIconButton";
 import { ShareButton } from "../page_tabbar/ShareButton";
 import { UndoRedoIcons } from "../page_tabbar/UndoRedoIcons";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";
 
@@ -24,11 +23,11 @@ export function PageTabBar(props: {
     <As as="header" css={toolBarCss}>
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
-`}
+}\`;`}
       >
         <UndoRedoIcons formStoreId={props.formStoreId} />
         <ResizeViewButtons
@@ -40,20 +39,20 @@ export function PageTabBar(props: {
 
       <DebugInfo formStoreId={props.formStoreId} />
       {/* <Show when={layoutStore().selectedSection === "setting"}>
-              <div css={css`
+              <div css={`return \`._id {
   display: flex;
   align-items: center;
-`}>
+}\`;`}>
                 <MiddleSectionButtons />
               </As>
             </Show> */}
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
-`}
+}\`;`}
       >
         <RefreshButton handleRefresh={props.handleRefresh} />
         <SaveIconButton formStoreId={props.formStoreId} />

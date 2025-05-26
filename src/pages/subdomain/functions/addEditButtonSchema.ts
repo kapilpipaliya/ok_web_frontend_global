@@ -3,7 +3,6 @@ import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import type { ModalStateStore } from "~/lib/types/ModalStateStore";
 
 import { SETTINGS_CONSTANTS } from "../../settings/constants";
-import { css } from "~/lib/styles";
 
 export function addEditButtonSchema(label: string) {
   return {
@@ -44,16 +43,18 @@ export function addEditButtonSchema(label: string) {
                 width: 20,
               },
             ],
-            css: css`
+            css: `return \`._id {
   display: flex;
   align-items: center;
   cursor: pointer;
   background-color: transparent;
   border: none;
+  color: \${args.theme.var.color.primary};
   &:hover {
-    background-color: \${args.theme.var.color.base_20};
+    background-color: \${args.theme.var.color.background_l100};
+    color: \${args.theme.var.color.primary_d400};
   }
-`,
+}\`;`,
             componentName: "Html",
             props: (options: FunctionArgumentType) => ({
               onClick: () => {

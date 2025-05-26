@@ -41,6 +41,10 @@ export function ComponentField(props: Readonly<{}>) {
 
   const componentData = createAsync(
     async () => {
+      const name = componentName();
+      if (typeof name !== "string") {
+        return {};
+      }
       if (meta()?.P?.componentName?.startsWith("System")) {
         return {};
       }
@@ -48,7 +52,7 @@ export function ComponentField(props: Readonly<{}>) {
       if (vertex && getChildrenAttrs(graph, setGraph, vertex).length !== 0) {
         return {};
       }
-      return await fetchComponentData([componentName()]);
+      return await fetchComponentData([name]);
     },
     { deferStream: true },
   );
@@ -158,9 +162,8 @@ export function ComponentField(props: Readonly<{}>) {
     const slotFilter = (vertex: Vertex) => {
       if (props.slot) {
         return vertex.P.slot === props.slot;
-      } else {
-        return !vertex.P.slot;
       }
+      return !vertex.P.slot;
     };
     return (
       <PreviewContext.Provider value={[previewStoreProxy, setPreviewStore]}>
@@ -179,15 +182,21 @@ export function ComponentField(props: Readonly<{}>) {
   };
 
   const Content = () => {
-    if (componentData() && componentData()?.graph) {
+    if (componentData()?.graph) {
       setGraphData(graph, setGraph, componentData()!.graph!, {
         skipExisting: true,
       });
     }
     return (
       <Show
-        when={getCompVertex()}
-        fallback={<div>No Component Found: {componentName()}</div>}
+        when={getCompVertex() && typeof componentName() === "string"}
+        fallback={
+          <div>
+            {typeof componentName() !== "string"
+              ? "Component name should be a string"
+              : `No Component Found: ${componentName()}`}
+          </div>
+        }
       >
         <SlotContext.Provider value={Children}>
           <ComponentWrapper />

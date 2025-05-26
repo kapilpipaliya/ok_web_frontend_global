@@ -14,7 +14,6 @@ import { createActiveClickOutside } from "~/lib/hooks/createActiveClickOutside";
 import { ComponentLabel, FormMetaData } from "~/lib/meta/formMetaData";
 
 import { Overlay } from "../settings/properties/formgroup/permission_field/Overlay";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -92,27 +91,27 @@ export function VariantsModal(
         as="div"
         aria-labelledby="Variants Modal"
         aria-modal="true"
-        css={css`
+        css={`return \`._id {
   position: relative;
   z-index: ${zIndex};
-`}
+}\`;`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
       >
         <Overlay />
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   inset: 0px;
   overflow-y: auto;
   position: fixed;
   width: 100vw;
   z-index: ${zIndex};
-`}
+}\`;`}
         >
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -123,42 +122,39 @@ export function VariantsModal(
      align-items: center;
      padding: 0;
   }
-`}
+}\`;`}
           >
             <As
               as="div"
-              css={css`
-  background-color: rgb(255,255,255);
-  border-radius: 0.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
-  overflow: hidden;
-  padding-bottom: 1rem;
-  position: relative;
-  padding-top: 1.25rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  text-align: left;
-  @media (width >= 52.125rem) {
-    padding: 0;
-    margin-bottom: 2rem;
-    margin-top: 2rem;
-    padding: 1.5rem;
-    width: 100%;
-    max-width:90vw;
-  }
-`}
+              css={`return \`._id {
+                  background-color: \${args.theme.var.color.background_l50};
+                  border-radius: 0.5rem;
+                  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                  overflow: hidden;
+                  padding-bottom: 1rem;
+                  position: relative;
+                  padding-top: 1.25rem;
+                  padding-left: 1rem;
+                  padding-right: 1rem;
+                  text-align: left;
+                  @media (width >= 52.125rem) {
+                      margin-bottom: 2rem;
+                      margin-top: 2rem;
+                      width: 100%;
+                      max-width: 90vw;
+                  }
+              }\`;`}
             >
               <div>
                 <div class="">
                   <As
                     as="h3"
-                    css={css`
+                    css={`return \`._id {
   line-height: 1.5rem;
-  color: rgb(17,24,39);
+  color: \${args.theme.var.color.text};
   font-size: 1rem;
   font-weight: 600;
-  leading: 1.5rem;
-`}
+}\`;`}
                     id="modal-title"
                   >
                     {props.selectedVariant
@@ -168,9 +164,9 @@ export function VariantsModal(
                   </As>
                   <As
                     as="div"
-                    css={css`
+                    css={`return \`._id {
   margin-top: 0.5rem;
-`}
+}\`;`}
                   >
                     <TableInputField
                       data={
@@ -188,18 +184,18 @@ export function VariantsModal(
               </div>
               <As
                 as="div"
-                css={css`
+                css={`return \`._id {
   display: flex;
   gap: 0.75rem;
   margin-top: 1.25rem;
-`}
+}\`;`}
               >
                 {error() && (
                   <As
                     as="div"
-                    css={css`
-  color: #FF0000;
-`}
+                    css={`return \`._id {
+  color: \${args.theme.var.color.error};
+}\`;`}
                   >
                     {error()}
                   </As>

@@ -11,7 +11,9 @@ export function runWithOwnerFunction<T>(
   fn: () => T,
 ): T | undefined {
   try {
-    if (!owner) return undefined;
+    if (!owner) {
+      return undefined;
+    }
 
     return runWithOwner(owner, () => {
       return fn();

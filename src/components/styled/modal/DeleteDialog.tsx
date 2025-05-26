@@ -5,7 +5,6 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { CustomModal } from "./CustomModal";
 import { As } from "~/components/As";
-import { css } from "~/lib/styles";
 // prevents from being tree-shaken by TS
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 autofocus;
@@ -30,7 +29,7 @@ export function DialogWithButtons(
   return (
     <CustomModal
       customTitle={<span>{props.title}</span>}
-      dialogCss={css`min-width: 20%; border-radius: 10px; padding: 0;`}
+      dialogCss={`return \`._id {min-width: 20%; border-radius: 10px; padding: 0;}\`;`}
       footer={() => (
         <As as="div" css={[SETTINGS_CONSTANTS.MODAL.FOOTER.CSS]}>
           <Show when={props.hasPermission ?? true}>

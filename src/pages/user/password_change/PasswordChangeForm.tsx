@@ -14,7 +14,6 @@ import { validatePassword } from "~/lib/validation/validatePassword";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
-import { css } from "~/lib/styles";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -71,15 +70,15 @@ export function PasswordChangeForm() {
             attributes: [
               {
                 as: "button",
-                css: css`
+                css: `return \`._id {
   background-color: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.base_10};
+  color: \${args.theme.var.color.text_l900};
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
   border: none;
   margin-right: 8px;
-`,
+}\`;`,
                 componentName: "Html",
                 props: (options: SaveStateFunctionArgumentType) => ({
                   disabled: options.contextData.saveState[0]?.isLoading,
@@ -117,9 +116,9 @@ export function PasswordChangeForm() {
             }),
           },
         ],
-        css: css`
+        css: `return \`._id {
   margin-top: 24px;
-`,
+}\`;`,
         componentName: "Html",
       },
     ],
@@ -178,19 +177,19 @@ function createPasswordFieldWithHint(
                 }),
               },
             ],
-            css: css`
+            css: `return \`._id {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-`,
+}\`;`,
             componentName: "Html",
           },
         ],
-        css: css`
+        css: `return \`._id {
   position: relative;
-`,
+}\`;`,
         componentName: "Html",
       },
     ],

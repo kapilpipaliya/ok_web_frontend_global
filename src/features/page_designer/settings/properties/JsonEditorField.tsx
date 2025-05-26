@@ -4,7 +4,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { VanilaJsonEditor } from "~/components/styled/VanilaJsonEditor";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -34,7 +33,9 @@ export function JsonEditorFieldComponent(props: {
 
   const replacePropertyValue = (value: string) => {
     const vertex = getVertexToEdit();
-    if (!vertex) return;
+    if (!vertex) {
+      return;
+    }
 
     try {
       const parsedValue = JSON.parse(value);
@@ -82,10 +83,10 @@ export function JsonEditorFieldComponent(props: {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   margin-top: 5px;
   position: relative; /* Needed for absolute positioning of resize handle */
-`}
+}\`;`}
       ref={editorRef}
     >
       {!props?.hideLabel && "JSON"}
@@ -97,9 +98,9 @@ export function JsonEditorFieldComponent(props: {
       {!isJsonValid() && (
         <As
           as="span"
-          css={css`
+          css={`return \`._id {
   color: \${args.theme.var.color.error};
-`}
+}\`;`}
         >
           Invalid JSON
         </As>
@@ -107,7 +108,7 @@ export function JsonEditorFieldComponent(props: {
       <As
         as="div"
         onMouseDown={onMouseDown}
-        css={css`
+        css={`return \`._id {
           width: 100%;
           height: 10px;
           cursor: ns-resize;
@@ -126,7 +127,7 @@ export function JsonEditorFieldComponent(props: {
             background-color: \${args.theme.var.color.textWeak};
             border-radius: 1px;
           }
-        `}
+        }\`;`}
       />
     </As>
   );

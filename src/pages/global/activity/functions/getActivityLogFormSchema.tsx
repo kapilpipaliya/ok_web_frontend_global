@@ -59,12 +59,11 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
     try {
       const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
-      const url =
-        formData.id && formData.id.startsWith("-")
-          ? // @ts-expect-error ignore error
-            API.settings.activity.createUrl
-          : // @ts-expect-error ignore error
-            API.settings.activity.updateUrl;
+      const url = formData.id?.startsWith("-")
+        ? // @ts-expect-error ignore error
+          API.settings.activity.createUrl
+        : // @ts-expect-error ignore error
+          API.settings.activity.updateUrl;
       const payload: ActivityLogPayload = {
         action: formData.P.action as string,
         description: formData.P.description as string | undefined,
@@ -87,7 +86,7 @@ export function getActivityLogFormSchema(onSuccess: () => void) {
         options.revertTransactionUpToIndex(options.txnId, -1);
         options.ensureData();
         showSuccessToast(
-          formData.id && formData.id.startsWith("-")
+          formData.id?.startsWith("-")
             ? "Activity log created successfully"
             : "Activity log updated successfully",
         );

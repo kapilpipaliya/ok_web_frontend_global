@@ -1,5 +1,4 @@
 import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { getErrorSchema } from "~/lib/schema/getErrorSchema";
 
@@ -20,7 +19,7 @@ export function createTextAreaField(
   return [
     {
       as: "div",
-      css: [SETTINGS_CONSTANTS.LABEL_CSS, css`margin-top:5px;`],
+      css: [SETTINGS_CONSTANTS.LABEL_CSS, "._id {margin-top:5px;"],
       componentName: "Html",
       text: label,
     },

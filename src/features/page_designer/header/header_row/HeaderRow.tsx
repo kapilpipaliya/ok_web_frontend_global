@@ -7,7 +7,6 @@ import { SelectThemeButton } from "~/pages/theme_menu/SelectThemeButton";
 import { HomeIconButton } from "../../../../components/styled/buttons/HomeIconButton";
 import { SaveAllButton } from "../right/SaveAllButton";
 import { ToggleButtons } from "../right/ToggleButtons";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
@@ -23,11 +22,11 @@ const RightSection = () => {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
-`}
+}\`;`}
     >
       <ToggleButtons />
       <SaveAllButton />

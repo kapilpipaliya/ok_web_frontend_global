@@ -7,7 +7,6 @@ import { useFileManagerStore } from "../FileManagerContext";
 import { FileManagerConfigIcons } from "./FileManagerConfigIcons";
 import { FileManagerTreeItemContent } from "./FileManagerTreeItemContent";
 import { getExpressionForFilesData, getFilesData } from "./getFilesData";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -113,12 +112,12 @@ export function FileManagerTreeItem(props: Readonly<{ item: Vertex }>) {
         <As
           as="ul"
           css={[
-            css`
+            `return \`._id {
   padding-left: 8px;
   padding-top: 5px;
   list-style: none;
   padding: 0;
-`,
+}\`;`,
           ]}
         >
           <For each={children()?.filter((item) => item.L[0] !== "File")}>

@@ -1,56 +1,55 @@
 import { As } from "~/components/As";
 import { SimpleCard } from "./SimpleCard";
-import { css } from "~/lib/styles";
 
 export function CardGrids() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   max-width: 80rem;
   margin-left: auto; margin-right: auto;
   padding-left: 1rem; padding-right: 1rem;
   padding-left: 1.5rem@sm; padding-right: 1.5rem@sm;
   padding-left: 2rem@lg; padding-right: 2rem@lg;
-`}
+}\`;`}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   // max-width: 42rem;
   /* max-width: none@lg; */
   margin-left: auto; margin-right: auto;
   margin-left: 0@lg; margin-right: 0@lg;
-`}
+}\`;`}
       >
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
-`}
+}\`;`}
         >
           <As
             as="h2"
-            css={css`
+            css={`return \`._id {
   color: #3b82f6;
   font-size: 1rem;
   font-weight: 600;
-`}
+}\`;`}
           >
             Recent Users
           </As>
           <As
             as="a"
-            css={css`
+            css={`return \`._id {
   color: indigo_280;
   font-size: 0.875rem;
   font-weight: 600;
   &:hover {
     color: indigo;
   }
-`}
+}\`;`}
             href="#"
           >
             View all<span class="sr-only">, clients</span>
@@ -58,13 +57,13 @@ export function CardGrids() {
         </As>
         <As
           as="ul"
-          css={css`
+          css={`return \`._id {
   display: grid;
   column-gap: 1.5rem;
   row-gap: 2rem;
   grid-template-columns: repeat(1, 1fr);
   margin-top: 1.5rem;
-`}
+}\`;`}
         >
           <SimpleCard
             amount="$2,000.00"

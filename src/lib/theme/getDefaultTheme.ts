@@ -1,25 +1,5 @@
-import {
-  DEFAULT_ERROR,
-  DEFAULT_INFO,
-  DEFAULT_PRIMARY,
-  DEFAULT_SUCCESS,
-  DEFAULT_WARNING,
-  DEFAULT_TEXT,
-  DEFAULT_BACKGROUND,
-  DEFAULT_SURFACE,
-  DEFAULT_BORDER,
-  DEFAULT_MUTED,
-  DEFAULT_ERROR_DARK,
-  DEFAULT_INFO_DARK,
-  DEFAULT_PRIMARY_DARK,
-  DEFAULT_SUCCESS_DARK,
-  DEFAULT_WARNING_DARK,
-  DEFAULT_TEXT_DARK,
-  DEFAULT_BACKGROUND_DARK,
-  DEFAULT_SURFACE_DARK,
-  DEFAULT_BORDER_DARK,
-  DEFAULT_MUTED_DARK,
-} from "../styles/constants";
+import { DEFAULT_THEME } from "../styles/constants";
+import type { ModeSpecificColor } from "../styles/types/types";
 
 // https://github.com/bgrins/TinyColor/blob/master/npm/tinycolor.js#L784
 export function getDefaultTheme() {
@@ -27,44 +7,40 @@ export function getDefaultTheme() {
   "var": {
     "color": {
       "primary": {
-        "light": "${DEFAULT_PRIMARY}",
-        "dark": "${DEFAULT_PRIMARY_DARK}"
+        "light": "${(DEFAULT_THEME.color.primary as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.primary as ModeSpecificColor).dark}"
       },
       "info": {
-        "light": "${DEFAULT_INFO}",
-        "dark": "${DEFAULT_INFO_DARK}"
+        "light": "${(DEFAULT_THEME.color.info as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.info as ModeSpecificColor).dark}"
       },
       "success": {
-        "light": "${DEFAULT_SUCCESS}",
-        "dark": "${DEFAULT_SUCCESS_DARK}"
+        "light": "${(DEFAULT_THEME.color.success as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.success as ModeSpecificColor).dark}"
       },
       "warning": {
-        "light": "${DEFAULT_WARNING}",
-        "dark": "${DEFAULT_WARNING_DARK}"
+        "light": "${(DEFAULT_THEME.color.warning as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.warning as ModeSpecificColor).dark}"
       },
       "error": {
-        "light": "${DEFAULT_ERROR}",
-        "dark": "${DEFAULT_ERROR_DARK}"
+        "light": "${(DEFAULT_THEME.color.error as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.error as ModeSpecificColor).dark}"
       },
       "text": {
-        "light": "${DEFAULT_TEXT}",
-        "dark": "${DEFAULT_TEXT_DARK}"
+        "light": "${(DEFAULT_THEME.color.text as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.text as ModeSpecificColor).dark}"
       },
       "background": {
-        "light": "${DEFAULT_BACKGROUND}",
-        "dark": "${DEFAULT_BACKGROUND_DARK}"
-      },
-      "surface": {
-        "light": "${DEFAULT_SURFACE}",
-        "dark": "${DEFAULT_SURFACE_DARK}"
+        "light": "${(DEFAULT_THEME.color.background as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.background as ModeSpecificColor).dark}"
       },
       "border": {
-        "light": "${DEFAULT_BORDER}",
-        "dark": "${DEFAULT_BORDER_DARK}"
+        "light": "${(DEFAULT_THEME.color.border as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.border as ModeSpecificColor).dark}"
       },
       "muted": {
-        "light": "${DEFAULT_MUTED}",
-        "dark": "${DEFAULT_MUTED_DARK}"
+        "light": "${(DEFAULT_THEME.color.muted as ModeSpecificColor).light}",
+        "dark": "${(DEFAULT_THEME.color.muted as ModeSpecificColor).dark}"
       }
     }
   }

@@ -2,8 +2,7 @@ import { createContext, useContext } from "solid-js";
 
 // Moving constants and utility functions to separate modules
 import {
-  DEFAULT_BACKGROUND,
-  DEFAULT_PRIMARY,
+  DEFAULT_THEME,
   EASING_PRESETS,
   FONT_PRESETS,
   RADIUS_PRESETS,
@@ -12,7 +11,8 @@ import {
 
 import {
   createColorScheme,
-  getColorShade,
+  getLightShade,
+  getDarkShade,
   getContrastRatio,
   parseColorName,
   resolveColorForMode,
@@ -21,7 +21,6 @@ import {
 import type {
   ColorDefinition,
   ColorMode,
-  ShadeNumber,
   ThemeContext as ThemeContextType,
 } from "~/lib/styles/types/types";
 
@@ -43,16 +42,17 @@ type ColorTarget = {
 const colorHandlers = {
   /**
    * Handles dynamic color shade access in the theme proxy.
-   * Pattern: primary_640, error_820, etc. or direct colors like gray_280, blue_50, etc.
+   * Pattern: primary_l640, error_d820, background_l100, etc.
    */
   handleShadeAccess: (
     target: ColorTarget,
     prop: string,
     getColorMode?: () => ColorMode,
   ) => {
-    const shadeMatch = prop.match(/(.+)_(\d+)$/);
+    // Pattern: colorname_l### or colorname_d###
+    const shadeMatch = prop.match(/(.+)_([ld])(\d+)$/);
     if (shadeMatch) {
-      const [, baseProp, shadeValue] = shadeMatch;
+      const [, baseProp, shadeType, shadeValue] = shadeMatch;
       const shade = Number.parseInt(shadeValue, 10);
       let baseColorDef = target[baseProp];
 
@@ -68,15 +68,24 @@ const colorHandlers = {
       if (baseColorDef !== undefined) {
         const mode = getColorMode ? getColorMode() : "light";
 
+        // Swap light/dark when in dark mode
+        const effectiveShadeType =
+          mode === "dark" ? (shadeType === "l" ? "d" : "l") : shadeType;
+
         if (typeof baseColorDef === "string") {
-          return getColorShade(baseColorDef, shade as ShadeNumber);
-        } else if (typeof baseColorDef === "object" && baseColorDef !== null) {
+          return effectiveShadeType === "l"
+            ? getLightShade(baseColorDef, shade)
+            : getDarkShade(baseColorDef, shade);
+        }
+        if (typeof baseColorDef === "object" && baseColorDef !== null) {
           const resolvedColor = resolveColorForMode(
             baseColorDef as ColorDefinition,
             mode,
           );
           if (typeof resolvedColor === "string") {
-            return getColorShade(resolvedColor, shade as ShadeNumber);
+            return effectiveShadeType === "l"
+              ? getLightShade(resolvedColor, shade)
+              : getDarkShade(resolvedColor, shade);
           }
         }
       }
@@ -87,7 +96,8 @@ const colorHandlers = {
 
       if (typeof colorDef === "string") {
         return colorDef;
-      } else if (
+      }
+      if (
         typeof colorDef === "object" &&
         colorDef !== null &&
         isModeSpecificColor(colorDef as ColorDefinition)
@@ -145,7 +155,8 @@ const colorHandlers = {
     const contrastMatch = prop.match(/(.+?)ContrastRatio$/);
     if (contrastMatch) {
       const [, baseProp] = contrastMatch;
-      const baseColorDef = target[`${baseProp}Color`] || DEFAULT_PRIMARY;
+      const baseColorDef =
+        target[`${baseProp}Color`] || DEFAULT_THEME.color.primary;
       const mode = getColorMode ? getColorMode() : "light";
       const resolvedColor = resolveColorForMode(
         baseColorDef as ColorDefinition,
@@ -159,7 +170,7 @@ const colorHandlers = {
 
   /**
    * Handles semantic color access in the theme proxy.
-   * Pattern: textColor, backgroundColor, surfaceColor, etc.
+   * Pattern: textColor, backgroundColor, etc.
    */
   handleSemanticColorAccess: (
     target: ColorTarget,
@@ -174,7 +185,8 @@ const colorHandlers = {
     }
 
     // Fall back to computed semantic colors based on primary color
-    const baseColorDef = target.backgroundColor || DEFAULT_BACKGROUND;
+    const baseColorDef =
+      target.backgroundColor || DEFAULT_THEME.color.background;
     const resolvedBaseColor = resolveColorForMode(
       baseColorDef as ColorDefinition,
       mode,
@@ -183,24 +195,20 @@ const colorHandlers = {
     switch (prop) {
       case "textColor":
         return mode === "dark"
-          ? getColorShade(resolvedBaseColor, 20)
-          : getColorShade(resolvedBaseColor, 820);
+          ? getLightShade(resolvedBaseColor, 100)
+          : getDarkShade(resolvedBaseColor, 700);
       case "backgroundColor":
         return mode === "dark"
-          ? getColorShade(resolvedBaseColor, 820)
-          : getColorShade(resolvedBaseColor, 20);
-      case "surfaceColor":
-        return mode === "dark"
-          ? getColorShade(resolvedBaseColor, 640)
-          : "#ffffff";
+          ? getDarkShade(resolvedBaseColor, 700)
+          : getLightShade(resolvedBaseColor, 100);
       case "borderColor":
         return mode === "dark"
-          ? getColorShade(resolvedBaseColor, 460)
-          : getColorShade(resolvedBaseColor, 40);
+          ? getDarkShade(resolvedBaseColor, 400)
+          : getLightShade(resolvedBaseColor, 200);
       case "mutedColor":
         return mode === "dark"
-          ? getColorShade(resolvedBaseColor, 280)
-          : getColorShade(resolvedBaseColor, 80);
+          ? getLightShade(resolvedBaseColor, 250)
+          : getDarkShade(resolvedBaseColor, 150);
       default:
         return undefined;
     }
@@ -220,7 +228,8 @@ const colorHandlers = {
 
       if (typeof colorDef === "string") {
         return colorDef;
-      } else if (
+      }
+      if (
         typeof colorDef === "object" &&
         colorDef !== null &&
         isModeSpecificColor(colorDef as ColorDefinition)

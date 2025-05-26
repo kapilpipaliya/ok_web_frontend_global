@@ -4,7 +4,6 @@ import { createSignal } from "solid-js";
 import { TableInputField } from "~/components/fields/table_field/TableInputField";
 import { PlusIconButton } from "~/components/styled/buttons/PlusIconButton";
 import { As } from "~/components/As";
-import { css } from "~/lib/styles";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface TablePanelProps {
@@ -30,29 +29,29 @@ export function TablePanel(props: TablePanelProps) {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
         margin-top: 6px;
-      `}
+      }\`;`}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
           display: flex;
           gap: 0.5rem;
           align-items: center;
-        `}
+        }\`;`}
       >
         <As
           as="h3"
-          css={css`
-            color: rgb(17,24,39);
+          css={`return \`._id {
+            color: \${args.theme.var.color.text};
             font-size: 1rem;
             font-weight: 600;
             line-height: 1.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-          `}
+          }\`;`}
         >
           {props.icon && <Icon icon={props.icon} />}
           {props.title}
@@ -65,9 +64,9 @@ export function TablePanel(props: TablePanelProps) {
 
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
           margin-top: 0.5rem;
-        `}
+        }\`;`}
       >
         <TableInputField
           data={props.data}

@@ -1,5 +1,4 @@
 import type { JSX } from "solid-js";
-import { css } from "~/lib/styles";
 import { As } from "../As";
 
 export function CardGrid(
@@ -8,7 +7,7 @@ export function CardGrid(
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: grid;
   column-gap: 0.75rem;
   column-gap: 1rem;
@@ -18,7 +17,7 @@ export function CardGrid(
   @media (min-width: 1280px) {
     grid-template-columns: repeat(${props.cardSize}, 1fr);
   }
-`}
+}\`;`}
     >
       {props.children}
     </As>

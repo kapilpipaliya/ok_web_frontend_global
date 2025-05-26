@@ -49,10 +49,9 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
     try {
       const modalState = options.contextData.modalState;
       modalState[1]("isLoading", true);
-      const url =
-        formData.id && formData.id.startsWith("-")
-          ? API.subdomain.createUrl
-          : API.subdomain.updateUrl;
+      const url = formData.id?.startsWith("-")
+        ? API.subdomain.createUrl
+        : API.subdomain.updateUrl;
       const payload: {
         key: string;
         domain: string;
@@ -76,7 +75,7 @@ export function getSubDomainFormSchema(onSuccess: () => void) {
         options.removeTxnIdAndCreateNew(options.txnId);
         options.ensureData();
         showSuccessToast(
-          formData.id && formData.id.startsWith("-")
+          formData.id?.startsWith("-")
             ? "Project created successfully"
             : "Project updated successfully",
         );

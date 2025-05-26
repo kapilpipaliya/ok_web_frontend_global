@@ -12,7 +12,6 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { CompanyLogoSettings } from "./CompanyLogoSettings";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
@@ -143,9 +142,9 @@ export function GeneralSettings() {
             }),
           },
         ],
-        css: css`
+        css: `return \`._id {
   margin-top: 24px;
-`,
+}\`;`,
         componentName: "Html",
       },
     ],

@@ -9,7 +9,6 @@ import {
   parentTemplateAttribute,
 } from "../base/Comp";
 import { pageAttr } from "./pageAttr";
-import { css } from "~/lib/styles";
 
 export const wrapWithTitle = (
   title: string,
@@ -25,30 +24,30 @@ export const wrapWithTitle = (
           ? [
               {
                 as: "span",
-                css: css`
+                css: `return \`._id {
   color: \${args.theme.var.color.error};
-`,
+}\`;`,
                 componentName: "Html",
                 text: " *",
               },
             ]
           : [],
-        css: css`
+        css: `return \`._id {
   flex: 0.5;
-`,
+}\`;`,
         componentName: "Html",
         // key: `${title}`,
         text: title,
       },
       children,
     ],
-    css: css`
+    css: `return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`,
+}\`;`,
     componentName: "Html",
   };
 };
@@ -71,9 +70,9 @@ export const Page: IFormMetaData = {
         wrapWithTitle("Title", false, {
           css: [
             PROPERTIES.Css.TextFieldCss,
-            css`
+            `return \`._id {
                 flex: 1;
-              `,
+              }\`;`,
           ],
           componentName: "SystemTextInput",
           key: "title",
@@ -82,9 +81,9 @@ export const Page: IFormMetaData = {
         wrapWithTitle("Key", true, {
           css: [
             PROPERTIES.Css.TextFieldCss,
-            css`
+            `return \`._id {
                 flex: 1;
-              `,
+              }\`;`,
           ],
           componentName: "SystemTextInput",
           key: "key",
@@ -120,9 +119,9 @@ export const Page: IFormMetaData = {
         wrapWithTitle("Description", false, {
           css: [
             PROPERTIES.Css.TextFieldCss,
-            css`
+            `return \`._id {
                 flex: 1;
-              `,
+              }\`;`,
           ],
           componentName: "SystemTextInput",
           type: "textarea",
@@ -198,11 +197,11 @@ export const Page: IFormMetaData = {
           type: "ChatHistory",
         },
       ],
-      css: css`
+      css: `return \`._id {
   display: flex;
   flex-direction: column;
   gap: 8px;
-`,
+}\`;`,
       componentName: "Html",
     },
   ],
@@ -237,7 +236,7 @@ date`,
           key: "defValue",
           // componentName: "SystemTextInput",
           // componentName: "::'P.type'",
-          css: css`${PROPERTIES.Css.TextFieldCss}`,
+          css: PROPERTIES.Css.TextFieldCss,
           props: `return {
               componentName: "SystemTextInput",
               type: args.data?.P.type === "number" ? "number" : 
@@ -255,7 +254,7 @@ date`,
               size: 16,
             },
           ],
-          css: css`
+          css: `return \`._id {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -268,10 +267,10 @@ date`,
   transition: all 0.2s ease;
   border: none;
   &:hover {
-    background-color: \${args.theme.var.color.error_20};
+    background-color: \${args.theme.var.color.error_l100};
     color: \${args.theme.var.color.error};
   }
-`,
+}\`;`,
           componentName: "Html",
           key: "button",
           props: `return {
@@ -297,12 +296,12 @@ date`,
           type: "button",
         },
       ],
-      css: css`
+      css: `return \`._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 4px;
-`,
+}\`;`,
       componentName: "Html",
       displayName: "Default Value",
     },
@@ -317,7 +316,7 @@ date`,
         {
           displayName: "Value",
           key: "value",
-          css: css`${PROPERTIES.Css.TextFieldCss}`,
+          css: PROPERTIES.Css.TextFieldCss,
           props: `const type = args.evalExpression("<-$0::'P.type'", {
               graph: args.graph,
               setGraph: args.setGraph,

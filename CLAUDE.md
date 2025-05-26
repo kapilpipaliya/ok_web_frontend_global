@@ -98,12 +98,164 @@ The application has a component-based architecture where:
 - Components can be nested to create complex layouts
 - The system supports form components with validation
 
+#### Page Builder Graph Schema
+The Page Builder uses a graph-based structure with vertices and edges to represent UI components:
+
+**Graph Structure:**
+```javascript
+{
+  vertexes: [
+    {
+      id: string, // Unique identifier for the vertex
+      L: string,  // Label associated with the vertex (e.g., 'Attr', 'Component')
+      P: object   // Properties associated with the vertex
+    }
+  ],
+  edges: [
+    {
+      id: string,  // Unique identifier for the edge
+      T: string,   // Type/label of the edge
+      E: string,   // End vertex ID of the edge
+      S: string    // Start vertex ID of the edge
+    }
+  ]
+}
+```
+
+**Attr Vertex (Page Builder Items):**
+- `displayOrder`: number - Determines item order among siblings
+- `componentName`: string - Component type ('Html', 'Data', 'Slot', or custom component)
+- `fns`: Function body string - JavaScript functions for dynamic properties
+- `props`: Function body string - Dynamic properties returning key-value pairs
+- `css`: Function body string - CSS styling with `._id` selector for current element (returns string or array of strings)
+
+**Component Types:**
+
+1. **Html Component** (default if no componentName):
+   - `as`: HTML tag ('div', 'span', 'icon', 'portal') or omit for fragment
+   - `text`: Text content to render
+   - For icons: requires `icon`, `height`, `width` properties
+
+2. **Data Component** (for repeating patterns):
+   - `name`: string - Data context name
+   - `loop`: boolean - Enable iteration over children
+   - `expression`: string - Data evaluation expression
+   - Access iteration data via `args.contextData.name` in child components
+
+3. **Slot Component**:
+   - `name`: string - Slot name (default: 'children')
+
+**Function Arguments Available:**
+The `fns`, `props`, and `css` functions have access to `args` object containing:
+- `theme`: ThemeContext for styling
+- `data`: Current vertex data
+- `contextData`: Context data from parent components
+- `graph`: Graph interface for data access
+- `navigate`: Navigation utilities
+- `onChange`: Value change handler
+- `evalExpression`: Expression evaluation
+- `showSuccessToast`, `showErrorToast`: Toast notifications
+- Many other utilities for form handling, transactions, etc.
+
+**Component Variants:**
+Custom components can have variants defined through:
+- `Component` vertex with `key` property
+- `ComponentVariant` vertices with `key`, `type`, `defValue` properties
+- `ComponentVariantOption` vertices for string type options
+- Access variant values via `args.contextData.props["variantKey"]`
+
 #### Styling System
 The project uses a custom CSS-in-JS system that:
-- Supports direct CSS strings with template literals
+- Uses `._id` class selector for all component styles
+- Returns CSS as strings or arrays of strings (for compatibility with non-nested CSS environments)
 - Provides theme awareness and color utilities
 - Includes helpers for common patterns (buttons, containers, typography)
-- Supports nested selectors and pseudo-elements using morden css.
+- Supports pseudo-classes and pseudo-elements
+
+**CSS Pattern:**
+```typescript
+// Simple styles - return string with ._id
+const complexStyle = () => `._id {
+  background: \${args.theme.var.color.background};
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: \${args.theme.var.color.background_l200};
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+  }
+}`;
+
+// Media queries - return array
+const responsiveStyle = () => [
+  `._id { padding: 2rem; }`,
+  `@media (max-width: 768px) {
+    ._id { padding: 1rem; }
+  }`
+];
+```
+
+**Important:** The `css` function from `~/lib/styles` is optional. Styles can be written as plain strings/arrays following the `._id` pattern.
+
+#### Theme System
+The application uses a sophisticated theme system built around SolidJS with Neo4j graph database storage:
+
+**Core Features:**
+- Dark/light mode support with automatic color resolution and shade swapping
+- Customizable color schemes with semantic colors (primary, success, error, etc.)
+- Advanced color utilities including light/dark shades, contrast ratios, and accessibility helpers
+- Typography, spacing, and animation configuration
+- Proxy-based dynamic theme access
+
+**Color System:**
+```typescript
+// Unified color (same for light/dark)
+primary: "oklch(0.57 0.19 250)"
+
+// Mode-specific color
+primary: {
+  light: "oklch(0.57 0.19 250)",
+  dark: "oklch(0.7 0.15 250)"
+}
+
+// Dynamic shade access
+args.theme.var.color.primary_l100       // Light shade (close to base)
+args.theme.var.color.primary_l900       // Light shade (close to white)
+args.theme.var.color.primary_d100       // Dark shade (close to base)
+args.theme.var.color.primary_d900       // Dark shade (close to black)
+
+// Automatic shade swapping in dark mode
+// When dark mode is active, _l shades behave like _d shades and vice versa
+args.theme.var.color.primary_l100       // In light mode: light shade, In dark mode: dark shade
+
+// Other dynamic access
+args.theme.var.color.primaryScheme      // Color scheme variations
+args.theme.var.color.textColor         // Semantic color
+```
+
+**Shade System:**
+- Light shades: `_l1` to `_l1000` (l1 = closest to base color, l1000 = white)
+- Dark shades: `_d1` to `_d1000` (d1 = closest to base color, d1000 = black)
+- Common shades: `_l100`, `_l200`, `_l300`, `_l400`, `_l500`, `_l600`, `_l700`, `_l800`, `_l900`
+- Shades automatically swap in dark mode for better contrast
+
+**Theme Structure:**
+- `var.color`: Core color system (primary, success, error, text, background, etc.)
+- `var.fontFamily`: Typography settings (base, heading, mono fonts)
+- `var.spacingScale`: Spacing system (compact, default, loose)
+- `var.borderRadius`: Border radius presets
+- `var.transitionDuration*`: Animation timings
+- For background colors, prefer light shades (e.g., `background_l100`, `background_l50`)
+
+**Key Files:**
+- `src/lib/context/ThemeContext.tsx` - Theme context with proxy-based access
+- `src/lib/context/ThemeProvider.tsx` - Global theme state management
+- `src/lib/graph/get/sync/theme/themeConfig.ts` - Database integration
+- `src/lib/styles/colorUtils.ts` - Color manipulation utilities
+- `src/lib/styles/constants.ts` - Theme constants and presets
 
 #### Permission System
 The application implements a role-based access control system:
@@ -228,6 +380,19 @@ When implementing new features:
 4. Add appropriate error handling
 5. Use the project's CSS-in-JS system for styling
 6. Write Playwright tests for new functionality
+
+## Color Shade System
+- Explicit light/dark shades
+  - Light shades: `primary_l100` to `primary_l900` (l100 = close to base, l900 = close to white)
+  - Dark shades: `primary_d100` to `primary_d900` (d100 = close to base, d900 = close to black)
+- **Dark mode behavior**: Shades automatically swap in dark mode (`_l` becomes `_d` and vice versa)
+
+## CSS Styling Pattern Update
+- **All styles must use `._id` class selector**
+- **Return types**:
+  - Simple styles: Return string with `._id { ... }`
+  - Complex styles: Return array of strings for media queries
+  ```
 
 ## Memories
 

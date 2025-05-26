@@ -107,14 +107,12 @@ export const themeFormSchema = {
                 {
                   as: "button",
                   componentName: "Html",
-                  css: `
-                    ._id {
+                  css: `return \`._id {
                       padding: 5px;
-                      background-color: \${args.theme.var.color.gray_280};
-                      color: \${args.theme.var.color.base_10};
+                      background-color: \${args.theme.var.color.gray_l720};
+                      color: \${args.theme.var.color.text_l900};
                       border-radius: 5px;
-                    }
-                  `,
+                    }\`;`,
                   props: (options: ThemeFunctionArgumentType) => ({
                     onClick: async () => {
                       if (options.contextData.editorState) {
@@ -140,13 +138,11 @@ export const themeFormSchema = {
                 },
               ],
               componentName: "Html",
-              css: `
-                ._id {
+              css: `return \`._id {
                   display: flex;
                   align-items: center;
                   gap: 0.5rem;
-                }
-              `,
+                }\`;`,
             },
           ],
           componentName: "Html",

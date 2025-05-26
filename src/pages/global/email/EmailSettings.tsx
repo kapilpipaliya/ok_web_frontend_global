@@ -11,7 +11,6 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 import { handleApiRequest } from "../../../lib/api/general/handleApiRequest";
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import { css } from "~/lib/styles";
 
 // Define types for state stores
 type SaveStateStore = ReturnType<
@@ -152,7 +151,10 @@ export function EmailSettings() {
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
-          getErrorSchema("active", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "active",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -179,7 +181,10 @@ export function EmailSettings() {
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpHost", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "smtpHost",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -207,7 +212,10 @@ export function EmailSettings() {
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpPort", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "smtpPort",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -234,7 +242,10 @@ export function EmailSettings() {
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpUsername", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "smtpUsername",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -262,7 +273,10 @@ export function EmailSettings() {
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("smtpPassword", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "smtpPassword",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -290,7 +304,10 @@ export function EmailSettings() {
               hide: () => options.data?.P.active !== "sendgrid",
             }),
           },
-          getErrorSchema("sendGridApiKey", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "sendGridApiKey",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -323,7 +340,10 @@ export function EmailSettings() {
               hide: () => !options.data?.P.active,
             }),
           },
-          getErrorSchema("fromEmail", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "fromEmail",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -346,7 +366,10 @@ export function EmailSettings() {
               hide: () => options.data?.P.active !== "smtp",
             }),
           },
-          getErrorSchema("secure", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "secure",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -488,9 +511,9 @@ export function EmailSettings() {
                 }),
               },
             ],
-            css: css`
+            css: `return \`._id {
   margin-top: 24px;
-`,
+}\`;`,
             componentName: "Html",
           },
         ],

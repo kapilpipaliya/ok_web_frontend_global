@@ -10,7 +10,6 @@ import { submitDataCall } from "~/lib/api/service/data/submitDataCall";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -73,9 +72,9 @@ export function ModifyJsonMenu(props: {
 
   return (
     <DropdownMenu
-      css={css`
+      css={`return \`._id {
   padding: 0.50rem;
-`}
+}\`;`}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >
@@ -88,36 +87,36 @@ export function ModifyJsonMenu(props: {
       <div>
         <As
           as="label"
-          css={css`
-  color: #3b82f6;
+          css={`return \`._id {
+  color: \${args.theme.var.color.primary};
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-`}
+}\`;`}
           for="jsonInput"
         >
           JSON Data
         </As>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   margin-top: 2px;
-`}
+}\`;`}
         >
           <As
             as="textarea"
-            css={css`
+            css={`return \`._id {
   border-radius: 0.375rem;
   border-width: 0;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  color: #3b82f6;
+  color: \${args.theme.var.color.primary};
   display: block;
   font-size: 0.875rem;
   padding-left: 0.75rem; padding-right: 0.75rem;
   padding-top: 0.375rem; padding-bottom: 0.375rem;
   height: 800px;
   width: 800px;
-`}
+}\`;`}
             id="jsonInput"
             onChange={(e) => setJsonData(e.target.value)}
             placeholder="Enter JSON data here"
@@ -129,9 +128,9 @@ export function ModifyJsonMenu(props: {
       <Show when={error()}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   color: \${args.theme.var.color.error};
-`}
+}\`;`}
         >
           {error()}
         </As>

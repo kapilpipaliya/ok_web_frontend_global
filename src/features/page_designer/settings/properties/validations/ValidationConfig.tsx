@@ -2,7 +2,6 @@ import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 
 import { validateInput } from "./validateInput";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
@@ -67,32 +66,32 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
   ) => (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}
+}\`;`}
     >
       <As
         as="label"
-        css={css`
+        css={`return \`._id {
   font-size: 15px;
   display: flex;
-`}
+}\`;`}
       >
         {inputProps.label}
       </As>
       <As
         as="input"
         checked={inputProps.type === "checkbox" ? inputProps.value : undefined}
-        css={css`
+        css={`return \`._id {
   border: 1px solid #3b82f6;
   font-size: 15px;
   display: flex;
   padding: 2px;
-`}
+}\`;`}
         onChange={(e) => {
           inputProps.onChange(e);
           props.onChange(props.meta, values);
@@ -107,31 +106,31 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
     <div class="">
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}
+}\`;`}
       >
         <As
           as="label"
-          css={css`
+          css={`return \`._id {
   font-size: 15px;
   display: flex;
-`}
+}\`;`}
         >
           Regex
         </As>
         <As
           as="input"
-          css={css`
+          css={`return \`._id {
   border: 1px solid #3b82f6;
   font-size: 15px;
   display: flex;
   padding: 2px;
-`}
+}\`;`}
           onChange={(e) =>
             setValues("regex", regexprops.index, "value", e.target.value)
           }
@@ -141,32 +140,32 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       </As>
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}
+}\`;`}
       >
         <As
           as="label"
-          css={css`
+          css={`return \`._id {
   font-size: 15px;
   display: flex;
-`}
+}\`;`}
         >
           Enabled
         </As>
         <As
           as="input"
           checked={values.regex[regexprops.index].enabled}
-          css={css`
+          css={`return \`._id {
   border: 1px solid #3b82f6;
   font-size: 15px;
   display: flex;
   padding: 2px;
-`}
+}\`;`}
           onChange={(e) =>
             setValues("regex", regexprops.index, "enabled", e.target.checked)
           }
@@ -175,31 +174,31 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       </As>
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 2px;
   justify-content: space-between;
   margin-top: 6px;
-`}
+}\`;`}
       >
         <As
           as="label"
-          css={css`
+          css={`return \`._id {
   font-size: 15px;
   display: flex;
-`}
+}\`;`}
         >
           Message
         </As>
         <As
           as="input"
-          css={css`
+          css={`return \`._id {
   border: 1px solid #3b82f6;
   font-size: 15px;
   display: flex;
   padding: 2px;
-`}
+}\`;`}
           onChange={(e) =>
             setValues("regex", regexprops.index, "message", e.target.value)
           }
@@ -210,10 +209,10 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       <div>
         <As
           as="button"
-          css={css`
+          css={`return \`._id {
   border: 1px solid #3b82f6;
   padding: 2px;
-`}
+}\`;`}
           onClick={() => deleteRegex(regexprops.index)}
           type="button"
         >
@@ -228,9 +227,9 @@ export function ValidationConfig(props: Readonly<ValidationProps>) {
       <Show when={rules.length > 0}>
         <As
           as="h3"
-          css={css`
+          css={`return \`._id {
   font-weight: bold;
-`}
+}\`;`}
         >
           Validations:
         </As>

@@ -7,7 +7,6 @@ import { CustomModal } from "~/components/styled/modal/CustomModal";
 import FileManager from "~/features/file_manager/FileManager";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { As } from "~/components/As";
-import { css } from "~/lib/styles";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function FilePickerModal(props: {
@@ -19,18 +18,18 @@ export function FilePickerModal(props: {
 }) {
   return (
     <CustomModal
-      dialogCss={css`width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;`}
+      dialogCss={`return \`._id {width: 90vw; border-radius: 10px; padding: 0; height: 90vh; display: flex; flex-direction: column;}\`;`}
       footer={() => (
         <DialogFooter
           buttonText="Select"
           css={[
             SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS,
-            css`
+            `return \`._id {
               margin-left: auto;
               margin-right: 8px;
-            `,
+            }\`;`,
           ]}
-          containerCss={css`margin-top: auto;`}
+          containerCss={`return \`._id {margin-top: auto;}\`;`}
           onClick={() => {
             return props.onFileSelected(props.selectedFileVertex[0]);
           }}

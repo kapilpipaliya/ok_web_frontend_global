@@ -56,6 +56,7 @@ export function Content(props: ContentProps) {
   ];
 
   const [, otherProps] = splitProps(props.meta.P, ignoreMetaKeys);
+
   return (
     <>
       <ErrorBoundary

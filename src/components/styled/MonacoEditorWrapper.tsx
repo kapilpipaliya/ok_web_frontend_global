@@ -5,10 +5,11 @@ import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
 import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import { MonacoEditor } from "solid-monaco";
+import { createMemo } from "solid-js";
+import { useThemeMode } from "~/lib/theme/useThemeMode";
 
 // import onigasm from 'onigasm/lib/onigasm.wasm?url';
 import { PROPERTIES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "../As";
 
 // Initialize Monaco workers if not already done
@@ -45,6 +46,12 @@ export interface MonacoEditorWrapperProps {
 }
 
 export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
+  const themeMode = useThemeMode();
+
+  const theme = createMemo(() => {
+    return themeMode() === "dark" ? "vs-dark" : "vs";
+  });
+
   // Flag to track if we've initialized our extensions
   let extensionsInitialized = false;
   // Handle editor mount and setup custom language extensions if needed
@@ -66,9 +73,9 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
       as={MonacoEditor}
       css={[
         PROPERTIES.Css.TextFieldCss,
-        css`
+        `return \`._id {
           ${props.error ? "b: error" : ""}
-        `,
+        }\`;`,
       ]}
       height={props.height ?? "200px"}
       language={props.language}
@@ -76,7 +83,7 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
       onMount={handleEditorMount}
       options={{
         autoIndent: "full",
-        // theme: 'vs-dark',
+        theme: theme(),
         folding: false,
         fontSize: 14,
         formatOnPaste: true,

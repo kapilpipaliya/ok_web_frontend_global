@@ -3,7 +3,7 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 export function getMetaProps(
   meta: Record<string, unknown>,
   ignoreKeys: string[],
-  graph: GraphInterface,
+  _graph: GraphInterface,
 ): Record<string, unknown> {
   try {
     const result = {} as Record<string, unknown>;

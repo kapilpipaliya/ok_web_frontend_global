@@ -1,5 +1,4 @@
 import { IconButton } from "~/components/styled/IconButton";
-import { css } from "~/lib/styles";
 
 interface PlusIconButtonProps {
   onClick: () => void;
@@ -10,16 +9,20 @@ interface PlusIconButtonProps {
 export function PlusIconButton(props: PlusIconButtonProps) {
   return (
     <IconButton
-      css={css`
-        background-color: \${args.theme.var.color.primary_15};
+      css={`return \`._id {
+        background-color: \${args.theme.var.color.primary_l850};
+        color: \${args.theme.var.color.primary};
         border: none;
         cursor: pointer;
         padding: 4px;
         border-radius: 4px;
+        transition: all 0.2s ease;
+        
         &:hover {
-          background-color: \${args.theme.var.color.primary_50};
+          background-color: \${args.theme.var.color.primary_l500};
+          color: \${args.theme.var.color.text};
         }
-      `}
+      }\`;`}
       icon="ph:plus"
       size={props.size || "18"}
       aria-label={props.ariaLabel || "Add new item"}

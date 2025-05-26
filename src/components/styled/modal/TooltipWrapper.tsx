@@ -18,11 +18,9 @@ import {
 } from "@floating-ui/dom";
 import { mergeRefs, type Ref } from "@solid-primitives/refs";
 
-import { STYLES } from "~/pages/settings/constants";
 import { As } from "../../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { css } from "~/lib/styles";
 import type { SetStoreFunction } from "solid-js/store";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { CssType } from "~/components/form/type/CssType";
@@ -258,7 +256,7 @@ export function TooltipWrapper(props: {
       return;
     }
 
-    const middlewares = [offset(13), flip(), shift()];
+    const middlewares = [offset(14), flip(), shift()];
 
     // Only add arrow middleware if arrow element exists
     if (arrowEl) {
@@ -376,9 +374,7 @@ export function TooltipWrapper(props: {
             ref={setTooltip}
             role="tooltip"
             css={[
-              STYLES.tooltip.animationCss,
-              ...ensureArray(props.contentCss),
-              css`
+              `return \`._id {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -386,10 +382,18 @@ export function TooltipWrapper(props: {
                 transform: translate(${position().x}px, ${position().y}px);
                 opacity: 1;
                 animation: tooltipFadeIn 200ms ease-out;
-                
-                
-              `,
-              `@keyframes tooltipFadeIn {
+                background-color: \${args.theme.var.color.background_d800};
+                color: \${args.theme.var.color.background};
+                padding: 0.5rem 0.75rem;
+                border-radius: 0.375rem;
+                font-size: 0.875rem;
+                line-height: 1.25rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                max-width: 20rem;
+                word-wrap: break-word;
+              }\`;`,
+              ...ensureArray(props.contentCss),
+              `return \`@keyframes tooltipFadeIn {
                   from {
                     opacity: 0;
                     transform: translate(${position().x}px, ${position().y + 5}px);
@@ -398,7 +402,7 @@ export function TooltipWrapper(props: {
                     opacity: 1;
                     transform: translate(${position().x}px, ${position().y}px);
                   }
-                }`,
+                }\`;`,
             ]}
           >
             {props.content}
@@ -407,24 +411,49 @@ export function TooltipWrapper(props: {
               as="div"
               ref={setArrowElement}
               css={[
-                ...(props.arrowCss ? ensureArray(props.arrowCss) : []),
-                `
+                `return \`._id {
                   position: absolute;
-                  width: 8px;
-                  height: 8px;
+                  width: 10px;
+                  height: 10px;
+                  background-color: \${args.theme.var.color.background_d800};
                   transform: rotate(45deg);
                   z-index: -1;
                   
                   /* Position the arrow based on placement */
-                  ${placement().includes("top") ? "bottom: -4px;" : ""}
-                  ${placement().includes("bottom") ? "top: -4px;" : ""}
-                  ${placement().includes("left") ? "right: -4px;" : ""}
-                  ${placement().includes("right") ? "left: -4px;" : ""}
-                  
-                  left: ${arrowPosition().x}px;
-                  top: ${placement().includes("top") ? undefined : arrowPosition().y}px;
-                  bottom: ${placement().includes("top") ? arrowPosition().y : undefined}px;
-                `,
+                  ${
+                    placement().includes("top")
+                      ? `
+                    bottom: -5px;
+                    left: ${arrowPosition().x ?? 0}px;
+                  `
+                      : ""
+                  }
+                  ${
+                    placement().includes("bottom")
+                      ? `
+                    top: -5px;
+                    left: ${arrowPosition().x ?? 0}px;
+                  `
+                      : ""
+                  }
+                  ${
+                    placement().includes("left")
+                      ? `
+                    right: -5px;
+                    top: ${arrowPosition().y ?? 0}px;
+                  `
+                      : ""
+                  }
+                  ${
+                    placement().includes("right")
+                      ? `
+                    left: -5px;
+                    top: ${arrowPosition().y ?? 0}px;
+                  `
+                      : ""
+                  }
+                }\`;`,
+                ...(props.arrowCss ? ensureArray(props.arrowCss) : []),
               ]}
             />
           </As>

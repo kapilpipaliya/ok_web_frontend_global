@@ -7,7 +7,6 @@ import {
   type IconButtonProps,
 } from "../../../components/styled/IconButton";
 import { As } from "~/components/As";
-import { css } from "~/lib/styles";
 
 export function AddNewButton(
   props: IconButtonProps & {
@@ -20,7 +19,7 @@ export function AddNewButton(
     <IconButton
       css={[SETTINGS_CONSTANTS.MODAL.BUTTONS.SAVE_CSS]}
       icon="ph:plus"
-      iconCss={css`margin-right: 5px;`}
+      iconCss={`return \`._id {margin-right: 5px;}\`;`}
       size={22}
       title="Add New"
       {...rest}

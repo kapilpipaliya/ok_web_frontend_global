@@ -20,7 +20,7 @@ import { SETTINGS_CONSTANTS } from "../settings/constants";
 import { AddNewThemeDialog } from "./theme_config/AddNewThemeDialog";
 import { ThemeConfigEditButton } from "./theme_config/ThemeConfigEditButton";
 import { ThemePreview } from "./theme_config/ThemePreview";
-import { css } from "~/lib/styles";
+import { ThemeColorVariantsPreview } from "./theme_config/ThemeColorVariantsPreview";
 import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -131,10 +131,10 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
       <Show when={error()}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   padding: 0.5rem;
   color: \${args.theme.var.color.error};
-`}
+}\`;`}
         >
           {error()}
         </As>
@@ -142,9 +142,9 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
       <Show when={loading()}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   padding: 0.5rem;
-`}
+}\`;`}
         >
           Loading...
         </As>
@@ -153,12 +153,12 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
       <Show when={!(loading() || error())}>
         <As
           as="ul"
-          css={css`
+          css={`return \`._id {
   width: 100%;
   padding: 0;
   ${props.isStandalone ? "max-height:none;" : "max-height: 300px;"}
   overflow-y: auto;
-`}
+}\`;`}
         >
           <For each={graph.vertexLabelIdMap.Theme}>
             {(theme) => {
@@ -167,34 +167,36 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
               return (
                 <As
                   as="li"
-                  css={css`
-  ${isSelected() ? "background-color: ${args.theme.var.color.primary_60};" : ""}
+                  css={`return \`._id {
+  ${isSelected() ? "background-color: ${args.theme.var.color.primary_l400};" : ""}
   display: flex;
   align-items: center;  
   justify-content: space-between;
   padding: 0.5rem;
   cursor: pointer;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid \${args.theme.var.color.border};
   &:hover {
-    background-color: \${args.theme.var.color.primary_40};
+    background-color: \${args.theme.var.color.primary_l200};
   }
-`}
+}\`;`}
                   onClick={() => handleThemeSelect(theme)}
                 >
                   <As
                     as="div"
-                    css={css`
+                    css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-`}
+  flex: 1;
+}\`;`}
                   >
                     <Show when={isSelected()}>
                       <As
                         as="span"
-                        css={css`
+                        css={`return \`._id {
   color: \${args.theme.var.color.primary};
-`}
+  font-size: 1.2rem;
+}\`;`}
                       >
                         ✓
                       </As>
@@ -203,11 +205,11 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                   </As>
                   <As
                     as="div"
-                    css={css`
+                    css={`return \`._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-`}
+}\`;`}
                   >
                     <ThemePreview item={graph.vertexes[theme]} />
 
@@ -218,16 +220,15 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
 
                     <Show when={!isSelected()}>
                       <IconButton
-                        css={css`
+                        css={`return \`._id {
   color: \${args.theme.var.color.error};
   background-color: transparent;
   border: none;
   padding: 1px;
   cursor: pointer;
   &:hover {
-    color: \${args.theme.var.color.error_400};
-  }
-`}
+    color: \${args.theme.var.color.error_d400};
+}\`;`}
                         icon="ph:trash"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -245,57 +246,34 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
           </For>
         </As>
       </Show>
+
+      {/* Show color variants preview when in standalone mode */}
+      <Show when={props.isStandalone && getGlobalThemeVertex(graph)}>
+        <ThemeColorVariantsPreview themeVertex={getGlobalThemeVertex(graph)!} />
+      </Show>
+
       <Show when={confirmDelete()}>
         <Portal>
-          <As
-            as="div"
-            css={() => css`
-  ${SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS}
-`}
-          >
-            <As
-              as="div"
-              css={() => css`
-  ${SETTINGS_CONSTANTS.MODAL.HEADER.CSS}
-`}
-            >
-              <As
-                as="h3"
-                css={() => css`
-  ${SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS}
-`}
-              >
+          <As as="div" css={SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS}>
+            <As as="div" css={SETTINGS_CONSTANTS.MODAL.HEADER.CSS}>
+              <As as="h3" css={SETTINGS_CONSTANTS.MODAL.HEADER.TEXT_CSS}>
                 Delete Theme
               </As>
             </As>
-            <As
-              as="p"
-              css={() => css`
-  ${SETTINGS_CONSTANTS.MODAL.BODY.CSS}
-`}
-            >
+            <As as="p" css={SETTINGS_CONSTANTS.MODAL.BODY.CSS}>
               Are you sure you want to delete this theme?
             </As>
-            <As
-              as="div"
-              css={() => css`
-  ${SETTINGS_CONSTANTS.MODAL.FOOTER.CSS}
-`}
-            >
+            <As as="div" css={SETTINGS_CONSTANTS.MODAL.FOOTER.CSS}>
               <As
                 as="button"
-                css={() => css`
-                ${SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CSS}
-              `}
+                css={SETTINGS_CONSTANTS.MODAL.BUTTONS.DELETE_CSS}
                 onClick={handleDeleteConfirmation}
               >
                 Yes
               </As>
               <As
                 as="button"
-                css={() => css`
-                ${SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS}
-              `}
+                css={SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS}
                 onClick={() => setConfirmDelete(null)}
               >
                 No

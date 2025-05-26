@@ -10,7 +10,6 @@ import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { evalExpression } from "~/lib/expression_eval";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
-import { css } from "~/lib/styles";
 
 import { FilePickerModal } from "./FilePickerModal";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -87,11 +86,13 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
     <>
       <IconButton
         css={[
-          selectedFileVertex()?.length > 0 ? css`color: green;` : "",
-          css`
+          selectedFileVertex()?.length > 0
+            ? `return \`._id {color: \${args.theme.var.color.success};}\`;`
+            : "",
+          `return \`._id {
             background-color: transparent;
             border: none;
-          `,
+          }\`;`,
         ]}
         icon={"ph:image-square"}
         onClick={() => setOpenDialog(true)}

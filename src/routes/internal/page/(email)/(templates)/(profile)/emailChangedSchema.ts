@@ -1,54 +1,53 @@
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
-import { returnCSS } from "~/lib/styles";
 
 const content = [
   {
     as: "h1",
-    css: returnCSS`
+    css: `return \`._id {
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 1,
     text: "Email Change Notification",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 2,
     text: "We're writing to let you know that a request has been made to change the email address associated with your account.",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 3,
     text: "If you initiated this change, no further action is required. The new email address will be activated after verification.",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       color: \${args.theme.var.color.error};
       font-weight: bold;
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 4,
     text: "If you did not request this change, please contact our support team immediately.",
   },
   {
     as: "a",
-    css: returnCSS`
+    css: `return \`._id {
       background-color: \${args.theme.var.color.primary};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.base_10};
+      color: \${args.theme.var.color.text_l900};
       cursor: pointer;
       display: inline-block;
       padding: 8px 16px;
@@ -56,7 +55,7 @@ const content = [
       &:hover {
         opacity: 0.9;
       }
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 5,
     props: `return {

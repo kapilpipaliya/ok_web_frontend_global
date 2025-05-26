@@ -8,7 +8,6 @@ import { useDesignerFormIdContext } from "~/features/page_designer/context/Layou
 import { ComponentList } from "~/features/page_designer/form_elements/components/ComponentList";
 import { handleDropAtPosition } from "~/features/page_designer/functions/drag_drop/core/handleDropAtPosition";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -46,13 +45,13 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
             ICON_BUTTON_STYLES.baseCss,
             ICON_BUTTON_STYLES.defaultCss,
             ICON_BUTTON_STYLES.spacingCss,
-            css`
+            `return \`._id {
               background-color: transparent;
               border: none;
-            `,
+            }\`;`,
           ]}
           icon="ph:arrow-line-up"
-          iconCss={css`transition:transform 0.2s;`}
+          iconCss={`return \`._id {transition:transform 0.2s;}\`;`}
           onClick={(e) => {
             e.stopPropagation();
             setShowBeforeMenu(true);
@@ -86,13 +85,13 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
             ICON_BUTTON_STYLES.baseCss,
             ICON_BUTTON_STYLES.defaultCss,
             ICON_BUTTON_STYLES.spacingCss,
-            css`
+            `return \`._id {
               background-color: transparent;
               border: none;
-            `,
+            }\`;`,
           ]}
           icon="ph:arrow-line-down"
-          iconCss={css`transition:transform 0.2s;`}
+          iconCss={`return \`._id {transition:transform 0.2s;}\`;`}
           onClick={(e) => {
             e.stopPropagation();
             setShowAfterMenu(true);
@@ -127,13 +126,13 @@ export function InsertButtons(props: Readonly<{ item: Vertex; size: number }>) {
           ICON_BUTTON_STYLES.baseCss,
           ICON_BUTTON_STYLES.defaultCss,
           ICON_BUTTON_STYLES.spacingCss,
-          css`
+          `return \`._id {
             background-color: transparent;
             border: none;
-          `,
+          }\`;`,
         ]}
         icon="ph:plus-circle"
-        iconCss={css`transition:transform 0.2s;`}
+        iconCss={`return \`._id {transition:transform 0.2s;}\`;`}
         onClick={(e) => {
           e.stopPropagation();
           setShowInsideMenu(true);
@@ -176,9 +175,9 @@ export function InsertButtonsMenu(
 ) {
   return (
     <DropdownMenu
-      css={css`
+      css={`return \`._id {
   padding: 0.50rem;
-`}
+}\`;`}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
     >

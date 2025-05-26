@@ -11,7 +11,6 @@ import {
 } from "~/features/page_designer/context/LayoutContext";
 import { handleDrop } from "~/features/page_designer/event_handler/handleDrop";
 import { resetDragDropState } from "~/features/page_designer/event_handler/resetDragDropState";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { getChannel } from "~/lib/graph/mutate/core/channel/getChannel";
@@ -76,10 +75,10 @@ function DroppableWrapper(props: { children: any; formStoreId: string }) {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
         ${noMinHeight ? "" : "min-height: 300px;"}
-        ${isDraggingOver() ? "background-color: #f3f3f4;" : ""}
-      `}
+        ${isDraggingOver() ? "background-color: ${args.theme.var.color.background_l100};" : ""}
+      }\`;`}
       onClick={() => {
         onLayoutItemClick(
           layoutStoreVertex(),

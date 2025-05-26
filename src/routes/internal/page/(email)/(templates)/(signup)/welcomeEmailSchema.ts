@@ -1,23 +1,22 @@
-import { returnCSS } from "~/lib/styles";
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 const content = [
   {
     as: "h1",
-    css: returnCSS`
+    css: `return \`._id {
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 1,
     text: "Welcome to Our Platform!",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 2,
     text: "We're excited to have you on board. Here are some things you can do to get started:",
@@ -38,19 +37,19 @@ const content = [
         text: "Explore our features",
       },
     ],
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 24px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 3,
   },
   {
     as: "a",
-    css: returnCSS`
+    css: `return \`._id {
       background-color: \${args.theme.var.color.primary};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.base_10};
+      color: \${args.theme.var.color.text_l900};
       cursor: pointer;
       display: inline-block;
       padding: 8px 16px;
@@ -58,7 +57,7 @@ const content = [
       &:hover {
         opacity: 0.9;
       }
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 4,
     props: `return {

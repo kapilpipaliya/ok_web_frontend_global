@@ -12,7 +12,6 @@ import { revertTransactionUpToIndex } from "~/lib/graph/transaction/revert/rever
 import { getLastTxnIndex } from "~/lib/graph/transaction/value/getLastTxnIndex";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
@@ -81,9 +80,9 @@ export function ImportMenu(
 
   return (
     <DropdownMenu
-      css={css`
+      css={`return \`._id {
   padding: 0.50rem;
-`}
+}\`;`}
       onClickOutside={props.onClose}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
@@ -94,35 +93,35 @@ export function ImportMenu(
       <div>
         <As
           as="label"
-          css={css`
-  color: #3b82f6;
+          css={`return \`._id {
+  color: \${args.theme.var.color.primary};
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-`}
+}\`;`}
           for="importHtml"
         >
           HTML
         </As>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   margin-top: 2px;
-`}
+}\`;`}
         >
           <As
             as="textarea"
-            css={css`
+            css={`return \`._id {
   border-radius: 0.375rem;
   border-width: 0;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  color: #3b82f6;
+  color: \${args.theme.var.color.primary};
   display: block;
   font-size: 0.875rem;
   padding-left: 0.75rem; padding-right: 0.75rem;
   padding-top: 0.375rem; padding-bottom: 0.375rem;
   width: 100%;
-`}
+}\`;`}
             id="importHtml"
             onChange={(e) => setHtmlContent(e.target.value)}
             placeholder="Paste HTML here"
@@ -134,9 +133,9 @@ export function ImportMenu(
       <Show when={error()}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   color: \${args.theme.var.color.error};
-`}
+}\`;`}
         >
           {error()}
         </As>

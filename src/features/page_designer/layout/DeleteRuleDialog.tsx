@@ -5,7 +5,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { SimpleWithDismissButton } from "~/components/styled/modal/SimpleModal";
 
 import { useDesignerFormIdContext } from "../context/LayoutContext";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
@@ -28,18 +27,18 @@ const AttributeList = (
   <Show when={props.attributes.length > 0}>
     <As
       as="div"
-      css={css`
-  color: rgb(185,28,28);
+      css={`return \`._id {
+  color: \${args.theme.var.color.error};
   font-size: 0.875rem;
   margin-top: 0.5rem;
-`}
+}\`;`}
     >
       <As
         as="ul"
-        css={css`
+        css={`return \`._id {
   list-style-type: disc;
   padding-left: 1.25rem;
-`}
+}\`;`}
       >
         <li>
           {props.title} {props.attributes.join(", ")}.
@@ -95,9 +94,9 @@ export function DeleteAttributeDialog() {
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   margin-top: 1rem;
-`}
+}\`;`}
       >
         <AttributeList
           attributes={nameKeyAttributes()}
@@ -110,11 +109,11 @@ export function DeleteAttributeDialog() {
         <Show when={formStoreVertex()?.P.shouldContainAtLeastOneForm}>
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   color: \${args.theme.var.color.error};
   font-size: 0.875rem;
   margin-top: 0.5rem;
-`}
+}\`;`}
           >
             Error: At least one form attribute should be present.
           </As>

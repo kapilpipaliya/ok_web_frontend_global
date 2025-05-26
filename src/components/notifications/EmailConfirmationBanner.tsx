@@ -3,7 +3,6 @@ import type {
   IFormMetaData,
 } from "~/lib/meta/FormMetadataType";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
-import { css } from "~/lib/styles";
 import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { useToast } from "~/components/styled/modal/Toast";
@@ -24,11 +23,11 @@ export function EmailConfirmationBanner() {
       {
         as: "icon",
         icon: "ph:warning-circle-fill",
-        css: css`
-color: \${args.theme.var.color.warning};
+        css: (args: FunctionArgumentType) => `return \`._id {
+color: ${args.theme.var.color.warning};
 font-size: 24px;
 margin-right: 12px;
-`,
+}\`;`,
         componentName: "Html",
       },
       {
@@ -36,48 +35,48 @@ margin-right: 12px;
         attributes: [
           {
             as: "span",
-            css: css`
-color: \${args.theme.var.color.warning};
+            css: (args: FunctionArgumentType) => `return \`._id {
+color: ${args.theme.var.color.warning};
 font-weight: 600;
 display: block;
-`,
+}\`;`,
             componentName: "Html",
             text: "Email Confirmation Required",
           },
           {
             as: "span",
-            css: css`
+            css: (args: FunctionArgumentType) => `return \`._id {
 margin-top: 4px;
-color: \${args.theme.var.color.base};
+color: ${args.theme.var.color.text};
 display: block;
-`,
+}\`;`,
             componentName: "Html",
             text: "Please confirm your email address to access all features.",
           },
           {
             as: "button",
-            css: css`
+            css: (args: FunctionArgumentType) => `return \`._id {
 display: inline-flex;
 align-items: center;
 margin-top: 12px;
 padding: 6px 12px;
-background-color: \${args.theme.var.color.warning};
-color: white;
+background-color: ${args.theme.var.color.warning};
+color: ${args.theme.var.color.text_d700};
 border-radius: 4px;
 border: none;
 font-size: 14px;
 font-weight: 500;
 cursor: pointer;
-`,
+}\`;`,
             componentName: "Html",
             attributes: [
               {
                 as: "icon",
                 icon: "ph:envelope-simple-fill",
-                css: css`
+                css: `return \`._id {
 font-size: 16px;
 margin-right: 8px;
-`,
+}\`;`,
                 componentName: "Html",
               },
               {
@@ -111,15 +110,15 @@ margin-right: 8px;
         componentName: "Html",
       },
     ],
-    css: css`
+    css: (args: FunctionArgumentType) => `return \`._id {
 margin: 16px;
 padding: 16px;
-background-color: \${args.theme.var.color.warning_20};
+background-color: ${args.theme.var.color.warning_l150};
 border-radius: 8px;
-border: 1px solid \${args.theme.var.color.warning_40};
+border: 1px solid ${args.theme.var.color.warning_l200};
 display: flex;
 align-items: flex-start;
-`,
+}\`;`,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
       hide: options.data.P.emailConfirmed,

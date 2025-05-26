@@ -1,5 +1,4 @@
 import { STYLES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 
 /**
  * Creates a submit button
@@ -22,7 +21,7 @@ export function createSubmitButton(
         text,
       },
     ],
-    css: [STYLES.button2Css, css`width:100%`],
+    css: [STYLES.button2Css, "._id {width:100%"],
     componentName: "Html",
     props: () => ({
       disabled: isLoading,

@@ -26,7 +26,7 @@ export function AuthRequired(props: ParentProps) {
           });
         }
         return userData;
-      } catch (error) {
+      } catch (_error) {
         const params = new URLSearchParams();
         params.set("redirectUrl", location.pathname);
         navigate(`${API.urls.admin.signIn}?${params.toString()}`, {

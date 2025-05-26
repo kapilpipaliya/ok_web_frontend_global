@@ -6,7 +6,6 @@ import { IconButton } from "~/components/styled/IconButton";
 import { redo, redoAllowed } from "~/lib/graph/transaction/history/redo";
 import { undo, undoAllowed } from "~/lib/graph/transaction/history/undo";
 import { headerIconButtonCss } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -25,10 +24,14 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
 
   // Create transaction state info for tooltips
   const transactionInfo = createMemo(() => {
-    if (!txnVertex()) return { undoSteps: 0, redoSteps: 0, statusText: "" };
+    if (!txnVertex()) {
+      return { undoSteps: 0, redoSteps: 0, statusText: "" };
+    }
 
     const txn = txnVertex()?.P;
-    if (!txn) return { undoSteps: 0, redoSteps: 0, statusText: "" };
+    if (!txn) {
+      return { undoSteps: 0, redoSteps: 0, statusText: "" };
+    }
 
     const totalSteps = txn.steps.length;
     const activeIndex = txn.activeUndoIndex;
@@ -39,10 +42,15 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
 
     // Status text for tooltip
     let statusText = "";
-    if (txn.status === "modified") statusText = "Unsaved changes";
-    else if (txn.status === "reverted") statusText = "Reverted changes";
-    else if (txn.status === "error") statusText = "Error state";
-    else if (txn.status === "committed") statusText = "All changes saved";
+    if (txn.status === "modified") {
+      statusText = "Unsaved changes";
+    } else if (txn.status === "reverted") {
+      statusText = "Reverted changes";
+    } else if (txn.status === "error") {
+      statusText = "Error state";
+    } else if (txn.status === "committed") {
+      statusText = "All changes saved";
+    }
 
     return {
       undoSteps,
@@ -59,7 +67,7 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
       onClick: () => undo(formStoreVertex()?.P.txnId, graph, setGraph),
       getTooltip: () => {
         const info = transactionInfo();
-        const undoTooltip = `Undo (Ctrl+Z)`;
+        const undoTooltip = "Undo (Ctrl+Z)";
 
         if (info.undoSteps > 0) {
           return `${undoTooltip} - ${info.undoSteps} ${info.undoSteps === 1 ? "step" : "steps"} available`;
@@ -73,12 +81,12 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
         if (status === "modified" || status === "reverted") {
           return [
             headerIconButtonCss,
-            css`
-            color: \${args.theme.var.color.blue_600};
+            `return \`._id {
+            color: \${args.theme.var.color.primary};
             &:hover:not(:disabled) {
-              color: \${args.theme.var.color.blue_500};
+              color: \${args.theme.var.color.primary_l200};
             }
-          `,
+          }\`;`,
           ];
         }
         return headerIconButtonCss;
@@ -90,7 +98,7 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
       onClick: () => redo(formStoreVertex()?.P.txnId, graph, setGraph),
       getTooltip: () => {
         const info = transactionInfo();
-        const redoTooltip = `Redo (Ctrl+Y)`;
+        const redoTooltip = "Redo (Ctrl+Y)";
 
         if (info.redoSteps > 0) {
           return `${redoTooltip} - ${info.redoSteps} ${info.redoSteps === 1 ? "step" : "steps"} available`;
@@ -104,12 +112,12 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
         if (isRedoAvailable) {
           return [
             headerIconButtonCss,
-            css`
-            color: \${args.theme.var.color.blue_600};
+            `return \`._id {
+            color: \${args.theme.var.color.primary};
             &:hover:not(:disabled) {
-              color: \${args.theme.var.color.blue_500};
+              color: \${args.theme.var.color.primary_l200};
             }
-          `,
+          }\`;`,
           ];
         }
         return headerIconButtonCss;
@@ -120,13 +128,13 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
         margin-left: 2px;
         display: flex;
         align-items: center;
         gap: 2px;
         position: relative;
-      `}
+      }\`;`}
     >
       <For each={icons}>
         {(item) => (

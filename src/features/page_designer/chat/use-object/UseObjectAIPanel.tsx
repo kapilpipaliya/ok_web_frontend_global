@@ -19,7 +19,6 @@ import { ChatInput } from "./ChatInput";
 import { ChatMessage } from "./ChatMessage";
 import { ChatResponse } from "./chat_response/ChatResponse";
 import { getChatHistory } from "./functions/getChatHistory";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -159,7 +158,7 @@ You have access to the following theme variables:
 \`\`\`json
 ${JSON.stringify(globalTheme())}
 \`\`\`
-you can use above theme variables in css properties, like: \`\${args.theme.var.color.base_10}\`.
+you can use above theme variables in css properties, like: \`\${args.theme.var.color.background_l900}\`.
 
 Choose colors that work well for the context and maintain good contrast ratios.
 `.trim(),
@@ -187,22 +186,22 @@ Choose colors that work well for the context and maintain good contrast ratios.
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: grid;
   grid-template-rows: 1fr auto;
   height: 100%;
-  background: \${args.theme.var.color.base_1};
-`}
+  background: \${args.theme.var.color.background_l50};
+}\`;`}
     >
       <As
         as="div"
         css={[
           STYLES.overflowCss,
-          css`
+          `return \`._id {
             padding: 16px;
             scroll-behavior: smooth;
-            background: linear-gradient(to bottom, \${args.theme.var.color.base_1}, \${args.theme.var.color.base_3});
-          `,
+            background: linear-gradient(to bottom, \${args.theme.var.color.background_l50}, \${args.theme.var.color.background_l100});
+          }\`;`,
         ]}
         class="chat-history"
         ref={chatHistoryRef!}
@@ -212,15 +211,14 @@ Choose colors that work well for the context and maintain good contrast ratios.
             <As
               as="div"
               css={[
-                css`
+                `return \`._id {
   margin-bottom: 28px;
   animation: fadeIn 0.3s ease-in-out;
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-`,
+}\`;`,
+                `return \`@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}\`;`,
               ]}
             >
               <ChatMessage
@@ -245,27 +243,27 @@ Choose colors that work well for the context and maintain good contrast ratios.
           <As
             as="div"
             css={[
-              css`
+              (_args: FunctionArgumentType) => `return \`._id {
   padding: 16px;
   margin-bottom: 16px;
-  color: rgb(239,68,68);
-  background: rgba(254,242,242, 0.8);
+  color: \${args.theme.var.color.error};
+  background: \${args.theme.var.color.error_l50};
   border-radius: 8px;
-  border: 1px solid rgba(239,68,68, 0.3);
+  border: 1px solid \${args.theme.var.color.error_l100};
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-`,
+}\`;`,
             ]}
           >
             <As as="span">An error occurred. {error()?.message}</As>
             <As
               as="button"
-              css={css`
+              css={`return \`._id {
   padding: 8px 16px;
-  color: white;
-  background: rgb(59,130,246);
+  color: \${args.theme.var.color.primary_text};
+  background: \${args.theme.var.color.primary};
   border: none;
   border-radius: 6px;
   font-weight: 500;
@@ -273,9 +271,9 @@ Choose colors that work well for the context and maintain good contrast ratios.
   transition: background 0.2s;
   
   &:hover {
-    background: rgb(37,99,235);
+    background: \${args.theme.var.color.primary_l200};
   }
-`}
+}\`;`}
               onClick={() => reload()}
               type="button"
             >
@@ -288,63 +286,61 @@ Choose colors that work well for the context and maintain good contrast ratios.
           <As
             as="div"
             css={[
-              css`
+              `return \`._id {
   padding: 16px;
-  color: rgb(107,114,128);
+  color: \${args.theme.var.color.text_l300};
   display: flex;
   gap: 12px;
   align-items: center;
-  background: \${args.theme.var.color.base_5};
+  background: \${args.theme.var.color.background_l100};
   border-radius: 8px;
   margin-bottom: 16px;
-`,
+}\`;`,
             ]}
           >
             <As
               as="div"
               css={[
-                css`
+                `return \`._id {
   display: flex;
   align-items: center;
   gap: 12px;
   flex: 1;
-`,
+}\`;`,
               ]}
             >
               <As
                 as="div"
                 css={[
-                  css`
+                  `return \`._id {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 3px solid \${args.theme.var.color.base_20};
-  border-top-color: rgb(59,130,246);
+  border: 3px solid \${args.theme.var.color.border};
+  border-top-color: \${args.theme.var.color.primary};
   animation: spin 1s infinite linear;
-  
-
-`,
-                  `  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }`,
+}\`;`,
+                  `return \`@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}\`;`,
                 ]}
               />
               <As
                 as="span"
-                css={css`
+                css={`return \`._id {
                   font-weight: 500;
-                `}
+                }\`;`}
               >
                 AI is thinking...
               </As>
             </As>
             <As
               as="button"
-              css={css`
+              css={`return \`._id {
   padding: 8px 16px;
-  color: white;
-  background: rgb(239,68,68);
+  color: \${args.theme.var.color.error_text};
+  background: \${args.theme.var.color.error};
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -352,9 +348,9 @@ Choose colors that work well for the context and maintain good contrast ratios.
   transition: background 0.2s;
   
   &:hover {
-    background: rgb(220,38,38);
+    background: \${args.theme.var.color.error_l200};
   }
-`}
+}\`;`}
               onClick={() => stop()}
               type="button"
             >

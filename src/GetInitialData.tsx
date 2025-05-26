@@ -15,17 +15,22 @@ import { getUserRPC } from "./routes/api/auth/(user)/getUserRPC";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { ErrorMessage } from "~/components/ErrorMessage";
+import { SimpleErrorMessage } from "~/components/SimpleErrorMessage";
 
 interface GetInitialDataProps extends ParentProps {
   authenticate?: boolean;
   dontRedirectToLogin?: boolean;
 }
 
-const fetchData = query(async (authenticate?: boolean) => {
+const fetchData = query(async (_authenticate?: boolean) => {
   "use server";
   const [initialData, userData] = await Promise.all([
-    getInitialData(),
+    getInitialData().catch(
+      (error): ServerResult => ({
+        error: error.message || "Failed to connect to database",
+        graph: undefined,
+      }),
+    ),
     // authenticate ?
     getUserRPC().catch(() => null),
     // : Promise.resolve(null),
@@ -76,14 +81,14 @@ export function GetInitialData(props: GetInitialDataProps) {
         <Match
           when={props.authenticate && !(data()?.userData as UserData)?.user}
         >
-          <ErrorMessage
+          <SimpleErrorMessage
             message="Not Authorized"
             linkText="Go to Sign In"
             linkUrl={API.urls.admin.signIn}
           />
         </Match>
         <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
-          <ErrorMessage
+          <SimpleErrorMessage
             message={getGlobalStore(graph[0]).P.initialDataFetchError}
           />
         </Match>

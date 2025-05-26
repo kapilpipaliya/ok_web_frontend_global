@@ -16,7 +16,6 @@ import { UniqueConstrains } from "./keys/UniqueConstrain";
 import { LayoutTree } from "./layout/LayoutTree";
 import { Permission } from "./permission/Permission";
 import { Variants } from "./variants/Variants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { Divider } from "~/components/styled/Divider";
 import { isPermissionsConfigurable } from "./utils/permissionUtils";
@@ -36,25 +35,25 @@ export function SettingTabs() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: grid;
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr;
   height: 100%;
-`}
+}\`;`}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   overflow: auto;
-`}
+}\`;`}
       >
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   padding: 5px;
   height: 100%;
-`}
+}\`;`}
         >
           <FormConfig />
 

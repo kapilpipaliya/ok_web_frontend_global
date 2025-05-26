@@ -34,7 +34,6 @@ import {
 } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
-import { css } from "~/lib/styles";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -170,10 +169,10 @@ export function CompanyLogoSettings() {
           },
           {
             as: "img",
-            css: css`
+            css: `return \`._id {
   cursor: pointer;
   height: 60px;
-`,
+}\`;`,
             componentName: "Html",
             key: "companyLogo",
             props: () => {
@@ -191,7 +190,8 @@ export function CompanyLogoSettings() {
           {
             as: "button",
             css:
-              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS + css`margin-right: auto`,
+              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS +
+              "._id {margin-right: auto",
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenRectangularDialog(true),
@@ -213,11 +213,11 @@ export function CompanyLogoSettings() {
           },
           {
             as: "img",
-            css: css`
+            css: `return \`._id {
   cursor: pointer;
   height: 60px;
   width: 60px;
-`,
+}\`;`,
             componentName: "Html",
             key: "companySquareLogo",
             props: () => {
@@ -235,7 +235,8 @@ export function CompanyLogoSettings() {
           {
             as: "button",
             css:
-              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS + css`margin-right: auto`,
+              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS +
+              "._id {margin-right: auto",
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenSquareDialog(true),

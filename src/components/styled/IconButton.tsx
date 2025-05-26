@@ -2,7 +2,6 @@ import { Icon } from "@iconify-icon/solid";
 import { type JSX, Show, splitProps } from "solid-js";
 
 import { STYLES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "../As";
 import { TooltipWrapper } from "./modal/TooltipWrapper";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
@@ -95,20 +94,7 @@ export function IconButton(props: Readonly<IconButtonProps>): JSX.Element {
   return (
     <Show fallback={<InnerContent />} when={local.title}>
       <TooltipWrapper
-        arrowCss={STYLES.tooltip.arrowCss}
-        content={
-          <As as="div" css={STYLES.tooltip.contentCss}>
-            <As
-              as="div"
-              css={css`
-              font-size: 14px;
-              font-weight: 500;
-            `}
-            >
-              {local.title}
-            </As>
-          </As>
-        }
+        content={local.title}
         group={local.tooltipGroup}
         openDelay={300}
         triggerAs={props.href ? "a" : "button"}

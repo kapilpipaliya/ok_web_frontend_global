@@ -1,9 +1,7 @@
 import { type Accessor, For, Show } from "solid-js";
 
 import { IconButton } from "../IconButton";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 export function TableActions(
@@ -23,31 +21,32 @@ export function TableActions(
 ) {
   // Creates pagination button style based on disabled state
   const getPaginationButtonStyle = (isDisabled: boolean) => {
-    return (args: FunctionArgumentType) => css`
-      justify-content: center;
-      padding: 0.375rem;
-      background-color: ${
-        isDisabled ? args.theme.var.color.base_05 : args.theme.var.color.base_10
-      };
-      border-radius: 4px;
-      border: 1px solid ${
-        isDisabled
-          ? args.theme.var.color.base_15
-          : args.theme.var.color.primary_20
-      };
-      color: ${
-        isDisabled ? args.theme.var.color.base_40 : args.theme.var.color.primary
-      };
-      transition: all 0.2s ease;
-      &:hover {
-        background-color: ${
-          isDisabled
-            ? args.theme.var.color.base_05
-            : args.theme.var.color.primary_10
-        };
-        ${!isDisabled && `border-color: ${args.theme.var.color.primary};`}
-      }
-    `;
+    return [
+      `return \`._id {
+        justify-content: center;
+        padding: 0.375rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }\`;`,
+      isDisabled
+        ? `return \`._id {
+            background-color: \${args.theme.var.color.background_l300};
+            border: 1px solid \${args.theme.var.color.border};
+            color: \${args.theme.var.color.text_l600};
+            &:hover {
+              background-color: \${args.theme.var.color.background_l300};
+            }
+          }\`;`
+        : `return \`._id {
+            background-color: \${args.theme.var.color.background_l100};
+            border: 1px solid \${args.theme.var.color.primary_l800};
+            color: \${args.theme.var.color.primary};
+            &:hover {
+              background-color: \${args.theme.var.color.primary_l900};
+              border-color: \${args.theme.var.color.primary};
+            }
+          }\`;`,
+    ];
   };
 
   // Create start navigation disabled state
@@ -60,56 +59,68 @@ export function TableActions(
     <Show when={props.displayedRows().length > 0}>
       <As
         as="div"
-        css={(args: FunctionArgumentType) => css`
+        css={`return \`._id {
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 0.75rem 1.25rem;
-          background-color: ${args.theme.var.color.base_05};
+          background-color: \${args.theme.var.color.background_l300};
           border-radius: 0 0 10px 10px;
           box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
-        `}
+        }\`;`}
       >
         {/* Rows per page selector */}
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
             display: flex;
             align-items: center;
-          `}
+          }\`;`}
         >
           <As
             as="label"
             html-for="rowsPerPage"
-            css={(args: FunctionArgumentType) => css`
+            css={`return \`._id {
               font-size: 0.875rem;
-              color: ${args.theme.var.color.base};
+              color: \${args.theme.var.color.text};
               margin-right: 0.5rem;
-            `}
+            }\`;`}
           >
             Rows per page:
           </As>
           <As
             as="select"
-            css={(args: FunctionArgumentType) => css`
+            css={`return \`._id {
               padding: 0.25rem 0.5rem;
               border-radius: 4px;
-              border: 1px solid ${args.theme.var.color.primary_20};
-              background-color: ${args.theme.var.color.base_10};
+              border: 1px solid \${args.theme.var.color.primary_l800};
+              background-color: \${args.theme.var.color.background_l100};
+              color: \${args.theme.var.color.text};
               font-size: 0.875rem;
               cursor: pointer;
               outline: none;
               &:focus {
-                border-color: ${args.theme.var.color.primary};
-                box-shadow: 0 0 0 2px ${args.theme.var.color.primary_20};
+                border-color: \${args.theme.var.color.primary};
+                box-shadow: 0 0 0 2px \${args.theme.var.color.primary_l800};
               }
-            `}
+            }\`;`}
             id="rowsPerPage"
             onChange={props.handleRowsPerPageChange}
             value={props.rowsPerPage()}
           >
             <For each={props.rowsPerPageOptions || [10, 20, 50, 100]}>
-              {(option) => <option value={option}>{option}</option>}
+              {(option) => (
+                <As
+                  as="option"
+                  css={`return \`._id {
+                    color: \${args.theme.var.color.text};
+                    background-color: \${args.theme.var.color.background_l100};
+                  }\`;`}
+                  value={option}
+                >
+                  {option}
+                </As>
+              )}
             </For>
           </As>
         </As>
@@ -117,11 +128,11 @@ export function TableActions(
         {/* Page information */}
         <As
           as="div"
-          css={(args: FunctionArgumentType) => css`
+          css={`return \`._id {
             font-size: 0.875rem;
-            color: ${args.theme.var.color.base};
+            color: \${args.theme.var.color.text};
             font-weight: 500;
-          `}
+          }\`;`}
         >
           <span>{`${props.currentPage() * props.rowsPerPage() + 1}-${Math.min(
             (props.currentPage() + 1) * props.rowsPerPage(),
@@ -132,11 +143,11 @@ export function TableActions(
         {/* Pagination buttons */}
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-          `}
+          }\`;`}
         >
           <IconButton
             css={getPaginationButtonStyle(isStartDisabled())}

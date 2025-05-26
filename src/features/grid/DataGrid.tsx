@@ -278,7 +278,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
 
     // Make sure we have the form metadata before fetching
     // Allow proceeding even without metadata if we're handling an error
-    if (!formMeta && !loadMore) {
+    if (!(formMeta || loadMore)) {
       return { error: "Page metadata not loaded. Please try again." };
     }
 
@@ -302,9 +302,8 @@ export function DataGrid(props: Readonly<DataGridProps>) {
           };
         }
         return data;
-      } else {
-        return { error: getErrorMessage(data), isLoadMore: loadMore };
       }
+      return { error: getErrorMessage(data), isLoadMore: loadMore };
     } catch (error) {
       return {
         error:
@@ -455,7 +454,9 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   // Process data both on the client-side as well (for hydration)
   const processResult = () => {
     const result = dataResource();
-    if (!result) return;
+    if (!result) {
+      return;
+    }
 
     try {
       // Handle errors
@@ -562,7 +563,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
               <LoaderNew loaderHeight="55vh" />
             </Show>
             {/* IF we not reload table Inline schmea renderer form gives error, because its not properly reloaded */}
-            <Show when={!gridState.isLoading && !gridState.isLoadingMore}>
+            <Show when={!(gridState.isLoading || gridState.isLoadingMore)}>
               <CommonTable
                 allConfiguredPermission={allConfiguredPermission()}
                 cardSize={gridState.cardSize}

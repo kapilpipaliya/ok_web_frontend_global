@@ -23,7 +23,6 @@ import {
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
 import { PreviewIsolated } from "./PreviewIsolated";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
@@ -75,10 +74,9 @@ export function PageItem(
 
   // Get combined item style
   const getItemStyle = () => {
-    const baseStyle = baseItemStyle;
     return hoverPageId() === props.child.id
-      ? `${baseStyle} ${hoverItemStyle}`
-      : baseStyle;
+      ? [baseItemStyle, hoverItemStyle]
+      : baseItemStyle;
   };
 
   const handleDragStart = (e: DragEvent) => {
@@ -113,11 +111,15 @@ export function PageItem(
     });
 
     const formStore = formStoreVertex();
-    if (!formStore) return;
+    if (!formStore) {
+      return;
+    }
 
     // Safe access to properties
     const draggedVertex = layoutStoreVertex()?.P.draggedVertexIds?.[0];
-    if (!draggedVertex) return;
+    if (!draggedVertex) {
+      return;
+    }
 
     onClickAddComponent(
       graph,
@@ -163,11 +165,11 @@ export function PageItem(
         <Show when={props.child.P.icon}>
           <Icon height={20} icon={props.child.P.icon} noobserver width={20} />
         </Show>
-        <As as="div" css={css`font-size: 14px;`}>
+        <As as="div" css={`return \`._id {font-size: 14px;}\`;`}>
           {toTitle(props.child.key)}
         </As>
         <Show when={isHovered()}>
-          <As as="div" css={css`margin-left: auto;`}>
+          <As as="div" css={`return \`._id {margin-left: auto;}\`;`}>
             <IconButton
               css={buttonStyle}
               icon="ph:arrow-square-out"

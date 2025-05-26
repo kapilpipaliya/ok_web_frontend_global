@@ -1,34 +1,35 @@
-import { returnCSS } from "~/lib/styles";
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 const content = [
   {
     as: "h1",
-    css: returnCSS`
+    css: `return \`._id {
+      color: \${args.theme.var.color.text};
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 1,
     text: "You've Been Invited",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
+      color: \${args.theme.var.color.text};
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 2,
     text: "You've been invited to join our platform. Please click the button below to complete your registration and set up your account.",
   },
   {
     as: "a",
-    css: returnCSS`
+    css: `return \`._id {
       background-color: \${args.theme.var.color.primary};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.base_10};
+      color: \${args.theme.var.color.primary_text};
       cursor: pointer;
       display: inline-block;
       margin-bottom: 16px;
@@ -37,7 +38,7 @@ const content = [
       &:hover {
         opacity: 0.9;
       }
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 3,
     props: `return {
@@ -48,10 +49,10 @@ const content = [
   },
   {
     as: "p",
-    css: returnCSS`
-      color: \${args.theme.var.color.base};
+    css: `return \`._id {
+      color: \${args.theme.var.color.text};
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 4,
     text: "This invitation link will expire in 7 days. If you have any questions, please contact the administrator who invited you.",

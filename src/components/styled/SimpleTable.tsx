@@ -1,7 +1,6 @@
 import type { JSX } from "solid-js";
 
 import { STYLES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import type { CssType } from "~/components/form/type/CssType";
@@ -13,10 +12,10 @@ export function Table(
     <As
       as="div"
       css={[
-        css`
+        `return \`._id {
       position: relative;
       border-radius: 10px;
-    `,
+    }\`;`,
         STYLES.overflowCss,
       ]}
     >
@@ -24,14 +23,14 @@ export function Table(
         as="div"
         css={[
           ...ensureArray(props.css),
-          css`
+          `return \`._id {
           display: grid;
-          border-bottom: 2px solid #37c;
+          border-bottom: 2px solid \${args.theme.var.color.primary};
           font-size: 0.9em;
           grid-template-columns: repeat(${props.headers}, 1fr);
           border-radius: 10px;
           width: 100%;
-        `,
+        }\`;`,
           STYLES.overflowCss,
         ]}
       >
@@ -52,13 +51,15 @@ export function TableBodyCell(
     <As
       as="div"
       css={[
-        css`
+        `return \`._id {
         animation: fade 0.4s;
         align-content: center;
         padding: 2px;
         text-align: center;
-        ${props.index && props.index % 2 !== 0 ? "background-color: ${args.theme.var.color.primary_10};" : ""}
-      `,
+      }\`;`,
+        props.index && props.index % 2 !== 0
+          ? `return \`._id { background-color: \${args.theme.var.color.primary_l150}; }\`;`
+          : "",
         ...ensureArray(props.css),
       ]}
     >
@@ -71,14 +72,14 @@ export function TableHeadCell(props: Readonly<{ children: JSX.Element }>) {
   return (
     <As
       as="div"
-      css={css`
-      background-color: \${args.theme.var.color.primary_90};
-      border: 1px solid \${args.theme.var.color.primary_200};
-      color: \${args.theme.var.color.base_10};
+      css={`return \`._id {
+      background-color: \${args.theme.var.color.primary_l100};
+      border: 1px solid \${args.theme.var.color.primary_d100};
+      color: \${args.theme.var.color.text_d700};
       font-weight: 600;
       padding: 10px;
       text-align: center;
-    `}
+    }\`;`}
     >
       {props.children}
     </As>

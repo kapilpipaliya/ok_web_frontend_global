@@ -13,7 +13,6 @@ import { SchemaRenderer } from "~/pages/SchemaRenderer";
 
 import { useFileManagerStore } from "../FileManagerContext";
 import { getFolderFormSchema } from "./folderFormSchema";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -131,10 +130,10 @@ export function AddNewFileButton() {
     <As
       as="div"
       css={[
-        css`
+        `return \`._id {
   display: flex;
   gap: 4px;
-`,
+}\`;`,
       ]}
     >
       <FileUploader handleFileSelect={handleFileSelect} label="Upload File" />

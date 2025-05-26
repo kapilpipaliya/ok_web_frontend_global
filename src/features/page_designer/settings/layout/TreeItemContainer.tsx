@@ -1,5 +1,4 @@
 import { createMemo, type JSX, splitProps } from "solid-js";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { getSelectedItemStyle } from "./treeUtils";
@@ -41,7 +40,7 @@ export function TreeItemContainer(props: TreeItemContainerProps) {
 
   // little dark shadow on top, little lite shadow on bottom
   const containerStyles = createMemo(
-    () => css`
+    () => `return \`._id {
     align-items: center;
     display: flex;
     gap: 0.375rem;
@@ -49,12 +48,12 @@ export function TreeItemContainer(props: TreeItemContainerProps) {
     font-weight: ${local.hasChildren ? "bold" : "normal"};
     width: 100%;
     border-radius: ${local.hasChildren ? "5px" : "0 5px 5px 0"};
-    ${local.isHovered ? "background-color: #F2EDED;" : ""}
+    ${local.isHovered ? `background-color: \${args.theme.var.color.background_l150};` : ""}
     ${local.isSelected ? getSelectedItemStyle() : ""}
     ${!local.isDragOver && local.hasChildren ? "box-shadow: rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px;" : ""}
     padding: 2px 0;
     transition: all 0.15s ease-in-out;
-  `,
+  }\`;`,
   );
 
   return (

@@ -1,4 +1,3 @@
-import { css } from "~/lib/styles";
 import type { SetStoreFunction } from "solid-js/store";
 import { openInNewInternalTab } from "../pages/functions/openInNewInternalTab";
 import type { Id } from "~/lib/graph/type/id";
@@ -6,7 +5,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 // Common styles for items in the designer
-export const baseItemStyle = css`
+export const baseItemStyle = `return \`._id {
   align-items: center;
   border-radius: 0.2rem;
   box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 5px 0px;
@@ -18,20 +17,20 @@ export const baseItemStyle = css`
   padding: 10px;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   position: relative;
-`;
+}\`;`;
 
-export const hoverItemStyle = css`
-  background-color: #F2EDED;
+export const hoverItemStyle = `return \`._id {
+  background-color: \${args.theme.var.color.background_l150};
   box-shadow: 1px 1px 1px;
   cursor: move;
-`;
+}\`;`;
 
 // Common icons and button styles
-export const buttonStyle = css`
+export const buttonStyle = `return \`._id {
   background-color: transparent;
   border: none;
   cursor: pointer;
-`;
+}\`;`;
 
 // Helper for preview behavior
 export function setupPreview(
@@ -90,8 +89,8 @@ export function setupPreview(
 
     const relatedTarget = event.relatedTarget as Node;
     if (
-      (floatingElement && floatingElement.contains(relatedTarget)) ||
-      (previewRef && previewRef.contains(relatedTarget))
+      floatingElement?.contains(relatedTarget) ||
+      previewRef?.contains(relatedTarget)
     ) {
       // Mouse is over floating element or preview, don't close
       return;

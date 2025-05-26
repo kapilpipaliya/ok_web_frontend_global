@@ -15,7 +15,6 @@ import { useFormRefs } from "./functions/useFormRefs";
 import { useFormSubmit } from "./functions/useFormSubmit";
 import { usePasswordVisibility } from "./functions/usePasswordVisibility";
 import { validateFormData } from "./functions/validateFormData";
-import { css } from "~/lib/styles";
 import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader";
 import { createPasswordField } from "~/pages/auth/functions/schema/createPasswordField";
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
@@ -133,11 +132,11 @@ export function SignInForm() {
                 attributes: [
                   {
                     as: "a",
-                    css: css`
+                    css: `return \`._id {
   color: \${args.theme.var.color.primary};
   font-size: 14px;
   cursor: pointer;
-`,
+}\`;`,
                     componentName: "Html",
                     props: () => ({
                       onClick: () => {
@@ -147,15 +146,15 @@ export function SignInForm() {
                     text: "Forgot Password?",
                   },
                 ],
-                css: css`
+                css: `return \`._id {
   text-align: right;;
   margin-bottom: 16px;
-`,
+}\`;`,
                 componentName: "Html",
               },
               {
                 as: "button",
-                css: [STYLES.button2Css, css`width:100%`],
+                css: [STYLES.button2Css, "._id {width:100%"],
                 componentName: "Html",
                 props: (options: SignInFormFunctionArgumentType) => ({
                   disabled: options.contextData.submitState[0]?.isLoading,
@@ -188,18 +187,18 @@ export function SignInForm() {
             attributes: [
               {
                 as: "span",
-                css: css`
-  color: \${args.theme.var.color.base};
-`,
+                css: `return \`._id {
+  color: \${args.theme.var.color.text};
+}\`;`,
                 componentName: "Html",
                 text: "Don't have an account? ",
               },
               {
                 as: "a",
-                css: css`
+                css: `return \`._id {
   color: \${args.theme.var.color.primary};
   cursor: pointer;
-`,
+}\`;`,
                 componentName: "Html",
                 props: () => ({
                   onClick: () => {
@@ -209,12 +208,12 @@ export function SignInForm() {
                 text: "Sign Up",
               },
             ],
-            css: css`
+            css: `return \`._id {
   text-align: center;
   margin-top: 16px;
-  border-top: 1px solid \${args.theme.var.color.base_20};
+  border-top: 1px solid \${args.theme.var.color.border};
   padding-top: 16px;
-`,
+}\`;`,
             componentName: "Html",
           },
         ],

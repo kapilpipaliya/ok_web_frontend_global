@@ -8,7 +8,6 @@ import { iconMap } from "~/lib/ui/iconMap";
 import { getComponentName } from "../../functions/component/getComponentLabel";
 import { getChildrenAttrs } from "../../functions/layout/getChildrenAttrs";
 import { TreeItemExpandButton } from "./TreeItemExpandButton";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { getTreeItemColor } from "./treeUtils";
 import type { Id } from "~/lib/graph/type/id";
@@ -40,12 +39,12 @@ export function TreeItemContent(
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   gap: 4px;
   align-items: center;
   ${children().length ? "" : "padding-left: 24px;"}
-`}
+}\`;`}
       // bl:1px|dashed|black
     >
       <TreeItemExpandButton
@@ -69,11 +68,11 @@ export function TreeItemContent(
       />
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-        `}
+        }\`;`}
       >
         {nameExpr(props.metaVertex, componentName(), graph)}
       </As>

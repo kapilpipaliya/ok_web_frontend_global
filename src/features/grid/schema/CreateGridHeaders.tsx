@@ -19,11 +19,10 @@ import { STYLES } from "~/pages/settings/constants";
 
 import type { DataGridState } from "../context/DataGridContext";
 
-import { IconButton } from "../../../components/styled/IconButton";
-import { TooltipWrapper } from "../../../components/styled/modal/TooltipWrapper";
-import { selectedValue } from "../../../lib/graph/get/sync/edge/selectedValue";
+import { IconButton } from "~/components/styled/IconButton";
+import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
+import { selectedValue } from "~/lib/graph/get/sync/edge/selectedValue";
 import { ModifyJsonButton } from "../cell/ModifyJsonButton";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -111,16 +110,16 @@ export function CreateGridHeaders(
                 content={
                   <As
                     as="div"
-                    css={css`
-                    border: 2px solid #ccc;
-                  `}
+                    css={`return \`._id {
+                    border: 2px solid \${args.theme.var.color.border};
+                  }\`;`}
                   >
                     <As
                       as="div"
-                      css={css`
-                      background: white;
+                      css={`return \`._id {
+                      background: \${args.theme.var.color.background_l50};
                       padding: 8px;
-                    `}
+                    }\`;`}
                     >
                       <ImageWrapper
                         alt="Preview"
@@ -130,26 +129,26 @@ export function CreateGridHeaders(
                   </As>
                 }
                 triggerAs="span"
-                triggerCss={css`
+                triggerCss={`return \`._id {
                   display: flex;
                   align-items: center;
-                `}
+                }\`;`}
               >
                 <As
                   as="span"
-                  css={css`
+                  css={`return \`._id {
                   display: flex;
                   align-items: center;
                   gap: 8px;
-                `}
+                }\`;`}
                 >
                   <ImageWrapper
                     alt="Preview"
-                    css={css`
+                    css={`return \`._id {
                       border-radius: 4px;
                       height: 30px;
                       object-fit: cover;
-                    `}
+                    }\`;`}
                     src={getPreviewURL(attribute, info.row.original, graph)}
                   />
                 </As>
@@ -195,27 +194,27 @@ export function CreateGridHeaders(
                   <As as="div" css={STYLES.tooltip.contentCss}>
                     <ImageWrapper
                       alt="Preview"
-                      css={css`
+                      css={`return \`._id {
                         border-radius: 4px;
                         height: 200px;
                         object-fit: cover;
-                      `}
+                      }\`;`}
                       src={getDownloadLink(info.row.original)}
                     />
                   </As>
                 }
                 triggerAs="span"
-                triggerCss={css`
+                triggerCss={`return \`._id {
                   display: flex;
                   align-items: center;
-                `}
+                }\`;`}
               >
                 <As
                   as="span"
-                  css={css`
+                  css={`return \`._id {
                   display: flex;
                   align-items: center;
-                `}
+                }\`;`}
                   class="filename-container"
                 >
                   <As
@@ -223,19 +222,19 @@ export function CreateGridHeaders(
                     href={getDownloadLink(info.row.original)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    css={css`
+                    css={`return \`._id {
                       color: \${args.theme.var.color.primary};
                       text-decoration: none;
                       &:hover {
                         text-decoration: underline;
                       }
-                    `}
+                    }\`;`}
                   >
                     {info.getValue<string>()}
                   </As>
                   <IconButton
                     icon="ph:copy"
-                    css={css`
+                    css={`return \`._id {
                       color: \${args.theme.var.color.primary};
                       background-color: transparent;
                       border: none;
@@ -248,9 +247,9 @@ export function CreateGridHeaders(
                         opacity: 1;
                       }
                       &:hover {
-                        color: \${args.theme.var.color.primary_400};
+                        color: \${args.theme.var.color.primary_d400};
                       }
-                    `}
+                    }\`;`}
                     onClick={(e) => {
                       e.stopPropagation();
                       const url = getDownloadLink(info.row.original);
@@ -319,13 +318,13 @@ export function CreateGridHeaders(
         return (
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
             ${formNew.isInlineEditable ? "" : "padding: 0.25rem 0; border-radius: 7px;"}
             display: flex;
             align-items: center;
             gap: 4px;
             justify-content: center;
-          `}
+          }\`;`}
           >
             <Show
               when={
@@ -357,16 +356,20 @@ export function CreateGridHeaders(
                       )
                     }
                     icon="ph:pen"
-                    css={css`
+                    css={`return \`._id {
                       color: \${args.theme.var.color.primary};
                       background-color: transparent;
                       border: none;
                       padding: 1px;
                       cursor: pointer;
                       &:hover {
-                        color: \${args.theme.var.color.primary_400};
+                        color: \${args.theme.var.color.primary_d400};
                       }
-                    `}
+                      &:disabled {
+                        color: \${args.theme.var.color.text_l600};
+                        cursor: not-allowed;
+                      }
+                    }\`;`}
                     onClick={() => {
                       return navigate(
                         `/admin/${tableId}/${info.row.original.id}`,
@@ -392,15 +395,15 @@ export function CreateGridHeaders(
                   !gridState.hasFullPermission()
                 }
                 icon="ph:trash"
-                css={css`color: \${args.theme.var.color.error};
+                css={`return \`._id {color: \${args.theme.var.color.error};
                   background-color: transparent;
                   border: none;
                   padding: 1px;
                   cursor: pointer;
                   &:hover {
-                    color: \${args.theme.var.color.error_400};
+                    color: \${args.theme.var.color.error_d400};
                   }
-                `}
+                }\`;`}
                 onClick={() => setDeleteRowId(info.row.original.id)}
                 size={22}
               />
@@ -409,10 +412,16 @@ export function CreateGridHeaders(
             <Show when={tableId === "Page"}>
               <IconButton
                 icon="ph:database"
-                css={css`color: \${args.theme.var.color.primary};
+                css={`return \`._id {
+                  color: \${args.theme.var.color.primary};
                   background-color: transparent;
                   border: none;
-                `}
+                  padding: 1px;
+                  cursor: pointer;
+                  &:hover {
+                    color: \${args.theme.var.color.primary_d400};
+                  }
+                }\`;`}
                 onClick={() => {
                   const newUrl = `/admin/${info.row.original.P.key}`;
                   window.open(newUrl, "_blank");
@@ -422,15 +431,16 @@ export function CreateGridHeaders(
             </Show>
             <Show when={!(hideEditJsonAction || FormMetaData[tableId])}>
               <ModifyJsonButton
-                css={css`
+                css={`return \`._id {
                   color: \${args.theme.var.color.warning};
+                  background-color: transparent;
                   border: none;
                   padding: 1px;
                   cursor: pointer;
                   &:hover {
-                    color: \${args.theme.var.color.warning_400};
+                    color: \${args.theme.var.color.warning_d400};
                   }
-                `}
+                }\`;`}
                 item={info.row.original}
                 size={21}
               />

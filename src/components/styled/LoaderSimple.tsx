@@ -1,4 +1,3 @@
-import { css } from "~/lib/styles";
 import { As } from "../As";
 
 export function LoaderNew(
@@ -7,17 +6,17 @@ export function LoaderNew(
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: grid;
   height: ${props.loaderHeight ?? "100vh"};
   place-content: center;
-`}
+}\`;`}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   ${props.class ?? ""}
-`}
+}\`;`}
       >
         Loading
       </As>

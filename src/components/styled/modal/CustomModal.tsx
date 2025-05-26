@@ -11,7 +11,6 @@ import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { SETTINGS_CONSTANTS, STYLES } from "~/pages/settings/constants";
 
 import { useZIndex } from "../../fields/ZIndex";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -58,7 +57,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
           <Show when={props.closeButton !== false}>
             <As
               as="button"
-              css={css`
+              css={`return \`._id {
   float: right;
   padding: 0 5px;
   border-radius: 5px;
@@ -67,7 +66,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
   &:hover {
     background-color: lightgrey;
   }
-`}
+}\`;`}
               onClick={() => setOpen(false)}
               title="Close"
               type="button"
@@ -85,7 +84,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
         css={[
           SETTINGS_CONSTANTS.MODAL.BODY.CSS,
           ...ensureArray(props.dialogCss),
-          css`border-radius: 10px;`,
+          "._id {border-radius: 10px;",
         ]}
         ref={setFloating}
         role="dialog"
@@ -93,18 +92,18 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
         <Header />
         <As
           as="hr"
-          css={css`
+          css={`return \`._id {
   color: lightgrey;
-`}
+}\`;`}
         />
         <As
           as="div"
           css={[
             ...ensureArray(props.bodyCss),
             STYLES.overflowCss,
-            css`
+            `return \`._id {
   padding: 3px;
-`,
+}\`;`,
           ]}
         >
           {props.children}

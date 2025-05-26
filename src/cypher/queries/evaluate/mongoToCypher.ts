@@ -101,11 +101,12 @@ export function mongoToCypher(filter: MongoFilter): CypherQueryResult {
             return `n.${field} <= $${paramName}`;
           case "$ne":
             return `n.${field} <> $${paramName}`;
-          case "$in":
+          case "$in": {
             if (Array.isArray(value)) {
               return `n.${field} IN $${paramName}`;
             }
             throw new Error("$in operator requires an array value");
+          }
           default:
             throw new Error(`Unsupported operator: ${operator}`);
         }

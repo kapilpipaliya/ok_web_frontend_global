@@ -42,7 +42,9 @@ export function createDynamicFunctions(
       {
         get(_, key: string) {
           const metaFns = evaluateFns(meta.P.fns);
-          if (metaFns && key in metaFns) return metaFns[key];
+          if (metaFns && key in metaFns) {
+            return metaFns[key];
+          }
           // For Component type, merge fns from component vertex and meta
           const componentVertex = findVertexByLabelAndUniqueId(
             graph,
@@ -52,7 +54,9 @@ export function createDynamicFunctions(
           );
           if (componentVertex) {
             const componentFns = evaluateFns(componentVertex.P.fns);
-            if (componentFns && key in componentFns) return componentFns[key];
+            if (componentFns && key in componentFns) {
+              return componentFns[key];
+            }
           }
           return parentRenderContext()?.context?.fns?.[key];
         },

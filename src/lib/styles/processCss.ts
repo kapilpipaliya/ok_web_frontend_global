@@ -1,6 +1,8 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { CssType } from "~/components/form/type/CssType";
 
+const ID_PLACEHOLDER_REGEX = /\._id/g;
+
 /**
  * Processes CSS content from different formats into a single string
  * Used by both As.tsx and DynamicComponent.tsx for consistent CSS handling
@@ -21,15 +23,19 @@ export const processCssContent = (
 
   // Handle array of CSS strings/functions
   if (Array.isArray(cssContent)) {
-    return cssContent
-      .map((cssItem) => {
-        if (typeof cssItem === "function") {
-          return processStyle(cssItem(functionArgs), functionArgs, uniqueId);
-        }
-        return processStyle(cssItem, functionArgs, uniqueId);
-      })
-      .filter(Boolean)
-      .join("\n");
+    let result = "";
+    for (let i = 0; i < cssContent.length; i++) {
+      const cssItem = cssContent[i];
+      const processed =
+        typeof cssItem === "function"
+          ? processStyle(cssItem(functionArgs), functionArgs, uniqueId)
+          : processStyle(cssItem, functionArgs, uniqueId);
+
+      if (processed) {
+        result += (result ? "\n" : "") + processed;
+      }
+    }
+    return result || undefined;
   }
 
   // Handle function CSS
@@ -55,40 +61,43 @@ export const processStyle = (
   }
 
   if (Array.isArray(style)) {
-    return style
-      .map((s) => processStyle(s, functionArgs, uniqueId))
-      .filter(Boolean)
-      .join("\n");
-  }
-
-  if (typeof style === "string") {
-    // Handle template string evaluation
-    if (
-      style.trim() !== "" &&
-      (style.includes("args.") || style.includes("return"))
-    ) {
-      try {
-        const cssFunction = style.includes("return")
-          ? new Function("args", style)
-          : new Function("args", `return \`${style}\``);
-        const evaluatedStyle = cssFunction(functionArgs);
-        return typeof evaluatedStyle === "string" &&
-          evaluatedStyle.includes("._id")
-          ? evaluatedStyle.replace(/\._id/g, `.${uniqueId}`)
-          : evaluatedStyle || "";
-      } catch (error) {
-        console.error("Error evaluating css template string:", error, style);
-        return "";
+    let result = "";
+    for (let i = 0; i < style.length; i++) {
+      const processed = processStyle(style[i], functionArgs, uniqueId);
+      if (processed) {
+        result += (result ? "\n" : "") + processed;
       }
     }
-
-    // Handle plain CSS with ._id replacement
-    if (style.includes("._id")) {
-      return style.replace(/\._id/g, `.${uniqueId}`);
-    }
-
-    return style;
+    return result;
   }
 
-  return "";
+  // Early return for empty strings
+  const trimmedStyle = style.trim();
+  if (!trimmedStyle) {
+    return "";
+  }
+
+  // Fast path for simple ID replacement
+  // if (!trimmedStyle.includes("args.") && !trimmedStyle.includes("return")) {
+  //   return trimmedStyle.replace(ID_PLACEHOLDER_REGEX, `.${uniqueId}`);
+  // }
+
+  // Handle template string evaluation
+  try {
+    // const cssFunction = style.includes("return")
+    //   ? new Function("args", style)
+    //   : new Function("args", `return \`${style}\``);
+    const cssFunction = new Function("args", style);
+
+    const evaluatedStyle = cssFunction(functionArgs);
+
+    if (typeof evaluatedStyle === "string") {
+      return evaluatedStyle.replace(ID_PLACEHOLDER_REGEX, `.${uniqueId}`);
+    }
+
+    return "";
+  } catch (error) {
+    console.error("Error evaluating css template string:", error, style);
+    return "";
+  }
 };

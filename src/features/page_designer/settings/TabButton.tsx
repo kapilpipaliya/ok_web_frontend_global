@@ -1,6 +1,5 @@
 import { As } from "~/components/As";
 import { capitalizeFirstLetter } from "~/lib/data_structure/string/capitalizeFirstLetter";
-import { css } from "~/lib/styles";
 
 export interface TabButtonProps {
   data: string;
@@ -12,33 +11,35 @@ export function TabButton(props: TabButtonProps) {
   return (
     <As
       as="li"
-      css={css`
+      css={`return \`._id {
   cursor: pointer;
-`}
+}\`;`}
     >
       <As
         as="button"
         css={[
-          css`
+          `return \`._id {
   border: none;
   display: inline-block;
   padding: 10px;
   white-space: nowrap;
   background: transparent;
   outline: none;
-`,
+  color: \${args.theme.var.color.text_l300};
+  cursor: pointer;
+}\`;`,
           props.isSelected
-            ? css`
+            ? `return \`._id {
               font-weight: 600;
               color: \${args.theme.var.color.primary};
-              border-bottom: 2.5px solid \${args.theme.var.color.primary_200};
-            `
-            : css`
+              border-bottom: 2.5px solid \${args.theme.var.color.primary};
+            }\`;`
+            : `return \`._id {
               &:hover {
-                color: \${args.theme.var.color.base};
-                border-bottom: 2.5px solid \${args.theme.var.color.base};
+                color: \${args.theme.var.color.text};
+                border-bottom: 2.5px solid \${args.theme.var.color.primary_l400};
               }
-            `,
+            }\`;`,
         ]}
         onClick={props.onClick}
         type="button"

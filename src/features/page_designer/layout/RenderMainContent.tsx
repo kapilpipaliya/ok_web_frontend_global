@@ -20,7 +20,6 @@ import { FormElements } from "./main_content/FormElements";
 import { PageViewComponent } from "./main_content/PageViewComponent";
 import { PropertiesContent } from "./main_content/PropertiesContent";
 import { TabBar } from "./main_content/TabBar";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -42,15 +41,15 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
         width: ${isHorizontal ? "3px" : "100%"};
         height: ${isHorizontal ? "100%" : "3px"};
         cursor: ${isHorizontal ? "col-resize" : "row-resize"};
-        background-color: ${isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey) ? "rgb(163,163,163)" : "transparent"};
+        background-color: ${isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey) ? "${args.theme.var.color.text_l300}" : "transparent"};
         touch-action: none;
         transition: background-color 0.2s;
         height: 100%;
-      `}
+      }}\`;`}
       onMouseEnter={() => !props.isResizing && setIsHovered(true)}
       onMouseLeave={() => !props.isResizing && setIsHovered(false)}
       onPointerDown={props.onPointerDown}
@@ -84,21 +83,24 @@ const Panel: Component<PanelProps> = (props) => {
       >
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
           display: grid;
           grid-template-rows: auto 1fr;
           height: 100%;
-        `}
+        }}\`;`}
         >
           <As
             as="div"
-            css={css`
-            background: rgb(243,244,246);
-            border-bottom: 1px solid rgb(229,231,235);
+            css={`return \`._id {
+            background: \${args.theme.var.color.background_l100};
+            border-bottom: 1px solid \${args.theme.var.color.border};
             padding: 4px;
-          `}
+          }}\`;`}
           >
-            <As as="h1" css={css`font-weight: 600; font-size: inherit;`}>
+            <As
+              as="h1"
+              css={`return \`._id { font-weight: 600; font-size: inherit; }\`;`}
+            >
               {props.title}
             </As>
           </As>
@@ -112,19 +114,18 @@ const Panel: Component<PanelProps> = (props) => {
   return (
     <As
       as="div"
-      css={STYLES.overflowCss}
+      css={[
+        STYLES.overflowCss,
+        `return \`._id {
+          border: 1px solid \${args.theme.var.color.border};
+          display: grid;
+          grid-template-columns: ${props.resizePosition === "left" ? "3px 1fr" : "1fr 3px"};
+          grid-template-rows: ${props.resizePosition === "top" ? "3px 1fr" : "100%"};
+          height: 100%;
+        }\`;`,
+      ]}
       ref={props.ref}
-      style={{
-        // 'background-color': '#f0f0f0',
-        border: "1px solid #ccc",
-        display: "grid",
-        "grid-template-columns":
-          props.resizePosition === "left" ? "3px 1fr" : "1fr 3px",
-        "grid-template-rows":
-          props.resizePosition === "top" ? "3px 1fr" : "100%",
-        height: "100%",
-        ...props.style,
-      }}
+      style={props.style}
     >
       <div
         style={{
@@ -173,6 +174,49 @@ export function RenderMainContent() {
   const formStoreId = useDesignerFormIdContext();
   const _formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
+
+  // Helper function to generate grid-template-columns value
+  const getGridTemplateColumns = () => {
+    const layout = layoutStore();
+    const columns: string[] = [];
+
+    // Left panel
+    if (layout.isLeftOpen) {
+      columns.push(`${layout.leftWidth}px`);
+    }
+
+    // Main panels
+    if (layout.mainPanel) {
+      const mainPanelColumns = layout.mainPanel.map((panel) => {
+        const width = layout[`mainPanel${panel}Width`];
+        return typeof width === "number" ? `${width}px` : (width ?? "1fr");
+      });
+      columns.push(...mainPanelColumns);
+    }
+
+    // Check if we need to add a flexible column
+    const hasFlexibleMainPanel = layout.mainPanel?.some(
+      (panel) => layout[`mainPanel${panel}Width`] === "1fr",
+    );
+    if (hasFlexibleMainPanel) {
+      columns.push("0px");
+    } else {
+      columns.push("1fr");
+    }
+
+    // Right panels
+    if (layout.isRight0Open) {
+      columns.push(`${layout.rightWidth0}px`);
+    }
+    if (layout.isRight1Open) {
+      columns.push(`${layout.rightWidth1}px`);
+    }
+    if (layout.isRight2Open) {
+      columns.push(`${layout.rightWidth2}px`);
+    }
+
+    return columns.join(" ");
+  };
 
   const [isResizing, setIsResizing] = createSignal(false);
   const [activeResizeKey, setActiveResizeKey] = createSignal<null | string>(
@@ -259,27 +303,20 @@ export function RenderMainContent() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
         display: grid;
-        grid-template-columns: ${layoutStore().isLeftOpen ? `${layoutStore().leftWidth}px ` : ""}${layoutStore()
-          .mainPanel?.map((panel) => {
-            const width = layoutStore()[`mainPanel${panel}Width`];
-            return typeof width === "number" ? `${width}px` : (width ?? "1fr");
-          })
-          .join(
-            " ",
-          )}${layoutStore().mainPanel?.findIndex((panel) => layoutStore()[`mainPanel${panel}Width`] === "1fr") !== -1 ? " 0px" : " 1fr"}${layoutStore().isRight0Open ? ` ${layoutStore().rightWidth0}px` : ""}${layoutStore().isRight1Open ? ` ${layoutStore().rightWidth1}px` : ""}${layoutStore().isRight2Open ? ` ${layoutStore().rightWidth2}px` : ""};
+        grid-template-columns: ${getGridTemplateColumns()};
         width: 100vw;
         height: 100vh;
         grid-template-rows: 38px 1fr;
-      `}
+      }\`;`}
       // overflow:hidden
       //  grid-template-rows:1fr|${sizes.bottomHeight}px
     >
       <HeaderRow
-        css={css`
+        css={`return \`._id {
           align-items: center;
-        `}
+        }}\`;`}
         style={{
           "grid-column": `1 / span ${layoutStore().mainPanel?.length + 1 + 4}`,
         }}
@@ -368,11 +405,11 @@ export function RenderMainContent() {
         >
           {/* <Show
             fallback={
-              <div css={css`
-  border-left: 1 solid lightgrey;
+              <div css={`return \`._id {
+  border-left: 1px solid \${args.theme.var.color.border};
   padding-left: 8px;
   padding-top: 8px;
-`}>
+}\`;`}>
                 Element is not selected
               </As>
             }

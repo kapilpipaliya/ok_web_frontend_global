@@ -8,7 +8,6 @@ import { postAPI } from "~/lib/api/general/postApi";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 import { SchemaRenderer } from "../../SchemaRenderer";
-import { css } from "~/lib/styles";
 
 type DeleteState = {
   errorMessage: string;
@@ -95,14 +94,14 @@ export function AccountDeletionForm() {
       },
       {
         as: "button",
-        css: css`
+        css: `return \`._id {
   background-color: \${args.theme.var.color.error};
-  color: white;
+  color: \${args.theme.var.color.primary_text};
   padding: 8px 16px;
   border-radius: 4px;
   border: none;
   cursor: pointer;
-`,
+}\`;`,
         componentName: "Html",
         props: (options: DeleteStateFunctionArgumentType) => ({
           disabled: options.contextData.deleteState[0]?.isLoading,
@@ -114,11 +113,11 @@ export function AccountDeletionForm() {
         type: "button",
       },
     ],
-    css: css`
+    css: `return \`._id {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-`,
+}\`;`,
     componentName: "Html",
   };
   const deleteAccountSchema: FieldAttribute = {
@@ -129,30 +128,30 @@ export function AccountDeletionForm() {
         attributes: [
           {
             as: "h1",
-            css: css`
+            css: `return \`._id {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 4px;
   color: \${args.theme.var.color.error};
-`,
+}\`;`,
             componentName: "Html",
             text: "Delete Your Account",
           },
           {
             as: "p",
-            css: css`
+            css: `return \`._id {
   margin-bottom: 4px;
-  color: \${args.theme.var.color.error_80};
-`,
+  color: \${args.theme.var.color.error_l200};
+}\`;`,
             componentName: "Html",
             text: "Once you delete your account, all your data will be permanently removed after 48 hours. This action cannot be undone.",
           },
           {
             as: "p",
-            css: css`
+            css: `return \`._id {
   margin-bottom: 6px;
-  color: \${args.theme.var.color.error_80};
-`,
+  color: \${args.theme.var.color.error_l200};
+}\`;`,
             componentName: "Html",
             text: "During the 48-hour period, you will not be able to log in to your account. If you change your mind, please contact our support team immediately.",
           },
@@ -170,14 +169,14 @@ export function AccountDeletionForm() {
             }),
           },
         ],
-        css: css`
+        css: `return \`._id {
   margin-bottom: 4px;
   padding: 12px;
-  background-color: \${args.theme.var.color.error_10};
-  border: 1px solid \${args.theme.var.color.error_20};
+  background-color: \${args.theme.var.color.error_l100};
+  border: 1px solid \${args.theme.var.color.error_l150};
   color: \${args.theme.var.color.error};
   border-radius: 8px;
-`,
+}\`;`,
         componentName: "Html",
         props: (options: DeleteStateFunctionArgumentType) => ({
           hide: !options.contextData.deleteState[0]?.errorMessage,
@@ -194,14 +193,14 @@ export function AccountDeletionForm() {
             }),
           },
         ],
-        css: css`
+        css: `return \`._id {
   margin-bottom: 4px;
   padding: 12px;
-  background-color: #3b82f6;
-  border: 1px solid #3b82f6;
-  color: #3b82f6;
+  background-color: \${args.theme.var.color.primary};
+  border: 1px solid \${args.theme.var.color.primary};
+  color: \${args.theme.var.color.primary_text};
   border-radius: 8px;
-`,
+}\`;`,
         componentName: "Html",
         props: (options: DeleteStateFunctionArgumentType) => ({
           hide: !options.contextData.deleteState[0]?.successMessage,
@@ -212,14 +211,14 @@ export function AccountDeletionForm() {
         attributes: [
           {
             as: "button",
-            css: css`
+            css: `return \`._id {
   background-color: \${args.theme.var.color.error};
-  color: white;
+  color: \${args.theme.var.color.primary_text};
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-`,
+}\`;`,
             componentName: "Html",
             props: (options: DeleteStateFunctionArgumentType) => ({
               disabled: options.contextData.deleteState[0]?.isLoading,
@@ -231,10 +230,10 @@ export function AccountDeletionForm() {
             type: "button",
           },
         ],
-        css: css`
+        css: `return \`._id {
   display: flex;
   justify-content: flex-end;
-`,
+}\`;`,
         componentName: "Html",
       },
       // Confirmation Dialog
@@ -259,25 +258,25 @@ export function AccountDeletionForm() {
                         attributes: [
                           {
                             as: "span",
-                            css: css`
+                            css: `return \`._id {
   margin-bottom: 4px;
-`,
+}\`;`,
                             componentName: "Html",
                             text: "Are you sure you want to delete your account? This action cannot be undone.",
                           },
                           {
                             as: "span",
-                            css: css`
+                            css: `return \`._id {
   margin-bottom: 6px;
-`,
+}\`;`,
                             componentName: "Html",
                             text: "Your account will be scheduled for deletion and permanently removed after 48 hours.",
                           },
                           modalFooterSchema,
                         ],
-                        css: css`
+                        css: `return \`._id {
   padding: 24px;
-`,
+}\`;`,
                         componentName: "Html",
                       },
                     ],
@@ -304,12 +303,12 @@ export function AccountDeletionForm() {
         }),
       },
     ],
-    css: css`
+    css: `return \`._id {
   padding: 24px;
   border-radius: 8px;
-  background-color: white;
-  border: 1px solid \${args.theme.var.color.base_10};  
-`,
+  background-color: \${args.theme.var.color.primary_text};
+  border: 1px solid \${args.theme.var.color.background};  
+}\`;`,
     componentName: "Html",
   };
 

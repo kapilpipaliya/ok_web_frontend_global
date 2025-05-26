@@ -1,14 +1,13 @@
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { ModalStateStore } from "~/lib/types/ModalStateStore";
-import { css } from "../styles";
 
 export function loadingIconSchema() {
   return {
     attributes: [
       {
-        css: css`
+        css: `return \`._id {
   rotate: 2s linear infinite;
-`,
+}\`;`,
         componentName: "Html",
         as: "icon",
         height: 32,

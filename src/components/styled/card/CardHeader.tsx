@@ -1,7 +1,5 @@
 import { type JSX, Show } from "solid-js";
 import { As } from "~/components/As";
-import { css } from "~/lib/styles";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export function CardHeader(props: {
   children?: JSX.Element;
@@ -14,11 +12,11 @@ export function CardHeader(props: {
         <As
           as="img"
           alt={props.title}
-          css={(args: FunctionArgumentType) => css`
-  background-color: ${args.theme.var.color.base_5};
+          css={`return \`._id {
+  background-color: \${args.theme.var.color.background_l100};
   border-radius: 0.5rem;
   border-width: 1px;
-  border-color: ${args.theme.var.color.primary_25};
+  border-color: \${args.theme.var.color.primary_l750};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   display: flex;
   height: 3rem;
@@ -28,18 +26,18 @@ export function CardHeader(props: {
   &:hover {
     transform: scale(1.05);
   }
-`}
+}\`;`}
           src={props.imgSrc}
         />
       </Show>
       <As
         as="div"
-        css={(args: FunctionArgumentType) => css`
-  color: ${args.theme.var.color.base_85};
+        css={`return \`._id {
+  color: \${args.theme.var.color.text_l150};
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-`}
+}\`;`}
       >
         {props.title}
       </As>

@@ -6,7 +6,6 @@ import { IconButton } from "~/components/styled/IconButton";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { useDesignerFormIdContext } from "../../context/LayoutContext";
-import { css } from "~/lib/styles";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -30,14 +29,14 @@ export function HideShowIcon(props: { iconSize: number; metaVertex: Vertex }) {
         ICON_BUTTON_STYLES.baseCss,
         ICON_BUTTON_STYLES.defaultCss,
         ICON_BUTTON_STYLES.spacingCss,
-        css`
+        `return \`._id {
     background-color: transparent;
     border: none;
     ${isHiddenAttr() ? "color: ${args.theme.var.color.primary};" : ""}
-  `,
+  }\`;`,
       ]}
       icon={icon()}
-      iconCss={css`transition:transform 0.2s;`}
+      iconCss={`return \`._id { transition:transform 0.2s; }\`;`}
       onClick={(e) => {
         e.stopPropagation();
         toggleHidden(props.metaVertex.id, formStoreId!, graph, setGraph);

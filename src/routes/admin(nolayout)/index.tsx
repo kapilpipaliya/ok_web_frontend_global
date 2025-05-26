@@ -6,7 +6,6 @@ import { PermissionGuard } from "~/lib/permissions/examples/PermissionGuard";
 import AdminDashboard from "~/pages/admin_dashboard/Dashboard";
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { EmailConfirmationBanner } from "~/components/notifications/EmailConfirmationBanner";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -29,17 +28,17 @@ function AdminLayoutRoute(props: { children: JSX.Element }) {
         <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   flex: 1;
-`}
+}\`;`}
           />
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   margin-left: auto;
   display: flex;
   gap: 4px;
-`}
+}\`;`}
           >
             <UserDropdownMenuDisplay />
           </As>

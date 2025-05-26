@@ -29,7 +29,7 @@ import {
   getInitialFormStore,
 } from "~/components/form/context/FormContext";
 import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
-import { SimpleWarningAlert } from "~/components/styled/SimpleWarningAlert";
+import { SimpleAlert } from "~/components/styled/SimpleAlert";
 import { PageView } from "~/features/page_attr_render/PageView";
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
@@ -288,9 +288,8 @@ export function PageViewWrapper(
             const data = await props.getFormData();
             if (!data || data.error) {
               return { error: data?.error || "Error fetching form data" };
-            } else {
-              return { dataResult: { data } };
             }
+            return { dataResult: { data } };
           } catch (error) {
             return { error: (error as Error).message };
           }
@@ -552,7 +551,7 @@ export function PageViewWrapper(
         formStore().P.txnId,
         metaVertex()!.P.key,
         metaVertex()!.P.key === "Page"
-          ? { fns: `return { enabled: () => true }` }
+          ? { fns: "return { enabled: () => true }" }
           : {},
       );
 
@@ -730,7 +729,7 @@ export function PageViewWrapper(
       </Show> */}
 
         <Show when={formStore().P.error}>
-          <SimpleWarningAlert message={formStore().P.error} />
+          <SimpleAlert type="error" message={formStore().P.error} />
         </Show>
 
         {/* <Show when={getGlobalStore(graph).P.isDevelopment}>

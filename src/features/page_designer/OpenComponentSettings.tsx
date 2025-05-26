@@ -2,7 +2,6 @@ import { Icon } from "@iconify-icon/solid";
 import { Style } from "@solidjs/meta";
 import { createUniqueId } from "~/lib/solid/createUniqueId";
 
-import { css } from "~/lib/styles";
 import type { Id } from "~/lib/graph/type/id";
 
 export function OpenComponentSettings(
@@ -12,7 +11,7 @@ export function OpenComponentSettings(
   return (
     <>
       <Style>
-        {css`
+        {`._id {
   ${props.css}
 `.replaceAll("._id", `.${id}`)}
       </Style>

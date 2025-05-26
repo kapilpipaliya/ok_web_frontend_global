@@ -1,59 +1,13 @@
 // Export the type using export type for isolatedModules
-import type {
-  Breakpoint,
-  CssContext,
-  ShadeNumber,
-  ThemeColorKey,
-  ThemeContext,
-} from "~/lib/styles/types/types";
-
-export type { StyleDefinition } from "./styles";
+import type { Breakpoint } from "~/lib/styles/types/types";
 
 // ============================
 // = CORE CSS HELPER FUNCTIONS
 // ============================
 
-// Template literal helper for CSS - Converts template strings to scoped CSS
-export const css = (
-  strings: TemplateStringsArray,
-  ...values: unknown[]
-): string => {
-  const rawCss = String.raw({ raw: strings }, ...values);
-
-  // Add ._id wrapper if not already present
-  if (!rawCss.includes("._id")) {
-    return `._id {\n  ${rawCss.replace(/\n/g, "\n  ")}\n}`;
-  }
-
-  return rawCss;
-};
-
-// Helper function that returns a template string with CSS
-export const returnCSS = (
-  strings: TemplateStringsArray,
-  ...values: unknown[]
-): string => {
-  const rawCss = String.raw({ raw: strings }, ...values);
-
-  // If CSS doesn't include ._id wrapper, add it
-  if (!rawCss.includes("._id")) {
-    return `return \`._id {\n  ${rawCss.replace(/\n/g, "\n  ")}\n}\`;`;
-  }
-
-  return `return \`${rawCss}\`;`;
-};
-
 // ======================================
 // = ADVANCED CSS GENERATION UTILITIES
 // ======================================
-
-// Helper to create themed CSS with context
-export const themedCss = (fn: (theme: ThemeContext) => string) => {
-  return (options?: CssContext): string => {
-    const theme = options?.theme || {};
-    return fn(theme as ThemeContext);
-  };
-};
 
 // Utility for creating CSS class with interactive states
 export const withStates = (
@@ -89,39 +43,9 @@ export const withStates = (
   return result;
 };
 
-// Helper to create styled components using the As component
-export const styled = <T extends keyof HTMLElementTagNameMap>(
-  tag: T,
-  styles: string | ((props?: Record<string, unknown>) => string),
-) => {
-  return (props: Record<string, unknown> = {}) => {
-    const cssContent = typeof styles === "function" ? styles(props) : styles;
-    return {
-      as: tag,
-      css: cssContent,
-      ...props,
-    };
-  };
-};
-
 // ======================================
 // = THEME VARIABLE ACCESSORS
 // ======================================
-
-// Creates a CSS variable reference with optional fallback
-export const themeVar = (name: string, fallback?: string) => {
-  return fallback ? `var(--${name}, ${fallback})` : `var(--${name})`;
-};
-
-// Access a theme color with a specific shade
-export const colorWithShade = (
-  colorName: ThemeColorKey | string,
-  shade: ShadeNumber = 50,
-) => {
-  return shade === 50
-    ? themeVar(colorName as string)
-    : themeVar(`${colorName}-${shade}`);
-};
 
 // Creates a conditional CSS block based on color mode
 export const colorModeStyle = (
@@ -199,36 +123,6 @@ export const atBreakpoint = (breakpoint: Breakpoint, styles: string) => {
 // Creates styles for container queries
 export const containerQuery = (size: string, styles: string) => {
   return `@container (min-width: ${size}) {\n  ._id {\n    ${styles.replace(/\n/g, "\n    ")}\n  }\n}`;
-};
-
-// ======================================
-// = ADVANCED STYLE COMPOSITION
-// ======================================
-
-// Combine multiple CSS generators
-export const composeCss = (
-  ...cssGenerators: Array<string | (() => string)>
-) => {
-  return () =>
-    cssGenerators
-      .map((generator) =>
-        typeof generator === "function" ? generator() : generator,
-      )
-      .join("\n\n");
-};
-
-// Create scoped CSS for child selectors
-export const withChildSelector = (selector: string, styles: string) => {
-  return `._id ${selector} {\n  ${styles.replace(/\n/g, "\n  ")}\n}`;
-};
-
-// Create CSS for pseudo-elements
-export const withPseudoElement = (
-  element: "before" | "after",
-  styles: string,
-  content = '""',
-) => {
-  return `._id::${element} {\n  content: ${content};\n  ${styles.replace(/\n/g, "\n  ")}\n}`;
 };
 
 // Create CSS with animation keyframes

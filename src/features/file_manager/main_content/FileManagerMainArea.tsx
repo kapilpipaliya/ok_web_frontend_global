@@ -9,7 +9,6 @@ import { getFilesData } from "../sidebar/getFilesData";
 import { AddNewFileButton } from "./AddNewFileButton";
 import { getEditFileOrFolderSchema } from "./fileFormEditSchema";
 import { getComponentFormSchema } from "./getComponentFormSchema";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -60,11 +59,11 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
       <As
         as="div"
         css={[
-          css`
+          `return \`._id {
   display: flex;
   gap: 2px;
   padding: 2px;
-`,
+}\`;`,
         ]}
       >
         <For each={breadcrumb()}>
@@ -72,11 +71,11 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
             <As
               as="button"
               css={[
-                css`
+                `return \`._id {
   color: \${args.theme.var.color.primary};
   background-color: transparent;
   border: none;
-  ${index() === 0 ? "font-weight:600" : ""} cursor:pointer`,
+  ${index() === 0 ? "font-weight:600" : ""} cursor:pointer}\`;`,
               ]}
               onClick={() => setFileManagerStore("selectedItem", item)}
               type="button"

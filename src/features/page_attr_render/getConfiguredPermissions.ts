@@ -15,7 +15,7 @@ export function getConfiguredPermissions(
   const label = vertex.L[0];
   // RolePagePage
   const allRolePermissions: Vertex[] =
-    evalExpression(label === "Attr" ? `->$0Perm` : `<-Role$0$0`, {
+    evalExpression(label === "Attr" ? "->$0Perm" : "<-Role$0$0", {
       graph,
       setGraph: () => {},
       vertexes: [vertex],
@@ -23,7 +23,7 @@ export function getConfiguredPermissions(
   for (const rp of allRolePermissions) {
     // RolePage
     const roles: Vertex[] =
-      evalExpression(label === "Attr" ? `->$0Role` : `<-Role${label}`, {
+      evalExpression(label === "Attr" ? "->$0Role" : `<-Role${label}`, {
         graph,
         setGraph: () => {},
         vertexes: [rp],

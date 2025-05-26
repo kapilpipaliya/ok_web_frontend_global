@@ -70,7 +70,6 @@ export function createVertexIds() {
     class: `classVertex${createUniqueId()}`,
     defaultValue: `defaultValueVertex${createUniqueId()}`,
     disabled: `disabledVertex${createUniqueId()}`,
-    errorClass: `errorClassVertex${createUniqueId()}`,
     height: `heightVertex${createUniqueId()}`,
     hide: `hiddenVertex${createUniqueId()}`,
     icon: `iconVertex${createUniqueId()}`,
@@ -99,7 +98,7 @@ export function FormGroupProperties(props: Readonly<FormGroupPropertiesProps>) {
   const metaTxnId = generateNewTxnId(graph, setGraph);
   createVertices(vertexIds, metaTxnId, graph, setGraph);
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
-  const isHtmlIcon = () =>
+  const _isHtmlIcon = () =>
     selectedAttr()?.P.componentName === "Html" &&
     selectedAttr()?.P.as === "icon";
   const propAttributes = createMemo(
@@ -234,15 +233,6 @@ function createVertices(
         css: PROPERTIES.Css.TextFieldCss,
         displayName: "Class",
         key: "class",
-      },
-    },
-    {
-      id: vertexIds.errorClass,
-      P: {
-        componentName: "SystemTextInput",
-        css: PROPERTIES.Css.TextFieldCss,
-        displayName: "Error Class",
-        key: "errorClass",
       },
     },
     {

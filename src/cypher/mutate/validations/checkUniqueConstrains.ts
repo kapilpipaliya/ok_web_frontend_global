@@ -14,19 +14,25 @@ export async function checkUniqueConstrains(vertex: Vertex) {
     const key = vertex.P.key;
     const id = vertex.id;
 
-    if (!key) return { error: "Please configure the key first" };
-    if (isReservedKeyword(key))
+    if (!key) {
+      return { error: "Please configure the key first" };
+    }
+    if (isReservedKeyword(key)) {
       return {
         error: `The key "${key}" is a reserved word and cannot be used`,
       };
-    if (await doesNameExist(dbSession, label, key, id))
+    }
+    if (await doesNameExist(dbSession, label, key, id)) {
       return { error: "Provided key already exists" };
+    }
 
     const uniqueConstrains = await evalExpressionAsync(
       `g:'Page[${label}]'->$0Unique`,
       {},
     );
-    if (!Array.isArray(uniqueConstrains)) return { error: false };
+    if (!Array.isArray(uniqueConstrains)) {
+      return { error: false };
+    }
 
     for (const constraint of uniqueConstrains) {
       let keysToCheck: Vertex[] = [];
@@ -51,11 +57,15 @@ export async function checkUniqueConstrains(vertex: Vertex) {
         const keys = await evalExpressionAsync("->$0Key", {
           vertexes: [constraint],
         });
-        if (keys.length > 0) keysToCheck = keys;
+        if (keys.length > 0) {
+          keysToCheck = keys;
+        }
       }
 
       // Skip if no keys to check
-      if (keysToCheck.length === 0) continue;
+      if (keysToCheck.length === 0) {
+        continue;
+      }
 
       // Check for constraint violation
       if (

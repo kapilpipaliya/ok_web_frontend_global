@@ -10,8 +10,6 @@ import { As } from "~/components/As";
 
 import { useZIndex } from "../../fields/ZIndex";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
-import { css } from "~/lib/styles";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export function DropdownMenu(
@@ -63,7 +61,8 @@ export function DropdownMenu(
 
   const [local, rest] = splitProps(props, ["ref", "parentRef", "css"]);
   const borderClass = `border-radius: 0.375rem;
-box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+border: 1px solid \${args.theme.var.color.border};
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 outline-offset: 2px;
 outline: 2px solid transparent;
 transform-origin: top right`;
@@ -74,28 +73,27 @@ transform-origin: top right`;
         as="div"
         aria-orientation="vertical"
         css={[
-          (args: FunctionArgumentType) =>
-            (props.applyDefaultStyles ?? true)
-              ? css`
+          (props.applyDefaultStyles ?? true)
+            ? `return \`._id {
                 ${borderClass};
                 align-items: flex-start;
-                background: ${args.theme.var.color.base_3};
+                background: \${args.theme.var.color.background_l100};
                 display: flex;
                 flex-direction: column;
                 gap: 0.25rem;
                 min-width: 12rem;
                 overflow-y: auto;
                 padding: 0.25rem
-              `
-              : "",
+              }\`;`
+            : "",
           ...ensureArray(local.css),
-          css`
+          `return \`._id {
             left: ${floatingState().x ?? 0}px;
-            ${props.useSize ? `max-height: ${floatingState().maxHeight ?? 100}px;` : ""};
+            ${props.useSize ? `max-height: ${floatingState().maxHeight ?? 100}px;` : ""}
             position: ${strategy()};
             top: ${floatingState().y ?? 0}px;
             z-index: ${zIndex};
-          `,
+          }\`;`,
         ].filter(Boolean)}
         ref={mergeRefs(local.ref, (el) => setFloating(el))}
         role="menu"

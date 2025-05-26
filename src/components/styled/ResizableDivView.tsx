@@ -13,7 +13,6 @@ import type { FormStoreObject } from "../form/context/FormContext";
 
 import { useToast } from "./modal/Toast";
 import { ResizeOverlay } from "./ResizeOverlay";
-import { css } from "~/lib/styles";
 import { As } from "../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -176,26 +175,26 @@ export function ResizableContainer(
       css={[
         ...ensureArray(props.css),
         STYLES.overflowCss,
-        css`
+        `return \`._id {
   display: grid;
   flex-shrink: 0;
-`,
+}\`;`,
       ]}
     >
       <As
         as="div"
         css={[
           STYLES.overflowCss,
-          css`
+          `return \`._id {
   position: relative;
   display: flex;
   flex-direction: column;
   border-left: 1px solid lightgray;
-`,
-          css`
-  ${isDraggingOver() ? "background-color: ${args.theme.var.color.primary_10};" : ""}
-  ${resizing() ? "user-select: none;" : ""}
-`,
+}\`;`,
+          isDraggingOver()
+            ? `return \`._id { background-color: \${args.theme.var.color.primary_l150}; }\`;`
+            : "",
+          resizing() ? `return \`._id { user-select: none; }\`;` : "",
         ]}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}

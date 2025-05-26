@@ -15,7 +15,6 @@ import {
 import { IconButton } from "~/components/styled/IconButton";
 import { useDataGridContext } from "../context/DataGridContext";
 import { AddNewButton } from "./AddNewButton";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 
 interface GridHeaderProps {
@@ -42,12 +41,12 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
     <As
       as="div"
       css={[
-        css`
+        `return \`._id {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 4px 10px;
-`,
+}\`;`,
       ]}
     >
       <Dynamic
@@ -62,12 +61,12 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
       <As
         as="div"
         css={[
-          css`
+          `return \`._id {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 10px;
-`,
+}\`;`,
         ]}
       >
         <SearchBar
@@ -81,7 +80,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           icon={gridState.isLoading ? "ph:spinner-gap" : "ph:arrows-clockwise"}
           iconCss={
             gridState.isLoading
-              ? css`transition: transform 1s infinite linear;`
+              ? "._id {transition: transform 1s infinite linear;"
               : ""
           }
           onClick={handleRefresh}

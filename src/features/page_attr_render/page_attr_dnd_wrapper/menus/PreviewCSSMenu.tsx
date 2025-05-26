@@ -6,7 +6,6 @@ import { DialogSubTitle } from "~/components/styled/dialog/DialogSubTitle";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { useDesignerLayoutStore } from "~/features/page_designer/context/LayoutContext";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
@@ -25,9 +24,9 @@ export function PreviewCSSMenu(
 
   return (
     <DropdownMenu
-      css={css`
+      css={`return \`._id {
   padding: 0.50rem;
-`}
+}\`;`}
       onClickOutside={props.onClose}
       onMouseLeave={props.onMouseLeave}
       parentRef={props.parentRef}
@@ -38,9 +37,9 @@ export function PreviewCSSMenu(
 
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   margin-top: 2px;
-`}
+}\`;`}
       >
         <code>{cssContent()}</code>
       </As>

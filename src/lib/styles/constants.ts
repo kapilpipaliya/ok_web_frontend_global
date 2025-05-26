@@ -1,46 +1,48 @@
-import type { EasingPreset, SpacingScale } from "~/lib/styles/types/types";
-
-// Default color constants - Light mode
-export const DEFAULT_PRIMARY = "oklch(0.57 0.19 250)"; // Blue
-export const DEFAULT_INFO = "oklch(0.65 0.15 220)"; // Sky blue
-export const DEFAULT_SUCCESS = "oklch(0.7 0.15 160)"; // Emerald
-export const DEFAULT_WARNING = "oklch(0.7 0.2 60)"; // Orange
-export const DEFAULT_ERROR = "oklch(0.65 0.25 25)"; // Red
-
-// Default semantic colors - Light mode
-export const DEFAULT_TEXT = "oklch(0.2 0.02 250)"; // Dark text
-export const DEFAULT_BACKGROUND = "oklch(0.98 0.01 250)"; // Light background
-export const DEFAULT_SURFACE = "oklch(1 0 0)"; // White surface
-export const DEFAULT_BORDER = "oklch(0.85 0.02 250)"; // Light border
-export const DEFAULT_MUTED = "oklch(0.6 0.03 250)"; // Muted text
-
-// Default color constants - Dark mode
-export const DEFAULT_PRIMARY_DARK = "oklch(0.7 0.15 250)"; // Brighter blue
-export const DEFAULT_INFO_DARK = "oklch(0.75 0.12 220)"; // Brighter sky blue
-export const DEFAULT_SUCCESS_DARK = "oklch(0.75 0.12 160)"; // Brighter emerald
-export const DEFAULT_WARNING_DARK = "oklch(0.8 0.18 60)"; // Brighter orange
-export const DEFAULT_ERROR_DARK = "oklch(0.75 0.22 25)"; // Brighter red
-
-// Default semantic colors - Dark mode
-export const DEFAULT_TEXT_DARK = "oklch(0.9 0.02 250)"; // Light text
-export const DEFAULT_BACKGROUND_DARK = "oklch(0.1 0.02 250)"; // Dark background
-export const DEFAULT_SURFACE_DARK = "oklch(0.15 0.02 250)"; // Dark surface
-export const DEFAULT_BORDER_DARK = "oklch(0.3 0.03 250)"; // Dark border
-export const DEFAULT_MUTED_DARK = "oklch(0.6 0.03 250)"; // Muted text
+import type {
+  EasingPreset,
+  SpacingScale,
+  ThemeContext,
+} from "~/lib/styles/types/types";
 
 // Default theme values
 export const DEFAULT_THEME = {
   color: {
-    primary: DEFAULT_PRIMARY,
-    info: DEFAULT_INFO,
-    success: DEFAULT_SUCCESS,
-    warning: DEFAULT_WARNING,
-    error: DEFAULT_ERROR,
-    text: DEFAULT_TEXT,
-    background: DEFAULT_BACKGROUND,
-    surface: DEFAULT_SURFACE,
-    border: DEFAULT_BORDER,
-    muted: DEFAULT_MUTED,
+    primary: {
+      light: "oklch(0.57 0.19 250)", // Blue
+      dark: "oklch(0.7 0.15 250)", // Brighter blue
+    },
+    info: {
+      light: "oklch(0.65 0.15 220)", // Sky blue
+      dark: "oklch(0.75 0.12 220)", // Brighter sky blue
+    },
+    success: {
+      light: "oklch(0.7 0.15 160)", // Emerald
+      dark: "oklch(0.75 0.12 160)", // Brighter emerald
+    },
+    warning: {
+      light: "oklch(0.7 0.2 60)", // Orange
+      dark: "oklch(0.8 0.18 60)", // Brighter orange
+    },
+    error: {
+      light: "oklch(0.65 0.25 25)", // Red
+      dark: "oklch(0.75 0.22 25)", // Brighter red
+    },
+    text: {
+      light: "oklch(0.2 0.02 250)", // Dark text
+      dark: "oklch(0.9 0.02 250)", // Light text
+    },
+    background: {
+      light: "oklch(0.98 0.01 250)", // Light background
+      dark: "oklch(0.1 0.02 250)", // Dark background
+    },
+    border: {
+      light: "oklch(0.85 0.02 250)", // Light border
+      dark: "oklch(0.3 0.03 250)", // Dark border
+    },
+    muted: {
+      light: "oklch(0.6 0.03 250)", // Muted text
+      dark: "oklch(0.6 0.03 250)", // Muted text
+    },
   },
   fontFamily: "system-ui, sans-serif",
   fontSizeBase: "1rem",
@@ -54,7 +56,7 @@ export const DEFAULT_THEME = {
   transitionDurationNormal: "300ms",
   transitionDurationSlow: "500ms",
   defaultEasing: "ease" as EasingPreset,
-};
+} as ThemeContext["var"];
 
 // Font presets
 export const FONT_PRESETS = {

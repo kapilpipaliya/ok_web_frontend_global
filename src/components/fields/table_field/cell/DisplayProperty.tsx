@@ -23,7 +23,6 @@ import {
   useFormContext,
 } from "../../../form/context/FormContext";
 import { DefaultValue } from "./DefaultValue";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { IdAttr } from "~/lib/graph/type/idAttr";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -151,18 +150,18 @@ export function DisplayProperty(
       <Match when={metaVertex().P.hide}>
         <As
           as="td"
-          css={css`
+          css={`return \`._id {
   align-content: center;
-`}
+}\`;`}
         >
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
             ${getComponentClass(componentName()!)}
             display: flex;
             align-items: center;
             justify-content: center;
-`}
+}\`;`}
           >
             <DefaultValue
               joinVertex={props.joinVertex}
@@ -176,17 +175,17 @@ export function DisplayProperty(
       >
         <As
           as="td"
-          css={css`
+          css={`return \`._id {
   ${getComponentClass(componentName()!)}
   text-align: left;
   padding: 1px;
-`}
+}\`;`}
         >
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   width: 100%;
-`}
+}\`;`}
           >
             <DefaultValue
               joinVertex={props.joinVertex}
@@ -199,17 +198,17 @@ export function DisplayProperty(
       <Match when={true}>
         <As
           as="td"
-          css={css`
+          css={`return \`._id {
   ${getComponentClass(componentName()!)}
   align-content: center;
   padding: 1px;
-`}
+}\`;`}
         >
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   align-items: center;
-`}
+}\`;`}
           >
             <DefaultValue
               joinVertex={props.joinVertex}

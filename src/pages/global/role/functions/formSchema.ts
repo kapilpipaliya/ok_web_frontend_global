@@ -21,7 +21,6 @@ import { PROPERTIES, SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { addEditButtonSchema } from "~/pages/subdomain/functions/addEditButtonSchema";
 
 import { loadingIconSchema } from "~/lib/schema/loadingIconSchema";
-import { css } from "~/lib/styles";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 // Define the type for tabState store
@@ -134,17 +133,17 @@ export const roleFormSchema = {
               componentName: "Html",
               css: (args: RoleFormFunctionArgumentType) => {
                 return [
-                  css`
+                  `return \`._id {
                 cursor: pointer;
                 padding: 8px 16px;
                 background-color: transparent;
                 border-left: none;
                 border-right: none;
                 border-top: none;
-                `,
+                }\`;`,
                   args.contextData.tabState[0]?.activeTab === "Perm"
-                    ? css`border-bottom: 2px solid ${args.theme.var.color.primary};`
-                    : css`border-bottom: 2px solid transparent;`,
+                    ? `._id {border-bottom: 2px solid ${args.theme.var.color.primary};`
+                    : "._id {border-bottom: 2px solid transparent;",
                 ];
               },
               props: (options: RoleFormFunctionArgumentType) => {
@@ -165,17 +164,17 @@ export const roleFormSchema = {
               as: "button",
               componentName: "Html",
               css: (options: RoleFormFunctionArgumentType) => [
-                css`
+                `return \`._id {
                 cursor: pointer;
                 padding: 8px 16px;
                 background-color: transparent;
                 border-left: none;
                 border-right: none;
                 border-top: none;
-              `,
+              }\`;`,
                 options.contextData.tabState[0]?.activeTab === "Page"
-                  ? css`border-bottom: 2px solid ${options.theme.var.color.primary};`
-                  : css`border-bottom: 2px solid transparent;`,
+                  ? `._id {border-bottom: 2px solid ${options.theme.var.color.primary};`
+                  : "._id {border-bottom: 2px solid transparent;",
               ],
               props: (options: RoleFormFunctionArgumentType) => {
                 const permissions = evalExpression("->RolePage", {
@@ -192,10 +191,10 @@ export const roleFormSchema = {
               type: "button",
             },
           ],
-          css: css`
+          css: `return \`._id {
   display: flex;
-  border-bottom: 1px solid \${args.theme.var.color.base_40};
-`,
+  border-bottom: 1px solid \${args.theme.var.color.background_l200};
+}\`;`,
           componentName: "Html",
         },
         {
@@ -208,7 +207,7 @@ export const roleFormSchema = {
               css: (options: RoleFormFunctionArgumentType) =>
                 options.contextData.tabState[0]?.activeTab === "Perm"
                   ? ""
-                  : css`display:none`,
+                  : "._id {display:none",
             },
             {
               as: "div",
@@ -217,13 +216,13 @@ export const roleFormSchema = {
               css: (options: RoleFormFunctionArgumentType) =>
                 options.contextData.tabState[0]?.activeTab === "Page"
                   ? ""
-                  : css`display:none`,
+                  : "._id {display:none",
             },
           ],
-          css: css`
+          css: `return \`._id {
   margin-top: 16px;
   padding: 8px;
-`,
+}\`;`,
           componentName: "Html",
         },
       ],

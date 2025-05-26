@@ -60,7 +60,7 @@ export function GraphView() {
               el.replaceChildren();
             });
           }}
-          style="border: 1px solid #e0e0e0; width: 1200px; height: 600px;"
+          style="border: 1px solid ${args.theme.var.color.border}; width: 1200px; height: 600px;"
         />
         <pre>{JSON.stringify(json())}</pre>
       </>

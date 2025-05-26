@@ -13,7 +13,7 @@ export function FormConfig() {
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStore = () => graph.vertexes[layoutStoreId].P as PageLayoutObject;
 
-  const TransactionDebugView = (props: { openedFormId: Id }) => {
+  const _TransactionDebugView = (props: { openedFormId: Id }) => {
     const txnId = () =>
       graph.vertexes[graph.vertexes[props.openedFormId].P.formId].P.txnId;
 
@@ -38,15 +38,15 @@ export function FormConfig() {
       const status = memoizedTxnValue().status;
       switch (status) {
         case "modified":
-          return "theme.var.color.orange_600";
+          return "theme.var.color.orange_d600";
         case "reverted":
-          return "theme.var.color.blue_600";
+          return "theme.var.color.blue_d600";
         case "committed":
-          return "theme.var.color.green_600";
+          return "theme.var.color.green_d600";
         case "error":
-          return "theme.var.color.red_600";
+          return "theme.var.color.red_d600";
         default:
-          return "theme.var.color.gray_600";
+          return "theme.var.color.gray_d600";
       }
     };
 
@@ -74,10 +74,10 @@ export function FormConfig() {
         class="transaction-debug"
         style={{
           "margin-top": "20px",
-          border: `1px solid ${(args) => args.theme.var.color.gray_300}`,
+          border: `1px solid ${(args) => args.theme.var.color.gray_l700}`,
           "border-radius": "4px",
           padding: "12px",
-          "background-color": `${(args) => args.theme.var.color.gray_100}`,
+          "background-color": `${(args) => args.theme.var.color.gray_l900}`,
           "font-family": "monospace",
         }}
       >
@@ -123,8 +123,8 @@ export function FormConfig() {
             <span
               style={{
                 color: txnStats().undoAvailable
-                  ? `${(args) => args.theme.var.color.blue_600}`
-                  : `${(args) => args.theme.var.color.gray_500}`,
+                  ? `${(args) => args.theme.var.color.blue_d600}`
+                  : `${(args) => args.theme.var.color.gray_l500}`,
               }}
             >
               {txnStats().undoAvailable ? " Undo" : " No Undo"}
@@ -133,8 +133,8 @@ export function FormConfig() {
             <span
               style={{
                 color: txnStats().redoAvailable
-                  ? `${(args) => args.theme.var.color.blue_600}`
-                  : `${(args) => args.theme.var.color.gray_500}`,
+                  ? `${(args) => args.theme.var.color.blue_d600}`
+                  : `${(args) => args.theme.var.color.gray_l500}`,
               }}
             >
               {txnStats().redoAvailable ? "Redo" : "No Redo"}

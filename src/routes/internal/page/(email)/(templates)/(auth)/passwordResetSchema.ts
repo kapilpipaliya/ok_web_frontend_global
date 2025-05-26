@@ -1,23 +1,24 @@
-import { returnCSS } from "~/lib/styles";
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 const content = [
   {
     as: "h1",
-    css: returnCSS`
+    css: `return \`._id {
+      color: \${args.theme.var.color.text};
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 1,
     text: "Reset Your Password",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
+      color: \${args.theme.var.color.text};
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 2,
     text: "We received a request to reset your password. Please use the following verification code to complete the process:",
@@ -27,11 +28,14 @@ const content = [
     attributes: [
       {
         as: "p",
-        css: returnCSS`
-          font-size: 32px;
-          font-weight: bold;
-          letter-spacing: 4px;
-        `,
+        css: `return \`._id {
+          color: \${args.theme.var.color.primary};
+          font-size: 36px;
+          font-weight: 900;
+          letter-spacing: 8px;
+          margin: 0;
+          font-family: 'Courier New', monospace;
+        }\`;`,
         componentName: "Html",
         displayOrder: 1,
         props: `return {
@@ -39,21 +43,23 @@ const content = [
           }`,
       },
     ],
-    css: returnCSS`
-      background-color: \${args.theme.var.color.base_10};
-      border-radius: 4px;
-      margin-bottom: 24px;
-      padding: 16px;
+    css: `return \`._id {
+      background-color: \${args.theme.var.color.background_l100};
+      border: 2px solid \${args.theme.var.color.primary};
+      border-radius: 8px;
+      margin: 24px 0;
+      padding: 24px 16px;
       text-align: center;
-    `,
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }\`;`,
     componentName: "Html",
     displayOrder: 3,
   },
   {
     as: "p",
-    css: returnCSS`
-      color: \${args.theme.var.color.base};
-    `,
+    css: `return \`._id {
+      color: \${args.theme.var.color.text};
+    }\`;`,
     componentName: "Html",
     displayOrder: 4,
     text: "This code will expire in 10 minutes. If you didn't request this password reset, please ignore this email or contact support if you have concerns.",

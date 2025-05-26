@@ -1,7 +1,6 @@
 import { type JSX, Show, splitProps } from "solid-js";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
-import { css } from "~/lib/styles";
 import type { CssType } from "~/components/form/type/CssType";
 
 // TODO: Depricate this component
@@ -25,12 +24,12 @@ export function DialogFooter(
       as="div"
       css={[
         ...ensureArray(local.containerCss),
-        css`
+        `return \`._id {
   display: flex;
   align-items: center;
   gap: 0.50rem;
   margin-bottom: 6px;
-`,
+}\`;`,
       ]}
     >
       <Show when={local.children}>{local.children}</Show>

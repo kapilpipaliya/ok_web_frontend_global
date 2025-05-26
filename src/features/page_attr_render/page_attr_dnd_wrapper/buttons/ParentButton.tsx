@@ -9,7 +9,6 @@ import {
 import { onLayoutItemClick } from "~/features/page_designer/event_handler/onLayoutItemClick";
 import { evalExpression } from "~/lib/expression_eval";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
 import type { CssType } from "~/components/form/type/CssType";
@@ -37,10 +36,10 @@ export function ParentButton(props: Readonly<ParentButtonProps>) {
         ICON_BUTTON_STYLES.baseCss,
         ICON_BUTTON_STYLES.defaultCss,
         ...ensureArray(props.css),
-        css`
+        `return \`._id {
           background-color: transparent;
           border: none;
-        `,
+        }\`;`,
       ]}
       icon="ph:arrow-up"
       onClick={(e) => {

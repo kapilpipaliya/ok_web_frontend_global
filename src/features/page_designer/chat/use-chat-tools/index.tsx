@@ -2,7 +2,6 @@
 import { useChat } from "@ai-sdk/solid";
 import { For, Show } from "solid-js";
 import { As } from "~/components/As";
-import { css } from "~/lib/styles";
 
 export function UseChatTools() {
   const { addToolResult, handleInputChange, handleSubmit, input, messages } =
@@ -27,22 +26,22 @@ export function UseChatTools() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 300px;
   margin: 24px auto;
   /* stretch */
-`}
+}\`;`}
     >
       <For each={messages()} fallback={<As as="div">No messages</As>}>
         {(message) => (
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   white-space: pre-wrap;
-`}
+}\`;`}
           >
             <As as="strong">{`${message.role}: `}</As>
             {message.content}
@@ -54,9 +53,9 @@ export function UseChatTools() {
                       fallback={
                         <As
                           as="div"
-                          css={(args) => css`
-  color: ${args.theme.var.color.gray};
-`}
+                          css={`return \`._id {
+  color: \${args.theme.var.color.gray};
+}\`;`}
                         >
                           Calling {toolInvocation.toolName}...
                         </As>
@@ -67,9 +66,9 @@ export function UseChatTools() {
                       {(toolInvocation) => (
                         <As
                           as="div"
-                          css={(args) => css`
-  color: ${args.theme.var.color.gray};
-`}
+                          css={`return \`._id {
+  color: \${args.theme.var.color.gray};
+}\`;`}
                         >
                           Tool call {`${toolInvocation.toolName}: `}
                           {toolInvocation.result}
@@ -86,30 +85,30 @@ export function UseChatTools() {
                   {(toolInvocation) => (
                     <As
                       as="div"
-                      css={(args) => css`
-  color: ${args.theme.var.color.gray};
-`}
+                      css={`return \`._id {
+  color: \${args.theme.var.color.gray};
+}\`;`}
                     >
                       {toolInvocation.args.message}
                       <As
                         as="div"
-                        css={(_args) => css`
+                        css={`return \`._id {
   display: flex;
   gap: 2px;
-`}
+}\`;`}
                       >
                         <Show
                           fallback={
                             <>
                               <As
                                 as="button"
-                                css={(args) => css`
+                                css={`return \`._id {
   padding: 4px;
   font-weight: bold;
-  color: ${args.theme.var.color.white};
-  background-color: ${args.theme.var.color.blue};
+  color: \${args.theme.var.color.white};
+  background-color: \${args.theme.var.color.blue};
   border-radius: 4px;
-`}
+}\`;`}
                                 onClick={() =>
                                   addToolResult({
                                     result: "Yes, confirmed.",
@@ -121,13 +120,13 @@ export function UseChatTools() {
                               </As>
                               <As
                                 as="button"
-                                css={(args) => css`
+                                css={`return \`._id {
   padding: 4px;
   font-weight: bold;
-  color: ${args.theme.var.color.white};
-  background-color: ${args.theme.var.color.red};
+  color: \${args.theme.var.color.white};
+  background-color: \${args.theme.var.color.red};
   border-radius: 4px;
-`}
+}\`;`}
                                 onClick={() =>
                                   addToolResult({
                                     result: "No, denied",
@@ -159,16 +158,16 @@ export function UseChatTools() {
       <form onSubmit={handleSubmit}>
         <As
           as="input"
-          css={(args) => css`
+          css={`return \`._id {
   position: fixed;
   bottom: 0;
   width: 100%;
   max-width: 300px;
   padding: 2px;
-  border: 1px solid ${args.theme.var.color.gray_60};
+  border: 1px solid \${args.theme.var.color.gray_l400};
   border-radius: 4px;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-`}
+}\`;`}
           onChange={handleInputChange}
           placeholder="Say something..."
           value={input()}

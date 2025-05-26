@@ -10,9 +10,7 @@ import {
 
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { toastValue } from "~/toastValue";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 type Renderable = JSX.Element;
 
@@ -22,9 +20,9 @@ const DismissButton: Component<{
   return (
     <As
       as="button"
-      css={css`
+      css={`return \`._id {
   align-items: center;
-  background-color: rgba(229, 231, 235, 0.8);
+  background-color: \${args.theme.var.color.background_l200};
   border-radius: 9999px;
   display: flex;
   height: 1.5rem;
@@ -34,7 +32,7 @@ const DismissButton: Component<{
   top: 50%;
   transform: translateY(-50%);
   width: 1.5rem;
-`}
+}\`;`}
       onClick={props.onDismiss}
     >
       &times;
@@ -61,22 +59,22 @@ export function useToast() {
       (t) => (
         <As
           as="div"
-          css={(args: FunctionArgumentType) => css`
-  background-color: ${args.theme.var.color.base_10};
+          css={`return \`._id {
+  background-color: \${args.theme.var.color.background_l100};
   border-radius: 10px;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
   font-weight: 500;
   padding: 0.75rem 3rem 0.75rem 1.5rem;
   position: relative;
-`}
+}\`;`}
         >
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   display: flex;
   align-items: center;
   justify-content: center;
-`}
+}\`;`}
           >
             <As as="div">{message}</As>
             <Show when={showDismiss}>
@@ -155,7 +153,7 @@ export function useToast() {
           height={27}
           icon={"mingcute:warning-line"}
           noobserver
-          style={{ color: "#009cfa" }}
+          style={{ color: "var(--theme-color-info)" }}
           width={27}
         />
       ),
@@ -185,71 +183,70 @@ export function useToast() {
           <As
             as="div"
             css={[
-              css`
+              `return \`._id {
   animation: ${t.visible ? "enterAnimation 1s forwards" : "leaveAnimation 1s forwards"};
-`,
-              css`
-  background-color: #0891b2;
+}\`;`,
+              `return \`._id {
+  background-color: \${args.theme.var.color.primary};
   border-radius: 6px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   min-width: 350px;
   padding: 12px;
-`,
+}\`;`,
             ]}
           >
             <As
               as="div"
-              css={css`
+              css={`return \`._id {
   display: flex;
   gap: 8px;
-`}
+}\`;`}
             >
               <As
                 as="div"
-                css={css`
-  display: flex;
-  flex-direction: column;
-  display: flex;
-`}
+                css={`return \`._id {
+                    display: flex;
+                    flex-direction: column;
+                }\`;`}
               >
                 <As
                   as="div"
-                  css={(args: FunctionArgumentType) => css`
-  color: ${args.theme.var.color.base_10};
+                  css={`return \`._id {
+  color: \${args.theme.var.color.primary_text};
   font-weight: medium;
-`}
+}\`;`}
                 >
                   {title}
                 </As>
                 <As
                   as="div"
-                  css={css`
-  color: #ecfeff;
+                  css={`return \`._id {
+  color: \${args.theme.var.color.text_l50};
   font-size: 13px;
-`}
+}\`;`}
                 >
                   {subtitle}
                 </As>
               </As>
               <As
                 as="div"
-                css={css`
+                css={`return \`._id {
   align-items: center;
   display: flex;
-`}
+}\`;`}
               >
                 <As
                   as="button"
-                  css={(args: FunctionArgumentType) => css`
-  background-color: ${args.theme.var.color.primary};
+                  css={`return \`._id {
+  background-color: \${args.theme.var.color.primary};
   border-radius: 6px;
-  color: ${args.theme.var.color.base_10};
+  color: \${args.theme.var.color.primary_text};
   font-size: 13px;
   font-weight: 500;
   height: 80%;
   letter-spacing: 0.025em;
   padding: 14px;
-`}
+}\`;`}
                   onClick={() => toastValue.toast.dismiss(t.id)}
                   onMouseOut={(e) =>
                     (e.currentTarget.style.backgroundColor = "#0e7490")
@@ -264,25 +261,25 @@ export function useToast() {
               </As>
               <As
                 as="div"
-                css={css`
+                css={`return \`._id {
   align-items: center;
   display: flex;
-`}
+}\`;`}
               >
                 <As
                   as="button"
-                  css={css`
+                  css={`return \`._id {
   align-items: center;
   background-color: rgba(14,116,144,0.4);
   border-radius: 6px;
-  color: #1e293b;
+  color: \${args.theme.var.color.text};
   display: flex;
   font-size: 24px;
   height: 80%;
   letter-spacing: 0.025em;
   padding: 10px;
   position: relative;
-`}
+}\`;`}
                   onClick={() => toastValue.toast.dismiss(t.id)}
                   onMouseOut={(e) =>
                     (e.currentTarget.style.backgroundColor =
@@ -299,30 +296,30 @@ export function useToast() {
             </As>
             <As
               as="div"
-              css={css`
+              css={`return \`._id {
   padding-top: 16px;
   position: relative;
-`}
+}\`;`}
             >
               <As
                 as="div"
-                css={css`
-  background-color: #164e63;
+                css={`return \`._id {
+  background-color: \${args.theme.var.color.primary_l200};
   border-radius: 9999px;
   height: 4px;
   width: 100%;
-`}
+}\`;`}
               />
               <As
                 as="div"
-                css={css`
-  background-color: #ecfeff;
+                css={`return \`._id {
+  background-color: \${args.theme.var.color.background_l50};
   border-radius: 9999px;
   height: 4px;
   position: absolute;
   top: 16px;
   width: ${life()}%;
-`}
+}\`;`}
               />
             </As>
           </As>

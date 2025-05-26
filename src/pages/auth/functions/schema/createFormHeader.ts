@@ -1,5 +1,4 @@
 import { getLogoSchema } from "~/routes/internal/page/(email)/baseEmailTemplate";
-import { css } from "~/lib/styles";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 
 /**
@@ -11,9 +10,9 @@ import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 export function createFormHeader(title: string, subheader?: string) {
   return [
     getLogoSchema(
-      css`display:grid; place-items:center;`,
-      css`height:80px;`,
-      css`color: \${args.theme.var.color.base_40};`,
+      "._id {display:grid; place-items:center;",
+      "._id {height:80px;",
+      "._id {color: ${args.theme.var.color.text_d600};",
     ),
     {
       as: "h1",
@@ -26,12 +25,12 @@ export function createFormHeader(title: string, subheader?: string) {
       ? [
           {
             as: "p",
-            css: css`
-        color: \${args.theme.var.color.base_60};
+            css: `return \`._id {
+        color: \${args.theme.var.color.text_l400};
         text-align: center;
         margin-top: 8px;
         font-size: 16px;
-      `,
+      }\`;`,
             componentName: "Html",
             displayOrder: 3,
             text: subheader,

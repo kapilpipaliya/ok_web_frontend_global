@@ -1,7 +1,6 @@
 import type { JSX } from "solid-js";
 import { As } from "~/components/As";
 import { API } from "~/lib/api/endpoints";
-import { css } from "~/lib/styles";
 
 interface UnauthenticatedMenuProps {
   onClose: () => void;
@@ -14,24 +13,23 @@ export function UnauthenticatedMenu(
     <>
       <As
         as="li"
-        css={css`
-  margin: 5px 10px;
-  margin-top: 5px;
-`}
+        css={`return \`._id {
+            margin: 5px 10px;
+        }\`;`}
       >
         <As
           as="a"
-          css={css`
+          css={`return \`._id {
   display: flex;
   align-items: center;
-  color: #333;
+  color: \${args.theme.var.color.text};
   padding: 5px 7px;
   border-radius: 5px;
   text-decoration: none;
   &:hover {
-    background-color: rgb(241,241,241);
+    background-color: \${args.theme.var.color.background_l100};
   }
-`}
+}\`;`}
           href={API.urls.admin.signIn}
           onclick={props.onClose}
           replace={true}
@@ -41,24 +39,23 @@ export function UnauthenticatedMenu(
       </As>
       <As
         as="li"
-        css={css`
-  margin: 5px 10px;
-  margin-top: 5px;
-`}
+        css={`return \`._id {
+            margin: 5px 10px;
+        }\`;`}
       >
         <As
           as="a"
-          css={css`
+          css={`return \`._id {
   display: flex;
   align-items: center;
-  color: #333;
+  color: \${args.theme.var.color.text};
   padding: 5px 7px;
   border-radius: 5px;
   text-decoration: none;
   &:hover {
-    background-color: rgb(241,241,241);
+    background-color: \${args.theme.var.color.background_l100};
   }
-`}
+}\`;`}
           href={API.urls.user.signUp}
           onclick={props.onClose}
           replace={true}

@@ -18,7 +18,7 @@ import { useZIndex } from "../fields/ZIndex";
 import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { useTheme } from "~/lib/context/ThemeContext";
+import { useTheme } from "~/lib/theme/ThemeContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useNavigate } from "@solidjs/router";
@@ -253,9 +253,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
       </Show> */}
       <PageRenderContextProvider store={repeaterStore}>
         <Switch>
-          <Match when={isHidden()}>
-            <></>
-          </Match>
+          <Match when={isHidden()}></Match>
           <Match when={!component()}>
             NO INPUT {componentName() as string}
           </Match>

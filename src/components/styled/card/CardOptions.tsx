@@ -1,8 +1,6 @@
 import { createSignal, type JSX } from "solid-js";
 import { For } from "solid-js/web";
 import { As } from "~/components/As";
-import { css } from "~/lib/styles";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 type CardOption = {
   action: () => void;
@@ -19,22 +17,22 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
         as="button"
         aria-expanded={isDropdownOpen()}
         aria-haspopup="true"
-        css={(args: FunctionArgumentType) => css`
-  color: ${args.theme.var.color.primary_45};
+        css={`return \`._id {
+  color: \${args.theme.var.color.primary_l550};
   display: block;
   margin: -0.625rem;
   padding: 0.625rem;
   border-radius: 50%;
   transition: all 0.2s ease;
   &:hover {
-    color: ${args.theme.var.color.primary_75};
-    background-color: ${args.theme.var.color.primary_15};
+    color: \${args.theme.var.color.primary_l250};
+    background-color: \${args.theme.var.color.primary_l850};
   }
   &:focus {
-    outline: 2px solid ${args.theme.var.color.primary_35};
+    outline: 2px solid \${args.theme.var.color.primary_l650};
     outline-offset: 2px;
   }
-`}
+}\`;`}
         onClick={toggleDropdown}
         type="button"
       >
@@ -42,10 +40,10 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
         <As
           as="svg"
           aria-hidden="true"
-          css={css`
+          css={`return \`._id {
   height: 1.25rem;
   width: 1.25rem;
-`}
+}\`;`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -57,12 +55,12 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
           as="div"
           aria-labelledby={`options-menu-${props.title}-button`}
           aria-orientation="vertical"
-          css={(args: FunctionArgumentType) => [
-            css`
-              background-color: ${args.theme.var.color.base_5};
+          css={[
+            `return \`._id {
+              background-color: \${args.theme.var.color.background_l100};
               border-radius: 0.5rem;
               box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-              border: 1px solid ${args.theme.var.color.primary_25};
+              border: 1px solid \${args.theme.var.color.primary_l750};
               margin-top: 0.25rem;
               outline-offset: 2px;
               outline: 2px solid transparent;
@@ -73,8 +71,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
               width: 10rem;
               z-index: 10;
               animation: dropdown 0.2s ease forwards;
-          `,
-            `@keyframes dropdown {
+          }\`;`,
+            `return \`@keyframes dropdown {
                   from {
                       opacity: 0;
                       transform: translateY(-8px) scale(0.96);
@@ -83,7 +81,7 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
                       opacity: 1;
                       transform: translateY(0) scale(1);
                   }
-              }`,
+              }\`;`,
           ]}
           role="menu"
           tabindex="-1"
@@ -92,8 +90,8 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
             {(option, index) => (
               <As
                 as="a"
-                css={(args: FunctionArgumentType) => css`
-  color: ${args.theme.var.color.base_75};
+                css={`return \`._id {
+  color: \${args.theme.var.color.text_l250};
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
@@ -102,14 +100,14 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
   transition: all 0.15s ease;
   text-decoration: none;
   &:hover {
-    color: ${args.theme.var.color.base_95};
-    background-color: ${args.theme.var.color.primary_15};
+    color: \${args.theme.var.color.text_l50};
+    background-color: \${args.theme.var.color.primary_l850};
   }
   &:focus {
-    outline: 2px solid ${args.theme.var.color.primary_35};
+    outline: 2px solid \${args.theme.var.color.primary_l650};
     outline-offset: -1px;
   }
-`}
+}\`;`}
                 href="#"
                 id={`options-menu-${props.title}-item-${index()}`}
                 onClick={(e) => {
@@ -135,10 +133,10 @@ export function CardOptionsContainer(props: { children: JSX.Element }) {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   margin-left: auto;
   position: relative;
-`}
+}\`;`}
     >
       {props.children}
     </As>

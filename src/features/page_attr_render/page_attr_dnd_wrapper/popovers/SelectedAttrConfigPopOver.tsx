@@ -17,7 +17,6 @@ import { CopyButton } from "../buttons/CopyButton";
 import { PasteButton } from "../buttons/PasteButton";
 import { ComponentName } from "../components/ComponentName";
 import { InsertButtons } from "../menus/InsertButtons";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -43,19 +42,19 @@ export function SelectedAttrConfigPopOver(
     <As
       as="span"
       css={[
-        css`
+        `return \`._id {
   position: relative;
-`,
+}\`;`,
       ]}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
   background-color: \${args.theme.var.color.primary};
   bottom: 100%;
-  color: \${args.theme.var.color.base_10};
+  color: \${args.theme.var.color.primary_text};
   gap: 5px;
   padding: 0.25rem;
   position: absolute;
@@ -64,16 +63,16 @@ export function SelectedAttrConfigPopOver(
   button {
     color: white;
   }
-`}
+}\`;`}
       >
         <IconButton
           css={[
             ICON_BUTTON_STYLES.baseCss,
             ICON_BUTTON_STYLES.defaultCss,
-            css`
+            `return \`._id {
             background-color: transparent;
             border: none;
-          `,
+          }\`;`,
           ]}
           draggable={true}
           icon="ph:dots-six-vertical-bold"

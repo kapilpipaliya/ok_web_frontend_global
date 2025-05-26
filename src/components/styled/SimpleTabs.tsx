@@ -3,7 +3,6 @@ import { Icon } from "@iconify-icon/solid";
 
 import { isObject } from "~/lib/data_structure/object/isObject";
 import { evalExpression } from "~/lib/expression_eval";
-import { css } from "~/lib/styles";
 import { As } from "../As";
 
 export type TabItem = {
@@ -18,7 +17,7 @@ export function TabsWithUnderline(
     displayValueKey?: string;
     onTabClick: (key: string) => void;
     selectedKey: string;
-    tabs: Array<TabItem>;
+    tabs: TabItem[];
     iconSize?: number;
   }>,
 ) {
@@ -58,15 +57,15 @@ export function TabsWithUnderline(
       {/* Mobile view */}
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
         @media (width >= 52.125rem) {
           display: none;
         }
-      `}
+      }\`;`}
       >
         <As
           as="label"
-          css={css`
+          css={`return \`._id {
           position: absolute;
           width: 1px;
           height: 1px;
@@ -76,21 +75,21 @@ export function TabsWithUnderline(
           clip: rect(0, 0, 0, 0);
           white-space: nowrap;
           border-width: 0;
-        `}
+        }\`;`}
           for="tabs"
         >
           Select a tab
         </As>
         <As
           as="select"
-          css={(args) => css`
+          css={`return \`._id {
             line-height: 1.5rem;
             @media (width >= 52.125rem) {
               line-height: 1.25rem;
             }
-            border-color: ${args.theme.var.color.base_10};
+            border-color: \${args.theme.var.color.border};
             &:focus {
-              border-color: ${args.theme.var.color.primary};
+              border-color: \${args.theme.var.color.primary};
             }
             border-radius: 0.375rem;
             display: block;
@@ -103,7 +102,7 @@ export function TabsWithUnderline(
             padding-top: 0.5rem;
             padding-bottom: 0.5rem;
             width: 100%;
-          `}
+          }\`;`}
           id="tabs"
           onChange={(e) => props.onTabClick(e.currentTarget.value)}
           value={props.selectedKey}
@@ -120,28 +119,28 @@ export function TabsWithUnderline(
 
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
         display: none;
         @media (width >= 52.125rem) {
           display: block;
         }
-      `}
+      }\`;`}
       >
         <As
           as="div"
-          css={(args) => css`
+          css={`return \`._id {
           border-bottom-width: 1px;
-          border-color: ${args.theme.var.color.base_10};
-        `}
+          border-color: \${args.theme.var.color.border};
+        }\`;`}
         >
           <As
             as="nav"
             aria-label="Tabs"
-            css={css`
+            css={`return \`._id {
             display: flex;
             gap: 0.5rem;
             margin-bottom: -1px;
-          `}
+          }\`;`}
           >
             <For each={props.tabs}>
               {(tab) => (
@@ -150,35 +149,35 @@ export function TabsWithUnderline(
                   aria-current={
                     tab.id === props.selectedKey ? "page" : undefined
                   }
-                  css={(args) => css`
-                    line-height: 1.25rem;
-                    ${
-                      tab.id === props.selectedKey
-                        ? `
-                        border-color: ${args.theme.var.color.primary};
-                        color: ${args.theme.var.color.primary_280};
-                      `
-                        : `
-                        border-color: transparent;
-                        &:hover {
-                          border-color: ${args.theme.var.color.base_60};
-                          color: ${args.theme.var.color.primary_460};
-                        }
-                        color: ${args.theme.var.color.primary};
-                      `
-                    }
-                    background-color: transparent;
-                    border-bottom-width: 2px;
-                    border-left:none;
-                    border-right:none;
-                    border-top:none;
-                    font-weight: 500;
-                    padding: 0.5rem 0.25rem;
-                    white-space: nowrap;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                  `}
+                  css={[
+                    `return \`._id {
+                      line-height: 1.25rem;
+                      background-color: transparent;
+                      border-bottom-width: 2px;
+                      border-left:none;
+                      border-right:none;
+                      border-top:none;
+                      font-weight: 500;
+                      padding: 0.5rem 0.25rem;
+                      white-space: nowrap;
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                    }\`;`,
+                    tab.id === props.selectedKey
+                      ? `return \`._id {
+                          border-color: \${args.theme.var.color.primary};
+                          color: \${args.theme.var.color.primary_d200};
+                        }\`;`
+                      : `return \`._id {
+                          border-color: transparent;
+                          &:hover {
+                            border-color: \${args.theme.var.color.background_l400};
+                            color: \${args.theme.var.color.primary_d400};
+                          }
+                          color: \${args.theme.var.color.primary};
+                        }\`;`,
+                  ]}
                   onClick={() => props.onTabClick(tab.id)}
                   type="button"
                 >

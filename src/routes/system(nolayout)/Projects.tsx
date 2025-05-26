@@ -5,7 +5,6 @@ import { getCompanySquareLogoUrl } from "~/lib/graph/get/sync/company/getCompany
 import { UserDropdownMenuDisplay } from "~/pages/auth_menu/DropdownMenuDisplay";
 import { SETTINGS_CONSTANTS } from "~/pages/settings/constants";
 import { SubDomainGrid } from "~/pages/subdomain/SubDomainGrid";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import type { JSX } from "solid-js";
@@ -18,26 +17,26 @@ export default function Projects() {
       <As as="header" css={SETTINGS_CONSTANTS.HEADER_MENU_CSS}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   flex: 1;
-`}
+}\`;`}
         />
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   margin-left: auto;
   display: flex;
   gap: 4px;
-`}
+}\`;`}
         >
           <UserDropdownMenuDisplay />
         </As>
       </As>
 
       <HeaderWithDescription
-        css={css`
+        css={`return \`._id {
   flex: 1;
-`}
+}\`;`}
         description={
           <>
             Each project has a separate subdomain and database. Only
@@ -53,9 +52,9 @@ export default function Projects() {
 
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   padding: 6px;
-`}
+}\`;`}
       >
         <SubDomainGrid />
       </As>

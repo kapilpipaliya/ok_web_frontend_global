@@ -16,7 +16,6 @@ import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValu
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { PROPERTIES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { newVertex } from "~/lib/graph/mutate/core/vertex/newVertex";
@@ -64,27 +63,27 @@ export function CollAndData() {
     <>
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
-`}
+}\`;`}
       >
         <As
           as="span"
-          css={css`
+          css={`return \`._id {
   flex: 0.5;
   margin-top: 5px;
-`}
+}\`;`}
         >
           Expression:{" "}
         </As>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   display: flex;
   align-items: center;
   font-size: 15px;
   flex: 1;
-`}
+}\`;`}
         >
           <DynamicComponent
             data={graph.vertexes[formStoreVertex()?.P.selectedId]}
@@ -96,30 +95,30 @@ export function CollAndData() {
             txnId={formStoreVertex()?.P.txnId}
           />
           {/* 
-            <Icon icon="mdi:information-outline" noobserver css={css`
+            <Icon icon="mdi:information-outline" noobserver css={`return \`._id {
   margin-left: 2px;
   cursor: pointer;
-`} title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
+}\`;`} title="Either Expression or 'Collection and Data' is required. If Expression is configured, it will be used; otherwise, Collection and Data will be used."/>
           */}
         </As>
       </As>
 
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   text-align: center;
   margin-bottom: 2px;
   margin-top: 2px;
-`}
+}\`;`}
       >
         OR
       </As>
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
   flex: 0.5;
   margin-top: 5px;
-`}
+}\`;`}
       >
         Collection:
       </As>
@@ -135,10 +134,10 @@ export function CollAndData() {
       />
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
   flex: 0.5;
   margin-top: 5px;
-`}
+}\`;`}
       >
         Data:
       </As>

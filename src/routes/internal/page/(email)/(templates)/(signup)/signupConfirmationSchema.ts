@@ -1,34 +1,33 @@
-import { returnCSS } from "~/lib/styles";
 import { createEmailTemplate } from "~/routes/internal/page/(email)/baseEmailTemplate";
 
 const content = [
   {
     as: "h1",
-    css: returnCSS`
+    css: `return \`._id {
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 1,
     text: "Confirm Your Email Address",
   },
   {
     as: "p",
-    css: returnCSS`
+    css: `return \`._id {
       margin-bottom: 16px;
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 2,
     text: "Thank you for signing up! Please confirm your email address to activate your account.",
   },
   {
     as: "a",
-    css: returnCSS`
+    css: `return \`._id {
       background-color: \${args.theme.var.color.primary};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.base_10};
+      color: \${args.theme.var.color.text_l900};
       cursor: pointer;
       display: inline-block;
       margin-bottom: 16px;
@@ -37,7 +36,7 @@ const content = [
       &:hover {
         opacity: 0.9;
       }
-    `,
+    }\`;`,
     componentName: "Html",
     displayOrder: 3,
     props: `return {
@@ -48,9 +47,9 @@ const content = [
   },
   {
     as: "p",
-    css: returnCSS`
-      color: \${args.theme.var.color.base};
-    `,
+    css: `return \`._id {
+      color: \${args.theme.var.color.text};
+    }\`;`,
     componentName: "Html",
     displayOrder: 4,
     text: "If you didn't create an account, you can safely ignore this email.",

@@ -1,7 +1,7 @@
 // TODO: this is access levels, not permissions
 import type { Session, Transaction } from "neo4j-driver";
 
-export async function createDefaultPermissions(tx: Session | Transaction) {
+export async function createDefaultPermissions(_tx: Session | Transaction) {
   return;
   // const query = `
   //   MERGE (insert:Perm {key: 'insert'})

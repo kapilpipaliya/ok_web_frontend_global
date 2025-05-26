@@ -5,7 +5,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
-import { useToast } from "~/components/styled/modal/Toast";
 import { createAppState } from "~/createAppState";
 import { SearchBar } from "~/components/styled/SearchBar";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
@@ -19,7 +18,6 @@ import {
 } from "../../context/LayoutContext";
 import { ComponentItem } from "./ComonentItem";
 import { getCompChildren } from "./functions/getCompChildren";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -35,7 +33,7 @@ export function ComponentList(props: {
   const [graph, setGraph] = useGraph();
   const [searchQuery, setSearchQuery] = createSignal("");
   const [isFetchingData, setIsFetchingData] = createSignal(false);
-  const { showErrorToast } = useToast();
+  const [error, setError] = createSignal<string | null>(null);
   const [rootCompVertex, setRootCompVertex] = createSignal<Vertex>();
   const [expandedKeys, setExpandedKeys] = createStore<string[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
@@ -78,9 +76,10 @@ export function ComponentList(props: {
       return;
     }
     setIsFetchingData(true);
+    setError(null); // Clear any previous errors
     const result = await fetchData();
     if ((result as { error: string })?.error) {
-      showErrorToast((result as { error: string }).error);
+      setError((result as { error: string }).error);
     } else if ((result as ServerResult)?.result) {
       if (props.rootExpression?.startsWith("g:")) {
         setGraphData(graph, setGraph, (result as ServerResult).graph!);
@@ -135,6 +134,22 @@ export function ComponentList(props: {
 
   return (
     <>
+      <Show when={error()}>
+        <As
+          as="div"
+          css={`return \`._id {
+            background-color: \${args.theme.var.color.error_l50};
+            border: 1px solid \${args.theme.var.color.error_l200};
+            border-radius: 4px;
+            padding: 12px;
+            margin: 8px 0;
+            color: \${args.theme.var.color.error_d700};
+            font-size: 14px;
+          }\`;`}
+        >
+          Error: {error()}
+        </As>
+      </Show>
       <Show when={filteredChildren().length >= 5 || searchQuery().trim()}>
         <SearchBar
           handleChange={(value) => {
@@ -155,11 +170,11 @@ export function ComponentList(props: {
             //             fallback={
             //               <As
             //                 as="div"
-            //                 css={css`
+            //                 css={`return \`._id {
             //   margin: 20px 0px;
             //   padding: 3px;
             //   text-align: center;
-            // `}
+            // }\`;`}
             //               >
             //                 No Component Found!
             //               </As>
@@ -168,10 +183,10 @@ export function ComponentList(props: {
             {(item) => (
               <As
                 as="div"
-                css={css`
+                css={`return \`._id {
   font-weight: 600;
   margin: 8px 0px;
-`}
+}\`;`}
               >
                 <ComponentItem
                   child={item}

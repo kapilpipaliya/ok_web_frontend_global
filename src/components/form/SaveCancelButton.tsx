@@ -7,7 +7,6 @@ import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { formCancel } from "./functions/formCancel";
 import { formSubmit } from "./functions/formSubmit";
-import { css } from "~/lib/styles";
 import { As } from "../As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -46,18 +45,18 @@ export function SaveCancelButton(
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
       display: flex;
       justify-content: ${props.buttonAlign ? "end" : "start"};
-    `}
+    }\`;`}
     >
       <As
         as="button"
         css={[
           SETTINGS_CONSTANTS.MODAL.BUTTONS.CANCEL_CSS,
-          css`
+          `return \`._id {
   margin-right: 7px;
-`,
+}\`;`,
         ]}
         onClick={onCancel}
         type="button"

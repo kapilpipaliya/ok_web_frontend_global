@@ -18,7 +18,6 @@ import { useZIndex, ZIndex } from "../fields/ZIndex";
 import { IconButton } from "./IconButton";
 import { DropdownMenu } from "./modal/DropdownMenu";
 import { useToast } from "./modal/Toast";
-import { css } from "~/lib/styles";
 import { As } from "../As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 
@@ -86,7 +85,7 @@ function SelectedTag(props: {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   align-items: center;
   background-color: \${args.theme.var.color.primary};
   cursor: default;
@@ -95,17 +94,17 @@ function SelectedTag(props: {
   gap: 6px;
   padding: 4px 10px;
   border-radius: 4px;
-  color: white;
+  color: \${args.theme.var.color.text_d700};
   font-weight: 500;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-`}
+}\`;`}
     >
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
   white-space: nowrap;
-`}
+}\`;`}
       >
         {props.renderLabel
           ? props.renderLabel(props.tag, true)
@@ -113,7 +112,7 @@ function SelectedTag(props: {
       </As>
       <IconButton
         icon="ph:x"
-        css={css`
+        css={`return \`._id {
     background-color: transparent;
     border: none;
     display: flex;
@@ -121,12 +120,12 @@ function SelectedTag(props: {
     justify-content: center;
     padding: 2px;
     border-radius: 50%;
-    color: white;
+    color: \${args.theme.var.color.text_d700};
     transition: all 0.2s ease;
     &:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
-  `}
+  }\`;`}
         onClick={(e) => {
           e.preventDefault();
           e.stopImmediatePropagation();
@@ -159,7 +158,7 @@ function SingleOption(props: SingleOptionProps) {
       fallback={
         <As
           as="div"
-          css={({ theme }) => css`
+          css={`return \`._id {
   cursor: pointer;
   font-size: 14px;
   margin: 2px 3px;
@@ -168,15 +167,15 @@ function SingleOption(props: SingleOptionProps) {
   transition: background-color 0.2s ease;
   ${
     props.isSelected
-      ? `background-color: ${theme.var.color.primary_80};
-         color: white;`
+      ? `background-color: \${args.theme.var.color.primary_l200};
+         color: \${args.theme.var.color.text_d700};`
       : ""
   }
   &:hover {
-    background-color: ${theme.var.color.primary_40};
-    color: white;
+    background-color: \${args.theme.var.color.primary_l200};
+    color: \${args.theme.var.color.text_d700};
   }
-`}
+}\`;`}
           onClick={() => props.onSelect(props.option)}
         >
           {props.renderLabel
@@ -189,7 +188,7 @@ function SingleOption(props: SingleOptionProps) {
       <div>
         <As
           as="div"
-          css={({ theme }) => css`
+          css={`return \`._id {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -198,11 +197,11 @@ function SingleOption(props: SingleOptionProps) {
   margin: 3px;
   padding: 8px;
   border-radius: 5px;
-  ${props.isSelected ? `background-color: ${theme.var.color.primary_80};` : ""}
+  ${props.isSelected ? `background-color: \${args.theme.var.color.primary_l200};` : ""}
   &:hover {
-    background-color: ${theme.var.color.primary_40};
+    background-color: \${args.theme.var.color.primary_l200};
   }
-`}
+}\`;`}
           onClick={() => props.onToggleExpand(props.option)}
         >
           <Icon
@@ -220,9 +219,9 @@ function SingleOption(props: SingleOptionProps) {
         <Show when={props.isExpanded}>
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   padding-left: 20px;
-`}
+}\`;`}
           >
             <For
               each={
@@ -437,32 +436,32 @@ function OptionsList(props: OptionsListProps) {
       as="div"
       css={[
         STYLES.overflowCss,
-        ({ theme }) => css`
+        `return \`._id {
           border-radius: 8px;
           display: flex;
-          background-color: ${theme.var.color.base_10};
+          background-color: \${args.theme.var.color.background_l100};
           flex-direction: column;
           max-height: 250px;
           width: 100%;
           z-index: ${zIndex};
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        `,
+        }\`;`,
       ]}
     >
       <Show
         fallback={
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   cursor: pointer;
   padding: 12px 8px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: \${args.theme.var.color.base_80};
+  color: \${args.theme.var.color.text_l200};
   font-style: italic;
-`}
+}\`;`}
           >
             Loading...
           </As>
@@ -474,16 +473,16 @@ function OptionsList(props: OptionsListProps) {
           fallback={
             <As
               as="div"
-              css={css`
+              css={`return \`._id {
   cursor: pointer;
   padding: 12px 8px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: \${args.theme.var.color.base_80};
+  color: \${args.theme.var.color.text_l200};
   font-style: italic;
-`}
+}\`;`}
             >
               No item found{" "}
             </As>
@@ -555,8 +554,8 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
       as="div"
       css={[
         ensureArray(props.css),
-        css`
-  border: 1px solid \${args.theme.var.color.base};
+        `return \`._id {
+  border: 1px solid \${args.theme.var.color.border};
   padding: 0;
   border-radius: 6px;
   text-align: left;
@@ -564,45 +563,45 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
   transition: all 0.2s ease;
   &:focus-within {
     border-color: \${args.theme.var.color.primary};
-    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_20};
+    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_l100};
   }
-  ${props.error ? "border: 1px solid ${args.theme.var.color.error};" : ""}
-`,
+  ${props.error ? "border: 1px solid \\${args.theme.var.color.error};" : ""}
+}\`;`,
       ]}
       ref={mergeRefs<HTMLDivElement>(props.ref, setReference)}
     >
       {/* Main grid container */}
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-`}
+}\`;`}
       >
         {/* Tags and input area */}
         <As
           as="div"
           css={[
-            props.selectionLimit !== 1 ? css`flex-wrap: wrap;` : "",
-            css`
+            props.selectionLimit !== 1 ? "._id {flex-wrap: wrap;" : "",
+            `return \`._id {
   align-items: center;
   display: flex;
   gap: 8px;
   padding: 3px 8px;
   width: 100%;
   min-height: 38px;
-`,
+}\`;`,
           ]}
         >
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-`}
+}\`;`}
           >
             <For each={selectedValue()}>
               {(tag) => (
@@ -617,17 +616,17 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
           </As>
           <As
             as="div"
-            css={css`
+            css={`return \`._id {
   display: flex;
   align-items: center;
   flex: 1;
-`}
+}\`;`}
           >
             <As
               as="input"
               auto-complete="off"
               css={[
-                css`
+                `return \`._id {
   ${props.selectionLimit === 1 && selectedValue().length === 1 ? "width: 100px;" : ""}
   ${props.selectionLimit !== 1 ? "min-width: 100px;" : ""}
   border: none;
@@ -636,7 +635,8 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
   padding: 5px;
   font-size: 14px;
   background: transparent;
-`,
+  color: \${args.theme.var.color.text};
+}\`;`,
               ]}
               data-lpignore="true"
               disabled={props.disable}
@@ -653,18 +653,18 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
         {/* Dropdown icon area */}
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
   padding: 0 8px;
-`}
+}\`;`}
         >
           <As
             as={Icon}
-            css={css`
-  color: \${args.theme.var.color.base};
+            css={`return \`._id {
+  color: \${args.theme.var.color.text};
   cursor: pointer;
   transition: transform 0.2s ease;
   transform: rotate(${dropdownVisible() ? "180deg" : "0deg"});
@@ -672,7 +672,7 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
   &:hover {
     opacity: 1;
   }
-`}
+}\`;`}
             icon="ph:caret-down-bold"
             noobserver
             onClick={() => {
@@ -690,11 +690,11 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
       <Show when={props.error}>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   color: \${args.theme.var.color.error};
   font-size: 12px;
   padding: 2px;
-`}
+}\`;`}
         >
           {props.error}
         </As>
@@ -703,9 +703,9 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
       <Show when={dropdownVisible()}>
         <ZIndex>
           <DropdownMenu
-            css={css`
+            css={`return \`._id {
   border-radius: 5px;
-`}
+}\`;`}
             onClickOutside={() => setDropdownVisible(false)}
             parentRef={reference()!}
           >

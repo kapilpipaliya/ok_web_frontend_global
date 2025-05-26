@@ -220,7 +220,7 @@ function validateLayoutDeletion(
   setGraph: SetStoreFunction<GraphInterface>,
 ): boolean {
   const formDataId = formStoreVertex?.P.formDataId;
-  if (!formDataId || !graph.vertexes[formDataId]) {
+  if (!(formDataId && graph.vertexes[formDataId])) {
     return false;
   }
 

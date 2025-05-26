@@ -11,7 +11,6 @@ import {
   validatePasswordConditions,
 } from "../validation/validatePassword";
 import { popoverWrapperSchema } from "./popoverWrapperSchema";
-import { css } from "../styles";
 
 // Type for password condition
 interface PasswordCondition {
@@ -63,12 +62,12 @@ export function createPasswordHintPopoverContent(
     attributes: [
       {
         as: "h3",
-        css: css`
+        css: `return \`._id {
   font-size: 16px;
   color: \${args.theme.var.color.primary};
   margin: 0px;
   margin-bottom: 8px;
-`,
+}\`;`,
         componentName: "Html",
         text: "Password Requirements",
       },
@@ -90,9 +89,9 @@ export function createPasswordHintPopoverContent(
                     ? "success"
                     : "error"
                   : "grey";
-                return css`
+                return `return \`._id {
   color: \${args.theme.var.color.${iconColor}};
-`;
+}\`;`;
               },
               props: (options: ValidationStateFunctionArgumentType) => {
                 const validationState = options.contextData.validationState;
@@ -121,12 +120,12 @@ export function createPasswordHintPopoverContent(
                 const textColor = fieldValue
                   ? isValid
                     ? "success"
-                    : "base_640"
-                  : "base_640";
+                    : "text_d400"
+                  : "text_d400";
 
-                return css`
+                return `return \`._id {
   color: \${args.theme.var.color.${textColor}};
-`;
+}\`;`;
               },
               props: () => {
                 return {
@@ -135,20 +134,20 @@ export function createPasswordHintPopoverContent(
               },
             },
           ],
-          css: css`
+          css: `return \`._id {
   font-size: 14px;
   margin-bottom: 4px;
   display: flex;
   align-items: center;
   gap: 8px;
-`,
+}\`;`,
           componentName: "Html",
         })),
-        css: css`
+        css: `return \`._id {
   margin: 0px;
   padding-left: 16px;
   list-style: none;
-`,
+}\`;`,
         componentName: "Html",
         props: (options: ValidationStateFunctionArgumentType) => {
           createEffect(() => {
@@ -172,12 +171,12 @@ export function createPasswordHintPopoverContent(
         },
       },
     ],
-    css: css`
+    css: `return \`._id {
   padding: 12px;
   background-color: white;
   border-radius: 4px;
   max-width: 300px;
-`,
+}\`;`,
     componentName: "Html",
   };
 }
@@ -209,9 +208,9 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
                 : helpIconState[0]?.hasContent
                   ? "warning"
                   : "grey";
-              return css`
+              return `return \`._id {
   color: \${args.theme.var.color.${iconColor}};
-`;
+}\`;`;
             },
             props: (options: HelpIconStateFunctionArgumentType) => {
               const helpIconState = options.contextData.helpIconState;
@@ -227,11 +226,11 @@ export function createPasswordLabelWithHint(label: string): FieldAttribute {
             },
           },
         ],
-        css: css`
+        css: `return \`._id {
   display: flex;
   gap: 4px;
   align-items: center;
-`,
+}\`;`,
         componentName: "Html",
       },
     ],

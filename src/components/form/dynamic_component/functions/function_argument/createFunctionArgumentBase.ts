@@ -65,7 +65,7 @@ export function createFunctionArgumentBase(
     zIndex: number;
     navigate: Navigator;
     theme: ThemeContext;
-    parentItems: Array<[{ context: FunctionArgumentType }, unknown]>;
+    parentItems: [{ context: FunctionArgumentType }, unknown][];
     previewStore: { context: unknown };
   },
 ) {

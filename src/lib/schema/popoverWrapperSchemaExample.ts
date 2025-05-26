@@ -2,7 +2,6 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import type { createStore } from "solid-js/store";
 
 import { popoverWrapperSchema } from "./popoverWrapperSchema";
-import { css } from "../styles";
 
 // Define type for popover state store
 type PopoverStateStore = ReturnType<
@@ -26,13 +25,13 @@ export const popoverWrapperSchemaExample = () => {
   // Create a button that will trigger the popover
   const actionButton = {
     as: "button",
-    css: css`
+    css: `return \`._id {
   padding: 8px 16px;
   background-color: \${args.theme.var.color.primary};
   color: white;
   border-radius: 4px;
   cursor: pointer;
-`,
+}\`;`,
     componentName: "Button",
     text: "Hover Me",
   };
@@ -43,32 +42,32 @@ export const popoverWrapperSchemaExample = () => {
     attributes: [
       {
         as: "h3",
-        css: css`
+        css: `return \`._id {
   font-size: 18px;
   color: \${args.theme.var.color.primary};
   margin: 0px;
   margin-bottom: 8px;
-`,
+}\`;`,
         componentName: "Html",
         text: "Popover Title",
       },
       {
         as: "p",
-        css: css`
+        css: `return \`._id {
   font-size: 14px;
-  color: \${args.theme.var.color.base};
+  color: \${args.theme.var.color.text};
   margin: 0px;
-`,
+}\`;`,
         componentName: "Html",
         text: "This is the popover content. You can hover over the button to see this content.",
       },
     ],
-    css: css`
+    css: `return \`._id {
   padding: 12px;
   background-color: white;
   border-radius: 4px;
   max-width: 300px;
-`,
+}\`;`,
     componentName: "Html",
   };
 
@@ -83,13 +82,13 @@ export const dynamicPopoverExample = () => {
   // Create a button that will trigger the popover
   const actionButton = {
     as: "button",
-    css: css`
+    css: `return \`._id {
   padding: 8px 16px;
   background-color: \${args.theme.var.color.primary};
   color: white;
   border-radius: 4px;
   cursor: pointer;
-`,
+}\`;`,
     componentName: "Button",
     text: "Dynamic Popover",
   };
@@ -100,34 +99,34 @@ export const dynamicPopoverExample = () => {
     attributes: [
       {
         as: "h3",
-        css: css`
+        css: `return \`._id {
   font-size: 18px;
   color: \${args.theme.var.color.primary};
   margin: 0px;
   margin-bottom: 8px;
-`,
+}\`;`,
         componentName: "Html",
         text: "Dynamic Content",
       },
       {
         as: "p",
-        css: css`
+        css: `return \`._id {
   font-size: 14px;
-  color: \${args.theme.var.color.base};
+  color: \${args.theme.var.color.text};
   margin: 0px;
-`,
+}\`;`,
         componentName: "Html",
         props: (options: PopoverFunctionArgumentType) => ({
           text: `This popover uses data from context: ${options.contextData.popoverState[0]?.isVisible ? "Visible" : "Hidden"}`,
         }),
       },
     ],
-    css: css`
+    css: `return \`._id {
   padding: 12px;
   background-color: white;
   border-radius: 4px;
   max-width: 300px;
-`,
+}\`;`,
     componentName: "Html",
   };
 

@@ -1,7 +1,6 @@
 import { Show } from "solid-js";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { css } from "~/lib/styles";
 import type { Id } from "~/lib/graph/type/id";
 
 export function TreeItemExpandButton(
@@ -16,13 +15,13 @@ export function TreeItemExpandButton(
     <Show when={props.hasChildren}>
       <IconButton
         icon={props.isCollapsed ? "ph:caret-right" : "ph:caret-down"}
-        css={css`
+        css={`return \`._id {
           margin: 0 4px;
           transform: ${props.isCollapsed ? "rotate(0deg)" : "rotate(180deg)"};
           transition: transform 0.2s linear;
           background-color: transparent;
           border: none;
-        `}
+        }\`;`}
         noCenter
         onClick={(e) => {
           e.stopPropagation();

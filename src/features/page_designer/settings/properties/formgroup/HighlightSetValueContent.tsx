@@ -12,7 +12,6 @@ import { evalExpression } from "~/lib/expression_eval";
 
 import { DefaultValueContent } from "./DefaultValueContent";
 import { Label } from "./Label";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { IdAttr } from "~/lib/graph/type/idAttr";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -45,44 +44,44 @@ export function HighlightSetValueContent(
   return (
     <As
       as="div"
-      css={css`
-  ${
-    props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined &&
-    props.selectedLayout?.P[props.meta.P[IdAttr]] !== null
-      ? `
-  border: 2px solid #008000;
-  border-bottom: none;
-  border-top: none;
-  padding: 2px 3px;
-  border-radius: 5px;
-`
-      : ""
-  }
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  justify-content: space-between;
-  margin-top: 6px;
-`}
+      css={[
+        `return \`._id {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          justify-content: space-between;
+          margin-top: 6px;
+        }\`;`,
+        props.selectedLayout?.P[props.meta.P[IdAttr]] !== undefined &&
+        props.selectedLayout?.P[props.meta.P[IdAttr]] !== null
+          ? `return \`._id {
+              border: 2px solid \${args.theme.var.color.success};
+              border-bottom: none;
+              border-top: none;
+              padding: 2px 3px;
+              border-radius: 5px;
+            }\`;`
+          : "",
+      ]}
     >
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
   font-size: 15px;
   flex: 0.5;
-`}
+}\`;`}
       >
         <Label meta={props.meta} />
       </As>
       <As
         as="span"
-        css={css`
+        css={`return \`._id {
   font-size: 15px;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
-`}
+}\`;`}
       >
         <div style={{ flex: "1" }}>
           <Switch>
@@ -110,10 +109,10 @@ export function HighlightSetValueContent(
               <div>
                 <As
                   as="div"
-                  css={css`
+                  css={`return \`._id {
   display: flex;
   gap: 2px;
-`}
+}\`;`}
                 >
                   <DynamicComponent
                     data={props.selectedLayout}
@@ -142,10 +141,10 @@ export function HighlightSetValueContent(
               <div>
                 <As
                   as="div"
-                  css={css`
+                  css={`return \`._id {
   display: flex;
   gap: 2px;
-`}
+}\`;`}
                 >
                   <DynamicComponent
                     data={props.selectedLayout}
@@ -187,11 +186,11 @@ export function HighlightSetValueContent(
           <IconButton
             data-testid="clearIcon"
             icon="ph:x"
-            css={css`
+            css={`return \`._id {
               background-color: transparent;
               border: none;
-            `}
-            iconCss={css`color:#ff0000; cursor:pointer;`}
+            }\`;`}
+            iconCss={`return \`._id {color:\${args.theme.var.color.error}; cursor:pointer;}\`;`}
             onClick={() => props.onChange(props.meta, null)}
             size={24}
           />

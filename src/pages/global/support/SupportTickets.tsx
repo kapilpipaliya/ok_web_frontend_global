@@ -10,7 +10,6 @@ import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 
 import { getSupportTicketFormSchema } from "./functions/supportTicketFormSchema";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -76,11 +75,11 @@ export function SupportTickets() {
                 {(reply: Vertex) => (
                   <As
                     as="div"
-                    css={css`
+                    css={`return \`._id {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-`}
+}\`;`}
                   >
                     {new Date(reply.P.createdAt).toLocaleDateString()}{" "}
                     {new Date(reply.P.createdAt).toLocaleTimeString([], {

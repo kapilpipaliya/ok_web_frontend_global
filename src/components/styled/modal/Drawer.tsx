@@ -13,7 +13,6 @@ import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { STYLES } from "~/pages/settings/constants";
 
 import { useZIndex } from "../../fields/ZIndex";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -99,14 +98,14 @@ export function Drawer(props: Readonly<DrawerProps>) {
     return (
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   cursor: ew-resize;
   height: 100%;
   left: -5px;
   position: absolute;
   top: 0px;
   width: 10px;
-`}
+}\`;`}
         onMouseDown={handleMouseDown}
         onMouseEnter={() => setMainDivHover(true)}
         onMouseLeave={() => setMainDivHover(false)}
@@ -118,7 +117,26 @@ export function Drawer(props: Readonly<DrawerProps>) {
     return (
       <As
         as="div"
-        css={css`${isOpen() ? "right:0;" : `right:-${drawerWidth()};`} ${mainDivHover() ? "border-left:2px solid #37c;" : "border-left:none;"} background-color: \${args.theme.var.color.base_10}; border-radius:15px 0 0 15px; box-shadow:0 2px 5px rgba(0,0,0,0.5); color:black; height:100%; position:fixed; top:0; transition:right 0.5s; width:${drawerWidth()}; z-index:${zIndex};`}
+        css={[
+          `return \`._id {
+            background-color: \${args.theme.var.color.background_l100};
+            border-radius: 15px 0 0 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            color: black;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            transition: right 0.5s;
+            width: ${drawerWidth()};
+            z-index: ${zIndex};
+          }\`;`,
+          isOpen()
+            ? `return \`._id { right: 0; }\`;`
+            : `return \`._id { right: -${drawerWidth()}; }\`;`,
+          mainDivHover()
+            ? `return \`._id { border-left: 2px solid \${args.theme.var.color.primary}; }\`;`
+            : `return \`._id { border-left: none; }\`;`,
+        ]}
         ref={setFloating}
       >
         {p.children}
@@ -135,10 +153,10 @@ export function Drawer(props: Readonly<DrawerProps>) {
         <As
           as="div"
           css={[
-            css`
+            `return \`._id {
   ${props.drawerClass}
   height: 100%;
-`,
+}\`;`,
             STYLES.overflowCss,
           ]}
         >

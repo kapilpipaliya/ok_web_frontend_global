@@ -9,7 +9,6 @@ import {
 } from "./FileManagerContext";
 import { FileManagerMainContent } from "./main_content/FileManagerMainContent";
 import { Sidebar } from "./sidebar/FileManagerSideBar";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
@@ -37,11 +36,11 @@ export default function FileManager(
       <As
         as="div"
         css={[
-          css`
+          `return \`._id {
   display: grid;
   gap: 4px;
   grid-template-columns: repeat(2, 20% calc(80% - 4px));
-`,
+}\`;`,
         ]}
       >
         <Sidebar />

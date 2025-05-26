@@ -3,7 +3,6 @@ import type { Setter } from "solid-js";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 
 import { CustomModal } from "../../../components/styled/modal/CustomModal";
-import { css } from "~/lib/styles";
 
 // Deprecated
 export const QuickEditModal = (p: {
@@ -18,7 +17,7 @@ export const QuickEditModal = (p: {
 
   return (
     <CustomModal
-      dialogCss={css`min-width: 30%; padding: 6px;`}
+      dialogCss={`return \`._id {min-width: 30%; padding: 6px;}\`;`}
       open={() => !!p.tableId}
       setOpen={() => p.onClose(false)}
       title="Quick Edit"

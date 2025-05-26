@@ -4,7 +4,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { TransactionDetail } from "~/lib/graph/transaction/types/TransactionDetail";
 
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -25,11 +24,11 @@ export function DebugInfo(props: { formStoreId: string }) {
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   flex-direction: row;
   gap: 2px;
-`}
+}\`;`}
       >
         <span>Txn ID: {formStoreVertex()?.P.txnId}</span>
         <span>Steps: {tnxVertex()?.P.steps.length}</span>

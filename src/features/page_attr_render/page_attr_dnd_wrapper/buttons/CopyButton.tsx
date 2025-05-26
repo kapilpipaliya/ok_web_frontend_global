@@ -7,7 +7,6 @@ import {
   useDesignerFormIdContext,
 } from "~/features/page_designer/context/LayoutContext";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
-import { css } from "~/lib/styles";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { cloneLayoutAndChildren } from "~/features/page_designer/functions/layout/cloneLayoutAndChildren";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
@@ -88,10 +87,10 @@ export function CopyButton(props: Readonly<CopyButtonProps>) {
         ICON_BUTTON_STYLES.baseCss,
         ICON_BUTTON_STYLES.defaultCss,
         ...ensureArray(props.css),
-        css`
+        `return \`._id {
         background-color: transparent;
         border: none;
-      `,
+      }\`;`,
       ]}
       icon="ph:copy-simple"
       onClick={(e) => {

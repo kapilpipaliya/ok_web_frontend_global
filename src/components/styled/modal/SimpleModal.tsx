@@ -2,7 +2,6 @@ import { createContext, type JSX, Show, useContext } from "solid-js";
 import { As } from "~/components/As";
 
 import { useZIndex } from "~/components/fields/ZIndex";
-import { css } from "~/lib/styles";
 
 interface SimpleWithDismissButtonProps {
   children?: JSX.Element;
@@ -27,10 +26,10 @@ export function SimpleWithDismissButton(
         as="div"
         aria-labelledby="modal-title"
         aria-modal="true"
-        css={css`
+        css={`return \`._id {
   position: relative;
   z-index: ${zIndex};
-`}
+}\`;`}
         role="dialog"
       >
         <Backdrop />
@@ -44,11 +43,11 @@ function Backdrop() {
   return (
     <As
       as="div"
-      css={css`
-  background-color: rgb(107,114,128);
+      css={`return \`._id {
+  background-color: \${args.theme.var.color.overlay};
   inset: 0px;
   position: fixed;
-`}
+}\`;`}
     />
   );
 }
@@ -58,32 +57,32 @@ function DismissButton() {
   return (
     <As
       as="div"
-      css={css`
-  display: none;
-  position: absolute;
-  padding-right: 1rem;
-  padding-top: 1rem;
-  right: 0px;
-  top: 0px;
-  @media (width >= 52.125rem) {
-    display: block;
-  }
-`}
+      css={`return \`._id {
+          display: none;
+          position: absolute;
+          padding-right: 1rem;
+          padding-top: 1rem;
+          right: 0;
+          top: 0;
+          @media (width >= 52.125rem) {
+              display: block;
+          }
+      }\`;`}
     >
       <As
         as="button"
-        css={css`
-  background-color: rgb(255,255,255);
+        css={`return \`._id {
+  background-color: \${args.theme.var.color.background_l50};
   border-radius: 0.375rem;
   box-shadow: 0 0 0 2px rgba(0,0,0,0.5);
-  color: rgb(156,163,175);
-  color: rgb(107,114,128);
+  color: \${args.theme.var.color.text_l300};
+  color: \${args.theme.var.color.overlay};
   outline-offset: 2px;
   outline: 2px solid transparent;
   &:hover {
-    color: rgb(107,114,128);
+    color: \${args.theme.var.color.overlay};
   }
-`}
+}\`;`}
         onClick={props.onClose}
         type="button"
       >
@@ -91,10 +90,10 @@ function DismissButton() {
         <As
           as="svg"
           aria-hidden="true"
-          css={css`
+          css={`return \`._id {
   height: 1.5rem;
   width: 1.5rem;
-`}
+}\`;`}
           fill="none"
           stroke="currentColor"
           stroke-width="1.5"
@@ -121,17 +120,17 @@ function ModalContent() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   inset: 0px;
   overflow-y: auto;
   position: fixed;
   width: 100vw;
   z-index: ${zIndex};
-`}
+}\`;`}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -142,7 +141,7 @@ function ModalContent() {
     align-items: center;
     padding: 0;
   }
-`}
+}\`;`}
       >
         <ModalPanel />
       </As>
@@ -155,38 +154,39 @@ function ModalFooter() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   margin-top: 1.25rem;
   @media (width >= 52.125rem) {
     display: flex;
     flex-direction: row-reverse;
     margin-top: 1rem;
   }
-`}
+}\`;`}
     >
       <Show when={props.confirmButtonText}>
         <As
           as="button"
-          css={css`
-  background-color: rgb(220,38,38);
-  border-radius: 0.375rem;
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-  color: rgb(255,255,255);
-  display: inline-flex;
-  font-size: 0.875rem;
-  font-weight: 600;
-  justify-content: center;
-  padding-left: 0.75rem; padding-right: 0.75rem;
-  padding-top: 0.5rem; padding-bottom: 0.5rem;
-  width: 100%;
-  &:hover {
-    background-color: rgb(209,33,33);
-  }
-  @media (width >= 52.125rem) {
-    margin-left: 0.75rem;
-    width: auto;
-  }
-`}
+          css={`return \`._id {
+              background-color: \${args.theme.var.color.error};
+              border-radius: 0.375rem;
+              box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+              color: \${args.theme.var.color.background_l50};
+              display: inline-flex;
+              font-size: 0.875rem;
+              font-weight: 600;
+              justify-content: center;
+              padding: 0.5rem 0.75rem;
+              width: 100%;
+
+              &:hover {
+                  background-color: \${args.theme.var.color.error_l200};
+              }
+
+              @media (width >= 52.125rem) {
+                  margin-left: 0.75rem;
+                  width: auto;
+              }
+          }\`;`}
           onClick={props.onConfirm}
           type="button"
         >
@@ -196,11 +196,11 @@ function ModalFooter() {
       <Show when={props.closeButtonText}>
         <As
           as="button"
-          css={css`
-  background-color: rgb(255,255,255);
+          css={`return \`._id {
+  background-color: $\{args.theme.var.color.background_l50};
   border-radius: 0.375rem;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-  color: rgb(17,24,39);
+  color: \${args.theme.var.color.text};
   display: inline-flex;
   font-size: 0.875rem;
   font-weight: 600;
@@ -210,13 +210,13 @@ function ModalFooter() {
   padding-top: 0.5rem; padding-bottom: 0.5rem;
   width: 100%;
   &:hover {
-    background-color: rgb(249,250,251);
+    background-color: \${args.theme.var.color.background_l100};
   }
   @media (width >= 52.125rem) {
     margin-top: 0;
     width: auto;
   }
-`}
+}\`;`}
           onClick={props.onClose}
           type="button"
         >
@@ -232,19 +232,19 @@ function ModalHeader() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   @media (width >= 52.125rem) {
     display: flex;
     align-items: flex-start;
   }
-`}
+}\`;`}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   align-items: center;
-  background-color: rgb(254,226,226);
+  background-color: \${args.theme.var.color.error_l50};
   border-radius: 9999px;
   height: 3rem;
   justify-content: center;
@@ -254,16 +254,16 @@ function ModalHeader() {
     margin-left: 0; margin-right: 0;
     width: 2.5rem;
   }
-`}
+}\`;`}
       >
         <As
           as="svg"
           aria-hidden="true"
-          css={css`
-  color: rgb(220,38,38);
+          css={`return \`._id {
+  color: \${args.theme.var.color.error};
   height: 1.5rem;
   width: 1.5rem;
-`}
+}\`;`}
           fill="none"
           stroke="currentColor"
           stroke-width="1.5"
@@ -278,7 +278,7 @@ function ModalHeader() {
       </As>
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   
   margin-top: 0.75rem;
   text-align: center;
@@ -287,31 +287,31 @@ function ModalHeader() {
     margin-top: 0;
     text-align: left;
   }
-`}
+}\`;`}
       >
         <As
           as="h3"
-          css={css`
-  color: rgb(17,24,39);
+          css={`return \`._id {
+  color: \${args.theme.var.color.text};
   font-size: 1rem;
   font-weight: 600;
-`}
+}\`;`}
           id="modal-title"
         >
           {props.title}
         </As>
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   margin-top: 0.5rem;
-`}
+}\`;`}
         >
           <As
             as="p"
-            css={css`
-  color: rgb(107,114,128);
+            css={`return \`._id {
+  color: \${args.theme.var.color.overlay};
   font-size: 0.875rem;
-`}
+}\`;`}
           >
             {props.description}
           </As>
@@ -325,24 +325,23 @@ function ModalPanel() {
   return (
     <As
       as="div"
-      css={css`
-  background-color: rgb(255,255,255);
-  border-radius: 0.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);
-  overflow: hidden;
-  padding-bottom: 1rem;
-  position: relative;
-  padding-top: 1.25rem;
-  padding-left: 1rem; padding-right: 1rem;
-  text-align: left;
+      css={`return \`._id {
+          background-color: \${args.theme.var.color.background_l50};
+          border-radius: 0.5rem;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          overflow: hidden;
+          position: relative;
+          padding: 1.25rem 1rem 1rem;
+          text-align: left;
 
-  @media (width >= 52.125rem) {
-    max-width: 32rem;
-    padding: 1.5rem;
-    margin-top: 2rem; margin-bottom: 2rem;
-    width: 100%;
-  }
-`}
+          @media (width >= 52.125rem) {
+              max-width: 32rem;
+              padding: 1.5rem;
+              margin-top: 2rem;
+              margin-bottom: 2rem;
+              width: 100%;
+          }
+      }\`;`}
     >
       <DismissButton />
       <ModalHeader />

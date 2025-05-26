@@ -7,7 +7,6 @@ export type ThemeColorKey =
   | "error"
   | "text"
   | "background"
-  | "surface"
   | "border"
   | "muted";
 // Space scale options
@@ -37,7 +36,7 @@ export type ModeSpecificColor = {
 
 // Color definition can be either unified or mode-specific
 export type ColorDefinition = string | ModeSpecificColor;
-// Color shade range (5% increments from 0-100)
+// Color shade range (1-1000) - DEPRECATED: Use _l### for light shades and _d### for dark shades
 export type ShadeNumber =
   | 0
   | 5
@@ -132,7 +131,6 @@ export interface ThemeContext {
       // Always use semantic tokens in components (text, background, border, etc.). Under the hood, map them to primary, etc.
       text?: ColorDefinition;
       background?: ColorDefinition;
-      surface?: ColorDefinition;
       border?: ColorDefinition;
       muted?: ColorDefinition;
 
@@ -170,13 +168,13 @@ export interface ThemeContext {
   // ===========================================
   // These are implemented via proxy-based accessors
   // Examples:
-  // - Color shades: theme.primary_10, theme.error_90
+  // - Color shades: theme.primary_l100, theme.error_d900 (l=light, d=dark, 1-1000)
   // - Color palettes: theme.primaryPalette, theme.infoPalette
   // - Color schemes: theme.primaryScheme, theme.infoScheme
   // - Font presets: theme.fontSystem, theme.fontSans, theme.fontSerif
   // - Spacing scales: theme.spacingXs, theme.spacingMd, theme.spacing2xl
   // - Border radius: theme.radiusNone, theme.radiusMd, theme.radiusFull
-  // - Semantic colors: theme.textColor, theme.surfaceColor, theme.borderColor
+  // - Semantic colors: theme.textColor, theme.borderColor
 
   // ===========================================
   // = THEME MODIFICATION FUNCTIONS
@@ -208,7 +206,7 @@ export interface ThemeContext {
 
   // Advanced color utilities
   getSemanticColor?: (
-    context: "text" | "background" | "border" | "surface" | "muted",
+    context: "text" | "background" | "border" | "muted",
   ) => string;
   mixColors?: (color1: string, color2: string, amount?: number) => string;
   createGradient?: (

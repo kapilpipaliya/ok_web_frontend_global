@@ -3,7 +3,6 @@ import { useChat } from "@ai-sdk/solid";
 import { getTextFromDataUrl } from "@ai-sdk/ui-utils";
 import { createSignal, For } from "solid-js";
 import { As } from "~/components/As";
-import { css } from "~/lib/styles";
 
 export function UseChatAttachments() {
   const [files, setFiles] = createSignal<FileList | undefined>(undefined);
@@ -37,59 +36,59 @@ export function UseChatAttachments() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   flex-direction: column;
   gap: 2px;
-`}
+}\`;`}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
   display: flex;
   flex-direction: column;
   padding: 2px;
   gap: 2px;
-`}
+}\`;`}
       >
         <For each={messages()}>
           {(message) => (
             <As
               as="div"
-              css={(_args) => css`
+              css={`return \`._id {
   display: flex;
   flex-direction: row;
   gap: 2px;
-`}
+}\`;`}
             >
               <As
                 as="div"
-                css={(args) => css`
+                css={`return \`._id {
   width: 24px;
-  color: ${args.theme.var.color.gray};
+  color: \${args.theme.var.color.gray};
   flex-shrink: 0;
-`}
+}\`;`}
               >
                 {`${message.role}: `}
               </As>
 
               <As
                 as="div"
-                css={(_args) => css`
+                css={`return \`._id {
   display: flex;
   flex-direction: column;
   gap: 2px;
-`}
+}\`;`}
               >
                 {message.content}
 
                 <As
                   as="div"
-                  css={(_args) => css`
+                  css={`return \`._id {
   display: flex;
   flex-direction: row;
   gap: 2px;
-`}
+}\`;`}
                 >
                   <For each={message.experimental_attachments}>
                     {(attachment, _index) =>
@@ -97,24 +96,24 @@ export function UseChatAttachments() {
                         <As
                           as="img"
                           alt={attachment.name}
-                          css={css`
+                          css={`return \`._id {
   width: 24px;
   border-radius: 4px;
-`}
+}\`;`}
                           src={attachment.url}
                         />
                       ) : attachment.contentType?.includes("text/") ? (
                         <As
                           as="div"
-                          css={(args) => css`
+                          css={`return \`._id {
   width: 32px;
   height: 24px;
   border-radius: 4px;
   overflow: hidden;
   padding: 2px;
-  color: ${args.theme.var.color.gray};
-  border: 1px solid ${args.theme.var.color.gray_40};
-`}
+  color: \${args.theme.var.color.gray};
+  border: 1px solid \${args.theme.var.color.gray_d600};
+}\`;`}
                         >
                           {getTextFromDataUrl(attachment.url)}
                         </As>
@@ -131,21 +130,21 @@ export function UseChatAttachments() {
       {isLoading() && (
         <As
           as="div"
-          css={(args) => css`
+          css={`return \`._id {
   margin-top: 4px;
-  color: ${args.theme.var.color.gray};
-`}
+  color: \${args.theme.var.color.gray};
+}\`;`}
         >
           <As as="div">Loading...</As>
           <As
             as="button"
-            css={(args) => css`
+            css={`return \`._id {
   padding: 4px;
   margin-top: 4px;
-  color: ${args.theme.var.color.blue};
-  border: 1px solid ${args.theme.var.color.blue};
+  color: \${args.theme.var.color.blue};
+  border: 1px solid \${args.theme.var.color.blue};
   border-radius: 4px;
-`}
+}\`;`}
             onClick={stop}
             type="button"
           >
@@ -157,27 +156,27 @@ export function UseChatAttachments() {
       {error() && (
         <As
           as="div"
-          css={(_args) => css`
+          css={`return \`._id {
   margin-top: 4px;
-`}
+}\`;`}
         >
           <As
             as="div"
-            css={(args) => css`
-  color: ${args.theme.var.color.red};
-`}
+            css={`return \`._id {
+  color: \${args.theme.var.color.red};
+}\`;`}
           >
             An error occurred.
           </As>
           <As
             as="button"
-            css={(args) => css`
+            css={`return \`._id {
   padding: 4px;
   margin-top: 4px;
-  color: ${args.theme.var.color.blue};
-  border: 1px solid ${args.theme.var.color.blue};
+  color: \${args.theme.var.color.blue};
+  border: 1px solid \${args.theme.var.color.blue};
   border-radius: 4px;
-`}
+}\`;`}
             onClick={() => reload()}
             type="button"
           >
@@ -188,7 +187,7 @@ export function UseChatAttachments() {
 
       <As
         as="form"
-        css={(args) => css`
+        css={`return \`._id {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -196,13 +195,13 @@ export function UseChatAttachments() {
   bottom: 0;
   padding:   2px;
   width: 100%;
-  background-color: ${args.theme.var.color.white};
-`}
+  background-color: \${args.theme.var.color.white};
+}\`;`}
         onSubmit={onSend}
       >
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   display: flex;
   flex-direction: row;
   gap: 2px;
@@ -210,7 +209,7 @@ export function UseChatAttachments() {
   right: 2px;
   bottom: 14px;
   align-items: end;
-`}
+}\`;`}
         >
           <For each={files() ? Array.from(files()!) : []}>
             {(attachment) => {
@@ -220,18 +219,18 @@ export function UseChatAttachments() {
                   <As
                     as="img"
                     alt={attachment.name}
-                    css={css`
+                    css={`return \`._id {
   width: 24px;
   border-radius: 4px;
-`}
+}\`;`}
                     src={URL.createObjectURL(attachment)}
                   />
                   <As
                     as="span"
-                    css={(args) => css`
+                    css={`return \`._id {
   font-size: 12px;
-  color: ${args.theme.var.color.gray};
-`}
+  color: \${args.theme.var.color.gray};
+}\`;`}
                   >
                     {attachment.name}
                   </As>
@@ -239,24 +238,24 @@ export function UseChatAttachments() {
               ) : type.startsWith("text/") ? (
                 <As
                   as="div"
-                  css={(args) => css`
+                  css={`return \`._id {
   width: 24px;
-  color: ${args.theme.var.color.gray};
+  color: \${args.theme.var.color.gray};
   flex-shrink: 0;
   font-size: 12px;
   display: flex;
   flex-direction: column;
   gap: 1px;
-`}
+}\`;`}
                 >
                   <As
                     as="div"
-                    css={(args) => css`
+                    css={`return \`._id {
   width: 16px;
   height: 20px;
-  background-color: ${args.theme.var.color.gray_20};
+  background-color: \${args.theme.var.color.gray_l200};
   border-radius: 4px;
-`}
+}\`;`}
                   />
                   {attachment.name}
                 </As>
@@ -274,11 +273,11 @@ export function UseChatAttachments() {
 
         <As
           as="input"
-          css={(args) => css`
-  background-color: ${args.theme.var.color.gray_20};
+          css={`return \`._id {
+  background-color: \${args.theme.var.color.gray_l200};
   width: 100%;
   padding: 2px;
-`}
+}\`;`}
           disabled={isLoading()}
           onInput={handleInputChange}
           placeholder="Send message..."

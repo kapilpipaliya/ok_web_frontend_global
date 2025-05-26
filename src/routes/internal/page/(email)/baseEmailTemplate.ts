@@ -1,11 +1,14 @@
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 import { API } from "~/lib/api/endpoints";
-import { returnCSS } from "~/lib/styles";
 
 export function getLogoSchema(
   containerCss = "",
-  imageCss = returnCSS`height:80px; margin-bottom:24px;`,
-  borderCss = returnCSS`color: \${args.theme.var.color.base_80}; margin-top:24px; margin-bottom:24px;`,
+  imageCss = `return \`._id {
+  height:80px; margin-bottom:24px;
+}\`;`,
+  borderCss = `return \`._id {
+  color: \${args.theme.var.color.text_l200}; margin-top:24px; margin-bottom:24px;
+}\`;`,
 ) {
   return {
     as: "div",
@@ -60,38 +63,38 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
             attributes: [
               {
                 as: "p",
-                css: returnCSS`
-  color: grey;
+                css: `return \`._id {
+  color: \${args.theme.var.color.text_l200};
   font-size: 12px;
-`,
+}\`;`,
                 componentName: "Html",
                 displayOrder: 1,
                 text: "© 2024 Your Company. All rights reserved.",
               },
             ],
-            css: returnCSS`
+            css: `return \`._id {
   margin-top: 32px;
   text-align: center;
-`,
+}\`;`,
             componentName: "Html",
             displayOrder: 3,
           },
         ],
-        css: returnCSS`
+        css: `return \`._id {
   max-width: 600px;
   margin: auto;
   padding: 32px;
-  background-color: \${args.theme.var.color.base_2};
-`,
+  background-color: \${args.theme.var.color.background_l100};
+}\`;`,
         componentName: "Html",
         displayOrder: 1,
       },
     ],
-    css: returnCSS`
+    css: `return \`._id {
   min-height: 100vh;
-  background-color: \${args.theme.var.color.base_4};
+  background-color: \${args.theme.var.color.background};
   padding: 32px;
-`,
+}\`;`,
     componentName: "Html",
     displayOrder: 1,
   }) as FieldAttribute;

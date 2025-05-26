@@ -2,7 +2,6 @@ import { IconButton } from "~/components/styled/IconButton";
 import { TreeItemExpandButton } from "~/features/page_designer/settings/layout/TreeItemExpandButton";
 
 import { useFileManagerStore } from "../FileManagerContext";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -21,20 +20,20 @@ export function FileManagerTreeItemContent(
   return (
     <As
       as="div"
-      css={css`
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  flex: 1;
-  ${
-    props.hasChildren
-      ? ""
-      : `
-    border-left: 1px dashed black;
-    padding-left: 10px;
-  `
-  }
-`}
+      css={[
+        `return \`._id {
+          align-items: center;
+          cursor: pointer;
+          display: flex;
+          flex: 1;
+        }\`;`,
+        props.hasChildren
+          ? ""
+          : `return \`._id {
+              border-left: 1px dashed black;
+              padding-left: 10px;
+            }\`;`,
+      ]}
       onClick={handleDoubleClick}
     >
       <TreeItemExpandButton
@@ -44,7 +43,7 @@ export function FileManagerTreeItemContent(
         toggleExpand={props.toggleExpand}
       />
       <IconButton
-        css={css`
+        css={`return \`._id {
   cursor: pointer;
   margin-right: 5px;
   color: gray;
@@ -52,9 +51,9 @@ export function FileManagerTreeItemContent(
   border: none;
   padding: 0;
   &:hover {
-    color: gray_890;
+    color: \${args.theme.var.color.gray_l110};
   }
-`}
+}\`;`}
         icon={
           props.item.L[0] === "Folder"
             ? "ic:round-folder"

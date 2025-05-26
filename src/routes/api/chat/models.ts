@@ -59,7 +59,9 @@ function buildModelsTree(data: OpenRouterModelsResponse): ModelNode {
         const modelLabel = item.name || item.short_name || modelId;
 
         // Skip if no valid ID
-        if (!modelId) continue;
+        if (!modelId) {
+          continue;
+        }
 
         // Check if model already exists in this group
         let exists = false;

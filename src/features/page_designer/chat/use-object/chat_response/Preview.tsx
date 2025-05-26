@@ -16,7 +16,6 @@ import {
   insertAtPosition,
   insertComponents,
 } from "../functions/insertAtPosition";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { Edge } from "~/lib/graph/type/edge";
@@ -27,8 +26,8 @@ import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 export function Preview(props: {
   message: Vertex;
   object: {
-    vertexes: Array<Vertex>;
-    edges: Array<Edge>;
+    vertexes: Vertex[];
+    edges: Edge[];
     [key: string]: any;
   };
 }) {
@@ -70,7 +69,9 @@ export function Preview(props: {
         fallback={
           <As
             as="div"
-            css={[css`text-align: center; padding: 16px; color: #3b82f6;`]}
+            css={[
+              `return \`._id {text-align: center; padding: 16px; color: \${args.theme.var.color.primary};}\`;`,
+            ]}
           >
             No Preview Available
           </As>
@@ -88,9 +89,9 @@ export function Preview(props: {
       >
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
   display: none;
-`}
+}\`;`}
         >
           <PageViewWrapper
             formDataId={parentId}
@@ -107,9 +108,9 @@ export function Preview(props: {
             as="div"
             css={[
               toolBarCss,
-              css`
+              `return \`._id {
 
-`,
+}\`;`,
             ]}
           >
             <IconButton
@@ -126,30 +127,30 @@ export function Preview(props: {
           <As
             as="div"
             css={[
-              css`
+              `return \`._id {
   display: flex;
   gap: 8px;
   margin-top: 12px;
   justify-content: space-between;
-`,
+}\`;`,
             ]}
           >
             <As
               as="div"
               css={[
-                css`
+                `return \`._id {
   display: flex;
   gap: 8px;
-`,
+}\`;`,
               ]}
             >
               <As
                 as="select"
-                css={css`
+                css={`return \`._id {
   padding: 8px;
-  border: 1px solid \${args.theme.var.color.base};
+  border: 1px solid \${args.theme.var.color.border};
   border-radius: 6px;
-`}
+}\`;`}
                 onChange={(e) =>
                   setInsertMode(
                     e.currentTarget.value as "after" | "before" | "center",
@@ -163,14 +164,14 @@ export function Preview(props: {
               </As>
 
               <IconButton
-                css={css`
+                css={`return \`._id {
   background-color: transparent;
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_20};
+    background-color: \${args.theme.var.color.primary_l800};
   }
-`}
+}\`;`}
                 disabled={
                   layoutStoreVertex()?.P.formId === formId ||
                   !layoutStoreVertex()?.P.formId ||
@@ -215,17 +216,17 @@ export function Preview(props: {
             <As
               as="div"
               css={[
-                css`
+                `return \`._id {
   margin-bottom: 24px;
-`,
+}\`;`,
               ]}
             >
               <As
                 as="div"
                 css={[
-                  css`
+                  `return \`._id {
   display: none;
-`,
+}\`;`,
                 ]}
               >
                 <PageViewWrapper
@@ -242,20 +243,20 @@ export function Preview(props: {
                   as="div"
                   css={[
                     toolBarCss,
-                    css`
+                    `return \`._id {
   display: none;
-`,
+}\`;`,
                   ]}
                 >
                   <IconButton
-                    css={css`
+                    css={`return \`._id {
   background-color: transparent;
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_20};
+    background-color: \${args.theme.var.color.primary_l800};
   }
-`}
+}\`;`}
                     icon="ph:arrows-clockwise"
                     onClick={() => {
                       setIsPreview(false);
@@ -271,22 +272,22 @@ export function Preview(props: {
                 <As
                   as="div"
                   css={[
-                    css`
+                    `return \`._id {
   display: flex;
   gap: 8px;
   margin-top: 12px;
-`,
+}\`;`,
                   ]}
                 >
                   <IconButton
-                    css={css`
+                    css={`return \`._id {
   background-color: transparent;
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_20};
+    background-color: \${args.theme.var.color.primary_l800};
   }
-`}
+}\`;`}
                     disabled={
                       layoutStoreVertex()?.P.formId === formId ||
                       !layoutStoreVertex()?.P.formId
@@ -317,11 +318,11 @@ export function Preview(props: {
           <As
             as="div"
             css={[
-              css`
+              `return \`._id {
   text-align: center;
   padding: 16px;
-  color: #3b82f6;
-`,
+  color: \${args.theme.var.color.primary};
+}\`;`,
             ]}
           >
             No Preview Available

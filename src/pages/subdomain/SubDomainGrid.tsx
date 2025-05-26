@@ -8,7 +8,6 @@ import { API } from "~/lib/api/endpoints";
 
 import { SchemaRenderer } from "../SchemaRenderer";
 import { getSubDomainFormSchema } from "./functions/getSubDomainFormSchema";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { getSubDomains } from "~/routes/api/subdomain/getSubDomains";
 import type { ServerResult } from "~/cypher/types/ServerResult";
@@ -54,11 +53,13 @@ export const SubDomainGrid = () => {
           return (
             <As
               as="a"
-              css={css`
+              css={`return \`._id {
   color: \${args.theme.var.color.primary};
   text-decoration: none;
-  hover: text-decoration;
-`}
+  &:hover {
+    text-decoration: underline;
+  }
+}\`;`}
               href={getSubdomainUrl(info.row.original.P.key)}
               rel="noreferrer"
               target="_blank"
@@ -77,11 +78,13 @@ export const SubDomainGrid = () => {
           return (
             <As
               as="a"
-              css={css`
+              css={`return \`._id {
   color: \${args.theme.var.color.primary};
   text-decoration: none;
-  hover: text-decoration;
-`}
+  &:hover {
+    text-decoration: underline;
+  }
+}\`;`}
               href={getDomainUrl(info.row.original.P.domain)}
               rel="noreferrer"
               target="_blank"

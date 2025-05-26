@@ -12,7 +12,6 @@ import { validateEmail } from "~/lib/validation/validateEmail";
 import { handleApiRequest } from "../../../lib/api/general/handleApiRequest";
 import { SchemaRenderer } from "../../SchemaRenderer";
 import { PROPERTIES, SETTINGS_CONSTANTS } from "../../settings/constants";
-import { css } from "~/lib/styles";
 
 // Define the type for saveState store
 type SaveStateStore = ReturnType<
@@ -91,7 +90,10 @@ export function CompanySettings() {
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
-          getErrorSchema("companyName", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "companyName",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -112,7 +114,10 @@ export function CompanySettings() {
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
-          getErrorSchema("address", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "address",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -135,7 +140,10 @@ export function CompanySettings() {
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
-          getErrorSchema("contactEmail", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "contactEmail",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -155,7 +163,10 @@ export function CompanySettings() {
             css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
             componentName: "Html",
           },
-          getErrorSchema("phone", css`color:red; margin-top: -20px;`),
+          getErrorSchema(
+            "phone",
+            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+          ),
           {
             as: "div",
             attributes: [
@@ -214,9 +225,9 @@ export function CompanySettings() {
                 }),
               },
             ],
-            css: css`
+            css: `return \`._id {
   margin-top: 24px;
-`,
+}\`;`,
             componentName: "Html",
           },
         ],

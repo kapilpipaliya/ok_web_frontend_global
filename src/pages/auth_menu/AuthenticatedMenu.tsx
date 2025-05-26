@@ -8,7 +8,6 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 import { getMemberVertex } from "~/lib/graph/get/sync/store/getMemberVertex";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -84,9 +83,9 @@ export function AuthenticatedMenu(
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   padding: 10px;
-`}
+}\`;`}
     >
       <For each={getMenuItems()}>
         {(item) => {
@@ -96,38 +95,47 @@ export function AuthenticatedMenu(
           return (
             <As
               as="li"
-              css={css`
+              css={`return \`._id {
   margin-bottom: 8px;
   &:last-child {
     margin-bottom: 0;
   }
-`}
+}\`;`}
             >
               <As
                 as="a"
-                css={(args) => css`
+                css={[
+                  `return \`._id {
   display: flex;
   align-items: center;
-  color: ${args.theme.var.color.base};
+  color: \${args.theme.var.color.text};
   padding: 8px 12px;
   border-radius: 6px;
   text-decoration: none;
-  background-color: ${isActive ? args.theme.var.color.primary_30 : "transparent"};
-  font-weight: ${isActive ? "bold" : "normal"};
   &:hover {
-    background-color: ${args.theme.var.color.primary_30};
+    background-color: \${args.theme.var.color.primary_l150};
   }
-`}
+}\`;`,
+                  isActive
+                    ? `return \`._id { 
+                        background-color: \${args.theme.var.color.primary_l150}; 
+                        font-weight: bold; 
+                      }\`;`
+                    : `return \`._id { 
+                        background-color: transparent; 
+                        font-weight: normal; 
+                      }\`;`,
+                ]}
                 href={item.href}
                 onclick={props.onClose}
                 target={item.target}
               >
                 <As
                   as={Icon}
-                  css={(args) => css`
+                  css={`return \`._id {
   margin-right: 10px;
-  color: ${args.theme.var.color.primary};
-`}
+  color: \${args.theme.var.color.primary};
+}\`;`}
                   icon={item.icon}
                   width="20"
                 />
@@ -139,36 +147,36 @@ export function AuthenticatedMenu(
       </For>
       <As
         as="hr"
-        css={(args) => css`
+        css={`return \`._id {
   margin-top: 8px;
   margin-bottom: 8px;
-  color: ${args.theme.var.color.base_40};
-`}
+  color: \${args.theme.var.color.background_l100};
+}\`;`}
       />
       <li>
         <As
           as="a"
-          css={(args) => css`
+          css={`return \`._id {
   display: flex;
   align-items: center;
   width: 100%;
-  color: ${args.theme.var.color.error};
+  color: \${args.theme.var.color.error};
   padding: 8px 12px;
   border-radius: 6px;
   text-decoration: none;
   border: none;
   cursor: pointer;
   &:hover {
-    background-color: ${args.theme.var.color.error_30};
+    background-color: \${args.theme.var.color.error_l150};
   }
-`}
+}\`;`}
           href={API.urls.user.logout}
         >
           <As
             as={Icon}
-            css={css`
+            css={`return \`._id {
   margin-right: 10px;
-`}
+}\`;`}
             icon="ph:sign-out"
             width="20"
           />

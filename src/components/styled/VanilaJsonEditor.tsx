@@ -8,8 +8,10 @@ import type {
 import { createJSONEditor } from "vanilla-jsoneditor";
 
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import { useIsDarkMode } from "~/lib/theme/useThemeMode";
 
-// import 'vanilla-jsoneditor/themes/jse-theme-dark.css';
+// Import the dark theme CSS
+import "vanilla-jsoneditor/themes/jse-theme-dark.css";
 
 interface VanilaJsonEditorProps {
   json: unknown;
@@ -23,6 +25,8 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
   let containerRef: HTMLDivElement | undefined;
   const [editor, setEditor] = createSignal<JsonEditor | undefined>(undefined);
   const [currentContent, setCurrentContent] = createSignal<unknown>(props.json);
+
+  const isDarkMode = useIsDarkMode();
 
   // Update editor when props.json changes
   createEffect(() => {
@@ -182,6 +186,7 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
   return (
     <div
       ref={containerRef}
+      classList={{ "jse-theme-dark": isDarkMode() }}
       style={{
         height: props.height,
         overflow: "auto",

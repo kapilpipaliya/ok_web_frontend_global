@@ -28,9 +28,7 @@ import {
 
 import { CardGrid } from "../CardGrid";
 import { TableActions } from "./TableActions";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
-import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
 type TableProps = {
@@ -121,12 +119,12 @@ export function CommonTable(props: Readonly<TableProps>) {
   const FallBack = () => (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   grid-column: span ${props.headers.length} / span ${props.headers.length};
   justify-content: center;
   padding: 1rem;
-`}
+}\`;`}
     >
       No records to display
     </As>
@@ -156,12 +154,12 @@ export function CommonTable(props: Readonly<TableProps>) {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0,0,0,0.15);
   padding: 4px 10px;
   width: 100%;
-`}
+}\`;`}
     >
       <Switch>
         <Match when={props.layout === "table"}>
@@ -313,7 +311,8 @@ function TableHead(
 }
 
 const Content = (props: { header: ColumnDef<any>; row: Vertex }) =>
-  props.header.cell?.({
+  // on card layout,sometimes header.cell is undefined
+  props.header?.cell?.({
     getValue: () => getValue(props.header, props.row),
     row: { original: props.row },
   }) ?? null;
@@ -322,21 +321,21 @@ function LoadMoreButton(props: Readonly<{ onClick: () => void }>) {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   justify-content: end;
   padding: 5px 10px;
-`}
+}\`;`}
     >
       <As
         as="button"
-        css={(args: FunctionArgumentType) => css`
-  background-color: ${args.theme.var.color.primary};
-  border-right: 5pxpx solid;
+        css={`return \`._id {
+  background-color: \${args.theme.var.color.primary};
+  border-right: 5px solid;
   cursor: pointer;
   padding: 10px;
-  color: ${args.theme.var.color.base_10};
-`}
+  color: \${args.theme.var.color.primary_text};
+}\`;`}
         onClick={props.onClick}
       >
         Load More
@@ -377,8 +376,7 @@ function TableBody(
             <TableBodyCell
               css={
                 props.selectedRows.includes(row)
-                  ? (args: FunctionArgumentType) =>
-                      css`background-color:${args.theme.var.color.primary_40};`
+                  ? `return \`._id {background-color: \${args.theme.var.color.primary_l600};}\`;`
                   : ""
               }
               index={index()}
@@ -401,8 +399,7 @@ function TableBody(
               <TableBodyCell
                 css={
                   props.selectedRows.includes(row)
-                    ? (args: FunctionArgumentType) =>
-                        css`background-color:${args.theme.var.color.primary_40};`
+                    ? `return \`._id {background-color: \${args.theme.var.color.primary_l600};}\`;`
                     : ""
                 }
                 index={index()}

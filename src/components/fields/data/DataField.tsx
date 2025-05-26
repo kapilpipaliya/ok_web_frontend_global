@@ -13,7 +13,6 @@ import { evalExpression } from "~/lib/expression_eval";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 
 import { DataInternal } from "./DataInternal";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -123,9 +122,9 @@ export const DataField = (props: {
       <Match when={errorMessage()}>
         <As
           as="div"
-          css={(args) => css`
-  background-color: ${args.theme.var.color.error};
-`}
+          css={`return \`._id {
+  background-color: \${args.theme.var.color.error};
+}\`;`}
         >
           {errorMessage()}
         </As>

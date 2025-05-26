@@ -5,7 +5,6 @@ import { debounce } from "@solid-primitives/scheduled";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { evalExpression } from "~/lib/expression_eval";
 import { undo, undoAllowed } from "~/lib/graph/transaction/history/undo";
@@ -243,10 +242,14 @@ export function LayoutTree() {
   // Focus the currently selected item
   const focusSelectedItem = () => {
     const currentSelectedId = formStoreVertex()?.P.selectedId;
-    if (!currentSelectedId) return;
+    if (!currentSelectedId) {
+      return;
+    }
 
     const treeElement = treeRef();
-    if (!treeElement) return;
+    if (!treeElement) {
+      return;
+    }
 
     // Short delay to ensure the DOM has updated
     setTimeout(() => {
@@ -293,27 +296,35 @@ export function LayoutTree() {
   const addHtmlComponent = (dragPosition: "center" | "before" | "after") => {
     // Get the currently selected component
     const currentSelectedId = formStoreVertex()?.P.selectedId;
-    if (!currentSelectedId) return;
+    if (!currentSelectedId) {
+      return;
+    }
 
     const selectedVertex = graph.vertexes[currentSelectedId];
-    if (!selectedVertex) return;
+    if (!selectedVertex) {
+      return;
+    }
 
     // Get form data and transaction ID
     const formDataId = formStoreVertex()?.P.formDataId;
-    if (!formDataId) return;
+    if (!formDataId) {
+      return;
+    }
 
     const txnId = formStoreVertex()?.P.txnId || 0;
     const formDataVertex = graph.vertexes[formDataId];
     const formVertex = rootVertexes()[0];
 
-    if (!formDataVertex || !formVertex) return;
+    if (!(formDataVertex && formVertex)) {
+      return;
+    }
 
     // Default HTML component properties - a simple div with padding
     const htmlProps = {
       as: "div",
-      css: css`
+      css: `return \`._id {
         padding: 10px;
-      `,
+      }\`;`,
     };
 
     let parentVertex: Vertex;
@@ -351,7 +362,9 @@ export function LayoutTree() {
       dragPosition, // Position
     );
 
-    if (newComponentId === -1) return;
+    if (newComponentId === -1) {
+      return;
+    }
 
     // Sort children for before/after positions to ensure correct order
     if (dragPosition !== "center") {
@@ -424,10 +437,14 @@ export function LayoutTree() {
     ) {
       e.preventDefault();
       const currentSelectedId = formStoreVertex()?.P.selectedId;
-      if (!currentSelectedId) return;
+      if (!currentSelectedId) {
+        return;
+      }
 
       const selectedVertex = graph.vertexes[currentSelectedId];
-      if (!selectedVertex) return;
+      if (!selectedVertex) {
+        return;
+      }
 
       // Get component name for the toast message
       const componentName = selectedVertex.P?.key || "Html";
@@ -487,17 +504,23 @@ export function LayoutTree() {
     // }
 
     const currentSelectedId = formStoreVertex()?.P.selectedId;
-    if (!currentSelectedId) return;
+    if (!currentSelectedId) {
+      return;
+    }
 
     // Find all selectable tree items in the DOM
-    if (!treeElement) return;
+    if (!treeElement) {
+      return;
+    }
 
     // Handle backslash key to toggle visibility
     if (e.key === "\\") {
       e.preventDefault();
       const itemId = String(currentSelectedId);
       const vertex = graph.vertexes[itemId];
-      if (!vertex) return;
+      if (!vertex) {
+        return;
+      }
 
       // Call toggleHidden from HideShowIcon
       toggleHidden(itemId as Id, formStoreId!, graph, setGraph);
@@ -509,7 +532,9 @@ export function LayoutTree() {
       // Get the current item's JSON editor state
       const itemId = String(currentSelectedId);
       const vertex = graph.vertexes[itemId];
-      if (!vertex) return;
+      if (!vertex) {
+        return;
+      }
 
       // Toggle JSON editor for the selected item
       toggleJsonEditorForItem(itemId as Id);
@@ -520,14 +545,18 @@ export function LayoutTree() {
     }
 
     const itemElements = treeElement.querySelectorAll("[data-item-id]");
-    if (itemElements.length === 0) return;
+    if (itemElements.length === 0) {
+      return;
+    }
 
     // Find the currently selected element
     const currentElementIndex = Array.from(itemElements).findIndex(
       (el) => el.getAttribute("data-item-id") === String(currentSelectedId),
     );
 
-    if (currentElementIndex === -1) return;
+    if (currentElementIndex === -1) {
+      return;
+    }
 
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault();
@@ -567,7 +596,9 @@ export function LayoutTree() {
 
       // Check if the item has children
       const vertex = graph.vertexes[itemId];
-      if (!vertex) return;
+      if (!vertex) {
+        return;
+      }
 
       const hasChildren = getChildrenAttrs(graph, setGraph, vertex).length > 0;
 
@@ -681,39 +712,39 @@ export function LayoutTree() {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
         display: flex;
         flex-direction: column;
         height: 100%;
         overflow: hidden;
-      `}
+      }\`;`}
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
           display: flex;
           align-items: center;
           padding-bottom: 8px;
-          border-bottom: 1px solid #e5e5e5;
+          border-bottom: 1px solid \${args.theme.var.color.border};
           gap: 8px;
           position: sticky;
           top: 0;
-          background-color: white;
-        `}
+          background-color: \${args.theme.var.color.background};
+        }\`;`}
       >
         <As
           as="h3"
-          css={css`
-            color: rgb(17,24,39);
+          css={`return \`._id {
+            color: \${args.theme.var.color.text};
             font-size: 1rem;
             font-weight: 600;
             line-height: 1.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-          `}
+          }\`;`}
         >
           <Icon icon="tabler:layout-2" />
           Layers
@@ -725,11 +756,11 @@ export function LayoutTree() {
             ICON_BUTTON_STYLES.baseCss,
             ICON_BUTTON_STYLES.defaultCss,
             ICON_BUTTON_STYLES.spacingCss,
-            css`
+            `return \`._id {
               ${formStoreVertex()?.P.showAllJsonEditors ? "color: ${args.theme.var.color.primary};" : ""}
               background-color: transparent;
               border: none;
-        `,
+        }\`;`,
           ]}
           icon="tabler:json"
           size={18}
@@ -746,13 +777,13 @@ export function LayoutTree() {
 
       <As
         as="div"
-        css={css`
+        css={`return \`._id {
           padding: 0;
           margin: 0;
           overflow-y: auto;
           flex: 1;
           scroll-behavior: smooth;
-        `}
+        }\`;`}
         ref={setTreeRef}
       >
         <Show when={formStoreVertex()}>

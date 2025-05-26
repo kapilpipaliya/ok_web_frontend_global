@@ -13,7 +13,7 @@ export function runWithParentOwnerFunction<T>(
 ): T | undefined {
   const parentContext = parentRenderContextFn();
   try {
-    if (parentContext && parentContext.context.owner) {
+    if (parentContext?.context.owner) {
       return runWithOwner(parentContext.context.owner, () => {
         return fn();
       });

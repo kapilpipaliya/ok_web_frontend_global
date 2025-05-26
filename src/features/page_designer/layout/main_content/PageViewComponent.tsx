@@ -10,7 +10,6 @@ import {
 } from "../../context/LayoutContext";
 import { IFramePreview } from "../IFramePreview";
 import { PageTabBar } from "./PageTabBar";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
@@ -99,11 +98,11 @@ export function PageViewComponent(props: { mainPanel: Id }) {
   return (
     <As
       as="div"
-      css={css`
+      css={`return \`._id {
   display: flex;
   gap: 8px;
   flex-wrap: nowrap;
-`}
+}\`;`}
     >
       <For
         each={layoutStore().openedFormIds.filter(
@@ -144,11 +143,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                       });
                       // When a view is highlighted, also scroll its parent container to the top
                       // to ensure the view is fully visible
-                      if (
-                        viewRef &&
-                        viewRef.parentElement &&
-                        viewRef.parentElement.parentElement
-                      ) {
+                      if (viewRef?.parentElement?.parentElement) {
                         viewRef.parentElement.parentElement.scrollTop = 0;
                       }
                     }
@@ -157,7 +152,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                   return (
                     <As
                       as="div"
-                      css={isActive() ? "" : css`display: none;`}
+                      css={isActive() ? "" : "._id {display: none;}"}
                       ref={viewRef}
                     >
                       <PageTabBar
@@ -172,14 +167,14 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                         css={
                           isHighlighted()
                             ? [
-                                css`
-                          border: 3px solid #4285f4;
+                                `return \`._id {
+                          border: 3px solid \${args.theme.var.color.primary};
                           animation: borderPulse 1.5s infinite alternate;
-                        `,
-                                `@keyframes borderPulse {
-                            from { border-color: rgba(66, 133, 244, 0.5); }
-                            to { border-color: rgba(66, 133, 244, 1); }
-                          }`,
+                        }\`;`,
+                                `return \`@keyframes borderPulse {
+                            from { border-color: \${args.theme.var.color.primary_l300}; }
+                            to { border-color: \${args.theme.var.color.primary}; }
+                          }\`;`,
                               ]
                             : ""
                         }

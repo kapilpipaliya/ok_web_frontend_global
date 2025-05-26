@@ -16,7 +16,6 @@ import { resetDragDropState } from "../../event_handler/resetDragDropState";
 import { TreeItemExpandButton } from "../../settings/layout/TreeItemExpandButton";
 import { getCompChildren } from "./functions/getCompChildren";
 import { onCompDragStart } from "./functions/onCompDragStart";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import {
   baseItemStyle,
@@ -89,8 +88,15 @@ export function ComponentItem(
   };
 
   const getItemStyle = () => {
-    const backgroundColor = isNegative(props.child.id) ? "#e8ffe8" : "white";
-    return `${baseItemStyle}; background-color: ${backgroundColor};`;
+    const backgroundColor = isNegative(props.child.id)
+      ? `\${args.theme.var.color.success_l600}`
+      : `\${args.theme.var.color.background_l50}`;
+    return [
+      baseItemStyle,
+      `return \`._id {
+        background-color: ${backgroundColor};
+      }\`;`,
+    ];
   };
 
   const onDragEnd = () => {
@@ -165,20 +171,23 @@ export function ComponentItem(
 
         <As
           as="div"
-          css={css`
+          css={`return \`._id {
             font-size: 14px;
             font-weight: normal;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            ${props.child?.L[0] === "Comp" && !componentsMap[props.child?.P.key] ? `color: \${args.theme.var.color.error};` : ""}
-          `}
+            ${props.child?.L[0] === "Comp" && !componentsMap[props.child?.P.key] ? "color: ${args.theme.var.color.error};" : ""}
+          }\`;`}
         >
           {getDisplayName()}
         </As>
 
         <Show when={shouldShowButtons()}>
-          <As as="div" css={css`margin-left: auto; display: flex;`}>
+          <As
+            as="div"
+            css={`return \`._id {margin-left: auto; display: flex;}\`;`}
+          >
             <ComponentPreview
               item={props.child}
               previewGraph={props.previewGraph}
@@ -205,11 +214,11 @@ export function ComponentItem(
       >
         <As
           as="ul"
-          css={css`
+          css={`return \`._id {
             padding-left: 20px;
             padding-top: 5px;
             list-style: none;
-          `}
+          }\`;`}
         >
           <For each={children()}>
             {(child) => (

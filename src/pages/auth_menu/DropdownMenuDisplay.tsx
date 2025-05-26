@@ -7,7 +7,6 @@ import { IconButton } from "~/components/styled/IconButton";
 
 import { MenuItems } from "./MenuItems";
 import { ProfileHeader } from "./ProfileHeader";
-import { css } from "~/lib/styles";
 import { As } from "~/components/As";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
@@ -23,28 +22,36 @@ export function UserDropdownMenuDisplay(): JSX.Element {
 
   return (
     <>
-      <As as="div" css={css`display: flex; align-items: center; gap: 8px;`}>
+      <As
+        as="div"
+        css={`return \`._id {display: flex; align-items: center; gap: 8px;}\`;`}
+      >
         <IconButton
           icon={currentMode() === "dark" ? "ph:sun-fill" : "ph:moon-fill"}
           title={`Switch to ${currentMode() === "dark" ? "light" : "dark"} mode`}
           onClick={toggleTheme}
-          css={css`
+          css={`return \`._id {
             height: 36px;
             width: 36px;
             padding: 6px;
             border-radius: 7px;
-            background-color: \${args.theme.var.color.primary_10};
+            background-color: \${args.theme.var.color.background_l100};
             border: none;
             cursor: pointer;
+            color: \${args.theme.var.color.text};
             
             &:hover {
-              background-color: \${args.theme.var.color.primary_40};
+              background-color: \${args.theme.var.color.background_l200};
             }
-          `}
+            
+            svg {
+              fill: currentColor;
+            }
+          }\`;`}
         />
         <As
           as="button"
-          css={css`
+          css={`return \`._id {
             display: flex;
             align-items: center;
             height: 36px;
@@ -54,13 +61,13 @@ export function UserDropdownMenuDisplay(): JSX.Element {
             background-size: cover;
             border: none;
             cursor: pointer;
-            background-color: \${args.theme.var.color.primary_10};
+            background-color: \${args.theme.var.color.background_l100};
             background-image: url(${getProfileImageUrl(graph)});
 
             &:hover {
-              background-color: \${args.theme.var.color.primary_40};
+              background-color: \${args.theme.var.color.background_l200};
             }
-          `}
+          }\`;`}
           id="user-dropdown-toggle"
           onClick={handleOpen}
           ref={btnEl!}
@@ -69,28 +76,28 @@ export function UserDropdownMenuDisplay(): JSX.Element {
       <Show when={isOpen()}>
         <ZIndex>
           <DropdownMenu
-            css={css`
+            css={`return \`._id {
   border-radius: 5px;
-`}
+}\`;`}
             onClickOutside={handleClose}
             parentRef={btnEl!}
             placement="bottom-end"
           >
             <As
               as="ul"
-              css={css`
+              css={`return \`._id {
   list-style-type: none;
   margin: 0;
   padding: 0;
   position: relative;
-`}
+}\`;`}
             >
               <ProfileHeader />
               <As
                 as="hr"
-                css={css`
-  color: #1e293b;
-`}
+                css={`return \`._id {
+  color: \${args.theme.var.color.text};
+}\`;`}
               />
               <MenuItems onClose={handleClose} />
             </As>
