@@ -245,6 +245,7 @@ function ModalHeader() {
   display: flex;
   align-items: center;
   background-color: \${args.theme.var.color.error_l50};
+  color: \${args.theme.var.color.error_l50_text};
   border-radius: 9999px;
   height: 3rem;
   justify-content: center;

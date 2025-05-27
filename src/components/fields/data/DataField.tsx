@@ -124,6 +124,7 @@ export const DataField = (props: {
           as="div"
           css={`return \`._id {
   background-color: \${args.theme.var.color.error};
+  color: \${args.theme.var.color.error_text};
 }\`;`}
         >
           {errorMessage()}

@@ -154,7 +154,7 @@ export function SignInForm() {
               },
               {
                 as: "button",
-                css: [STYLES.button2Css, "._id {width:100%"],
+                css: [STYLES.button2Css, `return \`._id {width:100%;}\`;`],
                 componentName: "Html",
                 props: (options: SignInFormFunctionArgumentType) => ({
                   disabled: options.contextData.submitState[0]?.isLoading,

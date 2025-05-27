@@ -120,9 +120,9 @@ export function Drawer(props: Readonly<DrawerProps>) {
         css={[
           `return \`._id {
             background-color: \${args.theme.var.color.background_l100};
+            color: \${args.theme.var.color.background_l100_text};
             border-radius: 15px 0 0 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            color: black;
             height: 100%;
             position: fixed;
             top: 0;

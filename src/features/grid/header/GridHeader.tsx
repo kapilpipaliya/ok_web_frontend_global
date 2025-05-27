@@ -80,7 +80,7 @@ export function GridHeader(props: Readonly<GridHeaderProps>) {
           icon={gridState.isLoading ? "ph:spinner-gap" : "ph:arrows-clockwise"}
           iconCss={
             gridState.isLoading
-              ? "._id {transition: transform 1s infinite linear;"
+              ? `return \`._id {transition: transform 1s infinite linear;}\`;`
               : ""
           }
           onClick={handleRefresh}

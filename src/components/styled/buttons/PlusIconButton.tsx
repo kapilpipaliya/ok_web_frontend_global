@@ -20,7 +20,7 @@ export function PlusIconButton(props: PlusIconButtonProps) {
         
         &:hover {
           background-color: \${args.theme.var.color.primary_l500};
-          color: \${args.theme.var.color.text};
+          color: \${args.theme.var.color.primary_l500_text};
         }
       }\`;`}
       icon="ph:plus"

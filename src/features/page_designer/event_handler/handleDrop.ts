@@ -59,7 +59,10 @@ export async function handleDrop(
       toVertex,
       layoutStoreVertex.P.dragPosition!,
     );
-    if (layoutId !== -1 && fromVertex.L[0] === "Comp") {
+    if (
+      (layoutId !== -1 && fromVertex.L[0] === "Comp") ||
+      fromVertex.L[0] === "Component"
+    ) {
       onLayoutItemClick(
         layoutStoreVertex,
         formStoreVertex,

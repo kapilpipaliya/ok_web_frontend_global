@@ -23,6 +23,7 @@ const DismissButton: Component<{
       css={`return \`._id {
   align-items: center;
   background-color: \${args.theme.var.color.background_l200};
+  color: \${args.theme.var.color.background_l200_text};
   border-radius: 9999px;
   display: flex;
   height: 1.5rem;
@@ -61,6 +62,7 @@ export function useToast() {
           as="div"
           css={`return \`._id {
   background-color: \${args.theme.var.color.background_l100};
+  color: \${args.theme.var.color.background_l100_text};
   border-radius: 10px;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06);
   font-weight: 500;
@@ -270,25 +272,22 @@ export function useToast() {
                   as="button"
                   css={`return \`._id {
   align-items: center;
-  background-color: rgba(14,116,144,0.4);
+  background-color: \${args.theme.var.color.primary_l600};
   border-radius: 6px;
-  color: \${args.theme.var.color.text};
+  color: \${args.theme.var.color.primary_l600_text};
   display: flex;
   font-size: 24px;
   height: 80%;
   letter-spacing: 0.025em;
   padding: 10px;
   position: relative;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: \${args.theme.var.color.primary_l800};
+  }
 }\`;`}
                   onClick={() => toastValue.toast.dismiss(t.id)}
-                  onMouseOut={(e) =>
-                    (e.currentTarget.style.backgroundColor =
-                      "rgba(14,116,144,0.4)")
-                  }
-                  onMouseOver={(e) =>
-                    (e.currentTarget.style.backgroundColor =
-                      "rgba(14,116,144,0.2)")
-                  }
                 >
                   x
                 </As>

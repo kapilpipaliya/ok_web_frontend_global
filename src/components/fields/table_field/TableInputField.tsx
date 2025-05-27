@@ -166,7 +166,7 @@ export function TableInputField(
             `return \`._id {
   margin: 2px;
   border-radius: 10px;
-  ${sortedVertexes().length > 0 ? "border: 1px solid #37c;" : ""}
+  ${sortedVertexes().length > 0 ? "border: 1px solid ${args.theme.var.color.primary};" : ""}
 }\`;`,
             STYLES.overflowCss,
           ]}

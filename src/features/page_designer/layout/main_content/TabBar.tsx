@@ -44,8 +44,8 @@ export function TabBar(props: { mainPanel: Id }) {
       flex-shrink: 0;
       ${
         isActiveTab
-          ? "background-color: ${args.theme.var.color.primary_l250}; color: ${args.theme.var.color.text_l900};"
-          : "background-color: ${args.theme.var.color.background_l200}; color: ${args.theme.var.color.text};"
+          ? "background-color: ${args.theme.var.color.primary_l250}; color: ${args.theme.var.color.primary_l250_text};"
+          : "background-color: ${args.theme.var.color.background_l200}; color: ${args.theme.var.color.background_l200_text};"
       }
       ${isCurrentForm ? "border-bottom: 2px solid ${args.theme.var.color.error};" : ""}
     }\`;`;
@@ -225,7 +225,7 @@ export function TabBar(props: { mainPanel: Id }) {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  color: \${args.theme.var.color.text_l400};
+  color: \${args.theme.var.color.primary_text};
   transition: color 0.2s ease;
   &:hover {
     color: \${args.theme.var.color.primary};

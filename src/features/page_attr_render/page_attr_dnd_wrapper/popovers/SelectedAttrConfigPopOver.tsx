@@ -61,7 +61,7 @@ export function SelectedAttrConfigPopOver(
   border-radius: 5px;
   z-index: ${zIndex};
   button {
-    color: white;
+    color: \${args.theme.var.color.primary_text};
   }
 }\`;`}
       >

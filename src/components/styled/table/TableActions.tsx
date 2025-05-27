@@ -65,6 +65,7 @@ export function TableActions(
           justify-content: space-between;
           padding: 0.75rem 1.25rem;
           background-color: \${args.theme.var.color.background_l300};
+          color: \${args.theme.var.color.background_l300_text};
           border-radius: 0 0 10px 10px;
           box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
         }\`;`}
@@ -95,7 +96,7 @@ export function TableActions(
               border-radius: 4px;
               border: 1px solid \${args.theme.var.color.primary_l800};
               background-color: \${args.theme.var.color.background_l100};
-              color: \${args.theme.var.color.text};
+              color: \${args.theme.var.color.background_l100_text};
               font-size: 0.875rem;
               cursor: pointer;
               outline: none;
@@ -115,6 +116,7 @@ export function TableActions(
                   css={`return \`._id {
                     color: \${args.theme.var.color.text};
                     background-color: \${args.theme.var.color.background_l100};
+                    color: \${args.theme.var.color.background_l100_text};
                   }\`;`}
                   value={option}
                 >

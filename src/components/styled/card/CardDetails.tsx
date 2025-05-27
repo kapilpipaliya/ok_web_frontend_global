@@ -67,6 +67,7 @@ export function CardDetailsContainer(props: { children: JSX.Element }) {
   font-size: 0.875rem;
   padding: 1.25rem 1.5rem;
   background-color: \${args.theme.var.color.background_l100};
+  color: \${args.theme.var.color.background_l100_text};
   border-top: 1px solid \${args.theme.var.color.primary_l800};
 }\`;`}
     >
@@ -90,16 +91,16 @@ export function Status(props: { status: string }) {
         }\`;`,
         props.status === "Overdue"
           ? `return \`._id {
-              color: \${args.theme.var.color.error};
+              color: \${args.theme.var.color.error_l850_text};
               background-color: \${args.theme.var.color.error_l850};
             }\`;`
           : props.status === "Paid"
             ? `return \`._id {
-                color: \${args.theme.var.color.success};
+                color: \${args.theme.var.color.success_l850_text};
                 background-color: \${args.theme.var.color.success_l850};
               }\`;`
             : `return \`._id {
-                color: \${args.theme.var.color.warning};
+                color: \${args.theme.var.color.warning_l850_text};
                 background-color: \${args.theme.var.color.warning_l850};
               }\`;`,
       ]}

@@ -231,10 +231,23 @@ args.theme.var.color.primary_d900       // Dark shade (close to black)
 // When dark mode is active, _l shades behave like _d shades and vice versa
 args.theme.var.color.primary_l100       // In light mode: light shade, In dark mode: dark shade
 
+// Text color suffix (_text)
+args.theme.var.color.primary_text       // Auto-calculated readable text color for primary background
+args.theme.var.color.success_text       // Auto-calculated readable text color for success background
+args.theme.var.color.error_text         // Auto-calculated readable text color for error background
+args.theme.var.color.primary_l200_text  // Auto-calculated readable text color for primary_l200 shade
+
 // Other dynamic access
 args.theme.var.color.primaryScheme      // Color scheme variations
 args.theme.var.color.textColor         // Semantic color
 ```
+
+**Text Color Suffix (`_text`):**
+- Automatically calculates the most readable text color (white or black) for any background color
+- Works with base colors: `primary_text`, `success_text`, `error_text`, etc.
+- Works with shades: `primary_l200_text`, `background_d800_text`, etc.
+- Uses APCA (Advanced Perceptual Contrast Algorithm) for better readability
+- If a predefined `_text` color exists in the theme, it will be used instead of calculating
 
 **Shade System:**
 - Light shades: `_l1` to `_l1000` (l1 = closest to base color, l1000 = white)
@@ -251,11 +264,17 @@ args.theme.var.color.textColor         // Semantic color
 - For background colors, prefer light shades (e.g., `background_l100`, `background_l50`)
 
 **Key Files:**
-- `src/lib/context/ThemeContext.tsx` - Theme context with proxy-based access
-- `src/lib/context/ThemeProvider.tsx` - Global theme state management
+- `src/lib/theme/ThemeContext.tsx` - Theme context with proxy-based access
+- `src/lib/theme/ThemeProvider.tsx` - Global theme state management
 - `src/lib/graph/get/sync/theme/themeConfig.ts` - Database integration
-- `src/lib/styles/colorUtils.ts` - Color manipulation utilities
+- `src/lib/styles/colorUtils.ts` - Color manipulation utilities (uses colorjs.io library)
 - `src/lib/styles/constants.ts` - Theme constants and presets
+
+**Color Library:**
+The project uses [colorjs.io](https://colorjs.io/) for color manipulation, providing:
+- OKLCH color space support
+- APCA contrast algorithm for better text readability
+- Advanced color interpolation and manipulation
 
 #### Permission System
 The application implements a role-based access control system:

@@ -24,6 +24,7 @@ export function CardContainer(props: { children: JSX.Element }) {
   border-style: solid;
   overflow: hidden;
   background-color: \${args.theme.var.color.background_l100};
+  color: \${args.theme.var.color.background_l100_text};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   &:hover {
@@ -46,6 +47,7 @@ export function CardHeaderContainer(props: { children: JSX.Element }) {
   display: flex;
   align-items: center;
   background-color: \${args.theme.var.color.primary_l900};
+  color: \${args.theme.var.color.primary_l900_text};
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-color: \${args.theme.var.color.primary_l800};

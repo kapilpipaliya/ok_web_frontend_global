@@ -37,7 +37,7 @@
     "animated-scroll-to": "^2.3.2",
     "broadcast-channel": "^7.1.0",
     "case-switcher-js": "^1.1.10",
-    "culori": "^4.0.1",
+    "colorjs.io": "^0.5.2",
     "date-fns": "^4.1.0",
     "hjson": "^3.2.2",
     "idb": "^8.0.3",

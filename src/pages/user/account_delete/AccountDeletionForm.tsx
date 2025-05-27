@@ -96,7 +96,7 @@ export function AccountDeletionForm() {
         as: "button",
         css: `return \`._id {
   background-color: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.primary_text};
+  color: \${args.theme.var.color.error_text};
   padding: 8px 16px;
   border-radius: 4px;
   border: none;
@@ -174,7 +174,7 @@ export function AccountDeletionForm() {
   padding: 12px;
   background-color: \${args.theme.var.color.error_l100};
   border: 1px solid \${args.theme.var.color.error_l150};
-  color: \${args.theme.var.color.error};
+  color: \${args.theme.var.color.error_l100_text};
   border-radius: 8px;
 }\`;`,
         componentName: "Html",
@@ -213,7 +213,7 @@ export function AccountDeletionForm() {
             as: "button",
             css: `return \`._id {
   background-color: \${args.theme.var.color.error};
-  color: \${args.theme.var.color.primary_text};
+  color: \${args.theme.var.color.error_text};
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -306,7 +306,7 @@ export function AccountDeletionForm() {
     css: `return \`._id {
   padding: 24px;
   border-radius: 8px;
-  background-color: \${args.theme.var.color.primary_text};
+  background-color: \${args.theme.var.color.background_l100};
   border: 1px solid \${args.theme.var.color.background};  
 }\`;`,
     componentName: "Html",

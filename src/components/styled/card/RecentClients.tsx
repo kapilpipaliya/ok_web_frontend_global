@@ -33,7 +33,7 @@ export function CardGrids() {
           <As
             as="h2"
             css={`return \`._id {
-  color: #3b82f6;
+  color: \${args.theme.var.color.primary};
   font-size: 1rem;
   font-weight: 600;
 }\`;`}
@@ -43,11 +43,11 @@ export function CardGrids() {
           <As
             as="a"
             css={`return \`._id {
-  color: indigo_280;
+  color: \${args.theme.var.color.primary_l300};
   font-size: 0.875rem;
   font-weight: 600;
   &:hover {
-    color: indigo;
+    color: \${args.theme.var.color.primary};
   }
 }\`;`}
             href="#"

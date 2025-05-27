@@ -91,10 +91,14 @@ export function ComponentItem(
     const backgroundColor = isNegative(props.child.id)
       ? `\${args.theme.var.color.success_l600}`
       : `\${args.theme.var.color.background_l50}`;
+    const textColor = isNegative(props.child.id)
+      ? `\${args.theme.var.color.success_l600_text}`
+      : `\${args.theme.var.color.background_l50_text}`;
     return [
       baseItemStyle,
       `return \`._id {
         background-color: ${backgroundColor};
+        color: ${textColor};
       }\`;`,
     ];
   };

@@ -142,8 +142,8 @@ export const roleFormSchema = {
                 border-top: none;
                 }\`;`,
                   args.contextData.tabState[0]?.activeTab === "Perm"
-                    ? `._id {border-bottom: 2px solid ${args.theme.var.color.primary};`
-                    : "._id {border-bottom: 2px solid transparent;",
+                    ? `return \`._id {border-bottom: 2px solid \${args.theme.var.color.primary};}\`;`
+                    : `return \`._id {border-bottom: 2px solid transparent;}\`;`,
                 ];
               },
               props: (options: RoleFormFunctionArgumentType) => {
@@ -173,8 +173,8 @@ export const roleFormSchema = {
                 border-top: none;
               }\`;`,
                 options.contextData.tabState[0]?.activeTab === "Page"
-                  ? `._id {border-bottom: 2px solid ${options.theme.var.color.primary};`
-                  : "._id {border-bottom: 2px solid transparent;",
+                  ? `return \`._id {border-bottom: 2px solid \${options.theme.var.color.primary};}\`;`
+                  : `return \`._id {border-bottom: 2px solid transparent;}\`;`,
               ],
               props: (options: RoleFormFunctionArgumentType) => {
                 const permissions = evalExpression("->RolePage", {
@@ -207,7 +207,7 @@ export const roleFormSchema = {
               css: (options: RoleFormFunctionArgumentType) =>
                 options.contextData.tabState[0]?.activeTab === "Perm"
                   ? ""
-                  : "._id {display:none",
+                  : `return \`._id {display:none;}\`;`,
             },
             {
               as: "div",
@@ -216,7 +216,7 @@ export const roleFormSchema = {
               css: (options: RoleFormFunctionArgumentType) =>
                 options.contextData.tabState[0]?.activeTab === "Page"
                   ? ""
-                  : "._id {display:none",
+                  : `return \`._id {display:none;}\`;`,
             },
           ],
           css: `return \`._id {

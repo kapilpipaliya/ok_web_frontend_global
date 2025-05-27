@@ -94,7 +94,7 @@ function SelectedTag(props: {
   gap: 6px;
   padding: 4px 10px;
   border-radius: 4px;
-  color: \${args.theme.var.color.text_d700};
+  color: \${args.theme.var.color.primary_text};
   font-weight: 500;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
@@ -120,7 +120,7 @@ function SelectedTag(props: {
     justify-content: center;
     padding: 2px;
     border-radius: 50%;
-    color: \${args.theme.var.color.text_d700};
+    color: \${args.theme.var.color.primary_text};
     transition: all 0.2s ease;
     &:hover {
       background-color: rgba(255, 255, 255, 0.2);
@@ -168,12 +168,12 @@ function SingleOption(props: SingleOptionProps) {
   ${
     props.isSelected
       ? `background-color: \${args.theme.var.color.primary_l200};
-         color: \${args.theme.var.color.text_d700};`
+         color: \${args.theme.var.color.primary_l200_text};`
       : ""
   }
   &:hover {
     background-color: \${args.theme.var.color.primary_l200};
-    color: \${args.theme.var.color.text_d700};
+    color: \${args.theme.var.color.primary_l200_text};
   }
 }\`;`}
           onClick={() => props.onSelect(props.option)}
@@ -583,7 +583,9 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
         <As
           as="div"
           css={[
-            props.selectionLimit !== 1 ? "._id {flex-wrap: wrap;" : "",
+            props.selectionLimit !== 1
+              ? `return \`._id {flex-wrap: wrap;}\`;`
+              : "",
             `return \`._id {
   align-items: center;
   display: flex;

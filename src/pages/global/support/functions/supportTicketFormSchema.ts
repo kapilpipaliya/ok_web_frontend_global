@@ -166,7 +166,6 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   display: inline-block;
   padding: 8px;
   border-radius: 6px;
-  background-color: \${args.theme.var.color.background_l100};
 }\`;`;
                                 },
                               },
@@ -219,6 +218,9 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   border-radius: 6px;
   padding: 12px;
   background-color: \${args.theme.var.color.background_l100};
+  color: \${args.theme.var.color.background_l100_text};
+  scrollbar-width: thin;
+  scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_l300};
 }\`;`,
                 componentName: "Html",
                 class: "chat-history-container",
@@ -230,7 +232,13 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                     as: "div",
                     attributes: [
                       {
-                        css: PROPERTIES.Css.TextFieldCss + " flex-grow:1 mr:8",
+                        css: [
+                          PROPERTIES.Css.TextFieldCss,
+                          `return \`._id {
+                            flex-grow: 1;
+                            margin-right: 8px;
+                          }\`;`,
+                        ],
                         componentName: "SystemTextInput",
                         type: "textarea",
                         key: "newReply",
@@ -251,7 +259,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
                         as: "button",
                         css: `return \`._id {
   background-color: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.text};
+  color: \${args.theme.var.color.primary_text};
   padding: 8px 16px;  
   border-radius: 6px;
   border: none;

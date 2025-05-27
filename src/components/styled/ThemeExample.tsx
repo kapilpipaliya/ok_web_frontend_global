@@ -75,7 +75,7 @@ const sectionHeaderStyles = [
 const buttonStyles = [
   `return \`._id {
     background-color: \${args.theme.var.color.primary};
-    color: white;
+    color: \${args.theme.var.color.primary_text};
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;
@@ -85,9 +85,11 @@ const buttonStyles = [
   }\`;`,
   `return \`._id:hover {
     background-color: \${args.theme.var.color.primary_l200};
+    color: \${args.theme.var.color.primary_l200_text};
   }\`;`,
   `return \`._id:active {
     background-color: \${args.theme.var.color.primary_l100};
+    color: \${args.theme.var.color.primary_l100_text};
   }\`;`,
 ];
 

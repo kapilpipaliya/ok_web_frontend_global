@@ -25,7 +25,7 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
   border-radius: 50%;
   transition: all 0.2s ease;
   &:hover {
-    color: \${args.theme.var.color.primary_l250};
+    color: \${args.theme.var.color.primary_l850_text};
     background-color: \${args.theme.var.color.primary_l850};
   }
   &:focus {
@@ -58,6 +58,7 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
           css={[
             `return \`._id {
               background-color: \${args.theme.var.color.background_l100};
+              color: \${args.theme.var.color.background_l100_text};
               border-radius: 0.5rem;
               box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
               border: 1px solid \${args.theme.var.color.primary_l750};

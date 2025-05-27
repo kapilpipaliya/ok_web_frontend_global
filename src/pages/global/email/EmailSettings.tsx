@@ -153,7 +153,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "active",
-            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
           ),
           {
             as: "div",
@@ -183,7 +183,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "smtpHost",
-            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
           ),
           {
             as: "div",
@@ -214,7 +214,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "smtpPort",
-            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
           ),
           {
             as: "div",
@@ -244,7 +244,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "smtpUsername",
-            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
           ),
           {
             as: "div",
@@ -275,7 +275,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "smtpPassword",
-            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
           ),
           {
             as: "div",
@@ -306,7 +306,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "sendGridApiKey",
-            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
           ),
           {
             as: "div",
@@ -342,7 +342,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "fromEmail",
-            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
           ),
           {
             as: "div",
@@ -368,7 +368,7 @@ export function EmailSettings() {
           },
           getErrorSchema(
             "secure",
-            "._id {color: ${args.theme.var.color.error}; margin-top: -20px;",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
           ),
           {
             as: "div",

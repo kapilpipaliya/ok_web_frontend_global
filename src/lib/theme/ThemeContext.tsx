@@ -13,7 +13,7 @@ import {
   createColorScheme,
   getLightShade,
   getDarkShade,
-  getContrastRatio,
+  getContrastColor,
   parseColorName,
   resolveColorForMode,
   isModeSpecificColor,
@@ -21,6 +21,7 @@ import {
 import type {
   ColorDefinition,
   ColorMode,
+  ColorScheme,
   ThemeContext as ThemeContextType,
 } from "~/lib/styles/types/types";
 
@@ -41,6 +42,58 @@ type ColorTarget = {
 // Color handlers
 const colorHandlers = {
   /**
+   * Handles text color suffix access in the theme proxy.
+   * Pattern: primary_text, success_text, error_text, primary_l200_text, etc.
+   */
+  handleTextColorAccess: (
+    target: ColorTarget,
+    prop: string,
+    getColorMode?: () => ColorMode,
+  ): string | undefined => {
+    // Pattern: colorname_text
+    const textMatch = prop.match(/(.+)_text$/);
+    if (textMatch) {
+      const [, baseProp] = textMatch;
+
+      // First check if there's a predefined text color for this base color
+      const textColorKey = `${baseProp}_text`;
+      if (target[textColorKey] !== undefined) {
+        const mode = getColorMode ? getColorMode() : "light";
+        return resolveColorForMode(target[textColorKey], mode);
+      }
+
+      // Check if baseProp is a shade pattern (e.g., primary_l200)
+      const shadeMatch = baseProp.match(/(.+)_([ld])(\d+)$/);
+      if (shadeMatch) {
+        // First compute the shade color
+        const shadeColor = colorHandlers.handleShadeAccess(
+          target,
+          baseProp,
+          getColorMode,
+        );
+        if (shadeColor) {
+          // Then get the contrast color for this shade
+          return getContrastColor(shadeColor);
+        }
+      }
+
+      // If not predefined or a shade, calculate the appropriate text color based on the base color
+      const baseColorDef = target[baseProp];
+      if (baseColorDef !== undefined) {
+        const mode = getColorMode ? getColorMode() : "light";
+        const resolvedColor = resolveColorForMode(baseColorDef, mode);
+
+        // Use the getContrastColor function which finds the best contrast color
+        // It defaults to choosing between white and black
+        return getContrastColor(resolvedColor);
+      }
+
+      return undefined;
+    }
+    return undefined;
+  },
+
+  /**
    * Handles dynamic color shade access in the theme proxy.
    * Pattern: primary_l640, error_d820, background_l100, etc.
    */
@@ -48,7 +101,7 @@ const colorHandlers = {
     target: ColorTarget,
     prop: string,
     getColorMode?: () => ColorMode,
-  ) => {
+  ): string | undefined => {
     // Pattern: colorname_l### or colorname_d###
     const shadeMatch = prop.match(/(.+)_([ld])(\d+)$/);
     if (shadeMatch) {
@@ -78,10 +131,7 @@ const colorHandlers = {
             : getDarkShade(baseColorDef, shade);
         }
         if (typeof baseColorDef === "object" && baseColorDef !== null) {
-          const resolvedColor = resolveColorForMode(
-            baseColorDef as ColorDefinition,
-            mode,
-          );
+          const resolvedColor = resolveColorForMode(baseColorDef, mode);
           if (typeof resolvedColor === "string") {
             return effectiveShadeType === "l"
               ? getLightShade(resolvedColor, shade)
@@ -97,14 +147,10 @@ const colorHandlers = {
       if (typeof colorDef === "string") {
         return colorDef;
       }
-      if (
-        typeof colorDef === "object" &&
-        colorDef !== null &&
-        isModeSpecificColor(colorDef as ColorDefinition)
-      ) {
-        return resolveColorForMode(colorDef as ColorDefinition, mode);
+      if (isModeSpecificColor(colorDef)) {
+        return resolveColorForMode(colorDef, mode);
       }
-      return colorDef;
+      return colorDef as unknown as string;
     } else if (parseColorName(prop)) {
       return prop;
     }
@@ -119,7 +165,7 @@ const colorHandlers = {
     target: ColorTarget,
     prop: string,
     getColorMode?: () => ColorMode,
-  ) => {
+  ): ColorScheme | undefined => {
     const schemeMatch = prop.match(/(.+?)Scheme$/);
     if (schemeMatch) {
       const [, baseProp] = schemeMatch;
@@ -127,10 +173,7 @@ const colorHandlers = {
       const mode = getColorMode ? getColorMode() : "light";
 
       if (baseColorDef !== undefined) {
-        const resolvedColor = resolveColorForMode(
-          baseColorDef as ColorDefinition,
-          mode,
-        );
+        const resolvedColor = resolveColorForMode(baseColorDef, mode);
 
         if (
           typeof resolvedColor === "string" &&
@@ -144,31 +187,6 @@ const colorHandlers = {
   },
 
   /**
-   * Handles contrast ratio access in the theme proxy.
-   * Pattern: primaryContrastRatio, infoContrastRatio, etc.
-   */
-  handleContrastRatioAccess: (
-    target: ColorTarget,
-    prop: string,
-    getColorMode?: () => ColorMode,
-  ) => {
-    const contrastMatch = prop.match(/(.+?)ContrastRatio$/);
-    if (contrastMatch) {
-      const [, baseProp] = contrastMatch;
-      const baseColorDef =
-        target[`${baseProp}Color`] || DEFAULT_THEME.color.primary;
-      const mode = getColorMode ? getColorMode() : "light";
-      const resolvedColor = resolveColorForMode(
-        baseColorDef as ColorDefinition,
-        mode,
-      );
-      const backgroundColor = mode === "dark" ? "#ffffff" : "#000000";
-      return getContrastRatio(resolvedColor, backgroundColor);
-    }
-    return undefined;
-  },
-
-  /**
    * Handles semantic color access in the theme proxy.
    * Pattern: textColor, backgroundColor, etc.
    */
@@ -176,21 +194,18 @@ const colorHandlers = {
     target: ColorTarget,
     prop: string,
     getColorMode?: () => ColorMode,
-  ) => {
+  ): string | undefined => {
     const mode = getColorMode ? getColorMode() : "light";
 
     // First check if there's a specific semantic color defined
     if (target[prop] !== undefined) {
-      return resolveColorForMode(target[prop] as ColorDefinition, mode);
+      return resolveColorForMode(target[prop], mode);
     }
 
     // Fall back to computed semantic colors based on primary color
     const baseColorDef =
       target.backgroundColor || DEFAULT_THEME.color.background;
-    const resolvedBaseColor = resolveColorForMode(
-      baseColorDef as ColorDefinition,
-      mode,
-    );
+    const resolvedBaseColor = resolveColorForMode(baseColorDef, mode);
 
     switch (prop) {
       case "textColor":
@@ -221,7 +236,7 @@ const colorHandlers = {
     target: ColorTarget,
     prop: string,
     getColorMode?: () => ColorMode,
-  ) => {
+  ): string | number | boolean | ColorDefinition | undefined => {
     if (target[prop] !== undefined) {
       const colorDef = target[prop];
       const mode = getColorMode ? getColorMode() : "light";
@@ -234,7 +249,7 @@ const colorHandlers = {
         colorDef !== null &&
         isModeSpecificColor(colorDef as ColorDefinition)
       ) {
-        return resolveColorForMode(colorDef as ColorDefinition, mode);
+        return resolveColorForMode(colorDef, mode);
       }
       return colorDef;
     }
@@ -369,9 +384,9 @@ function handleColorProperties(
 ) {
   // Try specialized color handlers first
   const colorHandlerFunctions = [
+    colorHandlers.handleTextColorAccess,
     colorHandlers.handleShadeAccess,
     colorHandlers.handleSchemeAccess,
-    colorHandlers.handleContrastRatioAccess,
   ];
 
   for (const handler of colorHandlerFunctions) {

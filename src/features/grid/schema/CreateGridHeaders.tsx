@@ -118,6 +118,7 @@ export function CreateGridHeaders(
                       as="div"
                       css={`return \`._id {
                       background: \${args.theme.var.color.background_l50};
+                      color: \${args.theme.var.color.background_l50_text};
                       padding: 8px;
                     }\`;`}
                     >

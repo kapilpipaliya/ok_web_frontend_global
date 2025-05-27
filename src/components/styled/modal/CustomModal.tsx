@@ -84,7 +84,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
         css={[
           SETTINGS_CONSTANTS.MODAL.BODY.CSS,
           ...ensureArray(props.dialogCss),
-          "._id {border-radius: 10px;",
+          `return \`._id {border-radius: 10px;}\`;`,
         ]}
         ref={setFloating}
         role="dialog"

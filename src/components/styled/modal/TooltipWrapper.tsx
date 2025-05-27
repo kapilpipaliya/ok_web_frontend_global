@@ -383,7 +383,7 @@ export function TooltipWrapper(props: {
                 opacity: 1;
                 animation: tooltipFadeIn 200ms ease-out;
                 background-color: \${args.theme.var.color.background_d800};
-                color: \${args.theme.var.color.background};
+                color: \${args.theme.var.color.background_d800_text};
                 padding: 0.5rem 0.75rem;
                 border-radius: 0.375rem;
                 font-size: 0.875rem;

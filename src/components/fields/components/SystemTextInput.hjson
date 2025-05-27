@@ -16,7 +16,7 @@ const type = props.type === "textarea" ? undefined : (props.type || "text");
 const placeholder = props.placeholder || "";
 const disabled = props.disabled;
 const readOnly = props.readOnly;
-const originalValue =args.data?.P[args.contextData.props.key];
+const originalValue = props.value ?? args.data?.P[args.contextData.props.key];
 const value = props.type === "checkbox" 
   ? { checked: !!originalValue } 
   : { value: originalValue !== undefined ? originalValue : "" };

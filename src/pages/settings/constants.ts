@@ -65,7 +65,7 @@ export const SETTINGS_CONSTANTS = {
         }\`;`,
       DELETE_CSS: `return \`._id {
           background-color: \${args.theme.var.color.error};
-          color: \${args.theme.var.color.text_d700};
+          color: \${args.theme.var.color.error_text};
           padding: 8px 16px;
           border-radius: 4px;
           cursor: pointer;
@@ -73,7 +73,7 @@ export const SETTINGS_CONSTANTS = {
         }\`;`,
       SAVE_CSS: `return \`._id {
           background-color: \${args.theme.var.color.primary};
-          color: \${args.theme.var.color.text_l900};
+          color: \${args.theme.var.color.primary_text};
           padding: 8px 16px;
           border-radius: 4px;
           cursor: pointer;
@@ -122,7 +122,7 @@ export const SETTINGS_CONSTANTS = {
   },
   SAVE_BUTTON_CSS: `return \`._id {
       background-color: \${args.theme.var.color.primary};
-      color: \${args.theme.var.color.text_l900};
+      color: \${args.theme.var.color.primary_text};
       padding: 8px 16px;
       border-radius: 4px;
       cursor: pointer;
@@ -131,7 +131,7 @@ export const SETTINGS_CONSTANTS = {
     }\`;`,
   SECONDARY_BUTTON_CSS: `return \`._id {
       background-color: \${args.theme.var.color.primary_l200};
-      color: \${args.theme.var.color.text_l900};
+      color: \${args.theme.var.color.primary_l200_text};
       padding: 8px 16px;
       border-radius: 4px;
       cursor: pointer;
@@ -252,7 +252,7 @@ export const STYLES = {
     }\`;`,
   button2Css: `return \`._id {
       background-color: \${args.theme.var.color.primary};
-      color: \${args.theme.var.color.text_l900};
+      color: \${args.theme.var.color.primary_text};
       padding: 8px 16px;
       border-radius: 4px;
       cursor: pointer;
@@ -327,7 +327,7 @@ export const STYLES = {
     contentCss: `return \`._id {
         text-align: center;
         background-color: \${args.theme.var.color.background_d800};
-        color: \${args.theme.var.color.background};
+        color: \${args.theme.var.color.background_d800_text};
         font-size: 13px;
         font-family: poppins;
         font-weight: 300;

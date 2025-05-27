@@ -71,22 +71,23 @@ export const SortableRow = (
       <As
         as="tr"
         css={`return \`._id {
-        border-bottom: 1px solid #dddddd;
+        border-bottom: 1px solid \${args.theme.var.color.background_l400};
         border-radius: 10px;
         text-align: center;
         transition: background-color 0.2s ease;
         width: 50px;
         background-color: ${
           props.rowIndex === props.dragFromIndex()
-            ? "#e0e0e0"
+            ? "${args.theme.var.color.background_l300}"
             : props.rowIndex === props.dragToIndex()
-              ? "#f0f0f0"
-              : "white"
+              ? "${args.theme.var.color.background_l200}"
+              : "${args.theme.var.color.background}"
         };
+        color: \${args.theme.var.color.text};
         border: ${
           props.rowIndex === props.dragToIndex()
-            ? "2px solid green"
-            : "1px solid #ddd"
+            ? "2px solid ${args.theme.var.color.success}"
+            : "1px solid ${args.theme.var.color.background_l400}"
         };
       }\`;`}
         draggable={true}
@@ -142,7 +143,7 @@ export const SortableRow = (
             <Show when={expandVertex()}>
               <IconButton
                 css={`return \`._id {
-  color: green;
+  color: \${args.theme.var.color.success};
   cursor: pointer;
   background-color: transparent;
   border: none;
@@ -180,7 +181,7 @@ export const SortableRow = (
         <As
           as="tr"
           css={`return \`._id {
-  border-bottom: 1px solid #dddddd;
+  border-bottom: 1px solid \${args.theme.var.color.background_l400};
   border-radius: 10px;
 }\`;`}
         >

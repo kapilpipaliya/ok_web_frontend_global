@@ -3,8 +3,9 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 export function getErrorSchema(key: string, customCss?: string) {
   return {
     as: "span",
-    css: () =>
-      customCss || "._id {color:red; grid-column:span 2; margin-top:-22px;",
+    css:
+      customCss ||
+      `return \`._id {color:red; grid-column:span 2; margin-top:-22px;}\`;`,
     componentName: "Html",
     key: key,
     props: (args: FunctionArgumentType) => ({

@@ -47,6 +47,10 @@ export async function fetchFormData(
     return { error: "Missing required permissions" };
   }
 
+  if (id && id.startsWith("-")) {
+    return { data: { result: [{ id }] } };
+  }
+
   try {
     const formDataResult = await getFormData(graph, metaResult, id);
 

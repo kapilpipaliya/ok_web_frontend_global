@@ -42,11 +42,31 @@ export const DIMENSIONS = {
   },
 } as const;
 
+const getResizeHandleCSS = (direction: "horizontal" | "vertical") => {
+  const isHorizontal = direction === "horizontal";
+
+  return `return \`._id {
+  ${isHorizontal ? "width: 4px;" : "width: 100%;"}
+  ${isHorizontal ? "height: 100%;" : "height: 4px;"}
+  background-color: \${args.theme.var.color.border};
+  cursor: ${isHorizontal ? "col-resize" : "row-resize"};
+  position: absolute;
+  ${isHorizontal ? "right: 0;" : "bottom: 0;"}
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: \${args.theme.var.color.border_d200};
+  }
+}\`;`;
+};
+
 export function ResizableContainer(
   props: Readonly<{
     children: JSX.Element;
     css?: CssType;
     view: Id;
+    width?: string;
+    height?: string;
   }>,
 ) {
   const [width, setWidth] = createSignal(props.width || "");
@@ -189,7 +209,8 @@ export function ResizableContainer(
   position: relative;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid lightgray;
+  border-left: 1px solid \${args.theme.var.color.border};
+  border-top: 1px solid \${args.theme.var.color.border};
 }\`;`,
           isDraggingOver()
             ? `return \`._id { background-color: \${args.theme.var.color.primary_l150}; }\`;`
@@ -205,16 +226,16 @@ export function ResizableContainer(
           width: width(),
         }}
       >
-        <div
+        <As
+          as="div"
+          css={getResizeHandleCSS("horizontal")}
           onPointerDown={(e) => handlePointerDown(e, "horizontal")}
-          style={`width: 4px; height: ${height()}; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
         />
         {props.children}
-        <div
+        <As
+          as="div"
+          css={getResizeHandleCSS("vertical")}
           onPointerDown={(e) => handlePointerDown(e, "vertical")}
-          style={
-            "width: 100%; height: 4px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;"
-          }
         />
       </As>
 

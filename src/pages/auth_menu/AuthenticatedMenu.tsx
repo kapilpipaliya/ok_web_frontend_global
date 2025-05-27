@@ -114,11 +114,13 @@ export function AuthenticatedMenu(
   text-decoration: none;
   &:hover {
     background-color: \${args.theme.var.color.primary_l150};
+    color: \${args.theme.var.color.primary_l150_text};
   }
 }\`;`,
                   isActive
                     ? `return \`._id { 
                         background-color: \${args.theme.var.color.primary_l150}; 
+                        color: \${args.theme.var.color.primary_l150_text};
                         font-weight: bold; 
                       }\`;`
                     : `return \`._id { 
@@ -168,6 +170,7 @@ export function AuthenticatedMenu(
   cursor: pointer;
   &:hover {
     background-color: \${args.theme.var.color.error_l150};
+    color: \${args.theme.var.color.error_l150_text};
   }
 }\`;`}
           href={API.urls.user.logout}

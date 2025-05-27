@@ -189,9 +189,10 @@ export function CompanyLogoSettings() {
           },
           {
             as: "button",
-            css:
-              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS +
-              "._id {margin-right: auto",
+            css: [
+              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
+              `return \`._id {margin-right: auto;}\`;`,
+            ],
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenRectangularDialog(true),
@@ -234,9 +235,10 @@ export function CompanyLogoSettings() {
           },
           {
             as: "button",
-            css:
-              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS +
-              "._id {margin-right: auto",
+            css: [
+              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
+              `return \`._id {margin-right: auto;}\`;`,
+            ],
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenSquareDialog(true),

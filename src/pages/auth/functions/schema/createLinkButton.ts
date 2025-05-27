@@ -10,7 +10,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 export function createLinkButton(
   text: (options: FunctionArgumentType) => string,
   onClick: (options: FunctionArgumentType) => Promise<void> | void,
-  cssString = "._id {text-align:center; margin-top:16px;",
+  cssString = `return \`._id {text-align:center; margin-top:16px;}\`;`,
 ) {
   return {
     as: "div",

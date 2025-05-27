@@ -64,7 +64,7 @@ export function SimpleAlert(props: Readonly<SimpleAlertProps>): JSX.Element {
         }\`;`,
         props.backgroundColor
           ? `return \`._id { background-color: ${props.backgroundColor}; }\`;`
-          : `return \`._id { background-color: \${args.theme.var.color.${config().defaultBg}}; }\`;`,
+          : `return \`._id { background-color: \${args.theme.var.color.${config().defaultBg}}; color: \${args.theme.var.color.${config().defaultBg}_text}; }\`;`,
         props.borderColor
           ? `return \`._id { border-color: ${props.borderColor}; }\`;`
           : `return \`._id { border-color: \${args.theme.var.color.${config().defaultBorder}}; }\`;`,

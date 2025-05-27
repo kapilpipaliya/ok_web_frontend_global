@@ -3,6 +3,10 @@ import { createEffect, createSignal, on } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { VanilaJsonEditor } from "~/components/styled/VanilaJsonEditor";
+import {
+  resizeHandleStyles,
+  resizeContainerStyles,
+} from "~/components/styled/resizeHandleStyles";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -83,18 +87,28 @@ export function JsonEditorFieldComponent(props: {
   return (
     <As
       as="div"
-      css={`return \`._id {
+      css={[
+        resizeContainerStyles,
+        `return \`._id {
   margin-top: 5px;
-  position: relative; /* Needed for absolute positioning of resize handle */
-}\`;`}
+}\`;`,
+      ]}
       ref={editorRef}
     >
       {!props?.hideLabel && "JSON"}
-      <VanilaJsonEditor
-        json={getVertexToEdit()?.P ?? {}}
-        onChange={replacePropertyValue}
-        height={editorHeight()}
-      />
+      <As
+        as="div"
+        css={`return \`._id {
+          position: relative;
+          z-index: 1;
+        }\`;`}
+      >
+        <VanilaJsonEditor
+          json={getVertexToEdit()?.P ?? {}}
+          onChange={replacePropertyValue}
+          height={editorHeight()}
+        />
+      </As>
       {!isJsonValid() && (
         <As
           as="span"
@@ -105,30 +119,7 @@ export function JsonEditorFieldComponent(props: {
           Invalid JSON
         </As>
       )}
-      <As
-        as="div"
-        onMouseDown={onMouseDown}
-        css={`return \`._id {
-          width: 100%;
-          height: 10px;
-          cursor: ns-resize;
-          background-color: \${args.theme.var.color.border};
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          user-select: none; /* Prevent text selection during drag */
-          &::after {
-            content: "";
-            width: 30px;
-            height: 2px;
-            background-color: \${args.theme.var.color.textWeak};
-            border-radius: 1px;
-          }
-        }\`;`}
-      />
+      <As as="div" onMouseDown={onMouseDown} css={resizeHandleStyles} />
     </As>
   );
 }

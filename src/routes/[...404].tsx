@@ -65,7 +65,7 @@ export default function Notfound() {
           margin-top: 2rem;
           padding: 0.75rem 1.5rem;
           background-color: ${args.theme.var.color.primary};
-          color: white;
+          color: ${args.theme.var.color.primary_text};
           text-decoration: none;
           border-radius: ${args.theme.var.borderRadius};
           font-weight: 500;
@@ -73,6 +73,7 @@ export default function Notfound() {
           
           &:hover {
             background-color: ${args.theme.var.color.primary_d600};
+            color: ${args.theme.var.color.primary_d600_text};
           }
         }\`;`,
         text: "Go to Home",

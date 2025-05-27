@@ -31,7 +31,7 @@ export function ThemeSettings() {
         <As
           as="p"
           css={`return \`._id {
-  color: \${args.theme.var.color.primary_d400};
+  color: \${args.theme.var.color.text_l400};
 }\`;`}
         >
           Customize the look and feel of your application by managing themes.
@@ -41,6 +41,7 @@ export function ThemeSettings() {
         as="div"
         css={`return \`._id {
   background-color: \${args.theme.var.color.background_l100};
+  color: \${args.theme.var.color.background_l100_text};
   border-radius: 6px;
   padding: 1rem;
 }\`;`}

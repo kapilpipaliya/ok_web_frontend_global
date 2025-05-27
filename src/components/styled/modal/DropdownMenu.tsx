@@ -78,6 +78,7 @@ transform-origin: top right`;
                 ${borderClass};
                 align-items: flex-start;
                 background: \${args.theme.var.color.background_l100};
+                color: \${args.theme.var.color.background_l100_text};
                 display: flex;
                 flex-direction: column;
                 gap: 0.25rem;

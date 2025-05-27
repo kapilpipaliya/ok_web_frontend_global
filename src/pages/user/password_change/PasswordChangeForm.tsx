@@ -72,7 +72,7 @@ export function PasswordChangeForm() {
                 as: "button",
                 css: `return \`._id {
   background-color: \${args.theme.var.color.primary};
-  color: \${args.theme.var.color.text_l900};
+  color: \${args.theme.var.color.primary_text};
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;

@@ -133,9 +133,10 @@ export function ProfileImageSettings() {
           },
           {
             as: "button",
-            css:
-              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS +
-              "._id {margin-right:auto",
+            css: [
+              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
+              `return \`._id {margin-right:auto;}\`;`,
+            ],
             componentName: "Html",
             props: () => ({
               onClick: () => setOpenDialog(true),

@@ -8,6 +8,10 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import { IconButton } from "~/components/styled/IconButton";
 import { CustomModal } from "~/components/styled/modal/CustomModal";
 import { MonacoEditorWrapper } from "~/components/styled/MonacoEditorWrapper";
+import {
+  resizeHandleStyles,
+  resizeContainerStyles,
+} from "~/components/styled/resizeHandleStyles";
 import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import {
   formatCSSCode,
@@ -236,14 +240,7 @@ export function FunctionEditor(props: {
         }\`;`}
       >
         {/* Wrapper for the resizable editor and its handle */}
-        <As
-          as="div"
-          ref={resizableEditorAreaRef}
-          css={`return \`._id {
-            position: relative;
-            padding-bottom: 10px; /* Space FOR the resize handle */
-          }\`;`}
-        >
+        <As as="div" ref={resizableEditorAreaRef} css={resizeContainerStyles}>
           <MonacoEditorWrapper
             error={!isFunctionValid()}
             height={editorHeight()}
@@ -257,27 +254,7 @@ export function FunctionEditor(props: {
           <As
             as="div"
             onMouseDown={onMouseDownResize}
-            css={`return \`._id {
-              width: 100%;
-              height: 10px; /* Height of the handle itself */
-              cursor: ns-resize;
-              background-color: \${args.theme.var.color.border};
-              position: absolute;
-              bottom: 0; /* Sticks to the bottom of resizableEditorAreaRef */
-              left: 0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              user-select: none; 
-              z-index: 10;
-              &::after {
-                content: "";
-                width: 30px;
-                height: 2px;
-                background-color: \${args.theme.var.color.textWeak};
-                border-radius: 1px;
-              }
-            }\`;`}
+            css={resizeHandleStyles}
           />
         </As>
 

@@ -173,7 +173,7 @@ export function createPasswordHintPopoverContent(
     ],
     css: `return \`._id {
   padding: 12px;
-  background-color: white;
+  background-color: \${args.theme.var.color.background};
   border-radius: 4px;
   max-width: 300px;
 }\`;`,

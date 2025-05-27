@@ -1,13 +1,7 @@
-import {
-  formatCss,
-  interpolate,
-  oklch,
-  parse,
-  wcagContrast,
-  wcagLuminance,
-} from "culori";
+import Color from "colorjs.io";
 
-// https://github.com/color-js/
+// Configure Color.js to use OKLCH as the default color space
+Color.defaults.interpolation_space = "oklch";
 
 import type {
   ColorAdjustments,
@@ -18,22 +12,10 @@ import type {
 } from "~/lib/styles/types/types";
 
 /**
- * Format an OKLCH color object as a string
- */
-export function formatOklchString(
-  oklchColor: ReturnType<typeof oklch>,
-): string | undefined {
-  if (!oklchColor) {
-    return undefined;
-  }
-  return formatCss(oklchColor);
-}
-
-/**
  * Checks if a color definition is mode-specific
  */
 export function isModeSpecificColor(
-  color: ColorDefinition,
+  color: string | number | boolean | ColorDefinition | undefined,
 ): color is ModeSpecificColor {
   return (
     typeof color === "object" &&
@@ -47,7 +29,7 @@ export function isModeSpecificColor(
  * Resolves a color definition to a specific color string based on the current mode
  */
 export function resolveColorForMode(
-  colorDef: ColorDefinition,
+  colorDef: string | number | boolean | ColorDefinition | undefined,
   mode: ColorMode,
 ): string {
   // Handle system mode by defaulting to light
@@ -62,55 +44,49 @@ export function resolveColorForMode(
 }
 
 /**
- * Uses culori to parse a color name and handle variants like 'lightblue' and 'darkred'
+ * Uses Color.js to parse a color name and handle variants like 'lightblue' and 'darkred'
  * Returns the color in OKLCH string format for consistent handling in the system
  */
 export function parseColorName(colorName: string): string | undefined {
   try {
-    // Try to parse the color directly using culori
-    const color = parse(colorName);
+    // Try to parse the color directly using Color.js
+    const color = new Color(colorName);
     if (color) {
       // Convert to OKLCH for consistency with the rest of the system
-      const oklchColor = oklch(color);
-      if (oklchColor) {
-        return formatOklchString(oklchColor);
-      }
+      return color.to("oklch").toString();
     }
-
+  } catch {
     // Handle variant colors like "lightblue", "darkred", etc.
     const lightMatch = colorName.match(/^light(.+)$/i);
     const darkMatch = colorName.match(/^dark(.+)$/i);
 
     if (lightMatch) {
       const baseColorName = lightMatch[1];
-      const baseColor = parse(baseColorName);
-      if (baseColor) {
-        const oklchBaseColor = oklch(baseColor);
-        if (oklchBaseColor) {
-          // Lighten the color
-          oklchBaseColor.l = Math.min(0.95, (oklchBaseColor.l || 0.7) + 0.15);
-          return formatOklchString(oklchBaseColor);
-        }
+      try {
+        const baseColor = new Color(baseColorName);
+        // Lighten the color in OKLCH space
+        const oklchColor = baseColor.to("oklch");
+        oklchColor.l = Math.min(0.95, (oklchColor.l || 0.7) + 0.15);
+        return oklchColor.toString();
+      } catch {
+        // Ignore parse errors
       }
     }
 
     if (darkMatch) {
       const baseColorName = darkMatch[1];
-      const baseColor = parse(baseColorName);
-      if (baseColor) {
-        const oklchBaseColor = oklch(baseColor);
-        if (oklchBaseColor) {
-          // Darken the color
-          oklchBaseColor.l = Math.max(0.2, (oklchBaseColor.l || 0.5) - 0.15);
-          return formatOklchString(oklchBaseColor);
-        }
+      try {
+        const baseColor = new Color(baseColorName);
+        // Darken the color in OKLCH space
+        const oklchColor = baseColor.to("oklch");
+        oklchColor.l = Math.max(0.2, (oklchColor.l || 0.5) - 0.15);
+        return oklchColor.toString();
+      } catch {
+        // Ignore parse errors
       }
     }
-
-    return undefined;
-  } catch {
-    return undefined;
   }
+  return undefined;
 }
 
 /**
@@ -118,24 +94,22 @@ export function parseColorName(colorName: string): string | undefined {
  * l1 = very close to base color, l1000 = white
  */
 export function getLightShade(baseColor: string, shade: number): string {
-  // Ensure shade is between 1 and 1000
-  const safeShade = Math.max(1, Math.min(1000, shade));
+  try {
+    // Ensure shade is between 1 and 1000
+    const safeShade = Math.max(1, Math.min(1000, shade));
 
-  // Get the base color in OKLCH
-  const baseOklch = oklch(baseColor);
-  if (!baseOklch) {
+    // Get the base color and white in Color.js
+    const base = new Color(baseColor);
+    const white = new Color("white");
+
+    // Linearly interpolate from base color to white
+    const ratio = safeShade / 1000;
+    const interpolated = base.range(white, { space: "oklch" })(ratio);
+
+    return interpolated.toString({ format: "oklch" });
+  } catch {
     return baseColor;
   }
-
-  // Linearly interpolate from base color to white
-  const ratio = safeShade / 1000;
-  const white = oklch("white");
-  if (!white) {
-    return baseColor;
-  }
-
-  const interpolated = interpolate([baseOklch, white], "oklch")(ratio);
-  return formatOklchString(interpolated) || baseColor;
 }
 
 /**
@@ -143,33 +117,53 @@ export function getLightShade(baseColor: string, shade: number): string {
  * d1 = very close to base color, d1000 = black
  */
 export function getDarkShade(baseColor: string, shade: number): string {
-  // Ensure shade is between 1 and 1000
-  const safeShade = Math.max(1, Math.min(1000, shade));
+  try {
+    // Ensure shade is between 1 and 1000
+    const safeShade = Math.max(1, Math.min(1000, shade));
 
-  // Get the base color in OKLCH
-  const baseOklch = oklch(baseColor);
-  if (!baseOklch) {
+    // Get the base color and black in Color.js
+    const base = new Color(baseColor);
+    const black = new Color("black");
+
+    // Linearly interpolate from base color to black
+    const ratio = safeShade / 1000;
+    const interpolated = base.range(black, { space: "oklch" })(ratio);
+
+    return interpolated.toString({ format: "oklch" });
+  } catch {
     return baseColor;
   }
-
-  // Linearly interpolate from base color to black
-  const ratio = safeShade / 1000;
-  const black = oklch("black");
-  if (!black) {
-    return baseColor;
-  }
-
-  const interpolated = interpolate([baseOklch, black], "oklch")(ratio);
-  return formatOklchString(interpolated) || baseColor;
 }
 
 /**
  * Create a color scheme from a base color with harmonious variations
  */
 export function createColorScheme(baseColor: string): ColorScheme {
-  // Convert to OKLCH
-  const colorObj = oklch(baseColor);
-  if (!colorObj) {
+  try {
+    // Convert to OKLCH
+    const colorObj = new Color(baseColor).to("oklch");
+
+    // Get the hue in degrees (0-360)
+    const h = colorObj.h || 0;
+
+    // Create variants with different hues
+    const createVariant = (hueShift: number) => {
+      const variant = colorObj.clone();
+      variant.h = (h + hueShift + 360) % 360;
+      return variant.toString({ format: "oklch" });
+    };
+
+    return {
+      base: colorObj.toString({ format: "oklch" }),
+      analogous1: createVariant(30),
+      analogous2: createVariant(-30),
+      triadic1: createVariant(120),
+      triadic2: createVariant(-120),
+      complementary: createVariant(180),
+      split1: createVariant(150),
+      split2: createVariant(-150),
+    };
+  } catch {
     return {
       base: baseColor,
       analogous1: baseColor,
@@ -181,34 +175,6 @@ export function createColorScheme(baseColor: string): ColorScheme {
       split2: baseColor,
     };
   }
-
-  // Convert to OKLCH and work with hue in degrees (0-360)
-  const h = colorObj.h || 0;
-
-  // Create variants with different hues
-  return {
-    base: formatOklchString(colorObj) || baseColor,
-    analogous1:
-      formatOklchString(oklch({ ...colorObj, h: (h + 30) % 360 })) || baseColor,
-    analogous2:
-      formatOklchString(oklch({ ...colorObj, h: (h - 30 + 360) % 360 })) ||
-      baseColor,
-    triadic1:
-      formatOklchString(oklch({ ...colorObj, h: (h + 120) % 360 })) ||
-      baseColor,
-    triadic2:
-      formatOklchString(oklch({ ...colorObj, h: (h - 120 + 360) % 360 })) ||
-      baseColor,
-    complementary:
-      formatOklchString(oklch({ ...colorObj, h: (h + 180) % 360 })) ||
-      baseColor,
-    split1:
-      formatOklchString(oklch({ ...colorObj, h: (h + 150) % 360 })) ||
-      baseColor,
-    split2:
-      formatOklchString(oklch({ ...colorObj, h: (h - 150 + 360) % 360 })) ||
-      baseColor,
-  };
 }
 
 /**
@@ -248,47 +214,63 @@ export function getHslComponents(color: string): {
   l: number;
   a: number;
 } {
-  const oklchColor = oklch(color);
-  return {
-    h: Math.round(oklchColor?.h || 0),
-    s: Math.round((oklchColor?.c || 0) * 100), // Chroma as saturation
-    l: Math.round((oklchColor?.l || 0) * 100),
-    a:
-      oklchColor?.alpha !== undefined
-        ? Math.round(oklchColor.alpha * 100) / 100
-        : 1,
-  };
+  try {
+    const oklchColor = new Color(color).to("oklch");
+    return {
+      h: Math.round(oklchColor.h || 0),
+      s: Math.round((oklchColor.c || 0) * 100), // Chroma as saturation
+      l: Math.round((oklchColor.l || 0) * 100),
+      a:
+        oklchColor.alpha !== undefined
+          ? Math.round(oklchColor.alpha * 100) / 100
+          : 1,
+    };
+  } catch {
+    return { h: 0, s: 0, l: 0, a: 1 };
+  }
 }
 
 /**
  * Mix two colors together with the specified amount
  */
 export function mixColors(color1: string, color2: string, amount = 50): string {
-  const c1 = oklch(color1);
-  const c2 = oklch(color2);
+  try {
+    const c1 = new Color(color1);
+    const c2 = new Color(color2);
 
-  // If conversion failed, return first color as fallback
-  if (!(c1 && c2)) {
+    // Convert amount from percentage to 0-1 range
+    const ratio = amount / 100;
+
+    // Mix colors using interpolation in OKLCH space
+    const mixed = c1.range(c2, { space: "oklch" })(ratio);
+    return mixed.toString({ format: "oklch" });
+  } catch {
     return color1;
   }
-
-  // Convert amount from percentage to 0-1 range
-  const ratio = amount / 100;
-
-  // Mix colors using interpolation
-  const mixed = interpolate([c1, c2], "oklch")(ratio);
-  return formatOklchString(mixed) || color1;
 }
 
 /**
- * Get contrast ratio between two colors
+ * Get contrast ratio between two colors using APCA
+ * Returns absolute value for consistency (APCA returns negative for light-on-dark)
  */
 export function getContrastRatio(color1: string, color2: string): number {
-  return wcagContrast(color1, color2);
+  try {
+    const c1 = new Color(color1);
+    const c2 = new Color(color2);
+    // Use APCA for more accurate perceptual contrast
+    // Taking absolute value since APCA returns negative for light text on dark bg
+    return Math.abs(c2.contrastAPCA(c1));
+  } catch {
+    return 0;
+  }
 }
 
 /**
- * Check if a color combination meets accessibility standards
+ * Check if a color combination meets accessibility standards using APCA
+ * APCA recommended minimums:
+ * - Body text: 75
+ * - Large text (24px+): 60
+ * - Non-text elements: 45
  */
 export function meetsAccessibilityStandards(
   foreground: string,
@@ -298,35 +280,46 @@ export function meetsAccessibilityStandards(
 ): boolean {
   const ratio = getContrastRatio(foreground, background);
 
+  // APCA thresholds are different from WCAG
+  // These are approximate mappings to maintain similar behavior
   if (level === "AA") {
-    return size === "normal" ? ratio >= 4.5 : ratio >= 3;
+    return size === "normal" ? ratio >= 60 : ratio >= 45;
   }
-  return size === "normal" ? ratio >= 7 : ratio >= 4.5;
+  // AAA level requires higher contrast
+  return size === "normal" ? ratio >= 75 : ratio >= 60;
 }
 
 /**
  * Get the most readable color from a list of options against a background
- * mostReadable
+ * Uses APCA (Advanced Perceptual Contrast Algorithm) for better accuracy
+ * https://www.myndex.com/APCA/
  */
 export function getContrastColor(
   bgColor: string,
   options: string[] = ["#ffffff", "#000000"],
 ): string {
-  const bgLuminanceVal = wcagLuminance(bgColor);
+  try {
+    const bg = new Color(bgColor);
+    const results = options.map((color) => {
+      try {
+        const c = new Color(color);
+        // APCA gives positive values for light text on dark bg,
+        // negative for dark text on light bg. We want absolute values for comparison
+        const apcaValue = Math.abs(bg.contrastAPCA(c));
+        return {
+          color,
+          ratio: apcaValue,
+        };
+      } catch {
+        return { color, ratio: 0 };
+      }
+    });
 
-  // Calculate contrast ratios for each option
-  const contrastRatios = options.map((color) => {
-    const luminanceVal = wcagLuminance(color);
-    const light = Math.max(luminanceVal, bgLuminanceVal);
-    const dark = Math.min(luminanceVal, bgLuminanceVal);
-    return {
-      color,
-      ratio: (light + 0.05) / (dark + 0.05),
-    };
-  });
-
-  // Return the color with the highest contrast ratio
-  return contrastRatios.sort((a, b) => b.ratio - a.ratio)[0].color;
+    // Sort by highest absolute APCA value (best readability)
+    return results.sort((a, b) => b.ratio - a.ratio)[0].color;
+  } catch {
+    return options[0] || "#000000";
+  }
 }
 
 /**
@@ -336,39 +329,40 @@ export function adjustColor(
   color: string,
   adjustments: ColorAdjustments,
 ): string {
-  const c = oklch(color);
-  if (!c) {
+  try {
+    const c = new Color(color).to("oklch");
+
+    if (adjustments.lighten) {
+      c.l = Math.min(1, (c.l || 0) + adjustments.lighten / 200); // Smaller steps for OKLCH lightness
+    }
+
+    if (adjustments.darken) {
+      c.l = Math.max(0, (c.l || 0) - adjustments.darken / 200); // Smaller steps for OKLCH lightness
+    }
+
+    if (adjustments.saturate) {
+      c.c = Math.min(0.4, (c.c || 0) + adjustments.saturate / 300); // Chroma (saturation) has a smaller range in OKLCH
+    }
+
+    if (adjustments.desaturate) {
+      c.c = Math.max(0, (c.c || 0) - adjustments.desaturate / 300);
+    }
+
+    if (adjustments.spin) {
+      c.h = ((c.h || 0) + adjustments.spin) % 360;
+      if (c.h < 0) {
+        c.h += 360;
+      }
+    }
+
+    if (adjustments.alpha !== undefined) {
+      c.alpha = adjustments.alpha;
+    }
+
+    return c.toString({ format: "oklch" });
+  } catch {
     return color;
   }
-
-  if (adjustments.lighten) {
-    c.l = Math.min(1, (c.l || 0) + adjustments.lighten / 200); // Smaller steps for OKLCH lightness
-  }
-
-  if (adjustments.darken) {
-    c.l = Math.max(0, (c.l || 0) - adjustments.darken / 200); // Smaller steps for OKLCH lightness
-  }
-
-  if (adjustments.saturate) {
-    c.c = Math.min(0.4, (c.c || 0) + adjustments.saturate / 300); // Chroma (saturation) has a smaller range in OKLCH
-  }
-
-  if (adjustments.desaturate) {
-    c.c = Math.max(0, (c.c || 0) - adjustments.desaturate / 300);
-  }
-
-  if (adjustments.spin) {
-    c.h = ((c.h || 0) + adjustments.spin) % 360;
-    if (c.h < 0) {
-      c.h += 360;
-    }
-  }
-
-  if (adjustments.alpha !== undefined) {
-    c.alpha = adjustments.alpha;
-  }
-
-  return formatOklchString(c) || color;
 }
 
 /**
@@ -380,46 +374,56 @@ export function findAccessibleColor(
   level: "AA" | "AAA" = "AA",
   size: "normal" | "large" = "normal",
 ): string {
-  // Start with the base color
-  const c = oklch(baseColor);
-  if (!c) {
+  try {
+    // Start with the base color
+    const c = new Color(baseColor).to("oklch");
+    const bg = new Color(backgroundColor);
+
+    // If the original color meets standards, return it
+    if (
+      meetsAccessibilityStandards(c.toString(), backgroundColor, level, size)
+    ) {
+      return c.toString({ format: "oklch" });
+    }
+
+    // Otherwise, adjust lightness until we find a suitable color
+    const bgLuminance = bg.get("xyz-d65.y"); // Y component represents luminance
+    const isLight = bgLuminance > 0.5;
+
+    // Step size for adjustments - OKLCH lightness needs smaller steps
+    const step = 0.03;
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    // Clone the color for adjustment
+    const adjustedColor = c.clone();
+
+    // Iteratively adjust until we find a color that meets standards or hit max attempts
+    while (attempts < maxAttempts) {
+      attempts++;
+
+      // If background is light, darken the text; if dark, lighten it
+      if (isLight) {
+        adjustedColor.l = Math.max(0, (adjustedColor.l || 0) - step);
+      } else {
+        adjustedColor.l = Math.min(1, (adjustedColor.l || 0) + step);
+      }
+
+      if (
+        meetsAccessibilityStandards(
+          adjustedColor.toString(),
+          backgroundColor,
+          level,
+          size,
+        )
+      ) {
+        return adjustedColor.toString({ format: "oklch" });
+      }
+    }
+
+    // If we can't find a suitable color, return black or white for maximum contrast
+    return isLight ? "#000000" : "#ffffff";
+  } catch {
     return baseColor;
   }
-
-  let attempts = 0;
-  const maxAttempts = 20;
-
-  // If the original color meets standards, return it
-  const initialColor = formatOklchString(c) || baseColor;
-  if (meetsAccessibilityStandards(initialColor, backgroundColor, level, size)) {
-    return initialColor;
-  }
-
-  // Otherwise, adjust lightness until we find a suitable color
-  const bgLuminanceVal = wcagLuminance(backgroundColor);
-  const isLight = bgLuminanceVal > 0.5;
-
-  // Step size for adjustments - OKLCH lightness needs smaller steps
-  const step = 0.03;
-  const oklchCopy = { ...c };
-
-  // Iteratively adjust until we find a color that meets standards or hit max attempts
-  while (attempts < maxAttempts) {
-    attempts++;
-
-    // If background is light, darken the text; if dark, lighten it
-    if (isLight) {
-      oklchCopy.l = Math.max(0, (oklchCopy.l || 0) - step);
-    } else {
-      oklchCopy.l = Math.min(1, (oklchCopy.l || 0) + step);
-    }
-
-    const newColor = formatOklchString(oklchCopy) || baseColor;
-    if (meetsAccessibilityStandards(newColor, backgroundColor, level, size)) {
-      return newColor;
-    }
-  }
-
-  // If we can't find a suitable color, return black or white for maximum contrast
-  return isLight ? "#000000" : "#ffffff";
 }

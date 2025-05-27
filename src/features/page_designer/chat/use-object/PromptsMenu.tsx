@@ -107,6 +107,7 @@ export function PromptsMenu(props: PromptsMenuProps) {
                       
                       &:hover {
                         background: \${args.theme.var.color.primary_l100};
+                        color: \${args.theme.var.color.primary_l100_text};
                         border-color: \${args.theme.var.color.primary_l200};
                         transform: translateX(2px);
                       }
