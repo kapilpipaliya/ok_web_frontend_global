@@ -2,7 +2,6 @@ import { Icon } from "@iconify-icon/solid";
 import { type Accessor, createMemo } from "solid-js";
 
 import { nameExpr } from "~/features/page_designer/settings/functions/nameExpr";
-import { evalExpression } from "~/lib/expression_eval";
 import { iconMap } from "~/lib/ui/iconMap";
 
 import { getComponentName } from "../../functions/component/getComponentLabel";
@@ -13,6 +12,7 @@ import { getTreeItemColor } from "./treeUtils";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 
 export function TreeItemContent(
   props: Readonly<{
@@ -28,10 +28,14 @@ export function TreeItemContent(
   );
 
   const componentVertex = createMemo(() => {
-    return evalExpression("->$0Comp", {
-      graph,
-      vertexes: [props.metaVertex],
-    })?.[0];
+    return props.metaVertex.P.componentName
+      ? findVertexByLabelAndUniqueId(
+          graph,
+          "Component",
+          "key",
+          props.metaVertex.P.componentName,
+        )
+      : undefined;
   });
   const componentName = () =>
     getComponentName(componentVertex(), props.metaVertex);

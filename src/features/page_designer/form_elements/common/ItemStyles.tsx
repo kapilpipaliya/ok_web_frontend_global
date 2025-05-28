@@ -110,7 +110,7 @@ export function setupPreview(
 // Common function to open in new tab
 export function createOpenInNewTab(
   layoutStoreId: Id,
-  vertex: Vertex,
+  vertex: Vertex | undefined,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {

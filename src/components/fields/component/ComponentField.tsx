@@ -45,7 +45,8 @@ export function ComponentField(props: Readonly<{}>) {
       if (typeof name !== "string") {
         return {};
       }
-      if (meta()?.P?.componentName?.startsWith("System")) {
+      // when there is no children (when creating a component and added in tree) it continues to fetch, improve it
+      if (meta()?.id?.startsWith("-")) {
         return {};
       }
       const vertex = getCompVertex();

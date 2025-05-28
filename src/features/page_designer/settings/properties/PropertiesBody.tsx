@@ -14,6 +14,7 @@ import { FormGroupProperties } from "./formgroup/FormGroupProperties";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 
 export function PropertiesBody() {
   const [graph, setGraph] = useGraph();
@@ -23,11 +24,14 @@ export function PropertiesBody() {
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const selectedAttr = () => graph.vertexes[formStoreVertex()?.P.selectedId];
   const selectedComp = () =>
-    evalExpression("->$0Comp", {
-      graph,
-      setGraph,
-      vertexes: [selectedAttr()],
-    })?.[0];
+    selectedAttr()?.P.componentName
+      ? findVertexByLabelAndUniqueId(
+          graph,
+          "Component",
+          "key",
+          selectedAttr().P.componentName,
+        )
+      : undefined;
   const clearFileSelection = (meta: Vertex) => {
     const txnId = formStoreVertex()?.P.txnId;
     if (!txnId) {

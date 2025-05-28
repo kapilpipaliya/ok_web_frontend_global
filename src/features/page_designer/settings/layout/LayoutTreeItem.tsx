@@ -9,6 +9,7 @@ import {
 } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
+import { componentsMap } from "~/components/form/functions/componentsMap";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { generateBoxShadow } from "~/lib/css/generateBoxShadow";
@@ -38,13 +39,13 @@ import { As } from "~/components/As";
 import { JsonEditorFieldComponent } from "../properties/JsonEditorField";
 import { IconButton } from "~/components/styled/IconButton";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
-import { evalExpression } from "~/lib/expression_eval";
 import { getTreeItemBorder } from "./treeUtils";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 
 export function LayoutTreeItem(
   props: Readonly<{
@@ -235,16 +236,19 @@ export function LayoutTreeItem(
   };
 
   const getCopmVertex = () =>
-    (evalExpression("->$0Comp", {
-      graph,
-      setGraph,
-      vertexes: [props.metaVertex],
-    }) as Vertex[]) || ([] as Vertex[]);
+    props.metaVertex.P.componentName
+      ? findVertexByLabelAndUniqueId(
+          graph,
+          "Component",
+          "key",
+          props.metaVertex.P.componentName,
+        )
+      : undefined;
 
   // Create open in new tab handler
   const openInNewTab = createOpenInNewTab(
     layoutStoreId,
-    getCopmVertex()[0],
+    getCopmVertex(),
     graph,
     setGraph,
   );
@@ -413,7 +417,7 @@ export function LayoutTreeItem(
           when={
             isSelectedHoverId(props.metaVertex.id) &&
             props.metaVertex.L &&
-            props.metaVertex.P.componentName === "Component"
+            !(props.metaVertex.P.componentName in componentsMap)
           }
         >
           <IconButton

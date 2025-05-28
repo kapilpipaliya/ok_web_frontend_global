@@ -18,10 +18,7 @@ export function onClickAddComponent(
   toVertexId: Id | number,
 ) {
   const toVertex = graph.vertexes[toVertexId];
-  const _component = evalExpression("->$0Comp", {
-    graph,
-    vertexes: [toVertex],
-  });
+
   // if (!component?.[0]?.P.child) {
   //   toVertex = evalExpression("<-Attr", {
   //     graph,

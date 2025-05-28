@@ -16,11 +16,14 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
 export function openInNewInternalTab(
   layoutStoreId: Id,
-  child: Vertex,
+  child: Vertex | undefined,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   const layoutStore = graph.vertexes[layoutStoreId].P as PageLayoutObject;
+  if (!child) {
+    return;
+  }
   // Check if form with same label and dataId already exists
   const exists =
     child.id !== "new" &&
