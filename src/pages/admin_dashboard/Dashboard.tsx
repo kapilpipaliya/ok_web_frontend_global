@@ -9,6 +9,7 @@ import { DataGrid } from "~/features/grid/DataGrid";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { PageTable } from "./PageTable";
 
 export default function AdminDashboard() {
   const [graph] = useGraph();
@@ -60,6 +61,7 @@ export default function AdminDashboard() {
       <Suspense>
         <DataGrid isShowPagination={true} tableId={selectedId()} />
       </Suspense>
+      <PageTable />
     </div>
   );
 }

@@ -98,6 +98,146 @@ The application has a component-based architecture where:
 - Components can be nested to create complex layouts
 - The system supports form components with validation
 
+#### Page Schema System
+The application uses a page schema system for defining reusable components and pages organized by website:
+
+**Directory Structure:**
+```
+/src/page_schema/
+  └── [website_name]/
+      ├── components/     # Component definitions in hjson format
+      └── pages/         # Page templates in hjson format
+```
+
+**Example:**
+```
+/src/page_schema/
+  ├── default/
+  │   ├── components/
+  │   │   ├── SystemButton.hjson
+  │   │   ├── SystemCard.hjson
+  │   │   └── SystemHeading.hjson
+  │   └── pages/
+  │       ├── DemoHomePage.hjson
+  │       └── DemoContactForm.hjson
+  └── mywebsite/
+      ├── components/
+      │   └── CustomButton.hjson
+      └── pages/
+          └── LandingPage.hjson
+```
+
+**Schema Format:**
+Components and pages are defined using hjson files with the following structure:
+```javascript
+{
+  vertexes: [
+    {
+      id: string,      // Unique identifier
+      L: "Attr",       // Label (always "Attr" for page elements)
+      P: {             // Properties object
+        displayOrder: number,
+        componentName: string,  // "Html", "Data", "Slot", or custom component
+        props: string,         // Function body returning props object
+        css: string,          // Function body returning CSS styles
+        fns: string,          // Optional: Function definitions
+        slot: string          // Optional: Slot name when used inside a component
+      }
+    }
+  ],
+  edges: [
+    {
+      id: string,      // Unique edge identifier
+      T: "Attr",       // Edge type (must be "Attr" for parent-child relationships)
+      S: string,       // Start vertex ID (parent)
+      E: string        // End vertex ID (child)
+    }
+  ]
+}
+```
+
+**Important Notes:**
+- When `componentName` is "Html", the `as` property must be included in the props return statement or in the Properties object
+- If `as` is omitted, the component behaves as a fragment and only renders children
+- All schemas are automatically loaded during app initialization via `createAppState.ts` using dynamic imports
+- Components are registered under the "Component" label without website prefix (e.g., "SystemButton")
+- Pages are registered under the "Page" label without website prefix (e.g., "DemoHomePage")
+- The loader supports multiple websites, each with their own components and pages
+
+**Loader Functions:**
+The `~/page_schema/loader.ts` module provides several utility functions:
+- `loadWebsiteSchemas()` - Loads all schemas from all websites
+- `getWebsiteSchemas(websiteName)` - Gets schemas for a specific website
+- `getAllComponentSchemas()` - Gets all components across all websites (without website prefix)
+- `getAllPageSchemas()` - Gets all pages across all websites (without website prefix)
+
+**Note:** If multiple websites have components or pages with the same name, only the last one loaded will be used.
+
+**Schema Creation Guidelines:**
+When creating component and page schemas, follow the guidelines in `/src/routes/api/chat/SYSTEM_PROMPT.md`. Key points:
+
+1. **Component Properties:**
+   - `displayOrder`: Required number for sibling ordering
+   - `componentName`: "Html", "Data", "Slot", or custom component name
+   - `props`: Function body returning dynamic properties
+   - `css`: Function body returning CSS with `._id` selector
+   - `fns`: Function body for shared functions
+
+2. **CSS Guidelines:**
+   - Use kebab-case CSS properties (e.g., `border-radius` not `borderRadius`)
+   - Use `._id` selector for component-scoped styles
+   - Use theme variables: `${args.theme.var.color.primary}`
+   - Use rem units for consistent scaling
+   - Include responsive breakpoints
+
+3. **Data Components:**
+   - Use for repeating patterns with `loop: true`
+   - Provide `name` for data context
+   - Access data in children via `args.contextData.name`
+
+**Example Component Schema:**
+```hjson
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",  // Required for Html components
+  text: props.text || "Click me",
+  onClick: props.onClick
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_d200};
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: []
+}
+```
+
 #### Page Builder Graph Schema
 The Page Builder uses a graph-based structure with vertices and edges to represent UI components:
 
@@ -114,13 +254,15 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
   edges: [
     {
       id: string,  // Unique identifier for the edge
-      T: string,   // Type/label of the edge
-      E: string,   // End vertex ID of the edge
-      S: string    // Start vertex ID of the edge
+      T: string,   // Type/label of the edge (must be 'Attr' for parent-child relationships)
+      E: string,   // End vertex ID of the edge (child)
+      S: string    // Start vertex ID of the edge (parent)
     }
   ]
 }
 ```
+
+**Important**: Parent-child relationships between Attr vertices MUST use edges with T: "Attr"
 
 **Attr Vertex (Page Builder Items):**
 - `displayOrder`: number - Determines item order among siblings
@@ -137,10 +279,95 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
    - For icons: requires `icon`, `height`, `width` properties
 
 2. **Data Component** (for repeating patterns):
-   - `name`: string - Data context name
-   - `loop`: boolean - Enable iteration over children
+   - `name`: string - Data context name (required)
+   - `loop`: boolean - Enable iteration over children (set to true)
    - `expression`: string - Data evaluation expression
    - Access iteration data via `args.contextData.name` in child components
+   
+   **Example Data Component with Loop:**
+   ```hjson
+   {
+     vertexes: [
+       {
+         id: "1",
+         L: "Attr",
+         P: {
+           displayOrder: 1,
+           componentName: "Data",
+           name: "items",
+           loop: true,
+           props: '''
+   return {
+     data: [
+       { id: 1, title: "Item 1", description: "First item" },
+       { id: 2, title: "Item 2", description: "Second item" },
+       { id: 3, title: "Item 3", description: "Third item" }
+     ]
+   };
+   '''
+         }
+       },
+       {
+         id: "2",
+         L: "Attr",
+         P: {
+           displayOrder: 1,
+           componentName: "Html",
+           props: '''
+   const item = args.contextData.items;
+   return {
+     as: "div"
+   };
+   ''',
+           css: '''
+   return `._id {
+     padding: 1rem;
+     margin-bottom: 0.5rem;
+     background: ${args.theme.var.color.background_l100};
+     color: ${args.theme.var.color.background_l100_text};
+     border-radius: 0.5rem;
+   }`;
+   '''
+         }
+       },
+       {
+         id: "3",
+         L: "Attr",
+         P: {
+           displayOrder: 1,
+           componentName: "Html",
+           props: '''
+   const item = args.contextData.items;
+   return {
+     as: "h3",
+     text: item.title
+   };
+   '''
+         }
+       },
+       {
+         id: "4",
+         L: "Attr",
+         P: {
+           displayOrder: 2,
+           componentName: "Html",
+           props: '''
+   const item = args.contextData.items;
+   return {
+     as: "p",
+     text: item.description
+   };
+   '''
+         }
+       }
+     ],
+     edges: [
+       { id: "e1", T: "Attr", S: "1", E: "2" },
+       { id: "e2", T: "Attr", S: "2", E: "3" },
+       { id: "e3", T: "Attr", S: "2", E: "4" }
+     ]
+   }
+   ```
 
 3. **Slot Component**:
    - `name`: string - Slot name (default: 'children')
@@ -163,6 +390,97 @@ Custom components can have variants defined through:
 - `ComponentVariant` vertices with `key`, `type`, `defValue` properties
 - `ComponentVariantOption` vertices for string type options
 - Access variant values via `args.contextData.props["variantKey"]`
+
+**Example Component with Variants:**
+```hjson
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "CustomButton"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "variant",
+        type: "string",
+        defValue: "primary"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariantOption",
+      P: {
+        key: "primary",
+        value: "primary",
+        description: "Primary button style"
+      }
+    },
+    {
+      id: "4",
+      L: "ComponentVariantOption",
+      P: {
+        key: "secondary",
+        value: "secondary",
+        description: "Secondary button style"
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const variant = args.contextData.props?.variant || "primary";
+return {
+  as: "button",
+  text: args.contextData.props?.text || "Button"
+};
+''',
+        css: '''
+const variant = args.contextData.props?.variant || "primary";
+return `._id {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  ${variant === "primary" ? `
+    background: ${args.theme.var.color.primary};
+    color: ${args.theme.var.color.primary_text};
+    border: 1px solid transparent;
+    
+    &:hover {
+      background: ${args.theme.var.color.primary_d200};
+    }
+  ` : `
+    background: ${args.theme.var.color.background_l200};
+    color: ${args.theme.var.color.text};
+    border: 1px solid ${args.theme.var.color.background_l400};
+    
+    &:hover {
+      background: ${args.theme.var.color.background_l300};
+    }
+  `}
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariantOption", S: "2", E: "3" },
+    { id: "e3", T: "ComponentVariantOption", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "1", E: "5" }
+  ]
+}
+```
 
 #### Styling System
 The project uses a custom CSS-in-JS system that:
@@ -257,11 +575,9 @@ args.theme.var.color.textColor         // Semantic color
 
 **Theme Structure:**
 - `var.color`: Core color system (primary, success, error, text, background, etc.)
-- `var.fontFamily`: Typography settings (base, heading, mono fonts)
-- `var.spacingScale`: Spacing system (compact, default, loose)
-- `var.borderRadius`: Border radius presets
-- `var.transitionDuration*`: Animation timings
 - For background colors, prefer light shades (e.g., `background_l100`, `background_l50`)
+
+**Note:** Currently, the theme system only supports colors and their shades. Use fixed values for other CSS properties like border-radius, transitions, spacing, etc.
 
 **Key Files:**
 - `src/lib/theme/ThemeContext.tsx` - Theme context with proxy-based access
@@ -287,6 +603,11 @@ The application implements a role-based access control system:
 
 - `/src` - Main application code
   - `/components` - Reusable UI components
+  - `/page_schema` - Page and component schemas organized by website
+    - `/[website_name]/` - Website-specific schemas
+      - `/components/` - Component definitions in hjson format
+      - `/pages/` - Page templates in hjson format
+    - `loader.ts` - Dynamic schema loader module
   - `/cypher` - Neo4j database operations
     - `/constants` - Reserved keywords for Cypher queries
     - `/conversion` - Utilities for converting between Neo4j and JSON formats

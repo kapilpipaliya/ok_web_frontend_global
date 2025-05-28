@@ -98,7 +98,12 @@ export function MonacoEditorWrapper(props: Readonly<MonacoEditorWrapperProps>) {
           alwaysConsumeMouseWheel: false,
           horizontalScrollbarSize: 5,
           verticalScrollbarSize: 5,
+          horizontal: "auto",
+          vertical: "auto",
+          handleMouseWheel: true,
+          scrollByPage: false,
         },
+        scrollBeyondLastLine: false,
         tabSize: 2,
       }}
       value={props.value}

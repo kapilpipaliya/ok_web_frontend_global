@@ -1,0 +1,975 @@
+{
+  vertexes: [
+    {
+      id: "page-root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "navbar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}`;
+'''
+      }
+    },
+    {
+      id: "navbar-container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "navbar-brand",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "#",
+  text: "🎨 decode.io"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "navbar-menu",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "navbar-links",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav-link-data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "navLinks",
+        loop: true,
+        props: '''
+return {
+  data: [
+    { text: "Features", href: "#features" },
+    { text: "Pricing", href: "#pricing" },
+    { text: "Templates", href: "#templates" },
+    { text: "About", href: "#about" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "nav-link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const link = args.contextData.navLinks;
+return {
+  as: "a",
+  text: link.text,
+  href: link.href
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "navbar-actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "login-button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Login"
+};
+''',
+        css: '''
+return `._id {
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  border: 1px solid ${args.theme.var.color.background_l300};
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "signup-button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Sign Up"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_d200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero-section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "HeroSection",
+        props: '''
+return {
+  title: "Build Stunning Websites with Drag & Drop",
+  subtitle: "Create professional websites without writing a single line of code. Our intuitive page builder makes web design accessible to everyone.",
+  primaryButtonText: "Start Building Free",
+  secondaryButtonText: "Watch Demo",
+  features: [
+    { icon: "🎨", title: "Design", description: "Beautiful templates" },
+    { icon: "⚡", title: "Fast", description: "Lightning performance" },
+    { icon: "📱", title: "Responsive", description: "Mobile-first design" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "features-section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 1rem;
+  background: ${args.theme.var.color.background_l50};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features-container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "features-header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features-title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Everything You Need to Build Amazing Websites"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features-subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Our comprehensive set of tools and features makes website creation effortless"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  max-width: 600px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features-grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features-data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "featuresList",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      icon: "🎯",
+      title: "Drag & Drop Builder",
+      description: "Intuitive visual editor that lets you build pages by simply dragging and dropping elements.",
+      showLink: true
+    },
+    {
+      icon: "🎨",
+      title: "Professional Templates",
+      description: "Start with beautiful, responsive templates designed by professionals for any industry.",
+      showLink: true
+    },
+    {
+      icon: "📱",
+      title: "Mobile Responsive",
+      description: "Every website automatically adapts to look perfect on all devices and screen sizes.",
+      showLink: true
+    },
+    {
+      icon: "🚀",
+      title: "Lightning Fast",
+      description: "Optimized performance with global CDN ensures your website loads instantly worldwide.",
+      showLink: true
+    },
+    {
+      icon: "🔍",
+      title: "SEO Optimized",
+      description: "Built-in SEO tools help your website rank higher in search engine results.",
+      showLink: true
+    },
+    {
+      icon: "🔒",
+      title: "Secure Hosting",
+      description: "Enterprise-grade security with SSL certificates and daily backups included.",
+      showLink: true
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "feature-card-wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FeatureCard",
+        props: '''
+const feature = args.contextData.featuresList;
+return {
+  icon: feature.icon,
+  title: feature.title,
+  description: feature.description,
+  showLink: feature.showLink,
+  linkText: "Learn more →"
+};
+'''
+      }
+    },
+    {
+      id: "testimonials-section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 1rem;
+  background: ${args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials-container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials-header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials-title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Loved by Thousands of Happy Customers"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials-grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials-data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "testimonialsList",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      rating: 5,
+      quote: "decode.io has completely transformed how we build websites. The drag-and-drop interface is incredibly intuitive!",
+      name: "Sarah Johnson",
+      role: "CEO at TechStart",
+      avatarEmoji: "👩‍💼"
+    },
+    {
+      rating: 5,
+      quote: "I went from idea to live website in just 2 hours. The templates are beautiful and customization is a breeze.",
+      name: "Mike Chen",
+      role: "Freelance Designer",
+      avatarEmoji: "👨‍💻"
+    },
+    {
+      rating: 5,
+      quote: "The best website builder I've ever used. Fast, reliable, and the customer support is outstanding!",
+      name: "Emily Davis",
+      role: "Marketing Manager",
+      avatarEmoji: "👩‍💻"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "testimonial-card-wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "TestimonialCard",
+        props: '''
+const testimonial = args.contextData.testimonialsList;
+return {
+  rating: testimonial.rating,
+  quote: testimonial.quote,
+  name: testimonial.name,
+  role: testimonial.role,
+  avatarEmoji: testimonial.avatarEmoji
+};
+'''
+      }
+    },
+    {
+      id: "cta-section-1",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "CTASection",
+        props: '''
+return {
+  title: "Start Building Your Dream Website Today",
+  subtitle: "Join thousands of users who are already creating amazing websites with decode.io",
+  primaryButtonText: "Start Free Trial",
+  secondaryButtonText: "Schedule Demo",
+  showSecondaryButton: true
+};
+'''
+      }
+    },
+    {
+      id: "pricing-section",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 1rem;
+  background: ${args.theme.var.color.background_l50};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing-container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing-header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing-title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Simple, Transparent Pricing"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing-subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Choose the perfect plan for your needs. Always flexible to scale."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing-grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing-data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "pricingPlans",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      name: "Starter",
+      description: "Perfect for personal projects",
+      price: "9",
+      period: "/month",
+      featured: false,
+      features: [
+        "Up to 5 pages",
+        "Basic templates",
+        "1GB storage",
+        "Community support"
+      ],
+      buttonText: "Start Free"
+    },
+    {
+      name: "Professional",
+      description: "Everything you need to grow",
+      price: "29",
+      period: "/month",
+      featured: true,
+      features: [
+        "Unlimited pages",
+        "Premium templates",
+        "10GB storage",
+        "Priority support",
+        "Custom domain",
+        "Advanced SEO tools"
+      ],
+      buttonText: "Start Free Trial"
+    },
+    {
+      name: "Business",
+      description: "For teams and enterprises",
+      price: "99",
+      period: "/month",
+      featured: false,
+      features: [
+        "Everything in Pro",
+        "100GB storage",
+        "White-label option",
+        "API access",
+        "Dedicated support",
+        "Custom integrations"
+      ],
+      buttonText: "Contact Sales"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "pricing-card-wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "PricingCard",
+        props: '''
+const plan = args.contextData.pricingPlans;
+return {
+  name: plan.name,
+  description: plan.description,
+  price: plan.price,
+  period: plan.period,
+  featured: plan.featured,
+  features: plan.features,
+  buttonText: plan.buttonText
+};
+'''
+      }
+    },
+    {
+      id: "footer-wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Footer",
+        props: '''
+return {};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "page-root", E: "navbar" },
+    { id: "e2", T: "Attr", S: "navbar", E: "navbar-container" },
+    { id: "e3", T: "Attr", S: "navbar-container", E: "navbar-brand" },
+    { id: "e4", T: "Attr", S: "navbar-container", E: "navbar-menu" },
+    { id: "e5", T: "Attr", S: "navbar-menu", E: "navbar-links" },
+    { id: "e6", T: "Attr", S: "navbar-links", E: "nav-link-data" },
+    { id: "e7", T: "Attr", S: "nav-link-data", E: "nav-link" },
+    { id: "e8", T: "Attr", S: "navbar-menu", E: "navbar-actions" },
+    { id: "e9", T: "Attr", S: "navbar-actions", E: "login-button" },
+    { id: "e10", T: "Attr", S: "navbar-actions", E: "signup-button" },
+    { id: "e11", T: "Attr", S: "page-root", E: "hero-section" },
+    { id: "e12", T: "Attr", S: "page-root", E: "features-section" },
+    { id: "e13", T: "Attr", S: "features-section", E: "features-container" },
+    { id: "e14", T: "Attr", S: "features-container", E: "features-header" },
+    { id: "e15", T: "Attr", S: "features-header", E: "features-title" },
+    { id: "e16", T: "Attr", S: "features-header", E: "features-subtitle" },
+    { id: "e17", T: "Attr", S: "features-container", E: "features-grid" },
+    { id: "e18", T: "Attr", S: "features-grid", E: "features-data" },
+    { id: "e19", T: "Attr", S: "features-data", E: "feature-card-wrapper" },
+    { id: "e20", T: "Attr", S: "page-root", E: "testimonials-section" },
+    { id: "e21", T: "Attr", S: "testimonials-section", E: "testimonials-container" },
+    { id: "e22", T: "Attr", S: "testimonials-container", E: "testimonials-header" },
+    { id: "e23", T: "Attr", S: "testimonials-header", E: "testimonials-title" },
+    { id: "e24", T: "Attr", S: "testimonials-container", E: "testimonials-grid" },
+    { id: "e25", T: "Attr", S: "testimonials-grid", E: "testimonials-data" },
+    { id: "e26", T: "Attr", S: "testimonials-data", E: "testimonial-card-wrapper" },
+    { id: "e27", T: "Attr", S: "page-root", E: "cta-section-1" },
+    { id: "e28", T: "Attr", S: "page-root", E: "pricing-section" },
+    { id: "e29", T: "Attr", S: "pricing-section", E: "pricing-container" },
+    { id: "e30", T: "Attr", S: "pricing-container", E: "pricing-header" },
+    { id: "e31", T: "Attr", S: "pricing-header", E: "pricing-title" },
+    { id: "e32", T: "Attr", S: "pricing-header", E: "pricing-subtitle" },
+    { id: "e33", T: "Attr", S: "pricing-container", E: "pricing-grid" },
+    { id: "e34", T: "Attr", S: "pricing-grid", E: "pricing-data" },
+    { id: "e35", T: "Attr", S: "pricing-data", E: "pricing-card-wrapper" },
+    { id: "e36", T: "Attr", S: "page-root", E: "footer-wrapper" }
+  ]
+}

@@ -19,7 +19,10 @@ export type PermissionsObject = {
   hasViewPermission: boolean | null | undefined;
 };
 
-export function useComponentPermissions(meta: Vertex) {
+export function useComponentPermissions(props: {
+  meta: Vertex;
+  isNoPermissionCheck?: boolean | null;
+}) {
   const [graph] = useGraph();
   const formId = useFormContext();
   const formVertex = () =>
@@ -30,7 +33,11 @@ export function useComponentPermissions(meta: Vertex) {
 
   // Calculate configured permissions
   const allConfiguredPermission = createLazyMemo(() =>
-    getConfiguredPermissions(getGlobalStore(graph).P.userRoles, meta, graph),
+    getConfiguredPermissions(
+      getGlobalStore(graph).P.userRoles,
+      props.meta,
+      graph,
+    ),
   );
 
   // Permission level checks
@@ -69,13 +76,13 @@ export function useComponentPermissions(meta: Vertex) {
   });
 
   // Check if permission check should be skipped
-  const isNoPermissionCheck = (isNoPermissionCheckProp?: boolean | null) => {
+  const isNoPermissionCheck = () => {
     const vertex = formVertex();
     const formMetaId = vertex?.P.formMetaId;
 
     return (
       !previewStore ||
-      isNoPermissionCheckProp ||
+      props.isNoPermissionCheck ||
       (formMetaId
         ? graph.vertexes[formMetaId]?.P.isNoPermissionCheck
         : false) ||

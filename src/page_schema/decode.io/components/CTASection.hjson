@@ -1,0 +1,226 @@
+{
+  vertexes: [
+    {
+      id: "cta-root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 4rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cta-container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "cta-title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: args.contextData.props?.title || "Ready to Get Started?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cta-subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: args.contextData.props?.subtitle || "Join thousands of users who are already building amazing websites."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cta-buttons",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "cta-primary-button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: args.contextData.props?.primaryButtonText || "Start Free Trial"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.primary};
+  padding: 1rem 2.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(0,0,0,0.15);
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cta-secondary-button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const showSecondary = args.contextData.props?.showSecondaryButton !== false;
+if (!showSecondary) return { as: "fragment" };
+
+return {
+  as: "button",
+  text: args.contextData.props?.secondaryButtonText || "View Pricing"
+};
+''',
+        css: '''
+return `._id {
+  background: transparent;
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "cta-root", E: "cta-container" },
+    { id: "e2", T: "Attr", S: "cta-container", E: "cta-title" },
+    { id: "e3", T: "Attr", S: "cta-container", E: "cta-subtitle" },
+    { id: "e4", T: "Attr", S: "cta-container", E: "cta-buttons" },
+    { id: "e5", T: "Attr", S: "cta-buttons", E: "cta-primary-button" },
+    { id: "e6", T: "Attr", S: "cta-buttons", E: "cta-secondary-button" }
+  ]
+}

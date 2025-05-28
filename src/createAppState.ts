@@ -9,6 +9,7 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
 import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 import { componentSchemas } from "~/components/fields/components";
+import { loadWebsiteSchemas } from "~/page_schema/loader";
 
 export function createAppState() {
   const graph = createGraph();
@@ -73,6 +74,39 @@ export function createAppState() {
       "Component", // Parent label
       key, // Use the schema key as the parent key
     );
+  }
+
+  // Load website schemas (components and pages organized by website)
+  const websiteSchemas = loadWebsiteSchemas();
+
+  // Process components from all websites
+  for (const [websiteName, schemas] of Object.entries(websiteSchemas)) {
+    if (schemas.components) {
+      for (const [componentKey, schema] of Object.entries(schemas.components)) {
+        const importResult = importGraphStructure(schema, graph[0], graph[1]);
+        processImportedGraph(
+          importResult,
+          graph[0],
+          graph[1],
+          "Component", // Parent label
+          componentKey, // Use component key without prefix
+        );
+      }
+    }
+
+    // Process pages from all websites
+    if (schemas.pages) {
+      for (const [pageKey, schema] of Object.entries(schemas.pages)) {
+        const importResult = importGraphStructure(schema, graph[0], graph[1]);
+        processImportedGraph(
+          importResult,
+          graph[0],
+          graph[1],
+          "Page", // Parent label for pages
+          pageKey, // Use page key without prefix
+        );
+      }
+    }
   }
 
   return graph;

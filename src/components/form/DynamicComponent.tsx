@@ -101,7 +101,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
     hasPermission,
     isDisabledByPermissions,
     permissions,
-  } = useComponentPermissions(props.meta);
+  } = useComponentPermissions(props);
 
   // Component view mode and read-only state
   const isViewMode = () =>

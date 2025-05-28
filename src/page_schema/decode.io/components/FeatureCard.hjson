@@ -1,0 +1,156 @@
+{
+  vertexes: [
+    {
+      id: "feature-card-root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "feature-icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: args.contextData.props?.icon || "🚀"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "feature-title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: args.contextData.props?.title || "Feature Title"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "feature-description",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: args.contextData.props?.description || "Describe your amazing feature here. Make it compelling and clear."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  flex-grow: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9375rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "feature-link",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const showLink = args.contextData.props?.showLink !== false;
+if (!showLink) return { as: "fragment" };
+
+return {
+  as: "a",
+  text: args.contextData.props?.linkText || "Learn more →",
+  href: args.contextData.props?.linkUrl || "#"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  color: ${args.theme.var.color.primary};
+  font-weight: 500;
+  text-decoration: none;
+  margin-top: 1.5rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateX(5px);
+    color: ${args.theme.var.color.primary_d200};
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "feature-card-root", E: "feature-icon" },
+    { id: "e2", T: "Attr", S: "feature-card-root", E: "feature-title" },
+    { id: "e3", T: "Attr", S: "feature-card-root", E: "feature-description" },
+    { id: "e4", T: "Attr", S: "feature-card-root", E: "feature-link" }
+  ]
+}
