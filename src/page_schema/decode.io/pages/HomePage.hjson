@@ -148,7 +148,8 @@ return {
     { text: "Features", href: "#features" },
     { text: "Pricing", href: "#pricing" },
     { text: "Templates", href: "#templates" },
-    { text: "About", href: "#about" }
+    { text: "About", href: "#about" },
+    { text: "Discord", href: "https://discord.gg/xPtnERzA" }
   ]
 };
 '''

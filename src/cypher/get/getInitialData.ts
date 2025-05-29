@@ -14,7 +14,8 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 
 export async function getInitialData(request?: APIEvent["request"]) {
   "use server";
-  const { dbSession } = await getDBSessionForSubdomain(request);
+  const { dbSession, subDomain, domain } =
+    await getDBSessionForSubdomain(request);
   const nodeObj: Record<string, Vertex> = {};
   const relationshipObj: Record<string, Edge> = {};
 
@@ -63,6 +64,8 @@ export async function getInitialData(request?: APIEvent["request"]) {
       vertexes: nodeObj,
     },
     timestamp: new Date().getTime(),
+    subdomain: subDomain,
+    domain: domain || process.env.DOMAIN || null,
   } as ServerResult;
 }
 

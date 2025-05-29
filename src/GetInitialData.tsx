@@ -16,13 +16,13 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { SimpleErrorMessage } from "~/components/SimpleErrorMessage";
+import { loadWebsiteSchemasForSubdomain } from "~/createAppState";
 
 interface GetInitialDataProps extends ParentProps {
-  authenticate?: boolean;
   dontRedirectToLogin?: boolean;
 }
 
-const fetchData = query(async (_authenticate?: boolean) => {
+const fetchData = query(async () => {
   "use server";
   const [initialData, userData] = await Promise.all([
     getInitialData().catch(
@@ -39,6 +39,7 @@ const fetchData = query(async (_authenticate?: boolean) => {
 }, "initialData");
 
 export function GetInitialData(props: GetInitialDataProps) {
+  console.log("GetInitialData");
   const graph = useGraph();
   const navigate = useNavigate();
 
@@ -58,6 +59,28 @@ export function GetInitialData(props: GetInitialDataProps) {
 
     setGraphData(graph[0], graph[1], initialData.graph!);
 
+    // Store subdomain and domain in global store and load website schemas
+    if (initialData.subdomain) {
+      mergeVertexProperties<GlobalProperties>(
+        0,
+        "globalStoreId",
+        graph[0],
+        graph[1],
+        {
+          subdomain: initialData.subdomain,
+          domain: initialData.domain || undefined,
+        },
+      );
+
+      // Load website schemas based on subdomain
+      loadWebsiteSchemasForSubdomain(
+        graph[0],
+        graph[1],
+        initialData.subdomain,
+        initialData.domain || undefined,
+      );
+    }
+
     if (userData) {
       setUserData(graph[0], graph[1], userData);
       handleUserNavigation(
@@ -69,7 +92,7 @@ export function GetInitialData(props: GetInitialDataProps) {
 
   const data = createAsync(
     async () => {
-      return await fetchData(props.authenticate);
+      return await fetchData();
     },
     { deferStream: true },
   );
@@ -78,9 +101,7 @@ export function GetInitialData(props: GetInitialDataProps) {
     setData(data()!.initialData, data()!.userData as UserData);
     return (
       <Switch>
-        <Match
-          when={props.authenticate && !(data()?.userData as UserData)?.user}
-        >
+        <Match when={!(data()?.userData as UserData)?.user}>
           <SimpleErrorMessage
             message="Not Authorized"
             linkText="Go to Sign In"

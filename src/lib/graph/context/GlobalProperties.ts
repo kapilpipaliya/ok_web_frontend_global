@@ -13,6 +13,8 @@ export interface GlobalProperties {
   userSettingId: Id;
   tooltipRegistry?: { [key: string]: string[] }; // which tooltips belong to which group
   activeTooltips?: { [key: string]: boolean };
+  subdomain?: string; // Current subdomain
+  domain?: string; // Current domain
   // isAuthenticated: false,
   // theme: "light" as "light" | "dark",
   // notifications: [] as Array<{ id: number; message: string; type: "info" | "warning" | "error" }>,

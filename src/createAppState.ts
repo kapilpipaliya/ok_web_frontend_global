@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 
 import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import type { Id } from "~/lib/graph/type/id";
@@ -9,7 +9,26 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
 import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 import { componentSchemas } from "~/components/fields/components";
-import { loadWebsiteSchemas } from "~/page_schema/loader";
+import { loadWebsiteSchemas, getWebsiteSchemas } from "~/page_schema/loader";
+
+// Function to determine which website schemas to load
+function getWebsiteNameForSubdomain(
+  subdomain: string,
+  domain?: string,
+): string | null {
+  // For localhost in dev, load all websites
+  if (subdomain === "admin" && domain === "localhost") {
+    return null; // Load all
+  }
+
+  // If subdomain is 'www' and we have domain, use domain as website name
+  if (subdomain === "www" && domain) {
+    return domain;
+  }
+
+  // Otherwise use subdomain as website name
+  return subdomain;
+}
 
 export function createAppState() {
   const graph = createGraph();
@@ -76,40 +95,86 @@ export function createAppState() {
     );
   }
 
-  // Load website schemas (components and pages organized by website)
-  const websiteSchemas = loadWebsiteSchemas();
+  // Website schemas will be loaded after we get subdomain info from server
+  // This is handled in loadWebsiteSchemasForSubdomain function
 
-  // Process components from all websites
-  for (const [websiteName, schemas] of Object.entries(websiteSchemas)) {
+  return graph;
+}
+
+export function loadWebsiteSchemasForSubdomain(
+  graph: GraphInterface,
+  setGraph: SetStoreFunction<GraphInterface>,
+  subdomain: string,
+  domain?: string,
+) {
+  const websiteName = getWebsiteNameForSubdomain(subdomain, domain);
+
+  if (websiteName === null) {
+    // Load all websites (for localhost in dev mode)
+    const websiteSchemas = loadWebsiteSchemas();
+
+    // Process components from all websites
+    for (const [websiteName, schemas] of Object.entries(websiteSchemas)) {
+      if (schemas.components) {
+        for (const [componentKey, schema] of Object.entries(
+          schemas.components,
+        )) {
+          const importResult = importGraphStructure(schema, graph, setGraph);
+          processImportedGraph(
+            importResult,
+            graph,
+            setGraph,
+            "Component", // Parent label
+            componentKey, // Use component key without prefix
+          );
+        }
+      }
+
+      // Process pages from all websites
+      if (schemas.pages) {
+        for (const [pageKey, schema] of Object.entries(schemas.pages)) {
+          const importResult = importGraphStructure(schema, graph, setGraph);
+          processImportedGraph(
+            importResult,
+            graph,
+            setGraph,
+            "Page", // Parent label for pages
+            pageKey, // Use page key without prefix
+          );
+        }
+      }
+    }
+  } else {
+    // Load only specific website schemas
+    const schemas = getWebsiteSchemas(websiteName);
+
     if (schemas.components) {
       for (const [componentKey, schema] of Object.entries(schemas.components)) {
-        const importResult = importGraphStructure(schema, graph[0], graph[1]);
+        const importResult = importGraphStructure(schema, graph, setGraph);
         processImportedGraph(
           importResult,
-          graph[0],
-          graph[1],
+          graph,
+          setGraph,
           "Component", // Parent label
           componentKey, // Use component key without prefix
         );
       }
     }
 
-    // Process pages from all websites
+    // Process pages from the specific website
     if (schemas.pages) {
       for (const [pageKey, schema] of Object.entries(schemas.pages)) {
-        const importResult = importGraphStructure(schema, graph[0], graph[1]);
+        const importResult = importGraphStructure(schema, graph, setGraph);
         processImportedGraph(
           importResult,
-          graph[0],
-          graph[1],
+          graph,
+          setGraph,
           "Page", // Parent label for pages
           pageKey, // Use page key without prefix
         );
       }
     }
   }
-
-  return graph;
 }
 
 export function createGraph() {

@@ -50,42 +50,47 @@ export default function App() {
 
   return (
     <ToastProvider {...toastValue}>
-      <Router
-        root={(props) => {
-          // <A> and 'use' router primitives can be only used inside a Route.
-          // const location = useLocation();
-          return (
-            <MetaProvider>
-              <GraphContext.Provider value={graph}>
-                <ErrorBoundary
-                  fallback={(error, reset) => {
-                    // Log the UI error
-                    if (!isServer) {
-                      logError(error, { location: location.pathname });
-                    }
-                    return (
-                      <ErrorFallback error={error} resetErrorBoundary={reset} />
-                    );
-                  }}
-                >
-                  <Suspense>
+      <GraphContext.Provider value={graph}>
+        <Router
+          root={(props) => {
+            // <A> and 'use' router primitives can be only used inside a Route.
+            // const location = useLocation();
+            return (
+              <MetaProvider>
+                <Suspense>
+                  <ErrorBoundary
+                    fallback={(error, reset) => {
+                      // Log the UI error
+                      if (!isServer) {
+                        logError(error, { location: location.pathname });
+                      }
+                      return (
+                        <ErrorFallback
+                          error={error}
+                          resetErrorBoundary={reset}
+                        />
+                      );
+                    }}
+                  >
                     <GetInitialData dontRedirectToLogin={true}>
-                      <ThemeProvider>{props.children}</ThemeProvider>
+                      <ThemeProvider>
+                        <Suspense>{props.children}</Suspense>
+                      </ThemeProvider>
                     </GetInitialData>
-                  </Suspense>
-                </ErrorBoundary>
-                <Show when={isHydrated()}>
-                  {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
-                  <Toaster />
-                  {/* </Show> */}
-                </Show>
-              </GraphContext.Provider>
-            </MetaProvider>
-          );
-        }}
-      >
-        <FileRoutes />
-      </Router>
+                  </ErrorBoundary>
+                  <Show when={isHydrated()}>
+                    {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
+                    <Toaster />
+                    {/* </Show> */}
+                  </Show>
+                </Suspense>
+              </MetaProvider>
+            );
+          }}
+        >
+          <FileRoutes />
+        </Router>
+      </GraphContext.Provider>
     </ToastProvider>
   );
 }
