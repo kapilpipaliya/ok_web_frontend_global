@@ -194,16 +194,36 @@ export function FunctionEditor(props: {
   };
 
   // UI Components
-  const EditorContent = (p: { height?: string }) => {
-    const [initialHeight] = createSignal(p.height ?? "200px");
-    const [editorHeight, setEditorHeight] = createSignal(initialHeight());
+  const EditorContent = (p: { maxHeight?: string }) => {
+    // Calculate initial height based on content
+    const calculateInitialHeight = () => {
+      const lines = editorValue().split("\n").length;
+      const lineHeight = 19; // Monaco editor default line height
+      const padding = 40; // Extra padding for scrollbar and margins
+      const minHeight = 100;
+      const maxHeight = p.maxHeight ? Number.parseInt(p.maxHeight) : 400; // Use provided maxHeight or default
+
+      const calculatedHeight = Math.min(
+        Math.max(lines * lineHeight + padding, minHeight),
+        maxHeight,
+      );
+      return `${calculatedHeight}px`;
+    };
+
+    const [editorHeight, setEditorHeight] = createSignal(
+      calculateInitialHeight(),
+    );
     let resizableEditorAreaRef: HTMLDivElement | undefined; // Ref for the area containing editor + handle
     let dragStartEditorHeight = 0;
     let dragStartY = 0;
 
+    // Update height when content changes
     createEffect(() => {
-      const newInitialHeight = p.height ?? "200px";
-      setEditorHeight(newInitialHeight);
+      editorValue(); // Track changes
+      if (!isModalOpen()) {
+        // Only auto-adjust for inline editor
+        setEditorHeight(calculateInitialHeight());
+      }
     });
 
     const onMouseDownResize = (e: MouseEvent) => {
@@ -332,7 +352,7 @@ export function FunctionEditor(props: {
             title="Edit Function in Modal"
           />
         </As>
-        <EditorContent height="200px" />
+        <EditorContent />
       </As>
 
       <CustomModal
@@ -348,7 +368,7 @@ export function FunctionEditor(props: {
             height: 600px;
           }\`;`}
         >
-          <EditorContent height="560px" />
+          <EditorContent maxHeight="560px" />
         </As>
       </CustomModal>
     </>
