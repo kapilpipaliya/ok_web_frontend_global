@@ -34,6 +34,7 @@ import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { Breadcrumbs } from "./Breadcrumbs";
 
 // ---- Utility Functions ----
 
@@ -774,6 +775,14 @@ export function LayoutTree() {
           value={searchQuery()}
         />
       </As>
+
+      <Breadcrumbs
+        selectedVertex={
+          formStoreVertex()?.P.selectedId
+            ? graph.vertexes[formStoreVertex()?.P.selectedId]
+            : undefined
+        }
+      />
 
       <As
         as="div"

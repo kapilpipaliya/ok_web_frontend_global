@@ -216,9 +216,9 @@ export function LayoutTreeItem(
     }
 
     if (isSelectedLayoutId(props.metaVertex.id)) {
-      boxShadow += ` background-color:\${args.theme.var.color.primary_l150};`;
+      boxShadow += ` background-color:\${args.theme.var.color.primary_l300}; color:\${args.theme.var.color.primary_l300_text};`;
     } else if (isSelectedHoverId(props.metaVertex.id)) {
-      boxShadow += ` background-color:\${args.theme.var.color.background_l150};`;
+      boxShadow += ` background-color:\${args.theme.var.color.primary_l750}; color:\${args.theme.var.color.primary_l750_text};`;
     }
 
     return boxShadow;
@@ -391,6 +391,7 @@ export function LayoutTreeItem(
           metaVertex={props.metaVertex}
           toggleExpand={props.toggleExpand}
           parentIndex={props.parentIndex}
+          isSelected={isSelectedLayoutId(props.metaVertex.id)}
         />
         <Show when={isSelectedHoverId(props.metaVertex.id) || isNodeHidden()}>
           <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />

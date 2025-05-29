@@ -47,6 +47,7 @@ export const getTreeItemBorder = (index: number) => {
 export const getSelectedItemStyle = () => {
   return `
     background-color: \${args.theme.var.color.primary_l100}; 
+    color: \${args.theme.var.color.primary_l100_text};
     border-left: 3px solid \${args.theme.var.color.primary}; 
     box-shadow: 0 0 4px \${args.theme.var.color.primary_l600};
   `;

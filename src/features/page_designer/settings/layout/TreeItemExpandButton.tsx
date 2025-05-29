@@ -21,6 +21,7 @@ export function TreeItemExpandButton(
           transition: transform 0.2s linear;
           background-color: transparent;
           border: none;
+          color: currentColor;
         }\`;`}
         noCenter
         onClick={(e) => {

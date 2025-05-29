@@ -20,6 +20,7 @@ export function TreeItemContent(
     metaVertex: Vertex;
     toggleExpand: (itemId: Id) => void;
     parentIndex?: number;
+    isSelected?: boolean;
   }>,
 ) {
   const [graph, setGraph] = useGraph();
@@ -66,7 +67,11 @@ export function TreeItemContent(
           iconMap[componentName() as keyof typeof iconMap] ||
           "ph:circle"
         }
-        style={{ color: getTreeItemColor(props.parentIndex) }}
+        style={{
+          color: props.isSelected
+            ? "currentColor"
+            : getTreeItemColor(props.parentIndex),
+        }}
         noobserver
         width={17}
       />

@@ -8,7 +8,7 @@ export function nameExpr(
 ) {
   let displayName = componentName;
   if (componentName === "Html") {
-    displayName = v.P.as || "Fragment";
+    displayName = v.P.as ? `Html (${v.P.as})` : "Html";
   }
   return `${displayName ? ` ${displayName}` : ""}${v.P.layerName ? ` (${v.P.layerName})` : ""}`;
 }
