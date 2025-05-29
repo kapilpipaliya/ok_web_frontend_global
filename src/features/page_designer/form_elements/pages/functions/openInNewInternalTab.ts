@@ -33,12 +33,18 @@ export function openInNewInternalTab(
     });
 
   if (exists) {
-    // const openFormId = layoutStore.openedFormIds.find(formId => graph.vertexes[formId].P.dataId === child.id);
-    // if (openFormId) {
-    //   mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
-    //     formId: graph.vertexes[openFormId].P.formId
-    //   });
-    // }
+    // Find the existing form and activate it
+    const openFormId = layoutStore.openedFormIds.find((formId) => {
+      const form = graph.vertexes[formId].P as OpenFormInfo;
+      return form.label === child.L[0] && form.dataId === child.id;
+    });
+    if (openFormId) {
+      const existingForm = graph.vertexes[openFormId].P as OpenFormInfo;
+      mergeVertexProperties(0, layoutStoreId, graph, setGraph, {
+        [`mainPanel${existingForm.mainPanel}Tab`]: existingForm.formId,
+        formId: existingForm.formId,
+      });
+    }
   } else {
     const newOpenVertex = newVertex<OpenFormInfo>(uuidv7(), ["OpenForm"], {
       dataId: child.id,
@@ -58,6 +64,9 @@ export function openInNewInternalTab(
       setGraph,
       {
         openedFormIds: [...layoutStore.openedFormIds, newOpenVertex.id],
+        // Activate the newly created tab
+        [`mainPanel${layoutStore.mainPanel[0]}Tab`]: newOpenVertex.P.formId,
+        formId: newOpenVertex.P.formId,
       },
       { cloneProperties: false },
     );
