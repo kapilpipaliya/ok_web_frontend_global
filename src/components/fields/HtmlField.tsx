@@ -1,4 +1,11 @@
-import { type JSX, Match, Show, splitProps, Switch } from "solid-js";
+import {
+  type JSX,
+  Match,
+  Show,
+  splitProps,
+  Switch,
+  createMemo,
+} from "solid-js";
 import { Dynamic, Portal } from "solid-js/web";
 import { untrack } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
@@ -76,6 +83,8 @@ export function HtmlField(
     "src",
   ]);
 
+  const asLowerCase = createMemo(() => local.as?.toLowerCase());
+
   const handleTextChange = (e: Event) => {
     if (!layoutStoreId) {
       return;
@@ -147,10 +156,10 @@ export function HtmlField(
 
   return (
     <Switch>
-      <Match when={!local.as}>
+      <Match when={!local.as || asLowerCase() === "fragment"}>
         <Content />
       </Match>
-      <Match when={local.as === "img"}>
+      <Match when={asLowerCase() === "img"}>
         <img
           class={`${local.class || ""}`}
           loading="lazy"
@@ -163,30 +172,30 @@ export function HtmlField(
           )}
         />
       </Match>
-      <Match when={local.as === "icon"}>
+      <Match when={asLowerCase() === "icon"}>
         {/* @ts-expect-error - icon wiil be in others */}
         <Icon class={`${local.class || ""}`} noobserver {...others} />
       </Match>
-      <Match when={local.as === "base"}>
+      <Match when={asLowerCase() === "base"}>
         <Base {...others} />
       </Match>
 
-      <Match when={local.as === "link"}>
+      <Match when={asLowerCase() === "link"}>
         <Link {...others} />
       </Match>
 
-      <Match when={local.as === "meta"}>
+      <Match when={asLowerCase() === "meta"}>
         <Meta {...others} />
       </Match>
 
-      <Match when={local.as === "style"}>
+      <Match when={asLowerCase() === "style"}>
         <Style>{local.text}</Style>
       </Match>
 
-      <Match when={local.as === "title"}>
+      <Match when={asLowerCase() === "title"}>
         <Title>{local.text}</Title>
       </Match>
-      <Match when={local.as === "portal"}>
+      <Match when={asLowerCase() === "portal"}>
         <Portal {...others}>
           <Content />
         </Portal>
