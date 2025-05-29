@@ -44,7 +44,11 @@ export function processImportedGraph(
     IN: {},
     L: [parentLabel],
     OUT: {},
-    P: { key: parentKey },
+    P: {
+      key: parentKey,
+      fns: "return { enabled: () => true }",
+      isNoPermissionCheck: true,
+    },
   };
 
   addNewVertex(metaTxnId, parentVertex, graph, setGraph);
