@@ -1,0 +1,130 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeCommerceNavigationHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeCommerceHeroSection"
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "DecodeCommerceFeatureGrid"
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeCommerceROICalculator"
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "DecodeCommerceProcessTimeline"
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "DecodeCommercePricingSection"
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "DecodeCommerceTestimonialSlider"
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "DecodeCommerceFAQAccordion"
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "DecodeCommerceCTASection"
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeCommerceFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "3", E: "6" },
+    { id: "e6", T: "Attr", S: "3", E: "7" },
+    { id: "e7", T: "Attr", S: "3", E: "8" },
+    { id: "e8", T: "Attr", S: "3", E: "9" },
+    { id: "e9", T: "Attr", S: "3", E: "10" },
+    { id: "e10", T: "Attr", S: "3", E: "11" },
+    { id: "e11", T: "Attr", S: "1", E: "12" }
+  ]
+}

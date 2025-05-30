@@ -1,0 +1,627 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeCommerceNavigationHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0 3rem;
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Simple, Transparent Pricing"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "No hidden fees. No surprises. Just honest pricing for your eCommerce success."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text_d300};
+  max-width: 600px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "DecodeCommercePricingSection"
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: ${args.theme.var.color.background_d100};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Compare Plans"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "table"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 5px 20px ${args.theme.var.color.text_l900};
+  
+  @media (max-width: 768px) {
+    min-width: 600px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "thead"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_d100};
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tr"
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Features"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.background_d200};
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Data",
+        name: "planHeaders",
+        loop: true,
+        props: '''
+return {
+  data: ["Starter", "Professional", "Enterprise"]
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.planHeaders;
+return {
+  as: "th",
+  text: plan
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  border-bottom: 2px solid ${args.theme.var.color.background_d200};
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tbody"
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "features",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      feature: "NetSuite Integration",
+      starter: "Basic",
+      professional: "Advanced",
+      enterprise: "Full Suite"
+    },
+    {
+      feature: "Product Catalog Size",
+      starter: "Up to 1,000",
+      professional: "Unlimited",
+      enterprise: "Unlimited"
+    },
+    {
+      feature: "Monthly Orders",
+      starter: "Up to 500",
+      professional: "Up to 5,000",
+      enterprise: "Unlimited"
+    },
+    {
+      feature: "Support",
+      starter: "Email",
+      professional: "Priority",
+      enterprise: "Dedicated Manager"
+    },
+    {
+      feature: "Delivery Time",
+      starter: "2 months",
+      professional: "1.5 months",
+      enterprise: "Fast-track"
+    },
+    {
+      feature: "Custom Features",
+      starter: "—",
+      professional: "✓",
+      enterprise: "✓"
+    },
+    {
+      feature: "API Access",
+      starter: "Limited",
+      professional: "Full",
+      enterprise: "Full + Custom"
+    },
+    {
+      feature: "Analytics",
+      starter: "Basic",
+      professional: "Advanced",
+      enterprise: "Custom Dashboards"
+    },
+    {
+      feature: "Multi-store",
+      starter: "—",
+      professional: "Up to 3",
+      enterprise: "Unlimited"
+    },
+    {
+      feature: "SLA",
+      starter: "—",
+      professional: "99.9%",
+      enterprise: "99.99%"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+const index = feature.index;
+return {
+  as: "tr"
+};
+''',
+        css: '''
+const feature = args.contextData.features;
+const index = feature.index;
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.background_d100};
+  
+  &:hover {
+    background: ${args.theme.var.color.background_d50};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "td",
+  text: feature.feature
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "td",
+  text: feature.starter
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  color: ${args.theme.var.color.text_d300};
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "td",
+  text: feature.professional
+};
+''',
+        css: '''
+const feature = args.contextData.features;
+const hasCheck = feature.professional === "✓";
+return `._id {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_d300};
+  font-weight: ${hasCheck ? '600' : '400'};
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "td",
+  text: feature.enterprise
+};
+''',
+        css: '''
+const feature = args.contextData.features;
+const hasCheck = feature.enterprise === "✓";
+return `._id {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_d300};
+  font-weight: ${hasCheck ? '600' : '400'};
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "DecodeCommerceFAQAccordion"
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "DecodeCommerceCTASection"
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeCommerceFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "3", E: "8" },
+    { id: "e8", T: "Attr", S: "3", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "10", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "15", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "13", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "21", E: "23" },
+    { id: "e23", T: "Attr", S: "21", E: "24" },
+    { id: "e24", T: "Attr", S: "21", E: "25" },
+    { id: "e25", T: "Attr", S: "3", E: "26" },
+    { id: "e26", T: "Attr", S: "3", E: "27" },
+    { id: "e27", T: "Attr", S: "1", E: "28" }
+  ]
+}

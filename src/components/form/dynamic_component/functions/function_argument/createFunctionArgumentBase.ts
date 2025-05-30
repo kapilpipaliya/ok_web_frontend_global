@@ -27,6 +27,7 @@ import { runWithOwnerFunction } from "~/components/form/dynamic_component/owner/
 import { runWithParentOwnerFunction } from "~/components/form/dynamic_component/owner/runWithParentOwnerFunction";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
+import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
 
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
@@ -82,6 +83,8 @@ export function createFunctionArgumentBase(
     options.dynamicFns,
     options.parentRenderContext,
   );
+
+  const themeToggle = useThemeToggle();
 
   return {
     clearAllErrors: () => {
@@ -226,5 +229,10 @@ export function createFunctionArgumentBase(
     zIndex: hooks.zIndex,
     createSignal,
     createStore,
+    // Theme toggle functions from useThemeToggle hook
+    toggleTheme: themeToggle.toggleTheme,
+    setColorMode: themeToggle.setColorMode,
+    resetTheme: themeToggle.resetTheme,
+    currentMode: themeToggle.currentMode,
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

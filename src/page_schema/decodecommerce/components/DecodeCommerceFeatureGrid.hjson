@@ -1,0 +1,333 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeCommerceFeatureGrid"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "features"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: ${args.theme.var.color.background_d100};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Enterprise-Grade Features"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Everything you need to build a powerful eCommerce platform integrated with NetSuite"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text_d300};
+  max-width: 600px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "features",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      icon: "carbon:api-1",
+      title: "NetSuite API Integration",
+      description: "Seamless real-time synchronization with your NetSuite data"
+    },
+    {
+      icon: "carbon:shopping-cart",
+      title: "Advanced eCommerce",
+      description: "Full-featured shopping cart with inventory management"
+    },
+    {
+      icon: "carbon:chart-line",
+      title: "Analytics Dashboard",
+      description: "Real-time insights into your sales and customer behavior"
+    },
+    {
+      icon: "carbon:security",
+      title: "Enterprise Security",
+      description: "Bank-level encryption and compliance with industry standards"
+    },
+    {
+      icon: "carbon:mobile",
+      title: "Mobile-First Design",
+      description: "Responsive design that works perfectly on all devices"
+    },
+    {
+      icon: "carbon:search",
+      title: "SEO Optimized",
+      description: "Built-in SEO features to maximize your online visibility"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid ${args.theme.var.color.background_d200};
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px ${args.theme.var.color.text_l900};
+    border-color: ${args.theme.var.color.primary_l700};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.5rem;
+  background: ${args.theme.var.color.primary_l850};
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "icon",
+  icon: feature.icon,
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "h3",
+  text: feature.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "p",
+  text: feature.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.6;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "3", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "9", E: "12" },
+    { id: "e12", T: "Attr", S: "9", E: "13" }
+  ]
+}

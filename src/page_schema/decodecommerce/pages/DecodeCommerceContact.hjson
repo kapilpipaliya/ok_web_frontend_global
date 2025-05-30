@@ -1,0 +1,937 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeCommerceNavigationHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Let's Start Your eCommerce Journey"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Ready to transform your NetSuite into a powerful eCommerce platform? Let's talk."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text_d300};
+  max-width: 600px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  padding: 3rem;
+  box-shadow: 0 10px 40px ${args.theme.var.color.text_l900};
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Send Us a Message"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Data",
+        name: "formState",
+        props: '''
+const [formData, setFormData] = args.createStore({
+  name: "",
+  email: "",
+  company: "",
+  message: ""
+});
+
+const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  
+  // Simulate form submission
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  args.showSuccessToast("Thank you! We'll be in touch within 24 hours.");
+  
+  // Reset form
+  setFormData({
+    name: "",
+    email: "",
+    company: "",
+    message: ""
+  });
+  setIsSubmitting(false);
+};
+
+return {
+  data: {
+    formData,
+    setFormData,
+    isSubmitting,
+    handleSubmit
+  }
+};
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const formState = args.contextData.formState;
+return {
+  as: "form",
+  onSubmit: formState.handleSubmit
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Name"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const formState = args.contextData.formState;
+return {
+  as: "input",
+  type: "text",
+  required: true,
+  value: formState.formData.name,
+  onInput: (e) => formState.setFormData("name", e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_d200};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Email"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const formState = args.contextData.formState;
+return {
+  as: "input",
+  type: "email",
+  required: true,
+  value: formState.formData.email,
+  onInput: (e) => formState.setFormData("email", e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_d200};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Company"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const formState = args.contextData.formState;
+return {
+  as: "input",
+  type: "text",
+  value: formState.formData.company,
+  onInput: (e) => formState.setFormData("company", e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_d200};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "How can we help?"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const formState = args.contextData.formState;
+return {
+  as: "textarea",
+  required: true,
+  rows: 5,
+  value: formState.formData.message,
+  onInput: (e) => formState.setFormData("message", e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_d200};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  resize: vertical;
+  transition: all 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const formState = args.contextData.formState;
+return {
+  as: "button",
+  type: "submit",
+  disabled: formState.isSubmitting(),
+  text: formState.isSubmitting() ? "Sending..." : "Send Message"
+};
+''',
+        css: '''
+const formState = args.contextData.formState;
+return `._id {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary_d200};
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px ${args.theme.var.color.primary_l600};
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Other Ways to Reach Us"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "contactMethods",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      icon: "carbon:email",
+      title: "Email",
+      content: "sales@decodecommerce.com",
+      link: "mailto:sales@decodecommerce.com"
+    },
+    {
+      icon: "carbon:phone",
+      title: "Phone",
+      content: "(123) 456-7890",
+      link: "tel:+1234567890"
+    },
+    {
+      icon: "carbon:time",
+      title: "Office Hours",
+      content: "Monday - Friday, 9AM - 6PM EST",
+      link: null
+    },
+    {
+      icon: "carbon:location",
+      title: "Address",
+      content: "123 Business Ave, Suite 100, New York, NY 10001",
+      link: null
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.contactMethods;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_d100};
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_d200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.contactMethods;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 48px;
+  height: 48px;
+  background: ${args.theme.var.color.primary_l850};
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.contactMethods;
+return {
+  as: "icon",
+  icon: method.icon,
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.contactMethods;
+return {
+  as: "h3",
+  text: method.title
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.contactMethods;
+return method.link ? {
+  as: "a",
+  href: method.link,
+  text: method.content
+} : {
+  as: "p",
+  text: method.content
+};
+''',
+        css: '''
+const method = args.contextData.contactMethods;
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  text-decoration: none;
+  transition: all 0.2s ease;
+  
+  ${method.link ? `
+    &:hover {
+      color: ${args.theme.var.color.primary};
+    }
+  ` : ''}
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeCommerceFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "6", E: "8" },
+    { id: "e8", T: "Attr", S: "5", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "10", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "15", E: "17" },
+    { id: "e17", T: "Attr", S: "14", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "18", E: "20" },
+    { id: "e20", T: "Attr", S: "13", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "21", E: "23" },
+    { id: "e23", T: "Attr", S: "13", E: "24" },
+    { id: "e24", T: "Attr", S: "24", E: "25" },
+    { id: "e25", T: "Attr", S: "24", E: "26" },
+    { id: "e26", T: "Attr", S: "13", E: "27" },
+    { id: "e27", T: "Attr", S: "9", E: "28" },
+    { id: "e28", T: "Attr", S: "28", E: "29" },
+    { id: "e29", T: "Attr", S: "28", E: "30" },
+    { id: "e30", T: "Attr", S: "30", E: "31" },
+    { id: "e31", T: "Attr", S: "31", E: "32" },
+    { id: "e32", T: "Attr", S: "32", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "32", E: "35" },
+    { id: "e35", T: "Attr", S: "35", E: "36" },
+    { id: "e36", T: "Attr", S: "35", E: "37" },
+    { id: "e37", T: "Attr", S: "1", E: "38" }
+  ]
+}

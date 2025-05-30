@@ -1,0 +1,536 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeCommercePricingSection"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "pricing"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: ${args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Transparent Pricing"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Choose the plan that fits your business needs"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text_d300};
+  max-width: 600px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "plans",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      name: "Starter",
+      price: "$5,000",
+      period: "/month",
+      features: [
+        "Basic NetSuite Integration",
+        "Up to 1,000 products",
+        "Standard eCommerce features",
+        "Email support",
+        "2-month delivery"
+      ],
+      featured: false
+    },
+    {
+      name: "Professional",
+      price: "$10,000",
+      period: "/month",
+      features: [
+        "Advanced NetSuite Integration",
+        "Unlimited products",
+        "Custom features",
+        "Priority support",
+        "1.5-month delivery",
+        "Custom design implementation"
+      ],
+      featured: true
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      period: "pricing",
+      features: [
+        "Full NetSuite Suite",
+        "Multi-store support",
+        "Custom development",
+        "Dedicated account manager",
+        "Fast-track delivery",
+        "SLA guarantee"
+      ],
+      featured: false
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.plans;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const plan = args.contextData.plans;
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 2px solid ${plan.featured ? args.theme.var.color.primary : args.theme.var.color.background_d200};
+  border-radius: 1rem;
+  padding: 2rem;
+  position: relative;
+  transition: all 0.3s ease;
+  ${plan.featured ? 'transform: scale(1.05);' : ''}
+  
+  &:hover {
+    transform: translateY(-5px) ${plan.featured ? 'scale(1.05)' : ''};
+    box-shadow: 0 10px 40px ${args.theme.var.color.text_l850};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.plans;
+return {
+  as: plan.featured ? "div" : ""
+};
+''',
+        css: '''
+const plan = args.contextData.plans;
+return plan.featured ? `._id {
+  position: absolute;
+  top: -1rem;
+  right: 2rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 0.25rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}` : '';
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.plans;
+return plan.featured ? {
+  as: "span",
+  text: "Most Popular"
+} : {};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.plans;
+return {
+  as: "h3",
+  text: plan.name
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.plans;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.plans;
+return {
+  as: "span",
+  text: plan.price
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.plans;
+return {
+  as: "span",
+  text: plan.period
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  font-size: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "features",
+        loop: true,
+        props: '''
+const plan = args.contextData.plans;
+return {
+  data: plan.features
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "span",
+  text: feature
+};
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const plan = args.contextData.plans;
+return {
+  as: "a",
+  href: "#contact",
+  text: plan.name === "Enterprise" ? "Contact Sales" : "Get Started"
+};
+''',
+        css: '''
+const plan = args.contextData.plans;
+return `._id {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  ${plan.featured ? `
+    background: ${args.theme.var.color.primary};
+    color: ${args.theme.var.color.primary_text};
+    
+    &:hover {
+      background: ${args.theme.var.color.primary_d200};
+    }
+  ` : `
+    background: transparent;
+    color: ${args.theme.var.color.primary};
+    border: 2px solid ${args.theme.var.color.primary};
+    
+    &:hover {
+      background: ${args.theme.var.color.primary};
+      color: ${args.theme.var.color.primary_text};
+    }
+  `}
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "3", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "9", E: "12" },
+    { id: "e12", T: "Attr", S: "9", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "13", E: "15" },
+    { id: "e15", T: "Attr", S: "9", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "18", E: "20" },
+    { id: "e20", T: "Attr", S: "9", E: "21" }
+  ]
+}

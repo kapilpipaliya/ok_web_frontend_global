@@ -1,0 +1,781 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeCommerceNavigationHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "About DecodeCommerce"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We're on a mission to democratize eCommerce for NetSuite users"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  margin-bottom: 5rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Our Story"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Founded in 2020, DecodeCommerce emerged from a simple observation: businesses using NetSuite were struggling to create modern, efficient eCommerce experiences without massive development costs and time investments."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Our team of NetSuite experts and eCommerce specialists came together to bridge this gap. Using our proprietary DecodeUI.io platform, we've created a solution that delivers enterprise-grade eCommerce capabilities in weeks, not months."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.8;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary_l900};
+  border-radius: 1rem;
+  padding: 3rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:chart-line",
+  width: 80,
+  height: 80
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "200+ Projects"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Successfully delivered"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Our Values"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "values",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      icon: "carbon:timer",
+      title: "Speed",
+      description: "We believe great eCommerce shouldn't take forever to build. Our 2-month delivery promise keeps your business moving."
+    },
+    {
+      icon: "carbon:view",
+      title: "Transparency",
+      description: "No hidden fees, no surprises. Clear communication and honest pricing are the foundation of our relationships."
+    },
+    {
+      icon: "carbon:rocket",
+      title: "Innovation",
+      description: "We constantly improve our platform and processes to deliver better results faster for our clients."
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const value = args.contextData.values;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  border: 1px solid ${args.theme.var.color.background_d200};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px ${args.theme.var.color.text_l900};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const value = args.contextData.values;
+return {
+  as: "icon",
+  icon: value.icon,
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const value = args.contextData.values;
+return {
+  as: "h3",
+  text: value.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const value = args.contextData.values;
+return {
+  as: "p",
+  text: value.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: ${args.theme.var.color.background_d100};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Ready to Join Our Success Stories?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Let's discuss how DecodeCommerce can transform your NetSuite eCommerce experience."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text_d300};
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "#contact",
+  text: "Get Started"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1.25rem 2.5rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_d200};
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px ${args.theme.var.color.primary_l600};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-right",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeCommerceFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "6", E: "8" },
+    { id: "e8", T: "Attr", S: "3", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "12", E: "14" },
+    { id: "e14", T: "Attr", S: "12", E: "15" },
+    { id: "e15", T: "Attr", S: "11", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "16", E: "18" },
+    { id: "e18", T: "Attr", S: "16", E: "19" },
+    { id: "e19", T: "Attr", S: "10", E: "20" },
+    { id: "e20", T: "Attr", S: "10", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "23", E: "25" },
+    { id: "e25", T: "Attr", S: "23", E: "26" },
+    { id: "e26", T: "Attr", S: "3", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "28", E: "29" },
+    { id: "e29", T: "Attr", S: "28", E: "30" },
+    { id: "e30", T: "Attr", S: "28", E: "31" },
+    { id: "e31", T: "Attr", S: "31", E: "32" },
+    { id: "e32", T: "Attr", S: "1", E: "33" }
+  ]
+}

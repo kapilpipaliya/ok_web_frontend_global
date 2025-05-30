@@ -1,0 +1,392 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeCommerceProcessTimeline"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "process"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: ${args.theme.var.color.background_d100};
+  overflow: hidden;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "From Concept to Launch in 2 Months"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Our streamlined process ensures rapid deployment without compromising quality"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text_d300};
+  max-width: 600px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  position: relative;
+  
+  @media (max-width: 968px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 40px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: ${args.theme.var.color.primary_l300};
+    z-index: 0;
+    
+    @media (max-width: 968px) {
+      display: none;
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "steps",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      icon: "carbon:task",
+      title: "Discovery & Planning",
+      duration: "Week 1-2",
+      description: "Analyze requirements and create project roadmap"
+    },
+    {
+      icon: "carbon:code",
+      title: "Development",
+      duration: "Week 3-6",
+      description: "Build custom eCommerce solution with NetSuite integration"
+    },
+    {
+      icon: "carbon:test-tool",
+      title: "Testing & QA",
+      duration: "Week 7",
+      description: "Rigorous testing to ensure quality and performance"
+    },
+    {
+      icon: "carbon:rocket",
+      title: "Launch & Support",
+      duration: "Week 8",
+      description: "Deploy to production with ongoing support"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return [
+  `._id {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: slideReveal 0.6s ease-out forwards;
+    animation-delay: calc(var(--index, 0) * 0.2s);
+    
+    &:nth-child(1) { --index: 0; }
+    &:nth-child(2) { --index: 1; }
+    &:nth-child(3) { --index: 2; }
+    &:nth-child(4) { --index: 3; }
+  }`,
+  `@keyframes slideReveal {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }`
+];
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  background: ${args.theme.var.color.background};
+  border: 3px solid ${args.theme.var.color.primary_l300};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 10px 30px ${args.theme.var.color.primary_l300};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "icon",
+  icon: step.icon,
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  transition: all 0.3s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "h3",
+  text: step.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "p",
+  text: step.duration
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "p",
+  text: step.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.6;
+  font-size: 0.95rem;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "3", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "9", E: "12" },
+    { id: "e12", T: "Attr", S: "9", E: "13" },
+    { id: "e13", T: "Attr", S: "9", E: "14" }
+  ]
+}

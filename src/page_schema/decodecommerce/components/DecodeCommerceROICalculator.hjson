@@ -1,0 +1,1467 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeCommerceROICalculator"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: ${args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Calculate Your ROI"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "See your potential return on investment with DecodeCommerce"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text_d300};
+  max-width: 600px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Data",
+        name: "roiState",
+        props: '''
+// Input signals
+const [monthlyVisitors, setMonthlyVisitors] = args.createSignal(10000);
+const [conversionRate, setConversionRate] = args.createSignal(2); // percentage
+const [avgOrderValue, setAvgOrderValue] = args.createSignal(75);
+const [grossMargin, setGrossMargin] = args.createSignal(60); // percentage
+const [timeframe, setTimeframe] = args.createSignal(6); // months
+const serviceCost = 5000; // per month
+
+// ROI Calculation
+const calculateROI = () => {
+  const monthlyOrders = monthlyVisitors() * (conversionRate() / 100);
+  const monthlyRevenue = monthlyOrders * avgOrderValue();
+  const monthlyProfit = monthlyRevenue * (grossMargin() / 100);
+  
+  const totalRevenue = monthlyRevenue * timeframe();
+  const totalProfit = monthlyProfit * timeframe();
+  const totalInvestment = serviceCost * timeframe();
+  
+  const netProfit = totalProfit - totalInvestment;
+  const roi = ((netProfit) / totalInvestment) * 100;
+  
+  return {
+    monthlyRevenue,
+    totalRevenue,
+    totalProfit,
+    totalInvestment,
+    netProfit,
+    roi: Math.round(roi),
+    breakeven: totalInvestment / monthlyProfit // months to breakeven
+  };
+};
+
+return {
+  data: {
+    monthlyVisitors,
+    setMonthlyVisitors,
+    conversionRate,
+    setConversionRate,
+    avgOrderValue,
+    setAvgOrderValue,
+    grossMargin,
+    setGrossMargin,
+    timeframe,
+    setTimeframe,
+    serviceCost,
+    calculateROI
+  }
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+  
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_d50};
+  border-radius: 1rem;
+  padding: 2rem;
+  border: 1px solid ${args.theme.var.color.background_d100};
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Input Your Metrics"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    // Monthly Visitors
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Monthly Visitors"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "input",
+  type: "range",
+  min: 1000,
+  max: 100000,
+  step: 1000,
+  value: state.monthlyVisitors(),
+  onInput: (e) => state.setMonthlyVisitors(parseInt(e.target.value))
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: ${args.theme.var.color.background_d200};
+  border-radius: 4px;
+  outline: none;
+  position: relative;
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: ${args.theme.var.color.primary};
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    border: 2px solid ${args.theme.var.color.background};
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+    }
+  }
+  
+  &::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: ${args.theme.var.color.primary};
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid ${args.theme.var.color.background};
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "span",
+  text: `${state.monthlyVisitors().toLocaleString()} visitors`
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  text-align: right;
+  color: ${args.theme.var.color.primary};
+  font-weight: 600;
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    // Conversion Rate
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Conversion Rate (%)"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "input",
+  type: "range",
+  min: 0.1,
+  max: 10,
+  step: 0.1,
+  value: state.conversionRate(),
+  onInput: (e) => state.setConversionRate(parseFloat(e.target.value))
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: ${args.theme.var.color.background_d200};
+  border-radius: 4px;
+  outline: none;
+  position: relative;
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: ${args.theme.var.color.primary};
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    border: 2px solid ${args.theme.var.color.background};
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+    }
+  }
+  
+  &::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: ${args.theme.var.color.primary};
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid ${args.theme.var.color.background};
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "span",
+  text: `${state.conversionRate()}%`
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  text-align: right;
+  color: ${args.theme.var.color.primary};
+  font-weight: 600;
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    // Average Order Value
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Average Order Value ($)"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "input",
+  type: "range",
+  min: 10,
+  max: 500,
+  step: 5,
+  value: state.avgOrderValue(),
+  onInput: (e) => state.setAvgOrderValue(parseInt(e.target.value))
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: ${args.theme.var.color.background_d200};
+  border-radius: 4px;
+  outline: none;
+  position: relative;
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: ${args.theme.var.color.primary};
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    border: 2px solid ${args.theme.var.color.background};
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+    }
+  }
+  
+  &::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: ${args.theme.var.color.primary};
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid ${args.theme.var.color.background};
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "span",
+  text: `$${state.avgOrderValue()}`
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  text-align: right;
+  color: ${args.theme.var.color.primary};
+  font-weight: 600;
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    // Gross Margin
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Gross Margin (%)"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "input",
+  type: "range",
+  min: 10,
+  max: 90,
+  step: 5,
+  value: state.grossMargin(),
+  onInput: (e) => state.setGrossMargin(parseInt(e.target.value))
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: ${args.theme.var.color.background_d200};
+  border-radius: 4px;
+  outline: none;
+  position: relative;
+  
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: ${args.theme.var.color.primary};
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    border: 2px solid ${args.theme.var.color.background};
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+    }
+  }
+  
+  &::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: ${args.theme.var.color.primary};
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid ${args.theme.var.color.background};
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "span",
+  text: `${state.grossMargin()}%`
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  text-align: right;
+  color: ${args.theme.var.color.primary};
+  font-weight: 600;
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    // Timeframe
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Timeframe"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "select",
+  value: state.timeframe(),
+  onChange: (e) => state.setTimeframe(parseInt(e.target.value))
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_l300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary_l300};
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: 1,
+  text: "1 month"
+};
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: 6,
+  text: "6 months"
+};
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: 12,
+  text: "12 months"
+};
+'''
+      }
+    },
+    // Service Cost Display
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.primary_l900};
+  border-radius: 0.5rem;
+  text-align: center;
+  margin-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "DecodeCommerce Service Cost"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.9rem;
+  color: ${args.theme.var.color.text_d300};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+return {
+  as: "p",
+  text: `$${state.serviceCost.toLocaleString()}/month`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    // Results Section
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.success_l900};
+  border: 2px solid ${args.theme.var.color.success_l700};
+  border-radius: 1rem;
+  padding: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Your ROI Results"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    // ROI Percentage (Big Display)
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "div",
+  text: `${results.roi}%`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 4rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.success};
+  line-height: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Return on Investment"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text_d300};
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    // Metrics Grid
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    // Total Revenue
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "div",
+  text: `$${results.totalRevenue.toLocaleString()}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Total Revenue"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    // Net Profit
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "div",
+  text: `$${results.netProfit.toLocaleString()}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Net Profit"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    // Investment
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "div",
+  text: `$${results.totalInvestment.toLocaleString()}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Total Investment"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    // Breakeven
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "div",
+  text: `${Math.round(results.breakeven * 10) / 10} months`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Breakeven Time"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    // Summary Message
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 0.5rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.roiState;
+const results = state.calculateROI();
+return {
+  as: "p",
+  text: `Based on your inputs, your ROI would be ${results.roi}%, with an estimated net profit of $${results.netProfit.toLocaleString()} over ${state.timeframe()} months.`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "3", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "9", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "11", E: "13" },
+    { id: "e13", T: "Attr", S: "11", E: "14" },
+    { id: "e14", T: "Attr", S: "9", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "15", E: "17" },
+    { id: "e17", T: "Attr", S: "15", E: "18" },
+    { id: "e18", T: "Attr", S: "9", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "19", E: "21" },
+    { id: "e21", T: "Attr", S: "19", E: "22" },
+    { id: "e22", T: "Attr", S: "9", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "23", E: "25" },
+    { id: "e25", T: "Attr", S: "23", E: "26" },
+    { id: "e26", T: "Attr", S: "9", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "27", E: "29" },
+    { id: "e29", T: "Attr", S: "29", E: "30" },
+    { id: "e30", T: "Attr", S: "29", E: "31" },
+    { id: "e31", T: "Attr", S: "29", E: "32" },
+    { id: "e32", T: "Attr", S: "9", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "33", E: "35" },
+    { id: "e35", T: "Attr", S: "8", E: "36" },
+    { id: "e36", T: "Attr", S: "36", E: "37" },
+    { id: "e37", T: "Attr", S: "36", E: "38" },
+    { id: "e38", T: "Attr", S: "38", E: "39" },
+    { id: "e39", T: "Attr", S: "38", E: "40" },
+    { id: "e40", T: "Attr", S: "36", E: "41" },
+    { id: "e41", T: "Attr", S: "41", E: "42" },
+    { id: "e42", T: "Attr", S: "42", E: "43" },
+    { id: "e43", T: "Attr", S: "42", E: "44" },
+    { id: "e44", T: "Attr", S: "41", E: "45" },
+    { id: "e45", T: "Attr", S: "45", E: "46" },
+    { id: "e46", T: "Attr", S: "45", E: "47" },
+    { id: "e47", T: "Attr", S: "41", E: "48" },
+    { id: "e48", T: "Attr", S: "48", E: "49" },
+    { id: "e49", T: "Attr", S: "48", E: "50" },
+    { id: "e50", T: "Attr", S: "41", E: "51" },
+    { id: "e51", T: "Attr", S: "51", E: "52" },
+    { id: "e52", T: "Attr", S: "51", E: "53" },
+    { id: "e53", T: "Attr", S: "36", E: "54" },
+    { id: "e54", T: "Attr", S: "54", E: "55" }
+  ]
+}

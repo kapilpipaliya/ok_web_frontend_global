@@ -11,7 +11,7 @@ import type { UpdateOptions } from "~/lib/graph/mutate/core/setGraphData";
 
 import type { FormStoreObject } from "../context/FormContext";
 
-import type { ThemeContext } from "~/lib/styles/types/types";
+import type { ThemeContext, ColorMode } from "~/lib/styles/types/types";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
@@ -74,9 +74,14 @@ export interface FunctionArgumentBaseType {
     vertexId: string,
     graph: GraphInterface,
     setGraph: SetStoreFunction<GraphInterface>,
-    data: any,
+    data: Record<string, unknown>,
   ) => void;
   zIndex: number;
+  // Theme toggle functions
+  toggleTheme: () => void;
+  setColorMode: (mode: ColorMode) => void;
+  resetTheme: () => void;
+  currentMode: () => ColorMode;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

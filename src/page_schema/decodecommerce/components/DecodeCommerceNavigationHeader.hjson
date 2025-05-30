@@ -1,0 +1,236 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeCommerceNavigationHeader"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${args.theme.var.color.background_d200};
+  transition: all 0.3s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/",
+  text: "DecodeCommerce"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary_d200};
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "navItems",
+        loop: true,
+        props: '''
+return {
+  data: [
+    { href: "#features", text: "Features" },
+    { href: "#pricing", text: "Pricing" },
+    { href: "#process", text: "Process" },
+    { href: "#contact", text: "Contact" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItems;
+return {
+  as: "a",
+  href: item.href,
+  text: item.text
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const currentMode = args.currentMode();
+const isDark = currentMode === "dark";
+return {
+  as: "button",
+  onClick: args.toggleTheme
+};
+''',
+        css: '''
+return `._id {
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.background_d200};
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_d100};
+    border-color: ${args.theme.var.color.background_d300};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentMode = args.currentMode();
+const isDark = currentMode === "dark";
+return {
+  as: "icon",
+  icon: isDark ? "carbon:sun" : "carbon:moon",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "5", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" }
+  ]
+}

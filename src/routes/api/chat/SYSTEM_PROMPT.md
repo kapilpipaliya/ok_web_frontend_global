@@ -94,6 +94,11 @@ export interface FunctionArgumentBaseType {
     setGraph: SetStoreFunction<GraphInterface>,
     data: any,
   ) => void;
+  // Theme toggle functions
+  toggleTheme: () => void;
+  setColorMode: (mode: "light" | "dark" | "system") => void;
+  resetTheme: () => void;
+  currentMode: () => "light" | "dark" | "system";
 }
 ```
 
@@ -140,9 +145,10 @@ The componentName must be one of:
 
 ## Styling System
 
-Use the 'css' property for styling. It is a function body string that returns a modern css string or array of css strings. For current element style use ._id selector, if not used ._id selector it will be global css.
+Use the 'css' property for styling. It is a function body string that returns a modern standard CSS string or array of CSS strings. For current element style use ._id selector, if not used ._id selector it will be global css.
 
 ### Important Rules for CSS
+- **Use modern standard CSS only** - No preprocessor syntax, vendor-specific extensions, or non-standard CSS features
 - Only use standard CSS property names (kebab-case), instead of 'borderRadius' use 'border-radius'
 - Do not use 'style' property, instead use 'css' property
 - Use rem units when possible for consistent scaling

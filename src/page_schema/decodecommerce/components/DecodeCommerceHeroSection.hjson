@@ -1,0 +1,523 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeCommerceHeroSection"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle at 20% 50%, ${args.theme.var.color.primary_l800} 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, ${args.theme.var.color.success_l850} 0%, transparent 50%);
+    opacity: 0.5;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  position: relative;
+  z-index: 1;
+  
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return [
+  `._id {
+    animation: fadeInUp 0.8s ease-out;
+  }`,
+  `@keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }`
+];
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Custom eCommerce Solutions for NetSuite"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Transform your NetSuite experience with our SEO-friendly, drag-and-drop powered eCommerce platform. Built with DecodeUI.io for maximum flexibility."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "#contact",
+  text: "Get Started"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_d200};
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px ${args.theme.var.color.primary_l600};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-right",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Starting at $5,000/month"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  font-size: 1rem;
+  margin-left: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 3rem;
+  margin-top: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "stats",
+        loop: true,
+        props: '''
+return {
+  data: [
+    { number: "4+", text: "Months Saved" },
+    { number: "80%", text: "Faster Deployment" },
+    { number: "100%", text: "SEO Optimized" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return [
+  `._id {
+    animation: fadeIn 1s ease-out;
+    animation-delay: 0.5s;
+    animation-fill-mode: both;
+  }`,
+  `@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }`
+];
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "h3",
+  text: stat.number
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 0.25rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "p",
+  text: stat.text
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return [
+  `._id {
+    position: relative;
+    animation: float 3s ease-in-out infinite;
+  }`,
+  `@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }`,
+  `@media (max-width: 768px) {
+    ._id {
+      display: none;
+    }
+  }`
+];
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 10px 40px ${args.theme.var.color.text_l900};
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:shopping-cart",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "NetSuite Integration"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Seamless integration with your existing NetSuite infrastructure"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "5", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "8", E: "11" },
+    { id: "e11", T: "Attr", S: "5", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "4", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "18", E: "20" },
+    { id: "e20", T: "Attr", S: "18", E: "21" }
+  ]
+}

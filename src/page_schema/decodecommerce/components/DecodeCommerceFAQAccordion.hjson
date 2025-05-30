@@ -1,0 +1,409 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeCommerceFAQAccordion"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: ${args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Frequently Asked Questions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Everything you need to know about DecodeCommerce"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text_d300};
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Data",
+        name: "faqState",
+        props: '''
+const [openIndex, setOpenIndex] = args.createSignal(null);
+return {
+  data: {
+    openIndex,
+    setOpenIndex
+  }
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "faqs",
+        loop: true,
+        props: '''
+const faqData = [
+  {
+    question: "How quickly can I get my eCommerce site live?",
+    answer: "Our standard delivery time is 2 months from project kickoff. For Professional and Enterprise plans, we offer expedited delivery options that can have your site live in as little as 6 weeks."
+  },
+  {
+    question: "Do you provide ongoing support after launch?",
+    answer: "Yes! All our plans include ongoing support. Starter plans include email support, while Professional and Enterprise plans include priority support with faster response times and a dedicated account manager."
+  },
+  {
+    question: "Can you work with my existing NetSuite customizations?",
+    answer: "Absolutely. Our team specializes in NetSuite integrations and can work with your existing customizations, workflows, and business processes to ensure seamless integration."
+  },
+  {
+    question: "What if I need custom features not listed in the plans?",
+    answer: "We love custom challenges! Our Professional and Enterprise plans include custom feature development. Contact our sales team to discuss your specific requirements."
+  },
+  {
+    question: "Is the platform really SEO-friendly?",
+    answer: "Yes! Every site we build includes SEO best practices: semantic HTML, fast loading times, mobile optimization, structured data, and clean URLs. We also provide SEO training as part of the handover."
+  },
+  {
+    question: "What's your refund policy?",
+    answer: "We offer a 30-day money-back guarantee if you're not satisfied with the initial prototype. After development begins, we work closely with you to ensure the final product meets your expectations."
+  }
+];
+
+return {
+  data: faqData.map((item, idx) => ({ ...item, index: idx }))
+};
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const faqState = args.contextData.faqState;
+const index = faq.index;
+const isOpen = faqState.openIndex() === index;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_d200};
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary_l500};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const faqState = args.contextData.faqState;
+const index = faq.index;
+const isOpen = faqState.openIndex() === index;
+return {
+  as: "button",
+  onClick: () => faqState.setOpenIndex(isOpen ? null : index)
+};
+''',
+        css: '''
+const faq = args.contextData.faqs;
+const faqState = args.contextData.faqState;
+const index = faq.index;
+const isOpen = faqState.openIndex() === index;
+return `._id {
+  width: 100%;
+  padding: 1.25rem;
+  background: ${isOpen ? args.theme.var.color.primary_l900 : 'transparent'};
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${isOpen ? args.theme.var.color.primary_l850 : args.theme.var.color.background_l100};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+return {
+  as: "h3",
+  text: faq.question
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  padding-right: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const faqState = args.contextData.faqState;
+const index = faq.index;
+const isOpen = faqState.openIndex() === index;
+return {
+  as: "icon",
+  icon: isOpen ? "carbon:subtract" : "carbon:add",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+const faq = args.contextData.faqs;
+const faqState = args.contextData.faqState;
+const index = faq.index;
+const isOpen = faqState.openIndex() === index;
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const faqState = args.contextData.faqState;
+const index = faq.index;
+const isOpen = faqState.openIndex() === index;
+return {
+  as: isOpen ? "div" : ""
+};
+''',
+        css: '''
+const faq = args.contextData.faqs;
+const faqState = args.contextData.faqState;
+const index = faq.index;
+const isOpen = faqState.openIndex() === index;
+return isOpen ? [
+  `._id {
+    padding: 1rem 1.25rem 1.5rem;
+    animation: slideDown 0.3s ease-out;
+  }`,
+  `@keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }`
+] : '';
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const faqState = args.contextData.faqState;
+const index = faq.index;
+const isOpen = faqState.openIndex() === index;
+return isOpen ? {
+  as: "p",
+  text: faq.answer
+} : {};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.6;
+  margin: 0;
+  padding: 0 1.25rem 1.5rem;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "3", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "11", E: "13" },
+    { id: "e13", T: "Attr", S: "10", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" }
+  ]
+}

@@ -1,0 +1,662 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeCommerceNavigationHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0 3rem;
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Powerful Features for Modern eCommerce"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Everything you need to build, manage, and scale your NetSuite-powered eCommerce platform"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text_d300};
+  max-width: 700px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "DecodeCommerceFeatureGrid"
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 0;
+  background: ${args.theme.var.color.background_d100};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Advanced Capabilities"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "advancedFeatures",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      title: "Real-time Inventory Sync",
+      description: "Keep your inventory perfectly synchronized between NetSuite and your eCommerce platform. No more overselling or stock discrepancies.",
+      icon: "carbon:data-1",
+      features: [
+        "Automatic stock level updates",
+        "Multi-warehouse support",
+        "Low stock alerts",
+        "Batch inventory management"
+      ]
+    },
+    {
+      title: "Order Management System",
+      description: "Streamline your order processing from placement to fulfillment with our integrated order management system.",
+      icon: "carbon:delivery-truck",
+      features: [
+        "Automated order routing",
+        "Status tracking",
+        "Returns management",
+        "Customer notifications"
+      ]
+    },
+    {
+      title: "Customer Portal",
+      description: "Give your customers a self-service portal to manage their accounts, view orders, and track shipments.",
+      icon: "carbon:user-multiple",
+      features: [
+        "Order history",
+        "Reorder functionality",
+        "Account management",
+        "Support tickets"
+      ]
+    },
+    {
+      title: "Analytics & Reporting",
+      description: "Get deep insights into your business performance with our comprehensive analytics suite.",
+      icon: "carbon:analytics",
+      features: [
+        "Sales dashboards",
+        "Customer insights",
+        "Performance metrics",
+        "Custom reports"
+      ]
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
+return `._id {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: ${isEven ? '1fr 1fr' : '1fr 1fr'};
+  gap: 3rem;
+  align-items: center;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    grid-column: span 1;
+    grid-template-columns: 1fr;
+    margin-bottom: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
+return `._id {
+  ${!isEven ? 'order: 2;' : ''}
+  
+  @media (max-width: 768px) {
+    order: 1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+return {
+  as: "icon",
+  icon: feature.icon,
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+return {
+  as: "h3",
+  text: feature.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+return {
+  as: "p",
+  text: feature.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_d300};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "featureList",
+        loop: true,
+        props: '''
+const feature = args.contextData.advancedFeatures;
+return {
+  data: feature.features
+};
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.featureList;
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.featureList;
+return {
+  as: "span",
+  text: item
+};
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const feature = args.contextData.advancedFeatures;
+const index = feature.index;
+const isEven = index % 2 === 0;
+return `._id {
+  ${isEven ? 'order: 2;' : ''}
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 10px 40px ${args.theme.var.color.text_l900};
+  
+  @media (max-width: 768px) {
+    order: 2;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.advancedFeatures;
+return {
+  as: "icon",
+  icon: feature.icon,
+  width: 200,
+  height: 200
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: auto;
+  color: ${args.theme.var.color.primary_l800};
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "DecodeCommerceCTASection"
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeCommerceFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "3", E: "8" },
+    { id: "e8", T: "Attr", S: "3", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "10", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "16", E: "18" },
+    { id: "e18", T: "Attr", S: "15", E: "19" },
+    { id: "e19", T: "Attr", S: "15", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "22", E: "24" },
+    { id: "e24", T: "Attr", S: "14", E: "25" },
+    { id: "e25", T: "Attr", S: "25", E: "26" },
+    { id: "e26", T: "Attr", S: "3", E: "27" },
+    { id: "e27", T: "Attr", S: "1", E: "28" }
+  ]
+}

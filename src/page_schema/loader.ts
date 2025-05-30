@@ -106,18 +106,19 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
   const schemas: WebsiteSchemas = { components: {}, pages: {} };
 
   // We have to use the general pattern, but we'll filter efficiently
-  const allModules = import.meta.glob<string>("./*/*/**.hjson", {
+  // Use explicit default import for better compatibility
+  const allModules = import.meta.glob("./*/*/**.hjson", {
     eager: true,
     query: "?raw",
     import: "default",
-  });
+  }) as Record<string, string>;
 
   // Process only modules for this specific website
   for (const [path, content] of Object.entries(allModules)) {
     const parsedPath = parseModulePath(path);
     if (!parsedPath || parsedPath.websiteName !== websiteName) continue;
 
-    processSchemaFile(schemas, parsedPath, content as string);
+    processSchemaFile(schemas, parsedPath, content);
   }
 
   // Cache the result for future use
@@ -147,17 +148,18 @@ function loadAllWebsiteSchemasSync(): AllWebsiteSchemas {
   const schemas: AllWebsiteSchemas = {};
 
   // Import all hjson files synchronously
-  const eagerModules = import.meta.glob<string>("./*/*/**.hjson", {
+  // Use explicit default import for better compatibility
+  const eagerModules = import.meta.glob("./*/*/**.hjson", {
     eager: true,
     query: "?raw",
     import: "default",
-  });
+  }) as Record<string, string>;
 
   for (const [path, content] of Object.entries(eagerModules)) {
     const parsedPath = parseModulePath(path);
     if (!parsedPath) continue;
 
-    processSchemaFile(schemas, parsedPath, content as string);
+    processSchemaFile(schemas, parsedPath, content);
   }
 
   return schemas;
