@@ -432,7 +432,7 @@ return {
 ''',
         css: '''
 return `._id {
-  border-top: 1px solid ${args.theme.var.color.background_l300};
+  border-top: 1px solid ${args.theme.var.color.border};
   padding-top: 2rem;
   display: flex;
   justify-content: space-between;

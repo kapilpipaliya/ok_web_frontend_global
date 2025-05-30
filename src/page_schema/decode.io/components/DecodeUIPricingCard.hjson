@@ -16,6 +16,7 @@ return {
         css: '''
 return `._id {
   background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
   border-radius: 1rem;
   padding: 2rem;
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
@@ -28,6 +29,8 @@ return `._id {
   &[data-featured="true"] {
     box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     transform: scale(1.05);
+    border-color: ${args.theme.var.color.primary};
+    border-width: 2px;
     
     @media (max-width: 768px) {
       transform: scale(1);
@@ -36,6 +39,7 @@ return `._id {
   
   &:hover {
     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    border-color: ${args.theme.var.color.border_d200};
   }
   
   @media (max-width: 768px) {

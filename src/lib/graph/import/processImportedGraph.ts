@@ -40,7 +40,6 @@ export function processImportedGraph(
   for (const id of rootVertexIds) {
     const vertex = graph.vertexes[id];
     if (vertex.L.includes("Page") || vertex.L.includes("Component")) {
-      console.log("Page or Component found in root vertex", id);
       return {
         metaTxnId,
         parentId: id,

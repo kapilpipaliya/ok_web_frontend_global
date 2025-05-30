@@ -39,7 +39,6 @@ const fetchData = query(async () => {
 }, "initialData");
 
 export function GetInitialData(props: GetInitialDataProps) {
-  console.log("GetInitialData");
   const graph = useGraph();
   const navigate = useNavigate();
 

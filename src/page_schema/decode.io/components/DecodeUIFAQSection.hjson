@@ -166,7 +166,7 @@ return {
 ''',
         css: '''
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.border_l200};
+  border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
       }
