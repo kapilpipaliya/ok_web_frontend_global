@@ -36,6 +36,19 @@ export function processImportedGraph(
   parentKey = "Page",
 ): ProcessedGraphResult {
   const { metaTxnId, rootVertexIds } = importResult;
+  // Check if any root vertex has Label "Page" or "Component" and return early if found
+  for (const id of rootVertexIds) {
+    const vertex = graph.vertexes[id];
+    if (vertex.L.includes("Page") || vertex.L.includes("Component")) {
+      console.log("Page or Component found in root vertex", id);
+      return {
+        metaTxnId,
+        parentId: id,
+        attrRootIds: [],
+        labelGroups: new Map(),
+      };
+    }
+  }
 
   // Create parent vertex
   const parentId = generateNewVertexId(graph, setGraph);

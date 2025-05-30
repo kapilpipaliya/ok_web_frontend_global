@@ -22,79 +22,89 @@ The decode.io schema follows the standard page schema structure:
   - Smooth scroll to sections
 - **Customization**: Logo image, navigation items, styling
 
-### 2. **DecodeHero** - Hero Section
+### 2. **HeroSection** - Hero Landing Section
 - **Purpose**: Eye-catching landing section with call-to-action
 - **Features**:
-  - Main headline and subheadline
-  - Descriptive text
+  - Large title and subtitle
   - Two CTA buttons (primary and secondary)
-  - Responsive layout
-- **Customization**: Text content, button actions, colors
+  - Feature highlights grid
+  - Responsive layout with background effects
+- **Customization**: Title, subtitle, button text, features array
 
-### 3. **DecodeFeatures** - Features Grid
-- **Purpose**: Showcase product features in an organized grid
+### 3. **FeatureCard** - Feature Display Card
+- **Purpose**: Showcase individual features with icons
 - **Features**:
-  - Icon support for each feature
-  - Title and description for each item
-  - Responsive 3-column grid (stacks on mobile)
+  - Icon display (emoji or iconify)
+  - Title and description
+  - Optional "Learn more" link
   - Hover effects
-- **Customization**: Feature list, icons, content
+- **Customization**: Icon, title, description, showLink, linkText
 
-### 4. **DecodeVideoSection** - Video Demonstration
-- **Purpose**: Embed product demo or promotional video
+### 4. **TestimonialCard** - Customer Testimonial
+- **Purpose**: Display customer reviews and social proof
 - **Features**:
-  - YouTube video embedding
-  - Responsive aspect ratio (16:9)
-  - Section title and description
-- **Customization**: Video ID, surrounding text
+  - Star rating display
+  - Quote text
+  - Customer name and role
+  - Avatar emoji
+  - Card styling with hover effects
+- **Customization**: Rating, quote, name, role, avatarEmoji
 
-### 5. **DecodePricing** - Pricing Table
-- **Purpose**: Display pricing tiers and plans
+### 5. **PricingCard** - Pricing Plan Card
+- **Purpose**: Display pricing tiers and features
 - **Features**:
-  - Multiple pricing cards
-  - Feature lists with checkmarks
-  - Highlighted "popular" plan
-  - CTA buttons for each plan
-- **Customization**: Plans, features, pricing, styling
+  - Plan name and description
+  - Price with period
+  - Featured plan highlighting
+  - Feature list with checkmarks
+  - CTA button
+- **Customization**: Name, description, price, period, featured, features array, buttonText
 
-### 6. **DecodeTestimonials** - Customer Testimonials
-- **Purpose**: Build trust with social proof
+### 6. **CTASection** - Call-to-Action Section
+- **Purpose**: Conversion-focused section with prominent CTAs
 - **Features**:
-  - Grid layout for multiple testimonials
-  - Customer name, role, and company
-  - Quote formatting
+  - Centered layout with gradient background
+  - Title and subtitle
+  - Primary and optional secondary buttons
   - Responsive design
-- **Customization**: Testimonial content, layout
+- **Customization**: Title, subtitle, primaryButtonText, secondaryButtonText, showSecondaryButton
 
-### 7. **DecodeCTA** - Call-to-Action Section
-- **Purpose**: Final conversion push before footer
-- **Features**:
-  - Centered layout with emphasis
-  - Headline and description
-  - Primary action button
-- **Customization**: Text, button action, colors
-
-### 8. **DecodeFooter** - Footer Component
-- **Purpose**: Site footer with links and information
+### 7. **Footer** - Site Footer
+- **Purpose**: Comprehensive footer with links and information
 - **Features**:
   - Multi-column layout
-  - Company info and links
-  - Social media icons
+  - Company branding
+  - Product, company, and resource links
+  - Social media links
+  - Newsletter signup
   - Copyright notice
-- **Customization**: Links, social profiles, content
+- **Customization**: Currently uses static content, can be extended for dynamic links
+
+### 7. **FAQSection** - Frequently Asked Questions
+- **Purpose**: Interactive FAQ accordion component
+- **Features**:
+  - Expandable/collapsible question items
+  - Smooth animations and transitions
+  - Interactive state management
+  - Responsive design
+  - Rotating arrow indicator
+- **Customization**: 
+  - Title text
+  - Questions array with question/answer pairs
+  - Styling and animations
 
 ## Pages
 
-### 1. **DecodeLandingPage**
+### 1. **DecodeLandingPage** / **HomePage**
 The main landing page that combines all components in a logical flow:
-1. Navigation (DecodeNav)
-2. Hero section (DecodeHero)
-3. Features showcase (DecodeFeatures)
-4. Video demonstration (DecodeVideoSection)
-5. Pricing options (DecodePricing)
-6. Customer testimonials (DecodeTestimonials)
-7. Final CTA (DecodeCTA)
-8. Footer (DecodeFooter)
+1. Navigation (navbar with custom implementation)
+2. Hero section (HeroSection)
+3. Features showcase (FeatureCard components in grid)
+4. Customer testimonials (TestimonialCard components)
+5. Call to action (CTASection)
+6. Pricing options (PricingCard components)
+7. FAQ section (FAQSection)
+8. Footer (Footer)
 
 ## Technical Implementation
 
@@ -208,6 +218,27 @@ plans: [
   },
   // Add more plans...
 ]
+```
+
+### FAQ Customization
+```hjson
+// Define FAQ items
+props: '''
+return {
+  title: "Frequently Asked Questions",
+  questions: [
+    {
+      question: "How does it work?",
+      answer: "Our platform provides an intuitive interface..."
+    },
+    {
+      question: "What features are included?",
+      answer: "All plans include core features..."
+    }
+    // Add more questions...
+  ]
+};
+'''
 ```
 
 ## Best Practices

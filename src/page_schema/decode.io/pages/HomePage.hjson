@@ -933,39 +933,38 @@ return {
         props: '''
 return {
   title: "Frequently Asked Questions",
-  subtitle: "Everything you need to know about decode.io",
-  faqs: [
+  questions: [
     {
-      question: "How does the pricing work?",
-      answer: "We charge $20 per page you create. There are no monthly fees or hidden costs. You only pay for what you build. For bulk needs, we offer a package of 10 pages for $150, saving you 25%."
+      question: "How does decode.io's drag & drop builder work?",
+      answer: "Our intuitive drag & drop builder lets you create stunning websites without any coding knowledge. Simply select elements from our library, drag them onto your canvas, and customize them to match your vision. Every change is instantly visible, making web design as easy as arranging building blocks."
     },
     {
-      question: "What's included in the $20 per page?",
-      answer: "Everything! You get access to all templates, unlimited storage, drag-and-drop builder, SEO tools, mobile responsiveness, and community support. No feature limitations based on pricing."
+      question: "Can I use my own domain name?",
+      answer: "Absolutely! All our plans include custom domain support. You can either connect an existing domain you own or purchase a new one directly through our platform. We handle all the technical setup, including SSL certificates and DNS configuration."
     },
     {
-      question: "Can I try before I buy?",
-      answer: "Yes! You can explore our builder and preview templates before creating your first page. Once you're ready to publish, simply pay $20 for that page."
+      question: "What makes decode.io different from other website builders?",
+      answer: "decode.io stands out with its true visual editing experience, lightning-fast performance, and developer-friendly features. Unlike other builders, we offer unlimited customization without compromising on speed or SEO. Our unique graph-based architecture ensures your site loads instantly worldwide."
     },
     {
-      question: "Do I need coding knowledge?",
-      answer: "Not at all! decode.io is designed for everyone. Our intuitive drag-and-drop builder lets you create professional websites without writing a single line of code."
+      question: "Do I need technical skills to use decode.io?",
+      answer: "Not at all! decode.io is designed for everyone, from complete beginners to professional developers. Our visual interface requires zero coding knowledge, but if you're technical, you can access advanced features like custom code injection and API integrations."
     },
     {
-      question: "Can I use my own domain?",
-      answer: "Yes! You can connect your custom domain to any page. We provide free subdomains as well if you don't have your own domain yet."
+      question: "What kind of support do you offer?",
+      answer: "We provide comprehensive support through multiple channels. Free users get access to our community forum and knowledge base. Paid plans include priority email support, with our bulk package customers receiving dedicated support and faster response times."
     },
     {
-      question: "What happens to my pages after I pay?",
-      answer: "Your pages are yours forever. Once you pay for a page, it remains live indefinitely with no recurring charges. You can edit and update it anytime."
+      question: "Can I switch between pricing plans?",
+      answer: "Yes, you can upgrade or downgrade your plan at any time. When you upgrade, you'll immediately access new features. If you downgrade, changes take effect at the next billing cycle. Your content and pages are always preserved regardless of plan changes."
     },
     {
-      question: "Is there customer support?",
-      answer: "Absolutely! We offer community support for all users through our Discord channel. Bulk package and enterprise customers get priority support."
+      question: "Is my website mobile-friendly?",
+      answer: "Every website built with decode.io is automatically responsive and mobile-optimized. Our templates adapt perfectly to all screen sizes, and you can preview how your site looks on different devices while editing. We also provide mobile-specific customization options."
     },
     {
-      question: "Can I export my website?",
-      answer: "Yes, enterprise customers have access to our API and can export their websites. Contact our sales team for more information about enterprise features."
+      question: "How secure is decode.io?",
+      answer: "Security is our top priority. All websites are protected with SSL certificates, hosted on secure cloud infrastructure with DDoS protection, and backed up daily. We follow industry best practices for data protection and regularly update our security measures."
     }
   ]
 };

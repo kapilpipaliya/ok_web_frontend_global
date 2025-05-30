@@ -1,8 +1,14 @@
 import type { Vertex } from "~/lib/graph/type/vertex";
-import { type Accessor, type Component, getOwner } from "solid-js";
+import {
+  type Accessor,
+  type Component,
+  getOwner,
+  createSignal,
+} from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { SetStoreFunction } from "solid-js/store";
+import { createStore } from "solid-js/store";
 import type { ThemeContext } from "~/lib/styles/types/types";
 import type { Navigator, useSearchParams } from "@solidjs/router";
 import { createFunctionProxy } from "~/components/form/createFunctionProxy";
@@ -218,5 +224,7 @@ export function createFunctionArgumentBase(
     },
     updateValue: options.updateValue,
     zIndex: hooks.zIndex,
+    createSignal,
+    createStore,
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }
