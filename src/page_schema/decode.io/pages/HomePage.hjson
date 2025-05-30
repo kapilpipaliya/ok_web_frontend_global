@@ -853,48 +853,49 @@ return `._id {
 return {
   data: [
     {
-      name: "Starter",
-      description: "Perfect for personal projects",
-      price: "9",
-      period: "/month",
+      name: "Pay As You Go",
+      description: "Perfect for getting started",
+      price: "20",
+      period: "/page/month",
       featured: false,
       features: [
-        "Up to 5 pages",
-        "Basic templates",
-        "1GB storage",
-        "Community support"
+        "$20 per page",
+        "All templates included",
+        "Unlimited storage",
+        "Community support",
+        "Custom domain"
       ],
-      buttonText: "Start Free"
+      buttonText: "Start Building"
     },
     {
-      name: "Professional",
-      description: "Everything you need to grow",
-      price: "29",
-      period: "/month",
+      name: "Bulk Package",
+      description: "Best value for multiple pages",
+      price: "150",
+      period: "/10 pages/month",
       featured: true,
       features: [
-        "Unlimited pages",
-        "Premium templates",
-        "10GB storage",
+        "10 pages for $150",
+        "Save $50 (25% off)",
+        "All templates included",
         "Priority support",
         "Custom domain",
         "Advanced SEO tools"
       ],
-      buttonText: "Start Free Trial"
+      buttonText: "Get Bulk Package"
     },
     {
-      name: "Business",
-      description: "For teams and enterprises",
-      price: "99",
-      period: "/month",
+      name: "Enterprise",
+      description: "Custom solutions for large teams",
+      price: "Custom",
+      period: "pricing",
       featured: false,
       features: [
-        "Everything in Pro",
-        "100GB storage",
+        "Volume discounts",
         "White-label option",
         "API access",
         "Dedicated support",
-        "Custom integrations"
+        "Custom integrations",
+        "SLA guarantee"
       ],
       buttonText: "Contact Sales"
     }
@@ -924,10 +925,58 @@ return {
       }
     },
     {
-      id: "footer-wrapper",
+      id: "faq-section",
       L: "Attr",
       P: {
         displayOrder: 7,
+        componentName: "FAQSection",
+        props: '''
+return {
+  title: "Frequently Asked Questions",
+  subtitle: "Everything you need to know about decode.io",
+  faqs: [
+    {
+      question: "How does the pricing work?",
+      answer: "We charge $20 per page you create. There are no monthly fees or hidden costs. You only pay for what you build. For bulk needs, we offer a package of 10 pages for $150, saving you 25%."
+    },
+    {
+      question: "What's included in the $20 per page?",
+      answer: "Everything! You get access to all templates, unlimited storage, drag-and-drop builder, SEO tools, mobile responsiveness, and community support. No feature limitations based on pricing."
+    },
+    {
+      question: "Can I try before I buy?",
+      answer: "Yes! You can explore our builder and preview templates before creating your first page. Once you're ready to publish, simply pay $20 for that page."
+    },
+    {
+      question: "Do I need coding knowledge?",
+      answer: "Not at all! decode.io is designed for everyone. Our intuitive drag-and-drop builder lets you create professional websites without writing a single line of code."
+    },
+    {
+      question: "Can I use my own domain?",
+      answer: "Yes! You can connect your custom domain to any page. We provide free subdomains as well if you don't have your own domain yet."
+    },
+    {
+      question: "What happens to my pages after I pay?",
+      answer: "Your pages are yours forever. Once you pay for a page, it remains live indefinitely with no recurring charges. You can edit and update it anytime."
+    },
+    {
+      question: "Is there customer support?",
+      answer: "Absolutely! We offer community support for all users through our Discord channel. Bulk package and enterprise customers get priority support."
+    },
+    {
+      question: "Can I export my website?",
+      answer: "Yes, enterprise customers have access to our API and can export their websites. Contact our sales team for more information about enterprise features."
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "footer-wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
         componentName: "Footer",
         props: '''
 return {};
@@ -971,6 +1020,7 @@ return {};
     { id: "e33", T: "Attr", S: "pricing-container", E: "pricing-grid" },
     { id: "e34", T: "Attr", S: "pricing-grid", E: "pricing-data" },
     { id: "e35", T: "Attr", S: "pricing-data", E: "pricing-card-wrapper" },
-    { id: "e36", T: "Attr", S: "page-root", E: "footer-wrapper" }
+    { id: "e36", T: "Attr", S: "page-root", E: "faq-section" },
+    { id: "e37", T: "Attr", S: "page-root", E: "footer-wrapper" }
   ]
 }

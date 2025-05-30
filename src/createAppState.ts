@@ -9,26 +9,7 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
 import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 import { componentSchemas } from "~/components/fields/components";
-import { loadWebsiteSchemas, getWebsiteSchemas } from "~/page_schema/loader";
-
-// Function to determine which website schemas to load
-function getWebsiteNameForSubdomain(
-  subdomain: string,
-  domain?: string,
-): string | null {
-  // For localhost in dev, load all websites
-  if (subdomain === "admin" && domain === "localhost") {
-    return null; // Load all
-  }
-
-  // If subdomain is 'www' and we have domain, use domain as website name
-  if (subdomain === "www" && domain) {
-    return domain;
-  }
-
-  // Otherwise use subdomain as website name
-  return subdomain;
-}
+import { getSchemasForSubdomain } from "~/page_schema/loader";
 
 export function createAppState() {
   const graph = createGraph();
@@ -107,17 +88,23 @@ export function loadWebsiteSchemasForSubdomain(
   subdomain: string,
   domain?: string,
 ) {
-  const websiteName = getWebsiteNameForSubdomain(subdomain, domain);
+  const schemas = getSchemasForSubdomain(subdomain, domain);
 
-  if (websiteName === null) {
-    // Load all websites (for localhost in dev mode)
-    const websiteSchemas = loadWebsiteSchemas();
+  // Check if we got all schemas (AllWebsiteSchemas) or specific website schemas (WebsiteSchemas)
+  const isAllSchemas =
+    "components" in schemas || "pages" in schemas ? false : true;
 
-    // Process components from all websites
-    for (const [websiteName, schemas] of Object.entries(websiteSchemas)) {
-      if (schemas.components) {
+  if (isAllSchemas) {
+    // Process all websites
+    const allSchemas = schemas as Record<
+      string,
+      { components?: Record<string, any>; pages?: Record<string, any> }
+    >;
+
+    for (const [websiteName, websiteSchemas] of Object.entries(allSchemas)) {
+      if (websiteSchemas.components) {
         for (const [componentKey, schema] of Object.entries(
-          schemas.components,
+          websiteSchemas.components,
         )) {
           const importResult = importGraphStructure(schema, graph, setGraph);
           processImportedGraph(
@@ -131,8 +118,8 @@ export function loadWebsiteSchemasForSubdomain(
       }
 
       // Process pages from all websites
-      if (schemas.pages) {
-        for (const [pageKey, schema] of Object.entries(schemas.pages)) {
+      if (websiteSchemas.pages) {
+        for (const [pageKey, schema] of Object.entries(websiteSchemas.pages)) {
           const importResult = importGraphStructure(schema, graph, setGraph);
           processImportedGraph(
             importResult,
@@ -145,11 +132,16 @@ export function loadWebsiteSchemasForSubdomain(
       }
     }
   } else {
-    // Load only specific website schemas
-    const schemas = getWebsiteSchemas(websiteName);
+    // Process single website schemas
+    const websiteSchemas = schemas as {
+      components?: Record<string, any>;
+      pages?: Record<string, any>;
+    };
 
-    if (schemas.components) {
-      for (const [componentKey, schema] of Object.entries(schemas.components)) {
+    if (websiteSchemas.components) {
+      for (const [componentKey, schema] of Object.entries(
+        websiteSchemas.components,
+      )) {
         const importResult = importGraphStructure(schema, graph, setGraph);
         processImportedGraph(
           importResult,
@@ -162,8 +154,8 @@ export function loadWebsiteSchemasForSubdomain(
     }
 
     // Process pages from the specific website
-    if (schemas.pages) {
-      for (const [pageKey, schema] of Object.entries(schemas.pages)) {
+    if (websiteSchemas.pages) {
+      for (const [pageKey, schema] of Object.entries(websiteSchemas.pages)) {
         const importResult = importGraphStructure(schema, graph, setGraph);
         processImportedGraph(
           importResult,

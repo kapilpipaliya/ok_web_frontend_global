@@ -167,9 +167,7 @@ Components and pages are defined using hjson files with the following structure:
 **Loader Functions:**
 The `~/page_schema/loader.ts` module provides several utility functions:
 - `loadWebsiteSchemas()` - Loads all schemas from all websites
-- `getWebsiteSchemas(websiteName)` - Gets schemas for a specific website
-- `getAllComponentSchemas()` - Gets all components across all websites (without website prefix)
-- `getAllPageSchemas()` - Gets all pages across all websites (without website prefix)
+- `getWebsiteSchemasSync(websiteName)` - Gets schemas for a specific website
 
 **Note:** If multiple websites have components or pages with the same name, only the last one loaded will be used.
 

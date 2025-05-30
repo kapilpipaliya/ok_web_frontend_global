@@ -1,0 +1,432 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "FAQSection"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "title",
+        type: "string",
+        defValue: "Frequently asked questions"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariant",
+      P: {
+        key: "subtitle",
+        type: "string",
+        defValue: ""
+      }
+    },
+    {
+      id: "4",
+      L: "ComponentVariant",
+      P: {
+        key: "faqs",
+        type: "array",
+        defValue: []
+      }
+    },
+    {
+      id: "faq-root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "faqState",
+        fns: '''
+const [store, setStore] = args.createStore({
+  expandedItems: {}
+});
+
+return {
+  toggleItem: (index) => {
+    setStore("expandedItems", index, (prev) => !prev);
+  },
+  isExpanded: (index) => {
+    return store.expandedItems[index] || false;
+  },
+  getStore: () => store,
+  setStore: setStore
+};
+''',
+        props: '''
+return {
+  data: {
+    store: args.fns.getStore(),
+    toggleItem: args.fns.toggleItem,
+    isExpanded: args.fns.isExpanded
+  }
+};
+'''
+      }
+    },
+    {
+      id: "faq-section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  id: "faq"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 1rem;
+  background: ${args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 900px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const title = args.contextData.props?.title || "Frequently asked questions";
+const subtitle = args.contextData.props?.subtitle;
+return {
+  as: "div",
+  style: subtitle ? {} : { display: "none" }
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const title = args.contextData.props?.title || "Frequently asked questions";
+return {
+  as: "h2",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const subtitle = args.contextData.props?.subtitle;
+return {
+  as: "p",
+  text: subtitle,
+  style: subtitle ? {} : { display: "none" }
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "faqItem",
+        loop: true,
+        props: '''
+const faqs = args.contextData.props?.faqs || [];
+return {
+  data: faqs.map((faq, index) => ({ ...faq, index }))
+};
+'''
+      }
+    },
+    {
+      id: "faq-item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqItem;
+const index = faq.index;
+const state = args.contextData.faqState;
+
+return {
+  as: "div",
+  onClick: () => state.toggleItem(index)
+};
+''',
+        css: '''
+const state = args.contextData.faqState;
+const isExpanded = state.isExpanded(args.contextData.faqItem.index);
+
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_l200};
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.background_l300};
+  }
+  
+  ${isExpanded ? `
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  ` : ''}
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-question-wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-question",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqItem;
+return {
+  as: "h3",
+  text: faq.question
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-icon",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "material-symbols:expand-more",
+  height: 24,
+  width: 24
+};
+''',
+        css: '''
+const state = args.contextData.faqState;
+const isExpanded = state.isExpanded(args.contextData.faqItem.index);
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  transition: transform 0.3s ease;
+  transform: rotate(${isExpanded ? '180deg' : '0deg'});
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-answer-wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const state = args.contextData.faqState;
+const isExpanded = state.isExpanded(args.contextData.faqItem.index);
+return {
+  as: "div",
+  style: {
+    display: isExpanded ? "block" : "none"
+  }
+};
+''',
+        css: '''
+const state = args.contextData.faqState;
+const isExpanded = state.isExpanded(args.contextData.faqItem.index);
+return `._id {
+  max-height: ${isExpanded ? '500px' : '0'};
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq-answer",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqItem;
+return {
+  as: "p",
+  text: faq.answer
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+  padding: 0 1.5rem 1.5rem;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9375rem;
+    padding: 0 1.25rem 1.25rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariant", S: "1", E: "3" },
+    { id: "e3", T: "ComponentVariant", S: "1", E: "4" },
+    { id: "e4", T: "Attr", S: "1", E: "faq-root" },
+    { id: "e5", T: "Attr", S: "faq-root", E: "faq-section" },
+    { id: "e6", T: "Attr", S: "faq-section", E: "faq-container" },
+    { id: "e7", T: "Attr", S: "faq-container", E: "faq-header" },
+    { id: "e8", T: "Attr", S: "faq-header", E: "faq-title" },
+    { id: "e9", T: "Attr", S: "faq-header", E: "faq-subtitle" },
+    { id: "e10", T: "Attr", S: "faq-container", E: "faq-list" },
+    { id: "e11", T: "Attr", S: "faq-list", E: "faq-data" },
+    { id: "e12", T: "Attr", S: "faq-data", E: "faq-item" },
+    { id: "e13", T: "Attr", S: "faq-item", E: "faq-question-wrapper" },
+    { id: "e14", T: "Attr", S: "faq-question-wrapper", E: "faq-question" },
+    { id: "e15", T: "Attr", S: "faq-question-wrapper", E: "faq-icon" },
+    { id: "e16", T: "Attr", S: "faq-item", E: "faq-answer-wrapper" },
+    { id: "e17", T: "Attr", S: "faq-answer-wrapper", E: "faq-answer" }
+  ]
+}

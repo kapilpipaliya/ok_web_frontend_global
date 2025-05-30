@@ -18,6 +18,8 @@ import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
   componentName: string;
+  createSignal: any; // solid-js function: import { createSignal } from "solid-js";
+  createStore: any; // solid-js function: import { createStore } from "solid-js/store";
   data: Vertex;
   contextData: Record<string | symbol, unknown>;
   deleteTxnIdAndCreateNew: (txnId: number) => number;

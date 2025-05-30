@@ -13,92 +13,152 @@ interface WebsiteSchemas {
 }
 
 type AllWebsiteSchemas = Record<string, WebsiteSchemas>;
+type SchemaType = "components" | "pages";
 
-// This function dynamically imports all schemas from website subdirectories
-export function loadWebsiteSchemas(): AllWebsiteSchemas {
-  const schemas: AllWebsiteSchemas = {};
+interface ParsedPath {
+  websiteName: string;
+  schemaType: SchemaType;
+  fileName: string;
+}
 
-  // Import all hjson files from website subdirectories
-  // The glob pattern matches: page_schema/[websiteName]/[components|pages]/*.hjson
-  const hjsonModules = import.meta.glob<string>("./*/*/**.hjson", {
+// Helper function to parse module paths
+function parseModulePath(path: string): ParsedPath | null {
+  const parts = path.split("/");
+  if (parts.length < 4) return null;
+
+  const schemaType = parts[2];
+  if (schemaType !== "components" && schemaType !== "pages") return null;
+
+  return {
+    websiteName: parts[1],
+    schemaType: schemaType as SchemaType,
+    fileName: parts[3].replace(".hjson", ""),
+  };
+}
+
+// Helper to process a single schema file
+function processSchemaFile(
+  schemas: AllWebsiteSchemas | WebsiteSchemas,
+  parsedPath: ParsedPath,
+  content: string,
+): void {
+  try {
+    const schema = parseHjsonPreservingMultiline(content);
+
+    // Handle both AllWebsiteSchemas and WebsiteSchemas types
+    if ("components" in schemas || "pages" in schemas) {
+      // WebsiteSchemas
+      const websiteSchemas = schemas as WebsiteSchemas;
+      if (!websiteSchemas[parsedPath.schemaType]) {
+        websiteSchemas[parsedPath.schemaType] = {};
+      }
+      websiteSchemas[parsedPath.schemaType]![parsedPath.fileName] = schema;
+    } else {
+      // AllWebsiteSchemas
+      const allSchemas = schemas as AllWebsiteSchemas;
+      if (!allSchemas[parsedPath.websiteName]) {
+        allSchemas[parsedPath.websiteName] = {};
+      }
+      if (!allSchemas[parsedPath.websiteName][parsedPath.schemaType]) {
+        allSchemas[parsedPath.websiteName][parsedPath.schemaType] = {};
+      }
+      allSchemas[parsedPath.websiteName][parsedPath.schemaType]![
+        parsedPath.fileName
+      ] = schema;
+    }
+  } catch (error) {
+    console.error(
+      `Failed to parse schema at ${parsedPath.websiteName}/${parsedPath.schemaType}/${parsedPath.fileName}:`,
+      error,
+    );
+  }
+}
+
+// Function to determine which website schemas to load
+export function getWebsiteNameForSubdomain(
+  subdomain: string,
+  domain?: string,
+): string | null {
+  // For localhost in dev, load all websites
+  if (subdomain === "admin" && domain === "localhost") {
+    return null; // Load all
+  }
+
+  // If subdomain is 'www' and we have domain, use domain as website name
+  if (subdomain === "www" && domain) {
+    return domain;
+  }
+
+  // Otherwise use subdomain as website name
+  return subdomain;
+}
+
+// Cache for website schemas to avoid reloading
+const websiteSchemaCache = new Map<string, WebsiteSchemas>();
+
+// Get specific website schemas synchronously with caching
+export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
+  // Check cache first
+  if (websiteSchemaCache.has(websiteName)) {
+    return websiteSchemaCache.get(websiteName)!;
+  }
+
+  const schemas: WebsiteSchemas = { components: {}, pages: {} };
+
+  // We have to use the general pattern, but we'll filter efficiently
+  const allModules = import.meta.glob<string>("./*/*/**.hjson", {
     eager: true,
     query: "?raw",
     import: "default",
   });
 
-  // Process each imported module
-  for (const [path, content] of Object.entries(hjsonModules)) {
-    // Extract website name, type (components/pages), and filename from path
-    // Example path: ./mywebsite/components/Button.hjson
-    const parts = path.split("/");
-    if (parts.length >= 4) {
-      const websiteName = parts[1];
-      const schemaType = parts[2]; // 'components' or 'pages'
-      const fileName = parts[3].replace(".hjson", "");
+  // Process only modules for this specific website
+  for (const [path, content] of Object.entries(allModules)) {
+    const parsedPath = parseModulePath(path);
+    if (!parsedPath || parsedPath.websiteName !== websiteName) continue;
 
-      // Initialize website structure if needed
-      if (!schemas[websiteName]) {
-        schemas[websiteName] = {};
-      }
-
-      // Initialize schema type if needed
-      if (schemaType === "components" || schemaType === "pages") {
-        if (!schemas[websiteName][schemaType]) {
-          schemas[websiteName][schemaType] = {};
-        }
-
-        // Parse and store the schema
-        try {
-          schemas[websiteName][schemaType]![fileName] =
-            parseHjsonPreservingMultiline(content as string);
-        } catch (error) {
-          console.error(`Failed to parse schema at ${path}:`, error);
-        }
-      }
-    }
+    processSchemaFile(schemas, parsedPath, content as string);
   }
+
+  // Cache the result for future use
+  // websiteSchemaCache.set(websiteName, schemas);
 
   return schemas;
 }
 
-// Export function to get schemas for a specific website
-export function getWebsiteSchemas(websiteName: string): WebsiteSchemas {
-  const allSchemas = loadWebsiteSchemas();
-  return allSchemas[websiteName] || { components: {}, pages: {} };
+// Export function to get schemas based on subdomain
+export function getSchemasForSubdomain(
+  subdomain: string,
+  domain?: string,
+): AllWebsiteSchemas | WebsiteSchemas {
+  const websiteName = getWebsiteNameForSubdomain(subdomain, domain);
+
+  if (websiteName === null) {
+    // Return all schemas - need to load them all
+    return loadAllWebsiteSchemasSync();
+  } else {
+    // Return only specific website schemas
+    return getWebsiteSchemasSync(websiteName);
+  }
 }
 
-// Export function to get all component schemas across all websites
-export function getAllComponentSchemas(): Record<string, SchemaResult> {
-  const allSchemas = loadWebsiteSchemas();
-  const components: Record<string, SchemaResult> = {};
+// Load all website schemas synchronously (used when we need all schemas)
+function loadAllWebsiteSchemasSync(): AllWebsiteSchemas {
+  const schemas: AllWebsiteSchemas = {};
 
-  for (const [websiteName, schemas] of Object.entries(allSchemas)) {
-    if (schemas.components) {
-      for (const [componentName, schema] of Object.entries(
-        schemas.components,
-      )) {
-        // Store without website prefix to avoid duplicates
-        components[componentName] = schema;
-      }
-    }
+  // Import all hjson files synchronously
+  const eagerModules = import.meta.glob<string>("./*/*/**.hjson", {
+    eager: true,
+    query: "?raw",
+    import: "default",
+  });
+
+  for (const [path, content] of Object.entries(eagerModules)) {
+    const parsedPath = parseModulePath(path);
+    if (!parsedPath) continue;
+
+    processSchemaFile(schemas, parsedPath, content as string);
   }
 
-  return components;
-}
-
-// Export function to get all page schemas across all websites
-export function getAllPageSchemas(): Record<string, SchemaResult> {
-  const allSchemas = loadWebsiteSchemas();
-  const pages: Record<string, SchemaResult> = {};
-
-  for (const [websiteName, schemas] of Object.entries(allSchemas)) {
-    if (schemas.pages) {
-      for (const [pageName, schema] of Object.entries(schemas.pages)) {
-        // Store without website prefix to avoid duplicates
-        pages[pageName] = schema;
-      }
-    }
-  }
-
-  return pages;
+  return schemas;
 }
