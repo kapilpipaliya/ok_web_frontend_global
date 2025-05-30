@@ -264,11 +264,69 @@ return `._id {
       }
     },
     {
+      id: "theme-switch-button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const currentMode = args.currentMode();
+const isDark = currentMode === "dark";
+return {
+  as: "button",
+  onClick: args.toggleTheme,
+  title: isDark ? "Switch to light mode" : "Switch to dark mode"
+};
+''',
+        css: '''
+return `._id {
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.background_l300};
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_l100};
+    border-color: ${args.theme.var.color.background_l400};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "theme-switch-icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentMode = args.currentMode();
+const isDark = currentMode === "dark";
+return {
+  as: "icon",
+  icon: isDark ? "ph:sun" : "ph:moon",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
       id: "hero-section",
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "HeroSection",
+        componentName: "DecodeUIHeroSection",
         props: '''
 return {
   title: "Build Stunning Websites with Drag & Drop",
@@ -488,7 +546,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "FeatureCard",
+        componentName: "DecodeUIFeatureCard",
         props: '''
 const feature = args.contextData.featuresList;
 return {
@@ -663,7 +721,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "TestimonialCard",
+        componentName: "DecodeUITestimonialCard",
         props: '''
 const testimonial = args.contextData.testimonialsList;
 return {
@@ -681,7 +739,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 5,
-        componentName: "CTASection",
+        componentName: "DecodeUICTASection",
         props: '''
 return {
   title: "Start Building Your Dream Website Today",
@@ -909,7 +967,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "PricingCard",
+        componentName: "DecodeUIPricingCard",
         props: '''
 const plan = args.contextData.pricingPlans;
 return {
@@ -929,7 +987,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 7,
-        componentName: "FAQSection",
+        componentName: "DecodeUIFAQSection",
         props: '''
 return {
   title: "Frequently Asked Questions",
@@ -976,7 +1034,7 @@ return {
       L: "Attr",
       P: {
         displayOrder: 8,
-        componentName: "Footer",
+        componentName: "DecodeUIFooter",
         props: '''
 return {};
 '''
@@ -994,6 +1052,8 @@ return {};
     { id: "e8", T: "Attr", S: "navbar-menu", E: "navbar-actions" },
     { id: "e9", T: "Attr", S: "navbar-actions", E: "login-button" },
     { id: "e10", T: "Attr", S: "navbar-actions", E: "signup-button" },
+    { id: "e10a", T: "Attr", S: "navbar-actions", E: "theme-switch-button" },
+    { id: "e10b", T: "Attr", S: "theme-switch-button", E: "theme-switch-icon" },
     { id: "e11", T: "Attr", S: "page-root", E: "hero-section" },
     { id: "e12", T: "Attr", S: "page-root", E: "features-section" },
     { id: "e13", T: "Attr", S: "features-section", E: "features-container" },
