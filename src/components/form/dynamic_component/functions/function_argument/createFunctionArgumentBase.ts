@@ -2,16 +2,15 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import {
   type Accessor,
   type Component,
-  getOwner,
+  type Owner,
   createSignal,
 } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import type { SetStoreFunction } from "solid-js/store";
 import { createStore } from "solid-js/store";
-import type { ThemeContext } from "~/lib/styles/types/types";
+import type { ThemeContext, ColorMode } from "~/lib/styles/types/types";
 import type { Navigator, useSearchParams } from "@solidjs/router";
-import { createFunctionProxy } from "~/components/form/createFunctionProxy";
 import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
 import { deleteTxnIdAndCreateNew } from "~/components/form/functions/deleteTxnIdAndCreateNew";
 import { ensureData } from "~/components/form/functions/ensureData";
@@ -25,14 +24,18 @@ import { setGraphDataWithTransaction } from "~/lib/graph/mutate/core/setGraphDat
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { runWithOwnerFunction } from "~/components/form/dynamic_component/owner/runWithOwnerFunction";
 import { runWithParentOwnerFunction } from "~/components/form/dynamic_component/owner/runWithParentOwnerFunction";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
-import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
-
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
   showWarningToast: (message: string) => void;
+}
+
+interface ThemeToggleFunctions {
+  toggleTheme: () => void;
+  setColorMode: (mode: ColorMode) => void;
+  resetTheme: () => void;
+  currentMode: () => ColorMode;
 }
 
 /**
@@ -51,12 +54,10 @@ export function createFunctionArgumentBase(
     isViewMode: () => boolean | undefined;
     isReadOnly: () => boolean | undefined;
     mounted: () => boolean;
-    parentRenderContext: () => { context: FunctionArgumentType } | undefined;
     parentMeta: () => Vertex | undefined;
     ref: () => HTMLElement | null;
     setRef: (ref: HTMLElement | null) => void;
     updateValue: (value: unknown) => void;
-    dynamicFns: () => Record<string, unknown>;
     onChange: (value: unknown) => void;
     hasFullPermission: Accessor<boolean | null | undefined>;
     hasEditPermission: Accessor<boolean | null | undefined>;
@@ -74,18 +75,12 @@ export function createFunctionArgumentBase(
     theme: ThemeContext;
     parentItems: [{ context: FunctionArgumentType }, unknown][];
     previewStore: { context: unknown };
+    themeToggle: ThemeToggleFunctions;
+    owner: Owner;
+    parentRenderContext: () => { context: FunctionArgumentType } | undefined;
+    functionProxy: Record<string, unknown>;
   },
 ) {
-  const owner = getOwner();
-  const parentRenderContext = () => getLastItem(hooks.parentItems)?.[0];
-
-  const functionProxy = createFunctionProxy(
-    options.dynamicFns,
-    options.parentRenderContext,
-  );
-
-  const themeToggle = useThemeToggle();
-
   return {
     clearAllErrors: () => {
       const errorVertexId = `${props.data?.id}-error`;
@@ -107,7 +102,7 @@ export function createFunctionArgumentBase(
       return props.data;
     },
     get contextData() {
-      return runWithOwnerFunction(owner, () => useDataContext() || {});
+      return runWithOwnerFunction(hooks.owner, () => useDataContext() || {});
     },
     deleteTxnIdAndCreateNew: (txnId: number) => {
       return deleteTxnIdAndCreateNew(
@@ -134,7 +129,7 @@ export function createFunctionArgumentBase(
     evalExpression,
     mergeVertexProperties,
     get fns() {
-      return functionProxy;
+      return hooks.functionProxy;
     },
     formId: options.formId,
     get graph() {
@@ -164,12 +159,12 @@ export function createFunctionArgumentBase(
     mounted: options.mounted,
     navigate: hooks.navigate,
     onChange: options.onChange,
-    owner,
+    owner: hooks.owner,
     parentItems: hooks.parentItems,
     get parentMeta() {
       return options.parentMeta();
     },
-    parentRenderContext: options.parentRenderContext(),
+    parentRenderContext: hooks.parentRenderContext(),
     get readOnly() {
       return options.isReadOnly();
     },
@@ -188,9 +183,9 @@ export function createFunctionArgumentBase(
       revertTransaction(txnId, hooks.graph, hooks.setGraph),
     revertTransactionUpToIndex: (txnId: number, txnIndex: number) =>
       revertTransactionUpToIndex(txnId, txnIndex, hooks.graph, hooks.setGraph),
-    runWithOwner: (fn: () => void) => runWithOwnerFunction(owner, fn),
+    runWithOwner: (fn: () => void) => runWithOwnerFunction(hooks.owner, fn),
     runWithParentOwner: (fn: () => void) =>
-      runWithParentOwnerFunction(parentRenderContext, fn),
+      runWithParentOwnerFunction(hooks.parentRenderContext, fn),
     searchParams: hooks.searchParams,
     setError: (error: string | undefined, key?: string) => {
       const errorVertexId = `${props.data?.id}-error`;
@@ -230,9 +225,9 @@ export function createFunctionArgumentBase(
     createSignal,
     createStore,
     // Theme toggle functions from useThemeToggle hook
-    toggleTheme: themeToggle.toggleTheme,
-    setColorMode: themeToggle.setColorMode,
-    resetTheme: themeToggle.resetTheme,
-    currentMode: themeToggle.currentMode,
+    toggleTheme: hooks.themeToggle.toggleTheme,
+    setColorMode: hooks.themeToggle.setColorMode,
+    resetTheme: hooks.themeToggle.resetTheme,
+    currentMode: hooks.themeToggle.currentMode,
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

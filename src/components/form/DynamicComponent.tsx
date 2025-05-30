@@ -7,6 +7,7 @@ import {
   Show,
   Suspense,
   Switch,
+  getOwner,
 } from "solid-js";
 import { useSearchParams } from "@solidjs/router";
 import {
@@ -19,11 +20,13 @@ import { useToast } from "../styled/modal/Toast";
 import { type FormStoreObject, useFormContext } from "./context/FormContext";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { useTheme } from "~/lib/theme/ThemeContext";
+import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { useNavigate } from "@solidjs/router";
 
 import { ContentWrapper } from "~/components/form/dynamic_component/components/DynamicContent";
+import { createFunctionProxy } from "~/components/form/createFunctionProxy";
 
 import { useComponentPermissions } from "~/components/form/dynamic_component/hooks/useComponentPermissions";
 import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
@@ -90,6 +93,8 @@ export function DynamicComponent(props: DynamicComponentProps) {
   const zIndex = useZIndex();
   const navigate = useNavigate();
   const theme = useTheme();
+  const themeToggle = useThemeToggle();
+  const owner = getOwner();
 
   // Permission hooks
   const {
@@ -126,6 +131,12 @@ export function DynamicComponent(props: DynamicComponentProps) {
     componentName,
   );
 
+  // Create function proxy
+  const functionProxy = createFunctionProxy(
+    () => dynamicFns,
+    parentRenderContext,
+  );
+
   // Create function arguments
   const getFunctionArgument = () =>
     createFunctionArgumentBase(
@@ -138,12 +149,10 @@ export function DynamicComponent(props: DynamicComponentProps) {
         isViewMode: () => isViewMode(),
         isReadOnly: () => isReadOnly(),
         mounted,
-        parentRenderContext,
         parentMeta,
         ref,
         setRef,
         updateValue,
-        dynamicFns: () => dynamicFns,
         onChange,
         hasFullPermission,
         hasEditPermission,
@@ -161,6 +170,10 @@ export function DynamicComponent(props: DynamicComponentProps) {
         theme,
         parentItems,
         previewStore,
+        themeToggle,
+        owner: owner!,
+        parentRenderContext,
+        functionProxy,
       },
     );
 
