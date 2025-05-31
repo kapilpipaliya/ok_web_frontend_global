@@ -207,10 +207,8 @@ export function ComponentField(props: Readonly<{}>) {
   };
 
   return (
-    <>
       <Show when={componentData()}>
         <Content />
-      </Show>
-    </>
+    </Show>
   );
 }

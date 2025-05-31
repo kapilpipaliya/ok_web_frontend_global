@@ -61,7 +61,8 @@ export default function AdminDashboard() {
 
       <DataGrid isShowPagination={true} tableId={selectedId()} />
 
-      <PageTable />
+      {/*  In Development Remove comment */}
+      {/* <PageTable /> */}
     </div>
   );
 }
