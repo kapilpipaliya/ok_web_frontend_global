@@ -174,7 +174,7 @@ export function PageViewComponent(props: { mainPanel: Id }) {
                           animation: borderPulse 1.5s infinite alternate;
                         }\`;`,
                                 `return \`@keyframes borderPulse {
-                            from { border-color: \${args.theme.var.color.primary_l300}; }
+                            from { border-color: \${args.theme.var.color.primary_light_300}; }
                             to { border-color: \${args.theme.var.color.primary}; }
                           }\`;`,
                               ]

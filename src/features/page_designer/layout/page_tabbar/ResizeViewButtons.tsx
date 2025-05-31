@@ -137,7 +137,7 @@ export const ResizeViewButtons = (props: {
     padding: 0.15rem;
     width: 4.5rem;
     height: 28px;
-    background-color: \${args.theme.var.color.background_l100};
+    background-color: \${args.theme.var.color.background_light_100};
     color: \${args.theme.var.color.text};
   }\`;`;
 
@@ -158,7 +158,7 @@ export const ResizeViewButtons = (props: {
   border-radius: 5px;
   padding: 0.15rem;
   height: 28px;
-  background-color: \${args.theme.var.color.background_l100};
+  background-color: \${args.theme.var.color.background_light_100};
   color: \${args.theme.var.color.text};
 }\`;`}
         onChange={(e) => handleDimensionSelect(e.target.value)}

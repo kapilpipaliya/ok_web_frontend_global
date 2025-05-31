@@ -217,10 +217,10 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
   border: 1px solid \${args.theme.var.color.border};
   border-radius: 6px;
   padding: 12px;
-  background-color: \${args.theme.var.color.background_l100};
-  color: \${args.theme.var.color.background_l100_text};
+  background-color: \${args.theme.var.color.background_light_100};
+  color: \${args.theme.var.color.background_light_100_text};
   scrollbar-width: thin;
-  scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_l300};
+  scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_light_300};
 }\`;`,
                 componentName: "Html",
                 class: "chat-history-container",

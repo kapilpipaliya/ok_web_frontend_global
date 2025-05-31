@@ -22,7 +22,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background_d100};
+  background: ${args.theme.var.color.background_dark_100};
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -115,7 +115,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
 }`;
@@ -212,12 +212,12 @@ return `._id {
   padding: 2rem;
   text-align: center;
   transition: all 0.3s ease;
-  border: 1px solid ${args.theme.var.color.background_d200};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 30px ${args.theme.var.color.text_l900};
-    border-color: ${args.theme.var.color.primary_l700};
+    box-shadow: 0 10px 30px ${args.theme.var.color.text_light_900};
+    border-color: ${args.theme.var.color.primary_light_700};
   }
 }`;
 '''
@@ -240,7 +240,7 @@ return `._id {
   width: 64px;
   height: 64px;
   margin: 0 auto 1.5rem;
-  background: ${args.theme.var.color.primary_l850};
+  background: ${args.theme.var.color.primary_light_850};
   border-radius: 1rem;
   display: flex;
   align-items: center;
@@ -309,7 +309,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   line-height: 1.6;
 }`;
 '''

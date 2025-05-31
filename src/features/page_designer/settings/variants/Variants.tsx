@@ -78,13 +78,13 @@ export function Variants() {
         <IconButton
           icon="ph:pencil"
           css={`return \`._id {
-            background-color: \${args.theme.var.color.primary_l150};
+            background-color: \${args.theme.var.color.primary_light_150};
             border: none;
             cursor: pointer;
             padding: 4px;
             border-radius: 4px;
             &:hover {
-              background-color: \${args.theme.var.color.primary_l200};
+              background-color: \${args.theme.var.color.primary_light_200};
             }
           }\`;`}
           size="18"

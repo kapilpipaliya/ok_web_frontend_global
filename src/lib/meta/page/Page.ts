@@ -267,7 +267,7 @@ date`,
   transition: all 0.2s ease;
   border: none;
   &:hover {
-    background-color: \${args.theme.var.color.error_l100};
+    background-color: \${args.theme.var.color.error_light_100};
     color: \${args.theme.var.color.error};
   }
 }\`;`,

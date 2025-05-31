@@ -114,7 +114,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
 }`;
 '''
       }
@@ -217,13 +217,13 @@ return {
         css: '''
 return `._id {
   background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.background_d200};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
   border-radius: 0.75rem;
   overflow: hidden;
   transition: all 0.3s ease;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary_l500};
+    border-color: ${args.theme.var.color.primary_light_500};
   }
 }`;
 '''
@@ -253,7 +253,7 @@ const isOpen = faqState.openIndex() === index;
 return `._id {
   width: 100%;
   padding: 1.25rem;
-  background: ${isOpen ? args.theme.var.color.primary_l900 : 'transparent'};
+  background: ${isOpen ? args.theme.var.color.primary_light_900 : 'transparent'};
   border: none;
   cursor: pointer;
   display: flex;
@@ -263,7 +263,7 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${isOpen ? args.theme.var.color.primary_l850 : args.theme.var.color.background_l100};
+    background: ${isOpen ? args.theme.var.color.primary_light_850 : args.theme.var.color.background_light_100};
   }
 }`;
 '''
@@ -381,7 +381,7 @@ return isOpen ? {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   line-height: 1.6;
   margin: 0;
   padding: 0 1.25rem 1.5rem;

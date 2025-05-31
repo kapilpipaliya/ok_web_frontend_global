@@ -72,7 +72,7 @@ const SectionHeader = (props: SectionHeaderProps) => (
   position: sticky;
   top: 0;
   z-index: 1;
-  background-color: \${args.theme.var.color.background_l150};
+  background-color: \${args.theme.var.color.background_light_150};
   padding: 4px 0;
 }\`;`,
     ]}
@@ -234,7 +234,7 @@ export function FormElementTabs() {
       <As
         as="div"
         css={`return \`._id {
-  background-color: \${args.theme.var.color.background_l100};
+  background-color: \${args.theme.var.color.background_light_100};
   overflow-x: auto;
 }\`;`}
       >

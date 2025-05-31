@@ -169,7 +169,7 @@ export function Preview(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_l800};
+    background-color: \${args.theme.var.color.primary_light_800};
   }
 }\`;`}
                 disabled={
@@ -254,7 +254,7 @@ export function Preview(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_l800};
+    background-color: \${args.theme.var.color.primary_light_800};
   }
 }\`;`}
                     icon="ph:arrows-clockwise"
@@ -285,7 +285,7 @@ export function Preview(props: {
   padding: 4px;
   border-radius: 4px;
   hover: {
-    background-color: \${args.theme.var.color.primary_l800};
+    background-color: \${args.theme.var.color.primary_light_800};
   }
 }\`;`}
                     disabled={

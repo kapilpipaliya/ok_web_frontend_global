@@ -48,7 +48,7 @@ export default function Logout() {
       <As
         as="div"
         css={`return \`._id {
-          background-color: \${args.theme.var.color.background_l100};
+          background-color: \${args.theme.var.color.background_light_100};
           padding: 32px;
           border-radius: 8px;
           box-shadow: 1px 2px 3px \${args.theme.var.color.primary};

@@ -44,8 +44,8 @@ export function TabBar(props: { mainPanel: Id }) {
       flex-shrink: 0;
       ${
         isActiveTab
-          ? "background-color: ${args.theme.var.color.primary_l250}; color: ${args.theme.var.color.primary_l250_text};"
-          : "background-color: ${args.theme.var.color.background_l200}; color: ${args.theme.var.color.background_l200_text};"
+          ? "background-color: ${args.theme.var.color.primary_light_250}; color: ${args.theme.var.color.primary_light_250_text};"
+          : "background-color: ${args.theme.var.color.background_light_200}; color: ${args.theme.var.color.background_light_200_text};"
       }
       ${isCurrentForm ? "border-bottom: 2px solid ${args.theme.var.color.error};" : ""}
     }\`;`;
@@ -145,7 +145,7 @@ export function TabBar(props: { mainPanel: Id }) {
   gap: 5px;
   padding: 5px;
   border-bottom: 1px solid \${args.theme.var.color.border};
-  background-color: \${args.theme.var.color.background_l100};
+  background-color: \${args.theme.var.color.background_light_100};
 }\`;`}
       onDragOver={(e) => e.preventDefault()}
       onDrop={() => moveTab(props.mainPanel)}
@@ -155,7 +155,7 @@ export function TabBar(props: { mainPanel: Id }) {
         css={`return \`._id {
           background-color: transparent;
           border: none;
-          color: \${args.theme.var.color.text_l400};
+          color: \${args.theme.var.color.text_light_400};
           transition: color 0.2s ease;
           &:hover {
             color: \${args.theme.var.color.primary};
@@ -264,7 +264,7 @@ export function TabBar(props: { mainPanel: Id }) {
   cursor: pointer;
   border: none;
   &:hover {
-    color: \${args.theme.var.color.error_l800};
+    color: \${args.theme.var.color.error_light_800};
   }
 }\`;`}
                   icon="ph:x"
@@ -286,9 +286,9 @@ export function TabBar(props: { mainPanel: Id }) {
   margin-left: auto;
   background-color: transparent;
   border: none;
-  color: \${args.theme.var.color.text_l200};
+  color: \${args.theme.var.color.text_light_200};
   &:hover {
-    color: \${args.theme.var.color.error_l800};
+    color: \${args.theme.var.color.error_light_800};
   }
 }\`;`}
           icon="ph:x-circle"

@@ -295,7 +295,7 @@ export function FunctionEditor(props: {
           </EditorButton>
 
           <EditorButton
-            color={"${args.theme.var.color.primary_l300}"}
+            color={"${args.theme.var.color.primary_light_300}"}
             onClick={formatCode}
             title="Format Code with Prettier"
           >
@@ -305,7 +305,7 @@ export function FunctionEditor(props: {
           <Show when={isModalOpen()}>
             <As as="div" css={`return \`._id { margin-left: auto; }\`;`}>
               <EditorButton
-                color={"${args.theme.var.color.error_l800}"}
+                color={"${args.theme.var.color.error_light_800}"}
                 onClick={() => setIsModalOpen(false)}
               >
                 Cancel

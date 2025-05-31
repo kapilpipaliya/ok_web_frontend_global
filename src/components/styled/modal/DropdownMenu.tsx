@@ -77,8 +77,8 @@ transform-origin: top right`;
             ? `return \`._id {
                 ${borderClass};
                 align-items: flex-start;
-                background: \${args.theme.var.color.background_l100};
-                color: \${args.theme.var.color.background_l100_text};
+                background: \${args.theme.var.color.background_light_100};
+                color: \${args.theme.var.color.background_light_100_text};
                 display: flex;
                 flex-direction: column;
                 gap: 0.25rem;

@@ -58,7 +58,7 @@ export function TableBodyCell(
         text-align: center;
       }\`;`,
         props.index && props.index % 2 !== 0
-          ? `return \`._id { background-color: \${args.theme.var.color.primary_l800}; color: \${args.theme.var.color.primary_l800_text}; }\`;`
+          ? `return \`._id { background-color: \${args.theme.var.color.primary_light_800}; color: \${args.theme.var.color.primary_light_800_text}; }\`;`
           : "",
         ...ensureArray(props.css),
       ]}
@@ -74,7 +74,7 @@ export function TableHeadCell(props: Readonly<{ children: JSX.Element }>) {
       as="div"
       css={`return \`._id {
       background-color: \${args.theme.var.color.primary};
-      border: 1px solid \${args.theme.var.color.primary_d100};
+      border: 1px solid \${args.theme.var.color.primary_dark_100};
       color: \${args.theme.var.color.primary_text};
       font-weight: 600;
       padding: 10px;

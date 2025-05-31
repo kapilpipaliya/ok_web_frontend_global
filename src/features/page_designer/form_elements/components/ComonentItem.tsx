@@ -89,11 +89,11 @@ export function ComponentItem(
 
   const getItemStyle = () => {
     const backgroundColor = isNegative(props.child.id)
-      ? `\${args.theme.var.color.success_l600}`
-      : `\${args.theme.var.color.background_l50}`;
+      ? `\${args.theme.var.color.success_light_600}`
+      : `\${args.theme.var.color.background_light_50}`;
     const textColor = isNegative(props.child.id)
-      ? `\${args.theme.var.color.success_l600_text}`
-      : `\${args.theme.var.color.background_l50_text}`;
+      ? `\${args.theme.var.color.success_light_600_text}`
+      : `\${args.theme.var.color.background_light_50_text}`;
     return [
       baseItemStyle,
       `return \`._id {

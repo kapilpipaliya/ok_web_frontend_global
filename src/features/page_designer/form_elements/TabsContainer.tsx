@@ -10,7 +10,7 @@ export function TabsContainer(props: ParentProps) {
   line-height: 1rem;
   border-bottom-width: 1px;
   border-color: \${args.theme.var.color.border};
-  color: \${args.theme.var.color.text_l300};
+  color: \${args.theme.var.color.text_light_300};
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 10px;

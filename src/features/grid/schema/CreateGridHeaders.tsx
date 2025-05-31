@@ -117,8 +117,8 @@ export function CreateGridHeaders(
                     <As
                       as="div"
                       css={`return \`._id {
-                      background: \${args.theme.var.color.background_l50};
-                      color: \${args.theme.var.color.background_l50_text};
+                      background: \${args.theme.var.color.background_light_50};
+                      color: \${args.theme.var.color.background_light_50_text};
                       padding: 8px;
                     }\`;`}
                     >
@@ -248,7 +248,7 @@ export function CreateGridHeaders(
                         opacity: 1;
                       }
                       &:hover {
-                        color: \${args.theme.var.color.primary_d400};
+                        color: \${args.theme.var.color.primary_dark_400};
                       }
                     }\`;`}
                     onClick={(e) => {
@@ -364,10 +364,10 @@ export function CreateGridHeaders(
                       padding: 1px;
                       cursor: pointer;
                       &:hover {
-                        color: \${args.theme.var.color.primary_d400};
+                        color: \${args.theme.var.color.primary_dark_400};
                       }
                       &:disabled {
-                        color: \${args.theme.var.color.text_l600};
+                        color: \${args.theme.var.color.text_light_600};
                         cursor: not-allowed;
                       }
                     }\`;`}
@@ -402,7 +402,7 @@ export function CreateGridHeaders(
                   padding: 1px;
                   cursor: pointer;
                   &:hover {
-                    color: \${args.theme.var.color.error_d400};
+                    color: \${args.theme.var.color.error_dark_400};
                   }
                 }\`;`}
                 onClick={() => setDeleteRowId(info.row.original.id)}
@@ -420,7 +420,7 @@ export function CreateGridHeaders(
                   padding: 1px;
                   cursor: pointer;
                   &:hover {
-                    color: \${args.theme.var.color.primary_d400};
+                    color: \${args.theme.var.color.primary_dark_400};
                   }
                 }\`;`}
                 onClick={() => {
@@ -439,7 +439,7 @@ export function CreateGridHeaders(
                   padding: 1px;
                   cursor: pointer;
                   &:hover {
-                    color: \${args.theme.var.color.warning_d400};
+                    color: \${args.theme.var.color.warning_dark_400};
                   }
                 }\`;`}
                 item={info.row.original}

@@ -113,14 +113,14 @@ export function AuthenticatedMenu(
   border-radius: 6px;
   text-decoration: none;
   &:hover {
-    background-color: \${args.theme.var.color.primary_l150};
-    color: \${args.theme.var.color.primary_l150_text};
+    background-color: \${args.theme.var.color.primary_light_150};
+    color: \${args.theme.var.color.primary_light_150_text};
   }
 }\`;`,
                   isActive
                     ? `return \`._id { 
-                        background-color: \${args.theme.var.color.primary_l150}; 
-                        color: \${args.theme.var.color.primary_l150_text};
+                        background-color: \${args.theme.var.color.primary_light_150}; 
+                        color: \${args.theme.var.color.primary_light_150_text};
                         font-weight: bold; 
                       }\`;`
                     : `return \`._id { 
@@ -152,7 +152,7 @@ export function AuthenticatedMenu(
         css={`return \`._id {
   margin-top: 8px;
   margin-bottom: 8px;
-  color: \${args.theme.var.color.background_l100};
+  color: \${args.theme.var.color.background_light_100};
 }\`;`}
       />
       <li>
@@ -169,8 +169,8 @@ export function AuthenticatedMenu(
   border: none;
   cursor: pointer;
   &:hover {
-    background-color: \${args.theme.var.color.error_l150};
-    color: \${args.theme.var.color.error_l150_text};
+    background-color: \${args.theme.var.color.error_light_150};
+    color: \${args.theme.var.color.error_light_150_text};
   }
 }\`;`}
           href={API.urls.user.logout}

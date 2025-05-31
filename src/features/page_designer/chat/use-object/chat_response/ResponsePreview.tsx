@@ -24,7 +24,7 @@ export function ResponsePreview(props: { message: Vertex<DBMessage> }) {
           `return \`._id {
   font-weight: 600;
   margin-bottom: 12px;
-  color: \${args.theme.var.color.text_d600};
+  color: \${args.theme.var.color.text_dark_600};
   display: flex;
   align-items: center;
   gap: 6px;
@@ -51,7 +51,7 @@ export function ResponsePreview(props: { message: Vertex<DBMessage> }) {
   padding: 16px;
   border-radius: 8px;
   min-height: 120px;
-  background-color: \${args.theme.var.color.background_l50};
+  background-color: \${args.theme.var.color.background_light_50};
   transition: border-color 0.2s;
   width: 100%;
   

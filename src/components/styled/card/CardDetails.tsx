@@ -10,7 +10,7 @@ export function CardDetailRow(props: { children: JSX.Element; label: string }) {
   column-gap: 1rem;
   justify-content: space-between;
   padding: 0.75rem 0;
-  border-bottom: 1px solid \${args.theme.var.color.primary_l850};
+  border-bottom: 1px solid \${args.theme.var.color.primary_light_850};
   
   &:last-child {
     border-bottom: none;
@@ -20,7 +20,7 @@ export function CardDetailRow(props: { children: JSX.Element; label: string }) {
       <As
         as="dt"
         css={`return \`._id {
-  color: \${args.theme.var.color.text_l450};
+  color: \${args.theme.var.color.text_light_450};
   font-weight: 500;
 }\`;`}
       >
@@ -29,7 +29,7 @@ export function CardDetailRow(props: { children: JSX.Element; label: string }) {
       <As
         as="dd"
         css={`return \`._id {
-  color: \${args.theme.var.color.text_l150};
+  color: \${args.theme.var.color.text_light_150};
   font-weight: 600;
 }\`;`}
       >
@@ -66,9 +66,9 @@ export function CardDetailsContainer(props: { children: JSX.Element }) {
       css={`return \`._id {
   font-size: 0.875rem;
   padding: 1.25rem 1.5rem;
-  background-color: \${args.theme.var.color.background_l100};
-  color: \${args.theme.var.color.background_l100_text};
-  border-top: 1px solid \${args.theme.var.color.primary_l800};
+  background-color: \${args.theme.var.color.background_light_100};
+  color: \${args.theme.var.color.background_light_100_text};
+  border-top: 1px solid \${args.theme.var.color.primary_light_800};
 }\`;`}
     >
       {props.children}
@@ -91,17 +91,17 @@ export function Status(props: { status: string }) {
         }\`;`,
         props.status === "Overdue"
           ? `return \`._id {
-              color: \${args.theme.var.color.error_l850_text};
-              background-color: \${args.theme.var.color.error_l850};
+              color: \${args.theme.var.color.error_light_850_text};
+              background-color: \${args.theme.var.color.error_light_850};
             }\`;`
           : props.status === "Paid"
             ? `return \`._id {
-                color: \${args.theme.var.color.success_l850_text};
-                background-color: \${args.theme.var.color.success_l850};
+                color: \${args.theme.var.color.success_light_850_text};
+                background-color: \${args.theme.var.color.success_light_850};
               }\`;`
             : `return \`._id {
-                color: \${args.theme.var.color.warning_l850_text};
-                background-color: \${args.theme.var.color.warning_l850};
+                color: \${args.theme.var.color.warning_light_850_text};
+                background-color: \${args.theme.var.color.warning_light_850};
               }\`;`,
       ]}
     >

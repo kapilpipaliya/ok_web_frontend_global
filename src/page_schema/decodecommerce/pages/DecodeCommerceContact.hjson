@@ -55,7 +55,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_dark_100} 100%);
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -148,7 +148,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
   
@@ -200,7 +200,7 @@ return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 1rem;
   padding: 3rem;
-  box-shadow: 0 10px 40px ${args.theme.var.color.text_l900};
+  box-shadow: 0 10px 40px ${args.theme.var.color.text_light_900};
   
   @media (max-width: 768px) {
     padding: 2rem;
@@ -379,7 +379,7 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_d200};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
@@ -388,7 +388,7 @@ return `._id {
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
   }
 }`;
 '''
@@ -449,7 +449,7 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_d200};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
@@ -458,7 +458,7 @@ return `._id {
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
   }
 }`;
 '''
@@ -518,7 +518,7 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_d200};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
@@ -527,7 +527,7 @@ return `._id {
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
   }
 }`;
 '''
@@ -588,7 +588,7 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid ${args.theme.var.color.background_d200};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
@@ -598,7 +598,7 @@ return `._id {
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
   }
 }`;
 '''
@@ -634,9 +634,9 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary_d200};
+    background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px ${args.theme.var.color.primary_l600};
+    box-shadow: 0 5px 15px ${args.theme.var.color.primary_light_600};
   }
   
   &:disabled {
@@ -759,12 +759,12 @@ return `._id {
   display: flex;
   gap: 1rem;
   padding: 1.5rem;
-  background: ${args.theme.var.color.background_d100};
+  background: ${args.theme.var.color.background_dark_100};
   border-radius: 0.75rem;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_d200};
+    background: ${args.theme.var.color.background_dark_200};
   }
 }`;
 '''
@@ -786,7 +786,7 @@ return {
 return `._id {
   width: 48px;
   height: 48px;
-  background: ${args.theme.var.color.primary_l850};
+  background: ${args.theme.var.color.primary_light_850};
   border-radius: 0.5rem;
   display: flex;
   align-items: center;
@@ -873,7 +873,7 @@ return method.link ? {
         css: '''
 const method = args.contextData.contactMethods;
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   text-decoration: none;
   transition: all 0.2s ease;
   

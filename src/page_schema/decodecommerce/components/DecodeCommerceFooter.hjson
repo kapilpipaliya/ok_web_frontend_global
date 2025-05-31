@@ -20,8 +20,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_d200};
-  border-top: 1px solid ${args.theme.var.color.background_d300};
+  background: ${args.theme.var.color.background_dark_200};
+  border-top: 1px solid ${args.theme.var.color.background_dark_300};
   padding: 3rem 0 1rem;
   
   @media (max-width: 768px) {
@@ -134,7 +134,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   line-height: 1.6;
   margin-bottom: 1.5rem;
   max-width: 300px;
@@ -202,7 +202,7 @@ return `._id {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: ${args.theme.var.color.background_d300};
+  background: ${args.theme.var.color.background_dark_300};
   border-radius: 0.5rem;
   transition: all 0.2s ease;
   
@@ -345,7 +345,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   text-decoration: none;
   transition: all 0.2s ease;
   
@@ -465,7 +465,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   text-decoration: none;
   transition: all 0.2s ease;
   
@@ -524,7 +524,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   margin-bottom: 0.5rem;
 }`;
 '''
@@ -544,7 +544,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   margin-bottom: 1rem;
 }`;
 '''
@@ -564,7 +564,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   font-size: 0.9rem;
 }`;
 '''
@@ -584,7 +584,7 @@ return {
         css: '''
 return `._id {
   padding-top: 2rem;
-  border-top: 1px solid ${args.theme.var.color.background_d300};
+  border-top: 1px solid ${args.theme.var.color.background_dark_300};
   text-align: center;
 }`;
 '''
@@ -605,7 +605,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }`;
@@ -626,7 +626,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d400};
+  color: ${args.theme.var.color.text_dark_400};
   font-size: 0.85rem;
   font-style: italic;
 }`;

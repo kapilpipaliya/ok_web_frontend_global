@@ -44,7 +44,7 @@ const content = [
       },
     ],
     css: `return \`._id {
-      background-color: \${args.theme.var.color.background_l100};
+      background-color: \${args.theme.var.color.background_light_100};
       border: 2px solid \${args.theme.var.color.primary};
       border-radius: 8px;
       margin: 24px 0;

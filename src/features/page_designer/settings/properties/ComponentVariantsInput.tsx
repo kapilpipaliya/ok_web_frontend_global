@@ -72,7 +72,7 @@ export function ComponentVariantsInput(props: {
                     <As
                       as="span"
                       css={`return \`._id {
-                    color: \${args.theme.var.color.text_l300};
+                    color: \${args.theme.var.color.text_light_300};
                     font-size: 13px;
                   }\`;`}
                     >

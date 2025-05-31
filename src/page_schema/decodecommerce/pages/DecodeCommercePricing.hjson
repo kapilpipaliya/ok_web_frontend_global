@@ -55,7 +55,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0 3rem;
-  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_dark_100} 100%);
   
   @media (max-width: 768px) {
     padding: 3rem 0 2rem;
@@ -130,7 +130,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
   
@@ -163,7 +163,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background_d100};
+  background: ${args.theme.var.color.background_dark_100};
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -259,7 +259,7 @@ return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 5px 20px ${args.theme.var.color.text_l900};
+  box-shadow: 0 5px 20px ${args.theme.var.color.text_light_900};
   
   @media (max-width: 768px) {
     min-width: 600px;
@@ -281,7 +281,7 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_d100};
+  background: ${args.theme.var.color.background_dark_100};
 }`;
 '''
       }
@@ -317,7 +317,7 @@ return `._id {
   text-align: left;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.background_d200};
+  border-bottom: 2px solid ${args.theme.var.color.background_dark_200};
 }`;
 '''
       }
@@ -356,7 +356,7 @@ return `._id {
   text-align: center;
   font-weight: 600;
   color: ${args.theme.var.color.text};
-  border-bottom: 2px solid ${args.theme.var.color.background_d200};
+  border-bottom: 2px solid ${args.theme.var.color.background_dark_200};
 }`;
 '''
       }
@@ -467,10 +467,10 @@ return {
 const feature = args.contextData.features;
 const index = feature.index;
 return `._id {
-  border-bottom: 1px solid ${args.theme.var.color.background_d100};
+  border-bottom: 1px solid ${args.theme.var.color.background_dark_100};
   
   &:hover {
-    background: ${args.theme.var.color.background_d50};
+    background: ${args.theme.var.color.background_dark_50};
   }
 }`;
 '''
@@ -515,7 +515,7 @@ return {
 return `._id {
   padding: 1rem 1.5rem;
   text-align: center;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
 }`;
 '''
       }
@@ -539,7 +539,7 @@ const hasCheck = feature.professional === "✓";
 return `._id {
   padding: 1rem 1.5rem;
   text-align: center;
-  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_d300};
+  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_dark_300};
   font-weight: ${hasCheck ? '600' : '400'};
 }`;
 '''
@@ -564,7 +564,7 @@ const hasCheck = feature.enterprise === "✓";
 return `._id {
   padding: 1rem 1.5rem;
   text-align: center;
-  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_d300};
+  color: ${hasCheck ? args.theme.var.color.success : args.theme.var.color.text_dark_300};
   font-weight: ${hasCheck ? '600' : '400'};
 }`;
 '''

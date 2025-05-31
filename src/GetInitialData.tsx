@@ -4,7 +4,6 @@ import { Match, type ParentProps, Show, Switch } from "solid-js";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 import { handleUserNavigation } from "~/lib/graph/mutate/user/loadUser";
-import { API } from "~/lib/api/endpoints";
 
 import { setUserData } from "~/lib/graph/mutate/user/setUserData";
 
@@ -100,13 +99,6 @@ export function GetInitialData(props: GetInitialDataProps) {
     setData(data()!.initialData, data()!.userData as UserData);
     return (
       <Switch>
-        <Match when={!(data()?.userData as UserData)?.user}>
-          <SimpleErrorMessage
-            message="Not Authorized"
-            linkText="Go to Sign In"
-            linkUrl={API.urls.admin.signIn}
-          />
-        </Match>
         <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>
           <SimpleErrorMessage
             message={getGlobalStore(graph[0]).P.initialDataFetchError}

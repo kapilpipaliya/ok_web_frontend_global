@@ -216,9 +216,9 @@ export function LayoutTreeItem(
     }
 
     if (isSelectedLayoutId(props.metaVertex.id)) {
-      boxShadow += ` background-color:\${args.theme.var.color.primary_l300}; color:\${args.theme.var.color.primary_l300_text};`;
+      boxShadow += ` background-color:\${args.theme.var.color.primary_light_300}; color:\${args.theme.var.color.primary_light_300_text};`;
     } else if (isSelectedHoverId(props.metaVertex.id)) {
-      boxShadow += ` background-color:\${args.theme.var.color.primary_l750}; color:\${args.theme.var.color.primary_l750_text};`;
+      boxShadow += ` background-color:\${args.theme.var.color.primary_light_750}; color:\${args.theme.var.color.primary_light_750_text};`;
     }
 
     return boxShadow;
@@ -343,7 +343,7 @@ export function LayoutTreeItem(
     if (isDirectMatch()) {
       return `return \`._id {
         font-weight: bold;
-        background-color: \${args.theme.var.color.primary_l100};
+        background-color: \${args.theme.var.color.primary_light_100};
       }\`;`;
     }
     return "";

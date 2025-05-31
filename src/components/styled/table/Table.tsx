@@ -376,7 +376,7 @@ function TableBody(
             <TableBodyCell
               css={
                 props.selectedRows.includes(row)
-                  ? `return \`._id {background-color: \${args.theme.var.color.primary_l600}; color: \${args.theme.var.color.primary_l600_text};}\`;`
+                  ? `return \`._id {background-color: \${args.theme.var.color.primary_light_600}; color: \${args.theme.var.color.primary_light_600_text};}\`;`
                   : ""
               }
               index={index()}
@@ -399,7 +399,7 @@ function TableBody(
               <TableBodyCell
                 css={
                   props.selectedRows.includes(row)
-                    ? `return \`._id {background-color: \${args.theme.var.color.primary_l600}; color: \${args.theme.var.color.primary_l600_text};}\`;`
+                    ? `return \`._id {background-color: \${args.theme.var.color.primary_light_600}; color: \${args.theme.var.color.primary_light_600_text};}\`;`
                     : ""
                 }
                 index={index()}

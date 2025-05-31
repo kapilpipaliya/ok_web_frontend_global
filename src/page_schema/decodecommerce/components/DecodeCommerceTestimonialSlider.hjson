@@ -21,7 +21,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background_d100};
+  background: ${args.theme.var.color.background_dark_100};
   overflow: hidden;
   
   @media (max-width: 768px) {
@@ -115,7 +115,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
 }`;
 '''
       }
@@ -203,7 +203,7 @@ return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 1rem;
   padding: 2rem;
-  border: 1px solid ${args.theme.var.color.background_d200};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
   scroll-snap-align: start;
   
   @media (max-width: 768px) {
@@ -285,7 +285,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.primary_l300};
+  color: ${args.theme.var.color.primary_light_300};
   margin-bottom: 1rem;
 }`;
 '''
@@ -364,7 +364,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   font-size: 0.9rem;
 }`;
 '''

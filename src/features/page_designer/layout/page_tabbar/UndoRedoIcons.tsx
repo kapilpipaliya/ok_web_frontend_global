@@ -84,7 +84,7 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
             `return \`._id {
             color: \${args.theme.var.color.primary};
             &:hover:not(:disabled) {
-              color: \${args.theme.var.color.primary_l200};
+              color: \${args.theme.var.color.primary_light_200};
             }
           }\`;`,
           ];
@@ -115,7 +115,7 @@ export function UndoRedoIcons(props: { formStoreId: string }) {
             `return \`._id {
             color: \${args.theme.var.color.primary};
             &:hover:not(:disabled) {
-              color: \${args.theme.var.color.primary_l200};
+              color: \${args.theme.var.color.primary_light_200};
             }
           }\`;`,
           ];

@@ -167,13 +167,13 @@ export function TabsWithUnderline(
                     tab.id === props.selectedKey
                       ? `return \`._id {
                           border-color: \${args.theme.var.color.primary};
-                          color: \${args.theme.var.color.primary_d200};
+                          color: \${args.theme.var.color.primary_dark_200};
                         }\`;`
                       : `return \`._id {
                           border-color: transparent;
                           &:hover {
-                            border-color: \${args.theme.var.color.background_l400};
-                            color: \${args.theme.var.color.primary_d400};
+                            border-color: \${args.theme.var.color.background_light_400};
+                            color: \${args.theme.var.color.primary_dark_400};
                           }
                           color: \${args.theme.var.color.primary};
                         }\`;`,

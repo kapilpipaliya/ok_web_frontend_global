@@ -55,7 +55,7 @@ const getResizeHandleCSS = (direction: "horizontal" | "vertical") => {
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: \${args.theme.var.color.border_d200};
+    background-color: \${args.theme.var.color.border_dark_200};
   }
 }\`;`;
 };
@@ -213,7 +213,7 @@ export function ResizableContainer(
   border-top: 1px solid \${args.theme.var.color.border};
 }\`;`,
           isDraggingOver()
-            ? `return \`._id { background-color: \${args.theme.var.color.primary_l150}; }\`;`
+            ? `return \`._id { background-color: \${args.theme.var.color.primary_light_150}; }\`;`
             : "",
           resizing() ? `return \`._id { user-select: none; }\`;` : "",
         ]}

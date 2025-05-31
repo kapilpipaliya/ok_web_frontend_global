@@ -298,30 +298,6 @@ function GridContainer(props) {
 }
 ```
 
-### Typography
-
-```tsx
-import { As } from "~/components/As";
-import { css } from "~/lib/styles";
-import { typographyCss } from "~/lib/styles/directCss";
-
-function Heading(props) {
-  return (
-    <As as="h2" 
-      css={css`
-        ${typographyCss({
-          fontSize: 24,
-          fontWeight: 'bold',
-          textColor: '#1e293b',
-          lineHeight: 1.2
-        })}
-      `}
-      {...props}
-    />
-  );
-}
-```
-
 ## Converting Master CSS Classes
 
 If you need to convert existing Master CSS classes to direct CSS strings, you can use the `masterClassToCss` function:

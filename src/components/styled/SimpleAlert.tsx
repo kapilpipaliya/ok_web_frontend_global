@@ -19,35 +19,35 @@ interface SimpleAlertProps {
 const alertConfig = {
   error: {
     icon: "mdi:alert-circle",
-    defaultBg: "error_l50",
+    defaultBg: "error_light_50",
     defaultBorder: "error",
     defaultIcon: "error",
     defaultLink: "error",
-    defaultLinkHover: "error_l200",
+    defaultLinkHover: "error_light_200",
   },
   warning: {
     icon: "mdi:alert",
-    defaultBg: "warning_l50",
+    defaultBg: "warning_light_50",
     defaultBorder: "warning",
     defaultIcon: "warning",
     defaultLink: "warning",
-    defaultLinkHover: "warning_l200",
+    defaultLinkHover: "warning_light_200",
   },
   info: {
     icon: "mdi:information",
-    defaultBg: "primary_l50",
+    defaultBg: "primary_light_50",
     defaultBorder: "primary",
     defaultIcon: "primary",
     defaultLink: "primary",
-    defaultLinkHover: "primary_l200",
+    defaultLinkHover: "primary_light_200",
   },
   success: {
     icon: "mdi:check-circle",
-    defaultBg: "success_l50",
+    defaultBg: "success_light_50",
     defaultBorder: "success",
     defaultIcon: "success",
     defaultLink: "success",
-    defaultLinkHover: "success_l200",
+    defaultLinkHover: "success_light_200",
   },
 };
 

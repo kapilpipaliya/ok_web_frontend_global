@@ -12,7 +12,7 @@ export function createFormHeader(title: string, subheader?: string) {
     getLogoSchema(
       `return \`._id {display:grid; place-items:center;}\`;`,
       `return \`._id {height:80px;}\`;`,
-      `return \`._id {color: \${args.theme.var.color.text_d600};}\`;`,
+      `return \`._id {color: \${args.theme.var.color.text_dark_600};}\`;`,
     ),
     {
       as: "h1",
@@ -26,7 +26,7 @@ export function createFormHeader(title: string, subheader?: string) {
           {
             as: "p",
             css: `return \`._id {
-        color: \${args.theme.var.color.text_l400};
+        color: \${args.theme.var.color.text_light_400};
         text-align: center;
         margin-top: 8px;
         font-size: 16px;

@@ -37,7 +37,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:squares-four"
-        iconCss={`return \`._id {${layoutStore().isLeftOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_l300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isLeftOpen ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isLeftOpen")}
         size={22}
         title="Toggle Elements Panel"
@@ -46,7 +46,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:robot"
-        iconCss={`return \`._id {${layoutStore().isRight0Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_l300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isRight0Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isRight0Open")}
         size={22}
         title="Toggle AI Panel"
@@ -55,7 +55,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:sliders"
-        iconCss={`return \`._id {${layoutStore().isRight1Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_l300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isRight1Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isRight1Open")}
         size={22}
         title="Toggle Properties Panel"
@@ -64,7 +64,7 @@ export function ToggleButtons() {
       <IconButton
         css={headerIconButtonCss}
         icon="ph:gear"
-        iconCss={`return \`._id {${layoutStore().isRight2Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_l300}"};}\`;`}
+        iconCss={`return \`._id {${layoutStore().isRight2Open ? "color:${args.theme.var.color.primary}" : "color:${args.theme.var.color.text_light_300}"};}\`;`}
         onClick={() => togglePanel("isRight2Open")}
         size={22}
         title="Toggle Settings Panel"

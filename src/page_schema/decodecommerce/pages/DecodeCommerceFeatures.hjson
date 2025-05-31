@@ -55,7 +55,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0 3rem;
-  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_dark_100} 100%);
   
   @media (max-width: 768px) {
     padding: 3rem 0 2rem;
@@ -130,7 +130,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   max-width: 700px;
   margin: 0 auto;
   
@@ -163,7 +163,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background_d100};
+  background: ${args.theme.var.color.background_dark_100};
   
   @media (max-width: 768px) {
     padding: 3rem 0;
@@ -454,7 +454,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }`;
@@ -580,7 +580,7 @@ return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 10px 40px ${args.theme.var.color.text_l900};
+  box-shadow: 0 10px 40px ${args.theme.var.color.text_light_900};
   
   @media (max-width: 768px) {
     order: 2;
@@ -608,7 +608,7 @@ return {
 return `._id {
   width: 100%;
   height: auto;
-  color: ${args.theme.var.color.primary_l800};
+  color: ${args.theme.var.color.primary_light_800};
 }`;
 '''
       }

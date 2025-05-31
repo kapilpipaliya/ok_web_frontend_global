@@ -45,7 +45,7 @@ const content = [
       background-color: \${args.theme.var.color.primary};
       border: none;
       border-radius: 4px;
-      color: \${args.theme.var.color.text_l900};
+      color: \${args.theme.var.color.text_light_900};
       cursor: pointer;
       display: inline-block;
       margin-top: 16px;

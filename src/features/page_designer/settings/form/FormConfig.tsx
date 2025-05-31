@@ -38,15 +38,15 @@ export function FormConfig() {
       const status = memoizedTxnValue().status;
       switch (status) {
         case "modified":
-          return "theme.var.color.orange_d600";
+          return "theme.var.color.orange_dark_600";
         case "reverted":
-          return "theme.var.color.blue_d600";
+          return "theme.var.color.blue_dark_600";
         case "committed":
-          return "theme.var.color.green_d600";
+          return "theme.var.color.green_dark_600";
         case "error":
-          return "theme.var.color.red_d600";
+          return "theme.var.color.red_dark_600";
         default:
-          return "theme.var.color.gray_d600";
+          return "theme.var.color.gray_dark_600";
       }
     };
 
@@ -74,10 +74,10 @@ export function FormConfig() {
         class="transaction-debug"
         style={{
           "margin-top": "20px",
-          border: `1px solid ${(args) => args.theme.var.color.gray_l700}`,
+          border: `1px solid ${(args) => args.theme.var.color.gray_light_700}`,
           "border-radius": "4px",
           padding: "12px",
-          "background-color": `${(args) => args.theme.var.color.gray_l900}`,
+          "background-color": `${(args) => args.theme.var.color.gray_light_900}`,
           "font-family": "monospace",
         }}
       >
@@ -123,8 +123,8 @@ export function FormConfig() {
             <span
               style={{
                 color: txnStats().undoAvailable
-                  ? `${(args) => args.theme.var.color.blue_d600}`
-                  : `${(args) => args.theme.var.color.gray_l500}`,
+                  ? `${(args) => args.theme.var.color.blue_dark_600}`
+                  : `${(args) => args.theme.var.color.gray_light_500}`,
               }}
             >
               {txnStats().undoAvailable ? " Undo" : " No Undo"}
@@ -133,8 +133,8 @@ export function FormConfig() {
             <span
               style={{
                 color: txnStats().redoAvailable
-                  ? `${(args) => args.theme.var.color.blue_d600}`
-                  : `${(args) => args.theme.var.color.gray_l500}`,
+                  ? `${(args) => args.theme.var.color.blue_dark_600}`
+                  : `${(args) => args.theme.var.color.gray_light_500}`,
               }}
             >
               {txnStats().redoAvailable ? "Redo" : "No Redo"}

@@ -55,7 +55,8 @@ export function parseColorName(colorName: string): string | undefined {
       // Convert to OKLCH for consistency with the rest of the system
       return color.to("oklch").toString();
     }
-  } catch {
+  } catch (error) {
+    console.warn(`Failed to parse color name: ${colorName}`, error);
     // Handle variant colors like "lightblue", "darkred", etc.
     const lightMatch = colorName.match(/^light(.+)$/i);
     const darkMatch = colorName.match(/^dark(.+)$/i);
@@ -91,7 +92,7 @@ export function parseColorName(colorName: string): string | undefined {
 
 /**
  * Returns a light shade of the color (1-1000)
- * l1 = very close to base color, l1000 = white
+ * light_1 = very close to base color, light_1000 = white
  */
 export function getLightShade(baseColor: string, shade: number): string {
   try {
@@ -114,7 +115,7 @@ export function getLightShade(baseColor: string, shade: number): string {
 
 /**
  * Returns a dark shade of the color (1-1000)
- * d1 = very close to base color, d1000 = black
+ * dark_1 = very close to base color, dark_1000 = black
  */
 export function getDarkShade(baseColor: string, shade: number): string {
   try {
@@ -233,7 +234,12 @@ export function getHslComponents(color: string): {
 /**
  * Mix two colors together with the specified amount
  */
-export function mixColors(color1: string, color2: string, amount = 50): string {
+export function mixColors(
+  color1: string,
+  color2: string,
+  amount = 50,
+  preserveOpacity = true,
+): string {
   try {
     const c1 = new Color(color1);
     const c2 = new Color(color2);
@@ -243,6 +249,9 @@ export function mixColors(color1: string, color2: string, amount = 50): string {
 
     // Mix colors using interpolation in OKLCH space
     const mixed = c1.range(c2, { space: "oklch" })(ratio);
+    if (!preserveOpacity) {
+      mixed.alpha = 1;
+    }
     return mixed.toString({ format: "oklch" });
   } catch {
     return color1;
@@ -296,7 +305,7 @@ export function meetsAccessibilityStandards(
  */
 export function getContrastColor(
   bgColor: string,
-  options: string[] = ["#ffffff", "#000000"],
+  options: string[] = ["#ffffff", "#000000", "oklch(1 0 0)", "oklch(0 0 0)"],
 ): string {
   try {
     const bg = new Color(bgColor);

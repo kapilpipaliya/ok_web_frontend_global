@@ -51,8 +51,8 @@ export function addEditButtonSchema(label: string) {
   border: none;
   color: \${args.theme.var.color.primary};
   &:hover {
-    background-color: \${args.theme.var.color.background_l100};
-    color: \${args.theme.var.color.primary_d400};
+    background-color: \${args.theme.var.color.background_light_100};
+    color: \${args.theme.var.color.primary_dark_400};
   }
 }\`;`,
             componentName: "Html",

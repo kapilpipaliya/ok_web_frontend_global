@@ -70,9 +70,9 @@ export const gridCellStyles = (options: {
     ${
       isBase
         ? `
-      background: \${args.theme.var.color.background_l50};
-      border-left: 2px solid \${args.theme.var.color.text_l100};
-      border-right: 2px solid \${args.theme.var.color.text_l100};
+      background: \${args.theme.var.color.background_light_50};
+      border-left: 2px solid \${args.theme.var.color.text_light_100};
+      border-right: 2px solid \${args.theme.var.color.text_light_100};
     `
         : ""
     }

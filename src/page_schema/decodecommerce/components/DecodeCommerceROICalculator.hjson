@@ -114,7 +114,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
 }`;
@@ -219,10 +219,10 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_d50};
+  background: ${args.theme.var.color.background_dark_50};
   border-radius: 1rem;
   padding: 2rem;
-  border: 1px solid ${args.theme.var.color.background_d100};
+  border: 1px solid ${args.theme.var.color.background_dark_100};
 }`;
 '''
       }
@@ -314,7 +314,7 @@ return `._id {
   height: 8px;
   -webkit-appearance: none;
   appearance: none;
-  background: ${args.theme.var.color.background_d200};
+  background: ${args.theme.var.color.background_dark_200};
   border-radius: 4px;
   outline: none;
   position: relative;
@@ -328,12 +328,12 @@ return `._id {
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
     border: 2px solid ${args.theme.var.color.background};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
     }
   }
   
@@ -345,11 +345,11 @@ return `._id {
     cursor: pointer;
     border: 2px solid ${args.theme.var.color.background};
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
     }
   }
 }`;
@@ -445,7 +445,7 @@ return `._id {
   height: 8px;
   -webkit-appearance: none;
   appearance: none;
-  background: ${args.theme.var.color.background_d200};
+  background: ${args.theme.var.color.background_dark_200};
   border-radius: 4px;
   outline: none;
   position: relative;
@@ -459,12 +459,12 @@ return `._id {
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
     border: 2px solid ${args.theme.var.color.background};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
     }
   }
   
@@ -476,11 +476,11 @@ return `._id {
     cursor: pointer;
     border: 2px solid ${args.theme.var.color.background};
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
     }
   }
 }`;
@@ -576,7 +576,7 @@ return `._id {
   height: 8px;
   -webkit-appearance: none;
   appearance: none;
-  background: ${args.theme.var.color.background_d200};
+  background: ${args.theme.var.color.background_dark_200};
   border-radius: 4px;
   outline: none;
   position: relative;
@@ -590,12 +590,12 @@ return `._id {
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
     border: 2px solid ${args.theme.var.color.background};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
     }
   }
   
@@ -607,11 +607,11 @@ return `._id {
     cursor: pointer;
     border: 2px solid ${args.theme.var.color.background};
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
     }
   }
 }`;
@@ -707,7 +707,7 @@ return `._id {
   height: 8px;
   -webkit-appearance: none;
   appearance: none;
-  background: ${args.theme.var.color.background_d200};
+  background: ${args.theme.var.color.background_dark_200};
   border-radius: 4px;
   outline: none;
   position: relative;
@@ -721,12 +721,12 @@ return `._id {
     border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
     border: 2px solid ${args.theme.var.color.background};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
     }
   }
   
@@ -738,11 +738,11 @@ return `._id {
     cursor: pointer;
     border: 2px solid ${args.theme.var.color.background};
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px ${args.theme.var.color.primary_l500};
+    box-shadow: 0 2px 4px ${args.theme.var.color.primary_light_500};
     
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 8px ${args.theme.var.color.primary_l400};
+      box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_400};
     }
   }
 }`;
@@ -832,7 +832,7 @@ return {
 return `._id {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid ${args.theme.var.color.background_l300};
+  border: 1px solid ${args.theme.var.color.background_light_300};
   border-radius: 0.5rem;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
@@ -841,13 +841,13 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    border-color: ${args.theme.var.color.primary_l300};
+    border-color: ${args.theme.var.color.primary_light_300};
   }
   
   &:focus {
     outline: none;
     border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_l800};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_800};
   }
 }`;
 '''
@@ -914,7 +914,7 @@ return {
         css: '''
 return `._id {
   padding: 1rem;
-  background: ${args.theme.var.color.primary_l900};
+  background: ${args.theme.var.color.primary_light_900};
   border-radius: 0.5rem;
   text-align: center;
   margin-top: 1rem;
@@ -937,7 +937,7 @@ return {
         css: '''
 return `._id {
   font-size: 0.9rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   margin-bottom: 0.25rem;
 }`;
 '''
@@ -982,8 +982,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.success_l900};
-  border: 2px solid ${args.theme.var.color.success_l700};
+  background: ${args.theme.var.color.success_light_900};
+  border: 2px solid ${args.theme.var.color.success_light_700};
   border-radius: 1rem;
   padding: 2rem;
 }`;
@@ -1078,7 +1078,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   margin-top: 0.5rem;
 }`;
 '''
@@ -1166,7 +1166,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   margin-top: 0.25rem;
 }`;
 '''
@@ -1228,7 +1228,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   margin-top: 0.25rem;
 }`;
 '''
@@ -1290,7 +1290,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   margin-top: 0.25rem;
 }`;
 '''
@@ -1352,7 +1352,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   margin-top: 0.25rem;
 }`;
 '''

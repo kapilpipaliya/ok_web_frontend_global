@@ -98,9 +98,9 @@ color: \${args.theme.var.color.text};
     ],
     css: `return \`._id {
 padding: 16px;
-background-color: \${args.theme.var.color.primary_l150};
+background-color: \${args.theme.var.color.primary_light_150};
 border-radius: 8px;
-border: 1px solid \${args.theme.var.color.primary_l200};
+border: 1px solid \${args.theme.var.color.primary_light_200};
 display: flex;
 align-items: flex-start;
 }\`;`,
@@ -217,9 +217,9 @@ margin-right: 8px;
     ],
     css: `return \`._id {
 padding: 16px;
-background-color: \${args.theme.var.color.warning_l150};
+background-color: \${args.theme.var.color.warning_light_150};
 border-radius: 8px;
-border: 1px solid \${args.theme.var.color.warning_l200};
+border: 1px solid \${args.theme.var.color.warning_light_200};
 margin-bottom: 16px;
 display: flex;
 align-items: flex-start;

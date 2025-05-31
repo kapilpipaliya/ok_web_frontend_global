@@ -193,7 +193,7 @@ export const roleFormSchema = {
           ],
           css: `return \`._id {
   display: flex;
-  border-bottom: 1px solid \${args.theme.var.color.background_l200};
+  border-bottom: 1px solid \${args.theme.var.color.background_light_200};
 }\`;`,
           componentName: "Html",
         },

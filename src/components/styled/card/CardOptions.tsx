@@ -18,18 +18,18 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
         aria-expanded={isDropdownOpen()}
         aria-haspopup="true"
         css={`return \`._id {
-  color: \${args.theme.var.color.primary_l550};
+  color: \${args.theme.var.color.primary_light_550};
   display: block;
   margin: -0.625rem;
   padding: 0.625rem;
   border-radius: 50%;
   transition: all 0.2s ease;
   &:hover {
-    color: \${args.theme.var.color.primary_l850_text};
-    background-color: \${args.theme.var.color.primary_l850};
+    color: \${args.theme.var.color.primary_light_850_text};
+    background-color: \${args.theme.var.color.primary_light_850};
   }
   &:focus {
-    outline: 2px solid \${args.theme.var.color.primary_l650};
+    outline: 2px solid \${args.theme.var.color.primary_light_650};
     outline-offset: 2px;
   }
 }\`;`}
@@ -57,11 +57,11 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
           aria-orientation="vertical"
           css={[
             `return \`._id {
-              background-color: \${args.theme.var.color.background_l100};
-              color: \${args.theme.var.color.background_l100_text};
+              background-color: \${args.theme.var.color.background_light_100};
+              color: \${args.theme.var.color.background_light_100_text};
               border-radius: 0.5rem;
               box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-              border: 1px solid \${args.theme.var.color.primary_l750};
+              border: 1px solid \${args.theme.var.color.primary_light_750};
               margin-top: 0.25rem;
               outline-offset: 2px;
               outline: 2px solid transparent;
@@ -92,7 +92,7 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
               <As
                 as="a"
                 css={`return \`._id {
-  color: \${args.theme.var.color.text_l250};
+  color: \${args.theme.var.color.text_light_250};
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
@@ -101,11 +101,11 @@ export function CardOptions(props: { options: CardOption[]; title: string }) {
   transition: all 0.15s ease;
   text-decoration: none;
   &:hover {
-    color: \${args.theme.var.color.text_l50};
-    background-color: \${args.theme.var.color.primary_l850};
+    color: \${args.theme.var.color.text_light_50};
+    background-color: \${args.theme.var.color.primary_light_850};
   }
   &:focus {
-    outline: 2px solid \${args.theme.var.color.primary_l650};
+    outline: 2px solid \${args.theme.var.color.primary_light_650};
     outline-offset: -1px;
   }
 }\`;`}

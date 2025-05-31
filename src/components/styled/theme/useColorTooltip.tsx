@@ -12,8 +12,8 @@ import {
 const tooltipStyles = (isVisible: boolean) => `return \`._id {
   position: absolute;
   z-index: 1000;
-  background: \${args.theme.var.color.background_d900};
-  color: \${args.theme.var.color.background_d900_text};
+  background: \${args.theme.var.color.background_dark_900};
+  color: \${args.theme.var.color.background_dark_900_text};
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
@@ -31,7 +31,7 @@ const arrowStyles = () => `return \`._id {
   position: absolute;
   width: 8px;
   height: 8px;
-  background: \${args.theme.var.color.background_d900};
+  background: \${args.theme.var.color.background_dark_900};
   transform: rotate(45deg);
   z-index: -1;
 }\`;`;

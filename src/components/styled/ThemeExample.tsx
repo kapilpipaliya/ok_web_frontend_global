@@ -12,7 +12,7 @@ import { useColorTooltip, ColorTooltip } from "./theme/useColorTooltip";
 const containerStyles = [
   `return \`._id {
     padding: 2rem;
-    background: linear-gradient(135deg, \${args.theme.var.color.background_l200} 0%, \${args.theme.var.color.background_l100} 100%);
+    background: linear-gradient(135deg, \${args.theme.var.color.background_light_200} 0%, \${args.theme.var.color.background_light_100} 100%);
     border-radius: 1rem;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
     width: 100%;
@@ -84,12 +84,12 @@ const buttonStyles = [
     transition: background-color 0.2s ease;
   }\`;`,
   `return \`._id:hover {
-    background-color: \${args.theme.var.color.primary_l200};
-    color: \${args.theme.var.color.primary_l200_text};
+    background-color: \${args.theme.var.color.primary_light_200};
+    color: \${args.theme.var.color.primary_light_200_text};
   }\`;`,
   `return \`._id:active {
-    background-color: \${args.theme.var.color.primary_l100};
-    color: \${args.theme.var.color.primary_l100_text};
+    background-color: \${args.theme.var.color.primary_light_100};
+    color: \${args.theme.var.color.primary_light_100_text};
   }\`;`,
 ];
 

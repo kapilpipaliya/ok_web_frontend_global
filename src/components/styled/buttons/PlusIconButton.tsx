@@ -10,7 +10,7 @@ export function PlusIconButton(props: PlusIconButtonProps) {
   return (
     <IconButton
       css={`return \`._id {
-        background-color: \${args.theme.var.color.primary_l850};
+        background-color: \${args.theme.var.color.primary_light_850};
         color: \${args.theme.var.color.primary};
         border: none;
         cursor: pointer;
@@ -19,8 +19,8 @@ export function PlusIconButton(props: PlusIconButtonProps) {
         transition: all 0.2s ease;
         
         &:hover {
-          background-color: \${args.theme.var.color.primary_l500};
-          color: \${args.theme.var.color.primary_l500_text};
+          background-color: \${args.theme.var.color.primary_light_500};
+          color: \${args.theme.var.color.primary_light_500_text};
         }
       }\`;`}
       icon="ph:plus"

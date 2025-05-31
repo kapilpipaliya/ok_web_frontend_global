@@ -167,13 +167,13 @@ function SingleOption(props: SingleOptionProps) {
   transition: background-color 0.2s ease;
   ${
     props.isSelected
-      ? `background-color: \${args.theme.var.color.primary_l200};
-         color: \${args.theme.var.color.primary_l200_text};`
+      ? `background-color: \${args.theme.var.color.primary_light_200};
+         color: \${args.theme.var.color.primary_light_200_text};`
       : ""
   }
   &:hover {
-    background-color: \${args.theme.var.color.primary_l200};
-    color: \${args.theme.var.color.primary_l200_text};
+    background-color: \${args.theme.var.color.primary_light_200};
+    color: \${args.theme.var.color.primary_light_200_text};
   }
 }\`;`}
           onClick={() => props.onSelect(props.option)}
@@ -197,9 +197,9 @@ function SingleOption(props: SingleOptionProps) {
   margin: 3px;
   padding: 8px;
   border-radius: 5px;
-  ${props.isSelected ? `background-color: \${args.theme.var.color.primary_l200};` : ""}
+  ${props.isSelected ? `background-color: \${args.theme.var.color.primary_light_200};` : ""}
   &:hover {
-    background-color: \${args.theme.var.color.primary_l200};
+    background-color: \${args.theme.var.color.primary_light_200};
   }
 }\`;`}
           onClick={() => props.onToggleExpand(props.option)}
@@ -439,7 +439,7 @@ function OptionsList(props: OptionsListProps) {
         `return \`._id {
           border-radius: 8px;
           display: flex;
-          background-color: \${args.theme.var.color.background_l100};
+          background-color: \${args.theme.var.color.background_light_100};
           flex-direction: column;
           max-height: 250px;
           width: 100%;
@@ -459,7 +459,7 @@ function OptionsList(props: OptionsListProps) {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: \${args.theme.var.color.text_l200};
+  color: \${args.theme.var.color.text_light_200};
   font-style: italic;
 }\`;`}
           >
@@ -480,7 +480,7 @@ function OptionsList(props: OptionsListProps) {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: \${args.theme.var.color.text_l200};
+  color: \${args.theme.var.color.text_light_200};
   font-style: italic;
 }\`;`}
             >
@@ -563,7 +563,7 @@ export function MultiSelectField(props: MultiSelectFieldProps) {
   transition: all 0.2s ease;
   &:focus-within {
     border-color: \${args.theme.var.color.primary};
-    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_l100};
+    box-shadow: 0 0 0 2px \${args.theme.var.color.primary_light_100};
   }
   ${props.error ? "border: 1px solid \\${args.theme.var.color.error};" : ""}
 }\`;`,

@@ -36,7 +36,7 @@ export const Loader: Component<{
           left: 0;
           width: 100%;
           height: 100vh;
-          background-color: \${args.theme.var.color.background_l100};
+          background-color: \${args.theme.var.color.background_light_100};
           z-index: 9999;
         }\`;`
           : "",

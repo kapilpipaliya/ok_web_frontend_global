@@ -34,7 +34,7 @@ export const SETTINGS_CONSTANTS = {
     }\`;`,
   HEADER_MENU_CSS: `return \`._id {
       display: flex;
-      background-color: \${args.theme.var.color.background_l100};
+      background-color: \${args.theme.var.color.background_light_100};
       justify-content: space-between;
       border-radius: 7px;
     }\`;`,
@@ -56,8 +56,8 @@ export const SETTINGS_CONSTANTS = {
     },
     BUTTONS: {
       CANCEL_CSS: `return \`._id {
-          background-color: \${args.theme.var.color.background_l200};
-          color: \${args.theme.var.color.text_d400};
+          background-color: \${args.theme.var.color.background_light_200};
+          color: \${args.theme.var.color.text_dark_400};
           padding: 8px 16px;
           border-radius: 4px;
           cursor: pointer;
@@ -88,7 +88,7 @@ export const SETTINGS_CONSTANTS = {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: \${args.theme.var.color.background_l100};
+        background-color: \${args.theme.var.color.background_light_100};
       }\`;`,
     FOOTER: {
       CSS: `return \`._id {
@@ -96,7 +96,7 @@ export const SETTINGS_CONSTANTS = {
           padding: 16px;
           gap: 6px;
           border-top: 1px solid \${args.theme.var.color.border};
-          background-color: \${args.theme.var.color.background_l100};
+          background-color: \${args.theme.var.color.background_light_100};
         }\`;`,
     },
     HEADER: {
@@ -130,8 +130,8 @@ export const SETTINGS_CONSTANTS = {
       margin-right: 8px;
     }\`;`,
   SECONDARY_BUTTON_CSS: `return \`._id {
-      background-color: \${args.theme.var.color.primary_l200};
-      color: \${args.theme.var.color.primary_l200_text};
+      background-color: \${args.theme.var.color.primary_light_200};
+      color: \${args.theme.var.color.primary_light_200_text};
       padding: 8px 16px;
       border-radius: 4px;
       cursor: pointer;
@@ -153,8 +153,8 @@ export const SETTINGS_CONSTANTS = {
 // CSS-in-JS functions for standalone constants
 export const headerIconButtonCss = `return \`._id {
     border: 1px solid \${args.theme.var.color.border};
-    background-color: \${args.theme.var.color.background_l100};
-    color: \${args.theme.var.color.text_l300};
+    background-color: \${args.theme.var.color.background_light_100};
+    color: \${args.theme.var.color.text_light_300};
     justify-content: center;
     padding: 0.25rem;
     border-radius: 5px;
@@ -162,7 +162,7 @@ export const headerIconButtonCss = `return \`._id {
       color: \${args.theme.var.color.primary};
     }
     &:disabled {
-      color: \${args.theme.var.color.text_l100};
+      color: \${args.theme.var.color.text_light_100};
       cursor: not-allowed;
       opacity: 0.5;
     }
@@ -170,7 +170,7 @@ export const headerIconButtonCss = `return \`._id {
 
 export const toolBarCss = `return \`._id {
     display: flex;
-    background-color: \${args.theme.var.color.background_l100};
+    background-color: \${args.theme.var.color.background_light_100};
     gap: 2px;
     border-radius: 5px;
   }\`;`;
@@ -219,7 +219,7 @@ export const PROPERTIES = {
   Css: {
     CheckBoxCss: `return \`._id {
         border: 1px solid \${args.theme.var.color.border};
-        background-color: \${args.theme.var.color.background_l100};
+        background-color: \${args.theme.var.color.background_light_100};
         padding: 7px;
         border-radius: 6px;
         width: 20px;
@@ -227,13 +227,13 @@ export const PROPERTIES = {
       }\`;`,
     RadioButtonCss: `return \`._id {
         border: 1px solid \${args.theme.var.color.border};
-        background-color: \${args.theme.var.color.background_l100};
+        background-color: \${args.theme.var.color.background_light_100};
         padding: 7px;
         border-radius: 6px;
       }\`;`,
     TextFieldCss: `return \`._id {
         border: 1px solid \${args.theme.var.color.border};
-        background-color: \${args.theme.var.color.background_l100};
+        background-color: \${args.theme.var.color.background_light_100};
         color: \${args.theme.var.color.text};
         width: 100%;
         padding: 7px;
@@ -285,7 +285,7 @@ export const STYLES = {
   input: {
     baseCss: `return \`._id {
         border: 1px solid \${args.theme.var.color.border};
-        background-color: \${args.theme.var.color.background_l100};
+        background-color: \${args.theme.var.color.background_light_100};
         color: \${args.theme.var.color.text};
         outline: none;
         border-radius: 6px;
@@ -315,19 +315,19 @@ export const STYLES = {
 
   overflowCss: `return \`._id {
       overflow: auto;
-      scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_l300};
+      scrollbar-color: \${args.theme.var.color.border} \${args.theme.var.color.background_light_300};
       scrollbar-width: thin;
     }\`;`,
 
   // Tooltip styles
   tooltip: {
     arrowCss: `return \`._id {
-        background-color: \${args.theme.var.color.background_d800};
+        background-color: \${args.theme.var.color.background_dark_800};
       }\`;`,
     contentCss: `return \`._id {
         text-align: center;
-        background-color: \${args.theme.var.color.background_d800};
-        color: \${args.theme.var.color.background_d800_text};
+        background-color: \${args.theme.var.color.background_dark_800};
+        color: \${args.theme.var.color.background_dark_800_text};
         font-size: 13px;
         font-family: poppins;
         font-weight: 300;
@@ -353,16 +353,16 @@ export const ICON_BUTTON_STYLES = {
       padding: 0;
     }\`;`,
   defaultCss: `return \`._id {
-      color: \${args.theme.var.color.text_l200};
+      color: \${args.theme.var.color.text_light_200};
     }
     ._id:hover {
-      color: \${args.theme.var.color.primary_d600};
+      color: \${args.theme.var.color.primary_dark_600};
     }\`;`,
   deleteCss: `return \`._id {
       color: \${args.theme.var.color.error};
     }
     ._id:hover {
-      color: \${args.theme.var.color.error_l200};
+      color: \${args.theme.var.color.error_light_200};
     }\`;`,
   spacingCss: `return \`._id {
       margin-right: 0.125rem;

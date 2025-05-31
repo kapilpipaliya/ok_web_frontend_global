@@ -20,7 +20,7 @@ export const baseItemStyle = `return \`._id {
 }\`;`;
 
 export const hoverItemStyle = `return \`._id {
-  background-color: \${args.theme.var.color.background_l150};
+  background-color: \${args.theme.var.color.background_light_150};
   box-shadow: 1px 1px 1px;
   cursor: move;
 }\`;`;

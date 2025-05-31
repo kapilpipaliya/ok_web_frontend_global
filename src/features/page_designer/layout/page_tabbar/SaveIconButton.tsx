@@ -61,9 +61,9 @@ export function SaveIconButton(props: { formStoreId: string }) {
         css: [
           headerIconButtonCss,
           `return \`._id {
-            color: \${args.theme.var.color.orange_d600};
+            color: \${args.theme.var.color.orange_dark_600};
             &:hover {
-              color: \${args.theme.var.color.orange_d500};
+              color: \${args.theme.var.color.orange_dark_500};
             }
           }\`;`,
         ],
@@ -78,9 +78,9 @@ export function SaveIconButton(props: { formStoreId: string }) {
         css: [
           headerIconButtonCss,
           `return \`._id {
-            color: \${args.theme.var.color.blue_d600};
+            color: \${args.theme.var.color.blue_dark_600};
             &:hover {
-              color: \${args.theme.var.color.blue_d500};
+              color: \${args.theme.var.color.blue_dark_500};
             }
           }\`;`,
         ],
@@ -93,9 +93,9 @@ export function SaveIconButton(props: { formStoreId: string }) {
         css: [
           headerIconButtonCss,
           `return \`._id {
-            color: \${args.theme.var.color.red_d600};
+            color: \${args.theme.var.color.red_dark_600};
             &:hover {
-              color: \${args.theme.var.color.red_d500};
+              color: \${args.theme.var.color.red_dark_500};
             }
           }\`;`,
         ],

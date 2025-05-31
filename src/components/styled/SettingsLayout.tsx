@@ -103,7 +103,7 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                 as: "div",
                                 css: `return \`._id {
   font-size: 14px;
-  color: \${args.theme.var.color.text_l300};
+  color: \${args.theme.var.color.text_light_300};
   font-weight: 500;
   margin-bottom: 8px;
 }\`;`,
@@ -144,9 +144,9 @@ export function SettingsLayout(props: SettingsLayoutProps) {
                                         color: \${args.theme.var.color.primary_text};
                                       }\`;`
                                     : `return \`._id {
-                                        color: \${args.theme.var.color.text_d700};
+                                        color: \${args.theme.var.color.text_dark_700};
                                         &:hover {
-                                          background-color: \${args.theme.var.color.primary_l800};
+                                          background-color: \${args.theme.var.color.primary_light_800};
                                         }
                                       }\`;`,
                                 ],

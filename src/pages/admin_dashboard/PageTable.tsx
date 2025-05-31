@@ -73,8 +73,8 @@ export function PageTable() {
                       transition: all 0.2s ease;
                       
                       &:hover {
-                        background-color: \${args.theme.var.color.primary_l100};
-                        color: \${args.theme.var.color.primary_d200};
+                        background-color: \${args.theme.var.color.primary_light_100};
+                        color: \${args.theme.var.color.primary_dark_200};
                       }
                     }\`;`}
                   >

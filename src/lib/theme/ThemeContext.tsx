@@ -2,7 +2,6 @@ import { createContext, useContext } from "solid-js";
 
 // Moving constants and utility functions to separate modules
 import {
-  DEFAULT_THEME,
   EASING_PRESETS,
   FONT_PRESETS,
   RADIUS_PRESETS,
@@ -43,7 +42,7 @@ type ColorTarget = {
 const colorHandlers = {
   /**
    * Handles text color suffix access in the theme proxy.
-   * Pattern: primary_text, success_text, error_text, primary_l200_text, etc.
+   * Pattern: primary_text, success_text, error_text, primary_light_200_text, etc.
    */
   handleTextColorAccess: (
     target: ColorTarget,
@@ -62,8 +61,8 @@ const colorHandlers = {
         return resolveColorForMode(target[textColorKey], mode);
       }
 
-      // Check if baseProp is a shade pattern (e.g., primary_l200)
-      const shadeMatch = baseProp.match(/(.+)_([ld])(\d+)$/);
+      // Check if baseProp is a shade pattern (e.g., primary_light_200)
+      const shadeMatch = baseProp.match(/(.+)_(light|dark)_(\d+)$/);
       if (shadeMatch) {
         // First compute the shade color
         const shadeColor = colorHandlers.handleShadeAccess(
@@ -95,15 +94,15 @@ const colorHandlers = {
 
   /**
    * Handles dynamic color shade access in the theme proxy.
-   * Pattern: primary_l640, error_d820, background_l100, etc.
+   * Pattern: primary_light_640, error_dark_820, background_light_100, etc.
    */
   handleShadeAccess: (
     target: ColorTarget,
     prop: string,
     getColorMode?: () => ColorMode,
   ): string | undefined => {
-    // Pattern: colorname_l### or colorname_d###
-    const shadeMatch = prop.match(/(.+)_([ld])(\d+)$/);
+    // Pattern: colorname_light_### or colorname_dark_###
+    const shadeMatch = prop.match(/(.+)_(light|dark)_(\d+)$/);
     if (shadeMatch) {
       const [, baseProp, shadeType, shadeValue] = shadeMatch;
       const shade = Number.parseInt(shadeValue, 10);
@@ -123,17 +122,21 @@ const colorHandlers = {
 
         // Swap light/dark when in dark mode
         const effectiveShadeType =
-          mode === "dark" ? (shadeType === "l" ? "d" : "l") : shadeType;
+          mode === "dark"
+            ? shadeType === "light"
+              ? "dark"
+              : "light"
+            : shadeType;
 
         if (typeof baseColorDef === "string") {
-          return effectiveShadeType === "l"
+          return effectiveShadeType === "light"
             ? getLightShade(baseColorDef, shade)
             : getDarkShade(baseColorDef, shade);
         }
         if (typeof baseColorDef === "object" && baseColorDef !== null) {
           const resolvedColor = resolveColorForMode(baseColorDef, mode);
           if (typeof resolvedColor === "string") {
-            return effectiveShadeType === "l"
+            return effectiveShadeType === "light"
               ? getLightShade(resolvedColor, shade)
               : getDarkShade(resolvedColor, shade);
           }
@@ -184,49 +187,6 @@ const colorHandlers = {
       }
     }
     return undefined;
-  },
-
-  /**
-   * Handles semantic color access in the theme proxy.
-   * Pattern: textColor, backgroundColor, etc.
-   */
-  handleSemanticColorAccess: (
-    target: ColorTarget,
-    prop: string,
-    getColorMode?: () => ColorMode,
-  ): string | undefined => {
-    const mode = getColorMode ? getColorMode() : "light";
-
-    // First check if there's a specific semantic color defined
-    if (target[prop] !== undefined) {
-      return resolveColorForMode(target[prop], mode);
-    }
-
-    // Fall back to computed semantic colors based on primary color
-    const baseColorDef =
-      target.backgroundColor || DEFAULT_THEME.color.background;
-    const resolvedBaseColor = resolveColorForMode(baseColorDef, mode);
-
-    switch (prop) {
-      case "textColor":
-        return mode === "dark"
-          ? getLightShade(resolvedBaseColor, 100)
-          : getDarkShade(resolvedBaseColor, 700);
-      case "backgroundColor":
-        return mode === "dark"
-          ? getDarkShade(resolvedBaseColor, 700)
-          : getLightShade(resolvedBaseColor, 100);
-      case "borderColor":
-        return mode === "dark"
-          ? getDarkShade(resolvedBaseColor, 400)
-          : getLightShade(resolvedBaseColor, 200);
-      case "mutedColor":
-        return mode === "dark"
-          ? getLightShade(resolvedBaseColor, 250)
-          : getDarkShade(resolvedBaseColor, 150);
-      default:
-        return undefined;
-    }
   },
 
   /**
@@ -405,16 +365,6 @@ function handleColorProperties(
     );
     if (directResult !== undefined) {
       return directResult;
-    }
-
-    // Handle semantic colors
-    const semanticResult = colorHandlers.handleSemanticColorAccess(
-      target,
-      prop,
-      getColorMode,
-    );
-    if (semanticResult !== undefined) {
-      return semanticResult;
     }
   }
 

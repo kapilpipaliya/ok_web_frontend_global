@@ -23,7 +23,7 @@ return `._id {
   min-height: 90vh;
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_d100} 100%);
+  background: linear-gradient(135deg, ${args.theme.var.color.background} 0%, ${args.theme.var.color.background_dark_100} 100%);
   position: relative;
   overflow: hidden;
   
@@ -32,8 +32,8 @@ return `._id {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image: radial-gradient(circle at 20% 50%, ${args.theme.var.color.primary_l800} 0%, transparent 50%),
-                      radial-gradient(circle at 80% 80%, ${args.theme.var.color.success_l850} 0%, transparent 50%);
+    background-image: radial-gradient(circle at 20% 50%, ${args.theme.var.color.primary_light_800} 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, ${args.theme.var.color.success_light_850} 0%, transparent 50%);
     opacity: 0.5;
   }
 }`;
@@ -164,7 +164,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.25rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   line-height: 1.6;
   margin-bottom: 2rem;
   
@@ -223,9 +223,9 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary_d200};
+    background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px ${args.theme.var.color.primary_l600};
+    box-shadow: 0 5px 15px ${args.theme.var.color.primary_light_600};
   }
 }`;
 '''
@@ -261,7 +261,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   font-size: 1rem;
   margin-left: 1rem;
 }`;
@@ -376,7 +376,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   font-size: 0.9rem;
 }`;
 '''
@@ -428,7 +428,7 @@ return `._id {
   background: ${args.theme.var.color.background};
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 10px 40px ${args.theme.var.color.text_l900};
+  box-shadow: 0 10px 40px ${args.theme.var.color.text_light_900};
 }`;
 '''
       }
@@ -491,7 +491,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   font-size: 0.9rem;
 }`;
 '''

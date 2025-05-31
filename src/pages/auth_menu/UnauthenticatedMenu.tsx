@@ -27,7 +27,7 @@ export function UnauthenticatedMenu(
   border-radius: 5px;
   text-decoration: none;
   &:hover {
-    background-color: \${args.theme.var.color.background_l100};
+    background-color: \${args.theme.var.color.background_light_100};
   }
 }\`;`}
           href={API.urls.admin.signIn}
@@ -53,7 +53,7 @@ export function UnauthenticatedMenu(
   border-radius: 5px;
   text-decoration: none;
   &:hover {
-    background-color: \${args.theme.var.color.background_l100};
+    background-color: \${args.theme.var.color.background_light_100};
   }
 }\`;`}
           href={API.urls.user.signUp}

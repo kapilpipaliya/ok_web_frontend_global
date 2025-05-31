@@ -120,8 +120,8 @@ export function createPasswordHintPopoverContent(
                 const textColor = fieldValue
                   ? isValid
                     ? "success"
-                    : "text_d400"
-                  : "text_d400";
+                    : "text_dark_400"
+                  : "text_dark_400";
 
                 return `return \`._id {
   color: \${args.theme.var.color.${textColor}};

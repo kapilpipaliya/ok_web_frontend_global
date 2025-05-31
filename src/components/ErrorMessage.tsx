@@ -14,8 +14,8 @@ export function ErrorMessage(props: ErrorMessageProps) {
     <As
       as="div"
       css={`return \`._id {
-        background-color: \${args.theme.var.color.error_l150};
-        color: \${args.theme.var.color.error_l150_text};
+        background-color: \${args.theme.var.color.error_light_150};
+        color: \${args.theme.var.color.error_light_150_text};
         padding: 1rem;
         border-radius: 0.25rem;
         text-align: center;

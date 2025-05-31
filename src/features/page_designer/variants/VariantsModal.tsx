@@ -127,7 +127,7 @@ export function VariantsModal(
             <As
               as="div"
               css={`return \`._id {
-                  background-color: \${args.theme.var.color.background_l50};
+                  background-color: \${args.theme.var.color.background_light_50};
                   border-radius: 0.5rem;
                   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
                   overflow: hidden;

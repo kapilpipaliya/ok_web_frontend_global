@@ -219,7 +219,7 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary_d200};
+    background: ${args.theme.var.color.primary_dark_200};
   }
   
   /* Responsive design */
@@ -321,8 +321,8 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
    return `._id {
      padding: 1rem;
      margin-bottom: 0.5rem;
-     background: ${args.theme.var.color.background_l100};
-     color: ${args.theme.var.color.background_l100_text};
+     background: ${args.theme.var.color.background_light_100};
+     color: ${args.theme.var.color.background_light_100_text};
      border-radius: 0.5rem;
    }`;
    '''
@@ -455,15 +455,15 @@ return `._id {
     border: 1px solid transparent;
     
     &:hover {
-      background: ${args.theme.var.color.primary_d200};
+      background: ${args.theme.var.color.primary_dark_200};
     }
   ` : `
-    background: ${args.theme.var.color.background_l200};
+    background: ${args.theme.var.color.background_light_200};
     color: ${args.theme.var.color.text};
-    border: 1px solid ${args.theme.var.color.background_l400};
+    border: 1px solid ${args.theme.var.color.background_light_400};
     
     &:hover {
-      background: ${args.theme.var.color.background_l300};
+      background: ${args.theme.var.color.background_light_300};
     }
   `}
 }`;
@@ -496,7 +496,7 @@ const complexStyle = () => `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: \${args.theme.var.color.background_l200};
+    background: \${args.theme.var.color.background_light_200};
   }
   
   &::after {
@@ -505,11 +505,15 @@ const complexStyle = () => `._id {
   }
 }`;
 
-// Media queries - return array
-const responsiveStyle = () => [
-  `._id { padding: 2rem; }`,
-  `@media (max-width: 768px) {
-    ._id { padding: 1rem; }
+// Keyframes animation - return array
+const animatedStyle = () => [
+  `@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }`,
+  `._id {
+    animation: fadeIn 0.3s ease-in;
+    padding: 2rem;
   }`
 ];
 ```
@@ -538,42 +542,38 @@ primary: {
 }
 
 // Dynamic shade access
-args.theme.var.color.primary_l100       // Light shade (close to base)
-args.theme.var.color.primary_l900       // Light shade (close to white)
-args.theme.var.color.primary_d100       // Dark shade (close to base)
-args.theme.var.color.primary_d900       // Dark shade (close to black)
+args.theme.var.color.primary_light_100       // Light shade (close to base)
+args.theme.var.color.primary_light_900       // Light shade (close to white)
+args.theme.var.color.primary_dark_100       // Dark shade (close to base)
+args.theme.var.color.primary_dark_900       // Dark shade (close to black)
 
 // Automatic shade swapping in dark mode
 // When dark mode is active, _l shades behave like _d shades and vice versa
-args.theme.var.color.primary_l100       // In light mode: light shade, In dark mode: dark shade
+args.theme.var.color.primary_light_100       // In light mode: light shade, In dark mode: dark shade
 
 // Text color suffix (_text)
 args.theme.var.color.primary_text       // Auto-calculated readable text color for primary background
 args.theme.var.color.success_text       // Auto-calculated readable text color for success background
 args.theme.var.color.error_text         // Auto-calculated readable text color for error background
-args.theme.var.color.primary_l200_text  // Auto-calculated readable text color for primary_l200 shade
-
-// Other dynamic access
-args.theme.var.color.primaryScheme      // Color scheme variations
-args.theme.var.color.textColor         // Semantic color
+args.theme.var.color.primary_light_200_text  // Auto-calculated readable text color for primary_light_200 shade
 ```
 
 **Text Color Suffix (`_text`):**
 - Automatically calculates the most readable text color (white or black) for any background color
 - Works with base colors: `primary_text`, `success_text`, `error_text`, etc.
-- Works with shades: `primary_l200_text`, `background_d800_text`, etc.
+- Works with shades: `primary_light_200_text`, `background_dark_800_text`, etc.
 - Uses APCA (Advanced Perceptual Contrast Algorithm) for better readability
 - If a predefined `_text` color exists in the theme, it will be used instead of calculating
 
 **Shade System:**
-- Light shades: `_l1` to `_l1000` (l1 = closest to base color, l1000 = white)
-- Dark shades: `_d1` to `_d1000` (d1 = closest to base color, d1000 = black)
-- Common shades: `_l100`, `_l200`, `_l300`, `_l400`, `_l500`, `_l600`, `_l700`, `_l800`, `_l900`
+- Light shades: `_light_1` to `_light_1000` (light_1 = closest to base color, light_1000 = white)
+- Dark shades: `_dark_1` to `_dark_1000` (dark_1 = closest to base color, dark_1000 = black)
+- Common shades: `_light_100`, `_light_200`, `_light_300`, `_light_400`, `_light_500`, `_light_600`, `_light_700`, `_light_800`, `_light_900`
 - Shades automatically swap in dark mode for better contrast
 
 **Theme Structure:**
 - `var.color`: Core color system (primary, success, error, text, background, etc.)
-- For background colors, prefer light shades (e.g., `background_l100`, `background_l50`)
+- For background colors, prefer light shades (e.g., `background_light_100`, `background_light_50`)
 
 **Note:** Currently, the theme system only supports colors and their shades. Use fixed values for other CSS properties like border-radius, transitions, spacing, etc.
 
@@ -721,9 +721,9 @@ When implementing new features:
 
 ## Color Shade System
 - Explicit light/dark shades
-  - Light shades: `primary_l100` to `primary_l900` (l100 = close to base, l900 = close to white)
-  - Dark shades: `primary_d100` to `primary_d900` (d100 = close to base, d900 = close to black)
-- **Dark mode behavior**: Shades automatically swap in dark mode (`_l` becomes `_d` and vice versa)
+  - Light shades: `primary_light_100` to `primary_light_900` (light_100 = close to base, light_900 = close to white)
+  - Dark shades: `primary_dark_100` to `primary_dark_900` (dark_100 = close to base, dark_900 = close to black)
+- **Dark mode behavior**: Shades automatically swap in dark mode (`_light_` becomes `_dark_` and vice versa)
 
 ## CSS Styling Pattern Update
 - **All styles must use `._id` class selector**

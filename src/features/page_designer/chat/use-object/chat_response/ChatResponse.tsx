@@ -17,7 +17,7 @@ export function ChatResponse(props: ChatResponseProps) {
   padding: 16px;
   border: 1px solid \${args.theme.var.color.border};
   border-radius: 10px;
-  background-color: \${args.theme.var.color.background_l100};
+  background-color: \${args.theme.var.color.background_light_100};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   margin-top: 8px;
   transition: all 0.2s ease;

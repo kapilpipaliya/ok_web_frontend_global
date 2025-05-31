@@ -168,7 +168,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
                 <As
                   as="li"
                   css={`return \`._id {
-  ${isSelected() ? "background-color: ${args.theme.var.color.primary_l400}; color: ${args.theme.var.color.primary_l400_text};" : ""}
+  ${isSelected() ? "background-color: ${args.theme.var.color.primary_light_400}; color: ${args.theme.var.color.primary_light_400_text};" : ""}
   display: flex;
   align-items: center;  
   justify-content: space-between;
@@ -176,8 +176,8 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   cursor: pointer;
   border-bottom: 1px solid \${args.theme.var.color.border};
   &:hover {
-    background-color: \${args.theme.var.color.primary_l200};
-    color: \${args.theme.var.color.primary_l200_text};
+    background-color: \${args.theme.var.color.primary_light_200};
+    color: \${args.theme.var.color.primary_light_200_text};
   }
 }\`;`}
                   onClick={() => handleThemeSelect(theme)}
@@ -228,7 +228,7 @@ export function SelectThemeMenu(props: { isStandalone?: boolean }) {
   padding: 1px;
   cursor: pointer;
   &:hover {
-    color: \${args.theme.var.color.error_d400};
+    color: \${args.theme.var.color.error_dark_400};
 }\`;`}
                         icon="ph:trash"
                         onClick={(e) => {

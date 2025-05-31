@@ -7,7 +7,7 @@ export function getLogoSchema(
   height:80px; margin-bottom:24px;
 }\`;`,
   borderCss = `return \`._id {
-  color: \${args.theme.var.color.text_l200}; margin-top:24px; margin-bottom:24px;
+  color: \${args.theme.var.color.text_light_200}; margin-top:24px; margin-bottom:24px;
 }\`;`,
 ) {
   return {
@@ -64,7 +64,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
               {
                 as: "p",
                 css: `return \`._id {
-  color: \${args.theme.var.color.text_l200};
+  color: \${args.theme.var.color.text_light_200};
   font-size: 12px;
 }\`;`,
                 componentName: "Html",
@@ -84,7 +84,7 @@ export const createEmailTemplate = (content: FieldAttribute[]) =>
   max-width: 600px;
   margin: auto;
   padding: 32px;
-  background-color: \${args.theme.var.color.background_l100};
+  background-color: \${args.theme.var.color.background_light_100};
 }\`;`,
         componentName: "Html",
         displayOrder: 1,

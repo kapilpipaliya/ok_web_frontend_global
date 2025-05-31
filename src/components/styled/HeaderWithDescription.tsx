@@ -28,7 +28,7 @@ export function HeaderWithDescription(
         }\`;`,
         props.backgroundColor
           ? `return \`._id { background-color: ${props.backgroundColor}; }\`;`
-          : `return \`._id { background-color: \${args.theme.var.color.background_l50}; }\`;`,
+          : `return \`._id { background-color: \${args.theme.var.color.background_light_50}; }\`;`,
         props.borderColor
           ? `return \`._id { border-color: ${props.borderColor}; }\`;`
           : `return \`._id { border-color: \${args.theme.var.color.border}; }\`;`,
@@ -61,7 +61,7 @@ export function HeaderWithDescription(
           }\`;`,
           props.descriptionColor
             ? `return \`._id { color: ${props.descriptionColor}; }\`;`
-            : `return \`._id { color: \${args.theme.var.color.text_l200}; }\`;`,
+            : `return \`._id { color: \${args.theme.var.color.text_light_200}; }\`;`,
         ]}
       >
         {props.description || ""}

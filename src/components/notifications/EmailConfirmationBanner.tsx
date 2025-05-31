@@ -113,10 +113,10 @@ margin-right: 8px;
     css: (args: FunctionArgumentType) => `return \`._id {
 margin: 16px;
 padding: 16px;
-background-color: ${args.theme.var.color.warning_l150};
-color: ${args.theme.var.color.warning_l150_text};
+background-color: ${args.theme.var.color.warning_light_150};
+color: ${args.theme.var.color.warning_light_150_text};
 border-radius: 8px;
-border: 1px solid ${args.theme.var.color.warning_l200};
+border: 1px solid ${args.theme.var.color.warning_light_200};
 display: flex;
 align-items: flex-start;
 }\`;`,

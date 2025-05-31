@@ -77,7 +77,7 @@ function DroppableWrapper(props: { children: any; formStoreId: string }) {
       as="div"
       css={`return \`._id {
         ${noMinHeight ? "" : "min-height: 300px;"}
-        ${isDraggingOver() ? "background-color: ${args.theme.var.color.background_l100};" : ""}
+        ${isDraggingOver() ? "background-color: ${args.theme.var.color.background_light_100};" : ""}
       }\`;`}
       onClick={() => {
         onLayoutItemClick(

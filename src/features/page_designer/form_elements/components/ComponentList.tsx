@@ -138,12 +138,12 @@ export function ComponentList(props: {
         <As
           as="div"
           css={`return \`._id {
-            background-color: \${args.theme.var.color.error_l50};
-            border: 1px solid \${args.theme.var.color.error_l200};
+            background-color: \${args.theme.var.color.error_light_50};
+            border: 1px solid \${args.theme.var.color.error_light_200};
             border-radius: 4px;
             padding: 12px;
             margin: 8px 0;
-            color: \${args.theme.var.color.error_d700};
+            color: \${args.theme.var.color.error_dark_700};
             font-size: 14px;
           }\`;`}
         >

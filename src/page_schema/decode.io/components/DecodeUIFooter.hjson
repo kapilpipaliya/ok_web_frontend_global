@@ -13,7 +13,7 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_l100};
+  background: ${args.theme.var.color.background_light_100};
   color: ${args.theme.var.color.text};
   padding: 4rem 1rem 2rem;
   
@@ -203,7 +203,7 @@ return {
 return `._id {
   width: 2.5rem;
   height: 2.5rem;
-  background: ${args.theme.var.color.background_l200};
+  background: ${args.theme.var.color.background_light_200};
   border-radius: 50%;
   display: flex;
   align-items: center;

@@ -112,7 +112,7 @@ export function UseChatAttachments() {
   overflow: hidden;
   padding: 2px;
   color: \${args.theme.var.color.gray};
-  border: 1px solid \${args.theme.var.color.gray_d600};
+  border: 1px solid \${args.theme.var.color.gray_dark_600};
 }\`;`}
                         >
                           {getTextFromDataUrl(attachment.url)}
@@ -253,7 +253,7 @@ export function UseChatAttachments() {
                     css={`return \`._id {
   width: 16px;
   height: 20px;
-  background-color: \${args.theme.var.color.gray_l200};
+  background-color: \${args.theme.var.color.gray_light_200};
   border-radius: 4px;
 }\`;`}
                   />
@@ -274,7 +274,7 @@ export function UseChatAttachments() {
         <As
           as="input"
           css={`return \`._id {
-  background-color: \${args.theme.var.color.gray_l200};
+  background-color: \${args.theme.var.color.gray_light_200};
   width: 100%;
   padding: 2px;
 }\`;`}

@@ -13,7 +13,7 @@ return {
 ''',
         css: '''
 return `._id {
-  background: linear-gradient(135deg, ${args.theme.var.color.primary} 0%, ${args.theme.var.color.primary_d200} 100%);
+  background: linear-gradient(135deg, ${args.theme.var.color.primary} 0%, ${args.theme.var.color.primary_dark_200} 100%);
   color: ${args.theme.var.color.primary_text};
   padding: 5rem 1rem;
   min-height: 80vh;

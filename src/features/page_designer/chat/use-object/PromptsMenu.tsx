@@ -27,7 +27,7 @@ export function PromptsMenu(props: PromptsMenuProps) {
           padding: 16px;
           max-height: 420px;
           overflow-y: auto;
-          background: \${args.theme.var.color.background_l100};
+          background: \${args.theme.var.color.background_light_100};
           border: 1px solid \${args.theme.var.color.border};
           border-radius: 8px;
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
@@ -40,7 +40,7 @@ export function PromptsMenu(props: PromptsMenuProps) {
           }
           
           &::-webkit-scrollbar-track {
-            background: \${args.theme.var.color.background_l50};
+            background: \${args.theme.var.color.background_light_50};
             border-radius: 4px;
           }
           
@@ -49,7 +49,7 @@ export function PromptsMenu(props: PromptsMenuProps) {
             border-radius: 4px;
             
             &:hover {
-              background: \${args.theme.var.color.text_l200};
+              background: \${args.theme.var.color.text_light_200};
             }
           }
         }\`;`}
@@ -82,7 +82,7 @@ export function PromptsMenu(props: PromptsMenuProps) {
                 as="div"
                 css={`return \`._id {
                   font-weight: 600;
-                  color: \${args.theme.var.color.text_l200};
+                  color: \${args.theme.var.color.text_light_200};
                   font-size: 13px;
                   margin-top: 4px;
                 }\`;`}
@@ -96,7 +96,7 @@ export function PromptsMenu(props: PromptsMenuProps) {
                     css={`return \`._id {
                       text-align: left;
                       padding: 10px 12px;
-                      background: \${args.theme.var.color.background_l50};
+                      background: \${args.theme.var.color.background_light_50};
                       color: \${args.theme.var.color.text};
                       border-radius: 6px;
                       border: 1px solid \${args.theme.var.color.border};
@@ -106,9 +106,9 @@ export function PromptsMenu(props: PromptsMenuProps) {
                       cursor: pointer;
                       
                       &:hover {
-                        background: \${args.theme.var.color.primary_l100};
-                        color: \${args.theme.var.color.primary_l100_text};
-                        border-color: \${args.theme.var.color.primary_l200};
+                        background: \${args.theme.var.color.primary_light_100};
+                        color: \${args.theme.var.color.primary_light_100_text};
+                        border-color: \${args.theme.var.color.primary_light_200};
                         transform: translateX(2px);
                       }
                       

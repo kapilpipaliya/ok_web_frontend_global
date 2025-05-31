@@ -141,7 +141,7 @@ export function AccountDeletionForm() {
             as: "p",
             css: `return \`._id {
   margin-bottom: 4px;
-  color: \${args.theme.var.color.error_l200};
+  color: \${args.theme.var.color.error_light_200};
 }\`;`,
             componentName: "Html",
             text: "Once you delete your account, all your data will be permanently removed after 48 hours. This action cannot be undone.",
@@ -150,7 +150,7 @@ export function AccountDeletionForm() {
             as: "p",
             css: `return \`._id {
   margin-bottom: 6px;
-  color: \${args.theme.var.color.error_l200};
+  color: \${args.theme.var.color.error_light_200};
 }\`;`,
             componentName: "Html",
             text: "During the 48-hour period, you will not be able to log in to your account. If you change your mind, please contact our support team immediately.",
@@ -172,9 +172,9 @@ export function AccountDeletionForm() {
         css: `return \`._id {
   margin-bottom: 4px;
   padding: 12px;
-  background-color: \${args.theme.var.color.error_l100};
-  border: 1px solid \${args.theme.var.color.error_l150};
-  color: \${args.theme.var.color.error_l100_text};
+  background-color: \${args.theme.var.color.error_light_100};
+  border: 1px solid \${args.theme.var.color.error_light_150};
+  color: \${args.theme.var.color.error_light_100_text};
   border-radius: 8px;
 }\`;`,
         componentName: "Html",
@@ -306,7 +306,7 @@ export function AccountDeletionForm() {
     css: `return \`._id {
   padding: 24px;
   border-radius: 8px;
-  background-color: \${args.theme.var.color.background_l100};
+  background-color: \${args.theme.var.color.background_light_100};
   border: 1px solid \${args.theme.var.color.background};  
 }\`;`,
     componentName: "Html",

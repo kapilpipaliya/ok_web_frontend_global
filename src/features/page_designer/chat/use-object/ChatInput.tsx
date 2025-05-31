@@ -49,7 +49,7 @@ export function ChatInput(props: ChatInputProps) {
     <As
       as="form"
       css={`return \`._id {
-  background: \${args.theme.var.color.background_l100};
+  background: \${args.theme.var.color.background_light_100};
   border-top: 1px solid \${args.theme.var.color.border};
   padding: 12px;
   margin-bottom: 4px;
@@ -93,7 +93,7 @@ export function ChatInput(props: ChatInputProps) {
   resize: vertical;
   width: 100%;
   font-size: 14px;
-  background: \${args.theme.var.color.background_l100};
+  background: \${args.theme.var.color.background_light_100};
   transition: border-color 0.2s;
   
   &:focus {
@@ -144,10 +144,10 @@ export function ChatInput(props: ChatInputProps) {
                 background-color: transparent;
                 border: none;
                 transition: color 0.2s;
-                color: \${args.theme.var.color.text_l700};
+                color: \${args.theme.var.color.text_light_700};
                 
                 &:hover:not(:disabled) {
-                  color: \${args.theme.var.color.text_l500};
+                  color: \${args.theme.var.color.text_light_500};
                 }
               }\`;`}
               icon="ph:list"
@@ -162,10 +162,10 @@ export function ChatInput(props: ChatInputProps) {
                 border: none;
                 cursor: pointer;
                 transition: color 0.2s;
-                color: \${args.theme.var.color.text_l700};
+                color: \${args.theme.var.color.text_light_700};
                 
                 &:hover:not(:disabled) {
-                  color: \${args.theme.var.color.text_l500};
+                  color: \${args.theme.var.color.text_light_500};
                 }
               }\`;`}
               disabled={props.isLoading()}
@@ -214,10 +214,10 @@ function FileInput(props: {
           background-color: transparent;
           border: none;
           transition: color 0.2s;
-          color: \${args.theme.var.color.text_d600};
+          color: \${args.theme.var.color.text_dark_600};
           
           &:hover {
-            color: \${args.theme.var.color.text_l400};
+            color: \${args.theme.var.color.text_light_400};
           }
         }\`;`}
         icon="ph:paperclip"
@@ -270,7 +270,7 @@ function FileInput(props: {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: \${args.theme.var.color.background_l100};
+  background: \${args.theme.var.color.background_light_100};
   border-radius: 6px;
   border: 1px solid \${args.theme.var.color.border};
   overflow: hidden;
@@ -323,7 +323,7 @@ function FileInput(props: {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: \${args.theme.var.color.background_l100};
+  background: \${args.theme.var.color.background_light_100};
   border-radius: 6px;
   border: 1px solid \${args.theme.var.color.border};
 }\`;`}
@@ -345,8 +345,8 @@ function FileInput(props: {
                     position: absolute;
                     top: -6px;
                     right: -6px;
-                    background-color: \${args.theme.var.color.text_l900};
-                    color: \${args.theme.var.color.background_l100};
+                    background-color: \${args.theme.var.color.text_light_900};
+                    color: \${args.theme.var.color.background_light_100};
                     border: none;
                     border-radius: 50%;
                     width: 20px;
@@ -356,7 +356,7 @@ function FileInput(props: {
                     justify-content: center;
                     
                     &:hover {
-                      background-color: \${args.theme.var.color.text_l300};
+                      background-color: \${args.theme.var.color.text_light_300};
                     }
                   }\`;`}
                   onClick={() => {
@@ -407,7 +407,7 @@ function MessagesCount(props: {
   justify-content: space-between;
   align-items: center;
   padding: 6px 10px;
-  background: \${args.theme.var.color.background_l100};
+  background: \${args.theme.var.color.background_light_100};
   border-radius: 6px;
 }\`;`}
       >
@@ -437,7 +437,7 @@ function MessagesCount(props: {
                       as="span"
                       css={`return \`._id {
   font-weight: bold;
-  color: \${args.theme.var.color.background_l400};
+  color: \${args.theme.var.color.background_light_400};
 }\`;`}
                     >
                       {msg.role}:
@@ -456,7 +456,7 @@ function MessagesCount(props: {
             </As>
           }
           triggerCss={`return \`._id {
-            color: \${args.theme.var.color.text_l200};
+            color: \${args.theme.var.color.text_light_200};
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -493,10 +493,10 @@ function MessagesCount(props: {
           css={`return \`._id {
             background-color: transparent;
             border: none;
-            color: \${args.theme.var.color.text_l900};
+            color: \${args.theme.var.color.text_light_900};
             
             &:hover {
-              color: \${args.theme.var.color.text_l300};
+              color: \${args.theme.var.color.text_light_300};
             }
           }\`;`}
           icon="ph:trash"
@@ -514,7 +514,7 @@ function MessagesCount(props: {
               as="div"
               css={`return \`._id {
   padding: 12px;
-  background: \${args.theme.var.color.background_l100};
+  background: \${args.theme.var.color.background_light_100};
   border: 1px solid \${args.theme.var.color.border};
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -552,7 +552,7 @@ function MessagesCount(props: {
   font-weight: 500;
   
   &:hover {
-    background: \${args.theme.var.color.error_l200};
+    background: \${args.theme.var.color.error_light_200};
   }
 }\`;`}
                   onClick={() => {
@@ -567,7 +567,7 @@ function MessagesCount(props: {
                   css={`return \`._id {
   text-align: center;
   padding: 8px;
-  background: \${args.theme.var.color.background_l100};
+  background: \${args.theme.var.color.background_light_100};
   border-radius: 6px;
   border: 1px solid \${args.theme.var.color.border};
   transition: background 0.2s;

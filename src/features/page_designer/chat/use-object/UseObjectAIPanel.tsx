@@ -158,7 +158,7 @@ You have access to the following theme variables:
 \`\`\`json
 ${JSON.stringify(globalTheme())}
 \`\`\`
-you can use above theme variables in css properties, like: \`\${args.theme.var.color.background_l900}\`.
+you can use above theme variables in css properties, like: \`\${args.theme.var.color.background_light_900}\`.
 
 Choose colors that work well for the context and maintain good contrast ratios.
 `.trim(),
@@ -190,7 +190,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
   display: grid;
   grid-template-rows: 1fr auto;
   height: 100%;
-  background: \${args.theme.var.color.background_l50};
+  background: \${args.theme.var.color.background_light_50};
 }\`;`}
     >
       <As
@@ -200,7 +200,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
           `return \`._id {
             padding: 16px;
             scroll-behavior: smooth;
-            background: linear-gradient(to bottom, \${args.theme.var.color.background_l50}, \${args.theme.var.color.background_l100});
+            background: linear-gradient(to bottom, \${args.theme.var.color.background_light_50}, \${args.theme.var.color.background_light_100});
           }\`;`,
         ]}
         class="chat-history"
@@ -247,9 +247,9 @@ Choose colors that work well for the context and maintain good contrast ratios.
   padding: 16px;
   margin-bottom: 16px;
   color: \${args.theme.var.color.error};
-  background: \${args.theme.var.color.error_l50};
+  background: \${args.theme.var.color.error_light_50};
   border-radius: 8px;
-  border: 1px solid \${args.theme.var.color.error_l100};
+  border: 1px solid \${args.theme.var.color.error_light_100};
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -271,7 +271,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
   transition: background 0.2s;
   
   &:hover {
-    background: \${args.theme.var.color.primary_l200};
+    background: \${args.theme.var.color.primary_light_200};
   }
 }\`;`}
               onClick={() => reload()}
@@ -288,11 +288,11 @@ Choose colors that work well for the context and maintain good contrast ratios.
             css={[
               `return \`._id {
   padding: 16px;
-  color: \${args.theme.var.color.text_l300};
+  color: \${args.theme.var.color.text_light_300};
   display: flex;
   gap: 12px;
   align-items: center;
-  background: \${args.theme.var.color.background_l100};
+  background: \${args.theme.var.color.background_light_100};
   border-radius: 8px;
   margin-bottom: 16px;
 }\`;`,
@@ -348,7 +348,7 @@ Choose colors that work well for the context and maintain good contrast ratios.
   transition: background 0.2s;
   
   &:hover {
-    background: \${args.theme.var.color.error_l200};
+    background: \${args.theme.var.color.error_light_200};
   }
 }\`;`}
               onClick={() => stop()}

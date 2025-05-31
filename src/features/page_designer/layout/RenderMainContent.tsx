@@ -45,7 +45,7 @@ const ResizeHandle: Component<ResizeHandleProps> = (props) => {
         width: ${isHorizontal ? "3px" : "100%"};
         height: ${isHorizontal ? "100%" : "3px"};
         cursor: ${isHorizontal ? "col-resize" : "row-resize"};
-        background-color: ${isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey) ? "${args.theme.var.color.text_l300}" : "transparent"};
+        background-color: ${isHovered() || (props.isResizing && props.resizeKey === props.activeResizeKey) ? "${args.theme.var.color.text_light_300}" : "transparent"};
         touch-action: none;
         transition: background-color 0.2s;
         height: 100%;
@@ -92,7 +92,7 @@ const Panel: Component<PanelProps> = (props) => {
           <As
             as="div"
             css={`return \`._id {
-            background: \${args.theme.var.color.background_l100};
+            background: \${args.theme.var.color.background_light_100};
             border-bottom: 1px solid \${args.theme.var.color.border};
             padding: 4px;
           }}\`;`}

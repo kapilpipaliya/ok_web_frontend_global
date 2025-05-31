@@ -257,7 +257,7 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.primary_d200};
+    background: ${args.theme.var.color.primary_dark_200};
   }
 }`;
 '''
@@ -291,8 +291,8 @@ return `._id {
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${args.theme.var.color.background_l100};
-    border-color: ${args.theme.var.color.border_l400};
+    background: ${args.theme.var.color.background_light_100};
+    border-color: ${args.theme.var.color.border_light_400};
   }
 }`;
 '''
@@ -356,7 +356,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 1rem;
-  background: ${args.theme.var.color.background_l50};
+  background: ${args.theme.var.color.background_light_50};
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;
@@ -765,7 +765,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 1rem;
-  background: ${args.theme.var.color.background_l50};
+  background: ${args.theme.var.color.background_light_50};
   
   @media (max-width: 768px) {
     padding: 3rem 1rem;

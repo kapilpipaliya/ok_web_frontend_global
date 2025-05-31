@@ -25,7 +25,7 @@ export function TabButton(props: TabButtonProps) {
   white-space: nowrap;
   background: transparent;
   outline: none;
-  color: \${args.theme.var.color.text_l300};
+  color: \${args.theme.var.color.text_light_300};
   cursor: pointer;
 }\`;`,
           props.isSelected
@@ -37,7 +37,7 @@ export function TabButton(props: TabButtonProps) {
             : `return \`._id {
               &:hover {
                 color: \${args.theme.var.color.text};
-                border-bottom: 2.5px solid \${args.theme.var.color.primary_l400};
+                border-bottom: 2.5px solid \${args.theme.var.color.primary_light_400};
               }
             }\`;`,
         ]}

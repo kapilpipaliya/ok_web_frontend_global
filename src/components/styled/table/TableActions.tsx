@@ -30,19 +30,19 @@ export function TableActions(
       }\`;`,
       isDisabled
         ? `return \`._id {
-            background-color: \${args.theme.var.color.background_l300};
+            background-color: \${args.theme.var.color.background_light_300};
             border: 1px solid \${args.theme.var.color.border};
-            color: \${args.theme.var.color.text_l600};
+            color: \${args.theme.var.color.text_light_600};
             &:hover {
-              background-color: \${args.theme.var.color.background_l300};
+              background-color: \${args.theme.var.color.background_light_300};
             }
           }\`;`
         : `return \`._id {
-            background-color: \${args.theme.var.color.background_l100};
-            border: 1px solid \${args.theme.var.color.primary_l800};
+            background-color: \${args.theme.var.color.background_light_100};
+            border: 1px solid \${args.theme.var.color.primary_light_800};
             color: \${args.theme.var.color.primary};
             &:hover {
-              background-color: \${args.theme.var.color.primary_l900};
+              background-color: \${args.theme.var.color.primary_light_900};
               border-color: \${args.theme.var.color.primary};
             }
           }\`;`,
@@ -64,8 +64,8 @@ export function TableActions(
           align-items: center;
           justify-content: space-between;
           padding: 0.75rem 1.25rem;
-          background-color: \${args.theme.var.color.background_l300};
-          color: \${args.theme.var.color.background_l300_text};
+          background-color: \${args.theme.var.color.background_light_300};
+          color: \${args.theme.var.color.background_light_300_text};
           border-radius: 0 0 10px 10px;
           box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
         }\`;`}
@@ -94,15 +94,15 @@ export function TableActions(
             css={`return \`._id {
               padding: 0.25rem 0.5rem;
               border-radius: 4px;
-              border: 1px solid \${args.theme.var.color.primary_l800};
-              background-color: \${args.theme.var.color.background_l100};
-              color: \${args.theme.var.color.background_l100_text};
+              border: 1px solid \${args.theme.var.color.primary_light_800};
+              background-color: \${args.theme.var.color.background_light_100};
+              color: \${args.theme.var.color.background_light_100_text};
               font-size: 0.875rem;
               cursor: pointer;
               outline: none;
               &:focus {
                 border-color: \${args.theme.var.color.primary};
-                box-shadow: 0 0 0 2px \${args.theme.var.color.primary_l800};
+                box-shadow: 0 0 0 2px \${args.theme.var.color.primary_light_800};
               }
             }\`;`}
             id="rowsPerPage"
@@ -115,8 +115,8 @@ export function TableActions(
                   as="option"
                   css={`return \`._id {
                     color: \${args.theme.var.color.text};
-                    background-color: \${args.theme.var.color.background_l100};
-                    color: \${args.theme.var.color.background_l100_text};
+                    background-color: \${args.theme.var.color.background_light_100};
+                    color: \${args.theme.var.color.background_light_100_text};
                   }\`;`}
                   value={option}
                 >

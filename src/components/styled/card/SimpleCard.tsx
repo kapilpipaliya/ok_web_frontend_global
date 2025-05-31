@@ -18,19 +18,19 @@ export function CardContainer(props: { children: JSX.Element }) {
     <As
       as="div"
       css={`return \`._id {
-  border-color: \${args.theme.var.color.primary_l750};
+  border-color: \${args.theme.var.color.primary_light_750};
   border-radius: 0.75rem;
   border-width: 1px;
   border-style: solid;
   overflow: hidden;
-  background-color: \${args.theme.var.color.background_l100};
-  color: \${args.theme.var.color.background_l100_text};
+  background-color: \${args.theme.var.color.background_light_100};
+  color: \${args.theme.var.color.background_light_100_text};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-    border-color: \${args.theme.var.color.primary_l650};
+    border-color: \${args.theme.var.color.primary_light_650};
   }
 }\`;`}
     >
@@ -46,11 +46,11 @@ export function CardHeaderContainer(props: { children: JSX.Element }) {
       css={`return \`._id {
   display: flex;
   align-items: center;
-  background-color: \${args.theme.var.color.primary_l900};
-  color: \${args.theme.var.color.primary_l900_text};
+  background-color: \${args.theme.var.color.primary_light_900};
+  color: \${args.theme.var.color.primary_light_900_text};
   border-bottom-width: 1px;
   border-bottom-style: solid;
-  border-color: \${args.theme.var.color.primary_l800};
+  border-color: \${args.theme.var.color.primary_light_800};
   column-gap: 1rem;
   padding: 1.5rem;
 }\`;`}

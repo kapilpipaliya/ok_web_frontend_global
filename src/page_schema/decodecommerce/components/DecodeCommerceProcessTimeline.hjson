@@ -22,7 +22,7 @@ return {
         css: '''
 return `._id {
   padding: 5rem 0;
-  background: ${args.theme.var.color.background_d100};
+  background: ${args.theme.var.color.background_dark_100};
   overflow: hidden;
   
   @media (max-width: 768px) {
@@ -116,7 +116,7 @@ return {
         css: '''
 return `._id {
   font-size: 1.1rem;
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   max-width: 600px;
   margin: 0 auto;
 }`;
@@ -156,7 +156,7 @@ return `._id {
     left: 10%;
     right: 10%;
     height: 2px;
-    background: ${args.theme.var.color.primary_l300};
+    background: ${args.theme.var.color.primary_light_300};
     z-index: 0;
     
     @media (max-width: 968px) {
@@ -265,7 +265,7 @@ return `._id {
   height: 80px;
   margin: 0 auto 1.5rem;
   background: ${args.theme.var.color.background};
-  border: 3px solid ${args.theme.var.color.primary_l300};
+  border: 3px solid ${args.theme.var.color.primary_light_300};
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -276,7 +276,7 @@ return `._id {
   &:hover {
     transform: scale(1.1);
     border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 10px 30px ${args.theme.var.color.primary_l300};
+    box-shadow: 0 10px 30px ${args.theme.var.color.primary_light_300};
   }
 }`;
 '''
@@ -366,7 +366,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.text_d300};
+  color: ${args.theme.var.color.text_dark_300};
   line-height: 1.6;
   font-size: 0.95rem;
 }`;

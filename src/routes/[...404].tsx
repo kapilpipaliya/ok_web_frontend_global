@@ -50,7 +50,7 @@ export default function Notfound() {
         as: "p",
         css: (args: FunctionArgumentType) => `return \`._id {
           font-size: 1.125rem;
-          color: ${args.theme.var.color.text_l200};
+          color: ${args.theme.var.color.text_light_200};
           text-align: center;
           max-width: 600px;
           margin-top: 0.5rem;
@@ -72,8 +72,8 @@ export default function Notfound() {
           transition: background-color 0.2s ease;
           
           &:hover {
-            background-color: ${args.theme.var.color.primary_d600};
-            color: ${args.theme.var.color.primary_d600_text};
+            background-color: ${args.theme.var.color.primary_dark_600};
+            color: ${args.theme.var.color.primary_dark_600_text};
           }
         }\`;`,
         text: "Go to Home",

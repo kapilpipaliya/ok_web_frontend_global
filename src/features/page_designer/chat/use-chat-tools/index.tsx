@@ -164,7 +164,7 @@ export function UseChatTools() {
   width: 100%;
   max-width: 300px;
   padding: 2px;
-  border: 1px solid \${args.theme.var.color.gray_l400};
+  border: 1px solid \${args.theme.var.color.gray_light_400};
   border-radius: 4px;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
 }\`;`}

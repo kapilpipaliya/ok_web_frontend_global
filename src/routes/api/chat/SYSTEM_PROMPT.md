@@ -162,17 +162,18 @@ Use the 'css' property for styling. It is a function body string that returns a 
 - Check current mode with `args.currentMode()` which returns "light", "dark", or "system"
 - **Important Dark Mode Guidelines**:
   - Avoid using primary colors as backgrounds in dark mode - they often lack sufficient contrast
-  - Use dark background shades for backgrounds: `background_d200`, `background_d300`, etc as background color is white in light mode and black in dark mode
+  - Use dark background shades for backgrounds: `background_dark_200`, `background_dark_300`, etc as background color is white in light mode and black in dark mode
   - For light overlays on dark backgrounds, use very low opacity (0.05-0.1)
-  - **Note**: If the base background color is white (#FFFFFF), using `background_l100` will have no visible effect as light shades of white remain white
-  - Prefer using `background_d` shades or opacity-based overlays for dark mode styling
+  - **Note**: If the base background color is white (#FFFFFF), using `background_light_100` will have no visible effect as light shades of white remain white
+  - Prefer using `background_dark_` shades or opacity-based overlays for dark mode styling
 
 ### Theme Color Access
 - Base colors: `args.theme.var.color.primary`, `args.theme.var.color.background`, etc.
-- Light shades: `_l100` to `_l900` (l100 = close to base, l900 = close to white)
-- Dark shades: `_d100` to `_d900` (d100 = close to base, d900 = close to black)
-- Text colors: Automatic with `_text` suffix (e.g., `primary_text`, `background_l200_text`)
-- **Dark mode behavior**: Shades automatically swap (`_l` becomes `_d` and vice versa)
+- Standard colors: `args.theme.var.color.red`, `args.theme.var.color.blue`, `args.theme.var.color.green`, etc.
+- Light shades: `_light_100` to `_light_900` (light_100 = close to base, light_900 = close to white)
+- Dark shades: `_dark_100` to `_dark_900` (dark_100 = close to base, dark_900 = close to black)
+- Text colors: Automatic with `_text` suffix (e.g., `primary_text`, `background_light_200_text`)
+- **Dark mode behavior**: Shades automatically swap (`_light_` becomes `_dark_` and vice versa)
 
 ## Component Variants
 
