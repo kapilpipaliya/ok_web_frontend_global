@@ -27,7 +27,7 @@ const containerStyles = [
       "controls controls"
       "shades shades";
   }\`;`,
-  `@media (max-width: 768px) {
+  `return \`@media (max-width: 768px) {
     ._id {
       padding: 1.5rem;
       gap: 1.5rem;
@@ -37,7 +37,7 @@ const containerStyles = [
         "controls"
         "shades";
     }
-  }`,
+  }\`;`,
 ];
 
 const mainHeaderStyles = `return \`._id {
@@ -60,7 +60,7 @@ const sectionHeaderStyles = [
     margin: 0 0 1.5rem 0;
     position: relative;
   }\`;`,
-  `._id::after {
+  `return \`._id::after {
     content: '';
     position: absolute;
     bottom: -0.5rem;
