@@ -15,7 +15,7 @@ interface BaseUserData {
 }
 
 interface UserDataWithPassword extends BaseUserData {
-  password: string;
+  password?: string;
 }
 
 /**

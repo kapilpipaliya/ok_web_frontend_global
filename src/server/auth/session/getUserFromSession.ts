@@ -35,7 +35,7 @@ export async function getUserFromSession(
 
     const userFromDb = convertNodeToJson(result.records[0].get("u"));
 
-    if (!sessionUser.P.password) {
+    if (!userFromDb.P.password) {
       // Create admin session
       const driver = await getDriver();
       adminDbSession = driver.session({ database: ADMIN_DB_NAME });

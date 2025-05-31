@@ -78,6 +78,8 @@ async function authenticateAdminUser(dbUser: Vertex, password: string) {
       );
     }
     const adminUser = convertNodeToJson(adminDbResult.records[0].get("u"));
+
+    // save admin user to session
     return comparePassword(adminUser, password);
   } finally {
     await adminDbSession.close();
