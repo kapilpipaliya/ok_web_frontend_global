@@ -1,0 +1,371 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeUITestimonialCard"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "quote",
+        type: "string",
+        defValue: "This is an amazing product!"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariant",
+      P: {
+        key: "author",
+        type: "string",
+        defValue: "John Doe"
+      }
+    },
+    {
+      id: "4",
+      L: "ComponentVariant",
+      P: {
+        key: "role",
+        type: "string",
+        defValue: "CEO, Company"
+      }
+    },
+    {
+      id: "5",
+      L: "ComponentVariant",
+      P: {
+        key: "rating",
+        type: "number",
+        defValue: 5
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "stars",
+        loop: true,
+        props: '''
+const rating = args.contextData.props?.rating || 5;
+return {
+  data: Array(5).fill(0).map((_, i) => ({ filled: i < rating }))
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const star = args.contextData.stars;
+return {
+  as: "icon",
+  icon: star.filled ? "carbon:star-filled" : "carbon:star",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+const star = args.contextData.stars;
+return `._id {
+  color: ${star.filled ? args.theme.var.color.warning : args.theme.var.color.background_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "11a",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:quotes",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  opacity: 0.3;
+  flex-shrink: 0;
+  margin-top: -0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "blockquote",
+  text: args.contextData.props?.quote || "This is an amazing product!"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid ${args.theme.var.color.background_dark_100};
+  padding-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 48px;
+  height: 48px;
+  background: ${args.theme.var.color.primary};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: ${args.theme.var.color.primary_text};
+  font-size: 1.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const author = args.contextData.props?.author || "John Doe";
+return {
+  as: "span",
+  text: author.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: args.contextData.props?.author || "John Doe"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: args.contextData.props?.role || "CEO, Company"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariant", S: "1", E: "3" },
+    { id: "e3", T: "ComponentVariant", S: "1", E: "4" },
+    { id: "e4", T: "ComponentVariant", S: "1", E: "5" },
+    { id: "e5", T: "Attr", S: "1", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "6", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "11a" },
+    { id: "e11a", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "6", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "13", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "16", E: "18" }
+  ]
+}

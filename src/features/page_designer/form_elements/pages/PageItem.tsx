@@ -1,20 +1,17 @@
-import type { SetStoreFunction } from "solid-js/store";
+
 
 import { toTitle } from "case-switcher-js";
-import { createSignal, onCleanup, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { IconButton } from "~/components/styled/IconButton";
-import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { onClickAddComponent } from "~/features/page_designer/functions/component/onClickAddComponent";
 
 import type { NavItem } from "../functions/getTreeData";
 import {
   baseItemStyle,
-  hoverItemStyle,
   buttonStyle,
-  setupPreview,
   createOpenInNewTab,
 } from "../common/ItemStyles";
 
@@ -22,21 +19,18 @@ import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
-import { PreviewIsolated } from "./PreviewIsolated";
 import { As } from "~/components/As";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { Icon } from "@iconify-icon/solid";
+import { ComponentPreview } from "../components/ComponentPreview";
 
 export function PageItem(
   props: Readonly<{
     child: NavItem;
-    previewGraph: GraphInterface;
     previewPageId: Id | null;
-    setPreviewGraph: SetStoreFunction<GraphInterface>;
     setPreviewPageId: (id: Id | null) => void;
   }>,
 ) {
@@ -44,8 +38,9 @@ export function PageItem(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
-  const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const [isHovered, setIsHovered] = createSignal(false);
+  const [isPreviewOpen, setIsPreviewOpen] = createSignal(false);
+  const [isMouseOverItem, setIsMouseOverItem] = createSignal(false);
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
   );
@@ -57,26 +52,37 @@ export function PageItem(
       : undefined;
   };
 
-  let menuRef: HTMLDivElement | undefined;
+  const handleItemMouseEnter = () => {
+    setIsHovered(true);
+    setIsMouseOverItem(true);
+  };
 
-  // Use shared preview setup with function for props
-  const { handleMouseEnter, handleMouseLeave, previewTimer } = setupPreview(
-    () => ({
-      previewPageId: props.previewPageId,
-      setPreviewPageId: props.setPreviewPageId,
-      itemId: props.child.id,
-    }),
-    {
-      setHoverPageId,
-      setIsHovered,
-    },
-  );
+  const handleItemMouseLeave = () => {
+    setIsMouseOverItem(false);
+    // Only change hover state if preview is not open
+    if (!isPreviewOpen()) {
+      setIsHovered(false);
+    }
+  };
 
-  // Get combined item style
+  const handlePreviewOpen = () => {
+    setIsPreviewOpen(true);
+    // Ensure item stays in hovered state
+    setIsHovered(true);
+  };
+
+  const handlePreviewClose = () => {
+    setIsPreviewOpen(false);
+
+    // Only reset hover state if mouse is not over the item
+    if (!isMouseOverItem()) {
+      setIsHovered(false);
+    }
+  };
+
+  // Get item style
   const getItemStyle = () => {
-    return hoverPageId() === props.child.id
-      ? [baseItemStyle, hoverItemStyle]
-      : baseItemStyle;
+    return baseItemStyle;
   };
 
   const handleDragStart = (e: DragEvent) => {
@@ -84,10 +90,6 @@ export function PageItem(
     mergeVertexProperties<PageLayoutObject>(0, layoutStoreId, graph, setGraph, {
       draggedVertexIds: [],
     });
-    if (previewTimer) {
-      clearTimeout(previewTimer);
-    }
-    props.setPreviewPageId(null);
     const dataTransfer =
       selectedComponents().size > 0
         ? Array.from(selectedComponents())
@@ -144,11 +146,8 @@ export function PageItem(
     setGraph,
   );
 
-  onCleanup(() => {
-    if (previewTimer) {
-      clearTimeout(previewTimer);
-    }
-  });
+  // Should show buttons if item is hovered or preview is open
+  const shouldShowButtons = () => isHovered() || isPreviewOpen();
 
   return (
     <Show when={props.child.key}>
@@ -158,9 +157,8 @@ export function PageItem(
         draggable={"true"}
         ondblclick={handleDoubleClick}
         onDragStart={handleDragStart}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={(e) => handleMouseLeave(e)}
-        ref={(el) => (menuRef = el)}
+        onMouseEnter={handleItemMouseEnter}
+        onMouseLeave={handleItemMouseLeave}
       >
         <Show when={props.child.P.icon}>
           <Icon height={20} icon={props.child.P.icon} noobserver width={20} />
@@ -168,8 +166,16 @@ export function PageItem(
         <As as="div" css={`return \`._id {font-size: 14px;}\`;`}>
           {toTitle(props.child.key)}
         </As>
-        <Show when={isHovered()}>
-          <As as="div" css={`return \`._id {margin-left: auto;}\`;`}>
+        <Show when={shouldShowButtons()}>
+          <As
+            as="div"
+            css={`return \`._id {margin-left: auto; display: flex;}\`;`}
+          >
+            <ComponentPreview
+              item={props.child}
+              onPreviewOpen={handlePreviewOpen}
+              onPreviewClose={handlePreviewClose}
+            />
             <IconButton
               css={buttonStyle}
               icon="ph:arrow-square-out"
@@ -178,21 +184,6 @@ export function PageItem(
               title="Open in new tab"
             />
           </As>
-        </Show>
-        <Show when={props.previewPageId === props.child.id && menuRef}>
-          <DropdownMenu
-            onClickOutside={() => props.setPreviewPageId(null)}
-            onMouseLeave={() => props.setPreviewPageId(null)}
-            parentRef={menuRef as HTMLElement}
-          >
-            {toTitle(props.child.key)} Preview
-            <PreviewIsolated
-              // TODO FIX THIS
-              item={props.child}
-              graph={props.previewGraph}
-              setGraph={props.setPreviewGraph}
-            />
-          </DropdownMenu>
         </Show>
       </As>
     </Show>

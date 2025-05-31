@@ -24,7 +24,7 @@ export function EmailConfirmationBanner() {
         as: "icon",
         icon: "ph:warning-circle-fill",
         css: (args: FunctionArgumentType) => `return \`._id {
-color: ${args.theme.var.color.warning};
+color: ${args.theme.var.color.warning_dark_500};
 font-size: 24px;
 margin-right: 12px;
 }\`;`,
@@ -36,7 +36,6 @@ margin-right: 12px;
           {
             as: "span",
             css: (args: FunctionArgumentType) => `return \`._id {
-color: ${args.theme.var.color.warning};
 font-weight: 600;
 display: block;
 }\`;`,
@@ -47,7 +46,6 @@ display: block;
             as: "span",
             css: (args: FunctionArgumentType) => `return \`._id {
 margin-top: 4px;
-color: ${args.theme.var.color.text};
 display: block;
 }\`;`,
             componentName: "Html",

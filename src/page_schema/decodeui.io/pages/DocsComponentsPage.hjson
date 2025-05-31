@@ -1,0 +1,1285 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUINavHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  display: flex;
+  padding-top: 5rem;
+  
+  @media (max-width: 768px) {
+    padding-top: 4rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIDocSidebar"
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  overflow-y: auto;
+  height: calc(100vh - 5rem);
+  
+  @media (max-width: 768px) {
+    height: calc(100vh - 4rem);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIDocContent",
+        props: '''
+return {
+  title: "Component Library",
+  description: "Explore all available components for building stunning pages"
+};
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIBreadcrumb",
+        props: '''
+return {
+  items: "Home,Documentation,Components"
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)'};
+  border: 1px solid ${args.theme.var.color.primary};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:information",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "DecodeUI provides 50+ pre-built components that you can drag & drop to build your pages. All components are fully customizable and responsive."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Data",
+        name: "componentCategories",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      title: "Layout Components",
+      icon: "carbon:template",
+      description: "Structure your pages with flexible layouts",
+      components: [
+        {
+          name: "Container",
+          description: "Responsive container with max-width settings",
+          icon: "carbon:center-square"
+        },
+        {
+          name: "Grid",
+          description: "Flexible grid system with customizable columns",
+          icon: "carbon:grid"
+        },
+        {
+          name: "Flexbox",
+          description: "Flexible box layout for complex arrangements",
+          icon: "carbon:align-box-center"
+        },
+        {
+          name: "Section",
+          description: "Page sections with padding and backgrounds",
+          icon: "carbon:column"
+        }
+      ]
+    },
+    {
+      title: "Navigation",
+      icon: "carbon:navigation",
+      description: "Headers, footers, and navigation menus",
+      components: [
+        {
+          name: "Header",
+          description: "Site header with logo and navigation",
+          icon: "carbon:header"
+        },
+        {
+          name: "Navigation Menu",
+          description: "Responsive navigation with dropdowns",
+          icon: "carbon:menu"
+        },
+        {
+          name: "Footer",
+          description: "Site footer with links and information",
+          icon: "carbon:dock-bottom"
+        },
+        {
+          name: "Breadcrumb",
+          description: "Navigation breadcrumb trail",
+          icon: "carbon:chevron-right"
+        }
+      ]
+    },
+    {
+      title: "Content",
+      icon: "carbon:document",
+      description: "Text, images, and content display",
+      components: [
+        {
+          name: "Heading",
+          description: "H1-H6 headings with styling options",
+          icon: "carbon:text-long-paragraph"
+        },
+        {
+          name: "Paragraph",
+          description: "Rich text paragraphs with formatting",
+          icon: "carbon:text-align-left"
+        },
+        {
+          name: "Image",
+          description: "Responsive images with lazy loading",
+          icon: "carbon:image"
+        },
+        {
+          name: "Video",
+          description: "Embed videos from YouTube, Vimeo, etc.",
+          icon: "carbon:video"
+        }
+      ]
+    },
+    {
+      title: "Interactive",
+      icon: "carbon:touch-1",
+      description: "Buttons, forms, and interactive elements",
+      components: [
+        {
+          name: "Button",
+          description: "Customizable buttons with hover effects",
+          icon: "carbon:button-centered"
+        },
+        {
+          name: "Form",
+          description: "Complete form builder with validation",
+          icon: "carbon:form"
+        },
+        {
+          name: "Input Field",
+          description: "Text, email, password, and more",
+          icon: "carbon:text-input"
+        },
+        {
+          name: "Modal",
+          description: "Pop-up modals for important content",
+          icon: "carbon:popup"
+        }
+      ]
+    },
+    {
+      title: "Display",
+      icon: "carbon:view",
+      description: "Cards, lists, and data display",
+      components: [
+        {
+          name: "Card",
+          description: "Content cards with image and text",
+          icon: "carbon:document-blank"
+        },
+        {
+          name: "List",
+          description: "Ordered and unordered lists",
+          icon: "carbon:list"
+        },
+        {
+          name: "Table",
+          description: "Data tables with sorting and filtering",
+          icon: "carbon:table"
+        },
+        {
+          name: "Timeline",
+          description: "Process and history timelines",
+          icon: "carbon:flow-data"
+        }
+      ]
+    },
+    {
+      title: "Advanced",
+      icon: "carbon:analytics",
+      description: "Complex components for specific needs",
+      components: [
+        {
+          name: "Carousel",
+          description: "Image and content sliders",
+          icon: "carbon:carousel-horizontal"
+        },
+        {
+          name: "Accordion",
+          description: "Collapsible content sections",
+          icon: "carbon:chevron-down"
+        },
+        {
+          name: "Tabs",
+          description: "Tabbed content interfaces",
+          icon: "carbon:tabs"
+        },
+        {
+          name: "Pricing Table",
+          description: "Product pricing comparison",
+          icon: "carbon:currency"
+        }
+      ]
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.componentCategories;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.componentCategories;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.componentCategories;
+return {
+  as: "icon",
+  icon: category.icon,
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.componentCategories;
+return {
+  as: "h2",
+  text: category.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.componentCategories;
+return {
+  as: "p",
+  text: category.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "components",
+        loop: true,
+        props: '''
+const category = args.contextData.componentCategories;
+return {
+  data: category.components
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const component = args.contextData.components;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const component = args.contextData.components;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const component = args.contextData.components;
+return {
+  as: "icon",
+  icon: component.icon,
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  opacity: 0.8;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const component = args.contextData.components;
+return {
+  as: "h3",
+  text: component.name
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const component = args.contextData.components;
+return {
+  as: "p",
+  text: component.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 4rem;
+  padding-top: 3rem;
+  border-top: 1px solid ${args.theme.var.color.background_dark_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Using Components"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "1. Drag & Drop"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Simply drag any component from the component panel and drop it onto your page canvas. Components snap into place automatically."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "2. Customize Properties"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Click on any component to open the properties panel. Adjust text, colors, spacing, and other properties to match your design."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "3. Style with CSS"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Use the style panel to add custom CSS or choose from pre-defined style presets. All styling is responsive by default."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Component Properties"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "All components in DecodeUI support a wide range of customizable properties:"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
+  border-radius: 0.75rem;
+  padding: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "properties",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      title: "Content",
+      items: ["Text content", "Images & media", "Icons", "Links"]
+    },
+    {
+      title: "Layout",
+      items: ["Spacing (padding/margin)", "Width & height", "Position", "Display type"]
+    },
+    {
+      title: "Style",
+      items: ["Colors & backgrounds", "Borders & shadows", "Typography", "Animations"]
+    },
+    {
+      title: "Behavior",
+      items: ["Click actions", "Hover effects", "Visibility conditions", "Responsive settings"]
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const property = args.contextData.properties;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const property = args.contextData.properties;
+return {
+  as: "h4",
+  text: property.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "items",
+        loop: true,
+        props: '''
+const property = args.contextData.properties;
+return {
+  data: property.items
+};
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.items;
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:dot-mark",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.items;
+return {
+  as: "span",
+  text: item
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 1rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Need Custom Components?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We can create custom components tailored to your specific needs. Contact us for custom development."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Get in Touch",
+  onClick: () => args.navigate("/contact")
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 2rem;
+  background: white;
+  color: ${args.theme.var.color.primary};
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "6", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "9", E: "11" },
+    { id: "e11", T: "Attr", S: "8", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "13", E: "17" },
+    { id: "e17", T: "Attr", S: "13", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "21", E: "23" },
+    { id: "e23", T: "Attr", S: "20", E: "24" },
+    { id: "e24", T: "Attr", S: "8", E: "25" },
+    { id: "e25", T: "Attr", S: "25", E: "26" },
+    { id: "e26", T: "Attr", S: "25", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "28", E: "29" },
+    { id: "e29", T: "Attr", S: "28", E: "30" },
+    { id: "e30", T: "Attr", S: "27", E: "31" },
+    { id: "e31", T: "Attr", S: "31", E: "32" },
+    { id: "e32", T: "Attr", S: "31", E: "33" },
+    { id: "e33", T: "Attr", S: "27", E: "34" },
+    { id: "e34", T: "Attr", S: "34", E: "35" },
+    { id: "e35", T: "Attr", S: "34", E: "36" },
+    { id: "e36", T: "Attr", S: "25", E: "37" },
+    { id: "e37", T: "Attr", S: "25", E: "38" },
+    { id: "e38", T: "Attr", S: "25", E: "39" },
+    { id: "e39", T: "Attr", S: "39", E: "40" },
+    { id: "e40", T: "Attr", S: "40", E: "41" },
+    { id: "e41", T: "Attr", S: "41", E: "42" },
+    { id: "e42", T: "Attr", S: "42", E: "43" },
+    { id: "e43", T: "Attr", S: "42", E: "44" },
+    { id: "e44", T: "Attr", S: "44", E: "45" },
+    { id: "e45", T: "Attr", S: "45", E: "46" },
+    { id: "e46", T: "Attr", S: "46", E: "47" },
+    { id: "e47", T: "Attr", S: "46", E: "48" },
+    { id: "e48", T: "Attr", S: "8", E: "49" },
+    { id: "e49", T: "Attr", S: "49", E: "50" },
+    { id: "e50", T: "Attr", S: "49", E: "51" },
+    { id: "e51", T: "Attr", S: "49", E: "52" }
+  ]
+}

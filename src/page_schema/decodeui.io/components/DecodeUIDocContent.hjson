@@ -1,0 +1,211 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeUIDocContent"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "title",
+        type: "string",
+        defValue: "Documentation"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariant",
+      P: {
+        key: "description",
+        type: "string",
+        defValue: ""
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "article"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_dark_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: args.contextData.props?.title || "Documentation"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const description = args.contextData.props?.description;
+return {
+  as: description ? "p" : "",
+  text: description
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  /* Content styles for documentation */
+  
+  h2 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: ${args.theme.var.color.text};
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: ${args.theme.var.color.text};
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    color: ${args.theme.var.color.text};
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+  
+  ul, ol {
+    color: ${args.theme.var.color.text};
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+  
+  a {
+    color: ${args.theme.var.color.primary};
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  blockquote {
+    border-left: 4px solid ${args.theme.var.color.primary};
+    padding-left: 1.5rem;
+    margin: 1.5rem 0;
+    color: ${args.theme.var.color.text};
+    opacity: 0.8;
+    font-style: italic;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        name: "children"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariant", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "1", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "4", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" }
+  ]
+}

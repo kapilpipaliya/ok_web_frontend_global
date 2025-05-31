@@ -1,0 +1,203 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeUIFeatureCard"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "icon",
+        type: "string",
+        defValue: "carbon:api-1"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariant",
+      P: {
+        key: "title",
+        type: "string",
+        defValue: "Feature Title"
+      }
+    },
+    {
+      id: "4",
+      L: "ComponentVariant",
+      P: {
+        key: "description",
+        type: "string",
+        defValue: "Feature description goes here"
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, ${args.theme.var.color.primary}, ${args.theme.var.color.info});
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-color: ${args.theme.var.color.background_dark_300};
+    
+    &::before {
+      transform: scaleX(1);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.15)'};
+    transform: rotate(-5deg);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: args.contextData.props?.icon || "carbon:api-1",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: args.contextData.props?.title || "Feature Title"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: args.contextData.props?.description || "Feature description goes here"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  line-height: 1.6;
+  font-size: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariant", S: "1", E: "3" },
+    { id: "e3", T: "ComponentVariant", S: "1", E: "4" },
+    { id: "e4", T: "Attr", S: "1", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "5", E: "8" },
+    { id: "e8", T: "Attr", S: "5", E: "9" }
+  ]
+}

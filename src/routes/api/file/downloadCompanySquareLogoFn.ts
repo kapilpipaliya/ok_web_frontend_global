@@ -1,5 +1,5 @@
 import type { Session } from "neo4j-driver";
-import { APIError } from "~/lib/api/server/apiErrorHandler";
+import { redirect } from "@solidjs/router";
 import { downloadFileById } from "~/routes/api/file/functions/downloadFileById";
 
 /**
@@ -18,7 +18,8 @@ export async function downloadCompanySquareLogo(
   `);
 
   if (result.records.length === 0) {
-    throw new APIError("Company logo not found", 404);
+    // throw new APIError("Company logo not found", 404);
+    return redirect("/images/logo_square.svg");
   }
 
   const fileId = result.records[0].get("fileId");

@@ -1,0 +1,214 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1280px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Everything You Need to Build Professional Websites"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Powerful features that make website building fast, easy, and professional"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  max-width: 600px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "features",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      icon: "carbon:drag-horizontal",
+      title: "Drag & Drop Builder",
+      description: "Intuitive interface that lets you build pages visually without any coding knowledge"
+    },
+    {
+      icon: "carbon:search",
+      title: "SEO Optimized",
+      description: "Built-in SEO best practices ensure your pages rank well in search engines"
+    },
+    {
+      icon: "carbon:devices",
+      title: "Responsive Design",
+      description: "All pages automatically adapt to any screen size for perfect mobile experience"
+    },
+    {
+      icon: "carbon:template",
+      title: "Professional Templates",
+      description: "Start with pre-built templates and customize them to match your brand"
+    },
+    {
+      icon: "carbon:cloud",
+      title: "Multi-Project Support",
+      description: "Manage multiple websites with isolated databases and custom themes"
+    },
+    {
+      icon: "carbon:document",
+      title: "Full Documentation",
+      description: "Comprehensive guides and tutorials to help you build amazing websites"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIFeatureCard",
+        props: '''
+const feature = args.contextData.features;
+return {
+  icon: feature.icon,
+  title: feature.title,
+  description: feature.description
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "2", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" }
+  ]
+}

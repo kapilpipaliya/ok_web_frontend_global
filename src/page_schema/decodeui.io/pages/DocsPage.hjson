@@ -1,0 +1,614 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUINavHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  display: flex;
+  padding-top: 5rem;
+  
+  @media (max-width: 768px) {
+    padding-top: 4rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIDocSidebar"
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  overflow-y: auto;
+  height: calc(100vh - 5rem);
+  
+  @media (max-width: 768px) {
+    height: calc(100vh - 4rem);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "docContent",
+        props: '''
+const currentPage = args.searchParams?.get("page") || "home";
+
+const pageContent = {
+  home: {
+    title: "Welcome to DecodeUI Documentation",
+    description: "Learn how to build beautiful websites with our drag & drop builder",
+    content: `
+      <h2>Getting Started</h2>
+      <p>DecodeUI is a professional drag & drop page builder that empowers you to create stunning websites without writing code. Whether you're building pages yourself or hiring our experts, we've got you covered.</p>
+      
+      <h3>Choose Your Path</h3>
+      <ul>
+        <li><strong>DIY Builder</strong> - Use our intuitive drag & drop interface to build pages yourself</li>
+        <li><strong>Custom Service</strong> - Hire our experts to build custom pages for $50-100 per page</li>
+      </ul>
+      
+      <h3>Key Features</h3>
+      <ul>
+        <li>Visual drag & drop builder</li>
+        <li>Pre-built components and templates</li>
+        <li>Responsive design out of the box</li>
+        <li>SEO optimization tools</li>
+        <li>Dark/light theme support</li>
+        <li>Multi-project management</li>
+      </ul>
+      
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a href="#" onclick="args.setSearchParams({ page: 'quickstart' })">Quick Start Guide</a></li>
+        <li><a href="#" onclick="args.setSearchParams({ page: 'components' })">Component Library</a></li>
+        <li><a href="#" onclick="args.setSearchParams({ page: 'themes' })">Theme System</a></li>
+        <li><a href="#" onclick="args.setSearchParams({ page: 'api' })">API Reference</a></li>
+      </ul>
+    `
+  },
+  quickstart: {
+    title: "Quick Start Guide",
+    description: "Get up and running with DecodeUI in minutes",
+    content: `
+      <h2>1. Create Your Account</h2>
+      <p>Sign up for a free account at <a href="/signup">decodeui.io/signup</a>. You'll get instant access to the builder and 5 free pages to start with.</p>
+      
+      <h2>2. Create Your First Project</h2>
+      <p>After signing in, click "New Project" to create your first website. Each project gets its own subdomain and isolated database.</p>
+      
+      <h2>3. Choose a Template</h2>
+      <p>Start with one of our professional templates or begin with a blank canvas. All templates are fully customizable.</p>
+      
+      <h2>4. Drag & Drop Components</h2>
+      <p>Use the component panel to drag elements onto your page. Click any element to customize its properties, styling, and content.</p>
+      
+      <h2>5. Preview & Publish</h2>
+      <p>Use the preview mode to see how your site looks on different devices. When you're ready, click "Publish" to make your site live.</p>
+      
+      <h3>Need Help?</h3>
+      <p>If you prefer to have pages built for you, our expert designers are available to create custom pages starting at $50 per page.</p>
+    `
+  },
+  components: {
+    title: "Component Library",
+    description: "Explore all available components for building your pages",
+    content: `
+      <h2>Basic Components</h2>
+      
+      <h3>Text Elements</h3>
+      <ul>
+        <li><strong>Heading</strong> - H1 through H6 headings with customizable styles</li>
+        <li><strong>Paragraph</strong> - Body text with rich formatting options</li>
+        <li><strong>List</strong> - Ordered and unordered lists</li>
+      </ul>
+      
+      <h3>Layout Components</h3>
+      <ul>
+        <li><strong>Container</strong> - Responsive containers with max-width settings</li>
+        <li><strong>Grid</strong> - Flexible grid layouts with customizable columns</li>
+        <li><strong>Flexbox</strong> - Flexible box layouts for complex designs</li>
+      </ul>
+      
+      <h3>Interactive Elements</h3>
+      <ul>
+        <li><strong>Button</strong> - Customizable buttons with hover effects</li>
+        <li><strong>Form</strong> - Complete form builder with validation</li>
+        <li><strong>Modal</strong> - Pop-up modals for important content</li>
+      </ul>
+      
+      <h3>Media Components</h3>
+      <ul>
+        <li><strong>Image</strong> - Responsive images with lazy loading</li>
+        <li><strong>Video</strong> - Embedded videos from YouTube, Vimeo, etc.</li>
+        <li><strong>Icon</strong> - Access to thousands of icons</li>
+      </ul>
+      
+      <h3>Advanced Components</h3>
+      <ul>
+        <li><strong>Carousel</strong> - Image and content sliders</li>
+        <li><strong>Accordion</strong> - Collapsible content sections</li>
+        <li><strong>Tabs</strong> - Tabbed content interfaces</li>
+        <li><strong>Timeline</strong> - Process and history timelines</li>
+      </ul>
+    `
+  },
+  themes: {
+    title: "Theme System",
+    description: "Customize the look and feel of your website",
+    content: `
+      <h2>Understanding Themes</h2>
+      <p>DecodeUI's theme system allows you to customize colors, typography, spacing, and more across your entire website.</p>
+      
+      <h3>Color System</h3>
+      <p>Our color system includes:</p>
+      <ul>
+        <li><strong>Primary Color</strong> - Main brand color used for CTAs and emphasis</li>
+        <li><strong>Secondary Color</strong> - Supporting color for accents</li>
+        <li><strong>Text Colors</strong> - Optimized for readability in light/dark modes</li>
+        <li><strong>Background Colors</strong> - Layered backgrounds with proper contrast</li>
+      </ul>
+      
+      <h3>Dark Mode</h3>
+      <p>All themes support automatic dark mode with optimized color values. Colors automatically adjust for the best contrast and readability.</p>
+      
+      <h3>Custom Themes</h3>
+      <p>Pro users can create unlimited custom themes. Each project can have its own theme settings.</p>
+      
+      <h2>Theme Variables</h2>
+      <p>Access theme variables in custom CSS:</p>
+    `
+  },
+  api: {
+    title: "API Reference",
+    description: "Integrate DecodeUI with your applications",
+    content: `
+      <h2>REST API</h2>
+      <p>DecodeUI provides a comprehensive REST API for managing your projects, pages, and content programmatically.</p>
+      
+      <h3>Authentication</h3>
+      <p>All API requests require authentication using an API key. Get your API key from the account settings.</p>
+      
+      <h3>Endpoints</h3>
+      
+      <h4>Projects</h4>
+      <ul>
+        <li><code>GET /api/projects</code> - List all projects</li>
+        <li><code>POST /api/projects</code> - Create a new project</li>
+        <li><code>PUT /api/projects/:id</code> - Update project settings</li>
+        <li><code>DELETE /api/projects/:id</code> - Delete a project</li>
+      </ul>
+      
+      <h4>Pages</h4>
+      <ul>
+        <li><code>GET /api/pages</code> - List all pages in a project</li>
+        <li><code>POST /api/pages</code> - Create a new page</li>
+        <li><code>PUT /api/pages/:id</code> - Update page content</li>
+        <li><code>DELETE /api/pages/:id</code> - Delete a page</li>
+      </ul>
+      
+      <h4>Components</h4>
+      <ul>
+        <li><code>GET /api/components</code> - List available components</li>
+        <li><code>POST /api/components/custom</code> - Create custom component</li>
+      </ul>
+    `
+  }
+};
+
+return {
+  data: pageContent[currentPage] || pageContent.home
+};
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIDocContent",
+        props: '''
+const content = args.contextData.docContent;
+return {
+  title: content.title,
+  description: content.description
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.docContent;
+return {
+  as: "div"
+};
+''',
+        fns: '''
+return {
+  createMarkup: (html) => ({ __html: html })
+};
+''',
+        css: '''
+return `._id {
+  /* Inherit styles from parent */
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.docContent;
+const fns = args.fns;
+return {
+  as: "div",
+  dangerouslySetInnerHTML: fns.createMarkup(content.content)
+};
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Data",
+        name: "showCodeExample",
+        props: '''
+const currentPage = args.searchParams?.get("page") || "home";
+return {
+  data: currentPage === "themes"
+};
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const show = args.contextData.showCodeExample;
+return {
+  as: show ? "div" : ""
+};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUICodeBlock",
+        props: '''
+return {
+  language: "css",
+  code: `/* Using theme variables in custom CSS */
+.my-element {
+  background: var(--color-primary);
+  color: var(--color-primary-text);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  
+  /* Dark mode automatically handled */
+  transition: all 0.3s ease;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .my-element {
+    padding: var(--spacing-sm);
+  }
+}`
+};
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid ${args.theme.var.color.background_dark_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  
+  @media (max-width: 568px) {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Was this page helpful?"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.showSuccessToast("Thanks for your feedback!")
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.success};
+  color: ${args.theme.var.color.success};
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.success};
+    color: ${args.theme.var.color.success_text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:thumbs-up",
+  width: 18,
+  height: 18
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Yes"
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.showSuccessToast("Thanks for your feedback!")
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error};
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.error};
+    color: ${args.theme.var.color.error_text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:thumbs-down",
+  width: 18,
+  height: 18
+};
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "No"
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "7", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "7", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "17", E: "19" },
+    { id: "e19", T: "Attr", S: "16", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" },
+    { id: "e21", T: "Attr", S: "20", E: "22" }
+  ]
+}

@@ -1,4 +1,4 @@
-import type { SetStoreFunction } from "solid-js/store";
+
 
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
@@ -24,7 +24,6 @@ import {
 } from "../common/ItemStyles";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
-import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { ComponentPreview } from "./ComponentPreview";
 
@@ -34,9 +33,7 @@ export function ComponentItem(
     edgeName: string;
     expandedKeys: string[];
     onDoubleClick?: (fromVertex: Vertex) => void;
-    previewGraph: GraphInterface;
     previewPageId: Id | null;
-    setPreviewGraph: SetStoreFunction<GraphInterface>;
     setPreviewPageId: (id: Id | null) => void;
     toggleExpand: (itemId: Id) => void;
   }>,
@@ -194,8 +191,6 @@ export function ComponentItem(
           >
             <ComponentPreview
               item={props.child}
-              previewGraph={props.previewGraph}
-              setPreviewGraph={props.setPreviewGraph}
               onPreviewOpen={handlePreviewOpen}
               onPreviewClose={handlePreviewClose}
             />
@@ -231,9 +226,7 @@ export function ComponentItem(
                 edgeName={props.edgeName}
                 expandedKeys={props.expandedKeys}
                 onDoubleClick={props.onDoubleClick}
-                previewGraph={props.previewGraph}
                 previewPageId={props.previewPageId}
-                setPreviewGraph={props.setPreviewGraph}
                 setPreviewPageId={props.setPreviewPageId}
                 toggleExpand={props.toggleExpand}
               />

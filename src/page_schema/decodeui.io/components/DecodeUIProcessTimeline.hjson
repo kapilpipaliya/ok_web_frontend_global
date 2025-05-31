@@ -1,0 +1,446 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1280px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "How It Works"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Get started with DecodeUI in minutes"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  max-width: 600px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: ${args.theme.var.color.background_dark_200};
+    transform: translateX(-50%);
+    
+    @media (max-width: 768px) {
+      left: 2rem;
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "steps",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      number: "1",
+      title: "Sign Up Free",
+      description: "Create your account in seconds and get instant access to the builder",
+      icon: "carbon:user-avatar"
+    },
+    {
+      number: "2",
+      title: "Choose Your Path",
+      description: "Build pages yourself with our intuitive drag & drop builder, or hire us to create custom pages",
+      icon: "carbon:fork"
+    },
+    {
+      number: "3",
+      title: "Design & Build",
+      description: "Use our templates and components to create beautiful, responsive pages",
+      icon: "carbon:paint-brush"
+    },
+    {
+      number: "4",
+      title: "Publish & Grow",
+      description: "Deploy your website instantly and watch your business grow with built-in SEO and analytics",
+      icon: "carbon:rocket"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+const index = args.contextData.steps.number - 1;
+const isEven = index % 2 === 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const step = args.contextData.steps;
+const index = step.number - 1;
+const isEven = index % 2 === 0;
+return `._id {
+  display: flex;
+  align-items: center;
+  margin-bottom: 3rem;
+  position: relative;
+  
+  ${isEven ? '' : 'flex-direction: row-reverse;'}
+  
+  @media (max-width: 768px) {
+    flex-direction: row !important;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+const index = step.number - 1;
+const isEven = index % 2 === 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const step = args.contextData.steps;
+const index = step.number - 1;
+const isEven = index % 2 === 0;
+return `._id {
+  flex: 1;
+  ${isEven ? 'text-align: right; padding-right: 3rem;' : 'text-align: left; padding-left: 3rem;'}
+  
+  @media (max-width: 768px) {
+    flex: 1;
+    text-align: left !important;
+    padding-left: 2rem !important;
+    padding-right: 0 !important;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: inline-block;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "h3",
+  text: step.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "p",
+  text: step.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  box-shadow: 0 0 0 4px ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    left: 2rem;
+    width: 3rem;
+    height: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+return {
+  as: "icon",
+  icon: step.icon,
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary_text};
+  
+  @media (max-width: 768px) {
+    width: 20px;
+    height: 20px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const step = args.contextData.steps;
+const index = step.number - 1;
+const isEven = index % 2 === 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const step = args.contextData.steps;
+const index = step.number - 1;
+const isEven = index % 2 === 0;
+return `._id {
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "2", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "10", E: "12" },
+    { id: "e12", T: "Attr", S: "8", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "8", E: "15" }
+  ]
+}

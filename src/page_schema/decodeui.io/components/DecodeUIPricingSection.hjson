@@ -1,0 +1,375 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1280px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Simple, Transparent Pricing"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Choose the perfect plan for your needs. Build it yourself or let us build it for you."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  max-width: 600px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  align-items: stretch;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin: 0 auto 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIPricingCard",
+        props: '''
+return {
+  name: "Free",
+  price: "$0",
+  period: "forever",
+  features: "Drag & Drop Builder,5 Pages,Basic Templates,Community Support,SEO Tools",
+  isPopular: false,
+  ctaText: "Start Free"
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "DecodeUIPricingCard",
+        props: '''
+return {
+  name: "Pro",
+  price: "$29",
+  period: "month",
+  features: "Everything in Free,Unlimited Pages,Premium Templates,Priority Support,Advanced SEO,Custom Domain,Analytics",
+  isPopular: true,
+  ctaText: "Start Pro Trial"
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeUIPricingCard",
+        props: '''
+return {
+  name: "Custom Pages",
+  price: "$50-100",
+  period: "per page",
+  features: "Professional Design,Custom Development,SEO Optimized,Responsive Design,Revisions Included,Fast Delivery",
+  isPopular: false,
+  ctaText: "Get Quote"
+};
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "All Plans Include"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  text-align: left;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "features",
+        loop: true,
+        props: '''
+return {
+  data: [
+    { icon: "carbon:security", text: "SSL Security" },
+    { icon: "carbon:rocket", text: "Fast Loading" },
+    { icon: "carbon:cloud-upload", text: "Auto Backups" },
+    { icon: "carbon:code", text: "Clean Code" },
+    { icon: "carbon:mobile", text: "Mobile Ready" },
+    { icon: "carbon:chart-line", text: "Performance Monitoring" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "icon",
+  icon: feature.icon,
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.features;
+return {
+  as: "span",
+  text: feature.text
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "2", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "6", E: "8" },
+    { id: "e8", T: "Attr", S: "6", E: "9" },
+    { id: "e9", T: "Attr", S: "2", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "10", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" }
+  ]
+}

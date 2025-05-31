@@ -1,0 +1,321 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "aside"
+};
+''',
+        css: '''
+return `._id {
+  width: 280px;
+  height: calc(100vh - 5rem);
+  position: sticky;
+  top: 5rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
+  border-right: 1px solid ${args.theme.var.color.background_dark_200};
+  padding: 2rem;
+  overflow-y: auto;
+  
+  @media (max-width: 968px) {
+    display: none;
+  }
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: ${args.theme.var.color.background_dark_300};
+    border-radius: 3px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "docSections",
+        loop: true,
+        props: '''
+const currentPath = args.searchParams?.get("page") || "home";
+return {
+  data: [
+    {
+      title: "Getting Started",
+      items: [
+        { label: "Introduction", path: "home", icon: "carbon:home" },
+        { label: "Quick Start", path: "quickstart", icon: "carbon:rocket" },
+        { label: "Installation", path: "installation", icon: "carbon:download" },
+        { label: "First Project", path: "first-project", icon: "carbon:new-tab" }
+      ]
+    },
+    {
+      title: "Building Pages",
+      items: [
+        { label: "Drag & Drop Basics", path: "drag-drop", icon: "carbon:drag-horizontal" },
+        { label: "Components", path: "components", icon: "carbon:assembly-cluster" },
+        { label: "Layouts", path: "layouts", icon: "carbon:template" },
+        { label: "Forms", path: "forms", icon: "carbon:form" }
+      ]
+    },
+    {
+      title: "Styling",
+      items: [
+        { label: "Theme System", path: "themes", icon: "carbon:color-palette" },
+        { label: "Custom CSS", path: "custom-css", icon: "carbon:code" },
+        { label: "Responsive Design", path: "responsive", icon: "carbon:devices" },
+        { label: "Animations", path: "animations", icon: "carbon:flow" }
+      ]
+    },
+    {
+      title: "Advanced",
+      items: [
+        { label: "API Reference", path: "api", icon: "carbon:api-1" },
+        { label: "Custom Components", path: "custom-components", icon: "carbon:cube" },
+        { label: "SEO Settings", path: "seo", icon: "carbon:search" },
+        { label: "Deployment", path: "deployment", icon: "carbon:cloud-upload" }
+      ]
+    }
+  ],
+  currentPath
+};
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.docSections;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.docSections;
+return {
+  as: "h3",
+  text: section.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "navItems",
+        loop: true,
+        props: '''
+const section = args.contextData.docSections;
+const currentPath = args.contextData.docSections.currentPath;
+return {
+  data: section.items.map(item => ({
+    ...item,
+    isActive: item.path === currentPath
+  }))
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItems;
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItems;
+return {
+  as: "a",
+  onClick: (e) => {
+    e.preventDefault();
+    args.setSearchParams({ page: item.path });
+  }
+};
+''',
+        css: '''
+const item = args.contextData.navItems;
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  color: ${item.isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  background: ${item.isActive ? (args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)') : 'transparent'};
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 1.5rem;
+    background: ${args.theme.var.color.primary};
+    border-radius: 0 2px 2px 0;
+    opacity: ${item.isActive ? '1' : '0'};
+    transition: opacity 0.2s ease;
+  }
+  
+  &:hover {
+    background: ${args.currentMode() === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItems;
+return {
+  as: "icon",
+  icon: item.icon,
+  width: 18,
+  height: 18
+};
+''',
+        css: '''
+return `._id {
+  flex-shrink: 0;
+  opacity: 0.7;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItems;
+return {
+  as: "span",
+  text: item.label
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "9", E: "11" }
+  ]
+}

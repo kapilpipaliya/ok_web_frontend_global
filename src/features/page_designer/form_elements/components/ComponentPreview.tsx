@@ -3,14 +3,11 @@ import { IconButton } from "~/components/styled/IconButton";
 import { DropdownMenu } from "~/components/styled/modal/DropdownMenu";
 import { PreviewIsolated } from "../pages/PreviewIsolated";
 import { buttonStyle } from "../common/ItemStyles";
-import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-import type { SetStoreFunction } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { As } from "~/components/As";
 
 export function ComponentPreview(props: {
   item: Vertex;
-  previewGraph: GraphInterface;
-  setPreviewGraph: SetStoreFunction<GraphInterface>;
   onClick?: (e: MouseEvent) => void;
   onPreviewOpen?: () => void;
   onPreviewClose?: () => void;
@@ -108,23 +105,30 @@ export function ComponentPreview(props: {
       <Show when={isOpen() && buttonRef()}>
         <DropdownMenu
           data-preview-dropdown
+          css={`return \`._id {
+            height: 800px;
+            width: 800px;
+            overflow: auto;
+          }\`;`}
           offset={{ crossAxis: 30 }}
           onClickOutside={closePreview}
           onMouseEnter={handleDropdownMouseEnter}
           onMouseLeave={handleDropdownMouseLeave}
           parentRef={buttonRef() as HTMLElement}
         >
-          <div
+          <As
+            as="div"
+            css={`return \`._id {
+            height: 100%;
+            width: 100%;
+            overflow: auto;
+          }\`;`}
             onClick={(e) => e.stopPropagation()}
             onMouseEnter={(e) => e.stopPropagation()}
             onMouseLeave={(e) => e.stopPropagation()}
           >
-            <PreviewIsolated
-              item={props.item}
-              graph={props.previewGraph}
-              setGraph={props.setPreviewGraph}
-            />
-          </div>
+            <PreviewIsolated item={props.item} />
+          </As>
         </DropdownMenu>
       </Show>
     </>

@@ -5,7 +5,6 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
-import { createAppState } from "~/createAppState";
 import { SearchBar } from "~/components/styled/SearchBar";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
@@ -37,7 +36,7 @@ export function ComponentList(props: {
   const [rootCompVertex, setRootCompVertex] = createSignal<Vertex>();
   const [expandedKeys, setExpandedKeys] = createStore<string[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
-  const [previewGraph, setPreviewGraph] = createAppState();
+
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId!] as Vertex<PageLayoutObject>;
@@ -193,9 +192,7 @@ export function ComponentList(props: {
                   edgeName={props.edgeName}
                   expandedKeys={expandedKeys}
                   onDoubleClick={props.onDoubleClick}
-                  previewGraph={previewGraph}
                   previewPageId={previewPageId()}
-                  setPreviewGraph={setPreviewGraph}
                   setPreviewPageId={setPreviewPageId}
                   toggleExpand={toggleExpand}
                 />

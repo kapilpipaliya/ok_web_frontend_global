@@ -15,6 +15,7 @@ import { PreviewCSSButton } from "../buttons/PreviewCSSButton";
 import { SaveAsTemplateButton } from "../buttons/SaveAsTemplateButton";
 import { CopyButton } from "../buttons/CopyButton";
 import { PasteButton } from "../buttons/PasteButton";
+import { OpenInNewTabButton } from "../buttons/OpenInNewTabButton";
 import { ComponentName } from "../components/ComponentName";
 import { InsertButtons } from "../menus/InsertButtons";
 import { As } from "~/components/As";
@@ -85,6 +86,7 @@ export function SelectedAttrConfigPopOver(
         />
         <InsertButtons item={props.item} size={iconSize} />
         <ComponentName componentName={getComponentName()!} />
+        <OpenInNewTabButton item={props.item} size={iconSize} />
         <ParentButton item={props.item} size={iconSize} />
         <CopyButton item={props.item} size={iconSize} />
         <PasteButton item={props.item} size={iconSize} />

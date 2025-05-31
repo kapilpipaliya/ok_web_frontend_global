@@ -1,0 +1,400 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeUIPricingCard"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "name",
+        type: "string",
+        defValue: "Starter"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariant",
+      P: {
+        key: "price",
+        type: "string",
+        defValue: "$0"
+      }
+    },
+    {
+      id: "4",
+      L: "ComponentVariant",
+      P: {
+        key: "period",
+        type: "string",
+        defValue: "forever"
+      }
+    },
+    {
+      id: "5",
+      L: "ComponentVariant",
+      P: {
+        key: "features",
+        type: "string",
+        defValue: "Feature 1,Feature 2,Feature 3"
+      }
+    },
+    {
+      id: "6",
+      L: "ComponentVariant",
+      P: {
+        key: "isPopular",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "7",
+      L: "ComponentVariant",
+      P: {
+        key: "ctaText",
+        type: "string",
+        defValue: "Get Started"
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isPopular = args.contextData.props?.isPopular || false;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const isPopular = args.contextData.props?.isPopular || false;
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
+  border: 2px solid ${isPopular ? args.theme.var.color.primary : args.theme.var.color.background_dark_200};
+  border-radius: 1rem;
+  padding: 2rem;
+  position: relative;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  ${isPopular ? `
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  ` : ''}
+  
+  &:hover {
+    transform: translateY(-4px) ${isPopular ? 'scale(1.05)' : ''};
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    transform: ${isPopular ? 'scale(1)' : 'scale(1)'};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isPopular = args.contextData.props?.isPopular || false;
+return {
+  as: isPopular ? "div" : ""
+};
+''',
+        css: '''
+const isPopular = args.contextData.props?.isPopular || false;
+return isPopular ? `._id {
+  position: absolute;
+  top: -1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 0.25rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}` : '';
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isPopular = args.contextData.props?.isPopular || false;
+return {
+  as: isPopular ? "span" : "",
+  text: isPopular ? "Most Popular" : ""
+};
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: args.contextData.props?.name || "Starter"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: args.contextData.props?.price || "$0"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: " / " + (args.contextData.props?.period || "forever")
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "featureList",
+        loop: true,
+        props: '''
+const features = args.contextData.props?.features || "Feature 1,Feature 2,Feature 3";
+return {
+  data: features.split(",").map(f => f.trim())
+};
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.featureList;
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const feature = args.contextData.featureList;
+return {
+  as: "span",
+  text: feature
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const isPopular = args.contextData.props?.isPopular || false;
+return {
+  as: "button",
+  text: args.contextData.props?.ctaText || "Get Started",
+  onClick: () => args.navigate("/signup")
+};
+''',
+        css: '''
+const isPopular = args.contextData.props?.isPopular || false;
+return `._id {
+  width: 100%;
+  padding: 1rem;
+  background: ${isPopular ? args.theme.var.color.primary : 'transparent'};
+  color: ${isPopular ? args.theme.var.color.primary_text : args.theme.var.color.primary};
+  border: 2px solid ${args.theme.var.color.primary};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary};
+    color: ${args.theme.var.color.primary_text};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariant", S: "1", E: "3" },
+    { id: "e3", T: "ComponentVariant", S: "1", E: "4" },
+    { id: "e4", T: "ComponentVariant", S: "1", E: "5" },
+    { id: "e5", T: "ComponentVariant", S: "1", E: "6" },
+    { id: "e6", T: "ComponentVariant", S: "1", E: "7" },
+    { id: "e7", T: "Attr", S: "1", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "8", E: "11" },
+    { id: "e11", T: "Attr", S: "8", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "12", E: "14" },
+    { id: "e14", T: "Attr", S: "8", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "17", E: "19" },
+    { id: "e19", T: "Attr", S: "8", E: "20" }
+  ]
+}

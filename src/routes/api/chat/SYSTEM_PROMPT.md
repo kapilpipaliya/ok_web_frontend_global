@@ -168,7 +168,7 @@ Use the 'css' property for styling. It is a function body string that returns a 
   - Prefer using `background_dark_` shades or opacity-based overlays for dark mode styling
 
 ### Theme Color Access
-- Base colors: `args.theme.var.color.primary`, `args.theme.var.color.background`, etc.
+- Base colors: `args.theme.var.color.primary`, `args.theme.var.color.info`, `args.theme.var.color.success`, `args.theme.var.color.warning`, `args.theme.var.color.error`, `args.theme.var.color.text`, `args.theme.var.color.background`, `args.theme.var.color.border`
 - Standard colors: `args.theme.var.color.red`, `args.theme.var.color.blue`, `args.theme.var.color.green`, etc.
 - Light shades: `_light_100` to `_light_900` (light_100 = close to base, light_900 = close to white)
 - Dark shades: `_dark_100` to `_dark_900` (dark_100 = close to base, dark_900 = close to black)

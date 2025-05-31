@@ -1,0 +1,530 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_dark_50};
+  border-top: 1px solid ${args.theme.var.color.background_dark_200};
+  padding: 3rem 2rem 1.5rem;
+  margin-top: auto;
+  
+  @media (max-width: 768px) {
+    padding: 2rem 1rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1280px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  
+  @media (max-width: 568px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  @media (max-width: 968px) {
+    grid-column: span 2;
+  }
+  
+  @media (max-width: 568px) {
+    grid-column: span 1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "/api/file/downloadCompanySquareLogo",
+  alt: "DecodeUI Logo"
+};
+''',
+        css: '''
+return `._id {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "DecodeUI"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Professional drag & drop page builder. Build it yourself or let us build it for you."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 300px;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "social",
+        loop: true,
+        props: '''
+return {
+  data: [
+    { icon: "carbon:logo-twitter", href: "https://x.com/kapil12310" },
+    { icon: "carbon:logo-linkedin", href: "https://www.linkedin.com/in/kapil-pipaliya-a8ab41234/" },
+    { icon: "carbon:logo-github", href: "https://github.com/decodeuis" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const social = args.contextData.social;
+return {
+  as: "a",
+  href: social.href,
+  target: "_blank",
+  rel: "noopener noreferrer"
+};
+''',
+        css: '''
+return `._id {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const social = args.contextData.social;
+return {
+  as: "icon",
+  icon: social.icon,
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  transition: color 0.3s ease;
+  
+  ${args.contextData.social.href}:hover & {
+    color: ${args.theme.var.color.primary_text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Data",
+        name: "footerSections",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      title: "Product",
+      links: [
+        { text: "Features", href: "/features" },
+        { text: "Pricing", href: "/pricing" },
+        { text: "Templates", href: "/templates" },
+        { text: "Integrations", href: "/integrations" }
+      ]
+    },
+    {
+      title: "Resources",
+      links: [
+        { text: "Documentation", href: "/docs" },
+        { text: "Tutorials", href: "/docs/tutorials" },
+        { text: "Blog", href: "/blog" },
+        { text: "Support", href: "/support" }
+      ]
+    },
+    {
+      title: "Company",
+      links: [
+        { text: "About", href: "/about" },
+        { text: "Contact", href: "/contact" },
+        { text: "Careers", href: "/careers" },
+        { text: "Press", href: "/press" }
+      ]
+    },
+    {
+      title: "Legal",
+      links: [
+        { text: "Privacy", href: "/privacy" },
+        { text: "Terms", href: "/terms" },
+        { text: "Cookie Policy", href: "/cookies" },
+        { text: "License", href: "/license" }
+      ]
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.footerSections;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.footerSections;
+return {
+  as: "h4",
+  text: section.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "links",
+        loop: true,
+        props: '''
+const section = args.contextData.footerSections;
+return {
+  data: section.links
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const link = args.contextData.links;
+return {
+  as: "a",
+  text: link.text,
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate(link.href);
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+    opacity: 1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  border-top: 1px solid ${args.theme.var.color.background_dark_200};
+  padding-top: 1.5rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const year = new Date().getFullYear();
+return {
+  as: "p",
+  text: `© ${year} DecodeUI. All rights reserved.`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  font-size: 0.875rem;
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "4", E: "8" },
+    { id: "e8", T: "Attr", S: "4", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "3", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "2", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" }
+  ]
+}

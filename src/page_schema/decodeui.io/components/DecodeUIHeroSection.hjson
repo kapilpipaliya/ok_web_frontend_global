@@ -1,0 +1,734 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 6rem 2rem 4rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  position: relative;
+  overflow: hidden;
+  
+  @media (max-width: 768px) {
+    padding: 5rem 1rem 3rem;
+    min-height: auto;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, ${args.theme.var.color.primary}, transparent);
+    opacity: 0.05;
+    filter: blur(100px);
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: -30%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, ${args.theme.var.color.info}, transparent);
+    opacity: 0.05;
+    filter: blur(100px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    text-align: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  animation: fadeInUp 0.8s ease-out;
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Build it yourself or let us build it for you"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+  color: ${args.theme.var.color.primary};
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  border: 1px solid ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.2)'};
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Professional Drag & Drop Page Builder"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Create stunning, SEO-friendly websites with our intuitive drag & drop builder. Build pages yourself with full documentation support, or hire our experts to create custom pages for $50-100 per page."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Start Building Free",
+  onClick: () => args.navigate("/signup")
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem 2rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    
+    &::before {
+      width: 300px;
+      height: 300px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "View Pricing",
+  onClick: () => args.navigate("/pricing")
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem 2rem;
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  border: 2px solid ${args.theme.var.color.background_dark_300};
+  border-radius: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+    border-color: ${args.theme.var.color.background_dark_400};
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "stats",
+        props: '''
+return {
+  data: [
+    { icon: "carbon:user-multiple", value: "10K+", label: "Active Users" },
+    { icon: "carbon:document", value: "50K+", label: "Pages Built" },
+    { icon: "carbon:star", value: "4.9/5", label: "User Rating" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "icon",
+  icon: stat.icon,
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  opacity: 0.8;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "span",
+  text: stat.value
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "span",
+  text: stat.label
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  animation: fadeInRight 0.8s ease-out 0.2s both;
+  
+  @keyframes fadeInRight {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @media (max-width: 968px) {
+    order: -1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_dark_50};
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  
+  @media (max-width: 768px) {
+    height: 350px;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_300 : args.theme.var.color.background_dark_100};
+    border-bottom: 1px solid ${args.theme.var.color.background_dark_200};
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 0.5rem;
+  z-index: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "dots",
+        props: '''
+return {
+  data: ["red", "yellow", "green"]
+};
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const color = args.contextData.dots;
+const colors = {
+  red: "#FF5F56",
+  yellow: "#FFBD2E",
+  green: "#27C93F"
+};
+return {
+  as: "div"
+};
+''',
+        css: '''
+const color = args.contextData.dots;
+const colors = {
+  red: "#FF5F56",
+  yellow: "#FFBD2E",
+  green: "#27C93F"
+};
+return `._id {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: ${colors[color]};
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem;
+  height: calc(100% - 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:drag-horizontal",
+  width: 64,
+  height: 64
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  opacity: 0.3;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Drag & Drop Interface Preview"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  font-size: 1.125rem;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "3", E: "6" },
+    { id: "e6", T: "Attr", S: "3", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "7", E: "9" },
+    { id: "e9", T: "Attr", S: "3", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "12", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "2", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" },
+    { id: "e21", T: "Attr", S: "18", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "23", E: "25" }
+  ]
+}

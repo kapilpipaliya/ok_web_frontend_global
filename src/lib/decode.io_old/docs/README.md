@@ -155,7 +155,7 @@ The schema is automatically loaded when the application starts:
 ```javascript
 // Loaded via src/page_schema/loader.ts
 const schemas = await loadWebsiteSchemas();
-const decodeSchemas = getWebsiteSchemasSync('decode.io');
+const decodeSchemas = getWebsiteSchemasSync('decode.io_old');
 ```
 
 ### 2. Using Components

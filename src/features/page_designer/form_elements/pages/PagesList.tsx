@@ -13,10 +13,8 @@ import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { LoaderNew } from "~/components/styled/LoaderSimple";
 import { useToast } from "~/components/styled/modal/Toast";
-import { createAppState } from "~/createAppState";
 import { getTreeDataAPICall } from "~/cypher/get/getTreeDataAPICall";
 import { SearchBar } from "~/components/styled/SearchBar";
-import { GetInitialData } from "~/GetInitialData";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { STYLES } from "~/pages/settings/constants";
 
@@ -27,7 +25,6 @@ import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { GraphContext } from "~/lib/graph/context/GraphContext";
 
 export function PagesList(props: Readonly<{ coll: string }>) {
   const [graph, setGraph] = useGraph();
@@ -37,7 +34,6 @@ export function PagesList(props: Readonly<{ coll: string }>) {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal<NavItem[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
-  const [previewGraph, setPreviewGraph] = createAppState();
 
   const formStoreId = useDesignerFormIdContext();
   const formStoreVertex = () =>
@@ -103,10 +99,6 @@ export function PagesList(props: Readonly<{ coll: string }>) {
         <Match when={data.error}>Error: {data.error}</Match>
         <Match when={!isFetchingData()}>
           <>
-            <GraphContext.Provider value={[previewGraph, setPreviewGraph]}>
-              <GetInitialData />
-            </GraphContext.Provider>
-
             <Show when={filteredData().length >= 5}>
               <SearchBar
                 handleChange={(value) => {
@@ -144,9 +136,7 @@ export function PagesList(props: Readonly<{ coll: string }>) {
                 {(item) => (
                   <PageItem
                     child={item}
-                    previewGraph={previewGraph}
                     previewPageId={previewPageId()}
-                    setPreviewGraph={setPreviewGraph}
                     setPreviewPageId={setPreviewPageId}
                   />
                 )}

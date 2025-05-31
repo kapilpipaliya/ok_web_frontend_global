@@ -1,0 +1,237 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeUICodeBlock"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "code",
+        type: "string",
+        defValue: "// Code example"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariant",
+      P: {
+        key: "language",
+        type: "string",
+        defValue: "javascript"
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.background_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const language = args.contextData.props?.language || "javascript";
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_300 : args.theme.var.color.background_dark_200};
+  border-bottom: 1px solid ${args.theme.var.color.background_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const language = args.contextData.props?.language || "javascript";
+return {
+  as: "span",
+  text: language
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  text-transform: uppercase;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const code = args.contextData.props?.code || "// Code example";
+return {
+  as: "button",
+  onClick: () => {
+    navigator.clipboard.writeText(code);
+    args.showSuccessToast("Code copied to clipboard!");
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.background_dark_300};
+  border-radius: 0.375rem;
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+    border-color: ${args.theme.var.color.background_dark_400};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:copy",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Copy"
+};
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const code = args.contextData.props?.code || "// Code example";
+return {
+  as: "pre"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  padding: 1.5rem;
+  overflow-x: auto;
+  
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: ${args.theme.var.color.background_dark_200};
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: ${args.theme.var.color.background_dark_400};
+    border-radius: 3px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const code = args.contextData.props?.code || "// Code example";
+return {
+  as: "code",
+  text: code
+};
+''',
+        css: '''
+return `._id {
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariant", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "1", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "7", E: "9" },
+    { id: "e9", T: "Attr", S: "4", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" }
+  ]
+}

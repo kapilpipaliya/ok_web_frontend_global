@@ -1,0 +1,689 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUINavHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  padding-top: 5rem;
+  
+  @media (max-width: 768px) {
+    padding-top: 4rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem 2rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_50 : args.theme.var.color.background_dark_50};
+  
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "About DecodeUI"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Empowering businesses to build beautiful websites, one page at a time"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Our Story"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "DecodeUI was born from a simple observation: businesses need beautiful websites, but not everyone has the time or technical skills to build them. We created a solution that offers the best of both worlds."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  font-size: 1.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Our drag & drop builder empowers anyone to create professional websites without coding. But we also understand that sometimes you need expert help. That's why we offer custom page creation services - combining the flexibility of DIY with the expertise of professional designers."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.8;
+  font-size: 1.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
+  border-radius: 1rem;
+  padding: 3rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:chart-line",
+  width: 64,
+  height: 64
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Growing Fast"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "stats",
+        loop: true,
+        props: '''
+return {
+  data: [
+    { value: "10K+", label: "Users" },
+    { value: "50K+", label: "Pages Built" },
+    { value: "98%", label: "Satisfaction" },
+    { value: "24hr", label: "Support" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "div",
+  text: stat.value
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stats;
+return {
+  as: "div",
+  text: stat.label
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_50 : args.theme.var.color.background_dark_50};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1280px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Our Values"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  text-align: center;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIFeatureCard",
+        props: '''
+return {
+  icon: "carbon:user-favorite",
+  title: "Customer First",
+  description: "Every decision we make starts with how it benefits our customers. Your success is our success."
+};
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "DecodeUIFeatureCard",
+        props: '''
+return {
+  icon: "carbon:light",
+  title: "Simplicity",
+  description: "We believe powerful tools don't have to be complicated. Simplicity drives everything we build."
+};
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeUIFeatureCard",
+        props: '''
+return {
+  icon: "carbon:partnership",
+  title: "Flexibility",
+  description: "Build it yourself or let us help - we adapt to your needs, not the other way around."
+};
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "DecodeUIFeatureCard",
+        props: '''
+return {
+  icon: "carbon:trophy",
+  title: "Quality",
+  description: "From our builder to our custom services, we never compromise on quality. Excellence is our standard."
+};
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "DecodeUIFeatureCard",
+        props: '''
+return {
+  icon: "carbon:growth",
+  title: "Innovation",
+  description: "We continuously improve and evolve, bringing you the latest in web design and technology."
+};
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "DecodeUIFeatureCard",
+        props: '''
+return {
+  icon: "carbon:favorite",
+  title: "Transparency",
+  description: "Clear pricing, honest communication, and no hidden fees. What you see is what you get."
+};
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "DecodeUICTASection"
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeUIFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "3", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "10", E: "12" },
+    { id: "e12", T: "Attr", S: "10", E: "13" },
+    { id: "e13", T: "Attr", S: "9", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "14", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "19", E: "21" },
+    { id: "e21", T: "Attr", S: "3", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "23", E: "25" },
+    { id: "e25", T: "Attr", S: "25", E: "26" },
+    { id: "e26", T: "Attr", S: "25", E: "27" },
+    { id: "e27", T: "Attr", S: "25", E: "28" },
+    { id: "e28", T: "Attr", S: "25", E: "29" },
+    { id: "e29", T: "Attr", S: "25", E: "30" },
+    { id: "e30", T: "Attr", S: "25", E: "31" },
+    { id: "e31", T: "Attr", S: "3", E: "32" },
+    { id: "e32", T: "Attr", S: "1", E: "33" }
+  ]
+}

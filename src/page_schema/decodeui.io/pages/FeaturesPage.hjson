@@ -1,0 +1,522 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUINavHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  padding-top: 5rem;
+  
+  @media (max-width: 768px) {
+    padding-top: 4rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem 2rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_50 : args.theme.var.color.background_dark_50};
+  
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Powerful Features for Modern Web Building"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Everything you need to create professional websites, whether you build it yourself or let us build it for you"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1280px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "featureCategories",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      title: "Visual Builder",
+      description: "Build pages visually with our intuitive interface",
+      icon: "carbon:paint-brush",
+      features: [
+        {
+          icon: "carbon:drag-horizontal",
+          title: "Drag & Drop Interface",
+          description: "Simply drag components and drop them where you want. No coding required."
+        },
+        {
+          icon: "carbon:template",
+          title: "Pre-built Components",
+          description: "Access a library of professionally designed components ready to use."
+        },
+        {
+          icon: "carbon:view",
+          title: "Real-time Preview",
+          description: "See changes instantly as you build. What you see is what you get."
+        },
+        {
+          icon: "carbon:undo",
+          title: "Undo/Redo Support",
+          description: "Made a mistake? Easily undo or redo any action with confidence."
+        }
+      ]
+    },
+    {
+      title: "SEO & Performance",
+      description: "Built for speed and search engine visibility",
+      icon: "carbon:search",
+      features: [
+        {
+          icon: "carbon:rocket",
+          title: "Lightning Fast",
+          description: "Optimized code and fast loading times for better user experience."
+        },
+        {
+          icon: "carbon:tag",
+          title: "Meta Tag Management",
+          description: "Easy control over SEO meta tags for better search rankings."
+        },
+        {
+          icon: "carbon:mobile",
+          title: "Mobile Optimized",
+          description: "All pages are mobile-first and responsive by default."
+        },
+        {
+          icon: "carbon:chart-line",
+          title: "Analytics Ready",
+          description: "Built-in support for Google Analytics and other tracking tools."
+        }
+      ]
+    },
+    {
+      title: "Professional Services",
+      description: "Let our experts build for you",
+      icon: "carbon:user-multiple",
+      features: [
+        {
+          icon: "carbon:document",
+          title: "Custom Page Creation",
+          description: "$50-100 per page for professionally designed custom pages."
+        },
+        {
+          icon: "carbon:time",
+          title: "Fast Delivery",
+          description: "Most pages delivered within 48-72 hours."
+        },
+        {
+          icon: "carbon:renew",
+          title: "Unlimited Revisions",
+          description: "We work until you're 100% satisfied with the result."
+        },
+        {
+          icon: "carbon:certificate",
+          title: "Quality Guaranteed",
+          description: "Professional designers with years of experience."
+        }
+      ]
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.featureCategories;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 5rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.featureCategories;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.featureCategories;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.currentMode() === 'dark' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.1)'};
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.featureCategories;
+return {
+  as: "icon",
+  icon: category.icon,
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.featureCategories;
+return {
+  as: "h2",
+  text: category.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.featureCategories;
+return {
+  as: "p",
+  text: category.description
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "features",
+        loop: true,
+        props: '''
+const category = args.contextData.featureCategories;
+return {
+  data: category.features
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIFeatureCard",
+        props: '''
+const feature = args.contextData.features;
+return {
+  icon: feature.icon,
+  title: feature.title,
+  description: feature.description
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeUICTASection"
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "DecodeUIFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "3", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "12", E: "15" },
+    { id: "e15", T: "Attr", S: "12", E: "16" },
+    { id: "e16", T: "Attr", S: "11", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "3", E: "20" },
+    { id: "e20", T: "Attr", S: "1", E: "21" }
+  ]
+}

@@ -1,0 +1,1569 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUINavHeader"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  display: flex;
+  padding-top: 5rem;
+  
+  @media (max-width: 768px) {
+    padding-top: 4rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIDocSidebar"
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  overflow-y: auto;
+  height: calc(100vh - 5rem);
+  
+  @media (max-width: 768px) {
+    height: calc(100vh - 4rem);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIDocContent",
+        props: '''
+return {
+  title: "Getting Started with DecodeUI",
+  description: "Learn how to build beautiful websites with our drag & drop builder in minutes"
+};
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "DecodeUIBreadcrumb",
+        props: '''
+return {
+  items: "Home,Documentation,Getting Started"
+};
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Welcome to DecodeUI"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "DecodeUI is a professional drag & drop page builder that empowers you to create stunning, SEO-friendly websites without writing code. Whether you're a designer, developer, or business owner, DecodeUI provides the tools you need to bring your vision to life."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  font-size: 1.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "🚀 Quick Start"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Get up and running with DecodeUI in less than 5 minutes:"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ol"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.8;
+  padding-left: 2rem;
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Sign up for a free account at decodeui.io"
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Create your first project"
+};
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Choose a template or start from scratch"
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Drag & drop components to build your page"
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Publish your site with one click"
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Choose Your Path"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.primary};
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-avatar",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "DIY Builder"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Build pages yourself with our intuitive drag & drop interface. Perfect for those who want full control over their design."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: ${args.theme.var.color.text};
+    opacity: 0.9;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Visual drag & drop editor"
+};
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Pre-built components"
+};
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Real-time preview"
+};
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.info};
+  border-radius: 1rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:group",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Custom Service"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Let our expert designers build custom pages for you. Perfect when you need professional results fast."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: ${args.theme.var.color.text};
+    opacity: 0.9;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "$50-100 per page"
+};
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Professional design"
+};
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Fast delivery"
+};
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Key Concepts"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Projects"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Each project in DecodeUI represents a complete website. Projects have their own subdomain, isolated database, custom theme, and can contain multiple pages. You can manage multiple projects from a single account."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 9,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Pages"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 10,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Pages are individual web pages within your project. Each page can be designed independently using the drag & drop builder, with its own URL path, SEO settings, and components."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 11,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Components"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "56",
+      L: "Attr",
+      P: {
+        displayOrder: 12,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Components are the building blocks of your pages. DecodeUI provides a rich library of pre-built components like headers, hero sections, features, testimonials, and more. You can also create custom components."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "57",
+      L: "Attr",
+      P: {
+        displayOrder: 13,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Themes"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "58",
+      L: "Attr",
+      P: {
+        displayOrder: 14,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Themes control the visual appearance of your website including colors, typography, spacing, and more. Each project can have its own custom theme, and all themes support automatic dark/light mode switching."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "59",
+      L: "Attr",
+      P: {
+        displayOrder: 15,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Next Steps"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "60",
+      L: "Attr",
+      P: {
+        displayOrder: 16,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "61",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate("/docs/components");
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border-radius: 0.75rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "62",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:assembly-cluster",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "63",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "64",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Explore Components"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "65",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Browse our component library"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+}`;
+'''
+      }
+    },
+    {
+      id: "66",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate("/docs/tutorials");
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_dark_50};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border-radius: 0.75rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "67",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:education",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "68",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "69",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Follow Tutorials"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "70",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Step-by-step guides"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+}`;
+'''
+      }
+    },
+    {
+      id: "71",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate("/signup");
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 0.75rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+    transform: translateY(-2px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "72",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:rocket",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "73",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "74",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Start Building"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "75",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Create your first project"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "6", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "8", E: "10" },
+    { id: "e10", T: "Attr", S: "8", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "11", E: "13" },
+    { id: "e13", T: "Attr", S: "11", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "14", E: "17" },
+    { id: "e17", T: "Attr", S: "14", E: "18" },
+    { id: "e18", T: "Attr", S: "14", E: "19" },
+    { id: "e19", T: "Attr", S: "8", E: "20" },
+    { id: "e20", T: "Attr", S: "8", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "22", E: "24" },
+    { id: "e24", T: "Attr", S: "22", E: "25" },
+    { id: "e25", T: "Attr", S: "22", E: "26" },
+    { id: "e26", T: "Attr", S: "26", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "27", E: "29" },
+    { id: "e29", T: "Attr", S: "26", E: "30" },
+    { id: "e30", T: "Attr", S: "30", E: "31" },
+    { id: "e31", T: "Attr", S: "30", E: "32" },
+    { id: "e32", T: "Attr", S: "26", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "33", E: "35" },
+    { id: "e35", T: "Attr", S: "21", E: "36" },
+    { id: "e36", T: "Attr", S: "36", E: "37" },
+    { id: "e37", T: "Attr", S: "36", E: "38" },
+    { id: "e38", T: "Attr", S: "36", E: "39" },
+    { id: "e39", T: "Attr", S: "36", E: "40" },
+    { id: "e40", T: "Attr", S: "40", E: "41" },
+    { id: "e41", T: "Attr", S: "41", E: "42" },
+    { id: "e42", T: "Attr", S: "41", E: "43" },
+    { id: "e43", T: "Attr", S: "40", E: "44" },
+    { id: "e44", T: "Attr", S: "44", E: "45" },
+    { id: "e45", T: "Attr", S: "44", E: "46" },
+    { id: "e46", T: "Attr", S: "40", E: "47" },
+    { id: "e47", T: "Attr", S: "47", E: "48" },
+    { id: "e48", T: "Attr", S: "47", E: "49" },
+    { id: "e49", T: "Attr", S: "8", E: "50" },
+    { id: "e50", T: "Attr", S: "8", E: "51" },
+    { id: "e51", T: "Attr", S: "8", E: "52" },
+    { id: "e52", T: "Attr", S: "8", E: "53" },
+    { id: "e53", T: "Attr", S: "8", E: "54" },
+    { id: "e54", T: "Attr", S: "8", E: "55" },
+    { id: "e55", T: "Attr", S: "8", E: "56" },
+    { id: "e56", T: "Attr", S: "8", E: "57" },
+    { id: "e57", T: "Attr", S: "8", E: "58" },
+    { id: "e58", T: "Attr", S: "8", E: "59" },
+    { id: "e59", T: "Attr", S: "8", E: "60" },
+    { id: "e60", T: "Attr", S: "60", E: "61" },
+    { id: "e61", T: "Attr", S: "61", E: "62" },
+    { id: "e62", T: "Attr", S: "61", E: "63" },
+    { id: "e63", T: "Attr", S: "63", E: "64" },
+    { id: "e64", T: "Attr", S: "63", E: "65" },
+    { id: "e65", T: "Attr", S: "60", E: "66" },
+    { id: "e66", T: "Attr", S: "66", E: "67" },
+    { id: "e67", T: "Attr", S: "66", E: "68" },
+    { id: "e68", T: "Attr", S: "68", E: "69" },
+    { id: "e69", T: "Attr", S: "68", E: "70" },
+    { id: "e70", T: "Attr", S: "60", E: "71" },
+    { id: "e71", T: "Attr", S: "71", E: "72" },
+    { id: "e72", T: "Attr", S: "71", E: "73" },
+    { id: "e73", T: "Attr", S: "73", E: "74" },
+    { id: "e74", T: "Attr", S: "73", E: "75" }
+  ]
+}

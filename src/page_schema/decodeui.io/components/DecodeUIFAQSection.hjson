@@ -1,0 +1,401 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 2rem;
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background : args.theme.var.color.background};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Frequently Asked Questions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Everything you need to know about DecodeUI"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Data",
+        name: "faqState",
+        props: '''
+const [openItems, setOpenItems] = args.createSignal([]);
+return {
+  data: { openItems, setOpenItems }
+};
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "faqs",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      id: "1",
+      question: "What is DecodeUI?",
+      answer: "DecodeUI is a professional drag & drop page builder that allows you to create stunning, SEO-friendly websites without coding. You can build pages yourself using our intuitive interface, or hire our experts to create custom pages for you."
+    },
+    {
+      id: "2",
+      question: "How much does it cost to have pages built for me?",
+      answer: "Our custom page creation service costs between $50-100 per page, depending on complexity. This includes professional design, responsive layout, SEO optimization, and revisions to ensure you're completely satisfied with the result."
+    },
+    {
+      id: "3",
+      question: "Can I switch between building myself and hiring you?",
+      answer: "Absolutely! You have complete flexibility. You can start building pages yourself and hire us for specific pages when needed. Many clients build their main pages and hire us for specialized landing pages or complex layouts."
+    },
+    {
+      id: "4",
+      question: "Do I need coding knowledge to use DecodeUI?",
+      answer: "No coding knowledge is required! Our drag & drop interface is designed for non-technical users. We provide comprehensive documentation and tutorials to help you build professional websites easily."
+    },
+    {
+      id: "5",
+      question: "Can I manage multiple websites?",
+      answer: "Yes! DecodeUI supports multiple projects with isolated databases. Each project can have its own custom theme, domain, and settings. Perfect for agencies or businesses managing multiple brands."
+    },
+    {
+      id: "6",
+      question: "Is DecodeUI SEO friendly?",
+      answer: "Yes, all pages built with DecodeUI are SEO-optimized by default. We follow best practices for meta tags, structured data, fast loading times, and mobile responsiveness to help your pages rank well in search engines."
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const { openItems, setOpenItems } = args.contextData.faqState;
+const isOpen = openItems().includes(faq.id);
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_dark_200};
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.background_dark_300};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const { openItems, setOpenItems } = args.contextData.faqState;
+const isOpen = openItems().includes(faq.id);
+
+return {
+  as: "button",
+  onClick: () => {
+    if (isOpen) {
+      setOpenItems(openItems().filter(id => id !== faq.id));
+    } else {
+      setOpenItems([...openItems(), faq.id]);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 1.5rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.currentMode() === 'dark' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.02)'};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+return {
+  as: "h3",
+  text: faq.question
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const { openItems } = args.contextData.faqState;
+const isOpen = openItems().includes(faq.id);
+
+return {
+  as: "icon",
+  icon: isOpen ? "carbon:chevron-up" : "carbon:chevron-down",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+const { openItems } = args.contextData.faqState;
+const isOpen = openItems().includes(faq.id);
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+const faq = args.contextData.faqs;
+const { openItems } = args.contextData.faqState;
+const isOpen = openItems().includes(faq.id);
+
+return `._id {
+  max-height: ${isOpen ? '500px' : '0'};
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const faq = args.contextData.faqs;
+return {
+  as: "p",
+  text: faq.answer
+};
+''',
+        css: '''
+return `._id {
+  padding: 0 1.5rem 1.5rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    padding: 0 1.25rem 1.25rem;
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "3", E: "5" },
+    { id: "e5", T: "Attr", S: "2", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "10", E: "12" },
+    { id: "e12", T: "Attr", S: "9", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" }
+  ]
+}

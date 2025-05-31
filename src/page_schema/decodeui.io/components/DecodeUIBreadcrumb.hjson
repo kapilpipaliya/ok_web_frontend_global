@@ -1,0 +1,187 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "DecodeUIBreadcrumb"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "items",
+        type: "string",
+        defValue: "Home,Documentation"
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav",
+  "aria-label": "Breadcrumb"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ol"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "breadcrumbItems",
+        loop: true,
+        props: '''
+const items = (args.contextData.props?.items || "Home,Documentation").split(",");
+return {
+  data: items.map((item, index) => ({
+    label: item.trim(),
+    isLast: index === items.length - 1,
+    href: index === 0 ? "/" : "#"
+  }))
+};
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.breadcrumbItems;
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.breadcrumbItems;
+return {
+  as: item.isLast ? "span" : "a",
+  text: item.label,
+  onClick: item.isLast ? undefined : (e) => {
+    e.preventDefault();
+    if (item.href === "/") {
+      args.navigate("/");
+    }
+  }
+};
+''',
+        css: '''
+const item = args.contextData.breadcrumbItems;
+return `._id {
+  color: ${item.isLast ? args.theme.var.color.text : args.theme.var.color.primary};
+  text-decoration: none;
+  font-size: 0.875rem;
+  ${item.isLast ? 'font-weight: 500;' : 'cursor: pointer;'}
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    ${item.isLast ? '' : 'opacity: 0.8;'}
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.breadcrumbItems;
+return {
+  as: item.isLast ? "" : "span"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.4;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.breadcrumbItems;
+return {
+  as: item.isLast ? "" : "icon",
+  icon: "carbon:chevron-right",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "6", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" }
+  ]
+}
