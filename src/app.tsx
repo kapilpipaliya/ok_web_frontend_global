@@ -57,33 +57,33 @@ export default function App() {
             // const location = useLocation();
             return (
               <MetaProvider>
-                <Suspense>
-                  <ErrorBoundary
-                    fallback={(error, reset) => {
-                      // Log the UI error
-                      if (!isServer) {
-                        logError(error, { location: location.pathname });
-                      }
-                      return (
-                        <ErrorFallback
-                          error={error}
-                          resetErrorBoundary={reset}
-                        />
-                      );
-                    }}
-                  >
+                <ErrorBoundary
+                  fallback={(error, reset) => {
+                    // Log the UI error
+                    if (!isServer) {
+                      logError(error, { location: location.pathname });
+                    }
+                    return (
+                      <ErrorFallback
+                        error={error}
+                        resetErrorBoundary={reset}
+                      />
+                    );
+                  }}
+                >
+                  <Suspense>
                     <GetInitialData dontRedirectToLogin={true}>
                       <ThemeProvider>
                         <Suspense>{props.children}</Suspense>
                       </ThemeProvider>
                     </GetInitialData>
-                  </ErrorBoundary>
+                  </Suspense>
                   <Show when={isHydrated()}>
                     {/* <Show when={!location.pathname.startsWith("/email-templates")}> */}
                     <Toaster />
                     {/* </Show> */}
                   </Show>
-                </Suspense>
+                </ErrorBoundary>
               </MetaProvider>
             );
           }}

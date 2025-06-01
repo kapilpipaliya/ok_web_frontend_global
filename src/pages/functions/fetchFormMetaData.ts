@@ -4,6 +4,7 @@ import { getEdgesFromRowsAttr } from "~/lib/graph/get/sync/edge/getEdgesFromRows
 import { FormMetaData } from "~/lib/meta/formMetaData";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 import type { FetchFormMetaDataResult } from "./fetchPageData";
+import { fetchComponentDataFromGraph } from "./fetchComponentData";
 
 export async function fetchFormMetaData(
   // graph: GraphInterface,
@@ -38,5 +39,7 @@ export async function fetchFormMetaData(
     return { error: `No ${pageVertexName} configured` };
   }
 
-  return { data };
+  const componentDataResults = await fetchComponentDataFromGraph(data);
+
+  return { data, componentData: componentDataResults };
 }

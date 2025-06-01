@@ -29,6 +29,23 @@ export function setUserData(
       userSettingId: data.userSetting.id,
     });
     updateVertex(data.userSetting.id, data.userSetting, graph, setGraph);
+  } else {
+    // Create a new userSetting vertex if not provided
+    const newUserSettingId = `userSetting_${Date.now()}`;
+    const newUserSetting: Vertex = {
+      id: newUserSettingId,
+      IN: {},
+      L: [],
+      OUT: {},
+      P: {
+        type: "UserSetting",
+      },
+    };
+    
+    addNewVertex(0, newUserSetting, graph, setGraph);
+    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+      userSettingId: newUserSettingId,
+    });
   }
 
   if (data.roles) {

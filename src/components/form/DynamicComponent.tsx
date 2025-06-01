@@ -8,6 +8,7 @@ import {
   Suspense,
   Switch,
   getOwner,
+  ErrorBoundary,
 } from "solid-js";
 import { useSearchParams } from "@solidjs/router";
 import {
@@ -245,6 +246,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
     },
   });
   return (
+    <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
     <Suspense>
       <Show when={cssStyle()}>
         <Style>{cssStyle()}</Style>
@@ -304,5 +306,6 @@ export function DynamicComponent(props: DynamicComponentProps) {
         </Switch>
       </PageRenderContextProvider>
     </Suspense>
+    </ErrorBoundary>
   );
 }

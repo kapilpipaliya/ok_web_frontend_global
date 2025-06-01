@@ -1,5 +1,5 @@
 import { useSearchParams } from "@solidjs/router";
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, Suspense } from "solid-js";
 
 import {
   type TabItem,
@@ -59,7 +59,9 @@ export default function AdminDashboard() {
         iconSize={18}
       />
 
-      <DataGrid isShowPagination={true} tableId={selectedId()} />
+      <Suspense>
+        <DataGrid isShowPagination={true} tableId={selectedId()} />
+      </Suspense>
 
       {/*  In Development Remove comment */}
       {/* <PageTable /> */}

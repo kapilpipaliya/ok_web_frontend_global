@@ -154,22 +154,35 @@ export function SignInForm() {
               },
               {
                 as: "button",
-                css: [STYLES.button2Css, `return \`._id {width:100%;}\`;`],
+                css: [
+                  STYLES.button2Css, 
+                  `return \`._id {
+                    width: 100%;
+                  }
+                  ._id:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    background-color: \${args.theme.var.color.border};
+                  }\`;`
+                ],
                 componentName: "Html",
-                props: (options: SignInFormFunctionArgumentType) => ({
-                  disabled: options.contextData.submitState[0]?.isLoading,
-                  onClick: async () => {
-                    try {
-                      options.contextData.submitState[1]("isLoading", true);
-                      await handleSubmit(options.data);
-                    } finally {
-                      options.contextData.submitState[1]("isLoading", false);
-                    }
-                  },
-                  text: options.contextData.submitState[0]?.isLoading
-                    ? "Logging in..."
-                    : "Log In",
-                }),
+                props: (options: SignInFormFunctionArgumentType) => {
+                  const isFormEmpty = !options.data?.P?.email?.trim() || !options.data?.P?.password?.trim();
+                  const isLoading = options.contextData.submitState[0]?.isLoading;
+                  
+                  return {
+                    disabled: isLoading || isFormEmpty,
+                    onClick: async () => {
+                      try {
+                        options.contextData.submitState[1]("isLoading", true);
+                        await handleSubmit(options.data);
+                      } finally {
+                        options.contextData.submitState[1]("isLoading", false);
+                      }
+                    },
+                    text: isLoading ? "Logging in..." : "Log In",
+                  };
+                },
                 type: "button",
               },
             ],

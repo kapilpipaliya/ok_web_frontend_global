@@ -2,12 +2,12 @@ import type { ServerResult } from "~/cypher/types/ServerResult";
 import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 import { getFormData } from "~/components/form/functions/getFormData";
-import { fetchComponentDataPure } from "~/cypher/get/fetchComponentData";
 import type { Id } from "~/lib/graph/type/id";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
+import { fetchComponentDataFromGraph } from "./fetchComponentData";
 
 export interface FetchFormDataResult {
-  componentData?: null | ServerResult;
+  componentData?: ServerResult[];
   createNew?: boolean;
   data?: ServerResult;
   error?: string;
@@ -15,6 +15,7 @@ export interface FetchFormDataResult {
 }
 
 export interface FetchFormMetaDataResult {
+  componentData?: ServerResult[];
   data?: ServerResult;
   error?: string;
   form?: IFormMetaData;
@@ -62,29 +63,7 @@ export async function fetchFormData(
       return { error: `No ${pageVertexName} found` };
     }
 
-    // // Find all Component vertices from the loaded data
-    // const componentVertices = Object.values(
-    //   formDataResult.data!.graph!.vertexes,
-    // ).filter((v) => v.L.includes("Component"));
-
-    // Create a set of component names from Attr vertices
-    const componentNames = new Set<string>();
-
-    // Find all Attr vertices that define componentName
-    for (const vertex of Object.values(formDataResult.data!.graph!.vertexes)) {
-      if (vertex.L.includes("Attr") && vertex.P.componentName) {
-        // Skip "Html", "Data" and "Slot" components
-        if (!["Html", "Data", "Slot"].includes(vertex.P.componentName)) {
-          componentNames.add(vertex.P.componentName);
-        }
-      }
-    }
-
-    // Fetch data for all components if needed
-    let componentData: null | ServerResult = null;
-    if (componentNames.size > 0) {
-      componentData = await fetchComponentDataPure(Array.from(componentNames));
-    }
+    const componentData = await fetchComponentDataFromGraph(formDataResult.data);
 
     return { componentData, data: formDataResult.data };
   } catch (e) {

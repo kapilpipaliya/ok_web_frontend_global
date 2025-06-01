@@ -426,6 +426,18 @@ export function PageViewWrapper(
       }
       setGraphData(graph, setGraph, metaResult.data.graph!);
     }
+    
+    // Process componentData from metaResult
+    if (metaResult.componentData?.length) {
+      for (const componentData of metaResult.componentData) {
+        if (componentData.graph) {
+          setGraphData(graph, setGraph, componentData.graph, {
+            skipExisting: true,
+          });
+        }
+      }
+    }
+    
     if (formMetaId) {
       setFormStore("formMetaId", formMetaId);
     }
@@ -612,10 +624,14 @@ export function PageViewWrapper(
       // if we don't skip existing, if component is already added in the page, and we open in new tab, and modify it not updating existing components.
       setGraphData(graph, setGraph, result.data.graph, { skipExisting: true });
     }
-    if (result.componentData?.graph) {
-      setGraphData(graph, setGraph, result.componentData.graph!, {
-        skipExisting: true,
-      });
+    if (result.componentData?.length) {
+      for (const componentData of result.componentData) {
+        if (componentData.graph) {
+          setGraphData(graph, setGraph, componentData.graph, {
+            skipExisting: true,
+          });
+        }
+      }
     }
 
     if (formDataId) {
