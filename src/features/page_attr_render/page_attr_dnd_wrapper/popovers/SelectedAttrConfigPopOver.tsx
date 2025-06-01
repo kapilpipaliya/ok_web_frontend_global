@@ -29,8 +29,6 @@ interface SelectedAttrConfigPopOverProps {
 export function SelectedAttrConfigPopOver(
   props: Readonly<SelectedAttrConfigPopOverProps>,
 ) {
-  const zIndex = useZIndex();
-
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
@@ -60,7 +58,6 @@ export function SelectedAttrConfigPopOver(
   padding: 0.25rem;
   position: absolute;
   border-radius: 5px;
-  z-index: 99999;
   button {
     color: \${args.theme.var.color.primary_text};
   }

@@ -82,6 +82,7 @@ export function AttrConfigPopOverWrapper(
               floatingState: () => floatingState(),
               strategy: () => strategy(),
             })(),
+            "z-index": 99999
           }}
         >
           <AttrConfigPopOver item={props.item} />

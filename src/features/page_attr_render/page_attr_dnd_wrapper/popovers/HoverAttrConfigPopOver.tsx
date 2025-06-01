@@ -11,7 +11,6 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
-  const zIndex = useZIndex();
   const [graph] = useGraph();
   const getComponentName = () => getComponentLabel(graph, props.item);
   return (
@@ -35,7 +34,6 @@ export const HoverAttrConfigPopOver = (props: Readonly<{ item: Vertex }>) => {
   position: absolute;
   border-radius: 5px 5px 0 0;
   right: 0;
-  z-index: 99999;
 }\`;`}
       >
         <As
