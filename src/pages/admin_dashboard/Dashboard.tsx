@@ -9,7 +9,7 @@ import { DataGrid } from "~/features/grid/DataGrid";
 import { isAdminRole } from "~/lib/graph/get/sync/auth/isAdminRole";
 
 import { useGraph } from "~/lib/graph/context/UseGraph";
-import { PageTable } from "./PageTable";
+import { LoadingSpinner } from "~/components/LoadingSpinner";
 
 export default function AdminDashboard() {
   const [graph] = useGraph();
@@ -59,12 +59,12 @@ export default function AdminDashboard() {
         iconSize={18}
       />
 
-      <Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
         <DataGrid isShowPagination={true} tableId={selectedId()} />
       </Suspense>
 
       {/*  In Development Remove comment */}
-      {/* <PageTable /> */}
+      {/*<PageTable />*/}
     </div>
   );
 }

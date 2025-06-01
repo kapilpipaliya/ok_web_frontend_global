@@ -2,7 +2,7 @@ import type { JSX } from "solid-js";
 import { For } from "solid-js";
 
 import { Icon } from "@iconify-icon/solid";
-import { useNavigate, useLocation } from "@solidjs/router";
+import { useNavigate, useLocation, useSearchParams } from "@solidjs/router";
 
 import { useToast } from "~/components/styled/modal/Toast";
 import { API } from "~/lib/api/endpoints";
@@ -22,6 +22,7 @@ export function AuthenticatedMenu(
   const _navigate = useNavigate();
   const { showLoadingToast } = useToast();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   const isAdminSubDomain = () => getMemberVertex(graph).P.subDomain === "admin";
 
@@ -46,6 +47,22 @@ export function AuthenticatedMenu(
       });
     }
 
+    // Add "Import Local Pages" menu item if user is admin and query param "admin" is present
+    const adminMenuItems = [] as {
+      href: string;
+      icon: string;
+      label: string;
+      target?: string;
+    }[];
+    if (isAdminRole(graph) && searchParams.admin) {
+      adminMenuItems.push({
+        href: "/api/schema/import",
+        icon: "ph:upload",
+        label: "Import Local Pages",
+        target: "_blank",
+      });
+    }
+
     return isAdminSubDomain()
       ? [
           {
@@ -63,6 +80,7 @@ export function AuthenticatedMenu(
             icon: "ph:user-gear",
             label: "User Settings",
           },
+          ...adminMenuItems,
           ...commonItems,
         ]
       : [
@@ -76,6 +94,7 @@ export function AuthenticatedMenu(
             icon: "ph:user-gear",
             label: "User Settings",
           },
+          ...adminMenuItems,
           ...commonItems,
         ];
   };
