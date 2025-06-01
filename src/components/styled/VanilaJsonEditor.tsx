@@ -17,14 +17,19 @@ interface VanilaJsonEditorProps {
   json: unknown;
   onChange: (updatedContent: string) => void;
   height?: string;
+  autoHeight?: boolean;
+  minHeight?: number;
+  maxHeight?: number;
 }
 
 // https://github.com/josdejong/svelte-jsoneditor/issues/473
 // https://github.com/josdejong/svelte-jsoneditor
 export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
   let containerRef: HTMLDivElement | undefined;
+  let mutationObserver: MutationObserver | undefined;
   const [editor, setEditor] = createSignal<JsonEditor | undefined>(undefined);
   const [currentContent, setCurrentContent] = createSignal<unknown>(props.json);
+  const [containerHeight, setContainerHeight] = createSignal<string>(props.height || "200px");
 
   const isDarkMode = useIsDarkMode();
 
@@ -34,8 +39,49 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
       const newJson = JSON.parse(JSON.stringify(props.json));
       editor()!.update({ json: newJson });
       setCurrentContent(newJson);
+      
+      // Trigger height recalculation when content changes
+      if (props.autoHeight) {
+        setTimeout(updateHeight, 100);
+      }
     }
   });
+  
+  // Function to update height based on content
+  const updateHeight = () => {
+    if (!containerRef || !props.autoHeight) return;
+
+    // Find the main container and contents
+    const mainContainer = containerRef.querySelector('.jse-main');
+    const contentsContainer = containerRef.querySelector('.jse-contents');
+    
+    if (!contentsContainer) {
+      // Retry if not ready
+      setTimeout(updateHeight, 100);
+      return;
+    }
+    
+    // Get the actual scroll height of the contents
+    const contentScrollHeight = contentsContainer.scrollHeight;
+    
+    // Get other UI elements heights
+    const menuBar = containerRef.querySelector('.jse-menu');
+    const navigationBar = containerRef.querySelector('.jse-navigation-bar');
+    
+    const menuHeight = menuBar ? menuBar.offsetHeight : 0;
+    const navHeight = navigationBar ? navigationBar.offsetHeight : 0;
+    
+    // Calculate total height
+    const padding = 0; // don't use padding as its making this function call continuously because of mutation observer.
+    const totalHeight = menuHeight + navHeight + contentScrollHeight + padding;
+    
+    // Apply constraints
+    const minHeight = props.minHeight || 100;
+    const maxHeight = props.maxHeight || 800;
+    const finalHeight = Math.max(minHeight, Math.min(maxHeight, totalHeight));
+    
+    setContainerHeight(`${finalHeight}px`);
+  };
 
   onMount(() => {
     if (!containerRef) {
@@ -175,11 +221,35 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
     });
 
     setEditor(newEditor);
+    
+    // Initial height calculation
+    if (props.autoHeight) {
+      setTimeout(updateHeight, 200);
+      
+      // Watch for DOM changes (expanding/collapsing nodes)
+      mutationObserver = new MutationObserver(() => {
+        updateHeight();
+      });
+      
+      // Start observing the container for changes
+      mutationObserver.observe(containerRef, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
   });
 
   onCleanup(() => {
     if (editor()) {
       editor()!.destroy();
+    }
+    
+    // Clean up observer
+    if (mutationObserver) {
+      mutationObserver.disconnect();
+      mutationObserver = undefined;
     }
   });
 
@@ -188,7 +258,7 @@ export function VanilaJsonEditor(props: VanilaJsonEditorProps) {
       ref={containerRef}
       classList={{ "jse-theme-dark": isDarkMode() }}
       style={{
-        height: props.height,
+        height: props.autoHeight ? containerHeight() : props.height,
         overflow: "auto",
         width: "100%",
       }}

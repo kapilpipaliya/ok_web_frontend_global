@@ -23,7 +23,9 @@ export function JsonEditorFieldComponent(props: {
   const formStoreVertex = () =>
     graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
   const [isJsonValid, setIsJsonValid] = createSignal(true);
-  const [editorHeight, setEditorHeight] = createSignal(props.height ?? "200px"); // Default height
+  const [manualHeight, setManualHeight] = createSignal<string | undefined>(
+    props.height,
+  );
 
   // Get vertex to edit - either specified by props or use selected vertex
   const getVertexToEdit = () => {
@@ -72,7 +74,7 @@ export function JsonEditorFieldComponent(props: {
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const newHeight = startHeight + (moveEvent.clientY - startY);
-      setEditorHeight(`${Math.max(100, newHeight)}px`); // Minimum height 100px
+      setManualHeight(`${Math.max(100, newHeight)}px`); // Minimum height 100px
     };
 
     const onMouseUp = () => {
@@ -106,7 +108,10 @@ export function JsonEditorFieldComponent(props: {
         <VanilaJsonEditor
           json={getVertexToEdit()?.P ?? {}}
           onChange={replacePropertyValue}
-          height={editorHeight()}
+          height={manualHeight()}
+          autoHeight={!manualHeight()}
+          minHeight={100}
+          maxHeight={800}
         />
       </As>
       {!isJsonValid() && (
