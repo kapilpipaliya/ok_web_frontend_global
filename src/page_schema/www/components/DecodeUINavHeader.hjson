@@ -183,6 +183,9 @@ return {
         componentName: "Html",
         props: '''
 const item = args.contextData.navItems;
+const currentPath = args.location.pathname;
+const isActive = currentPath === item.href || 
+  (item.href === "/DocsGettingStartedPage" && currentPath.startsWith("/Docs"));
 return {
   as: "a",
   text: item.label,
@@ -194,10 +197,14 @@ return {
 };
 ''',
         css: '''
+const item = args.contextData.navItems;
+const currentPath = args.location.pathname;
+const isActive = currentPath === item.href || 
+  (item.href === "/DocsGettingStartedPage" && currentPath.startsWith("/Docs"));
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
   text-decoration: none;
-  font-weight: 500;
+  font-weight: ${isActive ? '600' : '500'};
   transition: all 0.2s ease;
   position: relative;
   
@@ -209,7 +216,7 @@ return `._id {
     right: 0;
     height: 2px;
     background: ${args.theme.var.color.primary};
-    transform: scaleX(0);
+    transform: scaleX(${isActive ? '1' : '0'});
     transition: transform 0.2s ease;
   }
   

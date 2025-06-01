@@ -1,6 +1,4 @@
 import { Icon } from "@iconify-icon/solid";
-
-import { useZIndex } from "~/components/fields/ZIndex";
 import { getComponentLabel } from "~/features/page_designer/functions/component/getComponentLabel";
 import { iconMap } from "~/lib/ui/iconMap";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";

@@ -10,7 +10,7 @@ import {
   getOwner,
   ErrorBoundary,
 } from "solid-js";
-import { useSearchParams } from "@solidjs/router";
+import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
 import {
   PageRenderContextProvider,
   usePageRenderContext,
@@ -24,7 +24,6 @@ import { useTheme } from "~/lib/theme/ThemeContext";
 import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
-import { useNavigate } from "@solidjs/router";
 
 import { ContentWrapper } from "~/components/form/dynamic_component/components/DynamicContent";
 import { createFunctionProxy } from "~/components/form/createFunctionProxy";
@@ -93,6 +92,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const zIndex = useZIndex();
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   const themeToggle = useThemeToggle();
   const owner = getOwner();
@@ -168,6 +168,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
         setSearchParams,
         zIndex,
         navigate,
+        location,
         theme,
         parentItems,
         previewStore,

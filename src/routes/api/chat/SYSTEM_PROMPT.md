@@ -65,6 +65,14 @@ export interface FunctionArgumentBaseType {
   meta: Vertex;
   mounted: Accessor<boolean>;
   navigate: ReturnType<typeof useNavigate>;
+  location: {
+    pathname: string;
+    search: string;
+    hash: string;
+    query: Record<string, string | string[]>;
+    state: Readonly<Partial<unknown>> | null;
+    key: string;
+  };
   onChange: (value: unknown) => void;
   owner: Owner;
   parentItems: PageRenderStore[];
