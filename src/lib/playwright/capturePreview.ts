@@ -20,6 +20,69 @@ import { newEdge } from "~/lib/graph/mutate/core/edge/newEdge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 
+export async function captureElementToPng(element: HTMLElement): Promise<File> {
+  const dataUrl = await domToPng(element);
+  const res = await fetch(dataUrl);
+  const blob = await res.blob();
+  return new File([blob], "preview.png", { type: "image/png" });
+}
+
+export async function captureFullElementToPng(
+  element: HTMLElement,
+): Promise<File> {
+  // Store original styles
+  const originalOverflow = element.style.overflow;
+  const originalOverflowX = element.style.overflowX;
+  const originalOverflowY = element.style.overflowY;
+
+  try {
+    // Hide scrollbars
+    element.style.overflow = "hidden";
+    element.style.overflowX = "hidden";
+    element.style.overflowY = "hidden";
+
+    // Capture with options to include full content
+    const dataUrl = await domToPng(element, {
+      width: element.scrollWidth,
+      height: element.scrollHeight,
+      style: {
+        overflow: "hidden",
+      },
+    });
+
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    return new File([blob], "preview.png", { type: "image/png" });
+  } finally {
+    // Restore original styles
+    element.style.overflow = originalOverflow;
+    element.style.overflowX = originalOverflowX;
+    element.style.overflowY = originalOverflowY;
+  }
+}
+
+export function downloadFile(file: File | Blob, fileName?: string): void {
+  if (!file) {
+    throw new Error("File or Blob is required");
+  }
+
+  const url = URL.createObjectURL(file);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName || (file instanceof File ? file.name : "download");
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+if (window) {
+  window.domToPng = domToPng;
+  window.downloadFile = downloadFile;
+  window.captureElementToPng = captureElementToPng;
+  window.captureFullElementToPng = captureFullElementToPng;
+}
+
 export async function capturePreview(
   formStoreVertex: () => Vertex<FormStoreObject>,
   graph: GraphInterface,
@@ -56,10 +119,7 @@ export async function capturePreview(
     }
 
     // Capture screenshot
-    const dataUrl = await domToPng(iframe.contentDocument!.body);
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
-    const file = new File([blob], "preview.png", { type: "image/png" });
+    const file = await captureElementToPng(iframe.contentDocument!.body);
 
     const imgSaveTxnId = generateNewTxnId(graph, setGraph);
     const existingPreview =
