@@ -7,7 +7,6 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const isScrolled = args.contextData.headerState?.isScrolled || false;
 return {
   as: "header"
 };
@@ -18,7 +17,7 @@ return `._id {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 2;
   background: ${args.currentMode() === 'dark' ? args.theme.var.color.background_dark_100 : 'rgba(255, 255, 255, 0.95)'};
   backdrop-filter: blur(10px);
   border-bottom: 1px solid ${args.theme.var.color.background_dark_100};
@@ -163,13 +162,14 @@ return `._id {
         displayOrder: 1,
         componentName: "Data",
         name: "navItems",
+        loop: true,
         props: '''
 return {
   data: [
-    { label: "Features", href: "/features" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Documentation", href: "/docs" },
-    { label: "About", href: "/about" }
+    { label: "Features", href: "/FeaturesPage" },
+    { label: "Pricing", href: "/PricingPage" },
+    { label: "Documentation", href: "/DocsGettingStartedPage" },
+    { label: "About", href: "/AboutPage" }
   ]
 };
 '''
@@ -186,6 +186,7 @@ const item = args.contextData.navItems;
 return {
   as: "a",
   text: item.label,
+  href: item.href,
   onClick: (e) => {
     e.preventDefault();
     args.navigate(item.href);
@@ -261,7 +262,7 @@ return `._id {
 return {
   as: "button",
   text: "Get Started",
-  onClick: () => args.navigate("/signup")
+  onClick: () => args.navigate("/auth/signup")
 };
 ''',
         css: '''
@@ -274,6 +275,7 @@ return `._id {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
   
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};

@@ -1,5 +1,4 @@
-import type { useNavigate, useSearchParams } from "@solidjs/router";
-import type { Accessor, Owner } from "solid-js";
+import type { Owner } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 
 import type { GraphData } from "~/cypher/types/ServerResult";
@@ -37,15 +36,18 @@ export interface FunctionArgumentBaseType {
   // formInitialValues: FormStoreObject;
   // formValueStore: FormStoreObject;
   meta: Vertex;
-  mounted: Accessor<boolean>;
-  navigate: ReturnType<typeof useNavigate>;
+  mounted: () => boolean;
+  navigate: (
+    to: string,
+    options?: { replace?: boolean; scroll?: boolean; state?: any },
+  ) => void;
   onChange: (value: unknown) => void;
   owner: Owner;
   parentItems: PageRenderStore[];
   parentMeta: Vertex;
   parentRenderContext: PageRenderObject;
   readOnly: boolean | null | undefined;
-  ref: Accessor<HTMLElement | null>;
+  ref: () => HTMLElement | null;
   setRef: (ref: HTMLElement | null) => void;
   removeTxnIdAndCreateNew: (txnId: number) => number;
   revertTransaction: (txnId: number) => void;
@@ -54,7 +56,7 @@ export interface FunctionArgumentBaseType {
   runWithParentOwner: <T>(fn: () => T) => T | undefined;
   // setFormValueStore: SetStoreFunction<FormStoreObject>;
   // updateFormValueStore: (data: any, setDirtyFlag?: boolean) => void;
-  searchParams?: ReturnType<typeof useSearchParams>[0];
+  searchParams?: Record<string, string | undefined>;
   setError: (error: string | undefined, key?: string) => void;
   setGraph: SetStoreFunction<GraphInterface>;
   setGraphData: (
@@ -62,7 +64,10 @@ export interface FunctionArgumentBaseType {
     args: GraphData,
     options: UpdateOptions,
   ) => void;
-  setSearchParams?: ReturnType<typeof useSearchParams>[1];
+  setSearchParams?: (
+    params: Record<string, string | undefined | null>,
+    options?: { replace?: boolean },
+  ) => void;
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
   showWarningToast: (message: string) => void;

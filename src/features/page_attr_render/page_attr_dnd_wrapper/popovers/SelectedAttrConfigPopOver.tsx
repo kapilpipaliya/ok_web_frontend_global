@@ -60,7 +60,7 @@ export function SelectedAttrConfigPopOver(
   padding: 0.25rem;
   position: absolute;
   border-radius: 5px;
-  z-index: ${zIndex};
+  z-index: 99999;
   button {
     color: \${args.theme.var.color.primary_text};
   }

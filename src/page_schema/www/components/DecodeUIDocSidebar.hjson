@@ -71,7 +71,7 @@ return `._id {
         name: "docSections",
         loop: true,
         props: '''
-const currentPath = args.searchParams?.get("page") || "home";
+const currentPath = args.searchParams?.page || "home";
 return {
   data: [
     {
