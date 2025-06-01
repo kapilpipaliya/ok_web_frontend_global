@@ -63,7 +63,9 @@ export async function fetchFormData(
       return { error: `No ${pageVertexName} found` };
     }
 
-    const componentData = await fetchComponentDataFromGraph(formDataResult.data);
+    const componentData = await fetchComponentDataFromGraph(
+      formDataResult.data,
+    );
 
     return { componentData, data: formDataResult.data };
   } catch (e) {

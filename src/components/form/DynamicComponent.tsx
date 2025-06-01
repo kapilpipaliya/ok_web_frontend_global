@@ -247,11 +247,11 @@ export function DynamicComponent(props: DynamicComponentProps) {
   });
   return (
     <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
-    <Suspense>
-      <Show when={cssStyle()}>
-        <Style>{cssStyle()}</Style>
-      </Show>
-      {/* <Show when={!props.isNoPermissionCheck && getGlobalStore(graph).P.isDevelopment}>
+      <Suspense>
+        <Show when={cssStyle()}>
+          <Style>{cssStyle()}</Style>
+        </Show>
+        {/* <Show when={!props.isNoPermissionCheck && getGlobalStore(graph).P.isDevelopment}>
         comp:{componentName()}
         <DebugPermissionInfo
           allConfiguredPermission={allConfiguredPermission()}
@@ -266,46 +266,46 @@ export function DynamicComponent(props: DynamicComponentProps) {
           userRoles={getGlobalStore(graph).P.userRoles}
         />
       </Show> */}
-      <PageRenderContextProvider store={repeaterStore}>
-        <Switch>
-          <Match when={isHidden()}></Match>
-          <Match when={!component()}>
-            NO INPUT {componentName() as string}
-          </Match>
+        <PageRenderContextProvider store={repeaterStore}>
+          <Switch>
+            <Match when={isHidden()}></Match>
+            <Match when={!component()}>
+              NO INPUT {componentName() as string}
+            </Match>
 
-          <Match
-            keyed
-            when={component() && (isNoPermissionCheck() || hasPermission())}
-          >
-            <ContentWrapper
-              meta={props.meta}
-              data={props.data}
-              children={props.children}
-              dynamicProps={dynamicProps}
-              mergedClasses={mergedClasses}
-              permissions={permissions}
-              component={component}
-              processedText={processedText}
-              disabled={
-                isNoPermissionCheck()
-                  ? props.meta.P.disabled
-                  : (props.disabled ??
-                    previewStore?.isViewOnly ??
-                    isDisabledByPermissions() ??
-                    props.meta.P.disabled)
-              }
-              readOnly={isReadOnly}
-              ref={ref}
-              setRef={setRef}
-              isNoPermissionCheck={isNoPermissionCheck}
-            />
-          </Match>
-          <Match when={getGlobalStore(graph).P.isDevelopment}>
-            Hidden component
-          </Match>
-        </Switch>
-      </PageRenderContextProvider>
-    </Suspense>
+            <Match
+              keyed
+              when={component() && (isNoPermissionCheck() || hasPermission())}
+            >
+              <ContentWrapper
+                meta={props.meta}
+                data={props.data}
+                children={props.children}
+                dynamicProps={dynamicProps}
+                mergedClasses={mergedClasses}
+                permissions={permissions}
+                component={component}
+                processedText={processedText}
+                disabled={
+                  isNoPermissionCheck()
+                    ? props.meta.P.disabled
+                    : (props.disabled ??
+                      previewStore?.isViewOnly ??
+                      isDisabledByPermissions() ??
+                      props.meta.P.disabled)
+                }
+                readOnly={isReadOnly}
+                ref={ref}
+                setRef={setRef}
+                isNoPermissionCheck={isNoPermissionCheck}
+              />
+            </Match>
+            <Match when={getGlobalStore(graph).P.isDevelopment}>
+              Hidden component
+            </Match>
+          </Switch>
+        </PageRenderContextProvider>
+      </Suspense>
     </ErrorBoundary>
   );
 }

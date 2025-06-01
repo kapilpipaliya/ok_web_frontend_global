@@ -23,7 +23,7 @@ export default createMiddleware({
     async (event) => {
       // Allow _server paths without permission check
       const url = new URL(event.request.url);
-      if (url.pathname === '/_server') {
+      if (url.pathname === "/_server") {
         return;
       }
 

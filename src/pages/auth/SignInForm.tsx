@@ -155,7 +155,7 @@ export function SignInForm() {
               {
                 as: "button",
                 css: [
-                  STYLES.button2Css, 
+                  STYLES.button2Css,
                   `return \`._id {
                     width: 100%;
                   }
@@ -163,13 +163,16 @@ export function SignInForm() {
                     opacity: 0.5;
                     cursor: not-allowed;
                     background-color: \${args.theme.var.color.border};
-                  }\`;`
+                  }\`;`,
                 ],
                 componentName: "Html",
                 props: (options: SignInFormFunctionArgumentType) => {
-                  const isFormEmpty = !options.data?.P?.email?.trim() || !options.data?.P?.password?.trim();
-                  const isLoading = options.contextData.submitState[0]?.isLoading;
-                  
+                  const isFormEmpty =
+                    !options.data?.P?.email?.trim() ||
+                    !options.data?.P?.password?.trim();
+                  const isLoading =
+                    options.contextData.submitState[0]?.isLoading;
+
                   return {
                     disabled: isLoading || isFormEmpty,
                     onClick: async () => {

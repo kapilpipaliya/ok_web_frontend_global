@@ -426,7 +426,7 @@ export function PageViewWrapper(
       }
       setGraphData(graph, setGraph, metaResult.data.graph!);
     }
-    
+
     // Process componentData from metaResult
     if (metaResult.componentData?.length) {
       for (const componentData of metaResult.componentData) {
@@ -437,7 +437,7 @@ export function PageViewWrapper(
         }
       }
     }
-    
+
     if (formMetaId) {
       setFormStore("formMetaId", formMetaId);
     }

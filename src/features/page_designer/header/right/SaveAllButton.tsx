@@ -1,6 +1,7 @@
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
 import { useNavigate } from "@solidjs/router";
+import { createSignal } from "solid-js";
 import { IconButton } from "~/components/styled/IconButton";
 import { useToast } from "~/components/styled/modal/Toast";
 import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
@@ -18,6 +19,7 @@ export function SaveAllButton() {
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
   const layoutStoreId = useDesignerLayoutStore();
   const navigate = useNavigate();
+  const [isSaving, setIsSaving] = createSignal(false);
   const layoutStore = () =>
     (graph.vertexes[layoutStoreId]?.P as PageLayoutObject) || {};
 
@@ -54,24 +56,46 @@ export function SaveAllButton() {
   };
 
   const handleSaveAll = async () => {
-    const idsToSave = formStoreIds().filter(
-      (openFormData) => !isDisabled(graph.vertexes[openFormData].P.formId),
-    );
+    setIsSaving(true);
+    try {
+      const idsToSave = formStoreIds().filter(
+        (openFormData) => !isDisabled(graph.vertexes[openFormData].P.formId),
+      );
 
-    // Process forms sequentially to avoid UI conflicts
-    for (const openFormData of idsToSave) {
-      await handleSaveAndCaptureForm(openFormData);
+      // Process forms sequentially to avoid UI conflicts
+      for (const openFormData of idsToSave) {
+        await handleSaveAndCaptureForm(openFormData);
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
     <IconButton
-      css={headerIconButtonCss}
-      disabled={formStoreIds().every((openFormData) =>
-        isDisabled(graph.vertexes[openFormData].P.formId),
-      )}
-      icon="ic:baseline-save-all"
+      css={
+        isSaving()
+          ? [
+              headerIconButtonCss,
+              `return \`._id {
+                animation: spin 1s linear infinite;
+              }
+              @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+              }\`;`,
+            ]
+          : headerIconButtonCss
+      }
+      disabled={
+        isSaving() ||
+        formStoreIds().every((openFormData) =>
+          isDisabled(graph.vertexes[openFormData].P.formId),
+        )
+      }
+      icon={isSaving() ? "ph:spinner" : "ic:baseline-save-all"}
       onClick={
+        isSaving() ||
         formStoreIds().every((openFormData) =>
           isDisabled(graph.vertexes[openFormData].P.formId),
         )
@@ -79,7 +103,7 @@ export function SaveAllButton() {
           : handleSaveAll
       }
       size={22}
-      title="Save All"
+      title={isSaving() ? "Saving..." : "Save All"}
       tooltipGroup="right-buttons"
     />
   );

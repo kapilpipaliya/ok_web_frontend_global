@@ -41,7 +41,7 @@ export function setUserData(
         type: "UserSetting",
       },
     };
-    
+
     addNewVertex(0, newUserSetting, graph, setGraph);
     mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
       userSettingId: newUserSettingId,

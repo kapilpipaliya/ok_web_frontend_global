@@ -1,5 +1,3 @@
-
-
 import { toTitle } from "case-switcher-js";
 import { createSignal, Show } from "solid-js";
 

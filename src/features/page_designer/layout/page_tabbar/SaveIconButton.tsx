@@ -1,4 +1,4 @@
-import { createMemo } from "solid-js";
+import { createMemo, createSignal } from "solid-js";
 
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 
@@ -14,13 +14,14 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 export function SaveIconButton(props: { formStoreId: string }) {
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showLoadingToast, showWarningToast } = useToast();
+  const [isSaving, setIsSaving] = createSignal(false);
   const formStoreVertex = () =>
     graph.vertexes[props.formStoreId!] as Vertex<FormStoreObject>;
   const txnId = () => formStoreVertex()?.P.txnId;
 
   // Check if save is disabled
   const isDisabled = createMemo(
-    () => !!txnId() && isDisabledTxn(txnId()!, graph),
+    () => isSaving() || (!!txnId() && isDisabledTxn(txnId()!, graph)),
   );
 
   // Get transaction status for UI enhancement
@@ -31,28 +32,50 @@ export function SaveIconButton(props: { formStoreId: string }) {
 
   // Save handler with appropriate feedback
   const saveAndCaptureForm = async () => {
-    // Call form submit
-    const formSubmitError = await formSubmit(
-      formStoreVertex,
-      graph,
-      setGraph,
-      () => {},
-      showErrorToast,
-      showLoadingToast,
-      showWarningToast,
-    )();
+    setIsSaving(true);
+    try {
+      // Call form submit
+      const formSubmitError = await formSubmit(
+        formStoreVertex,
+        graph,
+        setGraph,
+        () => {},
+        showErrorToast,
+        showLoadingToast,
+        showWarningToast,
+      )();
 
-    // If form saved successfully, capture preview
-    if (!formSubmitError) {
-      await capturePreview(formStoreVertex, graph, setGraph, showErrorToast);
+      // If form saved successfully, capture preview
+      if (!formSubmitError) {
+        await capturePreview(formStoreVertex, graph, setGraph, showErrorToast);
+      }
+
+      return !formSubmitError;
+    } finally {
+      setIsSaving(false);
     }
-
-    return !formSubmitError;
   };
 
   // Get icon and tooltip based on transaction status
   const buttonProps = createMemo(() => {
     const status = txnStatus();
+
+    if (isSaving()) {
+      return {
+        icon: "ph:spinner",
+        title: "Saving...",
+        css: [
+          headerIconButtonCss,
+          `return \`._id {
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }\`;`,
+        ],
+      };
+    }
 
     if (status === "modified") {
       return {

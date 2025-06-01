@@ -1,5 +1,3 @@
-
-
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { toTitle } from "case-switcher-js";

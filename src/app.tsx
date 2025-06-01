@@ -64,10 +64,7 @@ export default function App() {
                       logError(error, { location: location.pathname });
                     }
                     return (
-                      <ErrorFallback
-                        error={error}
-                        resetErrorBoundary={reset}
-                      />
+                      <ErrorFallback error={error} resetErrorBoundary={reset} />
                     );
                   }}
                 >
