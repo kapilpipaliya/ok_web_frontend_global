@@ -1,4 +1,4 @@
-import { createMemo, Show } from "solid-js";
+import { createMemo, Show, splitProps } from "solid-js";
 import { createAsync } from "@solidjs/router";
 
 import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
@@ -22,12 +22,14 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
 import { removeUndefinedProperties } from "~/lib/data_structure/removeUndefinedProperties";
+import type { JSX } from "solid-js";
 
-export function ComponentField(props: Readonly<{}>) {
+export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [previewStore, setPreviewStore] = usePreviewContext();
+  const [, otherProps] = splitProps(props, ["children"]);
 
   const meta = () => parentRenderContext()?.context.meta;
   const data = () => parentRenderContext()?.context.data as Vertex | undefined;
@@ -93,7 +95,7 @@ export function ComponentField(props: Readonly<{}>) {
         graph,
         setGraph,
       );
-      return { ...defaultValues, ...removeUndefinedProperties(props) };
+      return { ...defaultValues, ...removeUndefinedProperties(otherProps) };
     });
 
     const valuesProxy = new Proxy(

@@ -4,16 +4,13 @@ import { klona } from "klona";
 import { batch } from "solid-js";
 
 import { PageDesignerLabels } from "~/features/page_designer/constants/PageDesignerLabels";
-import { createAttrCompMetaVertex } from "~/features/page_designer/functions/drag_drop/attributes/createAttrCompMetaVertex";
 import { createAttrMetaVertex } from "~/features/page_designer/functions/drag_drop/attributes/createAttrMetaVertex";
 import { processChildrenAttrs } from "~/features/page_designer/functions/drag_drop/hierachy/processChildrenAttrs";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
-import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { uniqueNameKey } from "../../../constants/constant";
 import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
 import { getCompPropsObj } from "../attributes/getCompPropsObj";
-import { getComponentFromLayoutRow } from "../ui/getComponentFromLayoutRow";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { getUniqueName } from "~/features/page_designer/functions/form/getUniqueName";
@@ -39,7 +36,6 @@ export function componentDrop(
   }
 
   const attrMetaVertex = createAttrMetaVertex(graph, setGraph);
-  const attrCompMetaVertex = createAttrCompMetaVertex(graph, setGraph);
 
   if (PageDesignerLabels.includes(fromVertex.L[0])) {
     return (
@@ -51,7 +47,6 @@ export function componentDrop(
         graph,
         setGraph,
         attrMetaVertex,
-        attrCompMetaVertex,
       )[0] ?? -1
     );
   }
@@ -116,32 +111,7 @@ export function componentDrop(
 
     const rowVertex = graph.vertexes[rowResult.vertexId!];
 
-    if (["Component"].includes(fromVertex.L[0])) {
-      // set Component to the row
-      setSelectionValue(
-        txnId,
-        rowVertex,
-        graph,
-        setGraph,
-        attrCompMetaVertex,
-        fromVertex.id,
-      );
-    } else if (fromVertex.L[0] === "Attr") {
-      const compVertex = getComponentFromLayoutRow(
-        fromVertex.id,
-        graph,
-        setGraph,
-      );
-      if (compVertex) {
-        setSelectionValue(
-          txnId,
-          rowVertex,
-          graph,
-          setGraph,
-          attrCompMetaVertex,
-          compVertex.id,
-        );
-      }
+    if (fromVertex.L[0] === "Attr") {
       processChildrenAttrs(
         formVertex,
         fromVertex,
@@ -150,7 +120,6 @@ export function componentDrop(
         graph,
         setGraph,
         attrMetaVertex,
-        attrCompMetaVertex,
       );
     }
   });

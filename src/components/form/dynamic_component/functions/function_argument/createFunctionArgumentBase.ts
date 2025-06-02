@@ -72,6 +72,14 @@ export function createFunctionArgumentBase(
     setSearchParams: ReturnType<typeof useSearchParams>[1];
     zIndex: number;
     navigate: Navigator;
+    location: {
+      pathname: string;
+      search: string;
+      hash: string;
+      query: Record<string, string | string[]>;
+      state: Readonly<Partial<unknown>> | null;
+      key: string;
+    };
     theme: ThemeContext;
     parentItems: [{ context: FunctionArgumentType }, unknown][];
     previewStore: { context: unknown };
@@ -158,6 +166,7 @@ export function createFunctionArgumentBase(
     },
     mounted: options.mounted,
     navigate: hooks.navigate,
+    location: hooks.location,
     onChange: options.onChange,
     owner: hooks.owner,
     parentItems: hooks.parentItems,

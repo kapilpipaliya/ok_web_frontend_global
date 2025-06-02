@@ -2,9 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 
 import { klona } from "klona";
 
-import { getComponentFromLayoutRow } from "~/features/page_designer/functions/drag_drop/ui/getComponentFromLayoutRow";
 import { addNewRow } from "~/lib/graph/mutate/form/addNewRow";
-import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 
 import { uniqueNameKey } from "../../../constants/constant";
 import { getChildrenAttrs } from "../../layout/getChildrenAttrs";
@@ -36,7 +34,6 @@ export function processChildrenAttrs(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   attrMetaVertex: Vertex,
-  attrCompMetaVertex: Vertex,
 ) {
   const childrenVertexes = getChildrenAttrs(graph, setGraph, fromVertex);
   const results = [];
@@ -52,17 +49,6 @@ export function processChildrenAttrs(
       false,
     );
     const rowVertex = graph.vertexes[rowResult.vertexId!];
-    const compVertex = getComponentFromLayoutRow(child.id, graph, setGraph);
-    if (compVertex) {
-      setSelectionValue(
-        txnId,
-        rowVertex,
-        graph,
-        setGraph,
-        attrCompMetaVertex,
-        compVertex.id,
-      );
-    }
     processChildrenAttrs(
       formVertex,
       child,
@@ -71,7 +57,6 @@ export function processChildrenAttrs(
       graph,
       setGraph,
       attrMetaVertex,
-      attrCompMetaVertex,
     );
     results.push(rowResult.vertexId!);
   }

@@ -8,9 +8,7 @@ import {
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { usePreviewContext } from "~/features/page_designer/context/PreviewContext";
 import { getChildrenAttrs } from "~/features/page_designer/functions/layout/getChildrenAttrs";
-import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
-import { usePageRenderContext } from "./context/PageRenderContext";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
@@ -22,13 +20,11 @@ export function PageAttrRender(
     metaVertex: Vertex;
   }>,
 ) {
-  const parentItems = usePageRenderContext();
-  const _parentRenderContext = () => getLastItem(parentItems)?.[0];
   const [graph, setGraph] = useGraph();
   const formId = useFormContext();
   const formVertex = () =>
     formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
-  const [previewStore, _setPreviewStore] = usePreviewContext();
+  const [previewStore] = usePreviewContext();
 
   const childrenAttrs = createMemo(() => {
     const attrs = getChildrenAttrs(graph, setGraph, props.metaVertex);
@@ -37,7 +33,7 @@ export function PageAttrRender(
 
   return (
     <For each={childrenAttrs()}>
-      {(item, _index) => {
+      {(item) => {
         const Content = () => {
           return (
             <DynamicComponent
@@ -63,18 +59,13 @@ export function PageAttrRender(
           );
         };
 
-        // currently context is not reactive, but we are assuming it will work.
         return (
           <Switch>
-            <Match when={true}>
-              <Switch>
-                <Match when={!previewStore.isDesignMode}>
-                  <Content />
-                </Match>
-                <Match when={true}>
-                  <DnDWrapper />
-                </Match>
-              </Switch>
+            <Match when={!previewStore.isDesignMode}>
+              <Content />
+            </Match>
+            <Match when={previewStore.isDesignMode}>
+              <DnDWrapper />
             </Match>
           </Switch>
         );
