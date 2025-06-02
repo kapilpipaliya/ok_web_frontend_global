@@ -57,7 +57,21 @@ FormMetaData.Page.attributes.push({
 
 export const ComponentLabel = "Component";
 FormMetaData.Component = {
-  attributes: [...FormMetaData.Page.attributes, variantAttributes!],
+  attributes: [
+    ...FormMetaData.Page.attributes.map((attr) => {
+      // If this attribute has nested attributes, filter out the URL field
+      if (attr.attributes && Array.isArray(attr.attributes)) {
+        return {
+          ...attr,
+          attributes: attr.attributes.filter(
+            (nestedAttr) => nestedAttr.title !== "URL",
+          ),
+        };
+      }
+      return attr;
+    }),
+    variantAttributes!,
+  ],
   key: "Component",
   title: "Component",
 };

@@ -12,6 +12,7 @@ export async function checkUniqueConstrains(vertex: Vertex) {
   try {
     const label = vertex.L[0];
     const key = vertex.P.key;
+    const url = vertex.P.url;
     const id = vertex.id;
 
     if (!key) {
@@ -24,6 +25,16 @@ export async function checkUniqueConstrains(vertex: Vertex) {
     }
     if (await doesNameExist(dbSession, label, key, id)) {
       return { error: "Provided key already exists" };
+    }
+
+    // Check URL validation for Page entities
+    if (label === "Page") {
+      if (!url) {
+        return { error: "URL is required for Page" };
+      }
+      if (await doesUrlExist(dbSession, url, id)) {
+        return { error: "Provided URL already exists" };
+      }
     }
 
     const uniqueConstrains = await evalExpressionAsync(
@@ -98,6 +109,12 @@ async function doesNameExist(
 ) {
   const query = `MATCH (v:${label}) WHERE v.key = $key ${id ? "AND elementId(v) <> $id" : ""} RETURN v`;
   const result = await dbSession.run(query, id ? { id, key } : { key });
+  return result.records.length > 0;
+}
+
+async function doesUrlExist(dbSession: Session, url: string, id?: string) {
+  const query = `MATCH (v:Page) WHERE v.url = $url ${id ? "AND elementId(v) <> $id" : ""} RETURN v`;
+  const result = await dbSession.run(query, id ? { id, url } : { url });
   return result.records.length > 0;
 }
 

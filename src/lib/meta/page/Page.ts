@@ -49,9 +49,11 @@ export const wrapWithTitle = (
   margin-top: 6px;
 }\`;`,
     componentName: "Html",
+    title,
   };
 };
 
+// Dont add function, as it will break the server functions
 export const Page: IFormMetaData = {
   attributes: [
     {
@@ -113,6 +115,23 @@ export const Page: IFormMetaData = {
               //     graph,
               //   );
               // },
+            },
+          ],
+        }),
+        wrapWithTitle("URL", true, {
+          css: [
+            PROPERTIES.Css.TextFieldCss,
+            `return \`._id {
+                flex: 1;
+              }\`;`,
+          ],
+          componentName: "SystemTextInput",
+          key: "url",
+          validation: { required: true },
+          validationRules: [
+            {
+              message: "URL is required",
+              type: "required",
             },
           ],
         }),
