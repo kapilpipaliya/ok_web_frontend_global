@@ -11,7 +11,7 @@ import {
   type FetchFormMetaDataResult,
 } from "../functions/fetchPageData";
 import { fetchFormMetaData } from "../functions/fetchFormMetaData";
-import {PageViewConstants, PageViewWrapperProps} from "./types";
+import type { PageViewConstants, PageViewWrapperProps } from "./types";
 import type { PreviewStoreObject } from "~/features/page_designer/context/PreviewContext";
 import type { SetStoreFunction } from "solid-js/store";
 
@@ -26,7 +26,7 @@ interface UseMetadataOptions {
 
 export function useMetadata(
   props: Readonly<PageViewWrapperProps>,
-  options: UseMetadataOptions
+  options: UseMetadataOptions,
 ) {
   const metaData = createAsync(
     async () => {
@@ -53,9 +53,10 @@ export function useMetadata(
         options.constants.expression,
         options.constants.isDesignMode,
         options.constants.pageKeyName,
+        options.constants.url,
       );
       if (!metaResult) {
-        return { error: "No meta data found" };
+        return { error: "404" };
       }
       if (metaResult.error) {
         return metaResult;
@@ -82,7 +83,9 @@ export function useMetadata(
         options.previewStore.isNoPermissionCheck;
 
       const idLocal =
-        options.constants.dataId === "new" ? undefined : options.constants.dataId;
+        options.constants.dataId === "new"
+          ? undefined
+          : options.constants.dataId;
 
       if (idLocal && !options.constants.getFormData) {
         const dataResult = await fetchFormData(
@@ -186,7 +189,12 @@ export function useMetadata(
       }
 
       const metaVertexResult = untrack(() =>
-        createMeta(formToUse!, options.metaTxnId, options.graph, options.setGraph),
+        createMeta(
+          formToUse!,
+          options.metaTxnId,
+          options.graph,
+          options.setGraph,
+        ),
       );
 
       if (metaVertexResult.error) {

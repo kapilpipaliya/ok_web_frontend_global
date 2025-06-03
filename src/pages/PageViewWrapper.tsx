@@ -10,6 +10,7 @@ import { usePreviewContext } from "~/features/page_designer/context/PreviewConte
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { NotFound } from "~/components/404";
 
 import type {
   PageViewWrapperProps,
@@ -38,7 +39,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
       graph,
       setGraph,
       id,
-    }
+    },
   );
 
   const metaTxnId = props.metaTxnId ?? generateNewTxnId(graph, setGraph);
@@ -53,16 +54,13 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     previewStore.isNoPermissionCheck;
 
   // Initialize permissions
-  const { permissions, checkAuthError, getDynamicFns } = usePermissions(
-    props,
-    {
-      graph,
-      metaVertex,
-      isNoPermissionCheck,
-      id,
-      previewStore,
-    }
-  );
+  const { permissions, checkAuthError, getDynamicFns } = usePermissions(props, {
+    graph,
+    metaVertex,
+    isNoPermissionCheck,
+    id,
+    previewStore,
+  });
 
   const constants: PageViewConstants = {
     dataId: props.dataId,
@@ -75,46 +73,38 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     isNoPermissionCheck: props.isNoPermissionCheck,
     pageKeyName: props.pageKeyName,
     pageVertexName: props.pageVertexName,
+    url: props.url,
   };
 
   // Initialize metadata handling
-  const { metaData, setFormMetaData } = useMetadata(
-    props,
-    {
-      graph,
-      setGraph,
-      constants,
-      setFormStore,
-      metaTxnId,
-      previewStore,
-    }
-  );
+  const { metaData, setFormMetaData } = useMetadata(props, {
+    graph,
+    setGraph,
+    constants,
+    setFormStore,
+    metaTxnId,
+    previewStore,
+  });
 
   // Initialize form data handling
-  const { handleFormData } = useFormData(
-    props,
-    {
-      graph,
-      setGraph,
-      id,
-      setFormStore,
-      formStore,
-      metaVertex,
-      createErrorVertex,
-    }
-  );
+  const { handleFormData } = useFormData(props, {
+    graph,
+    setGraph,
+    id,
+    setFormStore,
+    formStore,
+    metaVertex,
+    createErrorVertex,
+  });
 
   // Initialize lifecycle hooks
-  const { onConfirmExit } = useLifecycle(
-    props,
-    {
-      graph,
-      setGraph,
-      formStore,
-      setFormStore,
-      metaTxnId,
-    }
-  );
+  const { onConfirmExit } = useLifecycle(props, {
+    graph,
+    setGraph,
+    formStore,
+    setFormStore,
+    metaTxnId,
+  });
 
   function validateMetaVertex(): string {
     if (
@@ -193,7 +183,10 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
 
     return (
       <>
-        <Show when={formStore().P.error}>
+        <Show when={formStore().P.error === "404"}>
+          <NotFound error={""} />
+        </Show>
+        <Show when={formStore().P.error !== "404" && formStore().P.error}>
           <SimpleAlert type="error" message={formStore().P.error} />
         </Show>
         {/* <Show when={getGlobalStore(graph).P.isDevelopment}>

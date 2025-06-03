@@ -13,6 +13,7 @@ export async function fetchFormMetaData(
   expression?: string,
   isDesignMode?: boolean,
   pageKeyName?: string,
+  url?: string,
 ): Promise<FetchFormMetaDataResult> {
   "use server";
   let form: IFormMetaData | null = null;
@@ -24,19 +25,29 @@ export async function fetchFormMetaData(
   form = FormMetaData[pageVertexName ?? "Page"] || FormMetaData.Page;
   const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
 
-  const data = await fetchDataFromDB({
-    expression:
-      expression ??
-      (formId
-        ? `id:'${formId}'`
-        : `g:'${pageVertexName ?? "Page"}[${pageKeyName}]'`),
-    // [getGlobalStore(graph).P.url]: true,
-    incoming,
-    outgoing,
-  });
+  const data = await fetchDataFromDB(
+    {
+      expression:
+        expression ??
+        (formId
+          ? `id:'${formId}'`
+          : url
+            ? `g:'${pageVertexName ?? "Page"}[$urlFilter]'`
+            : `g:'${pageVertexName ?? "Page"}[${pageKeyName}]'`),
+      // [getGlobalStore(graph).P.url]: true,
+      incoming,
+      outgoing,
+    },
+    {
+      nodes: {},
+      relationships: {},
+      // @ts-expect-error ignore error
+      $urlFilter: { filter: { url: url } },
+    },
+  );
 
   if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
-    return { error: `No ${pageVertexName} configured` };
+    return { error: "404" };
   }
 
   const componentDataResults = await fetchComponentDataFromGraph(data);

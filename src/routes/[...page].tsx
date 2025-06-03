@@ -4,21 +4,27 @@ import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 
-export default function PageShareView() {
+export default function PageHandler() {
   const params = useParams();
   const [graph] = useGraph();
 
+  // Get the page path from the catch-all parameter
+  const pagePath = createMemo(() => {
+    const path = params.page;
+    if (!path) return "/home";
+    return path.startsWith("/") ? path : `/${path}`; // .toLowerCase()
+  });
   const pageVertex = createMemo(() => {
-    if (!params.pageName) return undefined;
-    return findVertexByLabelAndUniqueId(graph, "Page", "key", params.pageName);
+    return findVertexByLabelAndUniqueId(graph, "Page", "url", pagePath());
   });
 
   return (
-    <Show when={params.pageName} keyed>
+    <Show when={pagePath()} keyed>
       <PageViewWrapper
         formMetaId={pageVertex()?.id}
-        pageKeyName={params.pageName}
         pageVertexName={"Page"}
+        // pageKeyName={params.pageName}
+        url={pagePath()}
       />
     </Show>
   );
