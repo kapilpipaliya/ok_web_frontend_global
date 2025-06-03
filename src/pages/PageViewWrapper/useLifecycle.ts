@@ -8,7 +8,7 @@ import { isDisabledTxn } from "~/lib/graph/transaction/value/isDisabledTxn";
 import type { SetStoreFunction } from "solid-js/store";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import {PageViewWrapperProps} from "~/pages/PageViewWrapper/types";
+import type { PageViewWrapperProps } from "~/pages/PageViewWrapper/types";
 
 interface UseLifecycleOptions {
   graph: GraphInterface;
@@ -20,7 +20,7 @@ interface UseLifecycleOptions {
 
 export function useLifecycle(
   props: Readonly<PageViewWrapperProps>,
-  options: UseLifecycleOptions
+  options: UseLifecycleOptions,
 ) {
   let onConfirmExit: () => void;
 

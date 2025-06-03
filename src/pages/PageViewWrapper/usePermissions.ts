@@ -7,7 +7,7 @@ import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { Id } from "~/lib/graph/type/id";
 import type { PreviewStoreObject } from "~/features/page_designer/context/PreviewContext";
-import {PageViewWrapperProps} from "~/pages/PageViewWrapper/types";
+import type { PageViewWrapperProps } from "~/pages/PageViewWrapper/types";
 
 interface UsePermissionsOptions {
   graph: GraphInterface;
@@ -19,7 +19,7 @@ interface UsePermissionsOptions {
 
 export function usePermissions(
   props: Readonly<PageViewWrapperProps>,
-  options: UsePermissionsOptions
+  options: UsePermissionsOptions,
 ) {
   const getDynamicFns = () => {
     try {

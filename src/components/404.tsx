@@ -1,12 +1,12 @@
-import { useParams } from "@solidjs/router";
 import { SchemaRenderer } from "~/pages/SchemaRenderer";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import type { FieldAttribute } from "~/lib/meta/FormMetadataType";
 
-export default function Notfound() {
-  const params = useParams();
-  const notFoundPath = params["404"];
+interface NotFoundProps {
+  error: string;
+}
 
+export function NotFound(props: NotFoundProps) {
   const notFoundSchema: FieldAttribute = {
     componentName: "Html",
     as: "div",
@@ -55,7 +55,8 @@ export default function Notfound() {
           max-width: 600px;
           margin-top: 0.5rem;
         }\`;`,
-        text: `The page "${notFoundPath}" could not be found on the server.`,
+        text:
+          props.error || "The requested page could not be found on the server.",
       },
       {
         componentName: "Html",
@@ -67,13 +68,12 @@ export default function Notfound() {
           background-color: ${args.theme.var.color.primary};
           color: ${args.theme.var.color.primary_text};
           text-decoration: none;
-          border-radius: ${args.theme.var.borderRadius};
+          border-radius: 0.5rem;
           font-weight: 500;
           transition: background-color 0.2s ease;
           
           &:hover {
-            background-color: ${args.theme.var.color.primary_dark_600};
-            color: ${args.theme.var.color.primary_dark_600_text};
+            background-color: ${args.theme.var.color.primary_dark_200};
           }
         }\`;`,
         text: "Go to Home",
@@ -91,8 +91,3 @@ export default function Notfound() {
     />
   );
 }
-/* <PageViewWrapper
-  isNoPermissionCheck={true}
-  pageKeyName={"404"}
-  pageVertexName={"Page"}
-/> */

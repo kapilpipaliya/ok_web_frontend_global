@@ -12,7 +12,7 @@ import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { SetStoreFunction } from "solid-js/store";
-import {PageViewWrapperProps} from "~/pages/PageViewWrapper/types";
+import type { PageViewWrapperProps } from "~/pages/PageViewWrapper/types";
 
 interface UseVertexManagementOptions {
   graph: GraphInterface;
@@ -22,7 +22,7 @@ interface UseVertexManagementOptions {
 
 export function useVertexManagement(
   props: Readonly<PageViewWrapperProps>,
-  options: UseVertexManagementOptions
+  options: UseVertexManagementOptions,
 ) {
   const layoutStoreId = props.uuid ?? uuidv7();
 

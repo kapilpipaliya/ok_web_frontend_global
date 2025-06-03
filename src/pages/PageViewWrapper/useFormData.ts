@@ -15,7 +15,7 @@ import type { FetchFormDataResult } from "../functions/fetchPageData";
 import type { Accessor } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
-import {PageViewWrapperProps} from "~/pages/PageViewWrapper/types";
+import type { PageViewWrapperProps } from "~/pages/PageViewWrapper/types";
 
 interface UseFormDataOptions {
   graph: GraphInterface;
@@ -29,7 +29,7 @@ interface UseFormDataOptions {
 
 export function useFormData(
   props: Readonly<PageViewWrapperProps>,
-  options: UseFormDataOptions
+  options: UseFormDataOptions,
 ) {
   function handleFormData(result?: FetchFormDataResult) {
     if (props.formDataId) {

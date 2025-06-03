@@ -21,6 +21,7 @@ export interface PageViewWrapperProps {
   pageVertexName?: string;
   parentId?: Id;
   txnId?: string;
+  url?: string;
   uuid?: string;
 }
 
@@ -35,6 +36,7 @@ export interface PageViewConstants {
   isNoPermissionCheck?: boolean;
   pageKeyName?: string;
   pageVertexName?: string;
+  url?: string;
 }
 
 export interface MetaDataResult {
