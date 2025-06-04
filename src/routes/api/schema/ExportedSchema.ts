@@ -1,6 +1,6 @@
 export interface ExportedVertex {
   id: string;
-  L: string;
+  L: string | string[];
   P: Record<string, unknown>;
 }
 

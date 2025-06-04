@@ -1,6 +1,9 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { getWebsiteSchemasSync, type WebsiteSchemas } from "~/page_schema/loader";
+import {
+  getWebsiteSchemasSync,
+  type WebsiteSchemas,
+} from "~/page_schema/loader";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";

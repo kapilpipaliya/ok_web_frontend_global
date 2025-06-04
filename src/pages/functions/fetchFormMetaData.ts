@@ -14,6 +14,7 @@ export async function fetchFormMetaData(
   isDesignMode?: boolean,
   pageKeyName?: string,
   url?: string,
+  skipComponentData?: boolean,
 ): Promise<FetchFormMetaDataResult> {
   "use server";
   let form: IFormMetaData | null = null;
@@ -48,6 +49,10 @@ export async function fetchFormMetaData(
 
   if (!(isValidResponse(data) && data.result) || data.result.length === 0) {
     return { error: "404" };
+  }
+
+  if (skipComponentData) {
+    return { data };
   }
 
   const componentDataResults = await fetchComponentDataFromGraph(data);
