@@ -62,6 +62,7 @@ interface DataGridProps {
   hideDeleteAction?: boolean;
   hideEditAction?: boolean;
   hideEditJsonAction?: boolean;
+  initialSelectedRowIds?: string[];
   initializeGridStoreParent?: (formStore: DataGridStore) => void;
   isShowPagination?: boolean;
   tableId: string;
@@ -394,16 +395,29 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       props.hideEditAction,
     );
 
+    const mappedData = nodes.map((node: Vertex) => graph.vertexes[node.id]);
+
     setGridState("tableStore", {
-      data: nodes.map((node: Vertex) => graph.vertexes[node.id]),
+      data: mappedData,
       tableColumns,
     });
     setGridState("search", "");
     // Track data from the graph store
-    setGridState(
-      "filteredData",
-      nodes.map((node: Vertex) => graph.vertexes[node.id]),
-    );
+    setGridState("filteredData", [...mappedData]);
+
+    // Handle initial row selection
+    if (
+      !isLoadMore &&
+      props.initialSelectedRowIds &&
+      props.initialSelectedRowIds.length > 0
+    ) {
+      const selectedRows = mappedData.filter((row) =>
+        props.initialSelectedRowIds!.includes(row.id),
+      );
+      if (selectedRows.length > 0) {
+        setGridState("selectedRows", selectedRows);
+      }
+    }
 
     // Reset the loading more flag after processing
     setGridState("isLoadingMore", false);

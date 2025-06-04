@@ -22,6 +22,7 @@ const getInitialFileManagerStore = () => {
       undefined as RowSelectionOptions<Vertex>["enableRowSelection"],
     expandedKeys: [] as string[],
     gridStore: null as DataGridStore | null,
+    initialSelectedFileId: null as string | null,
     parentVertexLabel: "Folder",
     root: null as null | Vertex[],
     rootKeys: { key: "Root" } as MongoFilter,
@@ -90,6 +91,7 @@ export function FileManagerStoreProvider(
     get enableRowSelection() {
       return props.enableRowSelection;
     },
+    initialSelectedFileId: props.fileId || null,
     get parentVertexLabel() {
       return props.parentVertexLabel;
     },

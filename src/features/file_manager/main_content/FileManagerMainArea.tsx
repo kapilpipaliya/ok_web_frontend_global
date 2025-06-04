@@ -115,6 +115,11 @@ export function FileManagerMainArea(props: Readonly<{ item: Vertex }>) {
           }
           enableRowSelection={fileManagerStore.enableRowSelection}
           getTableData={() => fetchChildren(props.item)}
+          initialSelectedRowIds={
+            fileManagerStore.initialSelectedFileId
+              ? [fileManagerStore.initialSelectedFileId]
+              : undefined
+          }
           initializeGridStoreParent={(gridStore_) => {
             setFileManagerStore({
               get gridStore() {
