@@ -145,7 +145,12 @@ create_user() {
 install_rocketchat() {
     print_status "Downloading Rocket.Chat..."
     
-    # Create installation directory
+    # Stop Rocket.Chat service if running
+    systemctl stop rocketchat 2>/dev/null || true
+    
+    # Clean installation directory
+    print_status "Cleaning installation directory..."
+    rm -rf $INSTALL_DIR/*
     mkdir -p $INSTALL_DIR
     chown $SERVICE_USER:$SERVICE_USER $INSTALL_DIR
     
@@ -155,8 +160,13 @@ install_rocketchat() {
     print_status "Extracting Rocket.Chat..."
     su - $SERVICE_USER -c "tar -xzf /tmp/rocket.chat.tgz -C /tmp"
     
-    # Move to installation directory
-    su - $SERVICE_USER -c "mv /tmp/bundle/* $INSTALL_DIR/"
+    # Copy to installation directory (using cp instead of mv to avoid conflicts)
+    print_status "Installing Rocket.Chat files..."
+    cp -rf /tmp/bundle/* $INSTALL_DIR/
+    chown -R $SERVICE_USER:$SERVICE_USER $INSTALL_DIR
+    
+    # Clean up temporary files
+    rm -rf /tmp/bundle /tmp/rocket.chat.tgz
     
     print_status "Installing Rocket.Chat dependencies..."
     cd $INSTALL_DIR/programs/server
@@ -294,6 +304,35 @@ start_rocketchat() {
     fi
 }
 
+# Check for existing installation
+check_existing_installation() {
+    if systemctl is-active --quiet rocketchat 2>/dev/null; then
+        print_warning "Rocket.Chat service is currently running!"
+        echo "This script will:"
+        echo "  - Stop the current Rocket.Chat service"
+        echo "  - Remove all application files in $INSTALL_DIR"
+        echo "  - Reinstall Rocket.Chat with latest version"
+        echo "  - Preserve your database data and messages"
+        echo ""
+        read -p "Do you want to continue with the reinstallation? (y/N): " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_status "Installation cancelled by user"
+            exit 0
+        fi
+    elif [[ -d "$INSTALL_DIR" && "$(ls -A $INSTALL_DIR 2>/dev/null)" ]]; then
+        print_warning "Existing Rocket.Chat installation found in $INSTALL_DIR"
+        echo "This script will remove all files and reinstall Rocket.Chat."
+        echo ""
+        read -p "Do you want to continue? (y/N): " -n 1 -r
+        echo ""
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            print_status "Installation cancelled by user"
+            exit 0
+        fi
+    fi
+}
+
 # Main installation function
 main() {
     clear
@@ -303,6 +342,9 @@ main() {
     echo ""
     
     get_user_input
+    
+    # Check for existing installation and warn user
+    check_existing_installation
     
     print_status "Starting installation..."
     
