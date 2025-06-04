@@ -88,7 +88,7 @@ export function FilePickerButton(props: Readonly<FilePickerButtonProps>) {
         css={[
           selectedFileVertex()?.length > 0
             ? `return \`._id {color: \${args.theme.var.color.success};}\`;`
-            : "",
+            : `return \`._id {color: \${args.theme.var.color.text};}\`;`,
           `return \`._id {
             background-color: transparent;
             border: none;

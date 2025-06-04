@@ -14,7 +14,8 @@ export async function GET({ request, params }: APIEvent) {
       throw new APIError("File name is required", 400);
     }
 
-    return await downloadFile(fileName as string, dbSession);
+    const decodedFileName = decodeURIComponent(fileName as string);
+    return await downloadFile(decodedFileName, dbSession);
   } catch (error) {
     return handleAPIError(error);
   } finally {

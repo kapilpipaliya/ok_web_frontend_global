@@ -9,8 +9,6 @@ import { Portal } from "solid-js/web";
 
 import { createClickOutside } from "~/lib/hooks/createClickOutside";
 import { SETTINGS_CONSTANTS, STYLES } from "~/pages/settings/constants";
-
-import { useZIndex } from "../../fields/ZIndex";
 import { As } from "~/components/As";
 import { ensureArray } from "~/lib/data_structure/array/ensureArray";
 import { useGraph } from "~/lib/graph/context/UseGraph";
@@ -19,6 +17,7 @@ interface CustomModalProps {
   bodyCss?: string | string[];
   children: JSX.Element;
   closeButton?: boolean;
+  containerCss?: string | string[];
   customTitle?: JSX.Element;
   dialogCss?: string | string[];
   footer?: (setOpen: Setter<boolean>) => JSX.Element;
@@ -29,7 +28,6 @@ interface CustomModalProps {
 }
 
 export function CustomModal(props: Readonly<CustomModalProps>) {
-  const _zIndex = useZIndex();
   const [open, setOpen] =
     props.open && props.setOpen
       ? ([props.open, props.setOpen] as [Accessor<boolean>, Setter<boolean>])
@@ -63,8 +61,9 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
   border-radius: 5px;
   background-color: transparent;
   border: none;
+  color: \${args.theme.var.color.text};
   &:hover {
-    background-color: lightgrey;
+    background-color: \${args.theme.var.color.background_light_200};
   }
 }\`;`}
               onClick={() => setOpen(false)}
@@ -93,7 +92,7 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
         <As
           as="hr"
           css={`return \`._id {
-  color: lightgrey;
+  color: \${args.theme.var.color.background_light_300};
 }\`;`}
         />
         <As
@@ -117,7 +116,13 @@ export function CustomModal(props: Readonly<CustomModalProps>) {
     <Show when={open()}>
       <As as="div" css={SETTINGS_CONSTANTS.MODAL.OVERLAY_CSS} />
       <Portal>
-        <As as="div" css={SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS}>
+        <As
+          as="div"
+          css={[
+            SETTINGS_CONSTANTS.MODAL.CONTAINER_CSS,
+            ...ensureArray(props.containerCss),
+          ]}
+        >
           <Content />
         </As>
       </Portal>

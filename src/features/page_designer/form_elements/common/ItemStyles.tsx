@@ -30,6 +30,13 @@ export const buttonStyle = `return \`._id {
   background-color: transparent;
   border: none;
   cursor: pointer;
+  color: \${args.theme.var.color.text};
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 1;
+  }
 }\`;`;
 
 // Helper for preview behavior

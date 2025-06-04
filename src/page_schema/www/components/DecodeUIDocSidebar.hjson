@@ -89,7 +89,7 @@ return {
         { label: "Drag & Drop Basics", path: "drag-drop", icon: "carbon:drag-horizontal" },
         { label: "Components", path: "components", icon: "carbon:assembly-cluster" },
         { label: "Layouts", path: "layouts", icon: "carbon:template" },
-        { label: "Forms", path: "forms", icon: "carbon:form" }
+        { label: "Forms", path: "forms", icon: "carbon:document" }
       ]
     },
     {
