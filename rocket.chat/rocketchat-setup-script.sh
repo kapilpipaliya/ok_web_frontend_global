@@ -48,6 +48,14 @@ get_user_input() {
     fi
 }
 
+# Get Node.js and npm paths for Volta installations
+get_node_paths() {
+    NODE_PATH=$(which node)
+    NPM_PATH=$(which npm)
+    print_status "Using Node.js from: $NODE_PATH"
+    print_status "Using npm from: $NPM_PATH"
+}
+
 # Check Node.js version
 check_nodejs() {
     print_status "Checking Node.js version..."
@@ -61,6 +69,9 @@ check_nodejs() {
         exit 1
     fi
     print_status "Node.js $(node -v) detected"
+    
+    # Get paths for Volta or other installations
+    get_node_paths
 }
 
 # Install MongoDB
@@ -149,7 +160,10 @@ install_rocketchat() {
     
     print_status "Installing Rocket.Chat dependencies..."
     cd $INSTALL_DIR/programs/server
-    su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && npm install"
+    # Run npm install as root since npm is installed via Volta for root user
+    npm install --production
+    # Change ownership back to service user
+    chown -R $SERVICE_USER:$SERVICE_USER $INSTALL_DIR
     
     print_status "Rocket.Chat installed"
 }
@@ -171,7 +185,7 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=rocketchat
 WorkingDirectory=$INSTALL_DIR
-ExecStart=/usr/bin/node $INSTALL_DIR/main.js
+ExecStart=$NODE_PATH $INSTALL_DIR/main.js
 Restart=always
 RestartSec=10
 Environment=MONGO_URL=mongodb://localhost:27017/rocketchat?replicaSet=rs01
