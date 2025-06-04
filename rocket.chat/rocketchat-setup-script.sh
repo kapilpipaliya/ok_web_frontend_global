@@ -333,6 +333,29 @@ check_existing_installation() {
     fi
 }
 
+# Setup Volta for system-wide access
+setup_volta_system_access() {
+    print_status "Installing Node.js globally via Volta for system-wide access..."
+    
+    # Check if Volta is available
+    if ! command -v volta &> /dev/null; then
+        print_error "Volta not found. Please install Volta first."
+        exit 1
+    fi
+    
+    # Install Node.js globally using Volta
+    print_status "Installing Node.js globally via Volta..."
+    volta install node@latest --global
+    
+    # Update paths to use the global installation
+    NODE_PATH=$(which node)
+    NPM_PATH=$(which npm)
+    
+    print_status "Node.js $(node -v) installed globally via Volta"
+    print_status "Global Node.js path: $NODE_PATH"
+    print_status "Global npm path: $NPM_PATH"
+}
+
 # Main installation function
 main() {
     clear
@@ -355,6 +378,7 @@ main() {
     
     # Installation steps
     check_nodejs
+    setup_volta_system_access
     install_dependencies
     install_mongodb
     configure_mongodb
