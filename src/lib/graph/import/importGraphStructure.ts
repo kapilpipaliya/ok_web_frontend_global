@@ -18,11 +18,13 @@ export interface ImportGraphData {
 /**
  * Imports a graph structure, creating new vertices and edges with new IDs.
  * Returns the transaction ID, map of old-to-new vertex IDs, and root vertex IDs.
+ * @param existingNodeMap - Optional map of old vertex IDs to existing database IDs that should be reused
  */
 export function importGraphStructure(
   graphData: ImportGraphData,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
+  existingNodeMap?: Map<string, string>,
 ): {
   metaTxnId: number;
   vertexIdMap: Map<string, string>;
@@ -33,6 +35,13 @@ export function importGraphStructure(
 
   // Store vertex old ids with new ids
   const vertexIdMap = new Map<string, string>();
+
+  // If we have existing node mappings, add them first
+  if (existingNodeMap) {
+    for (const [oldId, existingId] of existingNodeMap) {
+      vertexIdMap.set(oldId, existingId);
+    }
+  }
 
   const vertexesToProcess = Array.isArray(graphData.vertexes)
     ? graphData.vertexes
@@ -63,15 +72,11 @@ export function importGraphStructure(
   for (const edge of edgesToProcess) {
     const newId = generateNewVertexId(graph, setGraph);
 
-    // Check if this edge references existing database IDs
-    const isExistingSourceId = edge.P?._existingSourceId === true;
-    const isExistingEndId = edge.P?._existingEndId === true;
+    // Get the start and end IDs from the vertex mapping
+    const startId = vertexIdMap.get(edge.S);
+    const endId = vertexIdMap.get(edge.E);
 
-    // Get the start and end IDs - use existing database IDs or mapped IDs
-    const startId = isExistingSourceId ? edge.S : vertexIdMap.get(edge.S);
-    const endId = isExistingEndId ? edge.E : vertexIdMap.get(edge.E);
-
-    // Skip if we can't find the mapped IDs (but not for existing database IDs)
+    // Skip if we can't find the mapped IDs
     if (!startId || !endId) {
       console.warn(
         `Skipping edge ${edge.id}: missing vertex mapping for S:${edge.S} or E:${edge.E}`,
@@ -79,14 +84,10 @@ export function importGraphStructure(
       continue;
     }
 
-    // Remove the temporary markers from edge properties
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _existingSourceId, _existingEndId, ...cleanProps } = edge.P || {};
-
     const newEdge = {
       E: endId,
       id: newId,
-      P: cleanProps,
+      P: edge.P || {},
       S: startId,
       T: edge.T,
     };

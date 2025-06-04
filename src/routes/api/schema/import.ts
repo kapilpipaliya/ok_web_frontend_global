@@ -19,6 +19,7 @@ import {
 } from "~/lib/graph/import/importGraphStructure";
 import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
 import { deleteVertex } from "~/cypher/mutate/page/deletePage";
+import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import type { Session, Transaction } from "neo4j-driver";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { MutationArgs } from "~/cypher/types/MutationArgs";
@@ -125,10 +126,49 @@ async function deleteExistingItems(
   return deletedItems;
 }
 
+interface PreprocessResult {
+  schema: ImportGraphData;
+  existingNodeMap: Map<string, string>;
+}
+
+async function loadExistingNodesIntoGraph(
+  existingNodeMap: Map<string, string>,
+  tx: Transaction,
+  graph: GraphType,
+  setGraph: SetGraphType,
+): Promise<void> {
+  const nodeIds = Array.from(existingNodeMap.values());
+
+  if (nodeIds.length === 0) return;
+
+  // Fetch all existing nodes in one query
+  const result = await tx.run(
+    `
+    MATCH (n)
+    WHERE elementId(n) IN $nodeIds
+    RETURN n
+    `,
+    { nodeIds },
+  );
+
+  // Add existing nodes to the graph state
+  for (const record of result.records) {
+    const node = record.get("n");
+    const vertex = convertNodeToJson(node);
+
+    // Set vertex in graph state
+    setGraph("vertexes", vertex.id, vertex);
+
+    console.log(
+      `Loaded existing node ${vertex.id} (${vertex.L.join(", ")}) into graph state`,
+    );
+  }
+}
+
 async function preprocessSchemaForExistingNodes(
   schema: ImportGraphData,
   tx: Transaction,
-): Promise<ImportGraphData> {
+): Promise<PreprocessResult> {
   // This function handles existing nodes like Roles and Files
   // - Roles: Always use existing roles by key
   // - Files: Use existing files by fileName if they exist, otherwise create new ones
@@ -146,7 +186,10 @@ async function preprocessSchemaForExistingNodes(
 
   // If no vertexes, return as is
   if (!vertexesArray || vertexesArray.length === 0) {
-    return { vertexes: vertexesArray, edges: edgesArray };
+    return {
+      schema: { vertexes: vertexesArray, edges: edgesArray },
+      existingNodeMap: new Map(),
+    };
   }
 
   // Create a map to track old IDs to existing database IDs
@@ -197,7 +240,10 @@ async function preprocessSchemaForExistingNodes(
 
   // If no existing nodes found, return original schema
   if (existingNodeMap.size === 0) {
-    return { vertexes: vertexesArray, edges: edgesArray };
+    return {
+      schema: { vertexes: vertexesArray, edges: edgesArray },
+      existingNodeMap,
+    };
   }
 
   // Filter out existing vertices
@@ -205,41 +251,17 @@ async function preprocessSchemaForExistingNodes(
     (v) => !verticesToRemove.has(v.id),
   );
 
-  // Process edges - update references to existing nodes
-  const processedEdges = edgesArray.map((edge) => {
-    const updatedEdge = { ...edge };
-
-    // Update edge if it references an existing node
-    if (existingNodeMap.has(edge.S)) {
-      updatedEdge.S = existingNodeMap.get(edge.S)!;
-      // Mark that this is an existing database ID
-      updatedEdge.P = { ...updatedEdge.P, _existingSourceId: true };
-    }
-    if (existingNodeMap.has(edge.E)) {
-      updatedEdge.E = existingNodeMap.get(edge.E)!;
-      // Mark that this is an existing database ID
-      updatedEdge.P = { ...updatedEdge.P, _existingEndId: true };
-    }
-
-    return updatedEdge;
-  });
-
-  // Count AttrSrc edges for logging
-  const attrSrcEdges = processedEdges.filter((e) => e.T === "AttrSrc");
-  const attrSrcToExistingFiles = attrSrcEdges.filter(
-    (e) => e.P?._existingEndId,
-  );
-
+  // Keep edges as is - we'll handle the mapping in importGraphStructure
   console.log(
-    `Preprocessed schema: removed ${verticesToRemove.size} existing nodes, updated ${processedEdges.filter((e) => e.P?._existingSourceId || e.P?._existingEndId).length} edges`,
-  );
-  console.log(
-    `  - AttrSrc edges: ${attrSrcEdges.length} (${attrSrcToExistingFiles.length} to existing files)`,
+    `Preprocessed schema: found ${existingNodeMap.size} existing nodes to reuse`,
   );
 
   return {
-    vertexes: processedVertexes,
-    edges: processedEdges,
+    schema: {
+      vertexes: processedVertexes,
+      edges: edgesArray,
+    },
+    existingNodeMap,
   };
 }
 
@@ -252,10 +274,21 @@ async function importSingleSchema(
   tx: Transaction,
 ): Promise<SchemaImportResult> {
   // Pre-process schema to handle existing nodes (Roles, Files, etc.)
-  const processedSchema = await preprocessSchemaForExistingNodes(schema, tx);
+  const { schema: processedSchema, existingNodeMap } =
+    await preprocessSchemaForExistingNodes(schema, tx);
+
+  // Load existing nodes into the graph state
+  if (existingNodeMap.size > 0) {
+    await loadExistingNodesIntoGraph(existingNodeMap, tx, graph, setGraph);
+  }
 
   // Import the schema into the graph
-  const importResult = importGraphStructure(processedSchema, graph, setGraph);
+  const importResult = importGraphStructure(
+    processedSchema,
+    graph,
+    setGraph,
+    existingNodeMap,
+  );
 
   // Process the imported graph to create proper structure
   processImportedGraph(importResult, graph, setGraph, type, key);
@@ -273,6 +306,7 @@ async function importSingleSchema(
   const vertexCount = Array.isArray(processedSchema.vertexes)
     ? processedSchema.vertexes.length
     : Object.keys(processedSchema.vertexes || {}).length;
+
   const edgeCount = Array.isArray(processedSchema.edges)
     ? processedSchema.edges.length
     : Object.keys(processedSchema.edges || {}).length;
