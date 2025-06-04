@@ -91,6 +91,10 @@ function getDeleteEndpoint(tableId: string) {
   switch (tableId) {
     case "File":
       return API.file.deleteFileUrl;
+    case "Page":
+    case "Component":
+    case "EmailTemplate":
+      return API.page.deletePageUrl;
     case "Perm":
       return API.permission.deletePermissionUrl;
     case "Role":

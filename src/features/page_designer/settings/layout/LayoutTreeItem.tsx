@@ -472,19 +472,17 @@ export function LayoutTreeItem(
         >
           <For each={children()}>
             {(vertex) => (
-              <Show when={formStoreVertex()}>
-                <LayoutTreeItem
-                  collapsedKeys={props.collapsedKeys}
-                  metaVertex={vertex}
-                  toggleExpand={props.toggleExpand}
-                  parentIndex={props.parentIndex + 1}
-                  isJsonEditorOpen={props.isJsonEditorOpen}
-                  toggleJsonEditorForItem={props.toggleJsonEditorForItem}
-                  filterTree={props.filterTree}
-                  shouldExpandForSearch={props.shouldExpandForSearch}
-                  searchActive={props.searchActive}
-                />
-              </Show>
+              <LayoutTreeItem
+                collapsedKeys={props.collapsedKeys}
+                metaVertex={vertex}
+                toggleExpand={props.toggleExpand}
+                parentIndex={props.parentIndex + 1}
+                isJsonEditorOpen={props.isJsonEditorOpen}
+                toggleJsonEditorForItem={props.toggleJsonEditorForItem}
+                filterTree={props.filterTree}
+                shouldExpandForSearch={props.shouldExpandForSearch}
+                searchActive={props.searchActive}
+              />
             )}
           </For>
         </As>

@@ -15,6 +15,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVerte
 import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { SimpleErrorMessage } from "~/components/SimpleErrorMessage";
+import { loadWebsiteSchemasForSubdomain } from "~/createAppState";
 
 interface GetInitialDataProps extends ParentProps {
   dontRedirectToLogin?: boolean;
@@ -71,12 +72,12 @@ export function GetInitialData(props: GetInitialDataProps) {
 
       // In Development Remove comment
       // Load website schemas based on subdomain
-      // loadWebsiteSchemasForSubdomain(
-      //   graph[0],
-      //   graph[1],
-      //   initialData.subdomain,
-      //   initialData.domain || undefined,
-      // );
+      loadWebsiteSchemasForSubdomain(
+        graph[0],
+        graph[1],
+        initialData.subdomain,
+        initialData.domain || undefined,
+      );
     }
 
     if (userData) {

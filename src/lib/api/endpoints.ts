@@ -30,6 +30,9 @@ export const API = {
   },
   // Other endpoints
   // getInitialDataUrl: "/api/get/getInitialData",
+  page: {
+    deletePageUrl: "/api/page/delete",
+  },
   permission: {
     deletePermissionUrl: "/api/permissions/delete",
   },

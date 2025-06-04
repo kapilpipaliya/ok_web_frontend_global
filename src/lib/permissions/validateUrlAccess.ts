@@ -44,12 +44,12 @@ export function validateUrlAccess(
 
   // In Development Remove comment
   // Prevents access to admin routes when on system subdomain
-  if (isAdminSubDomain && (path === "/admin" || path.startsWith("/admin/"))) {
-    return {
-      hasPermission: false,
-      message: "Admin routes are not accessible from the system subdomain",
-    };
-  }
+  // if (isAdminSubDomain && (path === "/admin" || path.startsWith("/admin/"))) {
+  //   return {
+  //     hasPermission: false,
+  //     message: "Admin routes are not accessible from the system subdomain",
+  //   };
+  // }
 
   // If no specific permission is defined, default to authenticated
   if (!routePermission) {

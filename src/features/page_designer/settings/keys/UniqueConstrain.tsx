@@ -37,7 +37,11 @@ export function UniqueConstrains() {
     <TablePanel
       title="Unique Constrains"
       icon="ph:prohibit"
-      data={formStoreVertex()}
+      data={
+        formStoreVertex()?.P.formDataId
+          ? graph.vertexes[formStoreVertex().P.formDataId]
+          : undefined
+      }
       meta={graph.vertexes[metaVertexId]}
       addButtonAriaLabel="Add new unique constrain"
       isNoPermissionCheck={true}

@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 
-import { getWebsiteSchemasSync } from "~/page_schema/loader";
+import { getWebsiteSchemasSync, type WebsiteSchemas } from "~/page_schema/loader";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { checkRole } from "~/cypher/permissions/isPermission";
 import { SYSTEM_ROLES } from "~/cypher/permissions/type/types";
@@ -10,24 +10,365 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { createAppState } from "~/createAppState";
 import { mutateData } from "~/cypher/mutate/mutate_data/mutateData";
 import { commitTxn } from "~/lib/graph/transaction/core/commitTxn";
-import { importGraphStructure } from "~/lib/graph/import/importGraphStructure";
+import {
+  importGraphStructure,
+  type ImportGraphData,
+} from "~/lib/graph/import/importGraphStructure";
 import { processImportedGraph } from "~/lib/graph/import/processImportedGraph";
+import { deleteVertex } from "~/cypher/mutate/page/deletePage";
+import type { Session, Transaction } from "neo4j-driver";
+import type { Vertex } from "~/lib/graph/type/vertex";
+import type { MutationArgs } from "~/cypher/types/MutationArgs";
+
+interface ImportStats {
+  importedItems: string[];
+  deletedItems: string[];
+  totalVertices: number;
+  totalEdges: number;
+}
+
+interface SchemaImportResult {
+  importResult: {
+    metaTxnId: number;
+    vertexIdMap: Map<string, string>;
+    rootVertexIds: string[];
+    [key: string]: unknown;
+  };
+  commitData: MutationArgs;
+  vertexCount: number;
+  edgeCount: number;
+}
+
+type GraphType = ReturnType<typeof createAppState>[0];
+type SetGraphType = ReturnType<typeof createAppState>[1];
+
+async function findExistingVertex(
+  session: Session,
+  label: "Component" | "Page",
+  key: string,
+): Promise<string | null> {
+  const result = await session.run(
+    `
+      MATCH (v:${label} {key: $key})
+      RETURN elementId(v) as id
+    `,
+    { key },
+  );
+
+  if (result.records.length > 0) {
+    return result.records[0].get("id");
+  }
+  return null;
+}
+
+async function validateUserAndPermissions(
+  request: Request,
+  dbSession: Session,
+): Promise<Vertex> {
+  const user = await getUserFromSession(request);
+  if (!user) {
+    throw new APIError("User not found", 404);
+  }
+
+  const isAdmin = await checkRole(SYSTEM_ROLES.ADMIN, dbSession, user);
+  if (!isAdmin) {
+    throw new APIError("Unauthorized. Admin access required.", 403);
+  }
+
+  return user;
+}
+
+async function deleteExistingItems(
+  dbSession: Session,
+  websiteSchemas: WebsiteSchemas,
+  user: Vertex,
+): Promise<string[]> {
+  const deletedItems: string[] = [];
+
+  // Delete existing components
+  if (websiteSchemas.components) {
+    for (const componentKey of Object.keys(websiteSchemas.components)) {
+      const existingComponentId = await findExistingVertex(
+        dbSession,
+        "Component",
+        componentKey,
+      );
+
+      if (existingComponentId) {
+        console.log(`Deleting existing component: ${componentKey}`);
+        await deleteVertex(dbSession, existingComponentId, user);
+        deletedItems.push(`Component: ${componentKey}`);
+      }
+    }
+  }
+
+  // Delete existing pages
+  if (websiteSchemas.pages) {
+    for (const pageKey of Object.keys(websiteSchemas.pages)) {
+      const existingPageId = await findExistingVertex(
+        dbSession,
+        "Page",
+        pageKey,
+      );
+
+      if (existingPageId) {
+        console.log(`Deleting existing page: ${pageKey}`);
+        await deleteVertex(dbSession, existingPageId, user);
+        deletedItems.push(`Page: ${pageKey}`);
+      }
+    }
+  }
+
+  return deletedItems;
+}
+
+async function preprocessSchemaForExistingNodes(
+  schema: ImportGraphData,
+  tx: Transaction,
+): Promise<ImportGraphData> {
+  // This function handles existing nodes like Roles and Files
+  // - Roles: Always use existing roles by key
+  // - Files: Use existing files by fileName if they exist, otherwise create new ones
+  // - AttrSrc relationships: Will automatically connect to the correct File nodes
+
+  // Convert to arrays if needed
+  const vertexesArray = Array.isArray(schema.vertexes)
+    ? schema.vertexes
+    : Object.values(schema.vertexes);
+  const edgesArray = Array.isArray(schema.edges)
+    ? schema.edges
+    : schema.edges
+      ? Object.values(schema.edges)
+      : [];
+
+  // If no vertexes, return as is
+  if (!vertexesArray || vertexesArray.length === 0) {
+    return { vertexes: vertexesArray, edges: edgesArray };
+  }
+
+  // Create a map to track old IDs to existing database IDs
+  const existingNodeMap = new Map<string, string>();
+  const verticesToRemove = new Set<string>();
+
+  // Process Role vertices
+  const roleVertices = vertexesArray.filter((v) => v.L === "Role");
+  for (const roleVertex of roleVertices) {
+    const roleKey = roleVertex.P.key as string;
+    if (!roleKey) continue;
+
+    const existingRoleResult = await tx.run(
+      `MATCH (r:Role {key: $key}) RETURN elementId(r) as id`,
+      { key: roleKey },
+    );
+
+    if (existingRoleResult.records.length > 0) {
+      const existingRoleId = existingRoleResult.records[0].get("id");
+      existingNodeMap.set(roleVertex.id, existingRoleId);
+      verticesToRemove.add(roleVertex.id);
+      console.log(`Using existing Role: ${roleKey} (${existingRoleId})`);
+    }
+  }
+
+  // Process File vertices
+  const fileVertices = vertexesArray.filter((v) => v.L === "File");
+  for (const fileVertex of fileVertices) {
+    const fileName = fileVertex.P.fileName as string;
+    if (!fileName) continue;
+
+    // Try to find existing file by fileName
+    const existingFileResult = await tx.run(
+      `MATCH (f:File {fileName: $fileName}) RETURN elementId(f) as id LIMIT 1`,
+      { fileName },
+    );
+
+    if (existingFileResult.records.length > 0) {
+      const existingFileId = existingFileResult.records[0].get("id");
+      existingNodeMap.set(fileVertex.id, existingFileId);
+      verticesToRemove.add(fileVertex.id);
+      console.log(`Using existing File: ${fileName} (${existingFileId})`);
+    } else {
+      // File doesn't exist, it will be created during import
+      console.log(`File will be created: ${fileName}`);
+    }
+  }
+
+  // If no existing nodes found, return original schema
+  if (existingNodeMap.size === 0) {
+    return { vertexes: vertexesArray, edges: edgesArray };
+  }
+
+  // Filter out existing vertices
+  const processedVertexes = vertexesArray.filter(
+    (v) => !verticesToRemove.has(v.id),
+  );
+
+  // Process edges - update references to existing nodes
+  const processedEdges = edgesArray.map((edge) => {
+    const updatedEdge = { ...edge };
+
+    // Update edge if it references an existing node
+    if (existingNodeMap.has(edge.S)) {
+      updatedEdge.S = existingNodeMap.get(edge.S)!;
+      // Mark that this is an existing database ID
+      updatedEdge.P = { ...updatedEdge.P, _existingSourceId: true };
+    }
+    if (existingNodeMap.has(edge.E)) {
+      updatedEdge.E = existingNodeMap.get(edge.E)!;
+      // Mark that this is an existing database ID
+      updatedEdge.P = { ...updatedEdge.P, _existingEndId: true };
+    }
+
+    return updatedEdge;
+  });
+
+  // Count AttrSrc edges for logging
+  const attrSrcEdges = processedEdges.filter((e) => e.T === "AttrSrc");
+  const attrSrcToExistingFiles = attrSrcEdges.filter(
+    (e) => e.P?._existingEndId,
+  );
+
+  console.log(
+    `Preprocessed schema: removed ${verticesToRemove.size} existing nodes, updated ${processedEdges.filter((e) => e.P?._existingSourceId || e.P?._existingEndId).length} edges`,
+  );
+  console.log(
+    `  - AttrSrc edges: ${attrSrcEdges.length} (${attrSrcToExistingFiles.length} to existing files)`,
+  );
+
+  return {
+    vertexes: processedVertexes,
+    edges: processedEdges,
+  };
+}
+
+async function importSingleSchema(
+  schema: ImportGraphData,
+  graph: GraphType,
+  setGraph: SetGraphType,
+  type: "Component" | "Page",
+  key: string,
+  tx: Transaction,
+): Promise<SchemaImportResult> {
+  // Pre-process schema to handle existing nodes (Roles, Files, etc.)
+  const processedSchema = await preprocessSchemaForExistingNodes(schema, tx);
+
+  // Import the schema into the graph
+  const importResult = importGraphStructure(processedSchema, graph, setGraph);
+
+  // Process the imported graph to create proper structure
+  processImportedGraph(importResult, graph, setGraph, type, key);
+
+  // Commit the transaction to get the mutation data
+  const commitData = commitTxn(importResult.metaTxnId, graph);
+  if (!commitData) {
+    throw new APIError(
+      `Failed to prepare data for ${type.toLowerCase()}: ${key}`,
+      500,
+    );
+  }
+
+  // Calculate counts based on whether vertexes/edges are arrays or objects
+  const vertexCount = Array.isArray(processedSchema.vertexes)
+    ? processedSchema.vertexes.length
+    : Object.keys(processedSchema.vertexes || {}).length;
+  const edgeCount = Array.isArray(processedSchema.edges)
+    ? processedSchema.edges.length
+    : Object.keys(processedSchema.edges || {}).length;
+
+  return {
+    importResult,
+    commitData,
+    vertexCount,
+    edgeCount,
+  };
+}
+
+async function importSchemas(
+  websiteSchemas: WebsiteSchemas,
+  tx: Transaction,
+  graph: GraphType,
+  setGraph: SetGraphType,
+): Promise<ImportStats> {
+  const stats: ImportStats = {
+    importedItems: [],
+    deletedItems: [],
+    totalVertices: 0,
+    totalEdges: 0,
+  };
+
+  // Process components
+  if (websiteSchemas.components) {
+    for (const [componentKey, schema] of Object.entries(
+      websiteSchemas.components,
+    )) {
+      const result = await importSingleSchema(
+        schema,
+        graph,
+        setGraph,
+        "Component",
+        componentKey,
+        tx,
+      );
+
+      // Save to database
+      await mutateData(result.commitData, tx);
+
+      stats.importedItems.push(`Component: ${componentKey}`);
+      stats.totalVertices += result.vertexCount;
+      stats.totalEdges += result.edgeCount;
+    }
+  }
+
+  // Process pages
+  if (websiteSchemas.pages) {
+    for (const [pageKey, schema] of Object.entries(websiteSchemas.pages)) {
+      const result = await importSingleSchema(
+        schema,
+        graph,
+        setGraph,
+        "Page",
+        pageKey,
+        tx,
+      );
+
+      // Save to database
+      await mutateData(result.commitData, tx);
+
+      stats.importedItems.push(`Page: ${pageKey}`);
+      stats.totalVertices += result.vertexCount;
+      stats.totalEdges += result.edgeCount;
+    }
+  }
+
+  return stats;
+}
+
+async function buildSuccessResponse(
+  websiteName: string,
+  stats: ImportStats,
+  deletedItems: string[],
+  websiteSchemas: WebsiteSchemas,
+) {
+  return {
+    success: true,
+    message: `Successfully imported ${stats.importedItems.length} schemas from website: ${websiteName}${deletedItems.length > 0 ? ` (deleted ${deletedItems.length} existing items)` : ""}`,
+    details: {
+      website: websiteName,
+      importedItems: stats.importedItems,
+      deletedItems,
+      totalVertices: stats.totalVertices,
+      totalEdges: stats.totalEdges,
+      components: Object.keys(websiteSchemas.components || {}).length,
+      pages: Object.keys(websiteSchemas.pages || {}).length,
+    },
+  };
+}
 
 export async function GET({ request }: APIEvent) {
   const { dbSession, subDomain } = await getDBSessionForSubdomain(request);
 
   try {
-    // Check authentication
-    const user = await getUserFromSession(request);
-    if (!user) {
-      throw new APIError("User not found", 404);
-    }
-
-    // Check admin permissions
-    const isAdmin = await checkRole(SYSTEM_ROLES.ADMIN, dbSession, user);
-    if (!isAdmin) {
-      throw new APIError("Unauthorized. Admin access required.", 403);
-    }
+    // Validate user and permissions
+    const user = await validateUserAndPermissions(request, dbSession);
 
     // Use subdomain as website name
     const websiteName = subDomain;
@@ -39,76 +380,24 @@ export async function GET({ request }: APIEvent) {
       throw new APIError(`No schemas found for website: ${websiteName}`, 404);
     }
 
-    // Track all imported items
-    const importedItems: string[] = [];
-    let totalVertices = 0;
-    let totalEdges = 0;
+    // Delete existing items
+    const deletedItems = await deleteExistingItems(
+      dbSession,
+      websiteSchemas,
+      user,
+    );
 
-    // Create a new graph state
+    // Create a new graph state for import
     const [graph, setGraph] = createAppState();
+
+    // Start transaction for import
     const tx = dbSession.beginTransaction();
     try {
-      // Process components
-      if (websiteSchemas.components) {
-        for (const [componentKey, schema] of Object.entries(
-          websiteSchemas.components,
-        )) {
-          // Import the schema into the graph
-          const importResult = importGraphStructure(schema, graph, setGraph);
+      // Import all schemas
+      const stats = await importSchemas(websiteSchemas, tx, graph, setGraph);
 
-          // Process the imported graph to create proper structure
-          processImportedGraph(
-            importResult,
-            graph,
-            setGraph,
-            "Component",
-            componentKey,
-          );
-
-          // Commit the transaction to get the mutation data
-          const commitData = commitTxn(importResult.metaTxnId, graph);
-          if (!commitData) {
-            throw new APIError(
-              `Failed to prepare data for component: ${componentKey}`,
-              500,
-            );
-          }
-
-          // Save to database
-          await mutateData(commitData, tx);
-
-          importedItems.push(`Component: ${componentKey}`);
-          totalVertices += (schema.vertexes || []).length;
-          totalEdges += (schema.edges || []).length;
-        }
-      }
-
-      // Process pages
-      if (websiteSchemas.pages) {
-        for (const [pageKey, schema] of Object.entries(websiteSchemas.pages)) {
-          // Import the schema into the graph
-          const importResult = importGraphStructure(schema, graph, setGraph);
-
-          // Process the imported graph to create proper structure
-          processImportedGraph(importResult, graph, setGraph, "Page", pageKey);
-
-          // Commit the transaction to get the mutation data
-          const commitData = commitTxn(importResult.metaTxnId, graph);
-          if (!commitData) {
-            throw new APIError(
-              `Failed to prepare data for page: ${pageKey}`,
-              500,
-            );
-          }
-
-          // Save to database
-          await mutateData(commitData, tx);
-
-          importedItems.push(`Page: ${pageKey}`);
-          totalVertices += (schema.vertexes || []).length;
-          totalEdges += (schema.edges || []).length;
-        }
-      }
+      // Merge deleted items into stats
+      stats.deletedItems = deletedItems;
 
       // Log the import activity
       await createActivityLog(
@@ -117,23 +406,17 @@ export async function GET({ request }: APIEvent) {
         "Schema",
         websiteName,
         user.P.email,
-        `Imported ${importedItems.length} schemas from website: ${websiteName}. Total vertices: ${totalVertices}, Total edges: ${totalEdges}`,
+        `Imported ${stats.importedItems.length} schemas from website: ${websiteName}. Deleted ${deletedItems.length} existing items. Total vertices: ${stats.totalVertices}, Total edges: ${stats.totalEdges}`,
       );
 
       await tx.commit();
 
-      return {
-        success: true,
-        message: `Successfully imported ${importedItems.length} schemas from website: ${websiteName}`,
-        details: {
-          website: websiteName,
-          importedItems,
-          totalVertices,
-          totalEdges,
-          components: Object.keys(websiteSchemas.components || {}).length,
-          pages: Object.keys(websiteSchemas.pages || {}).length,
-        },
-      };
+      return buildSuccessResponse(
+        websiteName,
+        stats,
+        deletedItems,
+        websiteSchemas,
+      );
     } catch (error: unknown) {
       await tx.rollback();
       throw error;

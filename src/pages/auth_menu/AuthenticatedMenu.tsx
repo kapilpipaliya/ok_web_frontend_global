@@ -47,7 +47,7 @@ export function AuthenticatedMenu(
       });
     }
 
-    // Add "Import Local Pages" menu item if user is admin and query param "admin" is present
+    // Add "Import Local Pages" and "Export Pages and Components" menu items if user is admin and query param "admin" is present
     const adminMenuItems = [] as {
       href: string;
       icon: string;
@@ -59,6 +59,12 @@ export function AuthenticatedMenu(
         href: "/api/schema/import",
         icon: "ph:upload",
         label: "Import Local Pages",
+        target: "_blank",
+      });
+      adminMenuItems.push({
+        href: "/api/schema/export",
+        icon: "ph:download",
+        label: "Export Pages and Components",
         target: "_blank",
       });
     }

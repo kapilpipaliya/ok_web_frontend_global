@@ -5,18 +5,22 @@ import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { addNewEdge } from "~/lib/graph/mutate/core/edge/addNewEdge";
 import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-import type { Vertex } from "~/lib/graph/type/vertex";
-import type { Edge } from "~/lib/graph/type/edge";
+import type {
+  ExportedEdge,
+  ExportedVertex,
+} from "~/routes/api/schema/ExportedSchema";
+
+export interface ImportGraphData {
+  vertexes: Record<string, ExportedVertex> | ExportedVertex[];
+  edges: Record<string, ExportedEdge> | ExportedEdge[];
+}
 
 /**
  * Imports a graph structure, creating new vertices and edges with new IDs.
  * Returns the transaction ID, map of old-to-new vertex IDs, and root vertex IDs.
  */
 export function importGraphStructure(
-  graphData: {
-    vertexes: Record<string, Vertex> | Vertex[];
-    edges: Record<string, Edge> | Edge[];
-  },
+  graphData: ImportGraphData,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ): {
@@ -58,18 +62,31 @@ export function importGraphStructure(
   // Add all edges with new IDs, using the new vertex IDs
   for (const edge of edgesToProcess) {
     const newId = generateNewVertexId(graph, setGraph);
-    const startId = vertexIdMap.get(edge.S);
-    const endId = vertexIdMap.get(edge.E);
 
-    // Skip if we can't find the mapped IDs
-    if (!(startId && endId)) {
+    // Check if this edge references existing database IDs
+    const isExistingSourceId = edge.P?._existingSourceId === true;
+    const isExistingEndId = edge.P?._existingEndId === true;
+
+    // Get the start and end IDs - use existing database IDs or mapped IDs
+    const startId = isExistingSourceId ? edge.S : vertexIdMap.get(edge.S);
+    const endId = isExistingEndId ? edge.E : vertexIdMap.get(edge.E);
+
+    // Skip if we can't find the mapped IDs (but not for existing database IDs)
+    if (!startId || !endId) {
+      console.warn(
+        `Skipping edge ${edge.id}: missing vertex mapping for S:${edge.S} or E:${edge.E}`,
+      );
       continue;
     }
+
+    // Remove the temporary markers from edge properties
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _existingSourceId, _existingEndId, ...cleanProps } = edge.P || {};
 
     const newEdge = {
       E: endId,
       id: newId,
-      P: { ...edge.P },
+      P: cleanProps,
       S: startId,
       T: edge.T,
     };
