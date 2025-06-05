@@ -50,6 +50,7 @@ show_help() {
     echo "Options:"
     echo "  --fix, -f              Fix common installation issues"
     echo "  --fresh, --clean       Fresh install (WARNING: Deletes all data)"
+    echo "  --clear-db             Clear database only (WARNING: Deletes all data)"
     echo "  --mail-url URL         Update MAIL_URL configuration"
     echo "  --help, -h             Show this help message"
     echo ""
@@ -57,6 +58,7 @@ show_help() {
     echo "  sudo bash $0                    # Normal installation"
     echo "  sudo bash $0 --fix              # Fix installation issues"
     echo "  sudo bash $0 --fresh            # Fresh install (deletes database)"
+    echo "  sudo bash $0 --clear-db         # Clear database only"
     echo "  sudo bash $0 --mail-url 'smtp://user:pass@host:port'"
     echo ""
     exit 0
@@ -67,6 +69,7 @@ FIX_MODE=false
 MAIL_URL_MODE=false
 MAIL_URL_ARG=""
 FRESH_INSTALL=false
+CLEAR_DB_ONLY=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -81,6 +84,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --fresh|--clean)
             FRESH_INSTALL=true
+            shift
+            ;;
+        --clear-db)
+            CLEAR_DB_ONLY=true
             shift
             ;;
         --help|-h)
@@ -453,11 +460,40 @@ clear_mongodb_database() {
     if systemctl is-active --quiet rocketchat; then
         print_status "Stopping Rocket.Chat service..."
         systemctl stop rocketchat
+        sleep 5
+    fi
+    
+    # Ensure MongoDB is running
+    if ! systemctl is-active --quiet mongod; then
+        print_status "Starting MongoDB..."
+        systemctl start mongod
+        sleep 5
     fi
     
     # Drop the rocketchat database
     print_status "Dropping rocketchat database..."
-    mongosh --eval "use rocketchat; db.dropDatabase();" || mongo --eval "use rocketchat; db.dropDatabase();" || true
+    # Use mongosh first, fallback to mongo
+    if command -v mongosh &> /dev/null; then
+        mongosh rocketchat --eval "db.dropDatabase()" 2>/dev/null || mongosh --eval "use rocketchat; db.dropDatabase()" || true
+    else
+        mongo rocketchat --eval "db.dropDatabase()" 2>/dev/null || mongo --eval "use rocketchat; db.dropDatabase()" || true
+    fi
+    
+    # Also drop the rocketchat_cache database if it exists
+    print_status "Dropping rocketchat_cache database..."
+    if command -v mongosh &> /dev/null; then
+        mongosh rocketchat_cache --eval "db.dropDatabase()" 2>/dev/null || true
+    else
+        mongo rocketchat_cache --eval "db.dropDatabase()" 2>/dev/null || true
+    fi
+    
+    # List remaining databases to confirm
+    print_status "Verifying database removal..."
+    if command -v mongosh &> /dev/null; then
+        mongosh --eval "db.adminCommand('listDatabases')" | grep -E "rocketchat" || print_status "Rocketchat databases successfully removed"
+    else
+        mongo --eval "db.adminCommand('listDatabases')" | grep -E "rocketchat" || print_status "Rocketchat databases successfully removed"
+    fi
     
     # Re-initialize replica set if needed
     if ! mongosh --eval "rs.status().ok" 2>/dev/null | grep -q "1"; then
@@ -661,6 +697,23 @@ main() {
     echo "   Rocket.Chat Installation Script    "
     echo "======================================"
     echo ""
+    
+    # If running in clear DB only mode
+    if [[ "$CLEAR_DB_ONLY" == true ]]; then
+        print_warning "Database clearing mode!"
+        echo ""
+        print_error "WARNING: This will DELETE ALL ROCKETCHAT DATA!"
+        echo ""
+        read -p "Type 'yes' to confirm database deletion: " -r
+        echo ""
+        if [[ "$REPLY" == "yes" ]]; then
+            clear_mongodb_database
+            print_status "Database cleared. You may need to restart Rocket.Chat."
+        else
+            print_status "Database clearing cancelled"
+        fi
+        exit 0
+    fi
     
     # If running in mail URL mode, just update the mail URL
     if [[ "$MAIL_URL_MODE" == true ]]; then
