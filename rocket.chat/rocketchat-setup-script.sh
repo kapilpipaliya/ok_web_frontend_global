@@ -751,7 +751,7 @@ main() {
     create_user
     install_rocketchat
     create_service
-    install_nginx
+#    install_nginx
     configure_firewall
     start_rocketchat
     setup_ssl
