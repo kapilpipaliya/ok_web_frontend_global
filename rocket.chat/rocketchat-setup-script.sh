@@ -39,13 +39,29 @@ DOMAIN=""
 EMAIL=""
 NODE_PATH=""
 NPM_PATH=""
+SMTP_URL=""
 
-# Check if running fix mode
-if [[ "$1" == "--fix" ]] || [[ "$1" == "-f" ]]; then
-    FIX_MODE=true
-else
-    FIX_MODE=false
-fi
+# Check command line arguments
+FIX_MODE=false
+MAIL_URL_MODE=false
+MAIL_URL_ARG=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --fix|-f)
+            FIX_MODE=true
+            shift
+            ;;
+        --mail-url)
+            MAIL_URL_MODE=true
+            MAIL_URL_ARG="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
 
 # Function to get user input
 get_user_input() {
@@ -53,6 +69,8 @@ get_user_input() {
     if [[ ! -z "$DOMAIN" ]]; then
         read -p "Enter your email for SSL certificate: " EMAIL
     fi
+    
+    read -p "Enter SMTP URL (e.g., smtp://user:pass@host:port) or press Enter to skip: " SMTP_URL
 }
 
 # Check and install Node.js if needed
@@ -281,8 +299,8 @@ install_rocketchat() {
 create_service() {
     print_status "Creating systemd service..."
     
-    cat > /etc/systemd/system/rocketchat.service << EOF
-[Unit]
+    # Build the service file content
+    SERVICE_CONTENT="[Unit]
 Description=Rocket.Chat server
 After=network.target remote-fs.target nss-lookup.target mongod.service
 
@@ -300,11 +318,22 @@ RestartSec=10
 Environment=MONGO_URL=mongodb://localhost:27017/rocketchat?replicaSet=rs01
 Environment=MONGO_OPLOG_URL=mongodb://localhost:27017/local?replicaSet=rs01
 Environment=ROOT_URL=http://localhost:4000
-Environment=PORT=4000
+Environment=PORT=4000"
+
+    # Add MAIL_URL if provided
+    if [[ ! -z "$SMTP_URL" ]]; then
+        SERVICE_CONTENT="$SERVICE_CONTENT
+Environment=MAIL_URL=$SMTP_URL"
+        print_status "SMTP configuration added to service"
+    fi
+
+    SERVICE_CONTENT="$SERVICE_CONTENT
 
 [Install]
-WantedBy=multi-user.target
-EOF
+WantedBy=multi-user.target"
+
+    # Write the service file
+    echo "$SERVICE_CONTENT" > /etc/systemd/system/rocketchat.service
 
     systemctl daemon-reload
     print_status "Service file created"
@@ -401,6 +430,33 @@ start_rocketchat() {
     else
         print_error "Rocket.Chat failed to start. Check logs with: journalctl -u rocketchat -f"
     fi
+}
+
+# Update MAIL_URL in existing service
+update_mail_url() {
+    local mail_url="$1"
+    if [[ -z "$mail_url" ]]; then
+        print_error "No MAIL_URL provided"
+        return 1
+    fi
+    
+    print_status "Updating MAIL_URL in Rocket.Chat service..."
+    
+    # Check if MAIL_URL already exists in the service file
+    if grep -q "Environment=MAIL_URL=" /etc/systemd/system/rocketchat.service; then
+        # Update existing MAIL_URL
+        sed -i "s|Environment=MAIL_URL=.*|Environment=MAIL_URL=$mail_url|" /etc/systemd/system/rocketchat.service
+        print_status "Updated existing MAIL_URL"
+    else
+        # Add MAIL_URL after PORT environment variable
+        sed -i "/Environment=PORT=4000/a Environment=MAIL_URL=$mail_url" /etc/systemd/system/rocketchat.service
+        print_status "Added new MAIL_URL"
+    fi
+    
+    # Reload and restart service
+    systemctl daemon-reload
+    systemctl restart rocketchat
+    print_status "Service restarted with new MAIL_URL"
 }
 
 # Fix existing installation issues
@@ -515,6 +571,13 @@ main() {
     echo "   Rocket.Chat Installation Script    "
     echo "======================================"
     echo ""
+    
+    # If running in mail URL mode, just update the mail URL
+    if [[ "$MAIL_URL_MODE" == true ]]; then
+        print_status "Updating MAIL_URL configuration..."
+        update_mail_url "$MAIL_URL_ARG"
+        exit 0
+    fi
     
     # If running in fix mode, just run the fix function
     if [[ "$FIX_MODE" == true ]]; then
