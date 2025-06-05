@@ -35,7 +35,7 @@ ROCKETCHAT_VERSION="latest"
 INSTALL_DIR="/opt/Rocket.Chat"
 SERVICE_USER="rocketchat"
 MONGO_VERSION="8.0"
-DOMAIN=""
+DOMAIN="rocket.decodeui.dev"
 EMAIL=""
 NODE_PATH=""
 NPM_PATH=""
@@ -101,8 +101,8 @@ done
 
 # Function to get user input
 get_user_input() {
-    read -p "Enter your domain name (e.g., chat.example.com) or press Enter to skip SSL setup: " DOMAIN
-    if [[ ! -z "$DOMAIN" ]]; then
+    # Domain is pre-configured to rocket.decodeui.dev
+    if [[ -z "$EMAIL" ]]; then
         read -p "Enter your email for SSL certificate: " EMAIL
     fi
     
@@ -353,7 +353,7 @@ Restart=always
 RestartSec=10
 Environment=MONGO_URL=mongodb://localhost:27017/rocketchat?replicaSet=rs01
 Environment=MONGO_OPLOG_URL=mongodb://localhost:27017/local?replicaSet=rs01
-Environment=ROOT_URL=http://localhost:4000
+Environment=ROOT_URL=https://rocket.decodeui.dev
 Environment=PORT=4000"
 
     # Add MAIL_URL if provided
@@ -751,10 +751,10 @@ main() {
     create_user
     install_rocketchat
     create_service
-    # install_nginx
+    install_nginx
     configure_firewall
     start_rocketchat
-    # setup_ssl
+    setup_ssl
     
     echo ""
     echo "======================================"
@@ -762,11 +762,7 @@ main() {
     echo "======================================"
     echo ""
     
-    if [[ ! -z "$DOMAIN" ]]; then
-        print_status "Rocket.Chat is accessible at: https://$DOMAIN"
-    else
-        print_status "Rocket.Chat is accessible at: http://$(hostname -I | awk '{print $1}'):4000"
-    fi
+    print_status "Rocket.Chat is accessible at: https://rocket.decodeui.dev"
     
     echo ""
     print_status "Default admin setup:"
@@ -781,13 +777,6 @@ main() {
     echo "  - Stop: systemctl stop rocketchat"
     echo ""
     
-    if [[ -z "$DOMAIN" ]]; then
-        print_warning "No domain configured. To add SSL later:"
-        echo "  1. Point your domain to this server"
-        echo "  2. Run: certbot --nginx -d yourdomain.com"
-        echo "  3. Update ROOT_URL in /etc/systemd/system/rocketchat.service"
-        echo "  4. Restart Rocket.Chat: systemctl restart rocketchat"
-    fi
 }
 
 # Run main function
