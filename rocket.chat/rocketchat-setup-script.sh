@@ -159,10 +159,24 @@ configure_mongodb() {
     
     # Restart MongoDB
     systemctl restart mongod
-    sleep 5
+    sleep 10
     
-    # Initialize replica set
-    mongo --eval "rs.initiate()" || true
+    # Check if replica set is already initialized
+    if mongosh --eval "rs.status().ok" 2>/dev/null | grep -q "1"; then
+        print_status "MongoDB replica set already initialized"
+    else
+        # Initialize replica set using mongosh (mongo is deprecated)
+        print_status "Initializing MongoDB replica set..."
+        mongosh --eval "rs.initiate()" || mongo --eval "rs.initiate()" || true
+        sleep 5
+        
+        # Verify replica set initialization
+        if mongosh --eval "rs.status().ok" 2>/dev/null | grep -q "1"; then
+            print_status "MongoDB replica set initialized successfully"
+        else
+            print_warning "MongoDB replica set initialization may have failed. Check manually with: mongosh --eval 'rs.status()'"
+        fi
+    fi
     
     print_status "MongoDB replica set configured"
 }
@@ -228,7 +242,15 @@ install_rocketchat() {
         exit 1
     fi
     
+    # Install dependencies
     su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && $NPM_PATH install"
+    
+    # Fix Sharp module for ARM64 architecture if needed
+    ARCH=$(uname -m)
+    if [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+        print_status "Detected ARM64 architecture. Installing sharp module with platform-specific build..."
+        su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && $NPM_PATH install --os=linux --cpu=arm64 sharp" || true
+    fi
     
     print_status "Rocket.Chat installed"
 }
@@ -359,22 +381,75 @@ start_rocketchat() {
     fi
 }
 
+# Fix existing installation issues
+fix_existing_installation() {
+    print_status "Checking for common installation issues..."
+    
+    # Fix MongoDB replica set if needed
+    if systemctl is-active --quiet mongod; then
+        if ! mongosh --eval "rs.status().ok" 2>/dev/null | grep -q "1"; then
+            print_warning "MongoDB replica set not initialized. Fixing..."
+            mongosh --eval "rs.initiate()" || mongo --eval "rs.initiate()" || true
+            sleep 5
+        fi
+    fi
+    
+    # Fix Sharp module for ARM64 if needed
+    if [[ -d "$INSTALL_DIR/programs/server" ]]; then
+        ARCH=$(uname -m)
+        if [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
+            if systemctl is-active --quiet rocketchat && journalctl -u rocketchat -n 50 | grep -q "Could not load the \"sharp\" module"; then
+                print_warning "Sharp module issue detected on ARM64. Attempting to fix..."
+                systemctl stop rocketchat
+                su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && npm install --os=linux --cpu=arm64 sharp" || true
+                systemctl start rocketchat
+                sleep 10
+                if systemctl is-active --quiet rocketchat; then
+                    print_status "Sharp module fixed successfully!"
+                    return 0
+                fi
+            fi
+        fi
+    fi
+}
+
 # Check for existing installation
 check_existing_installation() {
     if systemctl is-active --quiet rocketchat 2>/dev/null; then
         print_warning "Rocket.Chat service is currently running!"
-        echo "This script will:"
-        echo "  - Stop the current Rocket.Chat service"
-        echo "  - Remove all application files in $INSTALL_DIR"
-        echo "  - Reinstall Rocket.Chat with latest version"
-        echo "  - Preserve your database data and messages"
         echo ""
-        read -p "Do you want to continue with the reinstallation? (y/N): " -n 1 -r
+        echo "Choose an option:"
+        echo "1) Fix existing installation issues"
+        echo "2) Reinstall Rocket.Chat (preserves database)"
+        echo "3) Cancel"
         echo ""
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            print_status "Installation cancelled by user"
-            exit 0
-        fi
+        read -p "Enter your choice (1-3): " -r
+        echo ""
+        case $REPLY in
+            1)
+                fix_existing_installation
+                print_status "Fix attempt completed. Check service status with: systemctl status rocketchat"
+                exit 0
+                ;;
+            2)
+                echo "This will:"
+                echo "  - Stop the current Rocket.Chat service"
+                echo "  - Remove all application files in $INSTALL_DIR"
+                echo "  - Reinstall Rocket.Chat with latest version"
+                echo "  - Preserve your database data and messages"
+                echo ""
+                read -p "Continue with reinstallation? (y/N): " -n 1 -r
+                echo ""
+                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    print_status "Installation cancelled by user"
+                    exit 0
+                fi
+                ;;
+            *)
+                print_status "Installation cancelled by user"
+                exit 0
+                ;;
+        esac
     elif [[ -d "$INSTALL_DIR" && "$(ls -A $INSTALL_DIR 2>/dev/null)" ]]; then
         print_warning "Existing Rocket.Chat installation found in $INSTALL_DIR"
         echo "This script will remove all files and reinstall Rocket.Chat."
