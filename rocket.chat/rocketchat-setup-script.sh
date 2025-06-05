@@ -37,6 +37,8 @@ SERVICE_USER="rocketchat"
 MONGO_VERSION="8.0"
 DOMAIN=""
 EMAIL=""
+NODE_PATH=""
+NPM_PATH=""
 
 # Function to get user input
 get_user_input() {
@@ -72,17 +74,34 @@ check_nodejs() {
 install_nodejs() {
     print_status "Installing Node.js 20.x..."
     
-    # Install Node.js repository
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    # Update package list first
+    apt-get update
     
-    # Install Node.js
+    # Install required packages for Node.js installation
+    apt-get install -y ca-certificates curl gnupg
+    
+    # Create directory for apt keyrings
+    mkdir -p /etc/apt/keyrings
+    
+    # Download and install NodeSource GPG key
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+    
+    # Add NodeSource repository
+    NODE_MAJOR=20
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+    
+    # Update package list with new repository
+    apt-get update
+    
+    # Install Node.js (includes npm)
     apt-get install -y nodejs
     
     # Verify installation
-    if command -v node &> /dev/null; then
+    if command -v node &> /dev/null && command -v npm &> /dev/null; then
         print_status "Node.js installed successfully (v$(node -v))"
+        print_status "npm installed successfully (v$(npm -v))"
     else
-        print_error "Failed to install Node.js"
+        print_error "Failed to install Node.js or npm"
         exit 1
     fi
 }
@@ -202,7 +221,14 @@ install_rocketchat() {
     
     print_status "Installing Rocket.Chat dependencies..."
     cd $INSTALL_DIR/programs/server
-    su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && npm install"
+    
+    # Ensure npm is available before using it
+    if ! command -v npm &> /dev/null; then
+        print_error "npm is not available. Please run the script again to install Node.js and npm first."
+        exit 1
+    fi
+    
+    su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && $NPM_PATH install"
     
     print_status "Rocket.Chat installed"
 }
