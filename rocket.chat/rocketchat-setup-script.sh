@@ -252,6 +252,13 @@ install_rocketchat() {
     # Install dependencies
     su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && $NPM_PATH install"
     
+    # Create .node_version.txt file with current Node.js version
+    print_status "Creating Node.js version file..."
+    NODE_VERSION=$(node -v | sed 's/^v//')  # Remove the 'v' prefix
+    echo "$NODE_VERSION" > $INSTALL_DIR/.node_version.txt
+    chown $SERVICE_USER:$SERVICE_USER $INSTALL_DIR/.node_version.txt
+    print_status "Created .node_version.txt with Node.js version: $NODE_VERSION"
+    
     # Fix Sharp module for ARM64 architecture if needed
     ARCH=$(uname -m)
     if [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
@@ -399,6 +406,15 @@ start_rocketchat() {
 # Fix existing installation issues
 fix_existing_installation() {
     print_status "Checking for common installation issues..."
+    
+    # Fix missing .node_version.txt file
+    if [[ ! -f "$INSTALL_DIR/.node_version.txt" ]]; then
+        print_warning "Missing .node_version.txt file. Creating..."
+        NODE_VERSION=$(node -v | sed 's/^v//')  # Remove the 'v' prefix
+        echo "$NODE_VERSION" > $INSTALL_DIR/.node_version.txt
+        chown $SERVICE_USER:$SERVICE_USER $INSTALL_DIR/.node_version.txt
+        print_status "Created .node_version.txt with Node.js version: $NODE_VERSION"
+    fi
     
     # Fix MongoDB replica set if needed
     if systemctl is-active --quiet mongod; then
