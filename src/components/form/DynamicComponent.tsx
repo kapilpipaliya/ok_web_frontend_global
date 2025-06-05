@@ -11,6 +11,7 @@ import {
   ErrorBoundary,
 } from "solid-js";
 import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
+import { clientOnly } from "@solidjs/start";
 import {
   PageRenderContextProvider,
   usePageRenderContext,
@@ -246,6 +247,46 @@ export function DynamicComponent(props: DynamicComponentProps) {
       return getFunctionArgumentWithValue();
     },
   });
+
+  // Create the main content component that will be wrapped conditionally
+  const ContentInner = () => (
+    <Switch>
+      <Match when={isHidden()}></Match>
+      <Match when={!component()}>NO INPUT {componentName() as string}</Match>
+
+      <Match
+        keyed
+        when={component() && (isNoPermissionCheck() || hasPermission())}
+      >
+        <ContentWrapper
+          meta={props.meta}
+          data={props.data}
+          children={props.children}
+          dynamicProps={dynamicProps}
+          mergedClasses={mergedClasses}
+          permissions={permissions}
+          component={component}
+          processedText={processedText}
+          disabled={
+            isNoPermissionCheck()
+              ? props.meta.P.disabled
+              : (props.disabled ??
+                previewStore?.isViewOnly ??
+                isDisabledByPermissions() ??
+                props.meta.P.disabled)
+          }
+          readOnly={isReadOnly}
+          ref={ref}
+          setRef={setRef}
+          isNoPermissionCheck={isNoPermissionCheck}
+        />
+      </Match>
+      <Match when={getGlobalStore(graph).P.isDevelopment}>
+        Hidden component
+      </Match>
+    </Switch>
+  );
+
   return (
     <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
       <Suspense>
@@ -269,40 +310,23 @@ export function DynamicComponent(props: DynamicComponentProps) {
       </Show> */}
         <PageRenderContextProvider store={repeaterStore}>
           <Switch>
-            <Match when={isHidden()}></Match>
-            <Match when={!component()}>
-              NO INPUT {componentName() as string}
+            <Match when={!previewStore.isDesignMode}>
+              <ContentInner />
             </Match>
-
-            <Match
-              keyed
-              when={component() && (isNoPermissionCheck() || hasPermission())}
-            >
-              <ContentWrapper
-                meta={props.meta}
-                data={props.data}
-                children={props.children}
-                dynamicProps={dynamicProps}
-                mergedClasses={mergedClasses}
-                permissions={permissions}
-                component={component}
-                processedText={processedText}
-                disabled={
-                  isNoPermissionCheck()
-                    ? props.meta.P.disabled
-                    : (props.disabled ??
-                      previewStore?.isViewOnly ??
-                      isDisabledByPermissions() ??
-                      props.meta.P.disabled)
-                }
-                readOnly={isReadOnly}
-                ref={ref}
-                setRef={setRef}
-                isNoPermissionCheck={isNoPermissionCheck}
-              />
-            </Match>
-            <Match when={getGlobalStore(graph).P.isDevelopment}>
-              Hidden component
+            <Match when={previewStore.isDesignMode}>
+              {(() => {
+                const PageAttrDnDWrapper = clientOnly(
+                  () =>
+                    import(
+                      "~/features/page_attr_render/page_attr_dnd_wrapper/components/PageAttrDnDWrapper"
+                    ),
+                );
+                return (
+                  <PageAttrDnDWrapper item={props.meta}>
+                    <ContentInner />
+                  </PageAttrDnDWrapper>
+                );
+              })()}
             </Match>
           </Switch>
         </PageRenderContextProvider>

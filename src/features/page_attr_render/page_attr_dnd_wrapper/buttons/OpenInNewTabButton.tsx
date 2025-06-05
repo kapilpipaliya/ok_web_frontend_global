@@ -8,6 +8,8 @@ import type { CssType } from "~/components/form/type/CssType";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 interface OpenInNewTabButtonProps {
   css?: CssType;
@@ -18,14 +20,16 @@ interface OpenInNewTabButtonProps {
 export function OpenInNewTabButton(props: Readonly<OpenInNewTabButtonProps>) {
   const [graph, setGraph] = useGraph();
   const layoutStoreId = useDesignerLayoutStore();
-
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
+  const getComponentName = () => parentRenderContext()?.context.componentName;
   const getCopmVertex = () =>
-    props.item.P.componentName
+    getComponentName()
       ? findVertexByLabelAndUniqueId(
           graph,
           "Component",
           "key",
-          props.item.P.componentName,
+          getComponentName()!,
         )
       : undefined;
   const handleOpenInNewTab = createOpenInNewTab(

@@ -4,7 +4,6 @@ import {
   useDesignerLayoutStore,
 } from "~/features/page_designer/context/LayoutContext";
 import { handleDragStart } from "~/features/page_designer/event_handler/handleDragStart";
-import { getComponentLabel } from "~/features/page_designer/functions/component/getComponentLabel";
 import { ICON_BUTTON_STYLES } from "~/pages/settings/constants";
 
 import { DeleteButton } from "../buttons/DeleteButton";
@@ -20,6 +19,8 @@ import { InsertButtons } from "../menus/InsertButtons";
 import { As } from "~/components/As";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 interface SelectedAttrConfigPopOverProps {
   item: Vertex;
@@ -31,9 +32,11 @@ export function SelectedAttrConfigPopOver(
   const layoutStoreId = useDesignerLayoutStore();
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId] as Vertex<PageLayoutObject>;
+  const parentItems = usePageRenderContext();
+  const parentRenderContext = () => getLastItem(parentItems)?.[0];
 
   const [graph, setGraph] = useGraph();
-  const getComponentName = () => getComponentLabel(graph, props.item);
+  const getComponentName = () => parentRenderContext()?.context.componentName;
 
   const iconSize = 20;
   return (
