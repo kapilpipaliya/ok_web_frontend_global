@@ -51,3 +51,7 @@ PORT: Change default port (3000)
 
 The script includes error handling, colored output for better readability, and comprehensive logging. It will also provide useful commands for managing your Rocket.Chat installation after setup is complete.
 Would you like me to add any additional features to the script, such as backup configuration or automatic updates?
+
+
+another way to install rocket.chat: https://www.youtube.com/watch?v=bbTjAxyAi50
+sudo bash rocketchat-setup-script.sh --mail-url "smtp://admin@decodeui.dev:kK11235813@@decodeui.dev:587"

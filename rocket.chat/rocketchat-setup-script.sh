@@ -41,10 +41,32 @@ NODE_PATH=""
 NPM_PATH=""
 SMTP_URL=""
 
+# Show help
+show_help() {
+    echo "Rocket.Chat Installation Script"
+    echo ""
+    echo "Usage: sudo bash $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --fix, -f              Fix common installation issues"
+    echo "  --fresh, --clean       Fresh install (WARNING: Deletes all data)"
+    echo "  --mail-url URL         Update MAIL_URL configuration"
+    echo "  --help, -h             Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  sudo bash $0                    # Normal installation"
+    echo "  sudo bash $0 --fix              # Fix installation issues"
+    echo "  sudo bash $0 --fresh            # Fresh install (deletes database)"
+    echo "  sudo bash $0 --mail-url 'smtp://user:pass@host:port'"
+    echo ""
+    exit 0
+}
+
 # Check command line arguments
 FIX_MODE=false
 MAIL_URL_MODE=false
 MAIL_URL_ARG=""
+FRESH_INSTALL=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -56,6 +78,13 @@ while [[ $# -gt 0 ]]; do
             MAIL_URL_MODE=true
             MAIL_URL_ARG="$2"
             shift 2
+            ;;
+        --fresh|--clean)
+            FRESH_INSTALL=true
+            shift
+            ;;
+        --help|-h)
+            show_help
             ;;
         *)
             shift
@@ -416,6 +445,30 @@ configure_firewall() {
     fi
 }
 
+# Clear MongoDB database
+clear_mongodb_database() {
+    print_warning "Clearing MongoDB database..."
+    
+    # Stop Rocket.Chat if running
+    if systemctl is-active --quiet rocketchat; then
+        print_status "Stopping Rocket.Chat service..."
+        systemctl stop rocketchat
+    fi
+    
+    # Drop the rocketchat database
+    print_status "Dropping rocketchat database..."
+    mongosh --eval "use rocketchat; db.dropDatabase();" || mongo --eval "use rocketchat; db.dropDatabase();" || true
+    
+    # Re-initialize replica set if needed
+    if ! mongosh --eval "rs.status().ok" 2>/dev/null | grep -q "1"; then
+        print_status "Re-initializing MongoDB replica set..."
+        mongosh --eval "rs.initiate()" || mongo --eval "rs.initiate()" || true
+        sleep 5
+    fi
+    
+    print_status "MongoDB database cleared"
+}
+
 # Start Rocket.Chat
 start_rocketchat() {
     print_status "Starting Rocket.Chat service..."
@@ -516,15 +569,40 @@ fix_existing_installation() {
 
 # Check for existing installation
 check_existing_installation() {
+    # If fresh install is requested, skip the menu and confirm database deletion
+    if [[ "$FRESH_INSTALL" == true ]]; then
+        print_warning "FRESH INSTALL REQUESTED!"
+        echo ""
+        echo "This will:"
+        echo "  - Stop and remove Rocket.Chat service"
+        echo "  - Delete all application files in $INSTALL_DIR"
+        echo "  - DROP THE ENTIRE ROCKETCHAT DATABASE"
+        echo "  - Reinstall everything from scratch"
+        echo ""
+        print_error "WARNING: ALL DATA WILL BE LOST!"
+        echo ""
+        read -p "Are you ABSOLUTELY SURE you want to continue? Type 'yes' to confirm: " -r
+        echo ""
+        if [[ "$REPLY" != "yes" ]]; then
+            print_status "Fresh install cancelled by user"
+            exit 0
+        fi
+        
+        # Clear the database
+        clear_mongodb_database
+        return
+    fi
+    
     if systemctl is-active --quiet rocketchat 2>/dev/null; then
         print_warning "Rocket.Chat service is currently running!"
         echo ""
         echo "Choose an option:"
         echo "1) Fix existing installation issues"
         echo "2) Reinstall Rocket.Chat (preserves database)"
-        echo "3) Cancel"
+        echo "3) Fresh install (DELETES ALL DATA)"
+        echo "4) Cancel"
         echo ""
-        read -p "Enter your choice (1-3): " -r
+        read -p "Enter your choice (1-4): " -r
         echo ""
         case $REPLY in
             1)
@@ -543,6 +621,18 @@ check_existing_installation() {
                 echo ""
                 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
                     print_status "Installation cancelled by user"
+                    exit 0
+                fi
+                ;;
+            3)
+                print_error "WARNING: This will DELETE ALL DATA!"
+                echo ""
+                read -p "Type 'yes' to confirm fresh install: " -r
+                echo ""
+                if [[ "$REPLY" == "yes" ]]; then
+                    clear_mongodb_database
+                else
+                    print_status "Fresh install cancelled"
                     exit 0
                 fi
                 ;;
