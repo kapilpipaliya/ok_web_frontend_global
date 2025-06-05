@@ -48,8 +48,8 @@ get_user_input() {
 
 # Check and install Node.js if needed
 check_nodejs() {
-    if ! command -v node &> /dev/null; then
-        print_warning "Node.js is not installed. Installing Node.js..."
+    if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+        print_warning "Node.js or npm is not installed. Installing Node.js and npm..."
         install_nodejs
     else
         NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
@@ -58,6 +58,11 @@ check_nodejs() {
             install_nodejs
         else
             print_status "Node.js is already installed (v$(node -v))"
+            # Check if npm is available
+            if ! command -v npm &> /dev/null; then
+                print_warning "npm is not found. Installing npm..."
+                apt-get install -y npm
+            fi
         fi
     fi
     get_node_paths
@@ -84,10 +89,21 @@ install_nodejs() {
 
 # Get Node.js and npm paths
 get_node_paths() {
-    NODE_PATH=$(which node)
-    NPM_PATH=$(which npm)
-    print_status "Using Node.js from: $NODE_PATH"
-    print_status "Using npm from: $NPM_PATH"
+    if command -v node &> /dev/null; then
+        NODE_PATH=$(which node)
+        print_status "Using Node.js from: $NODE_PATH"
+    else
+        print_error "Node.js not found in PATH"
+        exit 1
+    fi
+    
+    if command -v npm &> /dev/null; then
+        NPM_PATH=$(which npm)
+        print_status "Using npm from: $NPM_PATH"
+    else
+        print_error "npm not found in PATH"
+        exit 1
+    fi
 }
 
 # Install MongoDB
