@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Rocket.Chat Installation Script for Ubuntu
-# Prerequisites: Node.js already installed
 # Run with: sudo bash install-rocketchat.sh
 
 set -e  # Exit on error
@@ -36,7 +35,6 @@ ROCKETCHAT_VERSION="latest"
 INSTALL_DIR="/opt/Rocket.Chat"
 SERVICE_USER="rocketchat"
 MONGO_VERSION="8.0"
-NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
 DOMAIN=""
 EMAIL=""
 
@@ -48,30 +46,48 @@ get_user_input() {
     fi
 }
 
-# Get Node.js and npm paths for Volta installations
+# Check and install Node.js if needed
+check_nodejs() {
+    if ! command -v node &> /dev/null; then
+        print_warning "Node.js is not installed. Installing Node.js..."
+        install_nodejs
+    else
+        NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
+        if [[ $NODE_VERSION -lt 14 ]]; then
+            print_warning "Node.js version is too old (v$NODE_VERSION). Installing newer version..."
+            install_nodejs
+        else
+            print_status "Node.js is already installed (v$(node -v))"
+        fi
+    fi
+    get_node_paths
+}
+
+# Install Node.js
+install_nodejs() {
+    print_status "Installing Node.js 20.x..."
+    
+    # Install Node.js repository
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    
+    # Install Node.js
+    apt-get install -y nodejs
+    
+    # Verify installation
+    if command -v node &> /dev/null; then
+        print_status "Node.js installed successfully (v$(node -v))"
+    else
+        print_error "Failed to install Node.js"
+        exit 1
+    fi
+}
+
+# Get Node.js and npm paths
 get_node_paths() {
     NODE_PATH=$(which node)
     NPM_PATH=$(which npm)
     print_status "Using Node.js from: $NODE_PATH"
     print_status "Using npm from: $NPM_PATH"
-}
-
-# Check Node.js version
-check_nodejs() {
-    print_status "Checking Node.js version..."
-    if ! command -v node &> /dev/null; then
-        print_error "Node.js is not installed!"
-        exit 1
-    fi
-    
-    if [ "$NODE_VERSION" -lt 14 ]; then
-        print_error "Node.js version 14.x or higher is required. Current version: $(node -v)"
-        exit 1
-    fi
-    print_status "Node.js $(node -v) detected"
-    
-    # Get paths for Volta or other installations
-    get_node_paths
 }
 
 # Install MongoDB
@@ -170,10 +186,7 @@ install_rocketchat() {
     
     print_status "Installing Rocket.Chat dependencies..."
     cd $INSTALL_DIR/programs/server
-    # Run npm install as root since npm is installed via Volta for root user
-    npm install --production
-    # Change ownership back to service user
-    chown -R $SERVICE_USER:$SERVICE_USER $INSTALL_DIR
+    su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && npm install"
     
     print_status "Rocket.Chat installed"
 }
