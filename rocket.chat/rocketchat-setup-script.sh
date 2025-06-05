@@ -40,6 +40,13 @@ EMAIL=""
 NODE_PATH=""
 NPM_PATH=""
 
+# Check if running fix mode
+if [[ "$1" == "--fix" ]] || [[ "$1" == "-f" ]]; then
+    FIX_MODE=true
+else
+    FIX_MODE=false
+fi
+
 # Function to get user input
 get_user_input() {
     read -p "Enter your domain name (e.g., chat.example.com) or press Enter to skip SSL setup: " DOMAIN
@@ -249,7 +256,15 @@ install_rocketchat() {
     ARCH=$(uname -m)
     if [[ "$ARCH" == "aarch64" ]] || [[ "$ARCH" == "arm64" ]]; then
         print_status "Detected ARM64 architecture. Installing sharp module with platform-specific build..."
-        su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && $NPM_PATH install --os=linux --cpu=arm64 sharp" || true
+        # Ensure correct permissions before installing
+        chown -R $SERVICE_USER:$SERVICE_USER $INSTALL_DIR
+        # Install sharp module with proper permissions
+        su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && $NPM_PATH install --os=linux --cpu=arm64 sharp" || {
+            print_warning "Failed to install sharp as $SERVICE_USER. Attempting with elevated permissions..."
+            cd $INSTALL_DIR/programs/server
+            npm install --os=linux --cpu=arm64 sharp
+            chown -R $SERVICE_USER:$SERVICE_USER $INSTALL_DIR
+        }
     fi
     
     print_status "Rocket.Chat installed"
@@ -401,12 +416,26 @@ fix_existing_installation() {
             if systemctl is-active --quiet rocketchat && journalctl -u rocketchat -n 50 | grep -q "Could not load the \"sharp\" module"; then
                 print_warning "Sharp module issue detected on ARM64. Attempting to fix..."
                 systemctl stop rocketchat
-                su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && npm install --os=linux --cpu=arm64 sharp" || true
+                
+                # Fix permissions first
+                print_status "Fixing file permissions..."
+                chown -R $SERVICE_USER:$SERVICE_USER $INSTALL_DIR
+                
+                # Try to install sharp module
+                su - $SERVICE_USER -c "cd $INSTALL_DIR/programs/server && npm install --os=linux --cpu=arm64 sharp" || {
+                    print_warning "Failed to install as $SERVICE_USER. Trying with elevated permissions..."
+                    cd $INSTALL_DIR/programs/server
+                    npm install --os=linux --cpu=arm64 sharp
+                    chown -R $SERVICE_USER:$SERVICE_USER $INSTALL_DIR
+                }
+                
                 systemctl start rocketchat
                 sleep 10
                 if systemctl is-active --quiet rocketchat; then
                     print_status "Sharp module fixed successfully!"
                     return 0
+                else
+                    print_error "Rocket.Chat still failing. Check logs with: journalctl -u rocketchat -f"
                 fi
             fi
         fi
@@ -470,6 +499,15 @@ main() {
     echo "   Rocket.Chat Installation Script    "
     echo "======================================"
     echo ""
+    
+    # If running in fix mode, just run the fix function
+    if [[ "$FIX_MODE" == true ]]; then
+        print_status "Running in fix mode..."
+        get_node_paths
+        fix_existing_installation
+        print_status "Fix completed. Check service status with: systemctl status rocketchat"
+        exit 0
+    fi
     
     get_user_input
     
