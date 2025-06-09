@@ -95,6 +95,9 @@ export interface FunctionArgumentBaseType {
   setColorMode: (mode: ColorMode) => void;
   resetTheme: () => void;
   currentMode: () => ColorMode;
+  // User settings
+  userSetting: Record<string, unknown> | undefined;
+  saveUserSetting: (settings: Record<string, unknown>) => void;
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

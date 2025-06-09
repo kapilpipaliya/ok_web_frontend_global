@@ -81,6 +81,7 @@ if (window) {
   window.downloadFile = downloadFile;
   window.captureElementToPng = captureElementToPng;
   window.captureFullElementToPng = captureFullElementToPng;
+  // captureFullElementToPng(document.querySelector('.layout')).then(downloadFile)
 }
 
 export async function capturePreview(

@@ -1,0 +1,505 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FullChandHeader",
+        props: '''
+return {};
+'''
+      }
+    },
+    {
+      id: "pageHeader",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary_light_100} 0%, ${args.theme.var.color.primary_light_50} 100%);
+  padding: 3rem 1rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "pageTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "His Inspiration"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mainContent",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1000px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "shrimadSection",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "shrimadTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Shrimad Rajchandra"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "shrimadContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 3rem;
+  align-items: start;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "shrimadImage",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "shrimadPhoto",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "https://www.fulchandshastri.com/wp-content/uploads/2016/09/Shrimad-Rajchandra-240x300.jpg",
+  alt: "Shrimad Rajchandra",
+  width: 240,
+  height: 300
+};
+''',
+        css: '''
+return `._id {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  height: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "shrimadText",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "shrimadPara1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Since childhood, Fulchand has been deeply inspired by Shrimad Rajchandra, who he considers his spiritual guru. Shrimad Rajchandra is considered to be the most spiritually progressive soul to have been on the earth in the last 2000 years. He had extraordinary powers of recollection and could expand his awareness to record 100 simultaneous tasks in his memory and recall every one of them without a single lapse."
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "shrimadPara2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Shrimad, once, received a flow of divine knowledge, and intuitively penned a book in less than 90 minutes that is considered the most authentic scripture in Jainism to learn about the path to Moksha. This scripture was called Atma Siddhi Shastra and it was one of Shrimad's wish to spread this scripture around the world. Since he passed away at a young age of 33 years old, his dream remained unfulfilled. Fulchand believes he came to the earth to fulfill this dream of his Guru. Using his miraculous linguistic ability, he translated the scripture into hundreds of languages of the world and got the book established as 142 countries of the world (and the scripture has recently reached 143 entries, twice in the list as a benefactor)."
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "kanjiSection",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+'''
+      }
+    },
+    {
+      id: "kanjiTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Shri Kanjiswami"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "kanjiContent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+  align-items: start;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "kanjiText",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "kanjiPara1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Pujya Gurudev Shri Kanjiswami was born in Umarala, Gujarat in V.S. 1946 (1889 AD). Kanjiswami was instrumental in starting a new revolution in the percept and practice of Jainism. Happy putting thousands of souls on the true path of salvation. The philosophy and truth have always been there since time immemorial but their true exponents were not in this modern age. It was already retained in the Agams, as propounded by the Tirthankara, especially Mahavir Bhagwan."
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "kanjiPara2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "However, the knowledge was clouded and in the absence of it's true interpretations, practitioners were led to believe and practice certain principles, which were not in accordance with what Mahavir Bhagwan had said. It was all a case of clinging to the form rather than the substance, and Kriyajada, false belief was reigning supreme."
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "kanjiPara3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Kanjiswami shed new light on what the Lord had preached and showed us the true eternal path. Gurudev gave the most correct interpretation of the Agams, and unveiled various principles. Using the glory of his own Self-Realisation, he showed how the soul was completely detached from each worldly surroundings and the true darshan, gnan and charitra were the basis of true religion. Nobody can understand true religion, unless he follows the three Fold basis in it's entirety."
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "kanjiImage",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    order: -1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "kanjiPhoto",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "https://www.fulchandshastri.com/wp-content/uploads/2016/09/kanjiswami-240x300.jpg",
+  alt: "Shri Kanjiswami",
+  width: 240,
+  height: 300
+};
+''',
+        css: '''
+return `._id {
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  height: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "footer",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "FullChandFooter",
+        props: '''
+return {};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "pageHeader" },
+    { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
+    { id: "e4", T: "Attr", S: "root", E: "mainContent" },
+    { id: "e5", T: "Attr", S: "mainContent", E: "container" },
+    { id: "e6", T: "Attr", S: "container", E: "shrimadSection" },
+    { id: "e7", T: "Attr", S: "shrimadSection", E: "shrimadTitle" },
+    { id: "e8", T: "Attr", S: "shrimadSection", E: "shrimadContent" },
+    { id: "e9", T: "Attr", S: "shrimadContent", E: "shrimadImage" },
+    { id: "e10", T: "Attr", S: "shrimadImage", E: "shrimadPhoto" },
+    { id: "e11", T: "Attr", S: "shrimadContent", E: "shrimadText" },
+    { id: "e12", T: "Attr", S: "shrimadText", E: "shrimadPara1" },
+    { id: "e13", T: "Attr", S: "shrimadText", E: "shrimadPara2" },
+    { id: "e14", T: "Attr", S: "container", E: "kanjiSection" },
+    { id: "e15", T: "Attr", S: "kanjiSection", E: "kanjiTitle" },
+    { id: "e16", T: "Attr", S: "kanjiSection", E: "kanjiContent" },
+    { id: "e17", T: "Attr", S: "kanjiContent", E: "kanjiText" },
+    { id: "e18", T: "Attr", S: "kanjiText", E: "kanjiPara1" },
+    { id: "e19", T: "Attr", S: "kanjiText", E: "kanjiPara2" },
+    { id: "e20", T: "Attr", S: "kanjiText", E: "kanjiPara3" },
+    { id: "e21", T: "Attr", S: "kanjiContent", E: "kanjiImage" },
+    { id: "e22", T: "Attr", S: "kanjiImage", E: "kanjiPhoto" },
+    { id: "e23", T: "Attr", S: "root", E: "footer" }
+  ]
+}

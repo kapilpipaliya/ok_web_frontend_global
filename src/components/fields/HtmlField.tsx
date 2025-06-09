@@ -80,7 +80,6 @@ export function HtmlField(
     "children",
     "text",
     "childrenBefore",
-    "src",
   ]);
 
   const asLowerCase = createMemo(() => local.as?.toLowerCase());
@@ -165,7 +164,7 @@ export function HtmlField(
           loading="lazy"
           {...(others as JSX.ImgHTMLAttributes<HTMLImageElement>)}
           src={replacePlaceholderWithUrl(
-            local.src ?? "",
+            others.src ?? "",
             "$0Src",
             meta(),
             graph,

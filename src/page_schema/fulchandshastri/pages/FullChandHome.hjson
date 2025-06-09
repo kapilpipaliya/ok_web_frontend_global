@@ -1,0 +1,670 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FullChandHeader",
+        props: '''
+return {};
+'''
+      }
+    },
+    {
+      id: "heroSection",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "FullChandHeroSection",
+        props: '''
+return {};
+'''
+      }
+    },
+    {
+      id: "mainContent",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  padding: 3rem 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "welcomeSection",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "welcomeTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Welcome to Fulchand Shastri's Spiritual Haven"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.3;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "welcomeDesc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Fulchand is an enlightened master who has devoted his life to spreading the teachings of his spiritual guru, Shrimad Rajchandra, in more than 220 countries around the world. Though he is strongly rooted in the Jainism theory of Samyak Darshan (Enlightenment) and Moksha (Nirvana), he aims to share this divine knowledge with every soul in the world that is ready to acquire it."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1.125rem;
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "featuresGrid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FullChandFeatureCard",
+        props: '''
+return {
+  icon: "carbon:book",
+  title: "Sacred Books",
+  description: "Access a comprehensive collection of spiritual texts and writings that guide souls on their journey to enlightenment.",
+  link: "/books",
+  linkText: "Explore Books",
+  align: "center"
+};
+'''
+      }
+    },
+    {
+      id: "feature2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "FullChandFeatureCard",
+        props: '''
+return {
+  icon: "carbon:video",
+  title: "Discourses",
+  description: "Watch thousands of hours of enlightening discourses available in multiple languages for seekers worldwide.",
+  link: "/discourses",
+  linkText: "Watch Discourses",
+  align: "center"
+};
+'''
+      }
+    },
+    {
+      id: "feature3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "FullChandFeatureCard",
+        props: '''
+return {
+  icon: "carbon:calendar",
+  title: "Upcoming Events",
+  description: "Stay updated with the schedule of spiritual gatherings, discourses, and special programs across the globe.",
+  link: "/schedule",
+  linkText: "View Schedule",
+  align: "center"
+};
+'''
+      }
+    },
+    {
+      id: "quote",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "FullChandQuoteSection",
+        props: '''
+return {
+  text: "The soul's journey towards enlightenment begins with a single step of self-realization. Every moment is an opportunity to awaken to your true nature.",
+  author: "Fulchand Shastri"
+};
+'''
+      }
+    },
+    {
+      id: "missionSection",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  padding: 3rem 2rem;
+  border-radius: 1rem;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Our Mission"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionGrid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionItem1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "missionIcon1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionIconSvg1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:earth",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "missionText1",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Spreading divine knowledge to souls across 220+ countries"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1rem;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionItem2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "missionIcon2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionIconSvg2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:education",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "missionText2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Teaching the path of Samyak Darshan and Moksha"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1rem;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionItem3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "missionIcon3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionIconSvg3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-multiple",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "missionText3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Welcoming all souls regardless of background or beliefs"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1rem;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionItem4",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "missionIcon4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 4rem;
+  height: 4rem;
+  background: ${args.theme.var.color.primary_light_100};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "missionIconSvg4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:favorite",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "missionText4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Compassionately guiding seekers on their spiritual journey"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_200};
+  font-size: 1rem;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "footer",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "FullChandFooter",
+        props: '''
+return {};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "heroSection" },
+    { id: "e3", T: "Attr", S: "root", E: "mainContent" },
+    { id: "e4", T: "Attr", S: "mainContent", E: "container" },
+    { id: "e5", T: "Attr", S: "container", E: "welcomeSection" },
+    { id: "e6", T: "Attr", S: "welcomeSection", E: "welcomeTitle" },
+    { id: "e7", T: "Attr", S: "welcomeSection", E: "welcomeDesc" },
+    { id: "e8", T: "Attr", S: "container", E: "featuresGrid" },
+    { id: "e9", T: "Attr", S: "featuresGrid", E: "feature1" },
+    { id: "e10", T: "Attr", S: "featuresGrid", E: "feature2" },
+    { id: "e11", T: "Attr", S: "featuresGrid", E: "feature3" },
+    { id: "e12", T: "Attr", S: "container", E: "quote" },
+    { id: "e13", T: "Attr", S: "container", E: "missionSection" },
+    { id: "e14", T: "Attr", S: "missionSection", E: "missionTitle" },
+    { id: "e15", T: "Attr", S: "missionSection", E: "missionGrid" },
+    { id: "e16", T: "Attr", S: "missionGrid", E: "missionItem1" },
+    { id: "e17", T: "Attr", S: "missionItem1", E: "missionIcon1" },
+    { id: "e18", T: "Attr", S: "missionIcon1", E: "missionIconSvg1" },
+    { id: "e19", T: "Attr", S: "missionItem1", E: "missionText1" },
+    { id: "e20", T: "Attr", S: "missionGrid", E: "missionItem2" },
+    { id: "e21", T: "Attr", S: "missionItem2", E: "missionIcon2" },
+    { id: "e22", T: "Attr", S: "missionIcon2", E: "missionIconSvg2" },
+    { id: "e23", T: "Attr", S: "missionItem2", E: "missionText2" },
+    { id: "e24", T: "Attr", S: "missionGrid", E: "missionItem3" },
+    { id: "e25", T: "Attr", S: "missionItem3", E: "missionIcon3" },
+    { id: "e26", T: "Attr", S: "missionIcon3", E: "missionIconSvg3" },
+    { id: "e27", T: "Attr", S: "missionItem3", E: "missionText3" },
+    { id: "e28", T: "Attr", S: "missionGrid", E: "missionItem4" },
+    { id: "e29", T: "Attr", S: "missionItem4", E: "missionIcon4" },
+    { id: "e30", T: "Attr", S: "missionIcon4", E: "missionIconSvg4" },
+    { id: "e31", T: "Attr", S: "missionItem4", E: "missionText4" },
+    { id: "e33", T: "Attr", S: "root", E: "footer" }
+  ]
+}

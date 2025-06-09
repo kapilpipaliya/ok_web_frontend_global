@@ -18,6 +18,7 @@ import {
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { DynamicPropsType } from "~/components/form/dynamic_component/functions/DynamicPropsType";
 import type { PermissionsObject } from "~/components/form/dynamic_component/hooks/useComponentPermissions";
+import {mergeRefs} from "@solid-primitives/refs";
 
 // Props for the content component
 type ContentProps = {
@@ -78,7 +79,7 @@ export function Content(props: ContentProps) {
           disabled={props.disabled}
           props={null}
           readOnly={props.readOnly()}
-          ref={props.setRef}
+          ref={mergeRefs(props.setRef, props.dynamicProps().ref)}
         >
           <Show
             fallback={

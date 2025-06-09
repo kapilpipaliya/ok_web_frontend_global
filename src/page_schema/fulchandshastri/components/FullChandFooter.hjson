@@ -1,0 +1,148 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer"
+};
+''',
+        css: '''
+return `._id {
+  background: #2a1810;
+  color: #d4a574;
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  margin-top: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "copyright",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentYear = new Date().getFullYear();
+return {
+  as: "div",
+  text: `Copyright © ${currentYear} Fulchand Shastri`
+};
+''',
+        css: '''
+return `._id {
+  color: #d4a574;
+}`;
+'''
+      }
+    },
+    {
+      id: "designCredit",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d4a574;
+}`;
+'''
+      }
+    },
+    {
+      id: "designText",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Design by"
+};
+'''
+      }
+    },
+    {
+      id: "askLink",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "https://askumarala.com",
+  text: "ASK Umarala",
+  target: "_blank",
+  rel: "noopener noreferrer"
+};
+''',
+        css: '''
+return `._id {
+  color: #d4a574;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: #e8c8a0;
+    text-decoration: underline;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "container" },
+    { id: "e2", T: "Attr", S: "container", E: "copyright" },
+    { id: "e3", T: "Attr", S: "container", E: "designCredit" },
+    { id: "e4", T: "Attr", S: "designCredit", E: "designText" },
+    { id: "e5", T: "Attr", S: "designCredit", E: "askLink" }
+  ]
+}

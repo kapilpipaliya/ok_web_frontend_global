@@ -1,0 +1,810 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_100 : args.theme.var.color.background_light_50};
+  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_100 : args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FullChandHeader"
+      }
+    },
+    {
+      id: "hero",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%);
+  color: white;
+  padding: 4rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '🕉️';
+    position: absolute;
+    font-size: 300px;
+    opacity: 0.05;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "heroTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "આત્મ સાધના નિત્ય ક્રમ"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "heroSubtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "દૈનિક આધ્યાત્મિક સાધનાનો વ્યવસ્થિત માર્ગ"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "content",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "introSection",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "introTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "નિત્ય ક્રમનું મહત્વ"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  color: #4a148c;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    {
+      id: "introText",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "આત્મ સાધના નિત્ય ક્રમ એ દૈનિક આધ્યાત્મિક અભ્યાસનો એક વ્યવસ્થિત કાર્યક્રમ છે જે સાધકને આત્મ-સાક્ષાત્કારના માર્ગે અગ્રસર કરે છે. આ ક્રમ અનુસાર દરરોજ નિયમિત રીતે સાધના કરવાથી મન શાંત થાય છે, એકાગ્રતા વધે છે અને આત્મિક શક્તિનો વિકાસ થાય છે."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 0 auto;
+  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "scheduleSection",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "scheduleTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "દૈનિક સાધના ક્રમ",
+  style: { textAlign: "center" }
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  color: #4a148c;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    {
+      id: "scheduleGrid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "scheduleData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "schedule",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      id: 1,
+      time: "પ્રાતઃકાળ ૪:૦૦ - ૫:૦૦",
+      title: "બ્રહ્મમુહૂર્ત સાધના",
+      activities: [
+        "સ્નાન અને શુદ્ધિકરણ",
+        "ગુરુ વંદના",
+        "મંત્ર જાપ (૧૦૮ માળા)",
+        "પ્રાણાયામ (૧૫ મિનિટ)"
+      ]
+    },
+    {
+      id: 2,
+      time: "પ્રાતઃકાળ ૫:૦૦ - ૬:૩૦",
+      title: "ધ્યાન અને સ્વાધ્યાય",
+      activities: [
+        "ધ્યાન (૪૫ મિનિટ)",
+        "આત્મસિદ્ધિ શાસ્ત્ર પારાયણ",
+        "ગુરુવાણી અભ્યાસ",
+        "આત્મચિંતન"
+      ]
+    },
+    {
+      id: 3,
+      time: "સવાર ૬:૩૦ - ૮:૦૦",
+      title: "યોગ અને પ્રાર્થના",
+      activities: [
+        "સૂર્ય નમસ્કાર",
+        "યોગાસન (૩૦ મિનિટ)",
+        "પ્રભાત પ્રાર્થના",
+        "ભક્તિ ગીતો"
+      ]
+    },
+    {
+      id: 4,
+      time: "સાંજ ૬:૦૦ - ૭:૩૦",
+      title: "સંધ્યા સાધના",
+      activities: [
+        "સંધ્યા આરતી",
+        "મંત્ર જાપ",
+        "સત્સંગ પઠન",
+        "આત્મનિરીક્ષણ"
+      ]
+    },
+    {
+      id: 5,
+      time: "રાત્રિ ૮:૩૦ - ૯:૩૦",
+      title: "રાત્રિ સાધના",
+      activities: [
+        "દિવસની સમીક્ષા",
+        "ક્ષમા પ્રાર્થના",
+        "આગામી દિવસનું આયોજન",
+        "શયન પૂર્વ ધ્યાન (૧૫ મિનિટ)"
+      ]
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "scheduleCard",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const schedule = args.contextData.schedule;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_100};
+  padding: 2rem;
+  border-radius: 1rem;
+  border-left: 4px solid #7b1fa2;
+}`;
+'''
+      }
+    },
+    {
+      id: "scheduleHeader",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "scheduleTime",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const schedule = args.contextData.schedule;
+return {
+  as: "span",
+  text: schedule.time
+};
+''',
+        css: '''
+return `._id {
+  background: #7b1fa2;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "scheduleTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const schedule = args.contextData.schedule;
+return {
+  as: "h3",
+  text: schedule.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  color: #4a148c;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    {
+      id: "scheduleActivities",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "activitiesData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "activity",
+        loop: true,
+        props: '''
+const schedule = args.contextData.schedule;
+return {
+  data: schedule.activities.map((activity, index) => ({
+    id: index + 1,
+    text: activity
+  }))
+};
+'''
+      }
+    },
+    {
+      id: "activityItem",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const activity = args.contextData.activity;
+return {
+  as: "li",
+  text: activity.text
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+  
+  &::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #7b1fa2;
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "benefitsSection",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "benefitsTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "નિત્ય ક્રમના લાભો",
+  style: { textAlign: "center" }
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  color: #4a148c;
+  margin-bottom: 3rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    {
+      id: "benefitsGrid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "benefitsData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "benefit",
+        loop: true,
+        props: '''
+return {
+  data: [
+    {
+      id: 1,
+      icon: "carbon:face-satisfied",
+      title: "માનસિક શાંતિ",
+      description: "નિયમિત સાધનાથી મન શાંત અને સ્થિર થાય છે"
+    },
+    {
+      id: 2,
+      icon: "carbon:chart-line",
+      title: "આધ્યાત્મિક પ્રગતિ",
+      description: "આત્મજ્ઞાનના માર્ગે સતત અગ્રસર થવામાં મદદ મળે છે"
+    },
+    {
+      id: 3,
+      icon: "carbon:health-cross",
+      title: "શારીરિક સ્વાસ્થ્ય",
+      description: "યોગ અને પ્રાણાયામથી શરીર સ્વસ્થ રહે છે"
+    },
+    {
+      id: 4,
+      icon: "carbon:user-certification",
+      title: "આત્મશુદ્ધિ",
+      description: "વિકારોનો નાશ થઈ આત્મા શુદ્ધ બને છે"
+    },
+    {
+      id: 5,
+      icon: "carbon:idea",
+      title: "બુદ્ધિ વિકાસ",
+      description: "સ્વાધ્યાયથી બુદ્ધિ તીક્ષ્ણ અને વિવેકશીલ બને છે"
+    },
+    {
+      id: 6,
+      icon: "carbon:partnership",
+      title: "ગુરુ કૃપા",
+      description: "નિયમિત સાધનાથી ગુરુની વિશેષ કૃપા પ્રાપ્ત થાય છે"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "benefitCard",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "FullChandFeatureCard",
+        props: '''
+const benefit = args.contextData.benefit;
+return {
+  icon: benefit.icon,
+  title: benefit.title,
+  description: benefit.description
+};
+'''
+      }
+    },
+    {
+      id: "guidelinesSection",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.mode === 'dark' ? args.theme.var.color.background_dark_200 : args.theme.var.color.background_light_50};
+  padding: 3rem;
+  border-radius: 1rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "guidelinesTitle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "મહત્વપૂર્ણ સૂચનાઓ"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  color: #4a148c;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    {
+      id: "guidelinesList",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+}`;
+'''
+      }
+    },
+    {
+      id: "guidelinesData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "guideline",
+        loop: true,
+        props: '''
+return {
+  data: [
+    { id: 1, text: "સાધના હંમેશા સ્વચ્છ સ્થાને અને શુદ્ધ વસ્ત્રો પહેરીને કરવી" },
+    { id: 2, text: "નિયમિતતા જાળવવી અત્યંત મહત્વપૂર્ણ છે - દરરોજ સમાન સમયે સાધના કરવી" },
+    { id: 3, text: "સાધના દરમિયાન મૌન પાળવું અને મનને એકાગ્ર રાખવું" },
+    { id: 4, text: "ગુરુની આજ્ઞા અને માર્ગદર્શન અનુસાર જ સાધના કરવી" },
+    { id: 5, text: "સાત્વિક આહાર લેવો અને બ્રહ્મચર્યનું પાલન કરવું" },
+    { id: 6, text: "સાધનાના અનુભવો ગુરુ સિવાય અન્ય કોઈને ન કહેવા" }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "guidelineItem",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const guideline = args.contextData.guideline;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "guidelineIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  height: 24,
+  width: 24,
+  style: { color: "#7b1fa2", flexShrink: 0, marginTop: "2px" }
+};
+'''
+      }
+    },
+    {
+      id: "guidelineText",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const guideline = args.contextData.guideline;
+return {
+  as: "p",
+  text: guideline.text
+};
+''',
+        css: '''
+return `._id {
+  line-height: 1.6;
+  color: ${args.theme.mode === 'dark' ? args.theme.var.color.text_light_200 : args.theme.var.color.text_dark_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "FullChandFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "hero" },
+    { id: "e3", T: "Attr", S: "hero", E: "heroTitle" },
+    { id: "e4", T: "Attr", S: "hero", E: "heroSubtitle" },
+    { id: "e5", T: "Attr", S: "root", E: "content" },
+    { id: "e6", T: "Attr", S: "content", E: "introSection" },
+    { id: "e7", T: "Attr", S: "introSection", E: "introTitle" },
+    { id: "e8", T: "Attr", S: "introSection", E: "introText" },
+    { id: "e9", T: "Attr", S: "content", E: "scheduleSection" },
+    { id: "e10", T: "Attr", S: "scheduleSection", E: "scheduleTitle" },
+    { id: "e11", T: "Attr", S: "scheduleSection", E: "scheduleGrid" },
+    { id: "e12", T: "Attr", S: "scheduleGrid", E: "scheduleData" },
+    { id: "e13", T: "Attr", S: "scheduleData", E: "scheduleCard" },
+    { id: "e14", T: "Attr", S: "scheduleCard", E: "scheduleHeader" },
+    { id: "e15", T: "Attr", S: "scheduleHeader", E: "scheduleTime" },
+    { id: "e16", T: "Attr", S: "scheduleHeader", E: "scheduleTitle" },
+    { id: "e17", T: "Attr", S: "scheduleCard", E: "scheduleActivities" },
+    { id: "e18", T: "Attr", S: "scheduleActivities", E: "activitiesData" },
+    { id: "e19", T: "Attr", S: "activitiesData", E: "activityItem" },
+    { id: "e20", T: "Attr", S: "content", E: "benefitsSection" },
+    { id: "e21", T: "Attr", S: "benefitsSection", E: "benefitsTitle" },
+    { id: "e22", T: "Attr", S: "benefitsSection", E: "benefitsGrid" },
+    { id: "e23", T: "Attr", S: "benefitsGrid", E: "benefitsData" },
+    { id: "e24", T: "Attr", S: "benefitsData", E: "benefitCard" },
+    { id: "e25", T: "Attr", S: "content", E: "guidelinesSection" },
+    { id: "e26", T: "Attr", S: "guidelinesSection", E: "guidelinesTitle" },
+    { id: "e27", T: "Attr", S: "guidelinesSection", E: "guidelinesList" },
+    { id: "e28", T: "Attr", S: "guidelinesList", E: "guidelinesData" },
+    { id: "e29", T: "Attr", S: "guidelinesData", E: "guidelineItem" },
+    { id: "e30", T: "Attr", S: "guidelineItem", E: "guidelineIcon" },
+    { id: "e31", T: "Attr", S: "guidelineItem", E: "guidelineText" },
+    { id: "e32", T: "Attr", S: "root", E: "footer" }
+  ]
+}

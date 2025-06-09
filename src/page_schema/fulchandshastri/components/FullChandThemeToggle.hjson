@@ -1,0 +1,65 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentMode = args.currentMode();
+const isDarkMode = currentMode === 'dark';
+return {
+  as: "button",
+  onClick: () => {
+    args.toggleTheme()
+  },
+  title: isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  color: inherit;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+  
+  &:active {
+    opacity: 0.5;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentMode = args.currentMode();
+const isDarkMode = currentMode === 'dark';
+return {
+  as: "icon",
+  icon: isDarkMode ? "carbon:sun" : "carbon:moon",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "icon" }
+  ]
+}

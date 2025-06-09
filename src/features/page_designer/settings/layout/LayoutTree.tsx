@@ -793,6 +793,7 @@ export function LayoutTree() {
           flex: 1;
           scroll-behavior: smooth;
         }\`;`}
+        class="layouttree"
         ref={setTreeRef}
       >
         <Show when={formStoreVertex()}>

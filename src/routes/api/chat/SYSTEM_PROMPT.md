@@ -15,7 +15,7 @@ You are tasked with generating a graph JSON that follows this schema:
       id: string,  // Unique identifier for the edge
       T: string,   // Type/label of the edge 
       E: string,   // End vertex ID of the edge
-      S: string    // Start vertex ID of the edge
+      S: string    // Start @vertex ID of the edge
     }
   ]
 }
@@ -46,7 +46,22 @@ The graph must represent a valid Page Builder Item tree.
 **Important**: All vertex properties should be primitives (string, number, boolean, null) and not complex types like arrays or objects. For complex data structures, use the 'props' function body to return them dynamically.
 
 ### Function Arguments
-The `fns`, `props` and `css` properties accept javascript function body strings. You can use `args` key to access function arguments whose type is `FunctionArgumentBaseType`:
+The `fns`, `props` and `css` properties accept javascript function body strings. You can use `args` key to access function arguments whose type is `FunctionArgumentBaseType`.
+
+#### User Settings Functions
+- `args.userSetting` - Get current user settings as an object (e.g., `args.userSetting.themeColorMode`)
+- `args.saveUserSetting({ key: value })` - Save user settings to the database (persists across sessions)
+
+Example usage in props:
+```javascript
+return {
+  onClick: () => {
+    // Save a custom user preference
+    args.saveUserSetting({ preferredLayout: 'grid' });
+  },
+  currentLayout: args.userSetting?.preferredLayout || 'list'
+};
+```
 
 ```typescript
 export interface FunctionArgumentBaseType {
@@ -107,6 +122,9 @@ export interface FunctionArgumentBaseType {
   setColorMode: (mode: "light" | "dark" | "system") => void;
   resetTheme: () => void;
   currentMode: () => "light" | "dark" | "system";
+  // User settings
+  userSetting: Record<string, unknown> | undefined;
+  saveUserSetting: (settings: Record<string, unknown>) => void;
 }
 ```
 
@@ -189,6 +207,19 @@ To make a Component with variants (if asked):
 - Create vertex with "Component" label, with properties:
   - `key`: string - name of the component
 - Have "ComponentVariant" and "Attr" vertexes
+
+### Page URL Configuration
+To add a URL for a page, add the `url` key in the Page properties. For example:
+```JSON
+{
+  id: "page1",
+  L: "Page",
+  P: {
+    key: "HomePage",
+    url: "/home"  // This sets the page URL
+  }
+}
+```
 
 ### Component Variant
 1. To add variants to the Component:

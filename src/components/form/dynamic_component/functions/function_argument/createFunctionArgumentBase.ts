@@ -25,6 +25,8 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import { runWithOwnerFunction } from "~/components/form/dynamic_component/owner/runWithOwnerFunction";
 import { runWithParentOwnerFunction } from "~/components/form/dynamic_component/owner/runWithParentOwnerFunction";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import { saveUserSetting } from "~/lib/api/saveUserSetting";
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
@@ -238,5 +240,13 @@ export function createFunctionArgumentBase(
     setColorMode: hooks.themeToggle.setColorMode,
     resetTheme: hooks.themeToggle.resetTheme,
     currentMode: hooks.themeToggle.currentMode,
+    // User settings getter and setter
+    get userSetting() {
+      const userSettingId = getGlobalStore(hooks.graph).P.userSettingId;
+      return userSettingId ? hooks.graph.vertexes[userSettingId]?.P : undefined;
+    },
+    saveUserSetting: (settings: Record<string, unknown>) => {
+      return saveUserSetting(settings, hooks.graph, hooks.setGraph);
+    },
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

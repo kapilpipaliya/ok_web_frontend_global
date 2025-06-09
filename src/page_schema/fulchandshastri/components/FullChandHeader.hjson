@@ -1,0 +1,983 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(to bottom, #d4a574, #c8956d);
+  color: #3a2317;
+  padding: 0.5rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}`;
+'''
+      }
+    },
+    {
+      id: "headerStateData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "headerState",
+        props: '''
+const [musicPlaying, setMusicPlaying] = args.createSignal(false);
+const [mobileMenuOpen, setMobileMenuOpen] = args.createSignal(false);
+const [audioRef, setAudioRef] = args.createSignal(null);
+
+return {
+  data: {
+    musicPlaying,
+    setMusicPlaying,
+    mobileMenuOpen,
+    setMobileMenuOpen,
+    audioRef,
+    setAudioRef
+  }
+};
+'''
+      }
+    },
+    {
+      id: "topBar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "socialIconsData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "socialLinks",
+        props: '''
+return {
+  data: [
+    {
+      id: 1,
+      icon: "carbon:logo-facebook",
+      href: "https://www.facebook.com/people/Fulchand-Shastri/100000525786302/",
+      title: "Facebook"
+    },
+    {
+      id: 2,
+      icon: "carbon:logo-instagram",
+      href: "https://www.instagram.com/fulchand_shastri/?hl=en/",
+      title: "Instagram"
+    },
+    {
+      id: 3,
+      icon: "carbon:logo-youtube",
+      href: "https://www.youtube.com/channel/UCDkvYtH9ia8xK2_Q821_ILg?app=desktop",
+      title: "YouTube"
+    },
+    {
+      id: 4,
+      icon: "carbon:chat",
+      href: "https://chat.whatsapp.com/LO7MR4bNNoBHBrq02sA1CG",
+      title: "WhatsApp Group"
+    },
+    {
+      id: 5,
+      icon: "carbon:video",
+      href: "https://zoom.us/j/4399270150?pwd=REZOVHVrdGFOc1U1OVg5dWxCVVl2Zz09",
+      title: "Zoom Meeting"
+    },
+    {
+      id: 6,
+      icon: "carbon:email",
+      href: "mailto:info@fulchandshastri.com",
+      title: "Email"
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "socialIcons",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "socialLinksData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "social",
+        loop: true,
+        props: '''
+const socialLinks = args.contextData.socialLinks;
+return {
+  data: socialLinks
+};
+'''
+      }
+    },
+    {
+      id: "socialLink",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const social = args.contextData.social;
+return {
+  as: "a",
+  href: social.href,
+  target: "_blank",
+  rel: "noopener noreferrer",
+  title: social.title
+};
+''',
+        css: '''
+return `._id {
+  color: #3a2317;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "socialIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const social = args.contextData.social;
+return {
+  as: "icon",
+  icon: social.icon,
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "musicPlayer",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const headerState = args.contextData.headerState;
+return {
+  as: "button",
+  onClick: async () => {
+    const audioElement = headerState.audioRef();
+
+    if (audioElement) {
+      try {
+        if (headerState.musicPlaying()) {
+          audioElement.pause();
+        } else {
+          const playPromise = audioElement.play();
+          if (playPromise !== undefined) {
+            await playPromise;
+          }
+        }
+      } catch (error) {
+        console.error('Audio playback error:', error);
+        args.showErrorToast('Unable to play audio. Please check your browser settings.');
+      }
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: #3a2317;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "musicIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const headerState = args.contextData.headerState;
+return {
+  as: "icon",
+  icon: headerState.musicPlaying() ? "carbon:stop-filled" : "carbon:play-filled",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "audioElement",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const headerState = args.contextData.headerState;
+return {
+  as: "audio",
+  src: "/audio/au.mp3", // Using local file to avoid CORS issues
+  // loop: true,
+  preload: "auto",
+  onPlay: () => headerState.setMusicPlaying(true),
+  onPause: () => headerState.setMusicPlaying(false),
+  onEnded: () => headerState.setMusicPlaying(false),
+  ref: (el) => {
+    if (el) {
+      headerState.setAudioRef(el);
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "locationInfo",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "locationLink",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "https://goo.gl/maps/BGEfU8y8wXz",
+  target: "_blank",
+  rel: "noopener noreferrer"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #3a2317;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "locationIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:location",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "locationText",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Umarala"
+};
+'''
+      }
+    },
+    {
+      id: "dateTime",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const date = new Date();
+const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+const formattedDate = date.toLocaleDateString('en-US', options);
+return {
+  as: "span",
+  text: formattedDate
+};
+''',
+        css: '''
+return `._id {
+  @media (max-width: 480px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "themeToggle",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "FullChandThemeToggle",
+        props: '''
+return {
+  currentMode: () => args.theme.mode,
+  toggleTheme: () => {
+    args.theme.mode = args.theme.mode === 'dark' ? 'light' : 'dark';
+  }
+};
+'''
+      }
+    },
+    {
+      id: "mainNav",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: rgba(0, 0, 0, 0.1);
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "navContainer",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #3a2317;
+  font-weight: bold;
+  font-size: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "logoImage",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "https://www.fulchandshastri.com/wp-content/themes/fulchand/include-files/images/logo.png",
+  alt: "Fulchand Shastri",
+  width: 200,
+  height: 60
+};
+''',
+        css: '''
+return `._id {
+  height: 60px;
+  width: auto;
+  
+  @media (max-width: 768px) {
+    height: 40px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobileMenuToggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const headerState = args.contextData.headerState;
+return {
+  as: "button",
+  onClick: () => {
+    headerState.setMobileMenuOpen(!headerState.mobileMenuOpen());
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: none;
+  background: none;
+  border: none;
+  color: #3a2317;
+  cursor: pointer;
+  padding: 0.5rem;
+  
+  @media (max-width: 768px) {
+    display: block;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mobileMenuIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const headerState = args.contextData.headerState;
+return {
+  as: "icon",
+  icon: headerState.mobileMenuOpen() ? "carbon:close" : "carbon:menu",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "navigationData",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Data",
+        name: "navigation",
+        props: '''
+return {
+  data: [
+    {
+      id: 1,
+      text: "Home",
+      href: "/",
+      submenu: null
+    },
+    {
+      id: 2,
+      text: "About",
+      href: "#",
+      submenu: [
+        { id: 1, text: "About Fulchand", href: "/about-fulchand" },
+        { id: 2, text: "His Inspiration", href: "/his-inspiration" },
+        { id: 3, text: "About ASK Umarala", href: "/about-ask-umarala" },
+        { id: 4, text: "Atma Siddhi Shastra Mission", href: "/atma-siddhi-shastra-mission" },
+        { id: 5, text: "Gyaan Deepak ! Prajwalan", href: "/gyaan-deepak-prajwalan" },
+        { id: 6, text: "Atma Sadhana Nitya Kram", href: "/atma-sadhana-nitya-kram" }
+      ]
+    },
+    {
+      id: 3,
+      text: "Books",
+      href: "/books",
+      submenu: null
+    },
+    {
+      id: 4,
+      text: "Discourses",
+      href: "/discourses",
+      submenu: null
+    },
+    {
+      id: 5,
+      text: "Schedule",
+      href: "/schedule",
+      submenu: null
+    },
+    {
+      id: 6,
+      text: "Gallery",
+      href: "#",
+      submenu: [
+        { id: 1, text: "Photos", href: "/photos" },
+        { id: 2, text: "Videos", href: "/videos" }
+      ]
+    },
+    {
+      id: 7,
+      text: "Donation",
+      href: "/donation",
+      submenu: null
+    },
+    {
+      id: 8,
+      text: "Bhakti",
+      href: "/bhakti",
+      submenu: null
+    },
+    {
+      id: 9,
+      text: "Contact",
+      href: "/contact",
+      submenu: null
+    }
+  ]
+};
+'''
+      }
+    },
+    {
+      id: "navMenu",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const headerState = args.contextData.headerState;
+return {
+  as: "nav"
+};
+''',
+        css: '''
+const headerState = args.contextData.headerState;
+const isMenuOpen = headerState.mobileMenuOpen();
+return `._id {
+  display: flex;
+  gap: 0;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    display: ${isMenuOpen ? 'flex' : 'none'};
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: #f5e6d3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "navItemsData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "navItem",
+        loop: true,
+        props: '''
+const navigation = args.contextData.navigation;
+return {
+  data: navigation
+};
+'''
+      }
+    },
+    {
+      id: "navItemWrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const navItem = args.contextData.navItem;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  
+  &:hover > div {
+    display: block;
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "navLink",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const navItem = args.contextData.navItem;
+return {
+  as: "a",
+  href: navItem.href,
+  text: navItem.text
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem 1.5rem;
+  color: #3a2317;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-block;
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  @media (max-width: 768px) {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "submenuWrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const navItem = args.contextData.navItem;
+return {
+  as: navItem.submenu ? "div" : null
+};
+''',
+        css: '''
+return `._id {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #f5e6d3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-width: 220px;
+  z-index: 1000;
+  
+  @media (max-width: 768px) {
+    position: static;
+    display: block;
+    box-shadow: none;
+    background: rgba(0, 0, 0, 0.05);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "submenuData",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "submenuItem",
+        loop: true,
+        props: '''
+const navItem = args.contextData.navItem;
+return {
+  data: navItem.submenu || []
+};
+'''
+      }
+    },
+    {
+      id: "submenuLink",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const submenuItem = args.contextData.submenuItem;
+return {
+  as: "a",
+  href: submenuItem.href,
+  text: submenuItem.text
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  color: #3a2317;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem 1rem 0.5rem 2rem;
+    font-size: 0.9rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "searchButton",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: none;
+  border: none;
+  color: #3a2317;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  
+  &:hover {
+    opacity: 0.7;
+  }
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "searchIcon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:search",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "gurujImage",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "gurujiImg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "img",
+  src: "https://www.fulchandshastri.com/wp-content/themes/fulchand/include-files/images/guruji.png",
+  alt: "Guruji",
+  width: 80,
+  height: 80
+};
+''',
+        css: '''
+return `._id {
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "headerStateData" },
+    { id: "e2", T: "Attr", S: "headerStateData", E: "topBar" },
+    { id: "e3", T: "Attr", S: "topBar", E: "socialIconsData" },
+    { id: "e4", T: "Attr", S: "socialIconsData", E: "socialIcons" },
+    { id: "e5", T: "Attr", S: "socialIcons", E: "socialLinksData" },
+    { id: "e6", T: "Attr", S: "socialLinksData", E: "socialLink" },
+    { id: "e7", T: "Attr", S: "socialLink", E: "socialIcon" },
+    { id: "e8", T: "Attr", S: "socialIcons", E: "musicPlayer" },
+    { id: "e9", T: "Attr", S: "musicPlayer", E: "musicIcon" },
+    { id: "e10", T: "Attr", S: "socialIcons", E: "audioElement" },
+    { id: "e11", T: "Attr", S: "topBar", E: "locationInfo" },
+    { id: "e14", T: "Attr", S: "locationInfo", E: "locationLink" },
+    { id: "e15", T: "Attr", S: "locationLink", E: "locationIcon" },
+    { id: "e16", T: "Attr", S: "locationLink", E: "locationText" },
+    { id: "e17", T: "Attr", S: "locationInfo", E: "dateTime" },
+    { id: "e18", T: "Attr", S: "locationInfo", E: "themeToggle" },
+    { id: "e19", T: "Attr", S: "headerStateData", E: "mainNav" },
+    { id: "e20", T: "Attr", S: "mainNav", E: "navContainer" },
+    { id: "e21", T: "Attr", S: "navContainer", E: "logo" },
+    { id: "e22", T: "Attr", S: "logo", E: "logoImage" },
+    { id: "e23", T: "Attr", S: "navContainer", E: "mobileMenuToggle" },
+    { id: "e24", T: "Attr", S: "mobileMenuToggle", E: "mobileMenuIcon" },
+    { id: "e25", T: "Attr", S: "navContainer", E: "navigationData" },
+    { id: "e26", T: "Attr", S: "navigationData", E: "navMenu" },
+    { id: "e27", T: "Attr", S: "navMenu", E: "navItemsData" },
+    { id: "e28", T: "Attr", S: "navItemsData", E: "navItemWrapper" },
+    { id: "e29", T: "Attr", S: "navItemWrapper", E: "navLink" },
+    { id: "e30", T: "Attr", S: "navItemWrapper", E: "submenuWrapper" },
+    { id: "e31", T: "Attr", S: "submenuWrapper", E: "submenuData" },
+    { id: "e32", T: "Attr", S: "submenuData", E: "submenuLink" },
+    { id: "e33", T: "Attr", S: "navMenu", E: "searchButton" },
+    { id: "e34", T: "Attr", S: "searchButton", E: "searchIcon" },
+    { id: "e35", T: "Attr", S: "navContainer", E: "gurujImage" },
+    { id: "e36", T: "Attr", S: "gurujImage", E: "gurujiImg" }
+  ]
+}
