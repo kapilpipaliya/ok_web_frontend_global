@@ -1,7 +1,17 @@
 {
   vertexes: [
     {
-      id: "root",
+      id: "page",
+      L: "Page",
+      P: {
+        key: "FullChandAbout",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/about-fulchand"
+      }
+    },
+    {
+      id: "rootAttr",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -871,12 +881,13 @@ return {};
     }
   ],
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "header" },
-    { id: "e2", T: "Attr", S: "root", E: "heroSection" },
+    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
+    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
+    { id: "e2", T: "Attr", S: "rootAttr", E: "heroSection" },
     { id: "e3", T: "Attr", S: "heroSection", E: "heroContent" },
     { id: "e4", T: "Attr", S: "heroContent", E: "heroTitle" },
     { id: "e5", T: "Attr", S: "heroContent", E: "heroSubtitle" },
-    { id: "e6", T: "Attr", S: "root", E: "mainContent" },
+    { id: "e6", T: "Attr", S: "rootAttr", E: "mainContent" },
     { id: "e7", T: "Attr", S: "mainContent", E: "container" },
     { id: "e8", T: "Attr", S: "container", E: "introSection" },
     { id: "e9", T: "Attr", S: "introSection", E: "introContent" },
@@ -912,6 +923,6 @@ return {};
     { id: "e39", T: "Attr", S: "teaching4Icon", E: "teaching4IconSvg" },
     { id: "e40", T: "Attr", S: "teaching4", E: "teaching4Title" },
     { id: "e41", T: "Attr", S: "teaching4", E: "teaching4Text" },
-    { id: "e42", T: "Attr", S: "root", E: "footer" }
+    { id: "e42", T: "Attr", S: "rootAttr", E: "footer" }
   ]
 }

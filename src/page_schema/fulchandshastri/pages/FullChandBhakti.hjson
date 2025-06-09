@@ -1,7 +1,17 @@
 {
   vertexes: [
     {
-      id: "root",
+      id: "page",
+      L: "Page",
+      P: {
+        key: "FullChandBhakti",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/bhakti"
+      }
+    },
+    {
+      id: "rootAttr",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -572,11 +582,12 @@ return {};
     }
   ],
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "header" },
-    { id: "e2", T: "Attr", S: "root", E: "pageHeader" },
+    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
+    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
+    { id: "e2", T: "Attr", S: "rootAttr", E: "pageHeader" },
     { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
     { id: "e4", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
-    { id: "e5", T: "Attr", S: "root", E: "mainContent" },
+    { id: "e5", T: "Attr", S: "rootAttr", E: "mainContent" },
     { id: "e6", T: "Attr", S: "mainContent", E: "container" },
     { id: "e7", T: "Attr", S: "container", E: "bhaktiData" },
     { id: "e8", T: "Attr", S: "bhaktiData", E: "bhaktiGrid" },
@@ -595,6 +606,6 @@ return {};
     { id: "e21", T: "Attr", S: "actionButtons", E: "downloadLyricsButton" },
     { id: "e22", T: "Attr", S: "downloadLyricsButton", E: "downloadLyricsIcon" },
     { id: "e23", T: "Attr", S: "downloadLyricsButton", E: "downloadLyricsText" },
-    { id: "e24", T: "Attr", S: "root", E: "footer" }
+    { id: "e24", T: "Attr", S: "rootAttr", E: "footer" }
   ]
 }

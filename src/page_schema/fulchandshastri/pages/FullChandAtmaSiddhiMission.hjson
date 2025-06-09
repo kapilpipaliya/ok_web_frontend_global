@@ -1,7 +1,17 @@
 {
   vertexes: [
     {
-      id: "root",
+      id: "page",
+      L: "Page",
+      P: {
+        key: "FullChandAtmaSiddhiMission",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/atma-siddhi-shastra-mission"
+      }
+    },
+    {
+      id: "rootAttr",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -717,11 +727,12 @@ return `._id {
     }
   ],
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "header" },
-    { id: "e2", T: "Attr", S: "root", E: "hero" },
+    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
+    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
+    { id: "e2", T: "Attr", S: "rootAttr", E: "hero" },
     { id: "e3", T: "Attr", S: "hero", E: "heroTitle" },
     { id: "e4", T: "Attr", S: "hero", E: "heroSubtitle" },
-    { id: "e5", T: "Attr", S: "root", E: "content" },
+    { id: "e5", T: "Attr", S: "rootAttr", E: "content" },
     { id: "e6", T: "Attr", S: "content", E: "missionSection" },
     { id: "e7", T: "Attr", S: "missionSection", E: "missionTitle" },
     { id: "e8", T: "Attr", S: "missionSection", E: "missionText" },
@@ -746,6 +757,6 @@ return `._id {
     { id: "e27", T: "Attr", S: "ctaSection", E: "ctaTitle" },
     { id: "e28", T: "Attr", S: "ctaSection", E: "ctaText" },
     { id: "e29", T: "Attr", S: "ctaSection", E: "ctaButton" },
-    { id: "e30", T: "Attr", S: "root", E: "footer" }
+    { id: "e30", T: "Attr", S: "rootAttr", E: "footer" }
   ]
 }

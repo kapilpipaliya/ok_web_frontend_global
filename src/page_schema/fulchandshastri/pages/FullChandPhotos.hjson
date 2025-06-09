@@ -1,7 +1,17 @@
 {
   vertexes: [
     {
-      id: "root",
+      id: "page",
+      L: "Page",
+      P: {
+        key: "FullChandPhotos",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/photos"
+      }
+    },
+    {
+      id: "rootAttr",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -659,10 +669,11 @@ return {};
     }
   ],
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "header" },
-    { id: "e2", T: "Attr", S: "root", E: "pageHeader" },
+    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
+    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
+    { id: "e2", T: "Attr", S: "rootAttr", E: "pageHeader" },
     { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
-    { id: "e4", T: "Attr", S: "root", E: "mainContent" },
+    { id: "e4", T: "Attr", S: "rootAttr", E: "mainContent" },
     { id: "e5", T: "Attr", S: "mainContent", E: "container" },
     { id: "e6", T: "Attr", S: "container", E: "albumsData" },
     { id: "e7", T: "Attr", S: "albumsData", E: "albumsGrid" },
@@ -685,6 +696,6 @@ return {};
     { id: "e24", T: "Attr", S: "viewAllButton", E: "viewAllLink" },
     { id: "e25", T: "Attr", S: "viewAllLink", E: "viewAllText" },
     { id: "e26", T: "Attr", S: "viewAllLink", E: "viewAllIcon" },
-    { id: "e27", T: "Attr", S: "root", E: "footer" }
+    { id: "e27", T: "Attr", S: "rootAttr", E: "footer" }
   ]
 }

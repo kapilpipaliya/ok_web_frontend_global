@@ -1,7 +1,17 @@
 {
   vertexes: [
     {
-      id: "root",
+      id: "page",
+      L: "Page",
+      P: {
+        key: "FullChandAboutASK",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/about-ask-umarala"
+      }
+    },
+    {
+      id: "rootAttr",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -710,11 +720,12 @@ return {
     }
   ],
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "header" },
-    { id: "e2", T: "Attr", S: "root", E: "hero" },
+    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
+    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
+    { id: "e2", T: "Attr", S: "rootAttr", E: "hero" },
     { id: "e3", T: "Attr", S: "hero", E: "heroTitle" },
     { id: "e4", T: "Attr", S: "hero", E: "heroSubtitle" },
-    { id: "e5", T: "Attr", S: "root", E: "content" },
+    { id: "e5", T: "Attr", S: "rootAttr", E: "content" },
     { id: "e6", T: "Attr", S: "content", E: "introSection" },
     { id: "e7", T: "Attr", S: "introSection", E: "introImage" },
     { id: "e8", T: "Attr", S: "introSection", E: "introContent" },
@@ -742,6 +753,6 @@ return {
     { id: "e30", T: "Attr", S: "contactInfo", E: "emailInfo" },
     { id: "e31", T: "Attr", S: "emailInfo", E: "emailIcon" },
     { id: "e32", T: "Attr", S: "emailInfo", E: "emailText" },
-    { id: "e33", T: "Attr", S: "root", E: "footer" }
+    { id: "e33", T: "Attr", S: "rootAttr", E: "footer" }
   ]
 }

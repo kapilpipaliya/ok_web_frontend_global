@@ -1,7 +1,17 @@
 {
   vertexes: [
     {
-      id: "root",
+      id: "page",
+      L: "Page",
+      P: {
+        key: "FullChandDiscourses",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/discourses"
+      }
+    },
+    {
+      id: "rootAttr",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -1218,11 +1228,12 @@ return {};
     }
   ],
   edges: [
-    { id: "e1", T: "Attr", S: "root", E: "header" },
-    { id: "e2", T: "Attr", S: "root", E: "pageHeader" },
+    { id: "e0", T: "Attr", S: "page", E: "rootAttr" },
+    { id: "e1", T: "Attr", S: "rootAttr", E: "header" },
+    { id: "e2", T: "Attr", S: "rootAttr", E: "pageHeader" },
     { id: "e3", T: "Attr", S: "pageHeader", E: "pageTitle" },
     { id: "e4", T: "Attr", S: "pageHeader", E: "pageSubtitle" },
-    { id: "e5", T: "Attr", S: "root", E: "mainContent" },
+    { id: "e5", T: "Attr", S: "rootAttr", E: "mainContent" },
     { id: "e6", T: "Attr", S: "mainContent", E: "container" },
     { id: "e7", T: "Attr", S: "container", E: "filterSection" },
     { id: "e8", T: "Attr", S: "filterSection", E: "filterLabel" },
@@ -1270,6 +1281,6 @@ return {};
     { id: "e50", T: "Attr", S: "pagination", E: "pageInfo" },
     { id: "e51", T: "Attr", S: "pagination", E: "nextButton" },
     { id: "e52", T: "Attr", S: "nextButton", E: "nextText" },
-    { id: "e53", T: "Attr", S: "root", E: "footer" }
+    { id: "e53", T: "Attr", S: "rootAttr", E: "footer" }
   ]
 }
