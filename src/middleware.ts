@@ -20,6 +20,10 @@ export default createMiddleware({
     //     }
     //   }
     // }),
+    // securityHeaders({
+    //   referrerPolicy: "no-referrer", // Allows all iframes by not sending referrer information
+    //   xFrameOptions: "SAMEORIGIN", // Allows iframes from the same origin
+    // }),
     async (event) => {
       // Allow _server paths without permission check
       const url = new URL(event.request.url);
