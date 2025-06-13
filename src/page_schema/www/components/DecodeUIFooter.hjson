@@ -302,7 +302,9 @@ return {
         { text: "Features", href: "/features" },
         { text: "Pricing", href: "/pricing" },
         { text: "Templates", href: "/templates" },
-        { text: "Integrations", href: "/integrations" }
+        { text: "Integrations", href: "/integrations" },
+        { text: "Sign In", href: "/auth/signin", isAdminSubdomain: true },
+        { text: "Sign Up", href: "/auth/signup", isAdminSubdomain: true }
       ]
     },
     {
@@ -439,9 +441,19 @@ const link = args.contextData.links;
 return {
   as: "a",
   text: link.text,
+  href: link.href,
+  target: link.isAdminSubdomain ? "_blank" : undefined,
+  rel: link.isAdminSubdomain ? "noopener noreferrer" : undefined,
   onClick: (e) => {
     e.preventDefault();
-    args.navigate(link.href);
+    if (link.isAdminSubdomain) {
+      const hostname = window.location.hostname;
+      const domain = hostname.replace(/^(www\.|)/, '');
+      const adminUrl = `https://admin.${domain}${link.href}`;
+      window.open(adminUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      args.navigate(link.href);
+    }
   }
 };
 ''',

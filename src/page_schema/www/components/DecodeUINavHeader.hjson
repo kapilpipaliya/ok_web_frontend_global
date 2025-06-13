@@ -267,9 +267,56 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
+  as: "a",
+  text: "Sign In",
+  href: "",
+  rel: "noopener noreferrer",
+  onClick: (e) => {
+    e.preventDefault();
+    const hostname = window.location.hostname;
+    const domain = hostname.replace(/^(www\.|)/, '');
+    const adminUrl = `https://admin.${domain}/auth/signin`;
+    window.open(adminUrl, '_blank', 'noopener,noreferrer');
+  }
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  padding: 0.5rem 1rem;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
   as: "button",
   text: "Get Started",
-  onClick: () => args.navigate("/auth/signup")
+  onClick: () => {
+    const hostname = window.location.hostname;
+    const domain = hostname.replace(/^(www\.|)/, '');
+    const adminUrl = `https://admin.${domain}/auth/signup`;
+    window.open(adminUrl, '_blank', 'noopener,noreferrer');
+  }
 };
 ''',
         css: '''
@@ -359,7 +406,8 @@ return `._id {
     { id: "e8", T: "Attr", S: "2", E: "9" },
     { id: "e9", T: "Attr", S: "9", E: "10" },
     { id: "e10", T: "Attr", S: "9", E: "11" },
-    { id: "e11", T: "Attr", S: "9", E: "12" },
-    { id: "e12", T: "Attr", S: "12", E: "13" }
+    { id: "e11", T: "Attr", S: "9", E: "14" },
+    { id: "e12", T: "Attr", S: "9", E: "12" },
+    { id: "e13", T: "Attr", S: "12", E: "13" }
   ]
 }

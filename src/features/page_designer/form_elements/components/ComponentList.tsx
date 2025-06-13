@@ -41,8 +41,10 @@ export function ComponentList(props: {
   const layoutStoreVertex = () =>
     graph.vertexes[layoutStoreId!] as Vertex<PageLayoutObject>;
 
-  const formStoreVertex = () =>
-    graph.vertexes[layoutStoreVertex().P.formId!] as Vertex<FormStoreObject>;
+  const formStoreVertex = () => {
+    const layoutVertex = layoutStoreVertex();
+    return layoutVertex ? graph.vertexes[layoutVertex.P.formId!] as Vertex<FormStoreObject> : undefined;
+  };
 
   function toggleExpand(itemId: Id) {
     setExpandedKeys((prev) =>
