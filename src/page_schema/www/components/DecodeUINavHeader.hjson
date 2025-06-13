@@ -166,10 +166,10 @@ return `._id {
         props: '''
 return {
   data: [
-    { label: "Features", href: "/FeaturesPage" },
-    { label: "Pricing", href: "/PricingPage" },
-    { label: "Documentation", href: "/DocsGettingStartedPage" },
-    { label: "About", href: "/AboutPage" }
+    { label: "Features", href: "/features" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "Documentation", href: "/docs/getting-started" },
+    { label: "About", href: "/about" }
   ]
 };
 '''
@@ -185,7 +185,7 @@ return {
 const item = args.contextData.navItems;
 const currentPath = args.location.pathname;
 const isActive = currentPath === item.href || 
-  (item.href === "/DocsGettingStartedPage" && currentPath.startsWith("/Docs"));
+  (item.href === "/docs/getting-started" && currentPath.startsWith("/docs"));
 return {
   as: "a",
   text: item.label,
@@ -200,7 +200,7 @@ return {
 const item = args.contextData.navItems;
 const currentPath = args.location.pathname;
 const isActive = currentPath === item.href || 
-  (item.href === "/DocsGettingStartedPage" && currentPath.startsWith("/Docs"));
+  (item.href === "/docs/getting-started" && currentPath.startsWith("/docs"));
 return `._id {
   color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
   text-decoration: none;

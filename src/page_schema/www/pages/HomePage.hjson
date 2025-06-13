@@ -1,6 +1,16 @@
 {
   vertexes: [
     {
+      id: "page",
+      L: "Page",
+      P: {
+        key: "HomePage",
+        fns: "return { enabled: () => true }",
+        isNoPermissionCheck: true,
+        url: "/"
+      }
+    },
+    {
       id: "1",
       L: "Attr",
       P: {
@@ -317,6 +327,7 @@ return {
     }
   ],
   edges: [
+    { id: "e0", T: "Attr", S: "page", E: "1" },
     { id: "e1", T: "Attr", S: "1", E: "2" },
     { id: "e2", T: "Attr", S: "2", E: "3" },
     { id: "e3", T: "Attr", S: "2", E: "4" },
