@@ -72,12 +72,12 @@ export function GetInitialData(props: GetInitialDataProps) {
 
       // In Development Remove comment
       // Load website schemas based on subdomain
-      loadWebsiteSchemasForSubdomain(
-        graph[0],
-        graph[1],
-        initialData.subdomain,
-        initialData.domain || undefined,
-      );
+      // loadWebsiteSchemasForSubdomain(
+      //   graph[0],
+      //   graph[1],
+      //   initialData.subdomain,
+      //   initialData.domain || undefined,
+      // );
     }
 
     if (userData) {
