@@ -124,10 +124,11 @@ return `._id {
         props: '''
 return {
   data: [
-    { href: "#features", text: "Features" },
-    { href: "#pricing", text: "Pricing" },
-    { href: "#process", text: "Process" },
-    { href: "#contact", text: "Contact" }
+    { href: "/", text: "Home" },
+    { href: "/features", text: "Features" },
+    { href: "/pricing", text: "Pricing" },
+    { href: "/about", text: "About" },
+    { href: "/contact", text: "Contact" }
   ]
 };
 '''
