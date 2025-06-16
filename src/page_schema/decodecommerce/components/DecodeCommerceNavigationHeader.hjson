@@ -142,6 +142,8 @@ return {
         componentName: "Html",
         props: '''
 const item = args.contextData.navItems;
+const currentPath = args.location.pathname;
+const isActive = item.href === currentPath || (item.href === "/" && currentPath === "/");
 return {
   as: "a",
   href: item.href,
@@ -149,11 +151,28 @@ return {
 };
 ''',
         css: '''
+const item = args.contextData.navItems;
+const currentPath = args.location.pathname;
+const isActive = item.href === currentPath || (item.href === "/" && currentPath === "/");
 return `._id {
-  color: ${args.theme.var.color.text};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
   text-decoration: none;
-  font-weight: 500;
+  font-weight: ${isActive ? '600' : '500'};
   transition: all 0.2s ease;
+  position: relative;
+  
+  ${isActive ? `
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -0.25rem;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: ${args.theme.var.color.primary};
+      border-radius: 1px;
+    }
+  ` : ''}
   
   &:hover {
     color: ${args.theme.var.color.primary};
