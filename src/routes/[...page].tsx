@@ -11,9 +11,10 @@ export default function PageHandler() {
   // Get the page path from the catch-all parameter
   const pagePath = createMemo(() => {
     const path = params.page;
-    if (!path) return "/home";
+    if (!path) return "/";
     return path.startsWith("/") ? path : `/${path}`; // .toLowerCase()
   });
+
   const pageVertex = createMemo(() => {
     return findVertexByLabelAndUniqueId(graph, "Page", "url", pagePath());
   });
