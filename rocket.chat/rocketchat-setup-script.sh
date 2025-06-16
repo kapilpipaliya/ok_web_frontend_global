@@ -35,7 +35,7 @@ ROCKETCHAT_VERSION="latest"
 INSTALL_DIR="/opt/Rocket.Chat"
 SERVICE_USER="rocketchat"
 MONGO_VERSION="8.0"
-DOMAIN="rocket.decodeui.dev"
+DOMAIN="${DOMAIN:-}"
 EMAIL=""
 NODE_PATH=""
 NPM_PATH=""
@@ -54,12 +54,16 @@ show_help() {
     echo "  --mail-url URL         Update MAIL_URL configuration"
     echo "  --help, -h             Show this help message"
     echo ""
+    echo "Environment Variables:"
+    echo "  DOMAIN                 Set the domain name (required)"
+    echo ""
     echo "Examples:"
     echo "  sudo bash $0                    # Normal installation"
     echo "  sudo bash $0 --fix              # Fix installation issues"
     echo "  sudo bash $0 --fresh            # Fresh install (deletes database)"
     echo "  sudo bash $0 --clear-db         # Clear database only"
     echo "  sudo bash $0 --mail-url 'smtp://user:pass@host:port'"
+    echo "  DOMAIN=chat.example.com sudo bash $0    # Install with custom domain"
     echo ""
     exit 0
 }
@@ -101,7 +105,14 @@ done
 
 # Function to get user input
 get_user_input() {
-    # Domain is pre-configured to rocket.decodeui.dev
+    # Domain must be provided
+    while [[ -z "$DOMAIN" ]]; then
+        read -p "Enter your domain (required): " DOMAIN
+        if [[ -z "$DOMAIN" ]]; then
+            print_error "Domain is required. Please enter a valid domain."
+        fi
+    done
+    
     if [[ -z "$EMAIL" ]]; then
         read -p "Enter your email for SSL certificate: " EMAIL
     fi
@@ -353,7 +364,7 @@ Restart=always
 RestartSec=10
 Environment=MONGO_URL=mongodb://localhost:27017/rocketchat?replicaSet=rs01
 Environment=MONGO_OPLOG_URL=mongodb://localhost:27017/local?replicaSet=rs01
-Environment=ROOT_URL=https://rocket.decodeui.dev
+Environment=ROOT_URL=https://$DOMAIN
 Environment=PORT=4000"
 
     # Add MAIL_URL if provided
@@ -762,7 +773,7 @@ main() {
     echo "======================================"
     echo ""
     
-    print_status "Rocket.Chat is accessible at: https://rocket.decodeui.dev"
+    print_status "Rocket.Chat is accessible at: https://$DOMAIN"
     
     echo ""
     print_status "Default admin setup:"
