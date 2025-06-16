@@ -103,7 +103,7 @@ return `._id {
         componentName: "Data",
         name: "docContent",
         props: '''
-const currentPage = args.searchParams?.get("page") || "home";
+const currentPage = args.searchParams?.page || "home";
 
 const pageContent = {
   home: {
@@ -336,7 +336,7 @@ return {
         componentName: "Data",
         name: "showCodeExample",
         props: '''
-const currentPage = args.searchParams?.get("page") || "home";
+const currentPage = args.searchParams?.page || "home";
 return {
   data: currentPage === "themes"
 };

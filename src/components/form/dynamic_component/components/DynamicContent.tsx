@@ -18,7 +18,7 @@ import {
 import type { Vertex } from "~/lib/graph/type/vertex";
 import type { DynamicPropsType } from "~/components/form/dynamic_component/functions/DynamicPropsType";
 import type { PermissionsObject } from "~/components/form/dynamic_component/hooks/useComponentPermissions";
-import {mergeRefs} from "@solid-primitives/refs";
+import { mergeRefs } from "@solid-primitives/refs";
 
 // Props for the content component
 type ContentProps = {

@@ -67,8 +67,8 @@ return {
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
   componentName: string;
-  createSignal: any, // solid-js function: import { createSignal } from "solid-js";
-  createStore: any, // solid-js function: import { createStore } from "solid-js/store";
+  createSignal: any; // solid-js function: import { createSignal } from "solid-js";
+  createStore: any; // solid-js function: import { createStore } from "solid-js/store";
   data: Vertex;
   contextData: Record<string | symbol, unknown>;
   deleteTxnIdAndCreateNew: (txnId: number) => number;
@@ -77,9 +77,20 @@ export interface FunctionArgumentBaseType {
   evalExpression: (expression: string, options: object) => unknown;
   fns: Record<string, ((...args: unknown[]) => unknown) | undefined>;
   graph: GraphInterface;
+  hasFullPermission: boolean | null | undefined;
+  hasEditPermission: boolean | null | undefined;
+  hasCreatePermission: boolean | null | undefined;
+  hasViewPermission: boolean | null | undefined;
+  isNoPermissionCheck: boolean | null | undefined;
+  isViewMode: boolean | null | undefined;
+  // formInitialValues: FormStoreObject;
+  // formValueStore: FormStoreObject;
   meta: Vertex;
-  mounted: Accessor<boolean>;
-  navigate: ReturnType<typeof useNavigate>;
+  mounted: () => boolean;
+  navigate: (
+          to: string,
+          options?: { replace?: boolean; scroll?: boolean; state?: any },
+  ) => void;
   location: {
     pathname: string;
     search: string;
@@ -94,16 +105,25 @@ export interface FunctionArgumentBaseType {
   parentMeta: Vertex;
   parentRenderContext: PageRenderObject;
   readOnly: boolean | null | undefined;
-  ref: Accessor<HTMLDivElement | null>;
+  ref: () => HTMLElement | null;
+  setRef: (ref: HTMLElement | null) => void;
   removeTxnIdAndCreateNew: (txnId: number) => number;
   revertTransaction: (txnId: number) => void;
   revertTransactionUpToIndex: (txnId: number, txnIndex: number) => void;
   runWithOwner: <T>(fn: () => T) => T | undefined;
   runWithParentOwner: <T>(fn: () => T) => T | undefined;
-  searchParams?: ReturnType<typeof useSearchParams>[0];
+  searchParams?: Record<string, string | undefined>;
   setError: (error: string | undefined, key?: string) => void;
   setGraph: SetStoreFunction<GraphInterface>;
-  setSearchParams?: ReturnType<typeof useSearchParams>[1];
+  setGraphData: (
+          txnId: number,
+          args: GraphData,
+          options: UpdateOptions,
+  ) => void;
+  setSearchParams?: (
+          params: Record<string, string | undefined | null>,
+          options?: { replace?: boolean },
+  ) => void;
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
   showWarningToast: (message: string) => void;
@@ -111,11 +131,11 @@ export interface FunctionArgumentBaseType {
   txnId: number;
   updateValue: (value: unknown) => void;
   mergeVertexProperties: (
-    txnId: number,
-    vertexId: string,
-    graph: GraphInterface,
-    setGraph: SetStoreFunction<GraphInterface>,
-    data: any,
+          txnId: number,
+          vertexId: string,
+          graph: GraphInterface,
+          setGraph: SetStoreFunction<GraphInterface>,
+          data: Record<string, unknown>,
   ) => void;
   // Theme toggle functions
   toggleTheme: () => void;

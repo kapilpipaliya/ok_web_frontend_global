@@ -40,7 +40,11 @@ export function createDynamicPropsMemo(
             options.graph,
           ) as DynamicPropsType;
         } catch (error) {
-          console.error("Error evaluating props function:", error, props.meta.P.props);
+          console.error(
+            "Error evaluating props function:",
+            error,
+            props.meta.P.props,
+          );
           return {} as DynamicPropsType;
         }
       }
