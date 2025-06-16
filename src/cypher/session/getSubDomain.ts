@@ -12,14 +12,13 @@ export async function getSubDomain(host: string) {
   }
 
   const effectiveDomain = domain || hostname;
-  // If domain is null, set it to "www"
-  const effectiveSubdomain = subdomain || "www";
+  const effectiveSubdomain = subdomain;
 
   if (effectiveSubdomain === "admin") {
     return { domain, subdomain: ADMIN_DB_NAME };
   }
   if (effectiveDomain === process.env.DOMAIN) {
-    return { domain, subdomain: effectiveSubdomain };
+    return { domain, subdomain: effectiveSubdomain || "www" };
   }
 
   // Otherwise look up the domain in SubDomain vertex
@@ -31,13 +30,13 @@ export async function getSubDomain(host: string) {
         MATCH (s:SubDomain {domain: $domain})
         RETURN s.key as subdomain
       `;
-      const result = await dbSession.run(query, { domain: effectiveSubdomain });
+      const result = await dbSession.run(query, { domain: effectiveDomain });
 
       if (result.records.length > 0) {
         return { domain, subdomain: result.records[0].get("subdomain") };
       }
     } catch (error) {
-      console.error("Error looking up domain:", error, effectiveSubdomain);
+      console.error("Error looking up domain:", error, effectiveDomain);
       throw error;
     }
   }
