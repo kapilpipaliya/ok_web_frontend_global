@@ -106,7 +106,7 @@ done
 # Function to get user input
 get_user_input() {
     # Domain must be provided
-    while [[ -z "$DOMAIN" ]]; then
+    while [[ -z "$DOMAIN" ]]; do
         read -p "Enter your domain (required): " DOMAIN
         if [[ -z "$DOMAIN" ]]; then
             print_error "Domain is required. Please enter a valid domain."
