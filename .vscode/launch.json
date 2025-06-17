@@ -21,7 +21,7 @@
       "name": "Launch npm run dev Prod",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "/root/.volta/bin/npm",
+      "runtimeExecutable": "/usr/bin/npm",
       "runtimeArgs": [
         "run",
         "dev"
