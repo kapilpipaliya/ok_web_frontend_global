@@ -32,6 +32,251 @@ return `._id {
       }
     },
     {
+      id: "1a",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "pageAnimations",
+        props: '''
+const refs = args.createStore({});
+
+// Initialize GSAP plugins
+if (args.mounted()) {
+  args.registerGSAPPlugins([args.GSAPPlugins.ScrollTrigger]);
+}
+
+// Helper function to save refs
+const saveRef = (name) => (el) => {
+  if (el) {
+    refs[name] = el;
+  }
+};
+
+// Initialize animations
+const initAnimations = () => {
+  if (!args.mounted()) return;
+  
+  // Hero title animation
+  if (refs.heroTitle) {
+    const chars = refs.heroTitle.textContent.split('');
+    refs.heroTitle.innerHTML = chars.map(char => `<span>${char}</span>`).join('');
+    const spans = refs.heroTitle.querySelectorAll('span');
+    
+    args.gsap.fromTo(spans,
+      { opacity: 0, y: 50, rotateY: -90 },
+      {
+        opacity: 1,
+        y: 0,
+        rotateY: 0,
+        duration: 0.8,
+        stagger: 0.02,
+        ease: args.gsapEasings.back.out(1.7),
+        delay: 0.2
+      }
+    );
+  }
+  
+  // Hero subtitle animation
+  if (refs.heroSubtitle) {
+    args.gsap.fromTo(refs.heroSubtitle,
+      { opacity: 0, y: 30 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1,
+        ease: args.gsapEasings.power3.out,
+        delay: 0.6
+      }
+    );
+  }
+  
+  // Feature category sections
+  const categoryHeaders = document.querySelectorAll('.category-header');
+  categoryHeaders.forEach((header, index) => {
+    const tl = args.createTimeline({
+      scrollTrigger: {
+        trigger: header,
+        start: 'top bottom-=100',
+        toggleActions: 'play none none reverse'
+      }
+    });
+    
+    const icon = header.querySelector('.category-icon');
+    const title = header.querySelector('h2');
+    const desc = header.querySelector('p');
+    
+    if (icon) {
+      tl.fromTo(icon,
+        { opacity: 0, scale: 0, rotation: -180 },
+        { 
+          opacity: 1, 
+          scale: 1, 
+          rotation: 0,
+          duration: 0.8,
+          ease: args.gsapEasings.back.out(1.7)
+        }
+      );
+    }
+    
+    if (title) {
+      tl.fromTo(title,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.6, ease: args.gsapEasings.power2.out },
+        '-=0.4'
+      );
+    }
+    
+    if (desc) {
+      tl.fromTo(desc,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, ease: args.gsapEasings.power2.out },
+        '-=0.3'
+      );
+    }
+  });
+  
+  // Feature cards animation with stagger effect
+  const featureGroups = document.querySelectorAll('.feature-grid');
+  featureGroups.forEach((group, groupIndex) => {
+    const cards = group.querySelectorAll('.feature-card');
+    
+    args.gsap.fromTo(cards,
+      { 
+        opacity: 0, 
+        y: 60,
+        scale: 0.9,
+        rotateX: -10
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        rotateX: 0,
+        duration: 0.6,
+        stagger: {
+          each: 0.1,
+          from: 'start'
+        },
+        ease: args.gsapEasings.power2.out,
+        scrollTrigger: {
+          trigger: group,
+          start: 'top bottom-=100',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+    
+    // Hover animations for cards
+    cards.forEach(card => {
+      let hoverTl = null;
+      
+      card.addEventListener('mouseenter', () => {
+        if (hoverTl) hoverTl.kill();
+        hoverTl = args.createTimeline();
+        
+        hoverTl.to(card, {
+          scale: 1.05,
+          y: -10,
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+          duration: 0.3,
+          ease: args.gsapEasings.power2.out
+        });
+        
+        const icon = card.querySelector('svg');
+        if (icon) {
+          hoverTl.to(icon, {
+            scale: 1.2,
+            rotation: 5,
+            duration: 0.3,
+            ease: args.gsapEasings.power2.out
+          }, 0);
+        }
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        if (hoverTl) hoverTl.kill();
+        hoverTl = args.createTimeline();
+        
+        hoverTl.to(card, {
+          scale: 1,
+          y: 0,
+          boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+          duration: 0.3,
+          ease: args.gsapEasings.power2.out
+        });
+        
+        const icon = card.querySelector('svg');
+        if (icon) {
+          hoverTl.to(icon, {
+            scale: 1,
+            rotation: 0,
+            duration: 0.3,
+            ease: args.gsapEasings.power2.out
+          }, 0);
+        }
+      });
+    });
+  });
+  
+  // CTA section animation
+  const ctaSection = document.querySelector('.cta-section');
+  if (ctaSection) {
+    args.gsap.fromTo(ctaSection,
+      { 
+        opacity: 0, 
+        scale: 0.9,
+        y: 50
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        duration: 1,
+        ease: args.gsapEasings.power3.out,
+        scrollTrigger: {
+          trigger: ctaSection,
+          start: 'top bottom-=100',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+  }
+  
+  // Parallax effect for background elements
+  const parallaxElements = document.querySelectorAll('[data-parallax]');
+  parallaxElements.forEach(el => {
+    const speed = el.dataset.parallax || 0.5;
+    
+    args.gsap.to(el, {
+      y: () => window.innerHeight * speed,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
+  });
+};
+
+// Run animations after mount
+if (args.mounted()) {
+  setTimeout(initAnimations, 100);
+}
+
+return {
+  data: { 
+    refs,
+    saveRef,
+    initAnimations
+  }
+};
+'''
+      }
+    },
+    {
       id: "2",
       L: "Attr",
       P: {
@@ -112,9 +357,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const { saveRef } = args.contextData.pageAnimations;
 return {
   as: "h1",
-  text: "Powerful Features for Modern Web Building"
+  text: "Powerful Features for Modern Web Building",
+  ref: saveRef('heroTitle')
 };
 ''',
         css: '''
@@ -138,9 +385,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const { saveRef } = args.contextData.pageAnimations;
 return {
   as: "p",
-  text: "Everything you need to create professional websites, whether you build it yourself or let us build it for you"
+  text: "Everything you need to create professional websites, whether you build it yourself or let us build it for you",
+  ref: saveRef('heroSubtitle')
 };
 ''',
         css: '''
@@ -329,7 +578,8 @@ return `._id {
         props: '''
 const category = args.contextData.featureCategories;
 return {
-  as: "div"
+  as: "div",
+  class: "category-header"
 };
 ''',
         css: '''
@@ -349,7 +599,8 @@ return `._id {
         props: '''
 const category = args.contextData.featureCategories;
 return {
-  as: "div"
+  as: "div",
+  class: "category-icon"
 };
 ''',
         css: '''
@@ -441,7 +692,8 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  class: "feature-grid"
 };
 ''',
         css: '''
@@ -485,7 +737,8 @@ const feature = args.contextData.features;
 return {
   icon: feature.icon,
   title: feature.title,
-  description: feature.description
+  description: feature.description,
+  class: "feature-card"
 };
 '''
       }
@@ -495,7 +748,12 @@ return {
       L: "Attr",
       P: {
         displayOrder: 3,
-        componentName: "DecodeUICTASection"
+        componentName: "DecodeUICTASection",
+        props: '''
+return {
+  class: "cta-section"
+};
+'''
       }
     },
     {
@@ -509,8 +767,9 @@ return {
   ],
   edges: [
     { id: "e0", T: "Attr", S: "page", E: "1" },
-    { id: "e1", T: "Attr", S: "1", E: "2" },
-    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e0a", T: "Attr", S: "1", E: "1a" },
+    { id: "e1", T: "Attr", S: "1a", E: "2" },
+    { id: "e2", T: "Attr", S: "1a", E: "3" },
     { id: "e3", T: "Attr", S: "3", E: "4" },
     { id: "e4", T: "Attr", S: "4", E: "5" },
     { id: "e5", T: "Attr", S: "5", E: "6" },
@@ -527,7 +786,7 @@ return {
     { id: "e16", T: "Attr", S: "11", E: "17" },
     { id: "e17", T: "Attr", S: "17", E: "18" },
     { id: "e18", T: "Attr", S: "18", E: "19" },
-    { id: "e19", T: "Attr", S: "3", E: "20" },
-    { id: "e20", T: "Attr", S: "1", E: "21" }
+    { id: "e19", T: "Attr", S: "1a", E: "20" },
+    { id: "e20", T: "Attr", S: "1a", E: "21" }
   ]
 }

@@ -98,6 +98,55 @@ export interface FunctionArgumentBaseType {
   // User settings
   userSetting: Record<string, unknown> | undefined;
   saveUserSetting: (settings: Record<string, unknown>) => void;
+  // GSAP animation library
+  gsap: any;
+  // GSAP utilities
+  createTimeline: (options?: any) => any;
+  createTween: (targets: any, vars: any) => any;
+  createFromTween: (targets: any, vars: any) => any;
+  createFromToTween: (targets: any, fromVars: any, toVars: any) => any;
+  killTweensOf: (targets: any) => void;
+  getTweensOf: (targets: any) => any[];
+  isTweening: (targets: any) => boolean;
+  setGSAPDefaults: (vars: any) => void;
+  registerGSAPPlugins: (...plugins: any[]) => void;
+  // GSAP easing presets
+  gsapEasings: {
+    power1: string;
+    power2: string;
+    power3: string;
+    power4: string;
+    easeIn: string;
+    easeOut: string;
+    easeInOut: string;
+    back: string;
+    elastic: string;
+    bounce: string;
+    rough: string;
+    slow: string;
+    steps: string;
+    circ: string;
+    expo: string;
+    sine: string;
+    none: string;
+    linear: string;
+  };
+  // GSAP plugins
+  GSAPPlugins: {
+    ScrollTrigger: any;
+    TextPlugin: any;
+    ScrollToPlugin: any;
+    CSSPlugin: any;
+    Draggable: any;
+    MotionPathPlugin: any;
+    MorphSVGPlugin: any;
+    DrawSVGPlugin: any;
+    SplitText: any;
+    InertiaPlugin: any;
+    ScrollSmoother: any;
+    Observer: any;
+    Flip: any;
+  };
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {

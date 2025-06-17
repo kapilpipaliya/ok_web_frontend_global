@@ -145,6 +145,36 @@ export interface FunctionArgumentBaseType {
   // User settings
   userSetting: Record<string, unknown> | undefined;
   saveUserSetting: (settings: Record<string, unknown>) => void;
+  // GSAP animation library
+  gsap: gsapExports.gsap,
+  // GSAP utilities
+  createTimeline: gsapExports.createTimeline,
+  createTween: gsapExports.createTween,
+  createFromTween: gsapExports.createFromTween,
+  createFromToTween: gsapExports.createFromToTween,
+  killTweensOf: gsapExports.killTweensOf,
+  getTweensOf: gsapExports.getTweensOf,
+  isTweening: gsapExports.isTweening,
+  setGSAPDefaults: gsapExports.setGSAPDefaults,
+  registerGSAPPlugins: gsapExports.registerGSAPPlugins,
+  // GSAP easing presets
+  gsapEasings: gsapExports.easings,
+  // GSAP plugins (these need to be registered before use)
+  GSAPPlugins: {
+    ScrollTrigger: gsapExports.ScrollTrigger,
+    TextPlugin: gsapExports.TextPlugin,
+    ScrollToPlugin: gsapExports.ScrollToPlugin,
+    CSSPlugin: gsapExports.CSSPlugin,
+    Draggable: gsapExports.Draggable,
+    MotionPathPlugin: gsapExports.MotionPathPlugin,
+    MorphSVGPlugin: gsapExports.MorphSVGPlugin,
+    DrawSVGPlugin: gsapExports.DrawSVGPlugin,
+    SplitText: gsapExports.SplitText,
+    InertiaPlugin: gsapExports.InertiaPlugin,
+    ScrollSmoother: gsapExports.ScrollSmoother,
+    Observer: gsapExports.Observer,
+    Flip: gsapExports.Flip,
+  },
 }
 ```
 

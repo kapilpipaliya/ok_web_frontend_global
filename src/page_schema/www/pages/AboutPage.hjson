@@ -32,6 +32,218 @@ return `._id {
       }
     },
     {
+      id: "1a",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        name: "pageAnimations",
+        props: '''
+const refs = args.createStore({});
+
+// Initialize GSAP plugins
+if (args.mounted()) {
+  args.registerGSAPPlugins([args.GSAPPlugins.ScrollTrigger]);
+}
+
+// Helper function to save refs
+const saveRef = (name) => (el) => {
+  if (el) {
+    refs[name] = el;
+  }
+};
+
+// Initialize animations
+const initAnimations = () => {
+  if (!args.mounted()) return;
+  
+  // Hero section fade in
+  if (refs.heroTitle) {
+    args.gsap.fromTo(refs.heroTitle,
+      { opacity: 0, y: 40 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1,
+        ease: args.gsapEasings.power3.out,
+        delay: 0.2
+      }
+    );
+  }
+  
+  if (refs.heroSubtitle) {
+    args.gsap.fromTo(refs.heroSubtitle,
+      { opacity: 0, y: 30 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        duration: 1,
+        ease: args.gsapEasings.power3.out,
+        delay: 0.4
+      }
+    );
+  }
+  
+  // Story section animation
+  if (refs.storySection) {
+    args.gsap.fromTo(refs.storySection,
+      { opacity: 0, x: -50 },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 1,
+        ease: args.gsapEasings.power2.out,
+        scrollTrigger: {
+          trigger: refs.storySection,
+          start: 'top center+=100',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+  }
+  
+  // Stats animation with counter effect
+  const statValues = document.querySelectorAll('.stat-value');
+  statValues.forEach(stat => {
+    const endValue = stat.textContent;
+    const isPercentage = endValue.includes('%');
+    const numericValue = parseInt(endValue.replace(/[^0-9]/g, ''));
+    
+    args.gsap.fromTo(stat,
+      { 
+        textContent: '0' + (isPercentage ? '%' : endValue.replace(/[0-9]/g, '')),
+        opacity: 0,
+        scale: 0.8
+      },
+      {
+        textContent: endValue,
+        opacity: 1,
+        scale: 1,
+        duration: 2,
+        ease: args.gsapEasings.power2.out,
+        snap: { textContent: 1 },
+        scrollTrigger: {
+          trigger: stat,
+          start: 'top bottom-=100',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+  });
+  
+  // Stats card animation
+  if (refs.statsCard) {
+    args.gsap.fromTo(refs.statsCard,
+      { opacity: 0, y: 40, scale: 0.95 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.8,
+        ease: args.gsapEasings.power2.out,
+        scrollTrigger: {
+          trigger: refs.statsCard,
+          start: 'top center+=100',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+  }
+  
+  // Values section title animation
+  if (refs.valuesTitle) {
+    args.gsap.fromTo(refs.valuesTitle,
+      { opacity: 0, y: 30 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: args.gsapEasings.power2.out,
+        scrollTrigger: {
+          trigger: refs.valuesTitle,
+          start: 'top bottom-=100',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+  }
+  
+  // Values cards stagger animation
+  const valueCards = document.querySelectorAll('.value-card');
+  args.gsap.fromTo(valueCards,
+    { opacity: 0, y: 50, rotateY: -10 },
+    {
+      opacity: 1,
+      y: 0,
+      rotateY: 0,
+      duration: 0.8,
+      stagger: 0.1,
+      ease: args.gsapEasings.power2.out,
+      scrollTrigger: {
+        trigger: valueCards[0],
+        start: 'top bottom-=100',
+        toggleActions: 'play none none reverse'
+      }
+    }
+  );
+  
+  // Hover animations for value cards
+  valueCards.forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      args.gsap.to(card, {
+        scale: 1.05,
+        boxShadow: '0 15px 30px rgba(0,0,0,0.15)',
+        duration: 0.3,
+        ease: args.gsapEasings.power2.out
+      });
+    });
+    
+    card.addEventListener('mouseleave', () => {
+      args.gsap.to(card, {
+        scale: 1,
+        boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+        duration: 0.3,
+        ease: args.gsapEasings.power2.out
+      });
+    });
+  });
+  
+  // CTA section animation
+  const ctaSection = document.querySelector('.cta-section');
+  if (ctaSection) {
+    args.gsap.fromTo(ctaSection,
+      { opacity: 0, scale: 0.9 },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 1,
+        ease: args.gsapEasings.elastic.out(1, 0.5),
+        scrollTrigger: {
+          trigger: ctaSection,
+          start: 'top bottom-=100',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+  }
+};
+
+// Run animations after mount
+if (args.mounted()) {
+  setTimeout(initAnimations, 100);
+}
+
+return {
+  data: { 
+    refs,
+    saveRef,
+    initAnimations
+  }
+};
+'''
+      }
+    },
+    {
       id: "2",
       L: "Attr",
       P: {
@@ -112,9 +324,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const { saveRef } = args.contextData.pageAnimations;
 return {
   as: "h1",
-  text: "About DecodeUI"
+  text: "About DecodeUI",
+  ref: saveRef('heroTitle')
 };
 ''',
         css: '''
@@ -138,9 +352,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const { saveRef } = args.contextData.pageAnimations;
 return {
   as: "p",
-  text: "Empowering businesses to build beautiful websites, one page at a time"
+  text: "Empowering businesses to build beautiful websites, one page at a time",
+  ref: saveRef('heroSubtitle')
 };
 ''',
         css: '''
@@ -216,8 +432,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const { saveRef } = args.contextData.pageAnimations;
 return {
-  as: "div"
+  as: "div",
+  ref: saveRef('storySection')
 };
 '''
       }
@@ -300,8 +518,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const { saveRef } = args.contextData.pageAnimations;
 return {
-  as: "div"
+  as: "div",
+  ref: saveRef('statsCard')
 };
 ''',
         css: '''
@@ -427,7 +647,8 @@ return {
 const stat = args.contextData.stats;
 return {
   as: "div",
-  text: stat.value
+  text: stat.value,
+  class: "stat-value"
 };
 ''',
         css: '''
@@ -511,9 +732,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const { saveRef } = args.contextData.pageAnimations;
 return {
   as: "h2",
-  text: "Our Values"
+  text: "Our Values",
+  ref: saveRef('valuesTitle')
 };
 ''',
         css: '''
@@ -565,7 +788,8 @@ return `._id {
 return {
   icon: "carbon:user-favorite",
   title: "Customer First",
-  description: "Every decision we make starts with how it benefits our customers. Your success is our success."
+  description: "Every decision we make starts with how it benefits our customers. Your success is our success.",
+  class: "value-card"
 };
 '''
       }
@@ -580,7 +804,8 @@ return {
 return {
   icon: "carbon:light",
   title: "Simplicity",
-  description: "We believe powerful tools don't have to be complicated. Simplicity drives everything we build."
+  description: "We believe powerful tools don't have to be complicated. Simplicity drives everything we build.",
+  class: "value-card"
 };
 '''
       }
@@ -595,7 +820,8 @@ return {
 return {
   icon: "carbon:partnership",
   title: "Flexibility",
-  description: "Build it yourself or let us help - we adapt to your needs, not the other way around."
+  description: "Build it yourself or let us help - we adapt to your needs, not the other way around.",
+  class: "value-card"
 };
 '''
       }
@@ -610,7 +836,8 @@ return {
 return {
   icon: "carbon:trophy",
   title: "Quality",
-  description: "From our builder to our custom services, we never compromise on quality. Excellence is our standard."
+  description: "From our builder to our custom services, we never compromise on quality. Excellence is our standard.",
+  class: "value-card"
 };
 '''
       }
@@ -625,7 +852,8 @@ return {
 return {
   icon: "carbon:growth",
   title: "Innovation",
-  description: "We continuously improve and evolve, bringing you the latest in web design and technology."
+  description: "We continuously improve and evolve, bringing you the latest in web design and technology.",
+  class: "value-card"
 };
 '''
       }
@@ -640,7 +868,8 @@ return {
 return {
   icon: "carbon:favorite",
   title: "Transparency",
-  description: "Clear pricing, honest communication, and no hidden fees. What you see is what you get."
+  description: "Clear pricing, honest communication, and no hidden fees. What you see is what you get.",
+  class: "value-card"
 };
 '''
       }
@@ -650,7 +879,12 @@ return {
       L: "Attr",
       P: {
         displayOrder: 4,
-        componentName: "DecodeUICTASection"
+        componentName: "DecodeUICTASection",
+        props: '''
+return {
+  class: "cta-section"
+};
+'''
       }
     },
     {
@@ -664,8 +898,9 @@ return {
   ],
   edges: [
     { id: "e0", T: "Attr", S: "page", E: "1" },
-    { id: "e1", T: "Attr", S: "1", E: "2" },
-    { id: "e2", T: "Attr", S: "1", E: "3" },
+    { id: "e0a", T: "Attr", S: "1", E: "1a" },
+    { id: "e1", T: "Attr", S: "1a", E: "2" },
+    { id: "e2", T: "Attr", S: "1a", E: "3" },
     { id: "e3", T: "Attr", S: "3", E: "4" },
     { id: "e4", T: "Attr", S: "4", E: "5" },
     { id: "e5", T: "Attr", S: "5", E: "6" },

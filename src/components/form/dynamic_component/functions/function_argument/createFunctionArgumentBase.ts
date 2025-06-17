@@ -27,6 +27,8 @@ import { runWithParentOwnerFunction } from "~/components/form/dynamic_component/
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
+import * as gsapExports from "~/lib/animation/gsap";
+
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
@@ -247,6 +249,36 @@ export function createFunctionArgumentBase(
     },
     saveUserSetting: (settings: Record<string, unknown>) => {
       return saveUserSetting(settings, hooks.graph, hooks.setGraph);
+    },
+    // GSAP animation library
+    gsap: gsapExports.gsap,
+    // GSAP utilities
+    createTimeline: gsapExports.createTimeline,
+    createTween: gsapExports.createTween,
+    createFromTween: gsapExports.createFromTween,
+    createFromToTween: gsapExports.createFromToTween,
+    killTweensOf: gsapExports.killTweensOf,
+    getTweensOf: gsapExports.getTweensOf,
+    isTweening: gsapExports.isTweening,
+    setGSAPDefaults: gsapExports.setGSAPDefaults,
+    registerGSAPPlugins: gsapExports.registerGSAPPlugins,
+    // GSAP easing presets
+    gsapEasings: gsapExports.easings,
+    // GSAP plugins (these need to be registered before use)
+    GSAPPlugins: {
+      ScrollTrigger: gsapExports.ScrollTrigger,
+      TextPlugin: gsapExports.TextPlugin,
+      ScrollToPlugin: gsapExports.ScrollToPlugin,
+      CSSPlugin: gsapExports.CSSPlugin,
+      Draggable: gsapExports.Draggable,
+      MotionPathPlugin: gsapExports.MotionPathPlugin,
+      MorphSVGPlugin: gsapExports.MorphSVGPlugin,
+      DrawSVGPlugin: gsapExports.DrawSVGPlugin,
+      SplitText: gsapExports.SplitText,
+      InertiaPlugin: gsapExports.InertiaPlugin,
+      ScrollSmoother: gsapExports.ScrollSmoother,
+      Observer: gsapExports.Observer,
+      Flip: gsapExports.Flip,
     },
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }
