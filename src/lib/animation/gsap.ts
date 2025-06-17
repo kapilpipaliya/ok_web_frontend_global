@@ -1,3 +1,4 @@
+import { gsap } from "gsap";
 // Re-export GSAP and commonly used plugins for animation support
 export { gsap } from "gsap";
 
@@ -21,8 +22,7 @@ export { Flip } from "gsap/Flip";
 // Helper function to register plugins
 export function registerGSAPPlugins(...plugins: any[]) {
   if (typeof window !== "undefined" && plugins.length > 0) {
-    const gsapInstance = (window as any).gsap || gsap;
-    gsapInstance.registerPlugin(...plugins);
+    gsap.registerPlugin(...plugins);
   }
 }
 

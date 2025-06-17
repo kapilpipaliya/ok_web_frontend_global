@@ -74,13 +74,8 @@ export function getWebsiteNameForSubdomain(
   domain?: string,
 ): string | null {
   // For localhost in dev, load all websites
-  if (subdomain === "admin" && domain === "localhost") {
+  if (subdomain === "admin") {
     return null; // Load all
-  }
-
-  // If subdomain is 'www' and we have domain, use domain as website name
-  if (subdomain === "www" && domain) {
-    return domain;
   }
 
   // Otherwise use subdomain as website name
@@ -121,7 +116,7 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
   return schemas;
 }
 
-// Export function to get schemas based on subdomain
+// function to get schemas based on subdomain
 export function getSchemasForSubdomain(
   subdomain: string,
   domain?: string,
