@@ -15,7 +15,7 @@ import {
   type PageLayoutObject,
   useDesignerLayoutStore,
 } from "../../context/LayoutContext";
-import { ComponentItem } from "./ComonentItem";
+import { ComponentItem } from "./ComponentItem";
 import { getCompChildren } from "./functions/getCompChildren";
 import { As } from "~/components/As";
 import type { Id } from "~/lib/graph/type/id";

@@ -117,7 +117,7 @@ export function ComponentItem(
   // Get display name for the component
   const getDisplayName = () => {
     const rawName = props.child?.P.label || props.child?.P.key;
-    return rawName ? toTitle(rawName) : "";
+    return rawName ? (rawName) : "";
   };
 
   // Should show buttons if item is hovered or preview is open
