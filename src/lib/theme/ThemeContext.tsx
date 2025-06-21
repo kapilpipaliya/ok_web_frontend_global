@@ -1,12 +1,6 @@
 import { createContext, useContext } from "solid-js";
 
 // Moving constants and utility functions to separate modules
-import {
-  EASING_PRESETS,
-  FONT_PRESETS,
-  RADIUS_PRESETS,
-  SPACING_SCALES,
-} from "~/lib/styles/constants";
 
 import {
   createColorScheme,
@@ -31,11 +25,6 @@ type ThemeObject = Record<string, unknown>;
 type ColorTarget = {
   [key: string]: string | number | boolean | ColorDefinition | undefined;
   primary?: ColorDefinition;
-  fontFamily?: string;
-  spacingScale?: string;
-  borderRadius?: string;
-  fontSizeBase?: string;
-  lineHeightBase?: number;
 };
 
 // Color handlers
@@ -218,85 +207,6 @@ const colorHandlers = {
 };
 
 // Non-color handlers
-const styleHandlers = {
-  /**
-   * Handles font preset access in the theme proxy.
-   * Pattern: fontSystem, fontSans, fontSerif, fontMono, fontHeading, etc.
-   */
-  handleFontPresetAccess: (target: ColorTarget, prop: string) => {
-    if (
-      prop.startsWith("font") &&
-      ![
-        "fontFamily",
-        "fontSizeBase",
-        "fontWeightBase",
-        "fontHeading",
-        "fontMono",
-      ].includes(prop)
-    ) {
-      const presetName = prop.replace(/^font/, "").toLowerCase();
-      return (
-        FONT_PRESETS[presetName as keyof typeof FONT_PRESETS] ||
-        target.fontFamily
-      );
-    }
-    return undefined;
-  },
-
-  /**
-   * Handles spacing scale access in the theme proxy.
-   * Pattern: spacingXs, spacingSm, spacingMd, spacingLg, spacingXl, spacing2xl, etc.
-   */
-  handleSpacingScaleAccess: (target: ColorTarget, prop: string) => {
-    if (prop.startsWith("spacing") && prop !== "spacingScale") {
-      const scaleName = target.spacingScale || "default";
-      const scale =
-        SPACING_SCALES[scaleName as keyof typeof SPACING_SCALES] ||
-        SPACING_SCALES.default;
-
-      const sizeMatch = prop.match(/^spacing(.+)$/);
-      if (sizeMatch) {
-        const size = sizeMatch[1].toLowerCase();
-        return scale[size as keyof typeof scale] || scale.md;
-      }
-      return scale;
-    }
-    return undefined;
-  },
-
-  /**
-   * Handles border radius access in the theme proxy.
-   * Pattern: radiusNone, radiusSm, radiusMd, radiusLg, radiusXl, radiusFull, etc.
-   */
-  handleBorderRadiusAccess: (target: ColorTarget, prop: string) => {
-    if (prop.startsWith("radius") && prop !== "borderRadius") {
-      const sizeMatch = prop.match(/^radius(.+)$/);
-      if (sizeMatch) {
-        const size = sizeMatch[1].toLowerCase();
-        return (
-          RADIUS_PRESETS[size as keyof typeof RADIUS_PRESETS] ||
-          target.borderRadius
-        );
-      }
-      return target.borderRadius;
-    }
-    return undefined;
-  },
-
-  /**
-   * Handles easing preset access in the theme proxy.
-   * Pattern: easingLinear, easingEaseInOut, etc.
-   */
-  handleEasingPresetAccess: (_target: ColorTarget, prop: string) => {
-    if (prop.startsWith("easing") && prop !== "defaultEasing") {
-      const presetName = prop.replace(/^easing/, "");
-      const presetKey = (presetName.charAt(0).toLowerCase() +
-        presetName.slice(1)) as keyof typeof EASING_PRESETS;
-      return EASING_PRESETS[presetKey] || EASING_PRESETS.ease;
-    }
-    return undefined;
-  },
-};
 
 // Main proxy creation function
 export const createSafeThemeProxy = (
@@ -318,12 +228,6 @@ export const createSafeThemeProxy = (
             currentPath,
             getColorMode,
           );
-        }
-
-        // Handle style-related properties
-        const styleResult = handleStyleProperties(target as ColorTarget, prop);
-        if (styleResult !== undefined) {
-          return styleResult;
         }
 
         // Handle nested objects and default values
@@ -365,29 +269,6 @@ function handleColorProperties(
     );
     if (directResult !== undefined) {
       return directResult;
-    }
-  }
-
-  return undefined;
-}
-
-function handleStyleProperties(target: ColorTarget, prop: string) {
-  const styleHandlerMap: Record<
-    string,
-    (target: ColorTarget, prop: string) => unknown
-  > = {
-    font: styleHandlers.handleFontPresetAccess,
-    spacing: styleHandlers.handleSpacingScaleAccess,
-    radius: styleHandlers.handleBorderRadiusAccess,
-    easing: styleHandlers.handleEasingPresetAccess,
-  };
-
-  for (const [prefix, handler] of Object.entries(styleHandlerMap)) {
-    if (prop.startsWith(prefix)) {
-      const result = handler(target, prop);
-      if (result !== undefined) {
-        return result;
-      }
     }
   }
 
