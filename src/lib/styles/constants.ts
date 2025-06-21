@@ -1,8 +1,4 @@
-import type {
-  EasingPreset,
-  SpacingScale,
-  ThemeContext,
-} from "~/lib/styles/types/types";
+import type { ThemeContext } from "~/lib/styles/types/types";
 
 // Default theme values
 export const DEFAULT_THEME = {
@@ -44,78 +40,7 @@ export const DEFAULT_THEME = {
       dark: "oklch(0.6 0.03 250)", // Muted text
     },
   },
-  fontFamily: "system-ui, sans-serif",
-  fontSizeBase: "1rem",
-  lineHeightBase: 1.5,
-  fontWeightBase: 400,
-  borderRadius: "0.25rem",
-  spacingScale: "default" as SpacingScale,
-  containerPadding: "1.5rem",
-  sectionPadding: "2rem",
-  transitionDurationFast: "150ms",
-  transitionDurationNormal: "300ms",
-  transitionDurationSlow: "500ms",
-  defaultEasing: "ease" as EasingPreset,
 } as ThemeContext["var"];
-
-// Font presets
-export const FONT_PRESETS = {
-  system: "system-ui, sans-serif",
-  sans: '"Open Sans", -apple-system, BlinkMacSystemFont, sans-serif',
-  serif: 'Georgia, "Times New Roman", serif',
-  mono: '"Roboto Mono", Menlo, Monaco, Consolas, monospace',
-  heading: '"Poppins", system-ui, sans-serif',
-};
-
-// Spacing scales
-export const SPACING_SCALES = {
-  compact: {
-    xs: "0.25rem",
-    sm: "0.5rem",
-    md: "0.75rem",
-    lg: "1rem",
-    xl: "1.5rem",
-    "2xl": "2rem",
-  },
-  default: {
-    xs: "0.5rem",
-    sm: "1rem",
-    md: "1.5rem",
-    lg: "2rem",
-    xl: "3rem",
-    "2xl": "4rem",
-  },
-  loose: {
-    xs: "0.75rem",
-    sm: "1.5rem",
-    md: "2.25rem",
-    lg: "3rem",
-    xl: "4.5rem",
-    "2xl": "6rem",
-  },
-};
-
-// Border radius presets
-export const RADIUS_PRESETS = {
-  none: "0",
-  sm: "0.125rem",
-  md: "0.25rem",
-  lg: "0.5rem",
-  xl: "1rem",
-  full: "9999px",
-};
-
-// Animation easing presets
-export const EASING_PRESETS = {
-  linear: "linear",
-  ease: "ease",
-  easeIn: "ease-in",
-  easeOut: "ease-out",
-  easeInOut: "ease-in-out",
-  easeInQuad: "cubic-bezier(0.55, 0.085, 0.68, 0.53)",
-  easeOutQuad: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-  easeInOutQuad: "cubic-bezier(0.455, 0.03, 0.515, 0.955)",
-};
 
 // CSS Reset styles
 export const CSS_RESET = `

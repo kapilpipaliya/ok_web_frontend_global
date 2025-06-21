@@ -9,20 +9,7 @@ export type ThemeColorKey =
   | "background"
   | "border"
   | "muted";
-// Space scale options
-export type SpacingScale = "compact" | "default" | "loose";
-// Border radius size options
-export type RadiusSize = "none" | "sm" | "md" | "lg" | "xl" | "full";
-// Animation easing presets
-export type EasingPreset =
-  | "linear"
-  | "ease"
-  | "easeIn"
-  | "easeOut"
-  | "easeInOut"
-  | "easeInQuad"
-  | "easeOutQuad"
-  | "easeInOutQuad";
+// Typography and layout types removed - use fixed values in CSS
 // Media breakpoints
 export type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
 // Color modes
@@ -79,15 +66,7 @@ export interface ColorAdjustments {
   alpha?: number;
 }
 
-// Typography settings
-export interface TypographySettings {
-  fontFamily?: string;
-  fontHeading?: string;
-  fontMono?: string;
-  fontSizeBase?: string;
-  lineHeightBase?: string | number;
-  fontWeightBase?: number;
-}
+// Typography settings removed - use fixed values in CSS
 
 // Color palette (all shades of a color)
 export type ColorPalette = Record<ShadeNumber, string>;
@@ -137,25 +116,9 @@ export interface ThemeContext {
       [key: string]: ColorDefinition | undefined;
     };
 
-    // Typography settings
-    fontFamily?: string;
-    fontHeading?: string;
-    fontMono?: string;
-    fontSizeBase?: string;
-    lineHeightBase?: string | number;
-    fontWeightBase?: number;
+    // Typography and layout settings removed - use fixed values in CSS
 
-    // Layout settings
-    borderRadius?: string;
-    spacingScale?: SpacingScale;
-    containerPadding?: string;
-    sectionPadding?: string;
-
-    // Animation settings
-    transitionDurationFast?: string;
-    transitionDurationNormal?: string;
-    transitionDurationSlow?: string;
-    defaultEasing?: EasingPreset;
+    // Animation settings removed - use fixed values in CSS
 
     // Advanced theming
     variables?: ThemeVariables;
@@ -171,9 +134,6 @@ export interface ThemeContext {
   // - Color shades: theme.primary_light_100, theme.error_dark_900 (light/dark, 1-1000)
   // - Color palettes: theme.primaryPalette, theme.infoPalette
   // - Color schemes: theme.primaryScheme, theme.infoScheme
-  // - Font presets: theme.fontSystem, theme.fontSans, theme.fontSerif
-  // - Spacing scales: theme.spacingXs, theme.spacingMd, theme.spacing2xl
-  // - Border radius: theme.radiusNone, theme.radiusMd, theme.radiusFull
 
   // ===========================================
   // = THEME MODIFICATION FUNCTIONS
@@ -187,11 +147,10 @@ export interface ThemeContext {
   resetTheme?: () => void;
 
   // Advanced theme helpers
-  setSpacingScale?: (scale: SpacingScale) => void;
-  setTypography?: (settings: TypographySettings) => void;
+  // setTypography removed - use fixed values in CSS
   setAllColors?: (colors: Record<ThemeColorKey, string>) => void;
   setColorScheme?: (baseColor: string, colorKeys?: ThemeColorKey[]) => void;
-  getBorderRadius?: (size: RadiusSize) => string;
+  // getBorderRadius removed - use fixed values in CSS
 
   // ===========================================
   // = COLOR UTILITY FUNCTIONS
