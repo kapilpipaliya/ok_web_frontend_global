@@ -1,6 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
 import { createMemo, createSignal, For, Show } from "solid-js";
-import { toTitle } from "case-switcher-js";
 
 import { componentsMap } from "~/components/form/functions/componentsMap";
 import { IconButton } from "~/components/styled/IconButton";
@@ -117,7 +116,7 @@ export function ComponentItem(
   // Get display name for the component
   const getDisplayName = () => {
     const rawName = props.child?.P.label || props.child?.P.key;
-    return rawName ? (rawName) : "";
+    return rawName ? rawName : "";
   };
 
   // Should show buttons if item is hovered or preview is open

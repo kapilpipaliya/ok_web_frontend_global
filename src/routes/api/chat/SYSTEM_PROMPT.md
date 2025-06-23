@@ -236,7 +236,7 @@ To add a URL for a page, add the `url` key in the Page properties. For example:
   L: "Page",
   P: {
     key: "HomePage",
-    url: "/home"  // This sets the page URL
+    url: "/"  // This sets the page URL
   }
 }
 ```
