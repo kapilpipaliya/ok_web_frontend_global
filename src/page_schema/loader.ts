@@ -4,10 +4,11 @@ import { parseHjsonPreservingMultiline } from "~/lib/hjson/parseHjsonPreservingM
 export interface WebsiteSchemas {
   components?: Record<string, ExportedSchema>;
   pages?: Record<string, ExportedSchema>;
+  themes?: Record<string, ExportedSchema>;
 }
 
 type AllWebsiteSchemas = Record<string, WebsiteSchemas>;
-type SchemaType = "components" | "pages";
+type SchemaType = "components" | "pages" | "themes";
 
 interface ParsedPath {
   websiteName: string;
@@ -21,7 +22,7 @@ function parseModulePath(path: string): ParsedPath | null {
   if (parts.length < 4) return null;
 
   const schemaType = parts[2];
-  if (schemaType !== "components" && schemaType !== "pages") return null;
+  if (schemaType !== "components" && schemaType !== "pages" && schemaType !== "themes") return null;
 
   return {
     websiteName: parts[1],
@@ -40,7 +41,7 @@ function processSchemaFile(
     const schema = parseHjsonPreservingMultiline(content);
 
     // Handle both AllWebsiteSchemas and WebsiteSchemas types
-    if ("components" in schemas || "pages" in schemas) {
+    if ("components" in schemas || "pages" in schemas || "themes" in schemas) {
       // WebsiteSchemas
       const websiteSchemas = schemas as WebsiteSchemas;
       if (!websiteSchemas[parsedPath.schemaType]) {
@@ -92,7 +93,7 @@ export function getWebsiteSchemasSync(websiteName: string): WebsiteSchemas {
     return websiteSchemaCache.get(websiteName)!;
   }
 
-  const schemas: WebsiteSchemas = { components: {}, pages: {} };
+  const schemas: WebsiteSchemas = { components: {}, pages: {}, themes: {} };
 
   // We have to use the general pattern, but we'll filter efficiently
   // Use explicit default import for better compatibility
