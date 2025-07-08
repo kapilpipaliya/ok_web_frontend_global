@@ -3,7 +3,7 @@ import { StyleRenderer } from "~/components/StyleRenderer";
 import { getGlobalThemeVertex } from "../graph/get/sync/store/getGlobalThemeVertex";
 import { getGlobalStore } from "../graph/get/sync/store/getGlobalStore";
 import { themeConfig } from "../graph/get/sync/theme/themeConfig";
-import { CSS_RESET, FONT_PRESETS } from "../styles/constants";
+import { CSS_RESET } from "../styles/constants";
 import { createSafeThemeProxy, ThemeContext } from "./ThemeContext";
 import type {
   ColorMode,
@@ -53,15 +53,14 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
       currentMode,
     ) as ThemeContextType["var"];
 
+    // font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     return `
       ${CSS_RESET}
 
       body {
         background-color: ${safeThemeVars.color?.background};
         color: ${safeThemeVars.color?.text};
-        font-family: ${safeThemeVars.fontFamily || FONT_PRESETS.system};
-        font-size: ${safeThemeVars.fontSizeBase || "1rem"};
-        line-height: ${safeThemeVars.lineHeightBase || 1.5};
+        
         -webkit-text-size-adjust: 100%;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -69,7 +68,7 @@ export const ThemeProvider: Component<ThemeProviderProps> = (props) => {
 
       /* Code and preformatted text */
       code, pre, kbd {
-        font-family: ${safeThemeVars.fontMono || FONT_PRESETS.mono};
+        font-family: "Roboto Mono", Menlo, Monaco, Consolas, monospace;
       }
     `;
   });

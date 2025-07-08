@@ -99,14 +99,15 @@ The application has a component-based architecture where:
 - The system supports form components with validation
 
 #### Page Schema System
-The application uses a page schema system for defining reusable components and pages organized by website:
+The application uses a page schema system for defining reusable components, pages, and themes organized by website:
 
 **Directory Structure:**
 ```
 /src/page_schema/
   └── [website_name]/
       ├── components/     # Component definitions in hjson format
-      └── pages/         # Page templates in hjson format
+      ├── pages/         # Page templates in hjson format
+      └── themes/        # Theme definitions in hjson format
 ```
 
 **Example:**
@@ -117,14 +118,20 @@ The application uses a page schema system for defining reusable components and p
   │   │   ├── SystemButton.hjson
   │   │   ├── SystemCard.hjson
   │   │   └── SystemHeading.hjson
-  │   └── pages/
-  │       ├── DemoHomePage.hjson
-  │       └── DemoContactForm.hjson
+  │   ├── pages/
+  │   │   ├── DemoHomePage.hjson
+  │   │   └── DemoContactForm.hjson
+  │   └── themes/
+  │       ├── DefaultTheme.hjson
+  │       └── DarkTheme.hjson
   └── mywebsite/
       ├── components/
       │   └── CustomButton.hjson
-      └── pages/
-          └── LandingPage.hjson
+      ├── pages/
+      │   └── LandingPage.hjson
+      └── themes/
+          ├── BrandTheme.hjson
+          └── MinimalTheme.hjson
 ```
 
 **Schema Format:**
@@ -166,10 +173,14 @@ Components and pages are defined using hjson files with the following structure:
 
 **Loader Functions:**
 The `~/page_schema/loader.ts` module provides several utility functions:
-- `loadWebsiteSchemas()` - Loads all schemas from all websites
+- `loadWebsiteSchemas()` - Loads all schemas (components, pages, and themes) from all websites
 - `getWebsiteSchemasSync(websiteName)` - Gets schemas for a specific website
 
-**Note:** If multiple websites have components or pages with the same name, only the last one loaded will be used.
+**Note:** 
+- If multiple websites have components, pages, or themes with the same name, only the last one loaded will be used.
+- Components are registered under the "Component" label
+- Pages are registered under the "Page" label  
+- Themes are registered under the "Theme" label
 
 **Schema Creation Guidelines:**
 When creating component and page schemas, follow the guidelines in `/src/routes/api/chat/SYSTEM_PROMPT.md`. Key points:
@@ -577,9 +588,150 @@ args.theme.var.color.primary_light_200_text  // Auto-calculated readable text co
 
 **Note:** Currently, the theme system only supports colors and their shades. Use fixed values for other CSS properties like border-radius, transitions, spacing, etc.
 
+**Theme Management:**
+Themes can be defined in hjson files within each website's `themes` folder in the page schema directory. Additionally, themes can be managed through the database UI at `/admin/GlobalSettings` > Theme Management.
+
+**Theme Schema Structure:**
+Each website can have its own themes folder:
+```
+/src/page_schema/
+  └── [website_name]/
+      └── themes/
+          ├── DefaultTheme.hjson
+          ├── DarkTheme.hjson
+          └── CustomTheme.hjson
+```
+
+**Theme Schema Format (hjson):**
+```hjson
+{
+  vertexes: [
+    {
+      id: "theme_root",
+      L: "Theme",
+      P: {
+        key: "CustomTheme",
+        name: "Custom Theme",
+        description: "A custom theme with modern colors",
+        data: '''
+return {
+  var: {
+    color: {
+      primary: {
+        light: "oklch(0.65 0.25 280)",
+        dark: "oklch(0.75 0.20 280)"
+      },
+      info: {
+        light: "oklch(0.70 0.18 230)",
+        dark: "oklch(0.80 0.15 230)"
+      },
+      success: {
+        light: "oklch(0.72 0.20 145)",
+        dark: "oklch(0.82 0.18 145)"
+      },
+      warning: {
+        light: "oklch(0.85 0.15 85)",
+        dark: "oklch(0.90 0.12 85)"
+      },
+      error: {
+        light: "oklch(0.68 0.25 25)",
+        dark: "oklch(0.78 0.22 25)"
+      },
+      text: {
+        light: "oklch(0.15 0.01 0)",
+        dark: "oklch(0.95 0.01 0)"
+      },
+      background: {
+        light: "oklch(0.98 0.005 0)",
+        dark: "oklch(0.12 0.01 0)"
+      },
+      border: {
+        light: "oklch(0.85 0.01 0)",
+        dark: "oklch(0.25 0.01 0)"
+      },
+      muted: {
+        light: "oklch(0.60 0.02 0)",
+        dark: "oklch(0.45 0.02 0)"
+      }
+    }
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}
+```
+
+**Theme Properties:**
+- `key`: Unique identifier for the theme
+- `name`: Display name for the theme
+- `description`: Brief description of the theme
+- `data`: Function body returning the theme configuration object
+
+**Custom Theme Variables:**
+You can add custom variables to your theme beyond the standard color system. These will be available via `args.theme` in your component schemas:
+
+```hjson
+{
+  vertexes: [
+    {
+      id: "theme_root",
+      L: "Theme",
+      P: {
+        key: "CustomTheme",
+        name: "Custom Theme",
+        data: '''
+return {
+  var: {
+    color: {
+      // Standard colors...
+    },
+    // Custom variables
+    spacing: {
+      xs: "0.25rem",
+      sm: "0.5rem",
+      md: "1rem",
+      lg: "2rem",
+      xl: "4rem"
+    },
+    borderRadius: {
+      sm: "0.25rem",
+      md: "0.5rem",
+      lg: "1rem",
+      full: "9999px"
+    },
+    animation: {
+      fast: "150ms",
+      normal: "300ms",
+      slow: "500ms"
+    }
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}
+```
+
+Then in your components:
+```javascript
+css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  transition: all ${args.theme.var.animation.normal} ease;
+}`;
+'''
+```
+
 **Key Files:**
 - `src/lib/theme/ThemeContext.tsx` - Theme context with proxy-based access
 - `src/lib/theme/ThemeProvider.tsx` - Global theme state management
+- `src/lib/theme/getDefaultTheme.ts` - Default theme generator function
 - `src/lib/graph/get/sync/theme/themeConfig.ts` - Database integration
 - `src/lib/styles/colorUtils.ts` - Color manipulation utilities (uses colorjs.io library)
 - `src/lib/styles/constants.ts` - Theme constants and presets
@@ -601,10 +753,11 @@ The application implements a role-based access control system:
 
 - `/src` - Main application code
   - `/components` - Reusable UI components
-  - `/page_schema` - Page and component schemas organized by website
+  - `/page_schema` - Page, component, and theme schemas organized by website
     - `/[website_name]/` - Website-specific schemas
       - `/components/` - Component definitions in hjson format
       - `/pages/` - Page templates in hjson format
+      - `/themes/` - Theme definitions in hjson format
     - `loader.ts` - Dynamic schema loader module
   - `/cypher` - Neo4j database operations
     - `/constants` - Reserved keywords for Cypher queries
