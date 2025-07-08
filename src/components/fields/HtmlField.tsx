@@ -5,11 +5,13 @@ import {
   splitProps,
   Switch,
   createMemo,
+  For,
 } from "solid-js";
 import { Dynamic, Portal } from "solid-js/web";
 import { untrack } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Link, Meta, Title, Base, Style } from "@solidjs/meta";
+import { createAsync } from "@solidjs/router";
 
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import {
@@ -27,6 +29,14 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { evalExpression } from "~/lib/expression_eval";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
+import type { ServerResult } from "~/cypher/types/ServerResult";
+import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
+import { useDataContext } from "~/features/page_attr_render/context/DataContext";
+import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
+import { isValidResponse } from "~/lib/api/general/isValidResponse";
+import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
+import { DataInternal } from "./data/DataInternal";
+import { As } from "~/components/As";
 
 export function replacePlaceholderWithUrl(
   value: string,
@@ -57,18 +67,25 @@ export function replacePlaceholderWithUrl(
 export function HtmlField(
   props: JSX.HTMLAttributes<HTMLDivElement> & {
     as?: string;
-    childrenBefore?: JSX.Element;
+    childrenBefore?: boolean;
     class?: string;
     longPressDuration?: number;
     onLongPress?: (event: Event) => void;
     src?: string;
     text?: string;
+    // DataField props
+    data?: (() => unknown[]) | unknown[];
+    expression?: string;
+    loop?: boolean;
+    name?: string;
   },
 ) {
   const [graph, setGraph] = useGraph();
   const parentItems = usePageRenderContext();
   const parentRenderContext = () => getLastItem(parentItems)?.[0];
   const meta = () => parentRenderContext()?.context.meta;
+  const data = () => parentRenderContext()?.context.data;
+  const contextData = useDataContext() || {};
   const layoutStoreId = useDesignerLayoutStore();
   const formStoreId = useDesignerFormIdContext();
   const [previewStore] = usePreviewContext();
@@ -80,9 +97,132 @@ export function HtmlField(
     "children",
     "text",
     "childrenBefore",
+    // DataField props
+    "data",
+    "expression",
+    "loop",
+    "name",
   ]);
 
   const asLowerCase = createMemo(() => local.as?.toLowerCase());
+
+  const DataField = () => {
+    // DataField logic - Fetch data if expression is provided and no static data
+    const selectionOptionsData = createAsync<ServerResult>(
+      async () => {
+        if (!local.expression || local.data) {
+          // Return empty result when no fetch is needed
+          return {
+            success: true,
+          } as ServerResult;
+        }
+        return fetchDataFromDB(
+          { expression: local.expression },
+          {
+            nodes: {},
+            relationships: {},
+            vertexes: [data()!],
+          },
+        );
+      },
+      { deferStream: true },
+    );
+
+    const DataFieldInternal = () => {
+      // Process the data based on props and fetched results
+      const processedData = createMemo(() => {
+        // If static data is provided, use it directly
+        if (local.data) {
+          return {
+            options:
+              typeof local.data === "function" ? local.data() : local.data,
+            error: null,
+          };
+        }
+
+        // If no expression, return empty
+        if (!local.expression) {
+          return { options: [], error: null };
+        }
+
+        const fetchedData = selectionOptionsData();
+
+        // Still loading
+        if (fetchedData === undefined) {
+          return { options: [], error: null };
+        }
+
+        // Process fetched data
+        if (isValidResponse(fetchedData) && fetchedData.graph) {
+          setGraphData(graph, setGraph, fetchedData.graph, {
+            skipExisting: true,
+          });
+
+          const evaluatedData =
+            evalExpression(local.expression, {
+              graph,
+              setGraph,
+              vertexes: contextData || [],
+            }) || [];
+
+          return { options: evaluatedData, error: null };
+        }
+
+        // Error case
+        return {
+          options: [],
+          error: getErrorMessage(fetchedData),
+        };
+      });
+
+      return (
+        <Switch>
+          <Match when={processedData().error}>
+            <As
+              as="div"
+              css={`return \` ._id {
+                  background-color: \${args.theme.var.color.error};
+                  color: \${args.theme.var.color.error_text};
+              }
+
+                  \`;`}
+            >
+              {processedData().error}
+            </As>
+          </Match>
+          <Match when={Array.isArray(processedData().options) && local.loop}>
+            <For each={processedData().options}>
+              {(value, index) => {
+                return (
+                  <DataInternal
+                    data={data()}
+                    index={index()}
+                    meta={meta()!}
+                    name={local.name!}
+                    repeaterValue={value}
+                  />
+                );
+              }}
+            </For>
+          </Match>
+          <Match when={processedData().options && local.name}>
+            <DataInternal
+              data={data()}
+              index={0}
+              meta={meta()!}
+              name={local.name!}
+              repeaterValue={processedData().options}
+            />
+          </Match>
+        </Switch>
+      );
+    };
+    return (
+      <Show when={selectionOptionsData()}>
+        <DataFieldInternal />
+      </Show>
+    );
+  };
 
   const handleTextChange = (e: Event) => {
     if (!layoutStoreId) {
@@ -144,12 +284,18 @@ export function HtmlField(
       );
     };
 
+    // note: text property will not work when using the data field
     return (
-      <>
-        <Show when={local.childrenBefore}>{local.childrenBefore}</Show>
-        <TextContent />
-        <Show when={!local.childrenBefore}>{local.children}</Show>
-      </>
+      <Switch>
+        <Match when={local.expression || local.data}>
+          <DataField />
+        </Match>
+        <Match when={true}>
+          <Show when={local.childrenBefore}>{local.children}</Show>
+          <TextContent />
+          <Show when={!local.childrenBefore}>{local.children}</Show>
+        </Match>
+      </Switch>
     );
   };
 
