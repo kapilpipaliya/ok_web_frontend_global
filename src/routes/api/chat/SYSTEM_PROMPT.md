@@ -35,7 +35,7 @@ The graph must represent a valid Page Builder Item tree.
 - `displayOrder`: number - Determines Item order among siblings
 
 ### Optional Properties
-- `componentName`: string - name of the component any of: 'Html', 'Data', 'Slot' or Custom Component name if specified in prompt.
+- `componentName`: string - name of the component any of: 'Html', 'Slot' or Custom Component name if specified in prompt.
 - `fns`: Function Body string - function definitions for the Item e.g. "return {fn1: () => {}}". Its the place where you add javascript code to generate dynamic properties for the Item. It will be inherited to all the children of the Item.
 - `props`: Function Body string - dynamic properties for the Item, it returns an object with key-value pairs e.g. "return {key: value}". Its the place where you add javascript code to generate dynamic properties for the Item.
   - Use 'props' for dynamic props. It is a Function Body string that should return an object with key-value pairs.
@@ -150,7 +150,10 @@ export interface FunctionArgumentBaseType {
 
 ## Component Types
 
-### HTML Component
+### Component Options
+The componentName must be one of:
+
+### 'Html' - Basic HTML elements
 If no componentName is provided, it is considered 'Html' type
 - When 'Html' component is used, it requires properties:
   - `as`: string - specifies HTML tag (div, span, etc), 'icon', 'portal'
@@ -165,25 +168,22 @@ If no componentName is provided, it is considered 'Html' type
     - In 'props' function body return 'text' property
   - Renders as: `<>{text}{children}</>`
 
-### Component Options
-The componentName must be one of:
-
-#### 'Html' - Basic HTML elements
-- See details above
-
-#### 'Data' - For repeating Item patterns and state management
-- Required properties:
+### Data Features in HTML Component
+The HTML component can also includes data handling capabilities for repeating patterns and state management:
+- Required properties for data features:
   - `name`: string - name of the data context, must not be empty
   - `loop`: boolean - set to true for duplicate repeater components
 - Optional properties:
-  - `expression`: string - expression to evaluate the data
-- 'Data' Item can be used for looping its children with different data. Set 'loop' to true and provide a 'name'.
-- In the 'props' function body of the 'Data' component, pass the 'data' key with an array of values to iterate over.
-- In child components, access the current iteration item using 'args.contextData.name' within 'props', 'fns', or 'css' function bodies.
-- Use 'Data' Item whenever possible for repeating patterns.
-- 'Data' Item can also be used for state management by defining state in the 'props' property 'data' key using solid-js functions like 'args.createSignal' or 'args.createStore'.
-- Access state in child components using 'args.contextData.name' within 'props', 'fns', or 'css' function bodies.
-- Example state usage: In 'props' property, define state like "const [count, setCount] = args.createSignal(0); return {data: {count, setCount}};" and access it in children via 'args.contextData.name.count' and 'args.contextData.name.setCount'.
+  - `data`: array or function returning array - static data to iterate over
+  - `expression`: string - expression to evaluate the data from database
+- For looping over data:
+  - Set 'loop' to true and provide a 'name'
+  - In the 'props' function body, pass the 'data' key with an array of values to iterate over
+  - In child components, access the current iteration item using 'args.contextData.name' within 'props', 'fns', or 'css' function bodies
+- For state management:
+  - Define state in the 'props' property 'data' key using solid-js functions like 'args.createSignal' or 'args.createStore'
+  - Access state in child components using 'args.contextData.name' within 'props', 'fns', or 'css' function bodies
+  - Example: In 'props' property, define state like "const [count, setCount] = args.createSignal(0); return {data: {count, setCount}};" and access it in children via 'args.contextData.name.count' and 'args.contextData.name.setCount'
 
 #### 'Slot' - Component slots
 - Optional properties:
