@@ -7,7 +7,7 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { adminUserData } from "~/cypher/mutate/manage/adminUserData";
 import { ADMIN_DB_NAME } from "~/cypher/core/boltConstant";
 import { getDriver } from "~/cypher/core/driver";
-import {Vertex} from "~/lib/graph/type/vertex";
+import { Vertex } from "~/lib/graph/type/vertex";
 
 // Usage: npm run send-test-email -- <subdomain> <from_email> <to_email>
 // Example: npm run send-test-email -- decodeui.io admin@decodeui.io test@test.com
@@ -18,37 +18,44 @@ const mockRequest = new Request("https://admin.decodeui.io");
 async function sendTestEmail() {
   // Get command line arguments
   const args = process.argv.slice(2);
-  
+
   if (args.length < 3) {
-    console.error("Usage: node sendTestEmail.js <subdomain> <from_email> <to_email>");
+    console.error(
+      "Usage: node sendTestEmail.js <subdomain> <from_email> <to_email>",
+    );
     process.exit(1);
   }
-  
+
   const [subdomain, fromEmail, toEmail] = args;
-  
+
   // Get database session
   const { dbSession } = await getDBSessionForSubdomain(mockRequest);
-  
+
   try {
-    console.log(`Sending test email from ${fromEmail} to ${toEmail} via subdomain ${subdomain}...`);
-    
+    console.log(
+      `Sending test email from ${fromEmail} to ${toEmail} via subdomain ${subdomain}...`,
+    );
+
     // Get the adminuser instead of creating a mock user
     const user = await findAndUseAdminUser();
-    
+
     if (!user) {
       console.error("Admin user not found. Cannot send test email.");
       process.exit(1);
     }
-    
+
     // Create user data from the admin user
     const userData: UserData = {
       email: user.P.email,
       uuid: user.P.uuid,
     };
-    
+
     // Generate secure token
-    const secureToken = await generateSecureToken(encodeUserData(userData), dbSession);
-    
+    const secureToken = await generateSecureToken(
+      encodeUserData(userData),
+      dbSession,
+    );
+
     user.P.email = toEmail;
     // Send email
     await sendNotificationEmail(
@@ -62,7 +69,7 @@ async function sendTestEmail() {
       subdomain,
       secureToken,
     );
-    
+
     console.log("Test email sent successfully!");
   } catch (error) {
     console.error("Error sending test email:", error);
@@ -76,7 +83,7 @@ async function findAndUseAdminUser(): Promise<null | Vertex> {
   const adminDbSession = (await getDriver()).session({
     database: ADMIN_DB_NAME,
   });
-  
+
   try {
     // Find user by email
     const query = `
@@ -84,16 +91,16 @@ async function findAndUseAdminUser(): Promise<null | Vertex> {
       WHERE u.email = $email OR u.username = $username
       RETURN u
     `;
-    
-    const result = await adminDbSession.run(query, { 
+
+    const result = await adminDbSession.run(query, {
       email: adminUserData.email,
-      username: adminUserData.username
+      username: adminUserData.username,
     });
-    
+
     if (result.records.length === 0) {
       return null;
     }
-    
+
     // Convert the user node to a Vertex object
     return convertNodeToJson(result.records[0].get("u"));
   } catch (error) {
@@ -104,4 +111,4 @@ async function findAndUseAdminUser(): Promise<null | Vertex> {
   }
 }
 
-sendTestEmail().catch(console.error); 
+sendTestEmail().catch(console.error);
