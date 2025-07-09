@@ -157,8 +157,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "plans",
+        componentName: "Html",
+        contextName: "plans",
         loop: true,
         props: '''
 return {
@@ -393,8 +393,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "features",
+        componentName: "Html",
+        contextName: "features",
         loop: true,
         props: '''
 const plan = args.contextData.plans;

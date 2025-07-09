@@ -362,8 +362,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "events",
+        componentName: "Html",
+        contextName: "events",
         loop: true,
         props: '''
 return {
@@ -800,8 +800,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "previousEvents",
+        componentName: "Html",
+        contextName: "previousEvents",
         loop: true,
         props: '''
 return {

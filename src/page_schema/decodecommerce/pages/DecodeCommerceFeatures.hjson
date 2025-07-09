@@ -264,8 +264,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "advancedFeatures",
+        componentName: "Html",
+        contextName: "advancedFeatures",
         loop: true,
         props: '''
 return {
@@ -496,8 +496,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "featureList",
+        componentName: "Html",
+        contextName: "featureList",
         loop: true,
         props: '''
 const feature = args.contextData.advancedFeatures;

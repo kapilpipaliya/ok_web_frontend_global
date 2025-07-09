@@ -476,8 +476,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 9,
-        componentName: "Data",
-        name: "endpoints",
+        componentName: "Html",
+        contextName: "endpoints",
         loop: true,
         props: '''
 return {
@@ -681,8 +681,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "endpointItems",
+        componentName: "Html",
+        contextName: "endpointItems",
         loop: true,
         props: '''
 const endpoint = args.contextData.endpoints;

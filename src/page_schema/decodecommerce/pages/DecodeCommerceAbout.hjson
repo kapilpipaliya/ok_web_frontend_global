@@ -467,8 +467,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "values",
+        componentName: "Html",
+        contextName: "values",
         loop: true,
         props: '''
 return {

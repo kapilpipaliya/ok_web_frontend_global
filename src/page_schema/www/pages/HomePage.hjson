@@ -36,8 +36,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "headerState",
+        componentName: "Html",
+        contextName: "headerState",
         props: '''
 const [isScrolled, setIsScrolled] = args.createSignal(false);
 const [mobileMenuOpen, setMobileMenuOpen] = args.createSignal(false);

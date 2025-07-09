@@ -139,8 +139,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "navLinks",
+        componentName: "Html",
+        contextName: "navLinks",
         loop: true,
         props: '''
 return {
@@ -494,8 +494,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "featuresList",
+        componentName: "Html",
+        contextName: "featuresList",
         loop: true,
         props: '''
 return {
@@ -684,8 +684,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "testimonialsList",
+        componentName: "Html",
+        contextName: "testimonialsList",
         loop: true,
         props: '''
 return {
@@ -904,8 +904,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "pricingPlans",
+        componentName: "Html",
+        namcontextNamee: "pricingPlans",
         loop: true,
         props: '''
 return {

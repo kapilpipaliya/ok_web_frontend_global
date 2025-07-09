@@ -117,8 +117,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Data",
-        name: "faqState",
+        componentName: "Html",
+        contextName: "faqState",
         props: '''
 const [openItems, setOpenItems] = args.createSignal([]);
 return {
@@ -152,8 +152,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "faqs",
+        componentName: "Html",
+        contextName: "faqs",
         loop: true,
         props: '''
 return {

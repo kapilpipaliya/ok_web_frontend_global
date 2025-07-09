@@ -318,8 +318,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "heroIcons",
+        componentName: "Html",
+        contextName: "heroIcons",
         loop: true,
         props: '''
 return {

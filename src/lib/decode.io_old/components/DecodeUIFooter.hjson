@@ -170,8 +170,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "socialLinks",
+        componentName: "Html",
+        contextName: "socialLinks",
         loop: true,
         props: '''
 return {
@@ -244,8 +244,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Data",
-        name: "footerSections",
+        componentName: "Html",
+        contextName: "footerSections",
         loop: true,
         props: '''
 return {
@@ -360,8 +360,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "footerLinks",
+        componentName: "Html",
+        contextName: "footerLinks",
         loop: true,
         props: '''
 const section = args.contextData.footerSections;

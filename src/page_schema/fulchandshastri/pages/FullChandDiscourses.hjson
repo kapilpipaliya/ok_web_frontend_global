@@ -653,8 +653,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "discourses",
+        componentName: "Html",
+        contextName: "discourses",
         loop: true,
         props: '''
 return {

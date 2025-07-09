@@ -64,8 +64,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "breadcrumbItems",
+        componentName: "Html",
+        contextName: "breadcrumbItems",
         loop: true,
         props: '''
 const items = (args.contextData.props?.items || "Home,Documentation").split(",");

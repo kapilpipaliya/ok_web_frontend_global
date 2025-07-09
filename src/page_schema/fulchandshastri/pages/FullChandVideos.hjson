@@ -323,8 +323,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Data",
-        name: "videos",
+        componentName: "Html",
+        contextName: "videos",
         loop: true,
         props: '''
 return {

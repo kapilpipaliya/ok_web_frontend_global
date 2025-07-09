@@ -67,8 +67,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "docSections",
+        componentName: "Html",
+        contextName: "docSections",
         loop: true,
         props: '''
 const currentPath = args.searchParams?.page || "home";
@@ -184,8 +184,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "navItems",
+        componentName: "Html",
+        contextName: "navItems",
         loop: true,
         props: '''
 const section = args.contextData.docSections;

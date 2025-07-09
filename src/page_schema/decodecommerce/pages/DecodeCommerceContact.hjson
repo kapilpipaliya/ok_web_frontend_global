@@ -246,8 +246,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Data",
-        name: "formState",
+        componentName: "Html",
+        contextName: "formState",
         props: '''
 const [formData, setFormData] = args.createStore({
   name: "",
@@ -717,8 +717,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "contactMethods",
+        componentName: "Html",
+        contextName: "contactMethods",
         loop: true,
         props: '''
 return {

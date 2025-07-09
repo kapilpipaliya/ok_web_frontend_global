@@ -166,8 +166,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "socialLinks",
+        componentName: "Html",
+        contextName: "socialLinks",
         loop: true,
         props: '''
 return {
@@ -295,8 +295,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "productLinks",
+        componentName: "Html",
+        contextName: "productLinks",
         loop: true,
         props: '''
 return {
@@ -415,8 +415,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "companyLinks",
+        componentName: "Html",
+        contextName: "companyLinks",
         loop: true,
         props: '''
 return {

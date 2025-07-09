@@ -22,7 +22,12 @@ function parseModulePath(path: string): ParsedPath | null {
   if (parts.length < 4) return null;
 
   const schemaType = parts[2];
-  if (schemaType !== "components" && schemaType !== "pages" && schemaType !== "themes") return null;
+  if (
+    schemaType !== "components" &&
+    schemaType !== "pages" &&
+    schemaType !== "themes"
+  )
+    return null;
 
   return {
     websiteName: parts[1],

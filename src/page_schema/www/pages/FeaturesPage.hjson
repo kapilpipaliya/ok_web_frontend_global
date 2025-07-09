@@ -205,8 +205,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "featureCategories",
+        componentName: "Html",
+        contextName: "featureCategories",
         loop: true,
         props: '''
 return {
@@ -463,8 +463,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "features",
+        componentName: "Html",
+        contextName: "features",
         loop: true,
         props: '''
 const category = args.contextData.featureCategories;

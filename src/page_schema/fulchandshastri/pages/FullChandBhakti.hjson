@@ -149,8 +149,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "bhaktiItems",
+        componentName: "Html",
+        contextName: "bhaktiItems",
         loop: true,
         props: '''
 return {

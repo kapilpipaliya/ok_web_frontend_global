@@ -208,8 +208,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Data",
-        name: "componentCategories",
+        componentName: "Html",
+        contextName: "componentCategories",
         loop: true,
         props: '''
 return {
@@ -514,8 +514,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "components",
+        componentName: "Html",
+        contextName: "components",
         loop: true,
         props: '''
 const category = args.contextData.componentCategories;
@@ -975,8 +975,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "properties",
+        componentName: "Html",
+        contextName: "properties",
         loop: true,
         props: '''
 return {
@@ -1064,8 +1064,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "items",
+        componentName: "Html",
+        contextName: "items",
         loop: true,
         props: '''
 const property = args.contextData.properties;

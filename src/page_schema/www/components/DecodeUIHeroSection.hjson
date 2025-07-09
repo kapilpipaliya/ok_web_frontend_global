@@ -348,8 +348,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "stats",
+        componentName: "Html",
+        contextName: "stats",
         props: '''
 return {
   data: [
@@ -574,8 +574,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "dots",
+        componentName: "Html",
+        contextName: "dots",
         props: '''
 return {
   data: ["red", "yellow", "green"]

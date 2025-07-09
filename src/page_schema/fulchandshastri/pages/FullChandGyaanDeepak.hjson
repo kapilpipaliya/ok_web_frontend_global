@@ -275,8 +275,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "feature",
+        componentName: "Html",
+        contextName: "feature",
         loop: true,
         props: '''
 return {
@@ -521,8 +521,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "schedule",
+        componentName: "Html",
+        contextName: "schedule",
         loop: true,
         props: '''
 return {

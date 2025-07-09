@@ -106,8 +106,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "faqItems",
+        componentName: "Html",
+        contextName: "faqItems",
         loop: true,
         props: '''
 const questions = args.contextData.props?.questions || [
@@ -136,8 +136,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "faqItem",
+        componentName: "Html",
+        contextName: "faqItem",
         props: '''
 const item = args.contextData.faqItems;
 const [isOpen, setIsOpen] = args.createSignal(false);

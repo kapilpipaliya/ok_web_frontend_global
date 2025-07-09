@@ -302,8 +302,8 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
          L: "Attr",
          P: {
            displayOrder: 1,
-           componentName: "Data",
-           name: "items",
+           componentName: "Html",
+           contextName: "items",
            loop: true,
            props: '''
    return {

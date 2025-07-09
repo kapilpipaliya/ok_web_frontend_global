@@ -100,8 +100,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "docContent",
+        componentName: "Html",
+        contextName: "docContent",
         props: '''
 const currentPage = args.searchParams?.page || "home";
 
@@ -333,8 +333,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Data",
-        name: "showCodeExample",
+        componentName: "Html",
+        contextName: "showCodeExample",
         props: '''
 const currentPage = args.searchParams?.page || "home";
 return {

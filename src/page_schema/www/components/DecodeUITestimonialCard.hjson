@@ -102,8 +102,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "stars",
+        componentName: "Html",
+        contextName: "stars",
         loop: true,
         props: '''
 const rating = args.contextData.props?.rating || 5;

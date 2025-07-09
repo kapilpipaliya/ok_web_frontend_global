@@ -265,8 +265,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "featureList",
+        componentName: "Html",
+        contextName: "featureList",
         loop: true,
         props: '''
 const features = args.contextData.props?.features || "Feature 1,Feature 2,Feature 3";

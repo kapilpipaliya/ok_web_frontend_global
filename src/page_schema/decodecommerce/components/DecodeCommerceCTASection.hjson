@@ -262,8 +262,8 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
-        name: "trustBadges",
+        componentName: "Html",
+        contextName: "trustBadges",
         loop: true,
         props: '''
 return {
