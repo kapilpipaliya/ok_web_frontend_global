@@ -31,6 +31,7 @@ import { evalExpression } from "~/lib/expression_eval";
 import { getDownloadLink } from "~/features/file_manager/sidebar/getDownloadLink";
 import type { ServerResult } from "~/cypher/types/ServerResult";
 import { fetchDataFromDB } from "~/cypher/get/fetchDataFromDB";
+import { executeServerFunction } from "~/cypher/get/executeServerFunction";
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 import { getErrorMessage } from "~/lib/api/general/getErrorMessage";
 import { isValidResponse } from "~/lib/api/general/isValidResponse";
@@ -78,6 +79,8 @@ export function HtmlField(
     expression?: string;
     loop?: boolean;
     name?: string;
+    // Server function props
+    serverFunction?: string; // Function body as string
   },
 ) {
   const [graph, setGraph] = useGraph();
@@ -102,6 +105,8 @@ export function HtmlField(
     "expression",
     "loop",
     "name",
+    // Server function props
+    "serverFunction",
   ]);
 
   const asLowerCase = createMemo(() => local.as?.toLowerCase());
@@ -110,12 +115,29 @@ export function HtmlField(
     // DataField logic - Fetch data if expression is provided and no static data
     const selectionOptionsData = createAsync<ServerResult>(
       async () => {
-        if (!local.expression || local.data) {
+        if ((!local.expression && !local.serverFunction) || local.data) {
           // Return empty result when no fetch is needed
           return {
             success: true,
           } as ServerResult;
         }
+
+        // If serverFunction is provided, execute it
+        if (local.serverFunction) {
+          return executeServerFunction(
+            {
+              functionBody: local.serverFunction,
+              contextData: contextData,
+            },
+            {
+              nodes: {},
+              relationships: {},
+              vertexes: data() ? [data()!] : [],
+            },
+          );
+        }
+
+        // Otherwise, use expression-based fetch
         return fetchDataFromDB(
           { expression: local.expression },
           {
@@ -140,8 +162,8 @@ export function HtmlField(
           };
         }
 
-        // If no expression, return empty
-        if (!local.expression) {
+        // If no expression or server function, return empty
+        if (!local.expression && !local.serverFunction) {
           return { options: [], error: null };
         }
 
@@ -153,19 +175,30 @@ export function HtmlField(
         }
 
         // Process fetched data
-        if (isValidResponse(fetchedData) && fetchedData.graph) {
-          setGraphData(graph, setGraph, fetchedData.graph, {
-            skipExisting: true,
-          });
+        if (isValidResponse(fetchedData)) {
+          // Update graph data if present
+          if (fetchedData.graph) {
+            setGraphData(graph, setGraph, fetchedData.graph, {
+              skipExisting: true,
+            });
+          }
 
-          const evaluatedData =
-            evalExpression(local.expression, {
-              graph,
-              setGraph,
-              vertexes: contextData || [],
-            }) || [];
+          // For server function, use the result directly
+          if (local.serverFunction && fetchedData.result !== undefined) {
+            return { options: fetchedData.result, error: null };
+          }
 
-          return { options: evaluatedData, error: null };
+          // For expression, evaluate it
+          if (local.expression) {
+            const evaluatedData =
+              evalExpression(local.expression, {
+                graph,
+                setGraph,
+                vertexes: contextData || [],
+              }) || [];
+
+            return { options: evaluatedData, error: null };
+          }
         }
 
         // Error case
@@ -287,7 +320,7 @@ export function HtmlField(
     // note: text property will not work when using the data field
     return (
       <Switch>
-        <Match when={local.expression || local.data}>
+        <Match when={local.expression || local.data || local.serverFunction}>
           <DataField />
         </Match>
         <Match when={true}>

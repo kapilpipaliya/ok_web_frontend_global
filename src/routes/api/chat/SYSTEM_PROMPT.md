@@ -176,6 +176,7 @@ The HTML component can also includes data handling capabilities for repeating pa
 - Optional properties:
   - `data`: array or function returning array - static data to iterate over
   - `expression`: string - expression to evaluate the data from database
+  - `serverFunction`: string - function body to execute on the server with database access
 - For looping over data:
   - Set 'loop' to true and provide a 'name'
   - In the 'props' function body, pass the 'data' key with an array of values to iterate over
@@ -184,6 +185,32 @@ The HTML component can also includes data handling capabilities for repeating pa
   - Define state in the 'props' property 'data' key using solid-js functions like 'args.createSignal' or 'args.createStore'
   - Access state in child components using 'args.contextData.name' within 'props', 'fns', or 'css' function bodies
   - Example: In 'props' property, define state like "const [count, setCount] = args.createSignal(0); return {data: {count, setCount}};" and access it in children via 'args.contextData.name.count' and 'args.contextData.name.setCount'
+
+### Server Function Usage
+The `serverFunction` property allows executing server-side code with database access:
+- The function body has access to an `args` object containing:
+  - `session`: Neo4j database session for running queries
+  - `context`: Evaluation context with nodes and relationships
+  - `contextData`: Data passed from the component
+  - `vertexes`: Current vertex data array
+  - `graph`: Object with nodes and relationships
+- Example usage:
+  ```javascript
+  serverFunction: `
+    // Query the database
+    const result = await args.session.run(
+      'MATCH (u:User) WHERE u.active = true RETURN u.name as name, u.email as email LIMIT 10'
+    );
+    
+    // Process and return the data
+    return result.records.map(record => ({
+      name: record.get('name'),
+      email: record.get('email')
+    }));
+  `
+  ```
+- The returned data is available to child components via `args.contextData.name`
+- Server functions are executed asynchronously and results are cached
 
 #### 'Slot' - Component slots
 - Optional properties:
