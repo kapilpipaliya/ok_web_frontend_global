@@ -78,7 +78,7 @@ export function HtmlField(
     data?: (() => unknown[]) | unknown[];
     expression?: string;
     loop?: boolean;
-    name?: string;
+    contextName?: string;
     // Server function props
     serverFunction?: string; // Function body as string
   },
@@ -104,7 +104,7 @@ export function HtmlField(
     "data",
     "expression",
     "loop",
-    "name",
+    "contextName",
     // Server function props
     "serverFunction",
   ]);
@@ -231,19 +231,19 @@ export function HtmlField(
                     data={data()}
                     index={index()}
                     meta={meta()!}
-                    name={local.name!}
+                    contextName={local.contextName!}
                     repeaterValue={value}
                   />
                 );
               }}
             </For>
           </Match>
-          <Match when={processedData().options && local.name}>
+          <Match when={processedData().options && local.contextName}>
             <DataInternal
               data={data()}
               index={0}
               meta={meta()!}
-              name={local.name!}
+              contextName={local.contextName!}
               repeaterValue={processedData().options}
             />
           </Match>

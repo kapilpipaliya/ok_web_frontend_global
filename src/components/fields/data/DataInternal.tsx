@@ -11,16 +11,16 @@ export function DataInternal(props: {
   data: any;
   index: number;
   meta: Vertex;
-  name: string;
+  contextName: string;
   repeaterValue: any;
 }) {
   const context = useDataContext() || {};
   const repeaterStore = new Proxy(context, {
     get(target, key) {
-      if (key === props.name) {
+      if (key === props.contextName) {
         return props.repeaterValue;
       }
-      if (key === `${props.name}Index`) {
+      if (key === `${props.contextName}Index`) {
         return props.index;
       }
       if (key === "index") {

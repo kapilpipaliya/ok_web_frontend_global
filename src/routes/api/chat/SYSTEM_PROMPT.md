@@ -171,20 +171,20 @@ If no componentName is provided, it is considered 'Html' type
 ### Data Features in HTML Component
 The HTML component can also includes data handling capabilities for repeating patterns and state management:
 - Required properties for data features:
-  - `name`: string - name of the data context, must not be empty
+  - `contextName`: string - name of the data context, must not be empty
   - `loop`: boolean - set to true for duplicate repeater components
 - Optional properties:
   - `data`: array or function returning array - static data to iterate over
   - `expression`: string - expression to evaluate the data from database
   - `serverFunction`: string - function body to execute on the server with database access
 - For looping over data:
-  - Set 'loop' to true and provide a 'name'
+  - Set 'loop' to true and provide a 'contextName'
   - In the 'props' function body, pass the 'data' key with an array of values to iterate over
-  - In child components, access the current iteration item using 'args.contextData.name' within 'props', 'fns', or 'css' function bodies
+  - In child components, access the current iteration item using 'args.contextData.contextName' within 'props', 'fns', or 'css' function bodies
 - For state management:
   - Define state in the 'props' property 'data' key using solid-js functions like 'args.createSignal' or 'args.createStore'
-  - Access state in child components using 'args.contextData.name' within 'props', 'fns', or 'css' function bodies
-  - Example: In 'props' property, define state like "const [count, setCount] = args.createSignal(0); return {data: {count, setCount}};" and access it in children via 'args.contextData.name.count' and 'args.contextData.name.setCount'
+  - Access state in child components using 'args.contextData.contextName' within 'props', 'fns', or 'css' function bodies
+  - Example: In 'props' property, define state like "const [count, setCount] = args.createSignal(0); return {data: {count, setCount}};" and access it in children via 'args.contextData.contextName.count' and 'args.contextData.contextName.setCount'
 
 ### Server Function Usage
 The `serverFunction` property allows executing server-side code with database access:
@@ -209,7 +209,7 @@ The `serverFunction` property allows executing server-side code with database ac
     }));
   `
   ```
-- The returned data is available to child components via `args.contextData.name`
+- The returned data is available to child components via `args.contextData.contextName`
 - Server functions are executed asynchronously and results are cached
 
 #### 'Slot' - Component slots
