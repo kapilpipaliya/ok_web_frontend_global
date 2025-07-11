@@ -255,7 +255,9 @@ To make a Component with variants (if asked):
   - `key`: string - name of the component
 - Have "ComponentVariant" and "Attr" vertexes
 
-### Page URL Configuration
+### Page Configuration
+
+#### Page URL Configuration
 To add a URL for a page, add the `url` key in the Page properties. For example:
 ```JSON
 {
@@ -267,6 +269,59 @@ To add a URL for a page, add the `url` key in the Page properties. For example:
   }
 }
 ```
+
+#### Page Permission System
+Pages support role-based access control through a graph-based permission model:
+
+**Permission Structure:**
+```
+Role -[RolePage]-> RolePage -[RolePagePage]-> Page
+```
+
+**Permission Levels** (from lowest to highest):
+- `NONE`: No access
+- `VIEW`: Can view the page
+- `CREATE`: Can create new content (includes VIEW)
+- `EDIT`: Can edit existing content (includes CREATE and VIEW)
+- `FULL`: Full control (includes all permissions)
+
+**Adding Page Permissions:**
+To grant a role permission to a page, create the following structure:
+```JSON
+[
+  {
+    "insert": {
+      "id": "-1",
+      "L": ["RolePage"],
+      "P": {
+        "access": "VIEW"  // Permission level: VIEW, CREATE, EDIT, or FULL
+      }
+    }
+  },
+  {
+    "insertEdge": {
+      "id": "-2",
+      "T": "RolePagePage",
+      "S": "-1",        // RolePage vertex ID
+      "E": "page_id"    // Target Page vertex ID
+    }
+  },
+  {
+    "insertEdge": {
+      "id": "-3",
+      "T": "RolePage",
+      "S": "role_id",   // Source Role vertex ID
+      "E": "-1"         // RolePage vertex ID
+    }
+  }
+]
+```
+
+**Key Points:**
+- One RolePage vertex is needed for each Role-Page permission relationship
+- Higher permission levels automatically include lower ones
+- Pages can bypass permission checks with `isNoPermissionCheck` property
+- When a page is deleted, all associated RolePage relationships are automatically cleaned up
 
 ### Component Variant
 1. To add variants to the Component:
