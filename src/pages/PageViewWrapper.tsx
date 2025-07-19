@@ -110,12 +110,18 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     if (
       formStore().P.formMetaId &&
       !isNoPermissionCheck() &&
-      ["Page"].includes(metaVertex()?.L[0]) &&
-      !getDynamicFns().enabled?.()
+      ["Page"].includes(metaVertex()?.L[0])
     ) {
-      const errorMsg = `${props.pageVertexName} is not enabled. Please contact your administrator.`;
-      setFormStore("error", errorMsg);
-      return errorMsg;
+      const dynamicFns = getDynamicFns();
+      const enabled = typeof dynamicFns.enabled === 'function' 
+        ? dynamicFns.enabled() 
+        : dynamicFns.enabled;
+      
+      if (!enabled) {
+        const errorMsg = `${props.pageVertexName} is not enabled. Please contact your administrator.`;
+        setFormStore("error", errorMsg);
+        return errorMsg;
+      }
     }
 
     if (!metaVertex()) {
