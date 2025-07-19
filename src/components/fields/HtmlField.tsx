@@ -6,11 +6,13 @@ import {
   Switch,
   createMemo,
   For,
+  createUniqueId,
+  Component,
 } from "solid-js";
 import { Dynamic, Portal } from "solid-js/web";
 import { untrack } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
-import { Link, Meta, Title, Base, Style } from "@solidjs/meta";
+import { Link, Meta, Title, Base, Style, useHead } from "@solidjs/meta";
 import { createAsync } from "@solidjs/router";
 
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
@@ -38,6 +40,27 @@ import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { DataInternal } from "./data/DataInternal";
 import { As } from "~/components/As";
+const MetaTag = (
+  tag: string,
+  props: { [k: string]: any },
+  setting?: { escape?: boolean; close?: boolean },
+) => {
+  useHead({
+    tag,
+    props,
+    setting,
+    id: createUniqueId(),
+    get name() {
+      return props.name || props.property;
+    },
+  });
+
+  return null;
+};
+
+export const Script: Component<JSX.ScriptHTMLAttributes<HTMLScriptElement>> = (
+  props,
+) => MetaTag("script", props, { close: true });
 
 export function replacePlaceholderWithUrl(
   value: string,
@@ -373,6 +396,11 @@ export function HtmlField(
       <Match when={asLowerCase() === "title"}>
         <Title>{local.text}</Title>
       </Match>
+
+      <Match when={asLowerCase() === "script"}>
+        <Script {...others}>{local.text}</Script>
+      </Match>
+
       <Match when={asLowerCase() === "portal"}>
         <Portal {...others}>
           <Content />
