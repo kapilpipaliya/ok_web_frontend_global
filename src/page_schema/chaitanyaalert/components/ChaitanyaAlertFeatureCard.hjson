@@ -1,0 +1,196 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "ChaitanyaAlertFeatureCard"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "icon",
+        type: "string",
+        defValue: "ph:bell"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariant",
+      P: {
+        key: "title",
+        type: "string",
+        defValue: "Feature Title"
+      }
+    },
+    {
+      id: "4",
+      L: "ComponentVariant",
+      P: {
+        key: "description",
+        type: "string",
+        defValue: "Feature description goes here"
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const icon = args.contextData.props?.icon || "ph:bell";
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 80px;
+  height: 80px;
+  background: ${args.theme.var.color.primary}20;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  
+  @media (max-width: 768px) {
+    width: 70px;
+    height: 70px;
+    margin-bottom: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const icon = args.contextData.props?.icon || "ph:bell";
+return {
+  as: "icon",
+  icon: icon,
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  
+  @media (max-width: 768px) {
+    width: 35px;
+    height: 35px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const title = args.contextData.props?.title || "Feature Title";
+return {
+  as: "h3",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const description = args.contextData.props?.description || "Feature description goes here";
+return {
+  as: "p",
+  text: description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  flex-grow: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariant", S: "1", E: "3" },
+    { id: "e3", T: "ComponentVariant", S: "1", E: "4" },
+    { id: "e4", T: "Attr", S: "1", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "5", E: "8" },
+    { id: "e8", T: "Attr", S: "5", E: "9" }
+  ]
+}

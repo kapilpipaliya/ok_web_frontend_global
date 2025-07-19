@@ -1,0 +1,459 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "ChaitanyaAlertFooter"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border-top: 1px solid ${args.theme.var.color.border};
+  margin-top: 4rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Chaitanya Alert"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Smart notification manager for messaging apps. Customize sounds, vibrations, and flashlight patterns for different contacts and groups."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Quick Links"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/features",
+  text: "Features"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/download",
+  text: "Download"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/privacy",
+  text: "Privacy Policy"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Support"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "https://chaitanyaalert.decodeui.io/feedback",
+  text: "Send Feedback",
+  target: "_blank",
+  rel: "noopener noreferrer"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  text-decoration: none;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  border-top: 1px solid ${args.theme.var.color.border};
+  padding-top: 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "© 2024 Chaitanya Alert. All rights reserved."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.9rem;
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "4", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "8", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "10", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "10", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "4", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "17", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "3", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" }
+  ]
+}

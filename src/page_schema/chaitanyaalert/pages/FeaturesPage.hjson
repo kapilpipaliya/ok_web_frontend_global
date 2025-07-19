@@ -1,0 +1,1552 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "ChaitanyaAlertFeaturesPage",
+        url: "/features"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "ChaitanyaAlertHeader"
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary}10 0%, ${args.theme.var.color.secondary}10 100%);
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Powerful Features"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Discover all the amazing features that make Chaitanya Alert the ultimate notification manager for your Android device."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 4rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 3rem;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  background: ${args.theme.var.color.primary}20;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:bell-ringing",
+  width: 50,
+  height: 50
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Custom Notification Sounds"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Set unique notification sounds for different contacts and groups. Choose from your device's ringtones or use custom audio files. Never confuse who's messaging you again with personalized sound alerts."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Individual sounds for each contact"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Regex pattern support for groups"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Built-in media player with controls"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  background: ${args.theme.var.color.secondary}20;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:vibrate",
+  width: 50,
+  height: 50
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.secondary};
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Custom Vibration Patterns"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Create unique vibration patterns for each contact. Choose from preset patterns like short, long, double, triple, or create custom sequences. Feel the difference even when your phone is silent."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Preset patterns (short, long, double, triple)"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Custom vibration sequences"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Loop patterns until sound ends"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  background: ${args.theme.var.color.accent}20;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:flashlight",
+  width: 50,
+  height: 50
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.accent};
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Flashlight Alerts"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Visual alerts with custom flashlight blinking patterns. Perfect for silent environments, noisy places, or when you need discrete notifications. Create patterns that match your style."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Custom blinking patterns"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Visual alerts for silent mode"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Synchronize with sound duration"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 3rem;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  background: ${args.theme.var.color.success}20;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:volume-high",
+  width: 50,
+  height: 50
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Volume Control"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Individual volume settings for each contact with precise control from 0-100%. Important people can be louder than others, ensuring you never miss critical notifications."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Per-contact volume settings"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Precise 0-100% control"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Priority-based notifications"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  background: ${args.theme.var.color.info}20;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:moon",
+  width: 50,
+  height: 50
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info};
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Silent Mode Override"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Choose which notifications play even when your phone is in silent or vibrate mode. Never miss important calls or messages from critical contacts, even in quiet environments."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}`;
+'''
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Override silent mode"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "56",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Critical contact prioritization"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "57",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Emergency notification support"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "58",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  padding: 4rem 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "59",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "60",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Ready to Experience the Difference?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "61",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Take control of your notifications with Chaitanya Alert's powerful features"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "62",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "63",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/download",
+  text: "Download Now"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px ${args.theme.var.color.primary}40;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_light_200};
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "64",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/about",
+  text: "Learn More"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid ${args.theme.var.color.border};
+  
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "65",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "ChaitanyaAlertFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "6", E: "8" },
+    { id: "e8", T: "Attr", S: "4", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "12", E: "15" },
+    { id: "e15", T: "Attr", S: "12", E: "16" },
+    { id: "e16", T: "Attr", S: "12", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "17", E: "19" },
+    { id: "e19", T: "Attr", S: "17", E: "20" },
+    { id: "e20", T: "Attr", S: "11", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "21", E: "24" },
+    { id: "e24", T: "Attr", S: "21", E: "25" },
+    { id: "e25", T: "Attr", S: "21", E: "26" },
+    { id: "e26", T: "Attr", S: "26", E: "27" },
+    { id: "e27", T: "Attr", S: "26", E: "28" },
+    { id: "e28", T: "Attr", S: "26", E: "29" },
+    { id: "e29", T: "Attr", S: "11", E: "30" },
+    { id: "e30", T: "Attr", S: "30", E: "31" },
+    { id: "e31", T: "Attr", S: "31", E: "32" },
+    { id: "e32", T: "Attr", S: "30", E: "33" },
+    { id: "e33", T: "Attr", S: "30", E: "34" },
+    { id: "e34", T: "Attr", S: "30", E: "35" },
+    { id: "e35", T: "Attr", S: "35", E: "36" },
+    { id: "e36", T: "Attr", S: "35", E: "37" },
+    { id: "e37", T: "Attr", S: "35", E: "38" },
+    { id: "e38", T: "Attr", S: "10", E: "39" },
+    { id: "e39", T: "Attr", S: "39", E: "40" },
+    { id: "e40", T: "Attr", S: "40", E: "41" },
+    { id: "e41", T: "Attr", S: "41", E: "42" },
+    { id: "e42", T: "Attr", S: "40", E: "43" },
+    { id: "e43", T: "Attr", S: "40", E: "44" },
+    { id: "e44", T: "Attr", S: "40", E: "45" },
+    { id: "e45", T: "Attr", S: "45", E: "46" },
+    { id: "e46", T: "Attr", S: "45", E: "47" },
+    { id: "e47", T: "Attr", S: "45", E: "48" },
+    { id: "e48", T: "Attr", S: "39", E: "49" },
+    { id: "e49", T: "Attr", S: "49", E: "50" },
+    { id: "e50", T: "Attr", S: "50", E: "51" },
+    { id: "e51", T: "Attr", S: "49", E: "52" },
+    { id: "e52", T: "Attr", S: "49", E: "53" },
+    { id: "e53", T: "Attr", S: "49", E: "54" },
+    { id: "e54", T: "Attr", S: "54", E: "55" },
+    { id: "e55", T: "Attr", S: "54", E: "56" },
+    { id: "e56", T: "Attr", S: "54", E: "57" },
+    { id: "e57", T: "Attr", S: "4", E: "58" },
+    { id: "e58", T: "Attr", S: "58", E: "59" },
+    { id: "e59", T: "Attr", S: "59", E: "60" },
+    { id: "e60", T: "Attr", S: "59", E: "61" },
+    { id: "e61", T: "Attr", S: "59", E: "62" },
+    { id: "e62", T: "Attr", S: "62", E: "63" },
+    { id: "e63", T: "Attr", S: "62", E: "64" },
+    { id: "e64", T: "Attr", S: "2", E: "65" }
+  ]
+}

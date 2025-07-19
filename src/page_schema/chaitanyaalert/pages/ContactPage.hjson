@@ -1,0 +1,1322 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "ChaitanyaAlertContactPage",
+        url: "/contact"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "ChaitanyaAlertHeader"
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary}10 0%, ${args.theme.var.color.secondary}10 100%);
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 120px;
+  height: 120px;
+  background: ${args.theme.var.color.primary};
+  border-radius: 2rem;
+  margin: 0 auto 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px ${args.theme.var.color.primary}30;
+  
+  @media (max-width: 768px) {
+    width: 100px;
+    height: 100px;
+    border-radius: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:envelope",
+  width: 60,
+  height: 60
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary_text};
+  
+  @media (max-width: 768px) {
+    width: 50px;
+    height: 50px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Contact & Feedback"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We'd love to hear from you! Share your feedback, report issues, or ask questions about Chaitanya Alert."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 4rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 3rem;
+  margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  background: ${args.theme.var.color.primary}20;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:heart",
+  width: 50,
+  height: 50
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Send Feedback"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Share your thoughts, suggestions, or feature requests. We read every message and value your input to make Chaitanya Alert better."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/feedback",
+  text: "Submit Feedback"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_light_200};
+    transform: translateY(-2px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:arrow-square-out",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  background: ${args.theme.var.color.error}20;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:bug",
+  width: 50,
+  height: 50
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Report Issues"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Found a bug or experiencing issues? Report it to help us improve the app for everyone. Include details about your device and the problem."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/feedback",
+  text: "Report Bug"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_text};
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background: ${args.theme.var.color.error_light_200};
+    transform: translateY(-2px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:arrow-square-out",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px ${args.theme.var.color.primary}20;
+    border-color: ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  background: ${args.theme.var.color.info}20;
+  border-radius: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:question",
+  width: 50,
+  height: 50
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info};
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Get Help"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Need help with installation, setup, or using the app? Ask questions and get support from our community and developers."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/feedback",
+  text: "Ask Question"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.info};
+  color: ${args.theme.var.color.info_text};
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background: ${args.theme.var.color.info_light_200};
+    transform: translateY(-2px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:arrow-square-out",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1.5rem;
+  padding: 3rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Frequently Asked Questions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: 1.5rem;
+  text-align: left;
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "How do I grant notification access permission?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Go to Settings > Apps > Special app access > Notification access, then find Chaitanya Alert and enable it."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Why aren't my custom sounds playing?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Make sure the sound file exists and is accessible. Check if the contact name matches exactly, including spaces and special characters."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Can I use regex patterns for group names?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Yes! Enable the regex option when creating a preference. For example, use '.*Group$' to match all names ending with 'Group'."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  padding: 4rem 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Still Need Help?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Can't find what you're looking for? We're here to help you get the most out of Chaitanya Alert."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/feedback",
+  text: "Contact Us"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px ${args.theme.var.color.primary}40;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_light_200};
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/download",
+  text: "Download App"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid ${args.theme.var.color.border};
+  
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "ChaitanyaAlertFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "6", E: "9" },
+    { id: "e9", T: "Attr", S: "6", E: "10" },
+    { id: "e10", T: "Attr", S: "4", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "14", E: "17" },
+    { id: "e17", T: "Attr", S: "14", E: "18" },
+    { id: "e18", T: "Attr", S: "14", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "13", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "21", E: "24" },
+    { id: "e24", T: "Attr", S: "21", E: "25" },
+    { id: "e25", T: "Attr", S: "21", E: "26" },
+    { id: "e26", T: "Attr", S: "26", E: "27" },
+    { id: "e27", T: "Attr", S: "13", E: "28" },
+    { id: "e28", T: "Attr", S: "28", E: "29" },
+    { id: "e29", T: "Attr", S: "29", E: "30" },
+    { id: "e30", T: "Attr", S: "28", E: "31" },
+    { id: "e31", T: "Attr", S: "28", E: "32" },
+    { id: "e32", T: "Attr", S: "28", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "12", E: "35" },
+    { id: "e35", T: "Attr", S: "35", E: "36" },
+    { id: "e36", T: "Attr", S: "35", E: "37" },
+    { id: "e37", T: "Attr", S: "37", E: "38" },
+    { id: "e38", T: "Attr", S: "38", E: "39" },
+    { id: "e39", T: "Attr", S: "38", E: "40" },
+    { id: "e40", T: "Attr", S: "37", E: "41" },
+    { id: "e41", T: "Attr", S: "41", E: "42" },
+    { id: "e42", T: "Attr", S: "41", E: "43" },
+    { id: "e43", T: "Attr", S: "37", E: "44" },
+    { id: "e44", T: "Attr", S: "44", E: "45" },
+    { id: "e45", T: "Attr", S: "44", E: "46" },
+    { id: "e46", T: "Attr", S: "4", E: "47" },
+    { id: "e47", T: "Attr", S: "47", E: "48" },
+    { id: "e48", T: "Attr", S: "48", E: "49" },
+    { id: "e49", T: "Attr", S: "48", E: "50" },
+    { id: "e50", T: "Attr", S: "48", E: "51" },
+    { id: "e51", T: "Attr", S: "51", E: "52" },
+    { id: "e52", T: "Attr", S: "51", E: "53" },
+    { id: "e53", T: "Attr", S: "2", E: "54" }
+  ]
+}

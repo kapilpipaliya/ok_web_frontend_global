@@ -1,0 +1,920 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "ChaitanyaAlertHomePage",
+        url: "/"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "ChaitanyaAlertHeader"
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "ChaitanyaAlertHero"
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 4rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Key Features"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Discover the powerful features that make Chaitanya Alert the ultimate notification manager"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "ChaitanyaAlertFeatureCard",
+        props: '''
+return {
+  icon: "ph:bell-ringing",
+  title: "Custom Notification Sounds",
+  description: "Set unique notification sounds for different contacts and groups. Never confuse who's messaging you again."
+};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "ChaitanyaAlertFeatureCard",
+        props: '''
+return {
+  icon: "ph:vibrate",
+  title: "Vibration Patterns",
+  description: "Create custom vibration patterns for each contact. Short, long, double, triple - make it unique."
+};
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "ChaitanyaAlertFeatureCard",
+        props: '''
+return {
+  icon: "ph:flashlight",
+  title: "Flashlight Alerts",
+  description: "Visual alerts with custom flashlight blinking patterns. Perfect for silent environments."
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "ChaitanyaAlertFeatureCard",
+        props: '''
+return {
+  icon: "ph:volume-high",
+  title: "Volume Control",
+  description: "Individual volume settings for each contact. Important people can be louder than others."
+};
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "ChaitanyaAlertFeatureCard",
+        props: '''
+return {
+  icon: "ph:moon",
+  title: "Silent Mode Override",
+  description: "Choose which notifications play even when your phone is in silent or vibrate mode."
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "ChaitanyaAlertFeatureCard",
+        props: '''
+return {
+  icon: "ph:database",
+  title: "Local Storage",
+  description: "All your notifications are saved locally on your device. Complete privacy and offline access."
+};
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  padding: 4rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "How It Works"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Get started with Chaitanya Alert in just a few simple steps"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 60px;
+  height: 60px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "1"
+};
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Download & Install"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Download the app from the link below and install it on your Android device"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 60px;
+  height: 60px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "2"
+};
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Grant Permissions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Enable notification access permission so the app can capture your messaging notifications"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 2rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 60px;
+  height: 60px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "3"
+};
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Set Preferences"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Configure custom sounds, vibrations, and flashlight patterns for your important contacts"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 4rem 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Ready to Get Started?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Download Chaitanya Alert now and take control of your notifications"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/download",
+  text: "Download Now"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px ${args.theme.var.color.primary}40;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_light_200};
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "ChaitanyaAlertFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "7", E: "9" },
+    { id: "e9", T: "Attr", S: "7", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "10", E: "12" },
+    { id: "e12", T: "Attr", S: "10", E: "13" },
+    { id: "e13", T: "Attr", S: "10", E: "14" },
+    { id: "e14", T: "Attr", S: "10", E: "15" },
+    { id: "e15", T: "Attr", S: "10", E: "16" },
+    { id: "e16", T: "Attr", S: "4", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "18", E: "20" },
+    { id: "e20", T: "Attr", S: "18", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "22", E: "25" },
+    { id: "e25", T: "Attr", S: "22", E: "26" },
+    { id: "e26", T: "Attr", S: "21", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "28", E: "29" },
+    { id: "e29", T: "Attr", S: "27", E: "30" },
+    { id: "e30", T: "Attr", S: "27", E: "31" },
+    { id: "e31", T: "Attr", S: "21", E: "32" },
+    { id: "e32", T: "Attr", S: "32", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "32", E: "35" },
+    { id: "e35", T: "Attr", S: "32", E: "36" },
+    { id: "e36", T: "Attr", S: "4", E: "37" },
+    { id: "e37", T: "Attr", S: "37", E: "38" },
+    { id: "e38", T: "Attr", S: "38", E: "39" },
+    { id: "e39", T: "Attr", S: "38", E: "40" },
+    { id: "e40", T: "Attr", S: "38", E: "41" },
+    { id: "e41", T: "Attr", S: "2", E: "42" }
+  ]
+}

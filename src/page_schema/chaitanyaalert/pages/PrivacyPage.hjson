@@ -1,0 +1,1719 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "ChaitanyaAlertPrivacyPage",
+        url: "/privacy"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "ChaitanyaAlertHeader"
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary}10 0%, ${args.theme.var.color.secondary}10 100%);
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 120px;
+  height: 120px;
+  background: ${args.theme.var.color.primary};
+  border-radius: 2rem;
+  margin: 0 auto 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px ${args.theme.var.color.primary}30;
+  
+  @media (max-width: 768px) {
+    width: 100px;
+    height: 100px;
+    border-radius: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:shield-check",
+  width: 60,
+  height: 60
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary_text};
+  
+  @media (max-width: 768px) {
+    width: 50px;
+    height: 50px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Privacy Policy"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Your privacy is our priority. Learn how we protect your data and ensure complete privacy."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Last updated: December 2024"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.9rem;
+  color: ${args.theme.var.color.muted};
+  font-style: italic;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 4rem 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.success}20;
+  border: 1px solid ${args.theme.var.color.success}40;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 80px;
+  height: 80px;
+  background: ${args.theme.var.color.success};
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:check-circle",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Privacy First Promise"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Chaitanya Alert is designed with privacy as the core principle. All your data stays on your device. We don't collect, store, or transmit any personal information to external servers."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  font-size: 1.1rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Information We Access"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "To provide our notification management service, Chaitanya Alert requires access to:"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:bell",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "strong",
+  text: "Notifications:"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: " We read notification content to identify the sender and apply your custom preferences."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:folder",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "strong",
+  text: "Storage:"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: " We store notification history and your preferences locally on your device."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:vibrate",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "strong",
+  text: "Device Hardware:"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: " We control vibration, flashlight, and audio to provide custom notification alerts."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "How We Use Your Data"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "All data processing happens locally on your device. We use the information solely to:"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Match notifications to your configured preferences"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  padding-left: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Play custom sounds, vibrations, and flashlight patterns"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  padding-left: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Maintain a local history of notifications for your reference"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  padding-left: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Import and export your preferences for backup purposes"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  padding-left: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Data Storage & Security"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Local Storage Only"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:device-mobile",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "All data is stored locally on your device using SQLite database. Nothing is transmitted to external servers."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "No Cloud Sync"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "56",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:cloud-x",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "57",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We don't offer cloud synchronization, ensuring your data never leaves your device."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "58",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "59",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Complete Control"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "60",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "ph:trash",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "61",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "You can delete all app data at any time by clearing the app's storage or uninstalling the app."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "62",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "63",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Third-Party Services"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "64",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Chaitanya Alert does not integrate with any third-party services, analytics platforms, or advertising networks. The app operates completely independently without external dependencies."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "65",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "66",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Changes to This Policy"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "67",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated revision date. Since the app doesn't connect to the internet, you'll need to check this website periodically for updates."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "68",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  padding: 4rem 2rem;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "69",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "70",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Questions About Privacy?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "71",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "If you have any questions about this Privacy Policy or how we handle your data, please contact us."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "72",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "73",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/contact",
+  text: "Contact Us"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px ${args.theme.var.color.primary}40;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_light_200};
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px ${args.theme.var.color.primary}50;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "74",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/download",
+  text: "Download App"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid ${args.theme.var.color.border};
+  
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "75",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "ChaitanyaAlertFooter"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "6", E: "9" },
+    { id: "e9", T: "Attr", S: "6", E: "10" },
+    { id: "e10", T: "Attr", S: "6", E: "11" },
+    { id: "e11", T: "Attr", S: "4", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "14", E: "17" },
+    { id: "e17", T: "Attr", S: "14", E: "18" },
+    { id: "e18", T: "Attr", S: "13", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" },
+    { id: "e21", T: "Attr", S: "20", E: "22" },
+    { id: "e22", T: "Attr", S: "20", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "24", E: "25" },
+    { id: "e25", T: "Attr", S: "24", E: "26" },
+    { id: "e26", T: "Attr", S: "26", E: "27" },
+    { id: "e27", T: "Attr", S: "26", E: "28" },
+    { id: "e28", T: "Attr", S: "23", E: "29" },
+    { id: "e29", T: "Attr", S: "29", E: "30" },
+    { id: "e30", T: "Attr", S: "29", E: "31" },
+    { id: "e31", T: "Attr", S: "31", E: "32" },
+    { id: "e32", T: "Attr", S: "31", E: "33" },
+    { id: "e33", T: "Attr", S: "23", E: "34" },
+    { id: "e34", T: "Attr", S: "34", E: "35" },
+    { id: "e35", T: "Attr", S: "34", E: "36" },
+    { id: "e36", T: "Attr", S: "36", E: "37" },
+    { id: "e37", T: "Attr", S: "36", E: "38" },
+    { id: "e38", T: "Attr", S: "19", E: "39" },
+    { id: "e39", T: "Attr", S: "39", E: "40" },
+    { id: "e40", T: "Attr", S: "39", E: "41" },
+    { id: "e41", T: "Attr", S: "39", E: "42" },
+    { id: "e42", T: "Attr", S: "42", E: "43" },
+    { id: "e43", T: "Attr", S: "42", E: "44" },
+    { id: "e44", T: "Attr", S: "42", E: "45" },
+    { id: "e45", T: "Attr", S: "42", E: "46" },
+    { id: "e46", T: "Attr", S: "19", E: "47" },
+    { id: "e47", T: "Attr", S: "47", E: "48" },
+    { id: "e48", T: "Attr", S: "47", E: "49" },
+    { id: "e49", T: "Attr", S: "49", E: "50" },
+    { id: "e50", T: "Attr", S: "50", E: "51" },
+    { id: "e51", T: "Attr", S: "51", E: "52" },
+    { id: "e52", T: "Attr", S: "50", E: "53" },
+    { id: "e53", T: "Attr", S: "49", E: "54" },
+    { id: "e54", T: "Attr", S: "54", E: "55" },
+    { id: "e55", T: "Attr", S: "55", E: "56" },
+    { id: "e56", T: "Attr", S: "54", E: "57" },
+    { id: "e57", T: "Attr", S: "49", E: "58" },
+    { id: "e58", T: "Attr", S: "58", E: "59" },
+    { id: "e59", T: "Attr", S: "59", E: "60" },
+    { id: "e60", T: "Attr", S: "58", E: "61" },
+    { id: "e61", T: "Attr", S: "19", E: "62" },
+    { id: "e62", T: "Attr", S: "62", E: "63" },
+    { id: "e63", T: "Attr", S: "62", E: "64" },
+    { id: "e64", T: "Attr", S: "19", E: "65" },
+    { id: "e65", T: "Attr", S: "65", E: "66" },
+    { id: "e66", T: "Attr", S: "65", E: "67" },
+    { id: "e67", T: "Attr", S: "4", E: "68" },
+    { id: "e68", T: "Attr", S: "68", E: "69" },
+    { id: "e69", T: "Attr", S: "69", E: "70" },
+    { id: "e70", T: "Attr", S: "69", E: "71" },
+    { id: "e71", T: "Attr", S: "69", E: "72" },
+    { id: "e72", T: "Attr", S: "72", E: "73" },
+    { id: "e73", T: "Attr", S: "72", E: "74" },
+    { id: "e74", T: "Attr", S: "2", E: "75" }
+  ]
+}
