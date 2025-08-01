@@ -46,6 +46,7 @@ import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
+import { TooltipWrapper } from "~/components/styled/modal/TooltipWrapper";
 
 export function LayoutTreeItem(
   props: Readonly<{
@@ -349,6 +350,42 @@ export function LayoutTreeItem(
     return "";
   });
 
+  const CodeTooltipIcon = (props: {
+    code: string;
+    icon: string;
+    title: string;
+  }) => (
+      <IconButton
+        css={[
+          ICON_BUTTON_STYLES.baseCss,
+          ICON_BUTTON_STYLES.defaultCss,
+          ICON_BUTTON_STYLES.spacingCss,
+          `return \`._id {
+            background-color: transparent;
+            border: none;
+          }\`;`,
+        ]}
+        icon={props.icon}
+        size={16}
+        onClick={(e) => e.stopPropagation()}
+        title={<As
+          as="pre"
+          css={`return \`._id {
+            margin: 0;
+            font-family: monospace;
+            font-size: 0.75rem;
+            max-width: 30rem;
+            max-height: 20rem;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+          }\`;`}
+        >
+          {props.code}
+        </As>}
+      />
+  );
+
   return (
     <Show when={shouldShowItem()}>
       <TreeItemContainer
@@ -393,6 +430,27 @@ export function LayoutTreeItem(
           parentIndex={props.parentIndex}
           isSelected={isSelectedLayoutId(props.metaVertex.id)}
         />
+        <Show when={props.metaVertex.P.fns}>
+          <CodeTooltipIcon
+            code={props.metaVertex.P.fns}
+            icon="tabler:function"
+            title="View functions code"
+          />
+        </Show>
+        <Show when={props.metaVertex.P.props}>
+          <CodeTooltipIcon
+            code={props.metaVertex.P.props}
+            icon="tabler:code"
+            title="View props code"
+          />
+        </Show>
+        <Show when={props.metaVertex.P.css}>
+          <CodeTooltipIcon
+            code={props.metaVertex.P.css}
+            icon="tabler:palette"
+            title="View CSS code"
+          />
+        </Show>
         <Show when={isSelectedHoverId(props.metaVertex.id) || isNodeHidden()}>
           <HideShowIcon iconSize={20} metaVertex={props.metaVertex} />
         </Show>
