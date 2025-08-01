@@ -469,6 +469,13 @@ export function LayoutTreeItem(
             onMouseEnter={handleDropdownMouseEnter}
             onMouseLeave={handleDropdownMouseLeave}
             parentRef={buttonRef() as HTMLElement}
+            onClick={(e: MouseEvent) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            onMouseDown={(e: MouseEvent) => {
+              e.stopPropagation();
+            }}
           >
             <As
               as="div"
@@ -488,6 +495,16 @@ export function LayoutTreeItem(
                   width: 100% !important;
                 }
               }\`;`}
+              onClick={(e: MouseEvent) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              onMouseDown={(e: MouseEvent) => {
+                e.stopPropagation();
+              }}
+              onMouseUp={(e: MouseEvent) => {
+                e.stopPropagation();
+              }}
             >
               <FunctionEditor
                 keyName={props.keyName}
