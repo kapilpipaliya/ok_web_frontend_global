@@ -1,0 +1,264 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "RealAssistantButton"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "variant",
+        type: "string",
+        defValue: "primary"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariantOption",
+      P: {
+        key: "primary",
+        value: "primary",
+        description: "Primary button style"
+      }
+    },
+    {
+      id: "4",
+      L: "ComponentVariantOption",
+      P: {
+        key: "secondary",
+        value: "secondary",
+        description: "Secondary button style"
+      }
+    },
+    {
+      id: "5",
+      L: "ComponentVariantOption",
+      P: {
+        key: "success",
+        value: "success",
+        description: "Success button style"
+      }
+    },
+    {
+      id: "6",
+      L: "ComponentVariantOption",
+      P: {
+        key: "danger",
+        value: "danger",
+        description: "Danger button style"
+      }
+    },
+    {
+      id: "7",
+      L: "ComponentVariant",
+      P: {
+        key: "size",
+        type: "string",
+        defValue: "medium"
+      }
+    },
+    {
+      id: "8",
+      L: "ComponentVariantOption",
+      P: {
+        key: "small",
+        value: "small",
+        description: "Small button size"
+      }
+    },
+    {
+      id: "9",
+      L: "ComponentVariantOption",
+      P: {
+        key: "medium",
+        value: "medium",
+        description: "Medium button size"
+      }
+    },
+    {
+      id: "10",
+      L: "ComponentVariantOption",
+      P: {
+        key: "large",
+        value: "large",
+        description: "Large button size"
+      }
+    },
+    {
+      id: "11",
+      L: "ComponentVariant",
+      P: {
+        key: "fullWidth",
+        type: "boolean",
+        defValue: false
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const variant = args.contextData.props?.variant || "primary";
+const size = args.contextData.props?.size || "medium";
+const fullWidth = args.contextData.props?.fullWidth || false;
+const text = args.contextData.props?.text || "Button";
+const icon = args.contextData.props?.icon;
+const onClick = args.contextData.props?.onClick;
+const disabled = args.contextData.props?.disabled || false;
+
+return {
+  as: "button",
+  onClick: onClick,
+  disabled: disabled
+};
+''',
+        css: '''
+const variant = args.contextData.props?.variant || "primary";
+const size = args.contextData.props?.size || "medium";
+const fullWidth = args.contextData.props?.fullWidth || false;
+const disabled = args.contextData.props?.disabled || false;
+
+const sizes = {
+  small: {
+    padding: "0.375rem 0.75rem",
+    fontSize: "0.875rem",
+    iconSize: 16
+  },
+  medium: {
+    padding: "0.5rem 1rem",
+    fontSize: "1rem",
+    iconSize: 20
+  },
+  large: {
+    padding: "0.75rem 1.5rem",
+    fontSize: "1.125rem",
+    iconSize: 24
+  }
+};
+
+const colors = {
+  primary: {
+    bg: args.theme.var.color.primary,
+    text: args.theme.var.color.primary_text,
+    hover: args.theme.var.color.primary_dark_200
+  },
+  secondary: {
+    bg: args.theme.var.color.secondary,
+    text: args.theme.var.color.secondary_text,
+    hover: args.theme.var.color.secondary_dark_200
+  },
+  success: {
+    bg: args.theme.var.color.success,
+    text: args.theme.var.color.success_text,
+    hover: args.theme.var.color.success_dark_200
+  },
+  danger: {
+    bg: args.theme.var.color.error,
+    text: args.theme.var.color.error_text,
+    hover: args.theme.var.color.error_dark_200
+  }
+};
+
+const currentSize = sizes[size];
+const currentColor = colors[variant];
+
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: ${currentSize.padding};
+  font-size: ${currentSize.fontSize};
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: ${currentColor.bg};
+  color: ${currentColor.text};
+  ${fullWidth ? "width: 100%;" : ""}
+  
+  &:hover:not(:disabled) {
+    background: ${currentColor.hover};
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: ${size === "large" ? "1rem" : size === "medium" ? "0.875rem" : "0.75rem"};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const icon = args.contextData.props?.icon;
+const size = args.contextData.props?.size || "medium";
+const iconSizes = { small: 16, medium: 20, large: 24 };
+
+if (!icon) return { as: "span" };
+
+return {
+  as: "icon",
+  icon: icon,
+  width: iconSizes[size],
+  height: iconSizes[size]
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const text = args.contextData.props?.text || "Button";
+
+return {
+  as: "span",
+  text: text
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariantOption", S: "2", E: "3" },
+    { id: "e3", T: "ComponentVariantOption", S: "2", E: "4" },
+    { id: "e4", T: "ComponentVariantOption", S: "2", E: "5" },
+    { id: "e5", T: "ComponentVariantOption", S: "2", E: "6" },
+    { id: "e6", T: "ComponentVariant", S: "1", E: "7" },
+    { id: "e7", T: "ComponentVariantOption", S: "7", E: "8" },
+    { id: "e8", T: "ComponentVariantOption", S: "7", E: "9" },
+    { id: "e9", T: "ComponentVariantOption", S: "7", E: "10" },
+    { id: "e10", T: "ComponentVariant", S: "1", E: "11" },
+    { id: "e11", T: "Attr", S: "1", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "12", E: "14" }
+  ]
+}

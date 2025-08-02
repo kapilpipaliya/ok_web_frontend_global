@@ -1,0 +1,1002 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "RealAssistantUserDashboard",
+        url: "/dashboard",
+        title: "Dashboard - RealAssistant"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "userStore",
+        fns: '''
+const [store, setStore] = args.createStore({
+  isLoggedIn: true,
+  balance: 45.50,
+  userName: "John Doe",
+  activeProblems: [],
+  recentTransactions: [],
+  stats: {
+    totalProblems: 0,
+    solvedProblems: 0,
+    pendingProblems: 0,
+    totalSpent: 0
+  }
+});
+
+return {
+  loadDashboardData: async () => {
+    // Load user data from database
+    // For demo, using sample data
+    setStore({
+      activeProblems: [
+        {
+          id: "1",
+          title: "Help with Excel Formula",
+          status: "in_progress",
+          assignedTo: "Sarah K.",
+          createdAt: "2024-01-15",
+          estimatedCost: 5.00
+        },
+        {
+          id: "2",
+          title: "Website Navigation Issue",
+          status: "pending",
+          assignedTo: null,
+          createdAt: "2024-01-16",
+          estimatedCost: 8.00
+        }
+      ],
+      recentTransactions: [
+        {
+          id: "t1",
+          type: "payment",
+          amount: -12.00,
+          description: "Solution: Tax Form Help",
+          date: "2024-01-14"
+        },
+        {
+          id: "t2",
+          type: "recharge",
+          amount: 50.00,
+          description: "Balance Recharge",
+          date: "2024-01-10"
+        }
+      ],
+      stats: {
+        totalProblems: 15,
+        solvedProblems: 13,
+        pendingProblems: 2,
+        totalSpent: 125.50
+      }
+    });
+  }
+};
+''',
+        props: '''
+const fns = args.fns;
+if (args.mounted()) {
+  fns.loadDashboardData();
+}
+
+return {
+  as: "div",
+  data: args.contextData.userStore
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        showBalance: true
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const userName = args.contextData.userStore?.userName || "User";
+return {
+  as: "h1",
+  text: `Welcome back, ${userName}!`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Current Balance"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const balance = args.contextData.userStore?.balance || 0;
+return {
+  as: "p",
+  text: `$${balance.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:wallet",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Active Problems"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const pending = args.contextData.userStore?.stats?.pendingProblems || 0;
+return {
+  as: "p",
+  text: pending.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.warning};
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:pending",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Problems Solved"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const solved = args.contextData.userStore?.stats?.solvedProblems || 0;
+return {
+  as: "p",
+  text: solved.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "primary",
+        size: "large",
+        text: "Submit New Problem",
+        icon: "carbon:add",
+        onClick: "() => args.navigate('/problem/new')"
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "success",
+        size: "large",
+        text: "Recharge Balance",
+        icon: "carbon:currency-dollar",
+        onClick: "() => args.navigate('/recharge')"
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Active Problems"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "problems",
+        loop: true,
+        props: '''
+const problems = args.contextData.userStore?.activeProblems || [];
+return {
+  data: problems
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "div",
+  onClick: () => args.navigate(`/problem/${problem.id}`)
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+    transform: translateX(4px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "h3",
+  text: problem.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+const statusColors = {
+  pending: args.theme.var.color.warning,
+  in_progress: args.theme.var.color.info,
+  completed: args.theme.var.color.success
+};
+return {
+  as: "span",
+  text: problem.status.replace("_", " ")
+};
+''',
+        css: '''
+const problem = args.contextData.problems;
+const statusColors = {
+  pending: args.theme.var.color.warning,
+  in_progress: args.theme.var.color.info,
+  completed: args.theme.var.color.success
+};
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${statusColors[problem.status] || args.theme.var.color.text};
+  text-transform: capitalize;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "span",
+  text: problem.assignedTo ? `Assigned to: ${problem.assignedTo}` : "Awaiting assignment"
+};
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "span",
+  text: `Est. Cost: $${problem.estimatedCost.toFixed(2)}`
+};
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Recent Transactions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "transactions",
+        loop: true,
+        props: '''
+const transactions = args.contextData.userStore?.recentTransactions || [];
+return {
+  data: transactions
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactions;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactions;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactions;
+return {
+  as: "p",
+  text: transaction.description
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactions;
+return {
+  as: "p",
+  text: transaction.date
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactions;
+const isPositive = transaction.amount > 0;
+return {
+  as: "span",
+  text: `${isPositive ? "+" : ""}$${Math.abs(transaction.amount).toFixed(2)}`
+};
+''',
+        css: '''
+const transaction = args.contextData.transactions;
+const isPositive = transaction.amount > 0;
+return `._id {
+  font-weight: 600;
+  color: ${isPositive ? args.theme.var.color.success : args.theme.var.color.error};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "9", E: "11" },
+    { id: "e11", T: "Attr", S: "8", E: "12" },
+    { id: "e12", T: "Attr", S: "6", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "15", E: "17" },
+    { id: "e17", T: "Attr", S: "14", E: "18" },
+    { id: "e18", T: "Attr", S: "6", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "21", E: "23" },
+    { id: "e23", T: "Attr", S: "20", E: "24" },
+    { id: "e24", T: "Attr", S: "4", E: "25" },
+    { id: "e25", T: "Attr", S: "25", E: "26" },
+    { id: "e26", T: "Attr", S: "25", E: "27" },
+    { id: "e27", T: "Attr", S: "4", E: "28" },
+    { id: "e28", T: "Attr", S: "28", E: "29" },
+    { id: "e29", T: "Attr", S: "29", E: "30" },
+    { id: "e30", T: "Attr", S: "29", E: "31" },
+    { id: "e31", T: "Attr", S: "31", E: "32" },
+    { id: "e32", T: "Attr", S: "32", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "33", E: "35" },
+    { id: "e35", T: "Attr", S: "32", E: "36" },
+    { id: "e36", T: "Attr", S: "36", E: "37" },
+    { id: "e37", T: "Attr", S: "36", E: "38" },
+    { id: "e38", T: "Attr", S: "28", E: "39" },
+    { id: "e39", T: "Attr", S: "39", E: "40" },
+    { id: "e40", T: "Attr", S: "39", E: "41" },
+    { id: "e41", T: "Attr", S: "41", E: "42" },
+    { id: "e42", T: "Attr", S: "42", E: "43" },
+    { id: "e43", T: "Attr", S: "43", E: "44" },
+    { id: "e44", T: "Attr", S: "43", E: "45" },
+    { id: "e45", T: "Attr", S: "42", E: "46" }
+  ]
+}

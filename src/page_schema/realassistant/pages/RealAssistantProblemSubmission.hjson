@@ -1,0 +1,955 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "RealAssistantProblemSubmission",
+        url: "/problem/new",
+        title: "Submit New Problem - RealAssistant"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "formStore",
+        fns: '''
+const [store, setStore] = args.createStore({
+  userBalance: 50.00,
+  formData: {
+    title: "",
+    category: "",
+    description: "",
+    urgency: "normal",
+    attachments: [],
+    estimatedCost: 0
+  },
+  categories: [
+    { id: "tech", name: "Technology & Computer", basePrice: 8 },
+    { id: "education", name: "Education & Learning", basePrice: 10 },
+    { id: "business", name: "Business & Finance", basePrice: 12 },
+    { id: "personal", name: "Personal & Lifestyle", basePrice: 6 },
+    { id: "other", name: "Other", basePrice: 8 }
+  ],
+  isSubmitting: false,
+  errors: {}
+});
+
+return {
+  calculateEstimate: () => {
+    const category = store.categories.find(c => c.id === store.formData.category);
+    const basePrice = category?.basePrice || 8;
+    const urgencyMultiplier = store.formData.urgency === "urgent" ? 1.5 : 1;
+    const estimated = basePrice * urgencyMultiplier;
+    setStore("formData", "estimatedCost", estimated);
+  },
+  
+  validateForm: () => {
+    const errors = {};
+    if (!store.formData.title.trim()) errors.title = "Title is required";
+    if (!store.formData.category) errors.category = "Please select a category";
+    if (!store.formData.description.trim()) errors.description = "Description is required";
+    if (store.formData.description.length < 50) errors.description = "Please provide more details (at least 50 characters)";
+    
+    setStore("errors", errors);
+    return Object.keys(errors).length === 0;
+  },
+  
+  submitProblem: async () => {
+    if (!args.fns.validateForm()) return;
+    
+    setStore("isSubmitting", true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    args.showSuccessToast("Problem submitted successfully!");
+    args.navigate("/dashboard");
+  },
+  
+  updateField: (field, value) => {
+    setStore("formData", field, value);
+    setStore("errors", field, undefined);
+    
+    if (field === "category" || field === "urgency") {
+      args.fns.calculateEstimate();
+    }
+  }
+};
+''',
+        props: '''
+const fns = args.fns;
+if (args.mounted()) {
+  fns.calculateEstimate();
+}
+
+return {
+  as: "div",
+  data: args.contextData.formStore
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        showBalance: true
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Submit a New Problem"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Describe your problem in detail and we'll match you with the right assistant."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "form",
+  onSubmit: (e) => {
+    e.preventDefault();
+    args.contextData.formStore.fns.submitProblem();
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Problem Title"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const formData = args.contextData.formStore?.formData || {};
+const errors = args.contextData.formStore?.errors || {};
+const updateField = args.contextData.formStore?.fns?.updateField;
+
+return {
+  as: "input",
+  type: "text",
+  placeholder: "Brief description of your problem",
+  value: formData.title,
+  onInput: (e) => updateField("title", e.target.value)
+};
+''',
+        css: '''
+const hasError = args.contextData.formStore?.errors?.title;
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: border-color 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const error = args.contextData.formStore?.errors?.title;
+if (!error) return { as: "span" };
+
+return {
+  as: "span",
+  text: error
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Category"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const formData = args.contextData.formStore?.formData || {};
+const categories = args.contextData.formStore?.categories || [];
+const updateField = args.contextData.formStore?.fns?.updateField;
+
+return {
+  as: "select",
+  value: formData.category,
+  onChange: (e) => updateField("category", e.target.value)
+};
+''',
+        css: '''
+const hasError = args.contextData.formStore?.errors?.category;
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "",
+  text: "Select a category"
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "categoryOptions",
+        loop: true,
+        props: '''
+const categories = args.contextData.formStore?.categories || [];
+return {
+  data: categories
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.categoryOptions;
+return {
+  as: "option",
+  value: category.id,
+  text: `${category.name} ($${category.basePrice})`
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const error = args.contextData.formStore?.errors?.category;
+if (!error) return { as: "span" };
+
+return {
+  as: "span",
+  text: error
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Urgency"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const formData = args.contextData.formStore?.formData || {};
+const updateField = args.contextData.formStore?.fns?.updateField;
+
+return {
+  as: "select",
+  value: formData.urgency,
+  onChange: (e) => updateField("urgency", e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "normal",
+  text: "Normal (24-48 hours)"
+};
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "urgent",
+  text: "Urgent (1-4 hours) +50%"
+};
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Problem Description"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const formData = args.contextData.formStore?.formData || {};
+const updateField = args.contextData.formStore?.fns?.updateField;
+
+return {
+  as: "textarea",
+  placeholder: "Please provide detailed information about your problem. Include what you've tried, what you expect, and any relevant context.",
+  value: formData.description,
+  onInput: (e) => updateField("description", e.target.value),
+  rows: 6
+};
+''',
+        css: '''
+const hasError = args.contextData.formStore?.errors?.description;
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const description = args.contextData.formStore?.formData?.description || "";
+const error = args.contextData.formStore?.errors?.description;
+const charCount = description.length;
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const error = args.contextData.formStore?.errors?.description;
+if (!error) return { as: "span" };
+
+return {
+  as: "span",
+  text: error
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const description = args.contextData.formStore?.formData?.description || "";
+const charCount = description.length;
+
+return {
+  as: "span",
+  text: `${charCount} characters`
+};
+''',
+        css: '''
+const description = args.contextData.formStore?.formData?.description || "";
+const charCount = description.length;
+return `._id {
+  font-size: 0.875rem;
+  color: ${charCount < 50 ? args.theme.var.color.error : args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Estimated Cost"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const balance = args.contextData.formStore?.userBalance || 0;
+const estimatedCost = args.contextData.formStore?.formData?.estimatedCost || 0;
+const hasEnoughBalance = balance >= estimatedCost;
+
+return {
+  as: "p",
+  text: hasEnoughBalance ? "You have sufficient balance" : "Insufficient balance - please recharge"
+};
+''',
+        css: '''
+const balance = args.contextData.formStore?.userBalance || 0;
+const estimatedCost = args.contextData.formStore?.formData?.estimatedCost || 0;
+const hasEnoughBalance = balance >= estimatedCost;
+
+return `._id {
+  font-size: 0.875rem;
+  color: ${hasEnoughBalance ? args.theme.var.color.success : args.theme.var.color.error};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const estimatedCost = args.contextData.formStore?.formData?.estimatedCost || 0;
+
+return {
+  as: "p",
+  text: `$${estimatedCost.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "primary",
+        size: "large",
+        text: "Submit Problem",
+        icon: "carbon:send",
+        type: "submit",
+        fullWidth: true,
+        disabled: "args.contextData.formStore?.isSubmitting"
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "secondary",
+        size: "large",
+        text: "Cancel",
+        onClick: "() => args.navigate('/dashboard')"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "4", E: "7" },
+    { id: "e7", T: "Attr", S: "7", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "9", E: "11" },
+    { id: "e11", T: "Attr", S: "9", E: "12" },
+    { id: "e12", T: "Attr", S: "8", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "16", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "14", E: "20" },
+    { id: "e20", T: "Attr", S: "13", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "21", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "23", E: "25" },
+    { id: "e25", T: "Attr", S: "8", E: "26" },
+    { id: "e26", T: "Attr", S: "26", E: "27" },
+    { id: "e27", T: "Attr", S: "26", E: "28" },
+    { id: "e28", T: "Attr", S: "26", E: "29" },
+    { id: "e29", T: "Attr", S: "29", E: "30" },
+    { id: "e30", T: "Attr", S: "29", E: "31" },
+    { id: "e31", T: "Attr", S: "8", E: "32" },
+    { id: "e32", T: "Attr", S: "32", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "34", E: "35" },
+    { id: "e35", T: "Attr", S: "34", E: "36" },
+    { id: "e36", T: "Attr", S: "33", E: "37" },
+    { id: "e37", T: "Attr", S: "8", E: "38" },
+    { id: "e38", T: "Attr", S: "38", E: "39" },
+    { id: "e39", T: "Attr", S: "38", E: "40" }
+  ]
+}

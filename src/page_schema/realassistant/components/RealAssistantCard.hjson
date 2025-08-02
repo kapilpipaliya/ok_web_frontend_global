@@ -1,0 +1,113 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "RealAssistantCard"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "variant",
+        type: "string",
+        defValue: "default"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariantOption",
+      P: {
+        key: "default",
+        value: "default",
+        description: "Default card style"
+      }
+    },
+    {
+      id: "4",
+      L: "ComponentVariantOption",
+      P: {
+        key: "elevated",
+        value: "elevated",
+        description: "Card with elevation"
+      }
+    },
+    {
+      id: "5",
+      L: "ComponentVariantOption",
+      P: {
+        key: "bordered",
+        value: "bordered",
+        description: "Card with border"
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const variant = args.contextData.props?.variant || "default";
+const onClick = args.contextData.props?.onClick;
+
+return {
+  as: "div",
+  onClick: onClick
+};
+''',
+        css: '''
+const variant = args.contextData.props?.variant || "default";
+const hasClick = args.contextData.props?.onClick;
+
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  
+  ${variant === "elevated" ? `
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  ` : variant === "bordered" ? `
+    border: 1px solid ${args.theme.var.color.border};
+  ` : `
+    background: ${args.theme.var.color.background_dark_50};
+  `}
+  
+  ${hasClick ? `
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+  ` : ""}
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        name: "children"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariantOption", S: "2", E: "3" },
+    { id: "e3", T: "ComponentVariantOption", S: "2", E: "4" },
+    { id: "e4", T: "ComponentVariantOption", S: "2", E: "5" },
+    { id: "e5", T: "Attr", S: "1", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" }
+  ]
+}

@@ -1,0 +1,1377 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "RealAssistantProblemDetails",
+        url: "/problem/:id",
+        title: "Problem Details - RealAssistant"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "problemStore",
+        fns: '''
+const [store, setStore] = args.createStore({
+  problem: {
+    id: "1",
+    title: "Help with Excel Formula",
+    category: "Technology & Computer",
+    description: "I need help creating a complex Excel formula that calculates commission based on multiple tiers. I have a sales spreadsheet where commission rates change based on total sales volume.",
+    status: "solution_provided",
+    urgency: "normal",
+    createdAt: "2024-01-15 10:30 AM",
+    estimatedCost: 8.00,
+    actualCost: 8.00,
+    assistant: {
+      name: "Sarah K.",
+      rating: 4.8,
+      expertise: "Excel & Data Analysis",
+      assignedAt: "2024-01-15 11:00 AM"
+    },
+    solution: {
+      providedAt: "2024-01-15 2:30 PM",
+      content: "I've created a nested IF formula that handles your commission tiers:\\n\\n=IF(A2<=10000, A2*0.05, IF(A2<=25000, 500+(A2-10000)*0.07, IF(A2<=50000, 1550+(A2-25000)*0.09, 3800+(A2-50000)*0.11)))\\n\\nThis formula assumes your sales amount is in cell A2.",
+      attachments: ["commission_calculator.xlsx"],
+      approved: false
+    },
+    messages: [
+      {
+        sender: "assistant",
+        text: "Hi! I see you need help with Excel formulas. Can you share more details about your commission structure?",
+        time: "11:05 AM"
+      },
+      {
+        sender: "user",
+        text: "Sure! Commission is 5% for sales up to $10k, 7% for $10k-25k, 9% for $25k-50k, and 11% above $50k",
+        time: "11:10 AM"
+      }
+    ]
+  },
+  showApproveDialog: false,
+  showRejectDialog: false,
+  rejectReason: ""
+});
+
+return {
+  loadProblemData: async (problemId) => {
+    // Load problem data from database
+    // For demo, using sample data
+  },
+  
+  approveSolution: async () => {
+    setStore("showApproveDialog", false);
+    setStore("problem", "solution", "approved", true);
+    setStore("problem", "status", "completed");
+    
+    // Process payment
+    args.showSuccessToast("Solution approved! Payment processed.");
+    
+    // Navigate to dashboard after delay
+    setTimeout(() => args.navigate("/dashboard"), 2000);
+  },
+  
+  rejectSolution: async () => {
+    if (!store.rejectReason.trim()) {
+      args.showErrorToast("Please provide a reason for rejection");
+      return;
+    }
+    
+    setStore("showRejectDialog", false);
+    setStore("problem", "status", "disputed");
+    
+    args.showWarningToast("Solution rejected. The assistant will be notified.");
+  },
+  
+  sendMessage: (message) => {
+    const newMessage = {
+      sender: "user",
+      text: message,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setStore("problem", "messages", msgs => [...msgs, newMessage]);
+  }
+};
+''',
+        props: '''
+const fns = args.fns;
+const problemId = args.location.pathname.split("/").pop();
+
+if (args.mounted()) {
+  fns.loadProblemData(problemId);
+}
+
+return {
+  as: "div",
+  data: args.contextData.problemStore
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        showBalance: true
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-left",
+  width: 24,
+  height: 24,
+  onClick: () => args.navigate("/dashboard")
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "h1",
+  text: problem?.title || "Problem Details"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const status = args.contextData.problemStore?.problem?.status || "pending";
+const statusMap = {
+  pending: { text: "Pending", color: "warning" },
+  in_progress: { text: "In Progress", color: "info" },
+  solution_provided: { text: "Solution Provided", color: "primary" },
+  completed: { text: "Completed", color: "success" },
+  disputed: { text: "Disputed", color: "error" }
+};
+const statusInfo = statusMap[status];
+
+return {
+  as: "span",
+  text: statusInfo.text
+};
+''',
+        css: '''
+const status = args.contextData.problemStore?.problem?.status || "pending";
+const statusColors = {
+  pending: args.theme.var.color.warning,
+  in_progress: args.theme.var.color.info,
+  solution_provided: args.theme.var.color.primary,
+  completed: args.theme.var.color.success,
+  disputed: args.theme.var.color.error
+};
+
+return `._id {
+  padding: 0.375rem 0.75rem;
+  background: ${statusColors[status] || args.theme.var.color.muted};
+  color: ${args.theme.var.color.background};
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Problem Description"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "p",
+  text: problem?.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Category"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "p",
+  text: problem?.category
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Urgency"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "p",
+  text: problem?.urgency === "urgent" ? "Urgent" : "Normal"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Submitted"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "p",
+  text: problem?.createdAt
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const solution = args.contextData.problemStore?.problem?.solution;
+if (!solution) return { as: "span" };
+
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Solution"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const solution = args.contextData.problemStore?.problem?.solution;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.success_light_50};
+  border: 1px solid ${args.theme.var.color.success_light_300};
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const solution = args.contextData.problemStore?.problem?.solution;
+return {
+  as: "p",
+  text: solution?.content
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const solution = args.contextData.problemStore?.problem?.solution;
+const approved = solution?.approved;
+const status = args.contextData.problemStore?.problem?.status;
+
+if (approved || status === "completed" || status === "disputed") return { as: "span" };
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "success",
+        size: "medium",
+        text: "Approve Solution",
+        icon: "carbon:checkmark-filled",
+        fullWidth: true,
+        onClick: "() => args.contextData.problemStore.setStore('showApproveDialog', true)"
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "danger",
+        size: "medium",
+        text: "Reject",
+        icon: "carbon:close-filled",
+        onClick: "() => args.contextData.problemStore.setStore('showRejectDialog', true)"
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Assigned Assistant"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.problemStore?.problem?.assistant;
+if (!assistant) {
+  return {
+    as: "p",
+    text: "No assistant assigned yet"
+  };
+}
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-avatar-filled",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.problemStore?.problem?.assistant;
+return {
+  as: "p",
+  text: assistant?.name
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.problemStore?.problem?.assistant;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:star-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning};
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.problemStore?.problem?.assistant;
+return {
+  as: "span",
+  text: assistant?.rating
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.problemStore?.problem?.assistant;
+return {
+  as: "p",
+  text: `Expertise: ${assistant?.expertise}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.problemStore?.problem?.assistant;
+return {
+  as: "p",
+  text: `Assigned: ${assistant?.assignedAt}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Cost Breakdown"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Estimated Cost:"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "span",
+  text: `$${problem?.estimatedCost?.toFixed(2) || "0.00"}`
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+const actualCost = problem?.actualCost;
+if (!actualCost) return { as: "span" };
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Final Cost:"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemStore?.problem;
+return {
+  as: "span",
+  text: `$${problem?.actualCost?.toFixed(2) || "0.00"}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const showDialog = args.contextData.problemStore?.showApproveDialog;
+if (!showDialog) return { as: "span" };
+
+return {
+  as: "portal"
+};
+'''
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.contextData.problemStore.setStore("showApproveDialog", false);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "56",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "57",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 400px;
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "58",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Approve Solution?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "59",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const actualCost = args.contextData.problemStore?.problem?.actualCost || 0;
+return {
+  as: "p",
+  text: `By approving this solution, $${actualCost.toFixed(2)} will be deducted from your balance and paid to the assistant.`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "60",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}`;
+'''
+      }
+    },
+    {
+      id: "61",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "secondary",
+        size: "medium",
+        text: "Cancel",
+        onClick: "() => args.contextData.problemStore.setStore('showApproveDialog', false)"
+      }
+    },
+    {
+      id: "62",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "success",
+        size: "medium",
+        text: "Approve & Pay",
+        icon: "carbon:checkmark-filled",
+        onClick: "() => args.contextData.problemStore.fns.approveSolution()"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "2", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "5", E: "8" },
+    { id: "e8", T: "Attr", S: "4", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "11", E: "13" },
+    { id: "e13", T: "Attr", S: "11", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "15", E: "17" },
+    { id: "e17", T: "Attr", S: "14", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "18", E: "20" },
+    { id: "e20", T: "Attr", S: "14", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "21", E: "23" },
+    { id: "e23", T: "Attr", S: "10", E: "24" },
+    { id: "e24", T: "Attr", S: "24", E: "25" },
+    { id: "e25", T: "Attr", S: "25", E: "26" },
+    { id: "e26", T: "Attr", S: "25", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "25", E: "29" },
+    { id: "e29", T: "Attr", S: "29", E: "30" },
+    { id: "e30", T: "Attr", S: "29", E: "31" },
+    { id: "e31", T: "Attr", S: "9", E: "32" },
+    { id: "e32", T: "Attr", S: "32", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "33", E: "35" },
+    { id: "e35", T: "Attr", S: "35", E: "36" },
+    { id: "e36", T: "Attr", S: "36", E: "37" },
+    { id: "e37", T: "Attr", S: "36", E: "38" },
+    { id: "e38", T: "Attr", S: "38", E: "39" },
+    { id: "e39", T: "Attr", S: "38", E: "40" },
+    { id: "e40", T: "Attr", S: "40", E: "41" },
+    { id: "e41", T: "Attr", S: "40", E: "42" },
+    { id: "e42", T: "Attr", S: "35", E: "43" },
+    { id: "e43", T: "Attr", S: "35", E: "44" },
+    { id: "e44", T: "Attr", S: "32", E: "45" },
+    { id: "e45", T: "Attr", S: "45", E: "46" },
+    { id: "e46", T: "Attr", S: "45", E: "47" },
+    { id: "e47", T: "Attr", S: "47", E: "48" },
+    { id: "e48", T: "Attr", S: "48", E: "49" },
+    { id: "e49", T: "Attr", S: "48", E: "50" },
+    { id: "e50", T: "Attr", S: "47", E: "51" },
+    { id: "e51", T: "Attr", S: "51", E: "52" },
+    { id: "e52", T: "Attr", S: "51", E: "53" },
+    { id: "e53", T: "Attr", S: "2", E: "54" },
+    { id: "e54", T: "Attr", S: "54", E: "55" },
+    { id: "e55", T: "Attr", S: "55", E: "56" },
+    { id: "e56", T: "Attr", S: "56", E: "57" },
+    { id: "e57", T: "Attr", S: "57", E: "58" },
+    { id: "e58", T: "Attr", S: "57", E: "59" },
+    { id: "e59", T: "Attr", S: "57", E: "60" },
+    { id: "e60", T: "Attr", S: "60", E: "61" },
+    { id: "e61", T: "Attr", S: "60", E: "62" }
+  ]
+}
