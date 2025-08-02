@@ -434,6 +434,12 @@ export function LayoutTreeItem(
       );
       saveUndoPoint(formStoreVertex()?.P.txnId, graph, setGraph);
     };
+
+    // Check if the code contains "=" or "data:"
+    const hasSpecialContent = () => {
+      const code = props.code || "";
+      return code.includes("=") || code.includes("data:");
+    };
     
     return (
       <>
@@ -445,6 +451,7 @@ export function LayoutTreeItem(
             `return \`._id {
               background-color: transparent;
               border: none;
+              ${hasSpecialContent() ? `color: \${args.theme.var.color.warning};` : ""}
             }\`;`,
           ]}
           icon={props.icon}
@@ -513,6 +520,7 @@ export function LayoutTreeItem(
                 returnType={props.returnType}
                 defaultValue={props.code}
                 setPropertyValue={handleSetPropertyValue}
+                vertexId={props.metaVertex.id}
               />
             </As>
           </DropdownMenu>
