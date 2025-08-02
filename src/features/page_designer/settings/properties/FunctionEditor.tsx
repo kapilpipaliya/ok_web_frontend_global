@@ -109,17 +109,31 @@ export function FunctionEditor(props: {
   // Editor reference
   let editorRef: Monaco.editor.IStandaloneCodeEditor | undefined;
 
-  // Update editor value when selected element changes
+  // Update editor value when selected element changes or property value changes
   createEffect(
     on(
-      () => formStoreVertex()?.P.selectedId,
       () => {
-        if (formStoreVertex()?.P.selectedId !== -1) {
+        const selectedId = formStoreVertex()?.P.selectedId;
+        const propertyValue = selectedId !== -1 && selectedId !== undefined
+          ? graph.vertexes[selectedId]?.P[propertyKey()]
+          : undefined;
+        return { selectedId, propertyValue };
+      },
+      ({ selectedId, propertyValue }) => {
+        if (selectedId !== -1 && selectedId !== undefined) {
           const newValue = getPropertyValue();
           setIsFunctionValid(true);
           setEditorValue(newValue);
           setOriginalValue(newValue);
           setHasChanges(false);
+          
+          // Update Monaco editor if it exists
+          if (editorRef) {
+            const model = editorRef.getModel();
+            if (model && model.getValue() !== newValue) {
+              model.setValue(newValue);
+            }
+          }
         }
       },
       { defer: true },
