@@ -1,0 +1,1556 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "RealAssistantAssistantSolution",
+        url: "/assistant/problem/:id",
+        title: "Submit Solution - RealAssistant"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "solutionStore",
+        fns: '''
+const [store, setStore] = args.createStore({
+  problem: {
+    id: "1",
+    title: "Help with Excel Formula",
+    category: "Technology & Computer",
+    description: "I need help creating a complex Excel formula that calculates commission based on multiple tiers. I have a sales spreadsheet where commission rates change based on total sales volume. The tiers are: 0-10k = 5%, 10k-25k = 7%, 25k-50k = 9%, above 50k = 11%. I need a single formula that can calculate the total commission correctly.",
+    urgency: "normal",
+    submittedAt: "2024-01-15 10:30 AM",
+    estimatedEarning: 8.00,
+    user: {
+      name: "John Doe",
+      rating: 4.5,
+      problemsSubmitted: 15
+    },
+    messages: [
+      {
+        sender: "user",
+        text: "I've tried using nested IFs but it's not calculating correctly for the middle tiers.",
+        time: "10:35 AM"
+      }
+    ]
+  },
+  solution: {
+    content: "",
+    attachments: []
+  },
+  isSubmitting: false,
+  showMessageDialog: false,
+  newMessage: "",
+  errors: {}
+});
+
+return {
+  loadProblemData: async (problemId) => {
+    // Load problem data from database
+    // For demo, using sample data
+  },
+  
+  updateSolution: (content) => {
+    setStore("solution", "content", content);
+    setStore("errors", "solution", undefined);
+  },
+  
+  sendMessage: () => {
+    if (!store.newMessage.trim()) return;
+    
+    const message = {
+      sender: "assistant",
+      text: store.newMessage,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    setStore("problem", "messages", msgs => [...msgs, message]);
+    setStore("newMessage", "");
+    setStore("showMessageDialog", false);
+    
+    args.showSuccessToast("Message sent to user");
+  },
+  
+  validateSolution: () => {
+    const errors = {};
+    if (!store.solution.content.trim()) {
+      errors.solution = "Please provide a solution";
+    }
+    if (store.solution.content.length < 50) {
+      errors.solution = "Please provide a more detailed solution (at least 50 characters)";
+    }
+    
+    setStore("errors", errors);
+    return Object.keys(errors).length === 0;
+  },
+  
+  submitSolution: async () => {
+    if (!args.fns.validateSolution()) return;
+    
+    setStore("isSubmitting", true);
+    
+    // Submit solution to database
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    args.showSuccessToast("Solution submitted successfully!");
+    args.navigate("/assistant/dashboard");
+  },
+  
+  skipProblem: () => {
+    if (confirm("Are you sure you want to skip this problem? It will be reassigned to another assistant.")) {
+      args.showWarningToast("Problem skipped");
+      args.navigate("/assistant/dashboard");
+    }
+  }
+};
+''',
+        props: '''
+const fns = args.fns;
+const problemId = args.location.pathname.split("/").pop();
+
+if (args.mounted()) {
+  fns.loadProblemData(problemId);
+}
+
+return {
+  as: "div",
+  data: args.contextData.solutionStore
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-left",
+  width: 24,
+  height: 24,
+  onClick: () => args.navigate("/assistant/dashboard")
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Submit Solution"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const earning = args.contextData.solutionStore?.problem?.estimatedEarning || 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: ${args.theme.var.color.success_light_100};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:money",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const earning = args.contextData.solutionStore?.problem?.estimatedEarning || 0;
+return {
+  as: "span",
+  text: `Earning: $${earning.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-height: 600px;
+  overflow-y: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Problem Details"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.solutionStore?.problem;
+return {
+  as: "h3",
+  text: problem?.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.solutionStore?.problem;
+return {
+  as: "span",
+  text: problem?.category
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.solutionStore?.problem;
+return {
+  as: "span",
+  text: `• ${problem?.urgency === "urgent" ? "Urgent" : "Normal"} Priority`
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.solutionStore?.problem;
+return {
+  as: "span",
+  text: `• Submitted ${problem?.submittedAt}`
+};
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.solutionStore?.problem;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.solutionStore?.problem;
+return {
+  as: "p",
+  text: problem?.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  white-space: pre-wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  border-top: 1px solid ${args.theme.var.color.border};
+  padding-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "User Information"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const user = args.contextData.solutionStore?.problem?.user;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-avatar",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const user = args.contextData.solutionStore?.problem?.user;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const user = args.contextData.solutionStore?.problem?.user;
+return {
+  as: "p",
+  text: user?.name
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const user = args.contextData.solutionStore?.problem?.user;
+return {
+  as: "p",
+  text: `${user?.problemsSubmitted} problems • ${user?.rating} ★ rating`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+const messages = args.contextData.solutionStore?.problem?.messages || [];
+if (messages.length === 0) return { as: "span" };
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 1rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+  padding-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Messages"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "messages",
+        loop: true,
+        props: '''
+const messages = args.contextData.solutionStore?.problem?.messages || [];
+return {
+  data: messages
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const message = args.contextData.messages;
+const isUser = message.sender === "user";
+return {
+  as: "div"
+};
+''',
+        css: '''
+const message = args.contextData.messages;
+const isUser = message.sender === "user";
+return `._id {
+  display: flex;
+  align-items: start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: ${isUser ? args.theme.var.color.primary_light_50 : args.theme.var.color.background_dark_50};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const message = args.contextData.messages;
+const isUser = message.sender === "user";
+return {
+  as: "icon",
+  icon: isUser ? "carbon:user" : "carbon:user-certification",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+const message = args.contextData.messages;
+const isUser = message.sender === "user";
+return `._id {
+  color: ${isUser ? args.theme.var.color.primary : args.theme.var.color.success};
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const message = args.contextData.messages;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const message = args.contextData.messages;
+return {
+  as: "p",
+  text: message.text
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const message = args.contextData.messages;
+return {
+  as: "span",
+  text: message.time
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Your Solution"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Solution Details"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.solutionStore?.solution?.content || "";
+const updateSolution = args.contextData.solutionStore?.fns?.updateSolution;
+
+return {
+  as: "textarea",
+  placeholder: "Provide a detailed solution to the user's problem. Include step-by-step instructions if applicable.",
+  value: content,
+  onInput: (e) => updateSolution(e.target.value),
+  rows: 10
+};
+''',
+        css: '''
+const hasError = args.contextData.solutionStore?.errors?.solution;
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${hasError ? args.theme.var.color.error : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  resize: vertical;
+  min-height: 200px;
+  transition: border-color 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.solutionStore?.solution?.content || "";
+const error = args.contextData.solutionStore?.errors?.solution;
+const charCount = content.length;
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const error = args.contextData.solutionStore?.errors?.solution;
+if (!error) return { as: "span" };
+
+return {
+  as: "span",
+  text: error
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const content = args.contextData.solutionStore?.solution?.content || "";
+const charCount = content.length;
+
+return {
+  as: "span",
+  text: `${charCount} characters`
+};
+''',
+        css: '''
+const content = args.contextData.solutionStore?.solution?.content || "";
+const charCount = content.length;
+return `._id {
+  font-size: 0.875rem;
+  color: ${charCount < 50 ? args.theme.var.color.error : args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.info_light_50};
+  border: 1px solid ${args.theme.var.color.info_light_300};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: start;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:information",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info};
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Tips for a good solution:"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Be clear and specific"
+};
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Include step-by-step instructions when applicable"
+};
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Test your solution before submitting"
+};
+'''
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Provide examples if helpful"
+};
+'''
+      }
+    },
+    {
+      id: "56",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "57",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "primary",
+        size: "large",
+        text: "Submit Solution",
+        icon: "carbon:send",
+        fullWidth: true,
+        disabled: "args.contextData.solutionStore?.isSubmitting",
+        onClick: "() => args.contextData.solutionStore.fns.submitSolution()"
+      }
+    },
+    {
+      id: "58",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "secondary",
+        size: "large",
+        text: "Ask User",
+        icon: "carbon:chat",
+        onClick: "() => args.contextData.solutionStore.setStore('showMessageDialog', true)"
+      }
+    },
+    {
+      id: "59",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantButton",
+        variant: "danger",
+        size: "large",
+        text: "Skip",
+        icon: "carbon:skip-forward",
+        onClick: "() => args.contextData.solutionStore.fns.skipProblem()"
+      }
+    },
+    {
+      id: "60",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const showDialog = args.contextData.solutionStore?.showMessageDialog;
+if (!showDialog) return { as: "span" };
+
+return {
+  as: "portal"
+};
+'''
+      }
+    },
+    {
+      id: "61",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.contextData.solutionStore.setStore("showMessageDialog", false);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "62",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "63",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 500px;
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "64",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Send Message to User"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "65",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const newMessage = args.contextData.solutionStore?.newMessage || "";
+const setStore = args.contextData.solutionStore?.setStore;
+
+return {
+  as: "textarea",
+  placeholder: "Ask for clarification or additional information...",
+  value: newMessage,
+  onInput: (e) => setStore("newMessage", e.target.value),
+  rows: 4
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: inherit;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  resize: vertical;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "66",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "67",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "secondary",
+        size: "medium",
+        text: "Cancel",
+        onClick: "() => args.contextData.solutionStore.setStore('showMessageDialog', false)"
+      }
+    },
+    {
+      id: "68",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "primary",
+        size: "medium",
+        text: "Send Message",
+        icon: "carbon:send",
+        onClick: "() => args.contextData.solutionStore.fns.sendMessage()"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "4", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "8", E: "10" },
+    { id: "e10", T: "Attr", S: "2", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "14", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "17", E: "19" },
+    { id: "e19", T: "Attr", S: "17", E: "20" },
+    { id: "e20", T: "Attr", S: "14", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "14", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "23", E: "25" },
+    { id: "e25", T: "Attr", S: "25", E: "26" },
+    { id: "e26", T: "Attr", S: "25", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "27", E: "29" },
+    { id: "e29", T: "Attr", S: "14", E: "30" },
+    { id: "e30", T: "Attr", S: "30", E: "31" },
+    { id: "e31", T: "Attr", S: "30", E: "32" },
+    { id: "e32", T: "Attr", S: "32", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "33", E: "35" },
+    { id: "e35", T: "Attr", S: "35", E: "36" },
+    { id: "e36", T: "Attr", S: "35", E: "37" },
+    { id: "e37", T: "Attr", S: "12", E: "38" },
+    { id: "e38", T: "Attr", S: "38", E: "39" },
+    { id: "e39", T: "Attr", S: "38", E: "40" },
+    { id: "e40", T: "Attr", S: "40", E: "41" },
+    { id: "e41", T: "Attr", S: "40", E: "42" },
+    { id: "e42", T: "Attr", S: "40", E: "43" },
+    { id: "e43", T: "Attr", S: "43", E: "44" },
+    { id: "e44", T: "Attr", S: "43", E: "45" },
+    { id: "e45", T: "Attr", S: "40", E: "46" },
+    { id: "e46", T: "Attr", S: "46", E: "47" },
+    { id: "e47", T: "Attr", S: "47", E: "48" },
+    { id: "e48", T: "Attr", S: "47", E: "49" },
+    { id: "e49", T: "Attr", S: "49", E: "50" },
+    { id: "e50", T: "Attr", S: "49", E: "51" },
+    { id: "e51", T: "Attr", S: "51", E: "52" },
+    { id: "e52", T: "Attr", S: "51", E: "53" },
+    { id: "e53", T: "Attr", S: "51", E: "54" },
+    { id: "e54", T: "Attr", S: "51", E: "55" },
+    { id: "e55", T: "Attr", S: "40", E: "56" },
+    { id: "e56", T: "Attr", S: "56", E: "57" },
+    { id: "e57", T: "Attr", S: "56", E: "58" },
+    { id: "e58", T: "Attr", S: "56", E: "59" },
+    { id: "e59", T: "Attr", S: "2", E: "60" },
+    { id: "e60", T: "Attr", S: "60", E: "61" },
+    { id: "e61", T: "Attr", S: "61", E: "62" },
+    { id: "e62", T: "Attr", S: "62", E: "63" },
+    { id: "e63", T: "Attr", S: "63", E: "64" },
+    { id: "e64", T: "Attr", S: "63", E: "65" },
+    { id: "e65", T: "Attr", S: "63", E: "66" },
+    { id: "e66", T: "Attr", S: "66", E: "67" },
+    { id: "e67", T: "Attr", S: "66", E: "68" }
+  ]
+}

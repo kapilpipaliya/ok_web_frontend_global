@@ -1,0 +1,1913 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "RealAssistantAssistantEarnings",
+        url: "/assistant/earnings",
+        title: "Earnings - RealAssistant"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "earningsStore",
+        fns: '''
+const [store, setStore] = args.createStore({
+  earnings: {
+    available: 1195.00,
+    pending: 85.00,
+    lifetime: 8420.00,
+    thisMonth: 1280.00,
+    lastMonth: 1450.00,
+    monthlyGrowth: -11.7
+  },
+  withdrawalMethods: [
+    {
+      id: "bank1",
+      type: "bank",
+      name: "Chase Bank ****4582",
+      isDefault: true
+    },
+    {
+      id: "paypal1",
+      type: "paypal",
+      name: "sarah.k@email.com",
+      isDefault: false
+    }
+  ],
+  selectedMethod: "bank1",
+  withdrawAmount: "",
+  transactions: [],
+  chartData: [],
+  filters: {
+    period: "month",
+    type: "all"
+  },
+  isWithdrawing: false,
+  showWithdrawDialog: false
+});
+
+return {
+  loadEarningsData: async () => {
+    // Load earnings data from database
+    setStore("transactions", [
+      {
+        id: "t1",
+        date: "2024-01-15",
+        type: "earning",
+        problem: "Excel Formula Help",
+        amount: 8.00,
+        status: "completed"
+      },
+      {
+        id: "t2",
+        date: "2024-01-15",
+        type: "earning",
+        problem: "PowerPoint Issue",
+        amount: 18.00,
+        status: "completed"
+      },
+      {
+        id: "t3",
+        date: "2024-01-14",
+        type: "earning",
+        problem: "Database Query",
+        amount: 12.00,
+        status: "pending"
+      },
+      {
+        id: "t4",
+        date: "2024-01-10",
+        type: "withdrawal",
+        description: "Bank Transfer",
+        amount: -500.00,
+        status: "completed"
+      }
+    ]);
+    
+    // Chart data for last 7 days
+    setStore("chartData", [
+      { day: "Mon", earnings: 45 },
+      { day: "Tue", earnings: 82 },
+      { day: "Wed", earnings: 35 },
+      { day: "Thu", earnings: 68 },
+      { day: "Fri", earnings: 92 },
+      { day: "Sat", earnings: 120 },
+      { day: "Sun", earnings: 58 }
+    ]);
+  },
+  
+  setWithdrawAmount: (value) => {
+    const amount = parseFloat(value) || 0;
+    if (amount <= store.earnings.available) {
+      setStore("withdrawAmount", value);
+    }
+  },
+  
+  selectWithdrawMethod: (methodId) => {
+    setStore("selectedMethod", methodId);
+  },
+  
+  processWithdrawal: async () => {
+    const amount = parseFloat(store.withdrawAmount) || 0;
+    if (amount <= 0 || amount > store.earnings.available) {
+      args.showErrorToast("Invalid withdrawal amount");
+      return;
+    }
+    
+    setStore("isWithdrawing", true);
+    
+    // Process withdrawal
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setStore("earnings", "available", store.earnings.available - amount);
+    setStore("withdrawAmount", "");
+    setStore("showWithdrawDialog", false);
+    setStore("isWithdrawing", false);
+    
+    args.showSuccessToast(`Successfully withdrew $${amount.toFixed(2)}`);
+  },
+  
+  filterTransactions: (period) => {
+    setStore("filters", "period", period);
+    // Re-fetch filtered data
+  }
+};
+''',
+        props: '''
+const fns = args.fns;
+if (args.mounted()) {
+  fns.loadEarningsData();
+}
+
+return {
+  as: "div",
+  data: args.contextData.earningsStore
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-left",
+  width: 24,
+  height: 24,
+  onClick: () => args.navigate("/assistant/dashboard")
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Earnings & Payments"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "primary",
+        size: "medium",
+        text: "Withdraw Funds",
+        icon: "carbon:wallet",
+        onClick: "() => args.contextData.earningsStore.setStore('showWithdrawDialog', true)"
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Available Balance"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const available = args.contextData.earningsStore?.earnings?.available || 0;
+return {
+  as: "p",
+  text: `$${available.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.success};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Ready to withdraw"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.success};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Pending Earnings"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const pending = args.contextData.earningsStore?.earnings?.pending || 0;
+return {
+  as: "p",
+  text: `$${pending.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.warning};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Awaiting user approval"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.warning};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "This Month"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const thisMonth = args.contextData.earningsStore?.earnings?.thisMonth || 0;
+return {
+  as: "p",
+  text: `$${thisMonth.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const growth = args.contextData.earningsStore?.earnings?.monthlyGrowth || 0;
+const isPositive = growth >= 0;
+return {
+  as: "p",
+  text: `${isPositive ? "+" : ""}${growth}% from last month`
+};
+''',
+        css: '''
+const growth = args.contextData.earningsStore?.earnings?.monthlyGrowth || 0;
+const isPositive = growth >= 0;
+return `._id {
+  font-size: 0.875rem;
+  color: ${isPositive ? args.theme.var.color.success : args.theme.var.color.error};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Lifetime Earnings"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const lifetime = args.contextData.earningsStore?.earnings?.lifetime || 0;
+return {
+  as: "p",
+  text: `$${lifetime.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Total earned on platform"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.primary};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Earnings Trend"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "chartBars",
+        loop: true,
+        props: '''
+const chartData = args.contextData.earningsStore?.chartData || [];
+const maxValue = Math.max(...chartData.map(d => d.earnings));
+return {
+  data: chartData.map(d => ({ ...d, height: (d.earnings / maxValue) * 100 }))
+};
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const bar = args.contextData.chartBars;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const bar = args.contextData.chartBars;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const bar = args.contextData.chartBars;
+return `._id {
+  width: 100%;
+  height: ${bar.height}%;
+  background: ${args.theme.var.color.primary};
+  border-radius: 0.25rem 0.25rem 0 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+    
+    &::after {
+      content: "$${bar.earnings}";
+      position: absolute;
+      top: -1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: ${args.theme.var.color.text};
+      color: ${args.theme.var.color.background};
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const bar = args.contextData.chartBars;
+return {
+  as: "span",
+  text: bar.day
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Transaction History"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "filterButtons",
+        loop: true,
+        props: '''
+const filters = [
+  { key: "all", label: "All" },
+  { key: "earning", label: "Earnings" },
+  { key: "withdrawal", label: "Withdrawals" }
+];
+return {
+  data: filters
+};
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const filter = args.contextData.filterButtons;
+const currentFilter = args.contextData.earningsStore?.filters?.type || "all";
+const isActive = filter.key === currentFilter;
+
+return {
+  as: "button",
+  text: filter.label,
+  onClick: () => args.contextData.earningsStore.setStore("filters", "type", filter.key)
+};
+''',
+        css: '''
+const filter = args.contextData.filterButtons;
+const currentFilter = args.contextData.earningsStore?.filters?.type || "all";
+const isActive = filter.key === currentFilter;
+
+return `._id {
+  padding: 0.375rem 0.75rem;
+  background: ${isActive ? args.theme.var.color.primary : args.theme.var.color.background_dark_100};
+  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
+  border: 1px solid ${isActive ? args.theme.var.color.primary : args.theme.var.color.border};
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${isActive ? args.theme.var.color.primary_dark_200 : args.theme.var.color.background_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "table"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "thead"
+};
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tr"
+};
+''',
+        css: '''
+return `._id {
+  border-bottom: 2px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Date"
+};
+''',
+        css: '''
+return `._id {
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Description"
+};
+''',
+        css: '''
+return `._id {
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Status"
+};
+''',
+        css: '''
+return `._id {
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Amount"
+};
+''',
+        css: '''
+return `._id {
+  text-align: right;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tbody"
+};
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "transactionRows",
+        loop: true,
+        props: '''
+const transactions = args.contextData.earningsStore?.transactions || [];
+const typeFilter = args.contextData.earningsStore?.filters?.type || "all";
+const filtered = typeFilter === "all" ? transactions : transactions.filter(t => t.type === typeFilter);
+return {
+  data: filtered
+};
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactionRows;
+return {
+  as: "tr"
+};
+''',
+        css: '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_50};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactionRows;
+return {
+  as: "td",
+  text: transaction.date
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "56",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactionRows;
+return {
+  as: "td",
+  text: transaction.type === "earning" ? transaction.problem : transaction.description
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "57",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactionRows;
+const statusColors = {
+  completed: { bg: "success_light_100", text: "success" },
+  pending: { bg: "warning_light_100", text: "warning" }
+};
+const status = statusColors[transaction.status];
+
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "58",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactionRows;
+return {
+  as: "span",
+  text: transaction.status
+};
+''',
+        css: '''
+const transaction = args.contextData.transactionRows;
+const statusColors = {
+  completed: args.theme.var.color.success,
+  pending: args.theme.var.color.warning
+};
+return `._id {
+  padding: 0.25rem 0.5rem;
+  background: ${statusColors[transaction.status]}_light_100;
+  color: ${statusColors[transaction.status]};
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}`;
+'''
+      }
+    },
+    {
+      id: "59",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transactionRows;
+const isPositive = transaction.amount > 0;
+return {
+  as: "td",
+  text: `${isPositive ? "+" : ""}$${Math.abs(transaction.amount).toFixed(2)}`
+};
+''',
+        css: '''
+const transaction = args.contextData.transactionRows;
+const isPositive = transaction.amount > 0;
+return `._id {
+  padding: 0.75rem;
+  text-align: right;
+  font-weight: 600;
+  color: ${isPositive ? args.theme.var.color.success : args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "60",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const showDialog = args.contextData.earningsStore?.showWithdrawDialog;
+if (!showDialog) return { as: "span" };
+
+return {
+  as: "portal"
+};
+'''
+      }
+    },
+    {
+      id: "61",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.contextData.earningsStore.setStore("showWithdrawDialog", false);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "62",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "63",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 500px;
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "64",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Withdraw Funds"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "65",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const available = args.contextData.earningsStore?.earnings?.available || 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "66",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Available to withdraw"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "67",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const available = args.contextData.earningsStore?.earnings?.available || 0;
+return {
+  as: "p",
+  text: `$${available.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.success};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "68",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "69",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Amount to withdraw"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "70",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "71",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "$"
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: ${args.theme.var.color.muted};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "72",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const amount = args.contextData.earningsStore?.withdrawAmount || "";
+const setWithdrawAmount = args.contextData.earningsStore?.fns?.setWithdrawAmount;
+
+return {
+  as: "input",
+  type: "number",
+  placeholder: "0.00",
+  value: amount,
+  onInput: (e) => setWithdrawAmount(e.target.value),
+  min: "10",
+  step: "0.01"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "73",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "74",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Withdrawal method"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "75",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "methods",
+        loop: true,
+        props: '''
+const methods = args.contextData.earningsStore?.withdrawalMethods || [];
+return {
+  data: methods
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "76",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.methods;
+const selectedMethod = args.contextData.earningsStore?.selectedMethod;
+const isSelected = selectedMethod === method.id;
+const selectMethod = args.contextData.earningsStore?.fns?.selectWithdrawMethod;
+
+return {
+  as: "div",
+  onClick: () => selectMethod(method.id)
+};
+''',
+        css: '''
+const method = args.contextData.methods;
+const selectedMethod = args.contextData.earningsStore?.selectedMethod;
+const isSelected = selectedMethod === method.id;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 2px solid ${isSelected ? args.theme.var.color.primary : args.theme.var.color.border};
+  background: ${isSelected ? args.theme.var.color.primary_light_50 : args.theme.var.color.background};
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "77",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.methods;
+const iconMap = {
+  bank: "carbon:bank",
+  paypal: "carbon:logo-paypal"
+};
+return {
+  as: "icon",
+  icon: iconMap[method.type] || "carbon:wallet",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "78",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.methods;
+return {
+  as: "span",
+  text: method.name
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "79",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const method = args.contextData.methods;
+const selectedMethod = args.contextData.earningsStore?.selectedMethod;
+const isSelected = selectedMethod === method.id;
+
+return {
+  as: "icon",
+  icon: isSelected ? "carbon:radio-button-checked" : "carbon:radio-button",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+const method = args.contextData.methods;
+const selectedMethod = args.contextData.earningsStore?.selectedMethod;
+const isSelected = selectedMethod === method.id;
+
+return `._id {
+  color: ${isSelected ? args.theme.var.color.primary : args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "80",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}`;
+'''
+      }
+    },
+    {
+      id: "81",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "secondary",
+        size: "medium",
+        text: "Cancel",
+        onClick: "() => args.contextData.earningsStore.setStore('showWithdrawDialog', false)"
+      }
+    },
+    {
+      id: "82",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "primary",
+        size: "medium",
+        text: "Withdraw",
+        icon: "carbon:send",
+        disabled: "args.contextData.earningsStore?.isWithdrawing",
+        onClick: "() => args.contextData.earningsStore.fns.processWithdrawal()"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "4", E: "8" },
+    { id: "e8", T: "Attr", S: "2", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "10", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "12", E: "14" },
+    { id: "e14", T: "Attr", S: "12", E: "15" },
+    { id: "e15", T: "Attr", S: "10", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "17", E: "19" },
+    { id: "e19", T: "Attr", S: "17", E: "20" },
+    { id: "e20", T: "Attr", S: "10", E: "21" },
+    { id: "e21", T: "Attr", S: "21", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "22", E: "24" },
+    { id: "e24", T: "Attr", S: "22", E: "25" },
+    { id: "e25", T: "Attr", S: "10", E: "26" },
+    { id: "e26", T: "Attr", S: "26", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "27", E: "29" },
+    { id: "e29", T: "Attr", S: "27", E: "30" },
+    { id: "e30", T: "Attr", S: "9", E: "31" },
+    { id: "e31", T: "Attr", S: "31", E: "32" },
+    { id: "e32", T: "Attr", S: "31", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "34", E: "35" },
+    { id: "e35", T: "Attr", S: "35", E: "36" },
+    { id: "e36", T: "Attr", S: "35", E: "37" },
+    { id: "e37", T: "Attr", S: "9", E: "38" },
+    { id: "e38", T: "Attr", S: "38", E: "39" },
+    { id: "e39", T: "Attr", S: "39", E: "40" },
+    { id: "e40", T: "Attr", S: "39", E: "41" },
+    { id: "e41", T: "Attr", S: "41", E: "42" },
+    { id: "e42", T: "Attr", S: "42", E: "43" },
+    { id: "e43", T: "Attr", S: "38", E: "44" },
+    { id: "e44", T: "Attr", S: "44", E: "45" },
+    { id: "e45", T: "Attr", S: "45", E: "46" },
+    { id: "e46", T: "Attr", S: "46", E: "47" },
+    { id: "e47", T: "Attr", S: "47", E: "48" },
+    { id: "e48", T: "Attr", S: "47", E: "49" },
+    { id: "e49", T: "Attr", S: "47", E: "50" },
+    { id: "e50", T: "Attr", S: "47", E: "51" },
+    { id: "e51", T: "Attr", S: "45", E: "52" },
+    { id: "e52", T: "Attr", S: "52", E: "53" },
+    { id: "e53", T: "Attr", S: "53", E: "54" },
+    { id: "e54", T: "Attr", S: "54", E: "55" },
+    { id: "e55", T: "Attr", S: "54", E: "56" },
+    { id: "e56", T: "Attr", S: "54", E: "57" },
+    { id: "e57", T: "Attr", S: "57", E: "58" },
+    { id: "e58", T: "Attr", S: "54", E: "59" },
+    { id: "e59", T: "Attr", S: "2", E: "60" },
+    { id: "e60", T: "Attr", S: "60", E: "61" },
+    { id: "e61", T: "Attr", S: "61", E: "62" },
+    { id: "e62", T: "Attr", S: "62", E: "63" },
+    { id: "e63", T: "Attr", S: "63", E: "64" },
+    { id: "e64", T: "Attr", S: "63", E: "65" },
+    { id: "e65", T: "Attr", S: "65", E: "66" },
+    { id: "e66", T: "Attr", S: "65", E: "67" },
+    { id: "e67", T: "Attr", S: "63", E: "68" },
+    { id: "e68", T: "Attr", S: "68", E: "69" },
+    { id: "e69", T: "Attr", S: "68", E: "70" },
+    { id: "e70", T: "Attr", S: "70", E: "71" },
+    { id: "e71", T: "Attr", S: "70", E: "72" },
+    { id: "e72", T: "Attr", S: "63", E: "73" },
+    { id: "e73", T: "Attr", S: "73", E: "74" },
+    { id: "e74", T: "Attr", S: "73", E: "75" },
+    { id: "e75", T: "Attr", S: "75", E: "76" },
+    { id: "e76", T: "Attr", S: "76", E: "77" },
+    { id: "e77", T: "Attr", S: "76", E: "78" },
+    { id: "e78", T: "Attr", S: "76", E: "79" },
+    { id: "e79", T: "Attr", S: "63", E: "80" },
+    { id: "e80", T: "Attr", S: "80", E: "81" },
+    { id: "e81", T: "Attr", S: "80", E: "82" }
+  ]
+}

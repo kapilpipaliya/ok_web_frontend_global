@@ -1,0 +1,1645 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "RealAssistantAssistantDashboard",
+        url: "/assistant/dashboard",
+        title: "Assistant Dashboard - RealAssistant"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "assistantStore",
+        fns: '''
+const [store, setStore] = args.createStore({
+  assistant: {
+    name: "Sarah K.",
+    rating: 4.8,
+    totalProblems: 156,
+    completedProblems: 148,
+    earnings: {
+      today: 45.00,
+      thisWeek: 320.00,
+      thisMonth: 1280.00,
+      pending: 85.00,
+      available: 1195.00
+    },
+    expertise: ["Excel & Data Analysis", "Technology Support", "Business Tools"],
+    isAvailable: true
+  },
+  assignedProblems: [],
+  recentActivity: [],
+  stats: {
+    avgResponseTime: "1.5 hours",
+    successRate: "94.8%",
+    avgRating: 4.8,
+    totalReviews: 148
+  }
+});
+
+return {
+  loadDashboardData: async () => {
+    // Load assistant data from database
+    setStore("assignedProblems", [
+      {
+        id: "1",
+        title: "Excel Formula Help",
+        category: "Technology",
+        urgency: "normal",
+        status: "assigned",
+        assignedAt: "2 hours ago",
+        estimatedEarning: 8.00,
+        userRating: 4.5
+      },
+      {
+        id: "2",
+        title: "PowerPoint Presentation Issue",
+        category: "Business",
+        urgency: "urgent",
+        status: "in_progress",
+        assignedAt: "4 hours ago",
+        estimatedEarning: 18.00,
+        userRating: 4.2
+      },
+      {
+        id: "3",
+        title: "Database Query Optimization",
+        category: "Technology",
+        urgency: "normal",
+        status: "awaiting_approval",
+        assignedAt: "Yesterday",
+        estimatedEarning: 12.00,
+        userRating: 4.8
+      }
+    ]);
+    
+    setStore("recentActivity", [
+      {
+        type: "solution_approved",
+        problem: "Tax Calculation Spreadsheet",
+        amount: 15.00,
+        time: "2 hours ago"
+      },
+      {
+        type: "new_assignment",
+        problem: "Excel Formula Help",
+        time: "4 hours ago"
+      },
+      {
+        type: "rating_received",
+        rating: 5,
+        problem: "Website Navigation Help",
+        time: "Yesterday"
+      }
+    ]);
+  },
+  
+  toggleAvailability: () => {
+    setStore("assistant", "isAvailable", !store.assistant.isAvailable);
+    args.saveUserSetting({ isAvailable: store.assistant.isAvailable });
+    args.showSuccessToast(store.assistant.isAvailable ? "You are now available" : "You are now unavailable");
+  },
+  
+  acceptProblem: (problemId) => {
+    // Accept problem assignment
+    args.navigate(`/assistant/problem/${problemId}`);
+  }
+};
+''',
+        props: '''
+const fns = args.fns;
+if (args.mounted()) {
+  fns.loadDashboardData();
+}
+
+return {
+  as: "div",
+  data: args.contextData.assistantStore
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:api-1",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Assistant Portal"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isAvailable = args.contextData.assistantStore?.assistant?.isAvailable;
+const toggleAvailability = args.contextData.assistantStore?.fns?.toggleAvailability;
+
+return {
+  as: "button",
+  onClick: toggleAvailability
+};
+''',
+        css: '''
+const isAvailable = args.contextData.assistantStore?.assistant?.isAvailable;
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: ${isAvailable ? args.theme.var.color.success_light_100 : args.theme.var.color.background_dark_100};
+  color: ${isAvailable ? args.theme.var.color.success : args.theme.var.color.muted};
+  border: 1px solid ${isAvailable ? args.theme.var.color.success : args.theme.var.color.border};
+  border-radius: 2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${isAvailable ? args.theme.var.color.success_light_200 : args.theme.var.color.background_dark_200};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isAvailable = args.contextData.assistantStore?.assistant?.isAvailable;
+return {
+  as: "icon",
+  icon: isAvailable ? "carbon:dot-mark" : "carbon:pause-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+const isAvailable = args.contextData.assistantStore?.assistant?.isAvailable;
+return `._id {
+  color: ${isAvailable ? args.theme.var.color.success : args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isAvailable = args.contextData.assistantStore?.assistant?.isAvailable;
+return {
+  as: "span",
+  text: isAvailable ? "Available" : "Unavailable"
+};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-avatar-filled",
+  width: 32,
+  height: 32,
+  onClick: () => args.navigate("/assistant/profile")
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  cursor: pointer;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const name = args.contextData.assistantStore?.assistant?.name;
+return {
+  as: "h2",
+  text: `Welcome back, ${name}!`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Today's Earnings"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const earnings = args.contextData.assistantStore?.assistant?.earnings?.today || 0;
+return {
+  as: "p",
+  text: `$${earnings.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:money",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Active Problems"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const activeProblems = args.contextData.assistantStore?.assignedProblems?.filter(p => p.status !== "completed").length || 0;
+return {
+  as: "p",
+  text: activeProblems.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.warning};
+}`;
+'''
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:task",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Success Rate"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const successRate = args.contextData.assistantStore?.stats?.successRate || "0%";
+return {
+  as: "p",
+  text: successRate
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:chart-line",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Average Rating"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const rating = args.contextData.assistantStore?.assistant?.rating || 0;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const rating = args.contextData.assistantStore?.assistant?.rating || 0;
+return {
+  as: "span",
+  text: rating.toFixed(1)
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:star-filled",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning};
+}`;
+'''
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:star-filled",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Assigned Problems"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "primary",
+        size: "small",
+        text: "View All",
+        icon: "carbon:arrow-right",
+        onClick: "() => args.navigate('/assistant/problems')"
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "problems",
+        loop: true,
+        props: '''
+const problems = args.contextData.assistantStore?.assignedProblems || [];
+return {
+  data: problems.slice(0, 5)
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "div",
+  onClick: () => args.navigate(`/assistant/problem/${problem.id}`)
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+    transform: translateX(4px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "h4",
+  text: problem.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "span",
+  text: problem.category
+};
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "span",
+  text: `• ${problem.assignedAt}`
+};
+'''
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+const urgencyColor = problem.urgency === "urgent" ? args.theme.var.color.error : args.theme.var.color.info;
+return {
+  as: "span",
+  text: problem.urgency === "urgent" ? "URGENT" : "Normal"
+};
+''',
+        css: '''
+const problem = args.contextData.problems;
+const urgencyColor = problem.urgency === "urgent" ? args.theme.var.color.error : args.theme.var.color.info;
+return `._id {
+  padding: 0.25rem 0.5rem;
+  background: ${urgencyColor}_light_100;
+  color: ${urgencyColor};
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}`;
+'''
+      }
+    },
+    {
+      id: "56",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "57",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+const statusMap = {
+  assigned: { text: "New", color: "info" },
+  in_progress: { text: "In Progress", color: "primary" },
+  awaiting_approval: { text: "Awaiting Approval", color: "warning" }
+};
+const status = statusMap[problem.status];
+
+return {
+  as: "span",
+  text: status.text
+};
+''',
+        css: '''
+const problem = args.contextData.problems;
+const statusColors = {
+  assigned: args.theme.var.color.info,
+  in_progress: args.theme.var.color.primary,
+  awaiting_approval: args.theme.var.color.warning
+};
+return `._id {
+  font-size: 0.875rem;
+  color: ${statusColors[problem.status] || args.theme.var.color.text};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "58",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problems;
+return {
+  as: "span",
+  text: `$${problem.estimatedEarning.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "59",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "60",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Recent Activity"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "61",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "activities",
+        loop: true,
+        props: '''
+const activities = args.contextData.assistantStore?.recentActivity || [];
+return {
+  data: activities
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "62",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const activity = args.contextData.activities;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: start;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "63",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const activity = args.contextData.activities;
+const iconMap = {
+  solution_approved: { icon: "carbon:checkmark-filled", color: "success" },
+  new_assignment: { icon: "carbon:task", color: "info" },
+  rating_received: { icon: "carbon:star-filled", color: "warning" }
+};
+const iconInfo = iconMap[activity.type];
+
+return {
+  as: "icon",
+  icon: iconInfo.icon,
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+const activity = args.contextData.activities;
+const colorMap = {
+  solution_approved: args.theme.var.color.success,
+  new_assignment: args.theme.var.color.info,
+  rating_received: args.theme.var.color.warning
+};
+return `._id {
+  color: ${colorMap[activity.type] || args.theme.var.color.muted};
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "64",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "65",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const activity = args.contextData.activities;
+let text = "";
+if (activity.type === "solution_approved") {
+  text = `Solution approved: ${activity.problem}`;
+} else if (activity.type === "new_assignment") {
+  text = `New problem assigned: ${activity.problem}`;
+} else if (activity.type === "rating_received") {
+  text = `Received ${activity.rating} star rating for: ${activity.problem}`;
+}
+
+return {
+  as: "p",
+  text: text
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "66",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const activity = args.contextData.activities;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "67",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const activity = args.contextData.activities;
+return {
+  as: "span",
+  text: activity.time
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "68",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const activity = args.contextData.activities;
+if (activity.type !== "solution_approved") return { as: "span" };
+
+return {
+  as: "span",
+  text: `+$${activity.amount.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "69",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "70",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "primary",
+        size: "medium",
+        text: "View All Problems",
+        icon: "carbon:list",
+        onClick: "() => args.navigate('/assistant/problems')"
+      }
+    },
+    {
+      id: "71",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        variant: "secondary",
+        size: "medium",
+        text: "Earnings Report",
+        icon: "carbon:analytics",
+        onClick: "() => args.navigate('/assistant/earnings')"
+      }
+    },
+    {
+      id: "72",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantButton",
+        variant: "secondary",
+        size: "medium",
+        text: "Update Profile",
+        icon: "carbon:user-settings",
+        onClick: "() => args.navigate('/assistant/profile')"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "4", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "9", E: "10" },
+    { id: "e10", T: "Attr", S: "9", E: "11" },
+    { id: "e11", T: "Attr", S: "8", E: "12" },
+    { id: "e12", T: "Attr", S: "2", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "13", E: "15" },
+    { id: "e15", T: "Attr", S: "15", E: "16" },
+    { id: "e16", T: "Attr", S: "16", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "18", E: "20" },
+    { id: "e20", T: "Attr", S: "17", E: "21" },
+    { id: "e21", T: "Attr", S: "15", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "23", E: "24" },
+    { id: "e24", T: "Attr", S: "24", E: "25" },
+    { id: "e25", T: "Attr", S: "24", E: "26" },
+    { id: "e26", T: "Attr", S: "23", E: "27" },
+    { id: "e27", T: "Attr", S: "15", E: "28" },
+    { id: "e28", T: "Attr", S: "28", E: "29" },
+    { id: "e29", T: "Attr", S: "29", E: "30" },
+    { id: "e30", T: "Attr", S: "30", E: "31" },
+    { id: "e31", T: "Attr", S: "30", E: "32" },
+    { id: "e32", T: "Attr", S: "29", E: "33" },
+    { id: "e33", T: "Attr", S: "15", E: "34" },
+    { id: "e34", T: "Attr", S: "34", E: "35" },
+    { id: "e35", T: "Attr", S: "35", E: "36" },
+    { id: "e36", T: "Attr", S: "36", E: "37" },
+    { id: "e37", T: "Attr", S: "36", E: "38" },
+    { id: "e38", T: "Attr", S: "38", E: "39" },
+    { id: "e39", T: "Attr", S: "38", E: "40" },
+    { id: "e40", T: "Attr", S: "35", E: "41" },
+    { id: "e41", T: "Attr", S: "13", E: "42" },
+    { id: "e42", T: "Attr", S: "42", E: "43" },
+    { id: "e43", T: "Attr", S: "43", E: "44" },
+    { id: "e44", T: "Attr", S: "44", E: "45" },
+    { id: "e45", T: "Attr", S: "44", E: "46" },
+    { id: "e46", T: "Attr", S: "43", E: "47" },
+    { id: "e47", T: "Attr", S: "47", E: "48" },
+    { id: "e48", T: "Attr", S: "48", E: "49" },
+    { id: "e49", T: "Attr", S: "49", E: "50" },
+    { id: "e50", T: "Attr", S: "50", E: "51" },
+    { id: "e51", T: "Attr", S: "50", E: "52" },
+    { id: "e52", T: "Attr", S: "52", E: "53" },
+    { id: "e53", T: "Attr", S: "52", E: "54" },
+    { id: "e54", T: "Attr", S: "49", E: "55" },
+    { id: "e55", T: "Attr", S: "48", E: "56" },
+    { id: "e56", T: "Attr", S: "56", E: "57" },
+    { id: "e57", T: "Attr", S: "56", E: "58" },
+    { id: "e58", T: "Attr", S: "42", E: "59" },
+    { id: "e59", T: "Attr", S: "59", E: "60" },
+    { id: "e60", T: "Attr", S: "59", E: "61" },
+    { id: "e61", T: "Attr", S: "61", E: "62" },
+    { id: "e62", T: "Attr", S: "62", E: "63" },
+    { id: "e63", T: "Attr", S: "62", E: "64" },
+    { id: "e64", T: "Attr", S: "64", E: "65" },
+    { id: "e65", T: "Attr", S: "64", E: "66" },
+    { id: "e66", T: "Attr", S: "66", E: "67" },
+    { id: "e67", T: "Attr", S: "66", E: "68" },
+    { id: "e68", T: "Attr", S: "13", E: "69" },
+    { id: "e69", T: "Attr", S: "69", E: "70" },
+    { id: "e70", T: "Attr", S: "69", E: "71" },
+    { id: "e71", T: "Attr", S: "69", E: "72" }
+  ]
+}
