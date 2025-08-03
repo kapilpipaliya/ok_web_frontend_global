@@ -1,0 +1,1610 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.createStore({
+  availability: {
+    status: "available", // available, busy, offline
+    autoAccept: false,
+    maxActiveProblems: 3,
+    currentActive: 2,
+    preferredCategories: ["Technology", "Programming", "Education"],
+    responseCommitment: "1hour" // 30min, 1hour, 2hours, 4hours, 24hours
+  },
+  schedule: {
+    monday: { enabled: true, start: "09:00", end: "17:00", breaks: [{start: "12:00", end: "13:00"}] },
+    tuesday: { enabled: true, start: "09:00", end: "17:00", breaks: [{start: "12:00", end: "13:00"}] },
+    wednesday: { enabled: true, start: "09:00", end: "17:00", breaks: [{start: "12:00", end: "13:00"}] },
+    thursday: { enabled: true, start: "09:00", end: "17:00", breaks: [{start: "12:00", end: "13:00"}] },
+    friday: { enabled: true, start: "09:00", end: "18:00", breaks: [{start: "12:00", end: "13:00"}] },
+    saturday: { enabled: false, start: "10:00", end: "14:00", breaks: [] },
+    sunday: { enabled: false, start: "", end: "", breaks: [] }
+  },
+  timeOff: [
+    { id: 1, startDate: "2024-03-25", endDate: "2024-03-27", reason: "Personal", status: "approved" },
+    { id: 2, startDate: "2024-04-15", endDate: "2024-04-15", reason: "Medical appointment", status: "pending" }
+  ],
+  notifications: {
+    newProblemAlert: true,
+    urgentProblemAlert: true,
+    categoryMatchAlert: true,
+    reminderBeforeDeadline: true,
+    dailySummary: false,
+    weeklyReport: true
+  },
+  timezone: "America/Los_Angeles",
+  editingDay: null,
+  showTimeOffModal: false,
+  newTimeOff: {
+    startDate: "",
+    endDate: "",
+    reason: ""
+  }
+});
+
+// Helper to get current day
+const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+const currentDay = days[new Date().getDay()];
+store.currentDay = currentDay;
+
+args.contextData.store = store;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Header
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        props: '''
+return {
+  showBalance: false
+};
+'''
+      }
+    },
+    
+    // Main Container
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Page Header
+    {
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Availability & Schedule"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "save_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        props: '''
+return {
+  text: "Save Changes",
+  variant: "primary",
+  icon: "carbon:save",
+  onClick: () => {
+    args.showSuccessToast("Availability settings saved!");
+  }
+};
+'''
+      }
+    },
+    
+    // Current Status Card
+    {
+      id: "status_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Current Status"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_available",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "button",
+  onClick: () => {
+    store.availability.status = "available";
+  }
+};
+''',
+        css: '''
+const store = args.contextData.store;
+const isActive = store.availability.status === "available";
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${isActive ? args.theme.var.color.success : args.theme.var.color.background_light_200};
+  color: ${isActive ? 'white' : args.theme.var.color.text};
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+  
+  &::before {
+    content: "🟢 ";
+  }
+  
+  &::after {
+    content: "Available";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_busy",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "button",
+  onClick: () => {
+    store.availability.status = "busy";
+  }
+};
+''',
+        css: '''
+const store = args.contextData.store;
+const isActive = store.availability.status === "busy";
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${isActive ? args.theme.var.color.warning : args.theme.var.color.background_light_200};
+  color: ${isActive ? 'white' : args.theme.var.color.text};
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+  
+  &::before {
+    content: "🟡 ";
+  }
+  
+  &::after {
+    content: "Busy";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_offline",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "button",
+  onClick: () => {
+    store.availability.status = "offline";
+  }
+};
+''',
+        css: '''
+const store = args.contextData.store;
+const isActive = store.availability.status === "offline";
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${isActive ? args.theme.var.color.error : args.theme.var.color.background_light_200};
+  color: ${isActive ? 'white' : args.theme.var.color.text};
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+  
+  &::before {
+    content: "🔴 ";
+  }
+  
+  &::after {
+    content: "Offline";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "active_problems",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "active_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Active Problems"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "active_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "div",
+  text: `${store.availability.currentActive} / ${store.availability.maxActiveProblems}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "response_time",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "response_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Response Commitment"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "response_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "select",
+  value: store.availability.responseCommitment,
+  onChange: (e) => {
+    store.availability.responseCommitment = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "response_opt_30min",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "30min",
+  text: "Within 30 minutes"
+};
+'''
+      }
+    },
+    
+    {
+      id: "response_opt_1hour",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "1hour",
+  text: "Within 1 hour"
+};
+'''
+      }
+    },
+    
+    {
+      id: "response_opt_2hours",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "2hours",
+  text: "Within 2 hours"
+};
+'''
+      }
+    },
+    
+    {
+      id: "response_opt_4hours",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "4hours",
+  text: "Within 4 hours"
+};
+'''
+      }
+    },
+    
+    {
+      id: "response_opt_24hours",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "24hours",
+  text: "Within 24 hours"
+};
+'''
+      }
+    },
+    
+    {
+      id: "auto_accept",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "auto_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Auto-Accept Problems"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "auto_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "label" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "auto_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "checkbox",
+  checked: store.availability.autoAccept,
+  onChange: (e) => {
+    store.availability.autoAccept = e.target.checked;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "auto_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "span",
+  text: store.availability.autoAccept ? "Enabled" : "Disabled"
+};
+''',
+        css: '''
+const store = args.contextData.store;
+return `._id {
+  font-size: 0.875rem;
+  color: ${store.availability.autoAccept ? args.theme.var.color.success : args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    // Layout Grid
+    {
+      id: "layout_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Weekly Schedule
+    {
+      id: "schedule_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "schedule_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "schedule_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Weekly Schedule"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "schedule_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "days_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "day",
+        loop: true,
+        props: '''
+const days = [
+  { key: "monday", label: "Monday" },
+  { key: "tuesday", label: "Tuesday" },
+  { key: "wednesday", label: "Wednesday" },
+  { key: "thursday", label: "Thursday" },
+  { key: "friday", label: "Friday" },
+  { key: "saturday", label: "Saturday" },
+  { key: "sunday", label: "Sunday" }
+];
+return {
+  data: days
+};
+'''
+      }
+    },
+    
+    {
+      id: "day_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+const day = args.contextData.day;
+const store = args.contextData.store;
+const isToday = store.currentDay === day.key;
+return `._id {
+  padding: 0.75rem;
+  background: ${isToday ? args.theme.var.color.primary_light_100 : args.theme.var.color.background_light_50};
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid ${isToday ? args.theme.var.color.primary_light_300 : 'transparent'};
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "day_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "day_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "day_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const day = args.contextData.day;
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "checkbox",
+  checked: store.schedule[day.key].enabled,
+  onChange: (e) => {
+    store.schedule[day.key].enabled = e.target.checked;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "day_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const day = args.contextData.day;
+const store = args.contextData.store;
+const isToday = store.currentDay === day.key;
+return {
+  as: "div",
+  text: day.label + (isToday ? " (Today)" : "")
+};
+''',
+        css: '''
+const day = args.contextData.day;
+const store = args.contextData.store;
+return `._id {
+  font-weight: ${store.schedule[day.key].enabled ? '600' : '400'};
+  color: ${store.schedule[day.key].enabled ? args.theme.var.color.text : args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "day_hours",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const day = args.contextData.day;
+const store = args.contextData.store;
+const schedule = store.schedule[day.key];
+if (schedule.enabled) {
+  return { as: "div" };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "start_time",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const day = args.contextData.day;
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "time",
+  value: store.schedule[day.key].start,
+  onInput: (e) => {
+    store.schedule[day.key].start = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.25rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.25rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "time_separator",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "to"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "end_time",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const day = args.contextData.day;
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "time",
+  value: store.schedule[day.key].end,
+  onInput: (e) => {
+    store.schedule[day.key].end = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.25rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.25rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    // Settings Panel
+    {
+      id: "settings_panel",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    // Time Off Card
+    {
+      id: "timeoff_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Time Off"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "add_timeoff_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => {
+    args.showSuccessToast("Add time off functionality");
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${args.theme.var.color.primary};
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+  
+  &::before {
+    content: "+ ";
+  }
+  
+  &::after {
+    content: "Add Time Off";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "timeoff",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+return {
+  data: store.timeOff
+};
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  background: ${args.theme.var.color.background_light_50};
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_details",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_dates",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const timeoff = args.contextData.timeoff;
+return {
+  as: "div",
+  text: timeoff.startDate === timeoff.endDate ? 
+    timeoff.startDate : 
+    `${timeoff.startDate} to ${timeoff.endDate}`
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_reason",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const timeoff = args.contextData.timeoff;
+return {
+  as: "div",
+  text: timeoff.reason
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "timeoff_status",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const timeoff = args.contextData.timeoff;
+return {
+  as: "span",
+  text: timeoff.status.charAt(0).toUpperCase() + timeoff.status.slice(1)
+};
+''',
+        css: '''
+const timeoff = args.contextData.timeoff;
+const colors = {
+  approved: args.theme.var.color.success,
+  pending: args.theme.var.color.warning,
+  rejected: args.theme.var.color.error
+};
+return `._id {
+  padding: 0.25rem 0.75rem;
+  background: ${colors[timeoff.status] || args.theme.var.color.background_light_200};
+  color: white;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    
+    // Notifications Card
+    {
+      id: "notifications_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "notif_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "notif_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Notification Preferences"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "notif_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "notif_items",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "notification",
+        loop: true,
+        props: '''
+const notifications = [
+  { key: "newProblemAlert", label: "New Problem Alerts", icon: "🔔" },
+  { key: "urgentProblemAlert", label: "Urgent Problem Alerts", icon: "🚨" },
+  { key: "categoryMatchAlert", label: "Category Match Alerts", icon: "🎯" },
+  { key: "reminderBeforeDeadline", label: "Deadline Reminders", icon: "⏰" },
+  { key: "dailySummary", label: "Daily Summary", icon: "📊" },
+  { key: "weeklyReport", label: "Weekly Report", icon: "📈" }
+];
+return {
+  data: notifications
+};
+'''
+      }
+    },
+    
+    {
+      id: "notif_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "label" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_light_50};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "notif_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const notification = args.contextData.notification;
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "checkbox",
+  checked: store.notifications[notification.key],
+  onChange: (e) => {
+    store.notifications[notification.key] = e.target.checked;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "notif_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const notification = args.contextData.notification;
+return {
+  as: "span",
+  text: `${notification.icon} ${notification.label}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ],
+  
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "container" },
+    { id: "e3", T: "Attr", S: "container", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "save_btn" },
+    { id: "e6", T: "Attr", S: "container", E: "status_card" },
+    { id: "e7", T: "Attr", S: "status_card", E: "status_content" },
+    { id: "e8", T: "Attr", S: "status_content", E: "status_header" },
+    { id: "e9", T: "Attr", S: "status_header", E: "status_title" },
+    { id: "e10", T: "Attr", S: "status_header", E: "status_toggle" },
+    { id: "e11", T: "Attr", S: "status_toggle", E: "status_available" },
+    { id: "e12", T: "Attr", S: "status_toggle", E: "status_busy" },
+    { id: "e13", T: "Attr", S: "status_toggle", E: "status_offline" },
+    { id: "e14", T: "Attr", S: "status_content", E: "status_info" },
+    { id: "e15", T: "Attr", S: "status_info", E: "active_problems" },
+    { id: "e16", T: "Attr", S: "active_problems", E: "active_label" },
+    { id: "e17", T: "Attr", S: "active_problems", E: "active_value" },
+    { id: "e18", T: "Attr", S: "status_info", E: "response_time" },
+    { id: "e19", T: "Attr", S: "response_time", E: "response_label" },
+    { id: "e20", T: "Attr", S: "response_time", E: "response_select" },
+    { id: "e21", T: "Attr", S: "response_select", E: "response_opt_30min" },
+    { id: "e22", T: "Attr", S: "response_select", E: "response_opt_1hour" },
+    { id: "e23", T: "Attr", S: "response_select", E: "response_opt_2hours" },
+    { id: "e24", T: "Attr", S: "response_select", E: "response_opt_4hours" },
+    { id: "e25", T: "Attr", S: "response_select", E: "response_opt_24hours" },
+    { id: "e26", T: "Attr", S: "status_info", E: "auto_accept" },
+    { id: "e27", T: "Attr", S: "auto_accept", E: "auto_label" },
+    { id: "e28", T: "Attr", S: "auto_accept", E: "auto_toggle" },
+    { id: "e29", T: "Attr", S: "auto_toggle", E: "auto_checkbox" },
+    { id: "e30", T: "Attr", S: "auto_toggle", E: "auto_text" },
+    { id: "e31", T: "Attr", S: "container", E: "layout_grid" },
+    { id: "e32", T: "Attr", S: "layout_grid", E: "schedule_card" },
+    { id: "e33", T: "Attr", S: "schedule_card", E: "schedule_header" },
+    { id: "e34", T: "Attr", S: "schedule_header", E: "schedule_title" },
+    { id: "e35", T: "Attr", S: "schedule_card", E: "schedule_content" },
+    { id: "e36", T: "Attr", S: "schedule_content", E: "days_list" },
+    { id: "e37", T: "Attr", S: "days_list", E: "day_item" },
+    { id: "e38", T: "Attr", S: "day_item", E: "day_row" },
+    { id: "e39", T: "Attr", S: "day_row", E: "day_info" },
+    { id: "e40", T: "Attr", S: "day_info", E: "day_checkbox" },
+    { id: "e41", T: "Attr", S: "day_info", E: "day_label" },
+    { id: "e42", T: "Attr", S: "day_row", E: "day_hours" },
+    { id: "e43", T: "Attr", S: "day_hours", E: "start_time" },
+    { id: "e44", T: "Attr", S: "day_hours", E: "time_separator" },
+    { id: "e45", T: "Attr", S: "day_hours", E: "end_time" },
+    { id: "e46", T: "Attr", S: "layout_grid", E: "settings_panel" },
+    { id: "e47", T: "Attr", S: "settings_panel", E: "timeoff_card" },
+    { id: "e48", T: "Attr", S: "timeoff_card", E: "timeoff_header" },
+    { id: "e49", T: "Attr", S: "timeoff_header", E: "timeoff_title" },
+    { id: "e50", T: "Attr", S: "timeoff_header", E: "add_timeoff_btn" },
+    { id: "e51", T: "Attr", S: "timeoff_card", E: "timeoff_content" },
+    { id: "e52", T: "Attr", S: "timeoff_content", E: "timeoff_list" },
+    { id: "e53", T: "Attr", S: "timeoff_list", E: "timeoff_item" },
+    { id: "e54", T: "Attr", S: "timeoff_item", E: "timeoff_details" },
+    { id: "e55", T: "Attr", S: "timeoff_details", E: "timeoff_dates" },
+    { id: "e56", T: "Attr", S: "timeoff_details", E: "timeoff_reason" },
+    { id: "e57", T: "Attr", S: "timeoff_item", E: "timeoff_status" },
+    { id: "e58", T: "Attr", S: "settings_panel", E: "notifications_card" },
+    { id: "e59", T: "Attr", S: "notifications_card", E: "notif_header" },
+    { id: "e60", T: "Attr", S: "notif_header", E: "notif_title" },
+    { id: "e61", T: "Attr", S: "notifications_card", E: "notif_content" },
+    { id: "e62", T: "Attr", S: "notif_content", E: "notif_items" },
+    { id: "e63", T: "Attr", S: "notif_items", E: "notif_item" },
+    { id: "e64", T: "Attr", S: "notif_item", E: "notif_checkbox" },
+    { id: "e65", T: "Attr", S: "notif_item", E: "notif_label" }
+  ]
+}

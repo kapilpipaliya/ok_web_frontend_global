@@ -1,0 +1,1750 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.createStore({
+  profile: {
+    name: "Jane Smith",
+    email: "jane.smith@example.com",
+    phone: "+1 234 567 8900",
+    bio: "Experienced software developer with 8+ years in web development, specializing in React, Node.js, and cloud architecture. I love helping people solve technical challenges and sharing my knowledge.",
+    avatar: null,
+    location: "San Francisco, CA",
+    languages: ["English", "Spanish"],
+    timezone: "America/Los_Angeles",
+    yearsExperience: 8,
+    profileComplete: 85
+  },
+  expertise: [
+    { id: 1, category: "Technology", skills: ["Web Development", "Mobile Apps", "Cloud Computing", "Database Design"], level: "Expert", certified: true },
+    { id: 2, category: "Programming", skills: ["JavaScript", "Python", "Java", "SQL"], level: "Expert", certified: true },
+    { id: 3, category: "Education", skills: ["Computer Science", "Mathematics"], level: "Intermediate", certified: false }
+  ],
+  certifications: [
+    { id: 1, name: "AWS Solutions Architect", issuer: "Amazon", date: "2023-06-15", verified: true },
+    { id: 2, name: "Google Cloud Professional", issuer: "Google", date: "2023-03-20", verified: true },
+    { id: 3, name: "React Expert", issuer: "Meta", date: "2022-11-10", verified: true }
+  ],
+  stats: {
+    totalSolved: 145,
+    avgRating: 4.8,
+    responseTime: "45 min",
+    successRate: "94%",
+    totalEarnings: 12500
+  },
+  editMode: false,
+  newSkill: "",
+  newLanguage: ""
+});
+
+args.contextData.store = store;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Header
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        props: '''
+return {
+  showBalance: false
+};
+'''
+      }
+    },
+    
+    // Main Container
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Page Header
+    {
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "My Profile"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "edit_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        props: '''
+const store = args.contextData.store;
+return {
+  text: store.editMode ? "Save Changes" : "Edit Profile",
+  variant: "primary",
+  icon: store.editMode ? "carbon:save" : "carbon:edit",
+  onClick: () => {
+    if (store.editMode) {
+      args.showSuccessToast("Profile updated successfully!");
+    }
+    store.editMode = !store.editMode;
+  }
+};
+'''
+      }
+    },
+    
+    // Profile Completion
+    {
+      id: "completion_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary_light_100};
+  border: 1px solid ${args.theme.var.color.primary_light_300};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "completion_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "completion_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Profile Completion"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.primary_dark_800};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "completion_percent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "div",
+  text: `${store.profile.profileComplete}%`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "completion_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  height: 0.75rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 0.5rem;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "completion_fill",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return { as: "div" };
+''',
+        css: '''
+const store = args.contextData.store;
+return `._id {
+  height: 100%;
+  width: ${store.profile.profileComplete}%;
+  background: ${args.theme.var.color.primary};
+  transition: width 0.3s ease;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "completion_tips",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "💡 Complete your profile to get more problem assignments and build trust with clients"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.primary_dark_700};
+}`;
+'''
+      }
+    },
+    
+    // Profile Layout
+    {
+      id: "profile_layout",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Main Profile Section
+    {
+      id: "main_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    // Basic Information
+    {
+      id: "basic_info_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "basic_info_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "basic_info_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Basic Information"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "basic_info_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "avatar_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "avatar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "div",
+  text: store.profile.name.split(' ').map(n => n[0]).join('').toUpperCase()
+};
+''',
+        css: '''
+return `._id {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, ${args.theme.var.color.primary}, ${args.theme.var.color.primary_dark_200});
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "avatar_upload",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+if (store.editMode) {
+  return { as: "div" };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "upload_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        props: '''
+return {
+  text: "Upload Photo",
+  variant: "secondary",
+  size: "small",
+  icon: "carbon:upload",
+  onClick: () => {
+    args.showSuccessToast("Photo upload functionality would open here");
+  }
+};
+'''
+      }
+    },
+    
+    {
+      id: "upload_hint",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "JPG, PNG up to 5MB"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "info_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "name_field",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "name_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Full Name"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "name_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "text",
+  value: store.profile.name,
+  disabled: !store.editMode,
+  onInput: (e) => {
+    store.profile.name = e.target.value;
+  }
+};
+''',
+        css: '''
+const store = args.contextData.store;
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${store.editMode ? args.theme.var.color.background : args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "email_field",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "email_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Email Address"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "email_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "email",
+  value: store.profile.email,
+  disabled: true
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: not-allowed;
+  opacity: 0.8;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "phone_field",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "phone_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Phone Number"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "phone_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "tel",
+  value: store.profile.phone,
+  disabled: !store.editMode,
+  onInput: (e) => {
+    store.profile.phone = e.target.value;
+  }
+};
+''',
+        css: '''
+const store = args.contextData.store;
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${store.editMode ? args.theme.var.color.background : args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "location_field",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "location_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Location"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "location_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "text",
+  value: store.profile.location,
+  disabled: !store.editMode,
+  onInput: (e) => {
+    store.profile.location = e.target.value;
+  }
+};
+''',
+        css: '''
+const store = args.contextData.store;
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${store.editMode ? args.theme.var.color.background : args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Bio Section
+    {
+      id: "bio_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "bio_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Professional Bio"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "bio_textarea",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "textarea",
+  value: store.profile.bio,
+  disabled: !store.editMode,
+  rows: 4,
+  onInput: (e) => {
+    store.profile.bio = e.target.value;
+  }
+};
+''',
+        css: '''
+const store = args.contextData.store;
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${store.editMode ? args.theme.var.color.background : args.theme.var.color.background_light_100};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Expertise Section
+    {
+      id: "expertise_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "expertise_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "expertise_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Areas of Expertise"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "add_expertise_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+if (store.editMode) {
+  return {
+    as: "button",
+    onClick: () => {
+      args.showSuccessToast("Add expertise functionality");
+    }
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${args.theme.var.color.primary};
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+  
+  &::before {
+    content: "+ ";
+  }
+  
+  &::after {
+    content: "Add Category";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "expertise_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "expertise_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "expertise",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+return {
+  data: store.expertise
+};
+'''
+      }
+    },
+    
+    {
+      id: "expertise_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.background_light_50};
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "expertise_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "expertise_category",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const expertise = args.contextData.expertise;
+return {
+  as: "div",
+  text: expertise.category
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "expertise_badges",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "level_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const expertise = args.contextData.expertise;
+return {
+  as: "span",
+  text: expertise.level
+};
+''',
+        css: '''
+const expertise = args.contextData.expertise;
+const colors = {
+  Expert: args.theme.var.color.success,
+  Intermediate: args.theme.var.color.warning,
+  Beginner: args.theme.var.color.info
+};
+return `._id {
+  padding: 0.25rem 0.75rem;
+  background: ${colors[expertise.level] || args.theme.var.color.background_light_200};
+  color: white;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "certified_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const expertise = args.contextData.expertise;
+if (expertise.certified) {
+  return {
+    as: "span",
+    text: "✓ Certified"
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  padding: 0.25rem 0.75rem;
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary};
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "skills_wrap",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "skills_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "skill",
+        loop: true,
+        props: '''
+const expertise = args.contextData.expertise;
+return {
+  data: expertise.skills.map(s => ({ name: s }))
+};
+'''
+      }
+    },
+    
+    {
+      id: "skill_tag",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const skill = args.contextData.skill;
+return {
+  as: "span",
+  text: skill.name
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.375rem 0.75rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Sidebar
+    {
+      id: "sidebar",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "aside" };
+'''
+      }
+    },
+    
+    // Stats Card
+    {
+      id: "stats_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "stats_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stats_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Performance Stats"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stats_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_items",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "stat",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+const stats = [
+  { label: "Problems Solved", value: store.stats.totalSolved, icon: "✅" },
+  { label: "Average Rating", value: `${store.stats.avgRating} ⭐`, icon: "⭐" },
+  { label: "Response Time", value: store.stats.responseTime, icon: "⏱" },
+  { label: "Success Rate", value: store.stats.successRate, icon: "📈" },
+  { label: "Total Earnings", value: `$${store.stats.totalEarnings.toLocaleString()}`, icon: "💰" }
+];
+return {
+  data: stats
+};
+'''
+      }
+    },
+    
+    {
+      id: "stat_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_100};
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div",
+  text: `${stat.icon} ${stat.label}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div",
+  text: stat.value
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Certifications Card
+    {
+      id: "cert_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cert_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cert_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Certifications"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cert_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cert_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "cert",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+return {
+  data: store.certifications
+};
+'''
+      }
+    },
+    
+    {
+      id: "cert_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  background: ${args.theme.var.color.background_light_50};
+  border-radius: 0.5rem;
+  margin-bottom: 0.75rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cert_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const cert = args.contextData.cert;
+return {
+  as: "div",
+  text: cert.name
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cert_details",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const cert = args.contextData.cert;
+return {
+  as: "div",
+  text: `${cert.issuer} • ${cert.date}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cert_verified",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const cert = args.contextData.cert;
+if (cert.verified) {
+  return {
+    as: "div",
+    text: "✓ Verified"
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.success};
+  margin-top: 0.25rem;
+  font-weight: 500;
+}`;
+'''
+      }
+    }
+  ],
+  
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "container" },
+    { id: "e3", T: "Attr", S: "container", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "edit_btn" },
+    { id: "e6", T: "Attr", S: "container", E: "completion_card" },
+    { id: "e7", T: "Attr", S: "completion_card", E: "completion_header" },
+    { id: "e8", T: "Attr", S: "completion_header", E: "completion_title" },
+    { id: "e9", T: "Attr", S: "completion_header", E: "completion_percent" },
+    { id: "e10", T: "Attr", S: "completion_card", E: "completion_bar" },
+    { id: "e11", T: "Attr", S: "completion_bar", E: "completion_fill" },
+    { id: "e12", T: "Attr", S: "completion_card", E: "completion_tips" },
+    { id: "e13", T: "Attr", S: "container", E: "profile_layout" },
+    { id: "e14", T: "Attr", S: "profile_layout", E: "main_section" },
+    { id: "e15", T: "Attr", S: "main_section", E: "basic_info_card" },
+    { id: "e16", T: "Attr", S: "basic_info_card", E: "basic_info_header" },
+    { id: "e17", T: "Attr", S: "basic_info_header", E: "basic_info_title" },
+    { id: "e18", T: "Attr", S: "basic_info_card", E: "basic_info_content" },
+    { id: "e19", T: "Attr", S: "basic_info_content", E: "avatar_section" },
+    { id: "e20", T: "Attr", S: "avatar_section", E: "avatar" },
+    { id: "e21", T: "Attr", S: "avatar_section", E: "avatar_upload" },
+    { id: "e22", T: "Attr", S: "avatar_upload", E: "upload_btn" },
+    { id: "e23", T: "Attr", S: "avatar_upload", E: "upload_hint" },
+    { id: "e24", T: "Attr", S: "basic_info_content", E: "info_grid" },
+    { id: "e25", T: "Attr", S: "info_grid", E: "name_field" },
+    { id: "e26", T: "Attr", S: "name_field", E: "name_label" },
+    { id: "e27", T: "Attr", S: "name_field", E: "name_input" },
+    { id: "e28", T: "Attr", S: "info_grid", E: "email_field" },
+    { id: "e29", T: "Attr", S: "email_field", E: "email_label" },
+    { id: "e30", T: "Attr", S: "email_field", E: "email_input" },
+    { id: "e31", T: "Attr", S: "info_grid", E: "phone_field" },
+    { id: "e32", T: "Attr", S: "phone_field", E: "phone_label" },
+    { id: "e33", T: "Attr", S: "phone_field", E: "phone_input" },
+    { id: "e34", T: "Attr", S: "info_grid", E: "location_field" },
+    { id: "e35", T: "Attr", S: "location_field", E: "location_label" },
+    { id: "e36", T: "Attr", S: "location_field", E: "location_input" },
+    { id: "e37", T: "Attr", S: "basic_info_content", E: "bio_section" },
+    { id: "e38", T: "Attr", S: "bio_section", E: "bio_label" },
+    { id: "e39", T: "Attr", S: "bio_section", E: "bio_textarea" },
+    { id: "e40", T: "Attr", S: "main_section", E: "expertise_card" },
+    { id: "e41", T: "Attr", S: "expertise_card", E: "expertise_header" },
+    { id: "e42", T: "Attr", S: "expertise_header", E: "expertise_title" },
+    { id: "e43", T: "Attr", S: "expertise_header", E: "add_expertise_btn" },
+    { id: "e44", T: "Attr", S: "expertise_card", E: "expertise_content" },
+    { id: "e45", T: "Attr", S: "expertise_content", E: "expertise_list" },
+    { id: "e46", T: "Attr", S: "expertise_list", E: "expertise_item" },
+    { id: "e47", T: "Attr", S: "expertise_item", E: "expertise_row" },
+    { id: "e48", T: "Attr", S: "expertise_row", E: "expertise_category" },
+    { id: "e49", T: "Attr", S: "expertise_row", E: "expertise_badges" },
+    { id: "e50", T: "Attr", S: "expertise_badges", E: "level_badge" },
+    { id: "e51", T: "Attr", S: "expertise_badges", E: "certified_badge" },
+    { id: "e52", T: "Attr", S: "expertise_item", E: "skills_wrap" },
+    { id: "e53", T: "Attr", S: "skills_wrap", E: "skills_list" },
+    { id: "e54", T: "Attr", S: "skills_list", E: "skill_tag" },
+    { id: "e55", T: "Attr", S: "profile_layout", E: "sidebar" },
+    { id: "e56", T: "Attr", S: "sidebar", E: "stats_card" },
+    { id: "e57", T: "Attr", S: "stats_card", E: "stats_header" },
+    { id: "e58", T: "Attr", S: "stats_header", E: "stats_title" },
+    { id: "e59", T: "Attr", S: "stats_card", E: "stats_content" },
+    { id: "e60", T: "Attr", S: "stats_content", E: "stat_items" },
+    { id: "e61", T: "Attr", S: "stat_items", E: "stat_item" },
+    { id: "e62", T: "Attr", S: "stat_item", E: "stat_label" },
+    { id: "e63", T: "Attr", S: "stat_item", E: "stat_value" },
+    { id: "e64", T: "Attr", S: "sidebar", E: "cert_card" },
+    { id: "e65", T: "Attr", S: "cert_card", E: "cert_header" },
+    { id: "e66", T: "Attr", S: "cert_header", E: "cert_title" },
+    { id: "e67", T: "Attr", S: "cert_card", E: "cert_content" },
+    { id: "e68", T: "Attr", S: "cert_content", E: "cert_list" },
+    { id: "e69", T: "Attr", S: "cert_list", E: "cert_item" },
+    { id: "e70", T: "Attr", S: "cert_item", E: "cert_name" },
+    { id: "e71", T: "Attr", S: "cert_item", E: "cert_details" },
+    { id: "e72", T: "Attr", S: "cert_item", E: "cert_verified" }
+  ]
+}
