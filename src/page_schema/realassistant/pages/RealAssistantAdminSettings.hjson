@@ -1,0 +1,1646 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.createStore({
+  activeTab: "general",
+  settings: {
+    general: {
+      siteName: "RealAssistant",
+      siteUrl: "https://realassistant.com",
+      supportEmail: "support@realassistant.com",
+      timezone: "America/New_York",
+      language: "en",
+      maintenanceMode: false,
+      registrationEnabled: true,
+      emailVerification: true
+    },
+    pricing: {
+      minRecharge: 10,
+      maxRecharge: 1000,
+      bonusPercentage: 10,
+      bonusThreshold: 100,
+      platformFee: 15,
+      minProblemCost: 5,
+      maxProblemCost: 500,
+      urgentMultiplier: 1.5
+    },
+    payments: {
+      stripeEnabled: true,
+      paypalEnabled: true,
+      bankTransferEnabled: false,
+      cryptoEnabled: false,
+      autoWithdrawal: false,
+      minWithdrawal: 50,
+      withdrawalFee: 2.5,
+      payoutSchedule: "weekly"
+    },
+    assistants: {
+      approvalRequired: true,
+      minRating: 4.0,
+      maxActiveProblems: 5,
+      responseTime: 24,
+      trainingRequired: true,
+      backgroundCheck: true,
+      commissionRate: 85,
+      bonusEnabled: true
+    },
+    notifications: {
+      emailNotifications: true,
+      smsNotifications: false,
+      pushNotifications: true,
+      newProblemAlert: true,
+      solutionAlert: true,
+      paymentAlert: true,
+      disputeAlert: true,
+      systemAlert: true
+    },
+    security: {
+      twoFactorAuth: false,
+      sessionTimeout: 30,
+      maxLoginAttempts: 5,
+      passwordMinLength: 8,
+      passwordRequireSpecial: true,
+      passwordRequireNumber: true,
+      passwordRequireUpper: true,
+      ipWhitelist: false
+    }
+  },
+  unsavedChanges: false
+});
+
+args.contextData.store = store;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Header
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        props: '''
+return {
+  showBalance: false
+};
+'''
+      }
+    },
+    
+    // Main Container
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Page Header
+    {
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Platform Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "save_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        props: '''
+const store = args.contextData.store;
+return {
+  text: store.unsavedChanges ? "Save Changes" : "All Saved",
+  variant: store.unsavedChanges ? "primary" : "secondary",
+  icon: "carbon:save",
+  disabled: !store.unsavedChanges,
+  onClick: () => {
+    store.unsavedChanges = false;
+    args.showSuccessToast("Settings saved successfully!");
+  }
+};
+'''
+      }
+    },
+    
+    // Settings Layout
+    {
+      id: "settings_layout",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Sidebar Navigation
+    {
+      id: "sidebar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "nav" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_200};
+  border-radius: 0.75rem;
+  padding: 1rem;
+  height: fit-content;
+  position: sticky;
+  top: 1rem;
+  
+  @media (max-width: 768px) {
+    position: static;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "nav_items",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "navItem",
+        loop: true,
+        props: '''
+const items = [
+  { id: "general", label: "General", icon: "⚙️" },
+  { id: "pricing", label: "Pricing", icon: "💰" },
+  { id: "payments", label: "Payments", icon: "💳" },
+  { id: "assistants", label: "Assistants", icon: "👥" },
+  { id: "notifications", label: "Notifications", icon: "🔔" },
+  { id: "security", label: "Security", icon: "🔐" }
+];
+return {
+  data: items
+};
+'''
+      }
+    },
+    
+    {
+      id: "nav_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+const store = args.contextData.store;
+return {
+  as: "button",
+  onClick: () => {
+    store.activeTab = item.id;
+  }
+};
+''',
+        css: '''
+const item = args.contextData.navItem;
+const store = args.contextData.store;
+const isActive = store.activeTab === item.id;
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: ${isActive ? args.theme.var.color.primary_light_100 : 'transparent'};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  border-radius: 0.5rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: ${isActive ? '600' : '400'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  
+  &:hover {
+    background: ${isActive ? args.theme.var.color.primary_light_100 : args.theme.var.color.background_light_100};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "nav_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+return {
+  as: "span",
+  text: item.icon
+};
+'''
+      }
+    },
+    
+    {
+      id: "nav_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+return {
+  as: "span",
+  text: item.label
+};
+'''
+      }
+    },
+    
+    // Settings Content
+    {
+      id: "content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_200};
+  border-radius: 0.75rem;
+  padding: 2rem;
+}`;
+'''
+      }
+    },
+    
+    // General Settings
+    {
+      id: "general_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+if (store.activeTab === "general") {
+  return { as: "div" };
+}
+return null;
+'''
+      }
+    },
+    
+    {
+      id: "general_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "General Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "general_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "site_name_field",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "site_name_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Site Name"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "site_name_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "text",
+  value: store.settings.general.siteName,
+  onInput: (e) => {
+    store.settings.general.siteName = e.target.value;
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "support_email_field",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "support_email_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Support Email"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "support_email_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "email",
+  value: store.settings.general.supportEmail,
+  onInput: (e) => {
+    store.settings.general.supportEmail = e.target.value;
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "general_toggles",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "maintenance_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "label" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "maintenance_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "checkbox",
+  checked: store.settings.general.maintenanceMode,
+  onChange: (e) => {
+    store.settings.general.maintenanceMode = e.target.checked;
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "maintenance_label_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "maintenance_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Maintenance Mode"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "maintenance_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Temporarily disable the site for maintenance"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    // Pricing Settings
+    {
+      id: "pricing_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+if (store.activeTab === "pricing") {
+  return { as: "div" };
+}
+return null;
+'''
+      }
+    },
+    
+    {
+      id: "pricing_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Pricing Configuration"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "pricing_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "platform_fee_field",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "platform_fee_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Platform Fee (%)"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "platform_fee_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "number",
+  value: store.settings.pricing.platformFee,
+  min: 0,
+  max: 100,
+  onInput: (e) => {
+    store.settings.pricing.platformFee = parseFloat(e.target.value);
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "min_recharge_field",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "min_recharge_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Minimum Recharge ($)"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "min_recharge_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "number",
+  value: store.settings.pricing.minRecharge,
+  min: 1,
+  onInput: (e) => {
+    store.settings.pricing.minRecharge = parseFloat(e.target.value);
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    // Payments Settings
+    {
+      id: "payments_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+if (store.activeTab === "payments") {
+  return { as: "div" };
+}
+return null;
+'''
+      }
+    },
+    
+    {
+      id: "payments_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Payment Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "payment_methods",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stripe_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "label" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_200};
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_light_50};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stripe_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "checkbox",
+  checked: store.settings.payments.stripeEnabled,
+  onChange: (e) => {
+    store.settings.payments.stripeEnabled = e.target.checked;
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stripe_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "stripe_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "💳 Stripe"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stripe_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Credit/Debit cards"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    // Assistants Settings
+    {
+      id: "assistants_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+if (store.activeTab === "assistants") {
+  return { as: "div" };
+}
+return null;
+'''
+      }
+    },
+    
+    {
+      id: "assistants_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Assistant Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "assistants_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "commission_field",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "commission_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Assistant Commission Rate (%)"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "commission_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "number",
+  value: store.settings.assistants.commissionRate,
+  min: 0,
+  max: 100,
+  onInput: (e) => {
+    store.settings.assistants.commissionRate = parseFloat(e.target.value);
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    // Notifications Settings
+    {
+      id: "notifications_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+if (store.activeTab === "notifications") {
+  return { as: "div" };
+}
+return null;
+'''
+      }
+    },
+    
+    {
+      id: "notifications_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Notification Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "notification_toggles",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "email_notif_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "label" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_200};
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_light_50};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "email_notif_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "checkbox",
+  checked: store.settings.notifications.emailNotifications,
+  onChange: (e) => {
+    store.settings.notifications.emailNotifications = e.target.checked;
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "email_notif_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "email_notif_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "📧 Email Notifications"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "email_notif_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Send email notifications for important events"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    // Security Settings
+    {
+      id: "security_section",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+if (store.activeTab === "security") {
+  return { as: "div" };
+}
+return null;
+'''
+      }
+    },
+    
+    {
+      id: "security_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Security Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "security_warning",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.warning_light_100};
+  color: ${args.theme.var.color.warning_dark_800};
+  border: 1px solid ${args.theme.var.color.warning_light_300};
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  
+  &::before {
+    content: "⚠️";
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "warning_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Changing security settings may affect user access. Please proceed with caution."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "security_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "session_timeout_field",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "session_timeout_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Session Timeout (minutes)"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "session_timeout_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "number",
+  value: store.settings.security.sessionTimeout,
+  min: 5,
+  max: 1440,
+  onInput: (e) => {
+    store.settings.security.sessionTimeout = parseInt(e.target.value);
+    store.unsavedChanges = true;
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    }
+  ],
+  
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "container" },
+    { id: "e3", T: "Attr", S: "container", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "save_btn" },
+    { id: "e6", T: "Attr", S: "container", E: "settings_layout" },
+    { id: "e7", T: "Attr", S: "settings_layout", E: "sidebar" },
+    { id: "e8", T: "Attr", S: "sidebar", E: "nav_items" },
+    { id: "e9", T: "Attr", S: "nav_items", E: "nav_item" },
+    { id: "e10", T: "Attr", S: "nav_item", E: "nav_icon" },
+    { id: "e11", T: "Attr", S: "nav_item", E: "nav_label" },
+    { id: "e12", T: "Attr", S: "settings_layout", E: "content" },
+    
+    // General Settings
+    { id: "e13", T: "Attr", S: "content", E: "general_section" },
+    { id: "e14", T: "Attr", S: "general_section", E: "general_title" },
+    { id: "e15", T: "Attr", S: "general_section", E: "general_grid" },
+    { id: "e16", T: "Attr", S: "general_grid", E: "site_name_field" },
+    { id: "e17", T: "Attr", S: "site_name_field", E: "site_name_label" },
+    { id: "e18", T: "Attr", S: "site_name_field", E: "site_name_input" },
+    { id: "e19", T: "Attr", S: "general_grid", E: "support_email_field" },
+    { id: "e20", T: "Attr", S: "support_email_field", E: "support_email_label" },
+    { id: "e21", T: "Attr", S: "support_email_field", E: "support_email_input" },
+    { id: "e22", T: "Attr", S: "general_section", E: "general_toggles" },
+    { id: "e23", T: "Attr", S: "general_toggles", E: "maintenance_toggle" },
+    { id: "e24", T: "Attr", S: "maintenance_toggle", E: "maintenance_checkbox" },
+    { id: "e25", T: "Attr", S: "maintenance_toggle", E: "maintenance_label_text" },
+    { id: "e26", T: "Attr", S: "maintenance_label_text", E: "maintenance_title" },
+    { id: "e27", T: "Attr", S: "maintenance_label_text", E: "maintenance_desc" },
+    
+    // Pricing Settings
+    { id: "e28", T: "Attr", S: "content", E: "pricing_section" },
+    { id: "e29", T: "Attr", S: "pricing_section", E: "pricing_title" },
+    { id: "e30", T: "Attr", S: "pricing_section", E: "pricing_grid" },
+    { id: "e31", T: "Attr", S: "pricing_grid", E: "platform_fee_field" },
+    { id: "e32", T: "Attr", S: "platform_fee_field", E: "platform_fee_label" },
+    { id: "e33", T: "Attr", S: "platform_fee_field", E: "platform_fee_input" },
+    { id: "e34", T: "Attr", S: "pricing_grid", E: "min_recharge_field" },
+    { id: "e35", T: "Attr", S: "min_recharge_field", E: "min_recharge_label" },
+    { id: "e36", T: "Attr", S: "min_recharge_field", E: "min_recharge_input" },
+    
+    // Payments Settings
+    { id: "e37", T: "Attr", S: "content", E: "payments_section" },
+    { id: "e38", T: "Attr", S: "payments_section", E: "payments_title" },
+    { id: "e39", T: "Attr", S: "payments_section", E: "payment_methods" },
+    { id: "e40", T: "Attr", S: "payment_methods", E: "stripe_toggle" },
+    { id: "e41", T: "Attr", S: "stripe_toggle", E: "stripe_checkbox" },
+    { id: "e42", T: "Attr", S: "stripe_toggle", E: "stripe_info" },
+    { id: "e43", T: "Attr", S: "stripe_info", E: "stripe_name" },
+    { id: "e44", T: "Attr", S: "stripe_info", E: "stripe_desc" },
+    
+    // Assistants Settings
+    { id: "e45", T: "Attr", S: "content", E: "assistants_section" },
+    { id: "e46", T: "Attr", S: "assistants_section", E: "assistants_title" },
+    { id: "e47", T: "Attr", S: "assistants_section", E: "assistants_grid" },
+    { id: "e48", T: "Attr", S: "assistants_grid", E: "commission_field" },
+    { id: "e49", T: "Attr", S: "commission_field", E: "commission_label" },
+    { id: "e50", T: "Attr", S: "commission_field", E: "commission_input" },
+    
+    // Notifications Settings
+    { id: "e51", T: "Attr", S: "content", E: "notifications_section" },
+    { id: "e52", T: "Attr", S: "notifications_section", E: "notifications_title" },
+    { id: "e53", T: "Attr", S: "notifications_section", E: "notification_toggles" },
+    { id: "e54", T: "Attr", S: "notification_toggles", E: "email_notif_toggle" },
+    { id: "e55", T: "Attr", S: "email_notif_toggle", E: "email_notif_checkbox" },
+    { id: "e56", T: "Attr", S: "email_notif_toggle", E: "email_notif_info" },
+    { id: "e57", T: "Attr", S: "email_notif_info", E: "email_notif_title" },
+    { id: "e58", T: "Attr", S: "email_notif_info", E: "email_notif_desc" },
+    
+    // Security Settings
+    { id: "e59", T: "Attr", S: "content", E: "security_section" },
+    { id: "e60", T: "Attr", S: "security_section", E: "security_title" },
+    { id: "e61", T: "Attr", S: "security_section", E: "security_warning" },
+    { id: "e62", T: "Attr", S: "security_warning", E: "warning_text" },
+    { id: "e63", T: "Attr", S: "security_section", E: "security_grid" },
+    { id: "e64", T: "Attr", S: "security_grid", E: "session_timeout_field" },
+    { id: "e65", T: "Attr", S: "session_timeout_field", E: "session_timeout_label" },
+    { id: "e66", T: "Attr", S: "session_timeout_field", E: "session_timeout_input" }
+  ]
+}

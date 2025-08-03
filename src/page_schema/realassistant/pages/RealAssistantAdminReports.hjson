@@ -1,0 +1,1819 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.createStore({
+  dateRange: "7days",
+  reportType: "overview",
+  chartData: {
+    revenue: [2800, 3200, 2900, 3500, 4200, 3800, 4500],
+    problems: [45, 52, 48, 58, 65, 61, 72],
+    users: [120, 135, 128, 142, 158, 165, 178],
+    dates: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  },
+  topCategories: [
+    { name: "Technology", count: 245, revenue: 12500 },
+    { name: "Education", count: 189, revenue: 8900 },
+    { name: "Legal", count: 156, revenue: 15600 },
+    { name: "Finance", count: 134, revenue: 10200 },
+    { name: "Health", count: 98, revenue: 7800 }
+  ],
+  performanceMetrics: {
+    avgResolutionTime: "3.2 hours",
+    satisfactionRate: "94.5%",
+    disputeRate: "2.3%",
+    completionRate: "89.7%",
+    avgProblemValue: "$85.50",
+    returnUserRate: "67%"
+  },
+  assistantPerformance: [
+    { name: "Sarah Wilson", solved: 145, rating: 4.9, earnings: 12500, responseTime: "45 min" },
+    { name: "Jane Smith", solved: 132, rating: 4.8, earnings: 10800, responseTime: "1.2 hours" },
+    { name: "Robert Chen", solved: 118, rating: 4.7, earnings: 9500, responseTime: "2.1 hours" },
+    { name: "Michael Lee", solved: 98, rating: 4.6, earnings: 7800, responseTime: "1.5 hours" },
+    { name: "Emily Davis", solved: 87, rating: 4.8, earnings: 6900, responseTime: "55 min" }
+  ],
+  revenueBreakdown: {
+    recharges: 45000,
+    platformFees: 6750,
+    withdrawals: 38250,
+    pending: 1850,
+    refunds: 450
+  }
+});
+
+args.contextData.store = store;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Header
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        props: '''
+return {
+  showBalance: false
+};
+'''
+      }
+    },
+    
+    // Main Container
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Page Header
+    {
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Analytics & Reports"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "header_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "date_range_select",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "select",
+  value: store.dateRange,
+  onChange: (e) => {
+    store.dateRange = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "range_opt_today",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "today",
+  text: "Today"
+};
+'''
+      }
+    },
+    
+    {
+      id: "range_opt_7days",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "7days",
+  text: "Last 7 Days"
+};
+'''
+      }
+    },
+    
+    {
+      id: "range_opt_30days",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "30days",
+  text: "Last 30 Days"
+};
+'''
+      }
+    },
+    
+    {
+      id: "range_opt_90days",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "90days",
+  text: "Last 90 Days"
+};
+'''
+      }
+    },
+    
+    {
+      id: "export_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        props: '''
+return {
+  text: "Export Report",
+  variant: "primary",
+  icon: "carbon:download",
+  onClick: () => {
+    args.showSuccessToast("Generating report...");
+  }
+};
+'''
+      }
+    },
+    
+    // Key Metrics
+    {
+      id: "metrics_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metric_revenue",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary}, ${args.theme.var.color.primary_dark_200});
+  color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: "💰";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    opacity: 0.3;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "revenue_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Total Revenue"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "revenue_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const total = store.chartData.revenue.reduce((a, b) => a + b, 0);
+return {
+  as: "div",
+  text: `$${total.toLocaleString()}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "revenue_trend",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "↑ 15.2% from last period"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metric_problems",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.success}, ${args.theme.var.color.success_dark_200});
+  color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: "📝";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    opacity: 0.3;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "problems_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Problems Solved"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "problems_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const total = store.chartData.problems.reduce((a, b) => a + b, 0);
+return {
+  as: "div",
+  text: total.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "problems_trend",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "↑ 8.5% from last period"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metric_users",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.info}, ${args.theme.var.color.info_dark_200});
+  color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: "👥";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    opacity: 0.3;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "users_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Active Users"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "users_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const latest = store.chartData.users[store.chartData.users.length - 1];
+return {
+  as: "div",
+  text: latest.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "users_trend",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "↑ 12.3% from last period"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metric_satisfaction",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.warning}, ${args.theme.var.color.warning_dark_200});
+  color: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: "⭐";
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    opacity: 0.3;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "satisfaction_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Satisfaction Rate"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "satisfaction_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "div",
+  text: store.performanceMetrics.satisfactionRate
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "satisfaction_trend",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "↑ 2.1% from last period"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    
+    // Charts Section
+    {
+      id: "charts_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Revenue Chart
+    {
+      id: "revenue_chart_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "chart_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "chart_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Revenue Trend"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "chart_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "chart_bars",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "bar",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+const maxValue = Math.max(...store.chartData.revenue);
+const data = store.chartData.revenue.map((value, index) => ({
+  value,
+  label: store.chartData.dates[index],
+  height: (value / maxValue) * 100
+}));
+return {
+  data
+};
+'''
+      }
+    },
+    
+    {
+      id: "bar_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "bar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const bar = args.contextData.bar;
+return {
+  as: "div",
+  title: `$${bar.value}`
+};
+''',
+        css: '''
+const bar = args.contextData.bar;
+return `._id {
+  width: 100%;
+  height: ${bar.height}%;
+  background: linear-gradient(to top, ${args.theme.var.color.primary}, ${args.theme.var.color.primary_light_300});
+  border-radius: 0.25rem 0.25rem 0 0;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px ${args.theme.var.color.primary_light_200};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "bar_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const bar = args.contextData.bar;
+return {
+  as: "div",
+  text: bar.label
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    // Top Categories
+    {
+      id: "categories_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "categories_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "categories_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Top Categories"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "categories_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "category_items",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "category",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+return {
+  data: store.topCategories
+};
+'''
+      }
+    },
+    
+    {
+      id: "category_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_100};
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "category_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "category_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.category;
+return {
+  as: "div",
+  text: category.name
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "category_revenue",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.category;
+return {
+  as: "div",
+  text: `$${category.revenue.toLocaleString()}`
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "category_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  height: 0.5rem;
+  background: ${args.theme.var.color.background_light_200};
+  border-radius: 0.25rem;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "category_bar_fill",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.category;
+const store = args.contextData.store;
+const maxRevenue = Math.max(...store.topCategories.map(c => c.revenue));
+const width = (category.revenue / maxRevenue) * 100;
+return {
+  as: "div"
+};
+''',
+        css: '''
+const category = args.contextData.category;
+const store = args.contextData.store;
+const maxRevenue = Math.max(...store.topCategories.map(c => c.revenue));
+const width = (category.revenue / maxRevenue) * 100;
+return `._id {
+  height: 100%;
+  width: ${width}%;
+  background: ${args.theme.var.color.primary};
+  transition: width 0.3s ease;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "category_count",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const category = args.contextData.category;
+return {
+  as: "div",
+  text: `${category.count} problems`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    
+    // Performance Tables
+    {
+      id: "tables_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Assistant Performance
+    {
+      id: "assistant_perf_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "assistant_perf_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "assistant_perf_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Top Performing Assistants"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "assistant_table",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "table" };
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "assistant_thead",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "thead" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "assistant_header_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "tr" };
+'''
+      }
+    },
+    
+    {
+      id: "th_assistant",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Assistant"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  text-transform: uppercase;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_solved",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Solved"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  text-transform: uppercase;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_rating",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Rating"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  text-transform: uppercase;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_earnings",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Earnings"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  text-transform: uppercase;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "assistant_tbody",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "tbody" };
+'''
+      }
+    },
+    
+    {
+      id: "assistant_rows",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "assistant",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+return {
+  data: store.assistantPerformance
+};
+'''
+      }
+    },
+    
+    {
+      id: "assistant_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "tr" };
+''',
+        css: '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.background_light_100};
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_assistant_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.assistant;
+return {
+  as: "td",
+  text: assistant.name
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_solved",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.assistant;
+return {
+  as: "td",
+  text: assistant.solved
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_rating",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.assistant;
+return {
+  as: "td",
+  text: `⭐ ${assistant.rating}`
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.warning};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_earnings",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.assistant;
+return {
+  as: "td",
+  text: `$${assistant.earnings.toLocaleString()}`
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: right;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    
+    // Performance Metrics
+    {
+      id: "metrics_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "metrics_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metrics_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Platform Performance"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metrics_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metric_items",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "metric",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+const metrics = [
+  { label: "Avg Resolution Time", value: store.performanceMetrics.avgResolutionTime, icon: "⏱" },
+  { label: "Completion Rate", value: store.performanceMetrics.completionRate, icon: "✅" },
+  { label: "Dispute Rate", value: store.performanceMetrics.disputeRate, icon: "⚠️" },
+  { label: "Avg Problem Value", value: store.performanceMetrics.avgProblemValue, icon: "💵" },
+  { label: "Return User Rate", value: store.performanceMetrics.returnUserRate, icon: "🔄" }
+];
+return {
+  data: metrics
+};
+'''
+      }
+    },
+    
+    {
+      id: "metric_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid ${args.theme.var.color.background_light_100};
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metric_label_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metric_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const metric = args.contextData.metric;
+return {
+  as: "span",
+  text: metric.icon
+};
+'''
+      }
+    },
+    
+    {
+      id: "metric_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const metric = args.contextData.metric;
+return {
+  as: "span",
+  text: metric.label
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "metric_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const metric = args.contextData.metric;
+return {
+  as: "div",
+  text: metric.value
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ],
+  
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "container" },
+    { id: "e3", T: "Attr", S: "container", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "header_actions" },
+    { id: "e6", T: "Attr", S: "header_actions", E: "date_range_select" },
+    { id: "e7", T: "Attr", S: "date_range_select", E: "range_opt_today" },
+    { id: "e8", T: "Attr", S: "date_range_select", E: "range_opt_7days" },
+    { id: "e9", T: "Attr", S: "date_range_select", E: "range_opt_30days" },
+    { id: "e10", T: "Attr", S: "date_range_select", E: "range_opt_90days" },
+    { id: "e11", T: "Attr", S: "header_actions", E: "export_btn" },
+    
+    // Metrics Grid
+    { id: "e12", T: "Attr", S: "container", E: "metrics_grid" },
+    { id: "e13", T: "Attr", S: "metrics_grid", E: "metric_revenue" },
+    { id: "e14", T: "Attr", S: "metric_revenue", E: "revenue_label" },
+    { id: "e15", T: "Attr", S: "metric_revenue", E: "revenue_value" },
+    { id: "e16", T: "Attr", S: "metric_revenue", E: "revenue_trend" },
+    { id: "e17", T: "Attr", S: "metrics_grid", E: "metric_problems" },
+    { id: "e18", T: "Attr", S: "metric_problems", E: "problems_label" },
+    { id: "e19", T: "Attr", S: "metric_problems", E: "problems_value" },
+    { id: "e20", T: "Attr", S: "metric_problems", E: "problems_trend" },
+    { id: "e21", T: "Attr", S: "metrics_grid", E: "metric_users" },
+    { id: "e22", T: "Attr", S: "metric_users", E: "users_label" },
+    { id: "e23", T: "Attr", S: "metric_users", E: "users_value" },
+    { id: "e24", T: "Attr", S: "metric_users", E: "users_trend" },
+    { id: "e25", T: "Attr", S: "metrics_grid", E: "metric_satisfaction" },
+    { id: "e26", T: "Attr", S: "metric_satisfaction", E: "satisfaction_label" },
+    { id: "e27", T: "Attr", S: "metric_satisfaction", E: "satisfaction_value" },
+    { id: "e28", T: "Attr", S: "metric_satisfaction", E: "satisfaction_trend" },
+    
+    // Charts Section
+    { id: "e29", T: "Attr", S: "container", E: "charts_section" },
+    { id: "e30", T: "Attr", S: "charts_section", E: "revenue_chart_card" },
+    { id: "e31", T: "Attr", S: "revenue_chart_card", E: "chart_header" },
+    { id: "e32", T: "Attr", S: "chart_header", E: "chart_title" },
+    { id: "e33", T: "Attr", S: "revenue_chart_card", E: "chart_body" },
+    { id: "e34", T: "Attr", S: "chart_body", E: "chart_bars" },
+    { id: "e35", T: "Attr", S: "chart_bars", E: "bar_container" },
+    { id: "e36", T: "Attr", S: "bar_container", E: "bar" },
+    { id: "e37", T: "Attr", S: "bar_container", E: "bar_label" },
+    
+    // Categories
+    { id: "e38", T: "Attr", S: "charts_section", E: "categories_card" },
+    { id: "e39", T: "Attr", S: "categories_card", E: "categories_header" },
+    { id: "e40", T: "Attr", S: "categories_header", E: "categories_title" },
+    { id: "e41", T: "Attr", S: "categories_card", E: "categories_list" },
+    { id: "e42", T: "Attr", S: "categories_list", E: "category_items" },
+    { id: "e43", T: "Attr", S: "category_items", E: "category_item" },
+    { id: "e44", T: "Attr", S: "category_item", E: "category_row" },
+    { id: "e45", T: "Attr", S: "category_row", E: "category_name" },
+    { id: "e46", T: "Attr", S: "category_row", E: "category_revenue" },
+    { id: "e47", T: "Attr", S: "category_item", E: "category_bar" },
+    { id: "e48", T: "Attr", S: "category_bar", E: "category_bar_fill" },
+    { id: "e49", T: "Attr", S: "category_item", E: "category_count" },
+    
+    // Tables Section
+    { id: "e50", T: "Attr", S: "container", E: "tables_section" },
+    
+    // Assistant Performance
+    { id: "e51", T: "Attr", S: "tables_section", E: "assistant_perf_card" },
+    { id: "e52", T: "Attr", S: "assistant_perf_card", E: "assistant_perf_header" },
+    { id: "e53", T: "Attr", S: "assistant_perf_header", E: "assistant_perf_title" },
+    { id: "e54", T: "Attr", S: "assistant_perf_card", E: "assistant_table" },
+    { id: "e55", T: "Attr", S: "assistant_table", E: "assistant_thead" },
+    { id: "e56", T: "Attr", S: "assistant_thead", E: "assistant_header_row" },
+    { id: "e57", T: "Attr", S: "assistant_header_row", E: "th_assistant" },
+    { id: "e58", T: "Attr", S: "assistant_header_row", E: "th_solved" },
+    { id: "e59", T: "Attr", S: "assistant_header_row", E: "th_rating" },
+    { id: "e60", T: "Attr", S: "assistant_header_row", E: "th_earnings" },
+    { id: "e61", T: "Attr", S: "assistant_table", E: "assistant_tbody" },
+    { id: "e62", T: "Attr", S: "assistant_tbody", E: "assistant_rows" },
+    { id: "e63", T: "Attr", S: "assistant_rows", E: "assistant_row" },
+    { id: "e64", T: "Attr", S: "assistant_row", E: "td_assistant_name" },
+    { id: "e65", T: "Attr", S: "assistant_row", E: "td_solved" },
+    { id: "e66", T: "Attr", S: "assistant_row", E: "td_rating" },
+    { id: "e67", T: "Attr", S: "assistant_row", E: "td_earnings" },
+    
+    // Performance Metrics
+    { id: "e68", T: "Attr", S: "tables_section", E: "metrics_card" },
+    { id: "e69", T: "Attr", S: "metrics_card", E: "metrics_header" },
+    { id: "e70", T: "Attr", S: "metrics_header", E: "metrics_title" },
+    { id: "e71", T: "Attr", S: "metrics_card", E: "metrics_list" },
+    { id: "e72", T: "Attr", S: "metrics_list", E: "metric_items" },
+    { id: "e73", T: "Attr", S: "metric_items", E: "metric_item" },
+    { id: "e74", T: "Attr", S: "metric_item", E: "metric_label_row" },
+    { id: "e75", T: "Attr", S: "metric_label_row", E: "metric_icon" },
+    { id: "e76", T: "Attr", S: "metric_label_row", E: "metric_label" },
+    { id: "e77", T: "Attr", S: "metric_item", E: "metric_value" }
+  ]
+}
