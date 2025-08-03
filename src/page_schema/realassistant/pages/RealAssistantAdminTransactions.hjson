@@ -1,0 +1,1912 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.createStore({
+  filterType: "all",
+  filterStatus: "all", 
+  dateRange: "7days",
+  searchTerm: "",
+  transactions: [
+    { id: 1, user: "John Doe", type: "recharge", amount: 100, method: "Credit Card", status: "completed", date: "2024-03-15 14:30", reference: "TXN-001234" },
+    { id: 2, user: "Jane Smith", type: "withdrawal", amount: 450, method: "Bank Transfer", status: "pending", date: "2024-03-15 12:15", reference: "TXN-001235" },
+    { id: 3, user: "Mike Johnson", type: "payment", amount: 35, method: "Balance", status: "completed", date: "2024-03-15 11:45", problem: "#245", reference: "TXN-001236" },
+    { id: 4, user: "Sarah Wilson", type: "withdrawal", amount: 1200, method: "PayPal", status: "completed", date: "2024-03-14 16:20", reference: "TXN-001237" },
+    { id: 5, user: "Tom Brown", type: "recharge", amount: 50, method: "Debit Card", status: "completed", date: "2024-03-14 10:30", reference: "TXN-001238" },
+    { id: 6, user: "Emily Davis", type: "refund", amount: 60, method: "Balance", status: "completed", date: "2024-03-14 09:15", problem: "#198", reference: "TXN-001239" },
+    { id: 7, user: "Lisa Anderson", type: "payment", amount: 75, method: "Balance", status: "completed", date: "2024-03-13 15:40", problem: "#201", reference: "TXN-001240" },
+    { id: 8, user: "Robert Chen", type: "bonus", amount: 25, method: "System", status: "completed", date: "2024-03-13 12:00", reference: "TXN-001241" }
+  ],
+  stats: {
+    totalVolume: 25840.50,
+    pendingAmount: 1850.00,
+    todayVolume: 3450.00,
+    weekVolume: 12500.00,
+    monthVolume: 45000.00,
+    avgTransaction: 125.50
+  }
+});
+
+args.contextData.store = store;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Header
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        props: '''
+return {
+  showBalance: false
+};
+'''
+      }
+    },
+    
+    // Main Container
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Page Header
+    {
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Transaction Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "actions_group",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "export_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        props: '''
+return {
+  text: "Export CSV",
+  variant: "secondary",
+  icon: "carbon:download",
+  onClick: () => {
+    args.showSuccessToast("Exporting transactions to CSV...");
+  }
+};
+'''
+      }
+    },
+    
+    {
+      id: "reconcile_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        props: '''
+return {
+  text: "Reconcile",
+  variant: "primary",
+  icon: "carbon:checkmark-outline",
+  onClick: () => {
+    args.showSuccessToast("Starting reconciliation process...");
+  }
+};
+'''
+      }
+    },
+    
+    // Financial Stats
+    {
+      id: "stats_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_volume",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "volume_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "volume_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Total Volume"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::before {
+    content: "💰";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "volume_amount",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "div",
+  text: `$${store.stats.totalVolume.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "volume_trend",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "↑ 12.5% from last week"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.success};
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_pending",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "pending_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "pending_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Pending Withdrawals"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::before {
+    content: "⏳";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "pending_amount",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "div",
+  text: `$${store.stats.pendingAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.warning};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "pending_count",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "3 transactions pending"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_today",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "today_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "today_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Today's Volume"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::before {
+    content: "📊";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "today_amount",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "div",
+  text: `$${store.stats.todayVolume.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "today_transactions",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "28 transactions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_avg",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RealAssistantCard",
+        props: '''
+return {
+  variant: "elevated"
+};
+'''
+      }
+    },
+    
+    {
+      id: "avg_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "avg_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Average Transaction"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &::before {
+    content: "📈";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "avg_amount",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "div",
+  text: `$${store.stats.avgTransaction.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.info};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "avg_info",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Based on last 30 days"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    // Filters
+    {
+      id: "filter_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "text",
+  placeholder: "Search by user or reference...",
+  value: store.searchTerm,
+  onInput: (e) => {
+    store.searchTerm = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 0.75rem center;
+  background-size: 1.25rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "type_filter",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "select",
+  value: store.filterType,
+  onChange: (e) => {
+    store.filterType = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "type_opt_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "all",
+  text: "All Types"
+};
+'''
+      }
+    },
+    
+    {
+      id: "type_opt_recharge",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "recharge",
+  text: "Recharge"
+};
+'''
+      }
+    },
+    
+    {
+      id: "type_opt_payment",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "payment",
+  text: "Payment"
+};
+'''
+      }
+    },
+    
+    {
+      id: "type_opt_withdrawal",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "withdrawal",
+  text: "Withdrawal"
+};
+'''
+      }
+    },
+    
+    {
+      id: "type_opt_refund",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "refund",
+  text: "Refund"
+};
+'''
+      }
+    },
+    
+    {
+      id: "type_opt_bonus",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "bonus",
+  text: "Bonus"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_filter",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "select",
+  value: store.filterStatus,
+  onChange: (e) => {
+    store.filterStatus = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "all",
+  text: "All Status"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_completed",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "completed",
+  text: "Completed"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_pending",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "pending",
+  text: "Pending"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_failed",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "failed",
+  text: "Failed"
+};
+'''
+      }
+    },
+    
+    {
+      id: "date_filter",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "select",
+  value: store.dateRange,
+  onChange: (e) => {
+    store.dateRange = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "date_opt_today",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "today",
+  text: "Today"
+};
+'''
+      }
+    },
+    
+    {
+      id: "date_opt_7days",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "7days",
+  text: "Last 7 Days"
+};
+'''
+      }
+    },
+    
+    {
+      id: "date_opt_30days",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "30days",
+  text: "Last 30 Days"
+};
+'''
+      }
+    },
+    
+    {
+      id: "date_opt_all",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "all",
+  text: "All Time"
+};
+'''
+      }
+    },
+    
+    {
+      id: "process_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "RealAssistantButton",
+        props: '''
+return {
+  text: "Process Pending",
+  variant: "primary",
+  onClick: () => {
+    args.showSuccessToast("Processing pending transactions...");
+  }
+};
+'''
+      }
+    },
+    
+    // Transactions Table
+    {
+      id: "table_container",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_200};
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "table",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "table" };
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "thead",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "thead" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "header_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "tr" };
+'''
+      }
+    },
+    
+    {
+      id: "th_id",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "ID"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_user",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "User"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_type",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Type"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_amount",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Amount"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_method",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Method"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_status",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Status"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_date",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Date"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_reference",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Reference"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 9,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Actions"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Table Body
+    {
+      id: "tbody",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "tbody" };
+'''
+      }
+    },
+    
+    {
+      id: "transactions_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "transaction",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+const filteredTransactions = store.transactions.filter(t => {
+  const matchesSearch = !store.searchTerm || 
+    t.user.toLowerCase().includes(store.searchTerm.toLowerCase()) ||
+    t.reference.toLowerCase().includes(store.searchTerm.toLowerCase());
+  const matchesType = store.filterType === "all" || t.type === store.filterType;
+  const matchesStatus = store.filterStatus === "all" || t.status === store.filterStatus;
+  return matchesSearch && matchesType && matchesStatus;
+});
+return {
+  data: filteredTransactions
+};
+'''
+      }
+    },
+    
+    {
+      id: "transaction_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "tr" };
+''',
+        css: '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_light_50};
+  }
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_id",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return {
+  as: "td",
+  text: `#${transaction.id}`
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_user",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return {
+  as: "td",
+  text: transaction.user
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_type",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "type_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+const icons = {
+  recharge: "➕",
+  payment: "💳",
+  withdrawal: "💰",
+  refund: "↩️",
+  bonus: "🎁"
+};
+return {
+  as: "span",
+  text: `${icons[transaction.type] || ""} ${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}`
+};
+''',
+        css: '''
+const transaction = args.contextData.transaction;
+const colors = {
+  recharge: args.theme.var.color.success,
+  payment: args.theme.var.color.primary,
+  withdrawal: args.theme.var.color.warning,
+  refund: args.theme.var.color.info,
+  bonus: args.theme.var.color.success
+};
+return `._id {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: ${colors[transaction.type] || args.theme.var.color.background_light_200};
+  color: white;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_amount",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+const isCredit = ['recharge', 'refund', 'bonus'].includes(transaction.type);
+return {
+  as: "td",
+  text: `${isCredit ? '+' : '-'}$${transaction.amount.toFixed(2)}`
+};
+''',
+        css: '''
+const transaction = args.contextData.transaction;
+const isCredit = ['recharge', 'refund', 'bonus'].includes(transaction.type);
+return `._id {
+  padding: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${isCredit ? args.theme.var.color.success : args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_method",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return {
+  as: "td",
+  text: transaction.method
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_status",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return {
+  as: "span",
+  text: transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)
+};
+''',
+        css: '''
+const transaction = args.contextData.transaction;
+const colors = {
+  completed: args.theme.var.color.success_light_100,
+  pending: args.theme.var.color.warning_light_100,
+  failed: args.theme.var.color.error_light_100
+};
+const textColors = {
+  completed: args.theme.var.color.success_dark_800,
+  pending: args.theme.var.color.warning_dark_800,
+  failed: args.theme.var.color.error_dark_800
+};
+return `._id {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: ${colors[transaction.status] || args.theme.var.color.background_light_200};
+  color: ${textColors[transaction.status] || args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_date",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return {
+  as: "td",
+  text: transaction.date
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_reference",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "reference_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    
+    {
+      id: "reference_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return {
+  as: "div",
+  text: transaction.reference
+};
+''',
+        css: '''
+return `._id {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.primary};
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "problem_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+if (transaction.problem) {
+  return {
+    as: "div",
+    text: `Problem ${transaction.problem}`
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+  margin-top: 0.25rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 9,
+        componentName: "Html",
+        props: '''
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "actions_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "view_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+return {
+  as: "button",
+  title: "View Details",
+  onClick: () => {
+    args.showSuccessToast(`View transaction ${transaction.reference}`);
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem;
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary};
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_light_200};
+  }
+  
+  &::before {
+    content: "👁";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "process_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const transaction = args.contextData.transaction;
+if (transaction.status === 'pending') {
+  return {
+    as: "button",
+    title: "Process Transaction",
+    onClick: () => {
+      args.showSuccessToast(`Processing ${transaction.reference}...`);
+    }
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem;
+  background: ${args.theme.var.color.success_light_100};
+  color: ${args.theme.var.color.success};
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.success_light_200};
+  }
+  
+  &::before {
+    content: "✓";
+  }
+}`;
+'''
+      }
+    }
+  ],
+  
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "container" },
+    { id: "e3", T: "Attr", S: "container", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "actions_group" },
+    { id: "e6", T: "Attr", S: "actions_group", E: "export_btn" },
+    { id: "e7", T: "Attr", S: "actions_group", E: "reconcile_btn" },
+    { id: "e8", T: "Attr", S: "container", E: "stats_grid" },
+    { id: "e9", T: "Attr", S: "stats_grid", E: "stat_volume" },
+    { id: "e10", T: "Attr", S: "stat_volume", E: "volume_content" },
+    { id: "e11", T: "Attr", S: "volume_content", E: "volume_label" },
+    { id: "e12", T: "Attr", S: "volume_content", E: "volume_amount" },
+    { id: "e13", T: "Attr", S: "volume_content", E: "volume_trend" },
+    { id: "e14", T: "Attr", S: "stats_grid", E: "stat_pending" },
+    { id: "e15", T: "Attr", S: "stat_pending", E: "pending_content" },
+    { id: "e16", T: "Attr", S: "pending_content", E: "pending_label" },
+    { id: "e17", T: "Attr", S: "pending_content", E: "pending_amount" },
+    { id: "e18", T: "Attr", S: "pending_content", E: "pending_count" },
+    { id: "e19", T: "Attr", S: "stats_grid", E: "stat_today" },
+    { id: "e20", T: "Attr", S: "stat_today", E: "today_content" },
+    { id: "e21", T: "Attr", S: "today_content", E: "today_label" },
+    { id: "e22", T: "Attr", S: "today_content", E: "today_amount" },
+    { id: "e23", T: "Attr", S: "today_content", E: "today_transactions" },
+    { id: "e24", T: "Attr", S: "stats_grid", E: "stat_avg" },
+    { id: "e25", T: "Attr", S: "stat_avg", E: "avg_content" },
+    { id: "e26", T: "Attr", S: "avg_content", E: "avg_label" },
+    { id: "e27", T: "Attr", S: "avg_content", E: "avg_amount" },
+    { id: "e28", T: "Attr", S: "avg_content", E: "avg_info" },
+    { id: "e29", T: "Attr", S: "container", E: "filter_bar" },
+    { id: "e30", T: "Attr", S: "filter_bar", E: "search_input" },
+    { id: "e31", T: "Attr", S: "filter_bar", E: "type_filter" },
+    { id: "e32", T: "Attr", S: "type_filter", E: "type_opt_all" },
+    { id: "e33", T: "Attr", S: "type_filter", E: "type_opt_recharge" },
+    { id: "e34", T: "Attr", S: "type_filter", E: "type_opt_payment" },
+    { id: "e35", T: "Attr", S: "type_filter", E: "type_opt_withdrawal" },
+    { id: "e36", T: "Attr", S: "type_filter", E: "type_opt_refund" },
+    { id: "e37", T: "Attr", S: "type_filter", E: "type_opt_bonus" },
+    { id: "e38", T: "Attr", S: "filter_bar", E: "status_filter" },
+    { id: "e39", T: "Attr", S: "status_filter", E: "status_opt_all" },
+    { id: "e40", T: "Attr", S: "status_filter", E: "status_opt_completed" },
+    { id: "e41", T: "Attr", S: "status_filter", E: "status_opt_pending" },
+    { id: "e42", T: "Attr", S: "status_filter", E: "status_opt_failed" },
+    { id: "e43", T: "Attr", S: "filter_bar", E: "date_filter" },
+    { id: "e44", T: "Attr", S: "date_filter", E: "date_opt_today" },
+    { id: "e45", T: "Attr", S: "date_filter", E: "date_opt_7days" },
+    { id: "e46", T: "Attr", S: "date_filter", E: "date_opt_30days" },
+    { id: "e47", T: "Attr", S: "date_filter", E: "date_opt_all" },
+    { id: "e48", T: "Attr", S: "filter_bar", E: "process_btn" },
+    { id: "e49", T: "Attr", S: "container", E: "table_container" },
+    { id: "e50", T: "Attr", S: "table_container", E: "table" },
+    { id: "e51", T: "Attr", S: "table", E: "thead" },
+    { id: "e52", T: "Attr", S: "thead", E: "header_row" },
+    { id: "e53", T: "Attr", S: "header_row", E: "th_id" },
+    { id: "e54", T: "Attr", S: "header_row", E: "th_user" },
+    { id: "e55", T: "Attr", S: "header_row", E: "th_type" },
+    { id: "e56", T: "Attr", S: "header_row", E: "th_amount" },
+    { id: "e57", T: "Attr", S: "header_row", E: "th_method" },
+    { id: "e58", T: "Attr", S: "header_row", E: "th_status" },
+    { id: "e59", T: "Attr", S: "header_row", E: "th_date" },
+    { id: "e60", T: "Attr", S: "header_row", E: "th_reference" },
+    { id: "e61", T: "Attr", S: "header_row", E: "th_actions" },
+    { id: "e62", T: "Attr", S: "table", E: "tbody" },
+    { id: "e63", T: "Attr", S: "tbody", E: "transactions_data" },
+    { id: "e64", T: "Attr", S: "transactions_data", E: "transaction_row" },
+    { id: "e65", T: "Attr", S: "transaction_row", E: "td_id" },
+    { id: "e66", T: "Attr", S: "transaction_row", E: "td_user" },
+    { id: "e67", T: "Attr", S: "transaction_row", E: "td_type" },
+    { id: "e68", T: "Attr", S: "td_type", E: "type_badge" },
+    { id: "e69", T: "Attr", S: "transaction_row", E: "td_amount" },
+    { id: "e70", T: "Attr", S: "transaction_row", E: "td_method" },
+    { id: "e71", T: "Attr", S: "transaction_row", E: "td_status" },
+    { id: "e72", T: "Attr", S: "td_status", E: "status_badge" },
+    { id: "e73", T: "Attr", S: "transaction_row", E: "td_date" },
+    { id: "e74", T: "Attr", S: "transaction_row", E: "td_reference" },
+    { id: "e75", T: "Attr", S: "td_reference", E: "reference_link" },
+    { id: "e76", T: "Attr", S: "reference_link", E: "reference_text" },
+    { id: "e77", T: "Attr", S: "reference_link", E: "problem_link" },
+    { id: "e78", T: "Attr", S: "transaction_row", E: "td_actions" },
+    { id: "e79", T: "Attr", S: "td_actions", E: "actions_container" },
+    { id: "e80", T: "Attr", S: "actions_container", E: "view_btn" },
+    { id: "e81", T: "Attr", S: "actions_container", E: "process_btn" }
+  ]
+}

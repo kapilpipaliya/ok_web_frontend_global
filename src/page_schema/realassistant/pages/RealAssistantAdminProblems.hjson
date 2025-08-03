@@ -1,0 +1,1941 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.createStore({
+  filterStatus: "all",
+  filterCategory: "all",
+  searchTerm: "",
+  sortBy: "recent",
+  selectedProblems: [],
+  problems: [
+    { 
+      id: 1, 
+      title: "Website not loading properly", 
+      user: "John Doe",
+      assistant: "Jane Smith",
+      category: "tech",
+      status: "in_progress",
+      urgency: "urgent",
+      estimatedCost: 50,
+      actualCost: null,
+      created: "2024-03-15 10:30",
+      updated: "2024-03-15 14:45"
+    },
+    { 
+      id: 2, 
+      title: "Math homework help - Calculus", 
+      user: "Mike Johnson",
+      assistant: "Sarah Wilson",
+      category: "education",
+      status: "solution_provided",
+      urgency: "normal",
+      estimatedCost: 30,
+      actualCost: 35,
+      created: "2024-03-14 09:15",
+      updated: "2024-03-15 11:20"
+    },
+    { 
+      id: 3, 
+      title: "Legal document review", 
+      user: "Emily Davis",
+      assistant: null,
+      category: "legal",
+      status: "pending",
+      urgency: "normal",
+      estimatedCost: 100,
+      actualCost: null,
+      created: "2024-03-15 16:00",
+      updated: "2024-03-15 16:00"
+    },
+    { 
+      id: 4, 
+      title: "Fix database connection issue", 
+      user: "Tom Brown",
+      assistant: "Jane Smith",
+      category: "tech",
+      status: "completed",
+      urgency: "urgent",
+      estimatedCost: 75,
+      actualCost: 80,
+      created: "2024-03-13 08:00",
+      updated: "2024-03-14 17:30"
+    },
+    { 
+      id: 5, 
+      title: "Investment portfolio advice", 
+      user: "Lisa Anderson",
+      assistant: "Robert Chen",
+      category: "finance",
+      status: "disputed",
+      urgency: "normal",
+      estimatedCost: 60,
+      actualCost: 60,
+      created: "2024-03-12 14:20",
+      updated: "2024-03-15 09:10"
+    }
+  ]
+});
+
+args.contextData.store = store;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Header
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantHeader",
+        props: '''
+return {
+  showBalance: false
+};
+'''
+      }
+    },
+    
+    // Main Container
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    
+    // Page Title
+    {
+      id: "header_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Problem Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "export_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantButton",
+        props: '''
+return {
+  text: "Export Report",
+  variant: "secondary",
+  icon: "carbon:download",
+  onClick: () => {
+    args.showSuccessToast("Exporting problems report...");
+  }
+};
+'''
+      }
+    },
+    
+    // Stats Cards
+    {
+      id: "stats_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_pending",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const pending = store.problems.filter(p => p.status === 'pending').length;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.warning_light_100};
+  color: ${args.theme.var.color.warning_dark_800};
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.warning_light_300};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_pending_count",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const pending = store.problems.filter(p => p.status === 'pending').length;
+return {
+  as: "div",
+  text: pending.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_pending_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Pending Assignment"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_progress",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const inProgress = store.problems.filter(p => ['assigned', 'in_progress', 'solution_provided'].includes(p.status)).length;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_dark_800};
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_progress_count",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const inProgress = store.problems.filter(p => ['assigned', 'in_progress', 'solution_provided'].includes(p.status)).length;
+return {
+  as: "div",
+  text: inProgress.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_progress_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "In Progress"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_completed",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const completed = store.problems.filter(p => p.status === 'completed').length;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.success_light_100};
+  color: ${args.theme.var.color.success_dark_800};
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.success_light_300};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_completed_count",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const completed = store.problems.filter(p => p.status === 'completed').length;
+return {
+  as: "div",
+  text: completed.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_completed_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Completed"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_disputed",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const disputed = store.problems.filter(p => p.status === 'disputed').length;
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error_light_100};
+  color: ${args.theme.var.color.error_dark_800};
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.error_light_300};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_disputed_count",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const disputed = store.problems.filter(p => p.status === 'disputed').length;
+return {
+  as: "div",
+  text: disputed.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "stat_disputed_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Disputed"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    
+    // Filters
+    {
+      id: "filter_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "text",
+  placeholder: "Search problems...",
+  value: store.searchTerm,
+  onInput: (e) => {
+    store.searchTerm = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 0.75rem center;
+  background-size: 1.25rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_filter",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "select",
+  value: store.filterStatus,
+  onChange: (e) => {
+    store.filterStatus = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "all",
+  text: "All Status"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_pending",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "pending",
+  text: "Pending"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_assigned",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "assigned",
+  text: "Assigned"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_progress",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "in_progress",
+  text: "In Progress"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_solution",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "solution_provided",
+  text: "Solution Provided"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_completed",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "completed",
+  text: "Completed"
+};
+'''
+      }
+    },
+    
+    {
+      id: "status_opt_disputed",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "disputed",
+  text: "Disputed"
+};
+'''
+      }
+    },
+    
+    {
+      id: "category_filter",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "select",
+  value: store.filterCategory,
+  onChange: (e) => {
+    store.filterCategory = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cat_opt_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "all",
+  text: "All Categories"
+};
+'''
+      }
+    },
+    
+    {
+      id: "cat_opt_tech",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "tech",
+  text: "Technology"
+};
+'''
+      }
+    },
+    
+    {
+      id: "cat_opt_edu",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "education",
+  text: "Education"
+};
+'''
+      }
+    },
+    
+    {
+      id: "cat_opt_legal",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "legal",
+  text: "Legal"
+};
+'''
+      }
+    },
+    
+    {
+      id: "cat_opt_finance",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "finance",
+  text: "Finance"
+};
+'''
+      }
+    },
+    
+    {
+      id: "sort_filter",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+return {
+  as: "select",
+  value: store.sortBy,
+  onChange: (e) => {
+    store.sortBy = e.target.value;
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1rem;
+  border: 1px solid ${args.theme.var.color.background_light_300};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "sort_opt_recent",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "recent",
+  text: "Most Recent"
+};
+'''
+      }
+    },
+    
+    {
+      id: "sort_opt_urgent",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "urgent",
+  text: "Urgent First"
+};
+'''
+      }
+    },
+    
+    {
+      id: "sort_opt_cost",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "cost",
+  text: "Highest Cost"
+};
+'''
+      }
+    },
+    
+    {
+      id: "bulk_assign",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "RealAssistantButton",
+        props: '''
+const store = args.contextData.store;
+return {
+  text: `Bulk Assign (${store.selectedProblems.length})`,
+  variant: "primary",
+  disabled: store.selectedProblems.length === 0,
+  onClick: () => {
+    if (store.selectedProblems.length > 0) {
+      args.showSuccessToast(`Assigning ${store.selectedProblems.length} problems...`);
+    }
+  }
+};
+'''
+      }
+    },
+    
+    // Problems Table
+    {
+      id: "problems_table",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.background_light_200};
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "table",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "table" };
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "thead",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "thead" };
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "header_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "tr" };
+'''
+      }
+    },
+    
+    {
+      id: "th_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "th" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  width: 50px;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "select_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const store = args.contextData.store;
+const filteredProblems = store.problems.filter(p => {
+  const matchesSearch = !store.searchTerm || 
+    p.title.toLowerCase().includes(store.searchTerm.toLowerCase()) ||
+    p.user.toLowerCase().includes(store.searchTerm.toLowerCase());
+  const matchesStatus = store.filterStatus === "all" || p.status === store.filterStatus;
+  const matchesCategory = store.filterCategory === "all" || p.category === store.filterCategory;
+  return matchesSearch && matchesStatus && matchesCategory;
+});
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: filteredProblems.length > 0 && filteredProblems.every(p => store.selectedProblems.includes(p.id)),
+  onChange: (e) => {
+    if (e.target.checked) {
+      store.selectedProblems = filteredProblems.map(p => p.id);
+    } else {
+      store.selectedProblems = [];
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_problem",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Problem"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_user",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "User"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_assistant",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Assistant"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_category",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Category"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_status",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Status"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_cost",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Cost"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_updated",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Updated"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "th_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 9,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Actions"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    // Table Body
+    {
+      id: "tbody",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "tbody" };
+'''
+      }
+    },
+    
+    {
+      id: "problems_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "problem",
+        loop: true,
+        props: '''
+const store = args.contextData.store;
+let filteredProblems = store.problems.filter(p => {
+  const matchesSearch = !store.searchTerm || 
+    p.title.toLowerCase().includes(store.searchTerm.toLowerCase()) ||
+    p.user.toLowerCase().includes(store.searchTerm.toLowerCase());
+  const matchesStatus = store.filterStatus === "all" || p.status === store.filterStatus;
+  const matchesCategory = store.filterCategory === "all" || p.category === store.filterCategory;
+  return matchesSearch && matchesStatus && matchesCategory;
+});
+
+// Sort problems
+if (store.sortBy === "urgent") {
+  filteredProblems = filteredProblems.sort((a, b) => {
+    if (a.urgency === "urgent" && b.urgency !== "urgent") return -1;
+    if (a.urgency !== "urgent" && b.urgency === "urgent") return 1;
+    return 0;
+  });
+} else if (store.sortBy === "cost") {
+  filteredProblems = filteredProblems.sort((a, b) => b.estimatedCost - a.estimatedCost);
+}
+
+return {
+  data: filteredProblems
+};
+'''
+      }
+    },
+    
+    {
+      id: "problem_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "tr" };
+''',
+        css: '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.background_light_200};
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_light_50};
+  }
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "problem_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+const store = args.contextData.store;
+return {
+  as: "input",
+  type: "checkbox",
+  checked: store.selectedProblems.includes(problem.id),
+  onChange: (e) => {
+    if (e.target.checked) {
+      store.selectedProblems = [...store.selectedProblems, problem.id];
+    } else {
+      store.selectedProblems = store.selectedProblems.filter(id => id !== problem.id);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_problem",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  max-width: 250px;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "problem_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return {
+  as: "div",
+  text: problem.title
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "problem_urgency",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+if (problem.urgency === "urgent") {
+  return {
+    as: "span",
+    text: "🔥 Urgent"
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.error};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_user",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return {
+  as: "td",
+  text: problem.user
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_assistant",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return {
+  as: "td",
+  text: problem.assistant || "Unassigned"
+};
+''',
+        css: '''
+const problem = args.contextData.problem;
+return `._id {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: ${problem.assistant ? args.theme.var.color.text : args.theme.var.color.text_light_600};
+  font-style: ${problem.assistant ? 'normal' : 'italic'};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_category",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "category_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+const icons = {
+  tech: "💻",
+  education: "📚",
+  legal: "⚖️",
+  finance: "💰"
+};
+return {
+  as: "span",
+  text: `${icons[problem.category] || ""} ${problem.category.charAt(0).toUpperCase() + problem.category.slice(1)}`
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_status",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "status_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+const statusLabels = {
+  pending: "Pending",
+  assigned: "Assigned",
+  in_progress: "In Progress",
+  solution_provided: "Solution Provided",
+  completed: "Completed",
+  disputed: "Disputed"
+};
+return {
+  as: "span",
+  text: statusLabels[problem.status]
+};
+''',
+        css: '''
+const problem = args.contextData.problem;
+const colors = {
+  pending: args.theme.var.color.warning,
+  assigned: args.theme.var.color.info,
+  in_progress: args.theme.var.color.primary,
+  solution_provided: args.theme.var.color.info,
+  completed: args.theme.var.color.success,
+  disputed: args.theme.var.color.error
+};
+return `._id {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: ${colors[problem.status] || args.theme.var.color.background_light_200};
+  color: white;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_cost",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "cost_display",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return { as: "div" };
+'''
+      }
+    },
+    
+    {
+      id: "estimated_cost",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return {
+  as: "div",
+  text: `Est: $${problem.estimatedCost}`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "actual_cost",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+if (problem.actualCost) {
+  return {
+    as: "div",
+    text: `Act: $${problem.actualCost}`
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_updated",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return {
+  as: "td",
+  text: problem.updated
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text_light_600};
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "td_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 9,
+        componentName: "Html",
+        props: '''
+return { as: "td" };
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "actions_group",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return { as: "div" };
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "view_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+return {
+  as: "button",
+  title: "View Details",
+  onClick: () => {
+    args.showSuccessToast(`View problem #${problem.id}`);
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem;
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary};
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.primary_light_200};
+  }
+  
+  &::before {
+    content: "👁";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "assign_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+if (!problem.assistant) {
+  return {
+    as: "button",
+    title: "Assign Assistant",
+    onClick: () => {
+      args.showSuccessToast(`Assign assistant to problem #${problem.id}`);
+    }
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem;
+  background: ${args.theme.var.color.success_light_100};
+  color: ${args.theme.var.color.success};
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.success_light_200};
+  }
+  
+  &::before {
+    content: "👤";
+  }
+}`;
+'''
+      }
+    },
+    
+    {
+      id: "resolve_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problem;
+if (problem.status === "disputed") {
+  return {
+    as: "button",
+    title: "Resolve Dispute",
+    onClick: () => {
+      args.showSuccessToast(`Resolve dispute for problem #${problem.id}`);
+    }
+  };
+}
+return null;
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem;
+  background: ${args.theme.var.color.warning_light_100};
+  color: ${args.theme.var.color.warning};
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.warning_light_200};
+  }
+  
+  &::before {
+    content: "⚖";
+  }
+}`;
+'''
+      }
+    }
+  ],
+  
+  edges: [
+    { id: "e1", T: "Attr", S: "root", E: "header" },
+    { id: "e2", T: "Attr", S: "root", E: "container" },
+    { id: "e3", T: "Attr", S: "container", E: "header_section" },
+    { id: "e4", T: "Attr", S: "header_section", E: "title" },
+    { id: "e5", T: "Attr", S: "header_section", E: "export_btn" },
+    { id: "e6", T: "Attr", S: "container", E: "stats_grid" },
+    { id: "e7", T: "Attr", S: "stats_grid", E: "stat_pending" },
+    { id: "e8", T: "Attr", S: "stat_pending", E: "stat_pending_count" },
+    { id: "e9", T: "Attr", S: "stat_pending", E: "stat_pending_label" },
+    { id: "e10", T: "Attr", S: "stats_grid", E: "stat_progress" },
+    { id: "e11", T: "Attr", S: "stat_progress", E: "stat_progress_count" },
+    { id: "e12", T: "Attr", S: "stat_progress", E: "stat_progress_label" },
+    { id: "e13", T: "Attr", S: "stats_grid", E: "stat_completed" },
+    { id: "e14", T: "Attr", S: "stat_completed", E: "stat_completed_count" },
+    { id: "e15", T: "Attr", S: "stat_completed", E: "stat_completed_label" },
+    { id: "e16", T: "Attr", S: "stats_grid", E: "stat_disputed" },
+    { id: "e17", T: "Attr", S: "stat_disputed", E: "stat_disputed_count" },
+    { id: "e18", T: "Attr", S: "stat_disputed", E: "stat_disputed_label" },
+    { id: "e19", T: "Attr", S: "container", E: "filter_bar" },
+    { id: "e20", T: "Attr", S: "filter_bar", E: "search_input" },
+    { id: "e21", T: "Attr", S: "filter_bar", E: "status_filter" },
+    { id: "e22", T: "Attr", S: "status_filter", E: "status_opt_all" },
+    { id: "e23", T: "Attr", S: "status_filter", E: "status_opt_pending" },
+    { id: "e24", T: "Attr", S: "status_filter", E: "status_opt_assigned" },
+    { id: "e25", T: "Attr", S: "status_filter", E: "status_opt_progress" },
+    { id: "e26", T: "Attr", S: "status_filter", E: "status_opt_solution" },
+    { id: "e27", T: "Attr", S: "status_filter", E: "status_opt_completed" },
+    { id: "e28", T: "Attr", S: "status_filter", E: "status_opt_disputed" },
+    { id: "e29", T: "Attr", S: "filter_bar", E: "category_filter" },
+    { id: "e30", T: "Attr", S: "category_filter", E: "cat_opt_all" },
+    { id: "e31", T: "Attr", S: "category_filter", E: "cat_opt_tech" },
+    { id: "e32", T: "Attr", S: "category_filter", E: "cat_opt_edu" },
+    { id: "e33", T: "Attr", S: "category_filter", E: "cat_opt_legal" },
+    { id: "e34", T: "Attr", S: "category_filter", E: "cat_opt_finance" },
+    { id: "e35", T: "Attr", S: "filter_bar", E: "sort_filter" },
+    { id: "e36", T: "Attr", S: "sort_filter", E: "sort_opt_recent" },
+    { id: "e37", T: "Attr", S: "sort_filter", E: "sort_opt_urgent" },
+    { id: "e38", T: "Attr", S: "sort_filter", E: "sort_opt_cost" },
+    { id: "e39", T: "Attr", S: "filter_bar", E: "bulk_assign" },
+    { id: "e40", T: "Attr", S: "container", E: "problems_table" },
+    { id: "e41", T: "Attr", S: "problems_table", E: "table" },
+    { id: "e42", T: "Attr", S: "table", E: "thead" },
+    { id: "e43", T: "Attr", S: "thead", E: "header_row" },
+    { id: "e44", T: "Attr", S: "header_row", E: "th_checkbox" },
+    { id: "e45", T: "Attr", S: "th_checkbox", E: "select_all" },
+    { id: "e46", T: "Attr", S: "header_row", E: "th_problem" },
+    { id: "e47", T: "Attr", S: "header_row", E: "th_user" },
+    { id: "e48", T: "Attr", S: "header_row", E: "th_assistant" },
+    { id: "e49", T: "Attr", S: "header_row", E: "th_category" },
+    { id: "e50", T: "Attr", S: "header_row", E: "th_status" },
+    { id: "e51", T: "Attr", S: "header_row", E: "th_cost" },
+    { id: "e52", T: "Attr", S: "header_row", E: "th_updated" },
+    { id: "e53", T: "Attr", S: "header_row", E: "th_actions" },
+    { id: "e54", T: "Attr", S: "table", E: "tbody" },
+    { id: "e55", T: "Attr", S: "tbody", E: "problems_data" },
+    { id: "e56", T: "Attr", S: "problems_data", E: "problem_row" },
+    { id: "e57", T: "Attr", S: "problem_row", E: "td_checkbox" },
+    { id: "e58", T: "Attr", S: "td_checkbox", E: "problem_checkbox" },
+    { id: "e59", T: "Attr", S: "problem_row", E: "td_problem" },
+    { id: "e60", T: "Attr", S: "td_problem", E: "problem_title" },
+    { id: "e61", T: "Attr", S: "td_problem", E: "problem_urgency" },
+    { id: "e62", T: "Attr", S: "problem_row", E: "td_user" },
+    { id: "e63", T: "Attr", S: "problem_row", E: "td_assistant" },
+    { id: "e64", T: "Attr", S: "problem_row", E: "td_category" },
+    { id: "e65", T: "Attr", S: "td_category", E: "category_badge" },
+    { id: "e66", T: "Attr", S: "problem_row", E: "td_status" },
+    { id: "e67", T: "Attr", S: "td_status", E: "status_badge" },
+    { id: "e68", T: "Attr", S: "problem_row", E: "td_cost" },
+    { id: "e69", T: "Attr", S: "td_cost", E: "cost_display" },
+    { id: "e70", T: "Attr", S: "cost_display", E: "estimated_cost" },
+    { id: "e71", T: "Attr", S: "cost_display", E: "actual_cost" },
+    { id: "e72", T: "Attr", S: "problem_row", E: "td_updated" },
+    { id: "e73", T: "Attr", S: "problem_row", E: "td_actions" },
+    { id: "e74", T: "Attr", S: "td_actions", E: "actions_group" },
+    { id: "e75", T: "Attr", S: "actions_group", E: "view_btn" },
+    { id: "e76", T: "Attr", S: "actions_group", E: "assign_btn" },
+    { id: "e77", T: "Attr", S: "actions_group", E: "resolve_btn" }
+  ]
+}

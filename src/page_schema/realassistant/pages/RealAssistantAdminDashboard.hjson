@@ -1,0 +1,2252 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Page",
+      P: {
+        key: "RealAssistantAdminDashboard",
+        url: "/admin",
+        title: "Admin Dashboard - RealAssistant"
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "adminStore",
+        fns: '''
+const [store, setStore] = args.createStore({
+  metrics: {
+    totalUsers: 1243,
+    activeUsers: 847,
+    totalAssistants: 89,
+    activeAssistants: 62,
+    totalProblems: 4521,
+    solvedProblems: 4102,
+    pendingProblems: 419,
+    totalRevenue: 52840.50,
+    monthlyRevenue: 8420.00,
+    platformFee: 1684.00
+  },
+  recentProblems: [],
+  topAssistants: [],
+  revenueChart: [],
+  alerts: []
+});
+
+return {
+  loadDashboardData: async () => {
+    // Load admin dashboard data
+    setStore("recentProblems", [
+      {
+        id: "1",
+        title: "Excel Formula Help",
+        user: "John Doe",
+        assistant: "Sarah K.",
+        status: "in_progress",
+        value: 8.00,
+        createdAt: "10 mins ago"
+      },
+      {
+        id: "2",
+        title: "Website Navigation Issue",
+        user: "Jane Smith",
+        assistant: "Unassigned",
+        status: "pending",
+        value: 12.00,
+        createdAt: "25 mins ago"
+      },
+      {
+        id: "3",
+        title: "Tax Calculation Help",
+        user: "Bob Wilson",
+        assistant: "Mike R.",
+        status: "disputed",
+        value: 15.00,
+        createdAt: "1 hour ago"
+      }
+    ]);
+    
+    setStore("topAssistants", [
+      {
+        id: "1",
+        name: "Sarah K.",
+        solved: 148,
+        rating: 4.8,
+        earnings: 1280.00,
+        successRate: 94.8
+      },
+      {
+        id: "2",
+        name: "Mike R.",
+        solved: 132,
+        rating: 4.7,
+        earnings: 1150.00,
+        successRate: 92.3
+      },
+      {
+        id: "3",
+        name: "Lisa T.",
+        solved: 98,
+        rating: 4.9,
+        earnings: 890.00,
+        successRate: 96.1
+      }
+    ]);
+    
+    setStore("revenueChart", [
+      { month: "Jan", revenue: 6200, problems: 720 },
+      { month: "Feb", revenue: 6800, problems: 810 },
+      { month: "Mar", revenue: 7400, problems: 890 },
+      { month: "Apr", revenue: 7100, problems: 850 },
+      { month: "May", revenue: 8200, problems: 980 },
+      { month: "Jun", revenue: 8420, problems: 1010 }
+    ]);
+    
+    setStore("alerts", [
+      {
+        type: "warning",
+        message: "3 problems have been disputed in the last hour",
+        time: "5 mins ago"
+      },
+      {
+        type: "info",
+        message: "5 new assistants registered today",
+        time: "2 hours ago"
+      },
+      {
+        type: "success",
+        message: "Platform revenue increased by 15% this month",
+        time: "Today"
+      }
+    ]);
+  },
+  
+  refreshData: () => {
+    args.fns.loadDashboardData();
+    args.showSuccessToast("Dashboard data refreshed");
+  }
+};
+''',
+        props: '''
+const fns = args.fns;
+if (args.mounted()) {
+  fns.loadDashboardData();
+}
+
+return {
+  as: "div",
+  data: args.contextData.adminStore
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  background: ${args.theme.var.color.background_dark_50};
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:dashboard",
+  width: 32,
+  height: 32
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Admin Dashboard"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantButton",
+        variant: "secondary",
+        size: "small",
+        text: "Refresh",
+        icon: "carbon:renew",
+        onClick: "() => args.contextData.adminStore.fns.refreshData()"
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:overflow-menu-vertical",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  position: sticky;
+  top: 60px;
+  z-index: 999;
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 2rem;
+  display: flex;
+  gap: 2rem;
+  overflow-x: auto;
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "navItems",
+        loop: true,
+        props: '''
+const items = [
+  { key: "dashboard", label: "Overview", icon: "carbon:dashboard", path: "/admin" },
+  { key: "users", label: "Users", icon: "carbon:user-multiple", path: "/admin/users" },
+  { key: "problems", label: "Problems", icon: "carbon:task", path: "/admin/problems" },
+  { key: "transactions", label: "Transactions", icon: "carbon:currency", path: "/admin/transactions" },
+  { key: "settings", label: "Settings", icon: "carbon:settings", path: "/admin/settings" }
+];
+return {
+  data: items
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItems;
+const isActive = item.key === "dashboard";
+
+return {
+  as: "div",
+  onClick: () => args.navigate(item.path)
+};
+''',
+        css: '''
+const item = args.contextData.navItems;
+const isActive = item.key === "dashboard";
+
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+  border-bottom: 2px solid ${isActive ? args.theme.var.color.primary : "transparent"};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItems;
+return {
+  as: "icon",
+  icon: item.icon,
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItems;
+return {
+  as: "span",
+  text: item.label
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const alerts = args.contextData.adminStore?.alerts || [];
+if (alerts.length === 0) return { as: "span" };
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "alertItems",
+        loop: true,
+        props: '''
+const alerts = args.contextData.adminStore?.alerts || [];
+return {
+  data: alerts
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const alert = args.contextData.alertItems;
+const colors = {
+  warning: { bg: "warning_light_100", border: "warning", icon: "warning" },
+  info: { bg: "info_light_100", border: "info", icon: "information" },
+  success: { bg: "success_light_100", border: "success", icon: "checkmark-filled" }
+};
+const alertColor = colors[alert.type];
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+const alert = args.contextData.alertItems;
+const colors = {
+  warning: args.theme.var.color.warning,
+  info: args.theme.var.color.info,
+  success: args.theme.var.color.success
+};
+const alertColor = colors[alert.type];
+
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: ${alertColor}_light_50;
+  border-left: 4px solid ${alertColor};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const alert = args.contextData.alertItems;
+const icons = {
+  warning: "carbon:warning",
+  info: "carbon:information",
+  success: "carbon:checkmark-filled"
+};
+
+return {
+  as: "icon",
+  icon: icons[alert.type],
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+const alert = args.contextData.alertItems;
+const colors = {
+  warning: args.theme.var.color.warning,
+  info: args.theme.var.color.info,
+  success: args.theme.var.color.success
+};
+return `._id {
+  color: ${colors[alert.type]};
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const alert = args.contextData.alertItems;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const alert = args.contextData.alertItems;
+return {
+  as: "p",
+  text: alert.message
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const alert = args.contextData.alertItems;
+return {
+  as: "span",
+  text: alert.time
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "26",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "27",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "28",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "29",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Total Users"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "30",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-multiple",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "31",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const total = args.contextData.adminStore?.metrics?.totalUsers || 0;
+const active = args.contextData.adminStore?.metrics?.activeUsers || 0;
+return {
+  as: "p",
+  text: total.toLocaleString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "32",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const active = args.contextData.adminStore?.metrics?.activeUsers || 0;
+return {
+  as: "p",
+  text: `${active} active`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.success};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "33",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "34",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "35",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "36",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Total Assistants"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "37",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-certification",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.secondary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "38",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const total = args.contextData.adminStore?.metrics?.totalAssistants || 0;
+return {
+  as: "p",
+  text: total.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "39",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const active = args.contextData.adminStore?.metrics?.activeAssistants || 0;
+return {
+  as: "p",
+  text: `${active} online`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.success};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "40",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "41",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "42",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "43",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Total Problems"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "44",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:task",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "45",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const total = args.contextData.adminStore?.metrics?.totalProblems || 0;
+return {
+  as: "p",
+  text: total.toLocaleString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "46",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const solved = args.contextData.adminStore?.metrics?.solvedProblems || 0;
+const total = args.contextData.adminStore?.metrics?.totalProblems || 1;
+const rate = ((solved / total) * 100).toFixed(1);
+return {
+  as: "p",
+  text: `${rate}% solved`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.success};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "47",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "48",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "49",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "50",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Monthly Revenue"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "51",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:money",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "52",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const revenue = args.contextData.adminStore?.metrics?.monthlyRevenue || 0;
+return {
+  as: "p",
+  text: `$${revenue.toLocaleString()}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.success};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "53",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const fee = args.contextData.adminStore?.metrics?.platformFee || 0;
+return {
+  as: "p",
+  text: `$${fee.toFixed(2)} platform fee`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.primary};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "54",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "RealAssistantCard",
+        variant: "elevated"
+      }
+    },
+    {
+      id: "55",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "56",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "57",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Pending Problems"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "58",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:pending",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "59",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const pending = args.contextData.adminStore?.metrics?.pendingProblems || 0;
+return {
+  as: "p",
+  text: pending.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.warning};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "60",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Needs attention"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.warning};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "61",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "62",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "63",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "64",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Recent Problems"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "65",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "View all →",
+  onClick: () => args.navigate("/admin/problems")
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.primary};
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "66",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "67",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "table"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+}`;
+'''
+      }
+    },
+    {
+      id: "68",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "thead"
+};
+'''
+      }
+    },
+    {
+      id: "69",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tr"
+};
+''',
+        css: '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "70",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Problem"
+};
+''',
+        css: '''
+return `._id {
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "71",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "User"
+};
+''',
+        css: '''
+return `._id {
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "72",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Assistant"
+};
+''',
+        css: '''
+return `._id {
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "73",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Status"
+};
+''',
+        css: '''
+return `._id {
+  text-align: left;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "74",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th",
+  text: "Value"
+};
+''',
+        css: '''
+return `._id {
+  text-align: right;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "75",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tbody"
+};
+'''
+      }
+    },
+    {
+      id: "76",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "problemRows",
+        loop: true,
+        props: '''
+const problems = args.contextData.adminStore?.recentProblems || [];
+return {
+  data: problems
+};
+'''
+      }
+    },
+    {
+      id: "77",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "tr"
+};
+''',
+        css: '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_50};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "78",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "79",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "80",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "p",
+  text: problem.title
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "81",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "p",
+  text: problem.createdAt
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "82",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "td",
+  text: problem.user
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "83",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "td",
+  text: problem.assistant
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "84",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "85",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+const statusColors = {
+  pending: { bg: "warning", text: "Pending" },
+  in_progress: { bg: "info", text: "In Progress" },
+  disputed: { bg: "error", text: "Disputed" }
+};
+const status = statusColors[problem.status];
+
+return {
+  as: "span",
+  text: status.text
+};
+''',
+        css: '''
+const problem = args.contextData.problemRows;
+const statusColors = {
+  pending: args.theme.var.color.warning,
+  in_progress: args.theme.var.color.info,
+  disputed: args.theme.var.color.error
+};
+
+return `._id {
+  padding: 0.25rem 0.5rem;
+  background: ${statusColors[problem.status]}_light_100;
+  color: ${statusColors[problem.status]};
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "86",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const problem = args.contextData.problemRows;
+return {
+  as: "td",
+  text: `$${problem.value.toFixed(2)}`
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: right;
+  font-weight: 600;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "87",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RealAssistantCard",
+        variant: "bordered"
+      }
+    },
+    {
+      id: "88",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Top Assistants"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "89",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "topAssistants",
+        loop: true,
+        props: '''
+const assistants = args.contextData.adminStore?.topAssistants || [];
+return {
+  data: assistants
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "90",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.topAssistants;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "91",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "92",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.topAssistants;
+return {
+  as: "h4",
+  text: assistant.name
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "93",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.topAssistants;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "94",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:star-filled",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning};
+}`;
+'''
+      }
+    },
+    {
+      id: "95",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.topAssistants;
+return {
+  as: "span",
+  text: assistant.rating.toFixed(1)
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "96",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.topAssistants;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "97",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.topAssistants;
+return {
+  as: "p",
+  text: `${assistant.solved} solved`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "98",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.topAssistants;
+return {
+  as: "p",
+  text: `${assistant.successRate}% success`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "99",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const assistant = args.contextData.topAssistants;
+return {
+  as: "p",
+  text: `$${assistant.earnings.toFixed(2)} earned`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  font-weight: 600;
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "1", E: "2" },
+    { id: "e2", T: "Attr", S: "2", E: "3" },
+    { id: "e3", T: "Attr", S: "3", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "5", E: "6" },
+    { id: "e6", T: "Attr", S: "5", E: "7" },
+    { id: "e7", T: "Attr", S: "4", E: "8" },
+    { id: "e8", T: "Attr", S: "8", E: "9" },
+    { id: "e9", T: "Attr", S: "8", E: "10" },
+    { id: "e10", T: "Attr", S: "2", E: "11" },
+    { id: "e11", T: "Attr", S: "11", E: "12" },
+    { id: "e12", T: "Attr", S: "12", E: "13" },
+    { id: "e13", T: "Attr", S: "13", E: "14" },
+    { id: "e14", T: "Attr", S: "14", E: "15" },
+    { id: "e15", T: "Attr", S: "14", E: "16" },
+    { id: "e16", T: "Attr", S: "2", E: "17" },
+    { id: "e17", T: "Attr", S: "17", E: "18" },
+    { id: "e18", T: "Attr", S: "18", E: "19" },
+    { id: "e19", T: "Attr", S: "19", E: "20" },
+    { id: "e20", T: "Attr", S: "20", E: "21" },
+    { id: "e21", T: "Attr", S: "20", E: "22" },
+    { id: "e22", T: "Attr", S: "22", E: "23" },
+    { id: "e23", T: "Attr", S: "20", E: "24" },
+    { id: "e24", T: "Attr", S: "17", E: "25" },
+    { id: "e25", T: "Attr", S: "25", E: "26" },
+    { id: "e26", T: "Attr", S: "26", E: "27" },
+    { id: "e27", T: "Attr", S: "27", E: "28" },
+    { id: "e28", T: "Attr", S: "28", E: "29" },
+    { id: "e29", T: "Attr", S: "28", E: "30" },
+    { id: "e30", T: "Attr", S: "27", E: "31" },
+    { id: "e31", T: "Attr", S: "27", E: "32" },
+    { id: "e32", T: "Attr", S: "25", E: "33" },
+    { id: "e33", T: "Attr", S: "33", E: "34" },
+    { id: "e34", T: "Attr", S: "34", E: "35" },
+    { id: "e35", T: "Attr", S: "35", E: "36" },
+    { id: "e36", T: "Attr", S: "35", E: "37" },
+    { id: "e37", T: "Attr", S: "34", E: "38" },
+    { id: "e38", T: "Attr", S: "34", E: "39" },
+    { id: "e39", T: "Attr", S: "25", E: "40" },
+    { id: "e40", T: "Attr", S: "40", E: "41" },
+    { id: "e41", T: "Attr", S: "41", E: "42" },
+    { id: "e42", T: "Attr", S: "42", E: "43" },
+    { id: "e43", T: "Attr", S: "42", E: "44" },
+    { id: "e44", T: "Attr", S: "41", E: "45" },
+    { id: "e45", T: "Attr", S: "41", E: "46" },
+    { id: "e46", T: "Attr", S: "25", E: "47" },
+    { id: "e47", T: "Attr", S: "47", E: "48" },
+    { id: "e48", T: "Attr", S: "48", E: "49" },
+    { id: "e49", T: "Attr", S: "49", E: "50" },
+    { id: "e50", T: "Attr", S: "49", E: "51" },
+    { id: "e51", T: "Attr", S: "48", E: "52" },
+    { id: "e52", T: "Attr", S: "48", E: "53" },
+    { id: "e53", T: "Attr", S: "25", E: "54" },
+    { id: "e54", T: "Attr", S: "54", E: "55" },
+    { id: "e55", T: "Attr", S: "55", E: "56" },
+    { id: "e56", T: "Attr", S: "56", E: "57" },
+    { id: "e57", T: "Attr", S: "56", E: "58" },
+    { id: "e58", T: "Attr", S: "55", E: "59" },
+    { id: "e59", T: "Attr", S: "55", E: "60" },
+    { id: "e60", T: "Attr", S: "17", E: "61" },
+    { id: "e61", T: "Attr", S: "61", E: "62" },
+    { id: "e62", T: "Attr", S: "62", E: "63" },
+    { id: "e63", T: "Attr", S: "63", E: "64" },
+    { id: "e64", T: "Attr", S: "63", E: "65" },
+    { id: "e65", T: "Attr", S: "62", E: "66" },
+    { id: "e66", T: "Attr", S: "66", E: "67" },
+    { id: "e67", T: "Attr", S: "67", E: "68" },
+    { id: "e68", T: "Attr", S: "68", E: "69" },
+    { id: "e69", T: "Attr", S: "69", E: "70" },
+    { id: "e70", T: "Attr", S: "69", E: "71" },
+    { id: "e71", T: "Attr", S: "69", E: "72" },
+    { id: "e72", T: "Attr", S: "69", E: "73" },
+    { id: "e73", T: "Attr", S: "69", E: "74" },
+    { id: "e74", T: "Attr", S: "67", E: "75" },
+    { id: "e75", T: "Attr", S: "75", E: "76" },
+    { id: "e76", T: "Attr", S: "76", E: "77" },
+    { id: "e77", T: "Attr", S: "77", E: "78" },
+    { id: "e78", T: "Attr", S: "78", E: "79" },
+    { id: "e79", T: "Attr", S: "79", E: "80" },
+    { id: "e80", T: "Attr", S: "79", E: "81" },
+    { id: "e81", T: "Attr", S: "77", E: "82" },
+    { id: "e82", T: "Attr", S: "77", E: "83" },
+    { id: "e83", T: "Attr", S: "77", E: "84" },
+    { id: "e84", T: "Attr", S: "84", E: "85" },
+    { id: "e85", T: "Attr", S: "77", E: "86" },
+    { id: "e86", T: "Attr", S: "61", E: "87" },
+    { id: "e87", T: "Attr", S: "87", E: "88" },
+    { id: "e88", T: "Attr", S: "87", E: "89" },
+    { id: "e89", T: "Attr", S: "89", E: "90" },
+    { id: "e90", T: "Attr", S: "90", E: "91" },
+    { id: "e91", T: "Attr", S: "91", E: "92" },
+    { id: "e92", T: "Attr", S: "91", E: "93" },
+    { id: "e93", T: "Attr", S: "93", E: "94" },
+    { id: "e94", T: "Attr", S: "93", E: "95" },
+    { id: "e95", T: "Attr", S: "90", E: "96" },
+    { id: "e96", T: "Attr", S: "96", E: "97" },
+    { id: "e97", T: "Attr", S: "96", E: "98" },
+    { id: "e98", T: "Attr", S: "96", E: "99" }
+  ]
+}
