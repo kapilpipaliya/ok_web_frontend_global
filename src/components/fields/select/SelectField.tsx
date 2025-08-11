@@ -282,14 +282,16 @@ export function SelectField(
         selectedValues={() => {
           if (isStaticOptions(meta())) {
             const value = data()?.P[meta().P[IdAttr]];
-            if (!value) {
+            if (value === undefined || value === null) {
               return [];
             }
             if (!Array.isArray(value) && getComponent() === "Select") {
+              const valueKey = meta().P.valueKey ?? "id";
               const option = options().find(
-                (option) =>
-                  (value?.[meta().P.valueKey ?? "id"] || value) ===
-                  (option?.[meta().P.valueKey ?? "id"] || option),
+                (option) => {
+                  const optionValue = option?.[valueKey] ?? option;
+                  return value === optionValue;
+                }
               );
               return option ? [option] : [{ label: value, value }];
             }

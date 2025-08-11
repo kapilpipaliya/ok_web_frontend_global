@@ -40,6 +40,8 @@ import { isValidResponse } from "~/lib/api/general/isValidResponse";
 import { setGraphData } from "~/lib/graph/mutate/core/setGraphData";
 import { DataInternal } from "./data/DataInternal";
 import { As } from "~/components/As";
+import {SolidMarkdown} from "~/components/solid-markdown";
+import remarkGfm from "remark-gfm";
 const MetaTag = (
   tag: string,
   props: { [k: string]: any },
@@ -97,6 +99,7 @@ export function HtmlField(
     onLongPress?: (event: Event) => void;
     src?: string;
     text?: string;
+    textType?: string; // "markdown" or undefined
     // DataField props
     data?: (() => unknown[]) | unknown[];
     expression?: string;
@@ -122,6 +125,7 @@ export function HtmlField(
     "class",
     "children",
     "text",
+    "textType",
     "childrenBefore",
     // DataField props
     "data",
@@ -322,21 +326,16 @@ export function HtmlField(
   const Content = () => {
     const TextContent = () => {
       return (
-        <Show when={props.text}>
-          <Show
-            fallback={<span>{local.text}</span>}
-            when={previewStore.isDesignMode}
-          >
-            <span
-              contentEditable={true}
-              onBlur={handleTextChange}
-              onKeyDown={handleKeyDown}
-              style={{ display: "inline-block", "min-width": "1em" }}
-            >
-              {local.text}
-            </span>
-          </Show>
-        </Show>
+
+              <Show
+                when={local.textType === "markdown"}
+                fallback={<span>{local.text}</span>}
+              >
+                <SolidMarkdown renderingStrategy="reconcile" remarkPlugins={[remarkGfm]}>
+                  {local.text}
+                </SolidMarkdown>
+              </Show>
+
       );
     };
 
