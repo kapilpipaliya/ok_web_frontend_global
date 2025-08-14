@@ -329,7 +329,7 @@ export function HtmlField(
 
               <Show
                 when={local.textType === "markdown"}
-                fallback={<span>{local.text}</span>}
+                fallback={local.text}
               >
                 <SolidMarkdown renderingStrategy="reconcile" remarkPlugins={[remarkGfm]}>
                   {local.text}

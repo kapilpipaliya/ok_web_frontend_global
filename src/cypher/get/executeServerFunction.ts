@@ -4,6 +4,7 @@ import type { EvalExpressionContext } from "../types/EvalExpressionContext";
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import {executeNamedServerFunction} from "~/cypher/get/executeNamedServerFunction";
 
 interface ServerFunctionRequest {
   functionBody: string;
@@ -23,12 +24,13 @@ export async function executeServerFunction(
   "use server";
 
   let dbSession: Session;
-  let _subDomain = "";
+  let sessionCreatedLocally = false;
 
   if (context.dbSession) {
     dbSession = context.dbSession;
   } else {
-    ({ dbSession, _subDomain } = await getDBSessionForSubdomain());
+    ({ dbSession } = await getDBSessionForSubdomain());
+    sessionCreatedLocally = true;
     context.dbSession = dbSession;
   }
 
@@ -46,6 +48,7 @@ export async function executeServerFunction(
       context: context,
       contextData: request.contextData || {},
       vertexes: context.vertexes || [],
+      executeNamedServerFunction,
       graph: {
         nodes: context.nodes,
         relationships: context.relationships,
@@ -65,5 +68,11 @@ export async function executeServerFunction(
   } catch (error: any) {
     console.error("Error in executeServerFunction:", error, error.cause);
     return { error: error.message };
+  } finally {
+    // Clean up: close the session if created locally and remove from context
+    if (sessionCreatedLocally && dbSession) {
+      await dbSession.close();
+      delete context.dbSession;
+    }
   }
 }
