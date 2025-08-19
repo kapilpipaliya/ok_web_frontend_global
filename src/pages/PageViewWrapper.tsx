@@ -11,6 +11,17 @@ import { generateNewTxnId } from "~/lib/graph/transaction/core/generateNewTxnId"
 import { revertTransaction } from "~/lib/graph/transaction/revert/revertTransaction";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { NotFound } from "~/components/404";
+import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
+import { createFunctionArgumentBase } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentBase";
+import { createFunctionArgumentWithValue } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentWithValue";
+import { useToast } from "~/components/styled/modal/Toast";
+import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
+import { useTheme } from "~/lib/theme/ThemeContext";
+import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
+import { useZIndex } from "~/components/fields/ZIndex";
+import { getOwner, createSignal } from "solid-js";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import type {
   PageViewWrapperProps,
@@ -25,6 +36,7 @@ import type {
   FetchFormDataResult,
   FetchFormMetaDataResult,
 } from "~/pages/functions/fetchPageData";
+import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 
 export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const [graph, setGraph] = useGraph();
@@ -48,8 +60,94 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
 
   const [previewStore] = usePreviewContext();
 
+  // Context hooks needed for function arguments
+  const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const zIndex = useZIndex();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
+  const themeToggle = useThemeToggle();
+  const owner = getOwner();
+  const parentItems = usePageRenderContext();
+  const [ref, setRef] = createSignal<HTMLElement | null>(null);
+  const [mounted, setMounted] = createSignal(false);
+  const [componentName] = createSignal<string>("Html");
+  
+  const parentRenderContext = () =>
+    getLastItem(parentItems)?.[0] as
+      | { context: FunctionArgumentType }
+      | undefined;
+  const parentMeta = () => parentRenderContext()?.context.meta;
+
+  // Create a proper function argument for evaluating dynamic props
+  const getFunctionArgument = () => {
+    const meta = metaVertex();
+    if (!meta) return {} as FunctionArgumentType;
+    
+    return createFunctionArgumentBase(
+      {
+        data: dataVertex(),
+        meta,
+      },
+      {
+        formVertex: () => formStore() as any,
+        formId: formStore().id,
+        componentName,
+        isNoPermissionCheck: () => props.isNoPermissionCheck || false,
+        isViewMode: () => false,
+        isReadOnly: () => false,
+        mounted,
+        parentMeta,
+        ref,
+        setRef,
+        updateValue: () => {},
+        onChange: () => {},
+        hasFullPermission: () => true,
+        hasEditPermission: () => true,
+        hasCreatePermission: () => true,
+        hasViewPermission: () => true,
+      },
+      {
+        graph,
+        setGraph,
+        toast,
+        searchParams,
+        setSearchParams,
+        zIndex,
+        navigate,
+        location,
+        theme,
+        parentItems,
+        previewStore,
+        themeToggle,
+        owner: owner!,
+        parentRenderContext,
+        functionProxy: {},
+      },
+    );
+  };
+
+  const getFunctionArgumentWithValue = () =>
+    createFunctionArgumentWithValue(getFunctionArgument, ()=> undefined);
+
+  // Evaluate dynamic props from metaVertex
+  const dynamicProps = (() => { // cant use createMemo, as it is giving error: tempate is not defined during ssr. must fix letter
+    const meta = metaVertex();
+    if (!meta) return {};
+    
+    return createDynamicPropsMemo(
+      { meta },
+      {
+        graph,
+        getFunctionArgumentWithValue,
+      },
+    )();
+  });
+
   const isNoPermissionCheck = () =>
     props.isNoPermissionCheck ||
+    dynamicProps().isNoPermissionCheck ||
     metaVertex()?.P.isNoPermissionCheck ||
     previewStore.isNoPermissionCheck;
 
