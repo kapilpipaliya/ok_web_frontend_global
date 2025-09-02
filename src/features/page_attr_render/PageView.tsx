@@ -1,19 +1,13 @@
-import { createMemo, Match, Show, Switch } from "solid-js";
+import { createMemo, Match, Show, Switch, JSX } from "solid-js";
 import { createStore } from "solid-js/store";
 
-import type { FormStoreObject } from "~/components/form/context/FormContext";
-
-import { getComponentDefaultValues } from "~/components/fields/component/functions/getComponentDefaultValues";
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
-import { useDesignerFormIdContext } from "~/features/page_designer/context/LayoutContext";
 import {
   PreviewContext,
   type PreviewStoreObject,
 } from "~/features/page_designer/context/PreviewContext";
-import { deNullify } from "~/lib/data_structure/object/deNullify";
 import {
   DataContext,
-  useDataContext,
 } from "~/features/page_attr_render/context/DataContext";
 import {
   PageRenderContextProvider,
@@ -24,6 +18,10 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 import type { Id } from "~/lib/graph/type/id";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { useGraph } from "~/lib/graph/context/UseGraph";
+import { SlotContext } from "~/components/fields/component/contexts/SlotContext";
+import { evalExpression } from "~/lib/expression_eval";
+import { ComponentWrapper } from "./ComponentWrapper";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 
 export function PageView(
   props: Readonly<{
@@ -48,6 +46,49 @@ export function PageView(
     if (props.id && !props.hasEditPermission) {
       return props.hasViewPermission;
     }
+  });
+
+  // Function to find and log layout vertexes
+  const logLayoutVertexes = () => {
+    if (props.metaVertex) {
+      // First get all Layout vertices from the data vertex
+      const layoutVertices = evalExpression("->$0Layout", {
+        graph,
+        setGraph,
+        vertexes: [props.metaVertex],
+      }) || [];
+      
+      // Sort by displayOrder
+      const sortedLayouts = layoutVertices.sort((a: Vertex, b: Vertex) => 
+        (a.P.displayOrder || 0) - (b.P.displayOrder || 0)
+      );
+
+      // Collect all component vertices
+      const allComponents: Vertex[] = [];
+      
+      // For each sorted layout, find its Component
+      for (const layoutVertex of sortedLayouts) {
+        const componentName = layoutVertex.P.componentName;
+        const components = componentName 
+          ? [findVertexByLabelAndUniqueId(graph, "Component", "key", componentName)].filter(Boolean) as Vertex[]
+          : [];
+        
+        // Add components to the array
+        allComponents.push(...components);
+      }
+      
+      return allComponents;
+    }
+    
+    return [];
+  };
+
+  // Calculate layout components for Page vertices
+  const layouts = createMemo(() => {
+    if (props.metaVertex?.L[0] === "Page") {
+      return logLayoutVertexes();
+    }
+    return [];
   });
 
   const previewStore = createStore<PreviewStoreObject>({
@@ -86,42 +127,6 @@ export function PageView(
     },
   });
 
-  const ComponentWrapper = () => {
-    const contextData = useDataContext() || {};
-    const formStoreId = useDesignerFormIdContext();
-
-    const values = createMemo(() => {
-      const formStore = graph.vertexes[formStoreId!] as Vertex<FormStoreObject>;
-      const componentValue = formStore?.P.componentValue
-        ? graph.vertexes[formStore.P.componentValue]?.P
-        : {};
-      return {
-        ...getComponentDefaultValues(props.metaVertex!, graph, setGraph),
-        ...deNullify(componentValue),
-      };
-    });
-
-    const newDataContext = new Proxy(contextData, {
-      get(target, key) {
-        if (key === "props") {
-          return values();
-        }
-        if (key === "index") {
-          return 0;
-        }
-        return target[key];
-      },
-    });
-    return (
-      <DataContext.Provider value={newDataContext}>
-        <PageAttrRender
-          data={props.data}
-          isNoPermissionCheck={props.isNoPermissionCheck!}
-          metaVertex={props.metaVertex!}
-        />
-      </DataContext.Provider>
-    );
-  };
   const dynamicFns = createMemo(() => {
     try {
       // Helper to evaluate fns from a vertex
@@ -168,28 +173,92 @@ export function PageView(
     },
   } as PageRenderObject);
 
+  // Inner component to handle recursive layout rendering
+  const LayoutRenderer = (innerProps: { index: number; content: JSX.Element }) => {
+    const currentLayout = createMemo(() => 
+      innerProps.index < layouts().length ? layouts()[innerProps.index] : null
+    );
+    
+    const LayoutContent = () => {
+      const SlotChildren = (childProps: { slot?: string }) => {
+        return (
+          <Show
+            when={!childProps.slot || childProps.slot === 'children'}
+            fallback={null}
+          >
+            <LayoutRenderer 
+              index={innerProps.index + 1} 
+              content={innerProps.content} 
+            />
+          </Show>
+        );
+      };
+      
+      return (
+        <SlotContext.Provider value={SlotChildren}>
+          {/*<Show*/}
+          {/*  when={currentLayout()?.L[0] === "Component"}*/}
+          {/*  fallback={*/}
+          {/*    <DataContext.Provider value={{ index: 0 }}>*/}
+          {/*      <PageAttrRender*/}
+          {/*        data={props.data}*/}
+          {/*        isNoPermissionCheck={props.isNoPermissionCheck}*/}
+          {/*        metaVertex={currentLayout()!}*/}
+          {/*      />*/}
+          {/*    </DataContext.Provider>*/}
+          {/*  }*/}
+          {/*>*/}
+            <ComponentWrapper 
+              metaVertex={currentLayout()!}
+              data={props.data}
+              isNoPermissionCheck={props.isNoPermissionCheck}
+            />
+          {/*</Show>*/}
+        </SlotContext.Provider>
+      );
+    };
+    
+    return (
+      <Show
+        when={currentLayout()}
+        fallback={innerProps.content}
+      >
+        <LayoutContent />
+      </Show>
+    );
+  };
+
+  const MainContent = () => (
+    <Switch>
+      <Match when={props.metaVertex?.L[0] === "Component"}>
+        <ComponentWrapper 
+          metaVertex={props.metaVertex!}
+          data={props.data}
+          isNoPermissionCheck={props.isNoPermissionCheck}
+        />
+      </Match>
+      <Match when={true}>
+        <DataContext.Provider value={{ index: 0 }}>
+          <PageAttrRender
+            data={props.data}
+            isNoPermissionCheck={props.isNoPermissionCheck!}
+            metaVertex={props.metaVertex!}
+          />
+        </DataContext.Provider>
+      </Match>
+    </Switch>
+  );
+
   return (
     <Show keyed when={props.metaVertex}>
       <PreviewContext.Provider value={previewStore}>
         <PageRenderContextProvider store={repeterStore}>
-          <Switch>
-            <Match when={true}>
-              <Switch>
-                <Match when={props.metaVertex?.L[0] === "Component"}>
-                  <ComponentWrapper />
-                </Match>
-                <Match when={true}>
-                  <DataContext.Provider value={{ index: 0 }}>
-                    <PageAttrRender
-                      data={props.data}
-                      isNoPermissionCheck={props.isNoPermissionCheck!}
-                      metaVertex={props.metaVertex!}
-                    />
-                  </DataContext.Provider>
-                </Match>
-              </Switch>
-            </Match>
-          </Switch>
+          <Show
+            when={layouts().length > 0} 
+            fallback={<MainContent/>}
+          >
+            <LayoutRenderer index={0} content={<MainContent/>} />
+          </Show>
         </PageRenderContextProvider>
       </PreviewContext.Provider>
     </Show>

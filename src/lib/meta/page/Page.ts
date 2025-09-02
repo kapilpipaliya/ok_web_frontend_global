@@ -192,8 +192,10 @@ export const Page: IFormMetaData = {
             {
               collection: "g:'Component'",
               componentName: "Select",
-              key: "Component",
+              key: "componentName",
               labelKey: "::'P.key'",
+              valueKey: "::'P.key'",
+              saveValue: true
             }],
           componentName: "DynamicTable",
           hide: true,
