@@ -160,7 +160,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     previewStore,
   });
 
-  const constants: PageViewConstants = {
+  const constants = (): PageViewConstants => ({
     dataId: props.dataId,
     expression: props.expression,
     formDataId: props.formDataId,
@@ -172,7 +172,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     pageKeyName: props.pageKeyName,
     pageVertexName: props.pageVertexName,
     url: props.url,
-  };
+  });
 
   // Initialize metadata handling
   const { metaData, setFormMetaData } = useMetadata(props, {

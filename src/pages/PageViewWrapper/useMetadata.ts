@@ -1,4 +1,4 @@
-import { createAsync, query } from "@solidjs/router";
+import { createAsync } from "@solidjs/router";
 import { untrack } from "solid-js";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { isObject } from "~/lib/data_structure/object/isObject";
@@ -20,54 +20,11 @@ import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 interface UseMetadataOptions {
   graph: GraphInterface;
   setGraph: SetStoreFunction<GraphInterface>;
-  constants: PageViewConstants;
+  constants: () => PageViewConstants;
   setFormStore: (key: string, value: unknown) => void;
   metaTxnId: number;
   previewStore: PreviewStoreObject;
 }
-
-// Create query functions for caching
-const getMetadataQuery = query(async (params: {
-  pageVertexName?: string;
-  formId?: string;
-  expression?: string;
-  isDesignMode?: boolean;
-  pageKeyName?: string;
-  url?: string;
-}) => {
-  // "use server";
-  const result = await fetchFormMetaData(
-    params.pageVertexName,
-    params.formId,
-    params.expression,
-    params.isDesignMode,
-    params.pageKeyName,
-    params.url,
-  );
-  return result;
-}, "metadata");
-
-const getFormDataQuery = query(async (params: {
-  graph: GraphInterface;
-  metaResult: { data?: ServerResult; form?: IFormMetaData };
-  formDataId?: string;
-  id?: string;
-  isNoPermissionCheck?: boolean;
-  hasRequiredPermissions?: boolean;
-  pageVertexName?: string;
-}) => {
-  // "use server";
-  const result = await fetchFormData(
-    params.graph,
-    params.metaResult,
-    params.formDataId,
-    params.id,
-    params.isNoPermissionCheck,
-    params.hasRequiredPermissions,
-    params.pageVertexName,
-  );
-  return result;
-}, "formData");
 
 export function useMetadata(
   props: Readonly<PageViewWrapperProps>,
@@ -75,10 +32,11 @@ export function useMetadata(
 ) {
   const metaData = createAsync(
     async () => {
-      if (options.constants.pageKeyName === "favicon.ico") {
+      const constants = options.constants();
+      if (constants.pageKeyName === "favicon.ico") {
         return { error: "No meta data found" };
       }
-      if (options.constants.formMetaId) {
+      if (constants.formMetaId) {
         if (props.getFormData) {
           try {
             const data = await props.getFormData();
@@ -92,15 +50,14 @@ export function useMetadata(
         }
         return {};
       }
-      // Use the cached query function
-      const metaResult = await getMetadataQuery({
-        pageVertexName: options.constants.pageVertexName,
-        formId: options.constants.formId,
-        expression: options.constants.expression,
-        isDesignMode: options.constants.isDesignMode,
-        pageKeyName: options.constants.pageKeyName,
-        url: options.constants.url,
-      });
+      const metaResult = await fetchFormMetaData(
+        constants.pageVertexName,
+        constants.formId,
+        constants.expression,
+        constants.isDesignMode,
+        constants.pageKeyName,
+        constants.url,
+      );
       if (!metaResult) {
         return { error: "404" };
       }
@@ -119,31 +76,30 @@ export function useMetadata(
         }
       }
 
-      const metaVertex = options.constants.formMetaId
-        ? options.graph.vertexes[options.constants.formMetaId]
+      const metaVertex = constants.formMetaId
+        ? options.graph.vertexes[constants.formMetaId]
         : metaResult.data?.graph?.vertexes[formMetaId!];
 
       const isNoPermissionCheck =
-        options.constants.isNoPermissionCheck ||
+        constants.isNoPermissionCheck ||
         metaVertex?.P?.isNoPermissionCheck ||
         options.previewStore.isNoPermissionCheck;
 
       const idLocal =
-        options.constants.dataId === "new"
+        constants.dataId === "new"
           ? undefined
-          : options.constants.dataId;
+          : constants.dataId;
 
-      if (idLocal && !options.constants.getFormData) {
-        // Use the cached query function
-        const dataResult = await getFormDataQuery({
-          graph: options.graph,
+      if (idLocal && !constants.getFormData) {
+        const dataResult = await fetchFormData(
+          options.graph,
           metaResult,
-          formDataId: options.constants.formDataId,
-          id: idLocal,
+          constants.formDataId,
+          idLocal,
           isNoPermissionCheck,
-          hasRequiredPermissions: true,
-          pageVertexName: options.constants.pageVertexName,
-        });
+          true,
+          constants.pageVertexName,
+        );
         return { dataResult, formMetaId, metaResult };
       }
 
@@ -191,11 +147,12 @@ export function useMetadata(
     }
 
     if (metaResult.data) {
+      const constants = options.constants();
       if (
-        options.constants.formId &&
-        options.graph.vertexes[options.constants.formId]
+        constants.formId &&
+        options.graph.vertexes[constants.formId]
       ) {
-        delete metaResult.data.graph!.vertexes[options.constants.formId];
+        delete metaResult.data.graph!.vertexes[constants.formId];
       }
       setGraphData(options.graph, options.setGraph, metaResult.data.graph!);
     }
@@ -218,7 +175,7 @@ export function useMetadata(
     if (!(props.formMetaId || formMetaId || form)) {
       options.setFormStore(
         "error",
-        `${options.constants.pageVertexName} is not configured`,
+        `${constants.pageVertexName} is not configured`,
       );
       return false;
     }
