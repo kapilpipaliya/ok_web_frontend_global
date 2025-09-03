@@ -65,7 +65,7 @@ export function useMetadata(
         return metaResult;
       }
 
-      let formMetaId = options.constants.formMetaId;
+      let formMetaId = constants.formMetaId;
       if (metaResult.data) {
         if (Array.isArray(metaResult.data.result)) {
           if (metaResult.data.result.length > 0) {
@@ -173,6 +173,7 @@ export function useMetadata(
     }
     const form = metaResult.form;
     if (!(props.formMetaId || formMetaId || form)) {
+       const constants = options.constants();
       options.setFormStore(
         "error",
         `${constants.pageVertexName} is not configured`,

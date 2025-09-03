@@ -255,7 +255,6 @@ export function DynamicComponent(props: DynamicComponentProps) {
       <Match when={!component()}>NO INPUT {componentName() as string}</Match>
 
       <Match
-        keyed
         when={component() && (isNoPermissionCheck() || hasPermission())}
       >
         <ContentWrapper

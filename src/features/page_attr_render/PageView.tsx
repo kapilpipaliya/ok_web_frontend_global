@@ -250,7 +250,7 @@ export function PageView(
   );
 
   return (
-    <Show keyed when={props.metaVertex}>
+    <Show when={props.metaVertex}>
       <PreviewContext.Provider value={previewStore}>
         <PageRenderContextProvider store={repeterStore}>
           <Show
