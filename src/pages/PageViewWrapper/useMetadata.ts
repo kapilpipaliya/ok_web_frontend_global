@@ -1,4 +1,4 @@
-import { createAsync } from "@solidjs/router";
+import { createAsync, query } from "@solidjs/router";
 import { untrack } from "solid-js";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
 import { isObject } from "~/lib/data_structure/object/isObject";
@@ -14,6 +14,8 @@ import { fetchFormMetaData } from "../functions/fetchFormMetaData";
 import type { PageViewConstants, PageViewWrapperProps } from "./types";
 import type { PreviewStoreObject } from "~/features/page_designer/context/PreviewContext";
 import type { SetStoreFunction } from "solid-js/store";
+import type { ServerResult } from "~/cypher/types/ServerResult";
+import type { IFormMetaData } from "~/lib/meta/FormMetadataType";
 
 interface UseMetadataOptions {
   graph: GraphInterface;
@@ -23,6 +25,49 @@ interface UseMetadataOptions {
   metaTxnId: number;
   previewStore: PreviewStoreObject;
 }
+
+// Create query functions for caching
+const getMetadataQuery = query(async (params: {
+  pageVertexName?: string;
+  formId?: string;
+  expression?: string;
+  isDesignMode?: boolean;
+  pageKeyName?: string;
+  url?: string;
+}) => {
+  // "use server";
+  const result = await fetchFormMetaData(
+    params.pageVertexName,
+    params.formId,
+    params.expression,
+    params.isDesignMode,
+    params.pageKeyName,
+    params.url,
+  );
+  return result;
+}, "metadata");
+
+const getFormDataQuery = query(async (params: {
+  graph: GraphInterface;
+  metaResult: { data?: ServerResult; form?: IFormMetaData };
+  formDataId?: string;
+  id?: string;
+  isNoPermissionCheck?: boolean;
+  hasRequiredPermissions?: boolean;
+  pageVertexName?: string;
+}) => {
+  // "use server";
+  const result = await fetchFormData(
+    params.graph,
+    params.metaResult,
+    params.formDataId,
+    params.id,
+    params.isNoPermissionCheck,
+    params.hasRequiredPermissions,
+    params.pageVertexName,
+  );
+  return result;
+}, "formData");
 
 export function useMetadata(
   props: Readonly<PageViewWrapperProps>,
@@ -47,14 +92,15 @@ export function useMetadata(
         }
         return {};
       }
-      const metaResult = await fetchFormMetaData(
-        options.constants.pageVertexName,
-        options.constants.formId,
-        options.constants.expression,
-        options.constants.isDesignMode,
-        options.constants.pageKeyName,
-        options.constants.url,
-      );
+      // Use the cached query function
+      const metaResult = await getMetadataQuery({
+        pageVertexName: options.constants.pageVertexName,
+        formId: options.constants.formId,
+        expression: options.constants.expression,
+        isDesignMode: options.constants.isDesignMode,
+        pageKeyName: options.constants.pageKeyName,
+        url: options.constants.url,
+      });
       if (!metaResult) {
         return { error: "404" };
       }
@@ -88,15 +134,16 @@ export function useMetadata(
           : options.constants.dataId;
 
       if (idLocal && !options.constants.getFormData) {
-        const dataResult = await fetchFormData(
-          options.graph,
+        // Use the cached query function
+        const dataResult = await getFormDataQuery({
+          graph: options.graph,
           metaResult,
-          options.constants.formDataId,
-          idLocal,
+          formDataId: options.constants.formDataId,
+          id: idLocal,
           isNoPermissionCheck,
-          true,
-          options.constants.pageVertexName,
-        );
+          hasRequiredPermissions: true,
+          pageVertexName: options.constants.pageVertexName,
+        });
         return { dataResult, formMetaId, metaResult };
       }
 
