@@ -165,7 +165,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     get expression() { return props.expression; },
     get formDataId() { return props.formDataId; },
     get formId() { return props.formId; },
-    get formMetaId() { return props.formMetaId; },
+    get formMetaId() { return untrack(()=>props.formMetaId) },
     get getFormData() { return !!props.getFormData; },
     get isDesignMode() { return props.isDesignMode; },
     get isNoPermissionCheck() { return props.isNoPermissionCheck; },
