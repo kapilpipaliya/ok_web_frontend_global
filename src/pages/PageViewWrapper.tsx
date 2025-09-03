@@ -1,6 +1,6 @@
 // ADD a Feature:
 // When nested PageViewWrapper is used, children should get parent context too.
-import { batch, createMemo, Match, Show, Switch, untrack } from "solid-js";
+import { batch, createMemo, createEffect, on, Match, Show, Switch, untrack } from "solid-js";
 
 import { FormContext } from "~/components/form/context/FormContext";
 import { DialogWithButtons } from "~/components/styled/modal/DeleteDialog";
@@ -73,7 +73,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const [ref, setRef] = createSignal<HTMLElement | null>(null);
   const [mounted, setMounted] = createSignal(false);
   const [componentName] = createSignal<string>("Html");
-  
+
   const parentRenderContext = () =>
     getLastItem(parentItems)?.[0] as
       | { context: FunctionArgumentType }
@@ -84,7 +84,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const getFunctionArgument = () => {
     const meta = metaVertex();
     if (!meta) return {} as FunctionArgumentType;
-    
+
     return createFunctionArgumentBase(
       {
         data: dataVertex(),
@@ -135,7 +135,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const dynamicProps = (() => { // cant use createMemo, as it is giving error: tempate is not defined during ssr. must fix letter
     const meta = metaVertex();
     if (!meta) return {};
-    
+
     return createDynamicPropsMemo(
       { meta },
       {
@@ -211,10 +211,10 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
       ["Page"].includes(metaVertex()?.L[0])
     ) {
       const dynamicFns = getDynamicFns();
-      const enabled = typeof dynamicFns.enabled === 'function' 
-        ? dynamicFns.enabled() 
+      const enabled = typeof dynamicFns.enabled === 'function'
+        ? dynamicFns.enabled()
         : dynamicFns.enabled;
-      
+
       if (!enabled) {
         const errorMsg = `${props.pageVertexName} is not enabled. Please contact your administrator.`;
         setFormStore("error", errorMsg);
@@ -253,6 +253,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   }) => {
     if (result) {
       batch(() => {
+        setFormStore("error", "");
         if (result.error) {
           setFormStore("error", result.error);
         } else {
@@ -282,7 +283,18 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
 
   const ContentSSR = () => {
     processResult(metaData());
-
+    createEffect(
+      on(
+        metaData,
+        () => {
+          const result = metaData();
+          if (result) {
+            processResult(result);
+          }
+        },
+        { defer: true }
+      )
+    );
     return (
       <>
         <Show when={formStore().P.error === "404"}>
@@ -355,17 +367,15 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   };
 
   return (
-    <Show when={metaData()} fallback={<div>Loading metadata...</div>}>
-      <Show when={formStore().P.count} fallback={<div>Loading form...</div>}>
-        <Show
-          when={
-            props.getFormData ? dataVertex() || !formStore().P.isFetching : true
-          }
-          fallback={<div>Loading data...</div>}
-        >
-          <ContentSSR />
-        </Show>
-      </Show>
+    <Show
+      when={
+        metaData() &&
+        formStore().P.count &&
+        (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)
+      }
+    >
+      <ContentSSR />
     </Show>
   );
 }
+
