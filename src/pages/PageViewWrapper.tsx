@@ -252,18 +252,16 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
     error?: string;
   }) => {
     if (result) {
-      untrack(() => {
-        batch(() => {
-          if (result.error) {
-            setFormStore("error", result.error);
-          } else {
-            setFormMetaData(result?.metaResult, result?.formMetaId);
-            const validationError = validateMetaVertex();
-            if (!validationError) {
-              handleFormData(result?.dataResult);
-            }
+      batch(() => {
+        if (result.error) {
+          setFormStore("error", result.error);
+        } else {
+          setFormMetaData(result?.metaResult, result?.formMetaId);
+          const validationError = validateMetaVertex();
+          if (!validationError) {
+            handleFormData(result?.dataResult);
           }
-        });
+        }
       });
     }
   };
@@ -357,14 +355,17 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   };
 
   return (
-    <Show
-      when={
-        metaData() &&
-        formStore().P.count &&
-        (props.getFormData ? dataVertex() || !formStore().P.isFetching : true)
-      }
-    >
-      <ContentSSR />
+    <Show when={metaData()} fallback={<div>Loading metadata...</div>}>
+      <Show when={formStore().P.count} fallback={<div>Loading form...</div>}>
+        <Show
+          when={
+            props.getFormData ? dataVertex() || !formStore().P.isFetching : true
+          }
+          fallback={<div>Loading data...</div>}
+        >
+          <ContentSSR />
+        </Show>
+      </Show>
     </Show>
   );
 }
