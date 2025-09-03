@@ -161,17 +161,17 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   });
 
   const constants = (): PageViewConstants => ({
-    dataId: props.dataId,
-    expression: props.expression,
-    formDataId: props.formDataId,
-    formId: props.formId,
-    formMetaId: props.formMetaId,
-    getFormData: !!props.getFormData,
-    isDesignMode: props.isDesignMode,
-    isNoPermissionCheck: props.isNoPermissionCheck,
-    pageKeyName: props.pageKeyName,
-    pageVertexName: props.pageVertexName,
-    url: props.url,
+    get dataId() { return props.dataId; },
+    get expression() { return props.expression; },
+    get formDataId() { return props.formDataId; },
+    get formId() { return props.formId; },
+    get formMetaId() { return props.formMetaId; },
+    get getFormData() { return !!props.getFormData; },
+    get isDesignMode() { return props.isDesignMode; },
+    get isNoPermissionCheck() { return props.isNoPermissionCheck; },
+    get pageKeyName() { return props.pageKeyName; },
+    get pageVertexName() { return props.pageVertexName; },
+    get url() { return props.url; },
   });
 
   // Initialize metadata handling
