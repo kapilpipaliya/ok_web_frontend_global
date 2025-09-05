@@ -1,0 +1,235 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "fetchYouTubeChannel",
+        description: "Fetches YouTube channel data and videos using Google API",
+        body: '''
+// Function to fetch YouTube channel data
+const channelUrl = args.params.channelUrl;
+const apiKey = args.params.apiKey || process.env.YOUTUBE_API_KEY;
+
+if (!channelUrl) {
+  throw new Error("Channel URL is required");
+}
+
+if (!apiKey) {
+  throw new Error("YouTube API key is required. Please provide apiKey parameter or set YOUTUBE_API_KEY environment variable");
+}
+
+// Extract channel ID from URL
+let channelId = null;
+
+// Handle different URL formats
+if (channelUrl.includes('@')) {
+  // Handle @username format
+  const username = channelUrl.match(/@([^/]+)/)?.[1];
+  if (username) {
+    // First, we need to search for the channel by username
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${username}&maxResults=1&key=${apiKey}`;
+    const searchResponse = await fetch(searchUrl);
+    const searchData = await searchResponse.json();
+    
+    if (searchData.items && searchData.items.length > 0) {
+      channelId = searchData.items[0].snippet.channelId;
+    }
+  }
+} else if (channelUrl.includes('/channel/')) {
+  // Handle /channel/ID format
+  channelId = channelUrl.match(/\/channel\/([^/]+)/)?.[1];
+} else if (channelUrl.includes('/c/')) {
+  // Handle /c/customname format
+  const customName = channelUrl.match(/\/c\/([^/]+)/)?.[1];
+  if (customName) {
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${customName}&maxResults=1&key=${apiKey}`;
+    const searchResponse = await fetch(searchUrl);
+    const searchData = await searchResponse.json();
+    
+    if (searchData.items && searchData.items.length > 0) {
+      channelId = searchData.items[0].snippet.channelId;
+    }
+  }
+} else if (channelUrl.match(/^UC[\w-]{22}$/)) {
+  // Direct channel ID
+  channelId = channelUrl;
+}
+
+if (!channelId) {
+  throw new Error("Could not extract channel ID from URL");
+}
+
+// Fetch channel details
+const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelId}&key=${apiKey}`;
+const channelResponse = await fetch(channelUrl);
+const channelData = await channelResponse.json();
+
+if (!channelData.items || channelData.items.length === 0) {
+  throw new Error("Channel not found");
+}
+
+const channel = channelData.items[0];
+
+// Create Channel vertex if it doesn't exist
+const existingChannel = await args.graph.getVertexByKey('Channel', channelId);
+let channelVertexId;
+
+if (!existingChannel) {
+  const createChannelResult = await args.graph.createVertex({
+    L: 'Channel',
+    P: {
+      key: channelId,
+      channelId: channelId,
+      title: channel.snippet.title,
+      description: channel.snippet.description,
+      thumbnails: channel.snippet.thumbnails,
+      publishedAt: channel.snippet.publishedAt,
+      viewCount: channel.statistics.viewCount,
+      subscriberCount: channel.statistics.subscriberCount,
+      videoCount: channel.statistics.videoCount,
+      uploadsPlaylistId: channel.contentDetails.relatedPlaylists.uploads
+    }
+  });
+  channelVertexId = createChannelResult.id;
+} else {
+  channelVertexId = existingChannel.id;
+  // Update channel data
+  await args.graph.updateVertex(channelVertexId, {
+    title: channel.snippet.title,
+    description: channel.snippet.description,
+    thumbnails: channel.snippet.thumbnails,
+    viewCount: channel.statistics.viewCount,
+    subscriberCount: channel.statistics.subscriberCount,
+    videoCount: channel.statistics.videoCount
+  });
+}
+
+// Create UserChannel edge if user is logged in
+if (args.user) {
+  const existingEdge = await args.graph.getEdgeByKey('UserChannel', `${args.user.id}-${channelVertexId}`);
+  if (!existingEdge) {
+    await args.graph.createEdge({
+      T: 'UserChannel',
+      S: args.user.id,
+      E: channelVertexId,
+      P: {
+        key: `${args.user.id}-${channelVertexId}`,
+        addedAt: new Date().toISOString()
+      }
+    });
+  }
+}
+
+// Fetch videos from uploads playlist
+const uploadsPlaylistId = channel.contentDetails.relatedPlaylists.uploads;
+let videos = [];
+let nextPageToken = null;
+let totalFetched = 0;
+const maxVideos = args.params.maxVideos || 50;
+
+do {
+  const videosUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${apiKey}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
+  const videosResponse = await fetch(videosUrl);
+  const videosData = await videosResponse.json();
+  
+  if (videosData.items) {
+    // Get video IDs for additional details
+    const videoIds = videosData.items.map(item => item.contentDetails.videoId).join(',');
+    
+    // Fetch video details
+    const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoIds}&key=${apiKey}`;
+    const videoDetailsResponse = await fetch(videoDetailsUrl);
+    const videoDetailsData = await videoDetailsResponse.json();
+    
+    // Process and save videos
+    for (const video of videoDetailsData.items) {
+      const existingVideo = await args.graph.getVertexByKey('Video', video.id);
+      let videoVertexId;
+      
+      if (!existingVideo) {
+        const createVideoResult = await args.graph.createVertex({
+          L: 'Video',
+          P: {
+            key: video.id,
+            videoId: video.id,
+            title: video.snippet.title,
+            description: video.snippet.description,
+            thumbnails: video.snippet.thumbnails,
+            publishedAt: video.snippet.publishedAt,
+            channelId: video.snippet.channelId,
+            channelTitle: video.snippet.channelTitle,
+            viewCount: video.statistics.viewCount,
+            likeCount: video.statistics.likeCount,
+            commentCount: video.statistics.commentCount,
+            duration: video.contentDetails.duration
+          }
+        });
+        videoVertexId = createVideoResult.id;
+      } else {
+        videoVertexId = existingVideo.id;
+        // Update video data
+        await args.graph.updateVertex(videoVertexId, {
+          title: video.snippet.title,
+          description: video.snippet.description,
+          thumbnails: video.snippet.thumbnails,
+          viewCount: video.statistics.viewCount,
+          likeCount: video.statistics.likeCount,
+          commentCount: video.statistics.commentCount
+        });
+      }
+      
+      // Create ChannelVideo edge
+      const existingChannelVideoEdge = await args.graph.getEdgeByKey('ChannelVideo', `${channelVertexId}-${videoVertexId}`);
+      if (!existingChannelVideoEdge) {
+        await args.graph.createEdge({
+          T: 'ChannelVideo',
+          S: channelVertexId,
+          E: videoVertexId,
+          P: {
+            key: `${channelVertexId}-${videoVertexId}`
+          }
+        });
+      }
+      
+      // Create UserVideo edge if user is logged in
+      if (args.user) {
+        const existingUserVideoEdge = await args.graph.getEdgeByKey('UserVideo', `${args.user.id}-${videoVertexId}`);
+        if (!existingUserVideoEdge) {
+          await args.graph.createEdge({
+            T: 'UserVideo',
+            S: args.user.id,
+            E: videoVertexId,
+            P: {
+              key: `${args.user.id}-${videoVertexId}`,
+              addedAt: new Date().toISOString()
+            }
+          });
+        }
+      }
+      
+      videos.push(video);
+    }
+    
+    totalFetched += videosData.items.length;
+  }
+  
+  nextPageToken = videosData.nextPageToken;
+} while (nextPageToken && totalFetched < maxVideos);
+
+// Return success response
+return {
+  success: true,
+  data: {
+    channel: channel,
+    channelVertexId: channelVertexId,
+    videosAdded: videos.length,
+    videos: videos.slice(0, maxVideos)
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

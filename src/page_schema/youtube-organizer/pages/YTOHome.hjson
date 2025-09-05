@@ -1,0 +1,562 @@
+{
+  vertexes: [
+    {
+      id: "page1",
+      L: "Page",
+      P: {
+        key: "YTOHome",
+        name: "YouTube Organizer Home",
+        description: "Home page for YouTube Organizer",
+        url: "/yto"
+      }
+    },
+    {
+      id: "layout1",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: calc(100vh - 8rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 1.5rem 0;
+  
+  @media (min-width: 768px) {
+    padding: 2rem 0;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "YouTube Organizer"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 2.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Organize your YouTube channels and playlists in one place"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  margin: 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: () => args.navigate("/yto/channels"),
+  role: "button",
+  tabIndex: 0,
+  "aria-label": "Go to channels"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:focus {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+  
+  @media (min-width: 768px) {
+    padding: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "material-symbols:subscriptions-rounded",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1rem;
+  
+  @media (min-width: 768px) {
+    width: 64px;
+    height: 64px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Channels"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Browse and manage your subscribed channels"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  margin: 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: () => args.navigate("/yto/playlists"),
+  role: "button",
+  tabIndex: 0,
+  "aria-label": "Go to playlists"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:focus {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+  
+  @media (min-width: 768px) {
+    padding: 3rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "material-symbols:playlist-play-rounded",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: 1rem;
+  
+  @media (min-width: 768px) {
+    width: 64px;
+    height: 64px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Playlists"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Organize and view your saved playlists"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  margin: 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  margin-top: auto;
+  
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Getting Started"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ol"
+};
+''',
+        css: '''
+return `._id {
+  list-style: decimal;
+  text-align: left;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Go to Channels or Playlists section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Click the floating '+' button to add a new item"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Enter a YouTube channel or playlist URL"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Your videos will be automatically fetched and organized"
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page1", E: "layout1" },
+    { id: "e2", T: "Attr", S: "page1", E: "1" },
+    { id: "e3", T: "Attr", S: "1", E: "2" },
+    { id: "e4", T: "Attr", S: "2", E: "3" },
+    { id: "e5", T: "Attr", S: "2", E: "4" },
+    { id: "e6", T: "Attr", S: "1", E: "5" },
+    { id: "e7", T: "Attr", S: "5", E: "6" },
+    { id: "e8", T: "Attr", S: "6", E: "7" },
+    { id: "e9", T: "Attr", S: "6", E: "8" },
+    { id: "e10", T: "Attr", S: "6", E: "9" },
+    { id: "e11", T: "Attr", S: "5", E: "10" },
+    { id: "e12", T: "Attr", S: "10", E: "11" },
+    { id: "e13", T: "Attr", S: "10", E: "12" },
+    { id: "e14", T: "Attr", S: "10", E: "13" },
+    { id: "e15", T: "Attr", S: "1", E: "14" },
+    { id: "e16", T: "Attr", S: "14", E: "15" },
+    { id: "e17", T: "Attr", S: "14", E: "16" },
+    { id: "e18", T: "Attr", S: "16", E: "17" },
+    { id: "e19", T: "Attr", S: "16", E: "18" },
+    { id: "e20", T: "Attr", S: "16", E: "19" },
+    { id: "e21", T: "Attr", S: "16", E: "20" }
+  ]
+}

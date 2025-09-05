@@ -1,0 +1,240 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "fetchYouTubePlaylist",
+        description: "Fetches YouTube playlist data and videos using Google API",
+        body: '''
+// Function to fetch YouTube playlist data
+const playlistUrl = args.params.playlistUrl;
+const apiKey = args.params.apiKey || process.env.YOUTUBE_API_KEY;
+
+if (!playlistUrl) {
+  throw new Error("Playlist URL is required");
+}
+
+if (!apiKey) {
+  throw new Error("YouTube API key is required. Please provide apiKey parameter or set YOUTUBE_API_KEY environment variable");
+}
+
+// Extract playlist ID from URL
+let playlistId = null;
+
+if (playlistUrl.includes('list=')) {
+  playlistId = playlistUrl.match(/list=([^&]+)/)?.[1];
+} else if (playlistUrl.match(/^PL[\w-]+$/)) {
+  // Direct playlist ID
+  playlistId = playlistUrl;
+}
+
+if (!playlistId) {
+  throw new Error("Could not extract playlist ID from URL");
+}
+
+// Fetch playlist details
+const playlistDetailsUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails,status&id=${playlistId}&key=${apiKey}`;
+const playlistResponse = await fetch(playlistDetailsUrl);
+const playlistData = await playlistResponse.json();
+
+if (!playlistData.items || playlistData.items.length === 0) {
+  throw new Error("Playlist not found");
+}
+
+const playlist = playlistData.items[0];
+
+// Create Playlist vertex if it doesn't exist
+const existingPlaylist = await args.graph.getVertexByKey('Playlist', playlistId);
+let playlistVertexId;
+
+if (!existingPlaylist) {
+  const createPlaylistResult = await args.graph.createVertex({
+    L: 'Playlist',
+    P: {
+      key: playlistId,
+      playlistId: playlistId,
+      title: playlist.snippet.title,
+      description: playlist.snippet.description,
+      thumbnails: playlist.snippet.thumbnails,
+      channelId: playlist.snippet.channelId,
+      channelTitle: playlist.snippet.channelTitle,
+      publishedAt: playlist.snippet.publishedAt,
+      itemCount: playlist.contentDetails.itemCount,
+      status: playlist.status
+    }
+  });
+  playlistVertexId = createPlaylistResult.id;
+} else {
+  playlistVertexId = existingPlaylist.id;
+  // Update playlist data
+  await args.graph.updateVertex(playlistVertexId, {
+    title: playlist.snippet.title,
+    description: playlist.snippet.description,
+    thumbnails: playlist.snippet.thumbnails,
+    itemCount: playlist.contentDetails.itemCount,
+    status: playlist.status
+  });
+}
+
+// Create UserPlaylist edge if user is logged in
+if (args.user) {
+  const existingEdge = await args.graph.getEdgeByKey('UserPlaylist', `${args.user.id}-${playlistVertexId}`);
+  if (!existingEdge) {
+    await args.graph.createEdge({
+      T: 'UserPlaylist',
+      S: args.user.id,
+      E: playlistVertexId,
+      P: {
+        key: `${args.user.id}-${playlistVertexId}`,
+        addedAt: new Date().toISOString()
+      }
+    });
+  }
+}
+
+// Fetch videos in playlist
+let videos = [];
+let nextPageToken = null;
+let totalFetched = 0;
+const maxVideos = args.params.maxVideos || 50;
+
+do {
+  const playlistItemsUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=50&key=${apiKey}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
+  const playlistItemsResponse = await fetch(playlistItemsUrl);
+  const playlistItemsData = await playlistItemsResponse.json();
+  
+  if (playlistItemsData.items) {
+    // Get video IDs for additional details
+    const videoIds = playlistItemsData.items.map(item => item.contentDetails.videoId).filter(id => id).join(',');
+    
+    if (videoIds) {
+      // Fetch video details
+      const videoDetailsUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id=${videoIds}&key=${apiKey}`;
+      const videoDetailsResponse = await fetch(videoDetailsUrl);
+      const videoDetailsData = await videoDetailsResponse.json();
+      
+      // Process and save videos
+      for (let i = 0; i < videoDetailsData.items.length; i++) {
+        const video = videoDetailsData.items[i];
+        const playlistItem = playlistItemsData.items[i];
+        
+        const existingVideo = await args.graph.getVertexByKey('Video', video.id);
+        let videoVertexId;
+        
+        if (!existingVideo) {
+          const createVideoResult = await args.graph.createVertex({
+            L: 'Video',
+            P: {
+              key: video.id,
+              videoId: video.id,
+              title: video.snippet.title,
+              description: video.snippet.description,
+              thumbnails: video.snippet.thumbnails,
+              publishedAt: video.snippet.publishedAt,
+              channelId: video.snippet.channelId,
+              channelTitle: video.snippet.channelTitle,
+              viewCount: video.statistics.viewCount,
+              likeCount: video.statistics.likeCount,
+              commentCount: video.statistics.commentCount,
+              duration: video.contentDetails.duration
+            }
+          });
+          videoVertexId = createVideoResult.id;
+        } else {
+          videoVertexId = existingVideo.id;
+          // Update video data
+          await args.graph.updateVertex(videoVertexId, {
+            title: video.snippet.title,
+            description: video.snippet.description,
+            thumbnails: video.snippet.thumbnails,
+            viewCount: video.statistics.viewCount,
+            likeCount: video.statistics.likeCount,
+            commentCount: video.statistics.commentCount
+          });
+        }
+        
+        // Create PlaylistVideo edge
+        const existingPlaylistVideoEdge = await args.graph.getEdgeByKey('PlaylistVideo', `${playlistVertexId}-${videoVertexId}`);
+        if (!existingPlaylistVideoEdge) {
+          await args.graph.createEdge({
+            T: 'PlaylistVideo',
+            S: playlistVertexId,
+            E: videoVertexId,
+            P: {
+              key: `${playlistVertexId}-${videoVertexId}`,
+              position: playlistItem.snippet.position,
+              addedAt: playlistItem.snippet.publishedAt
+            }
+          });
+        } else {
+          // Update position if changed
+          await args.graph.updateEdge(existingPlaylistVideoEdge.id, {
+            position: playlistItem.snippet.position
+          });
+        }
+        
+        // Create ChannelVideo edge if needed
+        const channelVertex = await args.graph.getVertexByKey('Channel', video.snippet.channelId);
+        if (channelVertex) {
+          const existingChannelVideoEdge = await args.graph.getEdgeByKey('ChannelVideo', `${channelVertex.id}-${videoVertexId}`);
+          if (!existingChannelVideoEdge) {
+            await args.graph.createEdge({
+              T: 'ChannelVideo',
+              S: channelVertex.id,
+              E: videoVertexId,
+              P: {
+                key: `${channelVertex.id}-${videoVertexId}`
+              }
+            });
+          }
+        }
+        
+        // Create UserVideo edge if user is logged in
+        if (args.user) {
+          const existingUserVideoEdge = await args.graph.getEdgeByKey('UserVideo', `${args.user.id}-${videoVertexId}`);
+          if (!existingUserVideoEdge) {
+            await args.graph.createEdge({
+              T: 'UserVideo',
+              S: args.user.id,
+              E: videoVertexId,
+              P: {
+                key: `${args.user.id}-${videoVertexId}`,
+                addedAt: new Date().toISOString()
+              }
+            });
+          }
+        }
+        
+        videos.push({
+          ...video,
+          position: playlistItem.snippet.position
+        });
+      }
+    }
+    
+    totalFetched += playlistItemsData.items.length;
+  }
+  
+  nextPageToken = playlistItemsData.nextPageToken;
+} while (nextPageToken && totalFetched < maxVideos);
+
+// Sort videos by position
+videos.sort((a, b) => a.position - b.position);
+
+// Return success response
+return {
+  success: true,
+  data: {
+    playlist: playlist,
+    playlistVertexId: playlistVertexId,
+    videosAdded: videos.length,
+    videos: videos.slice(0, maxVideos)
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

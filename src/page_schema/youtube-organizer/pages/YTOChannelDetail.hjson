@@ -1,0 +1,723 @@
+{
+  vertexes: [
+    {
+      id: "page1",
+      L: "Page",
+      P: {
+        key: "YTOChannelDetail",
+        name: "YouTube Organizer Channel Detail",
+        description: "View channel videos and playlists",
+        url: "/yto/channel/:channelId"
+      }
+    },
+    {
+      id: "layout1",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+return {
+  getChannelId: () => {
+    const path = args.location.pathname;
+    const match = path.match(/\/yto\/channel\/(.+)/);
+    return match ? match[1] : null;
+  }
+};
+''',
+        props: '''
+// Initialize tab state
+const [activeTab, setActiveTab] = args.createSignal("Videos");
+
+return {
+  data: {
+    activeTab,
+    setActiveTab
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: calc(100vh - 8rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "channel",
+        serverFunction: '''
+// Fetch channel details
+const channelId = args.contextData.channelId;
+if (!channelId) {
+  return null;
+}
+
+const result = await args.session.run(
+  `MATCH (c:Channel {channelId: $channelId})
+   RETURN c`,
+  { channelId: channelId }
+);
+
+if (result.records.length === 0) {
+  return null;
+}
+
+const channel = result.records[0].get('c').properties;
+return {
+  id: channel.id,
+  channelId: channel.channelId,
+  title: channel.title,
+  description: channel.description,
+  thumbnails: channel.thumbnails,
+  subscriberCount: channel.subscriberCount,
+  videoCount: channel.videoCount,
+  viewCount: channel.viewCount
+};
+''',
+        props: '''
+const channelId = args.fns.getChannelId();
+const channel = args.contextData.channel;
+
+if (!channel) {
+  return {
+    as: "div",
+    data: {
+      channelId: channelId
+    }
+  };
+}
+
+return {
+  as: "div",
+  data: {
+    channelId: channelId
+  }
+};
+''',
+        css: '''
+return "";
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const channel = args.contextData.channel;
+if (!channel) {
+  return {
+    as: "div"
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const channel = args.contextData.channel;
+if (!channel) {
+  return {
+    as: "p",
+    text: "Channel not found"
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const channel = args.contextData.channel;
+if (!channel) return { as: "" };
+
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 0.75rem;
+  
+  @media (min-width: 768px) {
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const channel = args.contextData.channel;
+const thumbnailUrl = channel.thumbnails?.default?.url || '';
+return {
+  as: "img",
+  src: thumbnailUrl,
+  alt: channel.title + " profile picture",
+  loading: "lazy"
+};
+''',
+        css: '''
+return `._id {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: ${args.theme.var.color.background_dark_200};
+  flex-shrink: 0;
+  
+  @media (min-width: 768px) {
+    width: 80px;
+    height: 80px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const channel = args.contextData.channel;
+return {
+  as: "h1",
+  text: channel.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  
+  @media (min-width: 768px) {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const channel = args.contextData.channel;
+const formatCount = (count) => {
+  if (!count) return "0";
+  const num = parseInt(count);
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + "M";
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + "K";
+  }
+  return num.toString();
+};
+
+const subscribers = formatCount(channel.subscriberCount) + " subscribers";
+const videos = channel.videoCount + " videos";
+const views = formatCount(channel.viewCount) + " views";
+
+return {
+  as: "p",
+  text: subscribers + " • " + videos + " • " + views
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "YTOTabBar",
+        props: '''
+const activeTab = args.contextData.activeTab;
+const setActiveTab = args.contextData.setActiveTab;
+
+return {
+  tabs: '["Videos", "Playlists", "About"]',
+  activeTab: activeTab(),
+  onTabChange: `(tab) => args.contextData.setActiveTab(tab)`
+};
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const activeTab = args.contextData.activeTab;
+return {
+  as: "div",
+  role: "tabpanel",
+  "aria-labelledby": "tab-" + activeTab()
+};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "videos",
+        serverFunction: '''
+// Fetch channel videos
+const channelId = args.contextData.channelId;
+const activeTab = args.contextData.activeTab;
+
+if (!channelId || activeTab() !== "Videos") {
+  return [];
+}
+
+const result = await args.session.run(
+  `MATCH (c:Channel {channelId: $channelId})-[cv:ChannelVideo]->(v:Video)
+   RETURN v
+   ORDER BY v.publishedAt DESC
+   LIMIT 50`,
+  { channelId: channelId }
+);
+
+return result.records.map(record => {
+  const video = record.get('v').properties;
+  return {
+    id: video.id,
+    videoId: video.videoId,
+    title: video.title,
+    description: video.description,
+    thumbnails: video.thumbnails,
+    publishedAt: video.publishedAt,
+    channelId: video.channelId,
+    channelTitle: video.channelTitle,
+    viewCount: video.viewCount,
+    duration: video.duration
+  };
+});
+''',
+        props: '''
+const activeTab = args.contextData.activeTab;
+const videos = args.contextData.videos || [];
+
+if (activeTab() !== "Videos") {
+  return { as: "" };
+}
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "videoList",
+        loop: true,
+        props: '''
+const videos = args.contextData.videos || [];
+if (videos.length === 0) {
+  return {
+    data: [{
+      id: "empty",
+      isEmpty: true
+    }]
+  };
+}
+return {
+  data: videos
+};
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.videoList;
+if (item.isEmpty) {
+  return {
+    as: "p",
+    text: "No videos found"
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 2rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOVideoCard",
+        props: '''
+const item = args.contextData.videoList;
+if (item.isEmpty) {
+  return { as: "" };
+}
+return {
+  video: JSON.stringify(item)
+};
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "playlists",
+        serverFunction: '''
+// Fetch channel playlists
+const channelId = args.contextData.channelId;
+const activeTab = args.contextData.activeTab;
+
+if (!channelId || activeTab() !== "Playlists") {
+  return [];
+}
+
+// Get playlists from this channel that the user has access to
+const result = await args.session.run(
+  `MATCH (p:Playlist {channelId: $channelId})
+   WHERE EXISTS((u:User)-[:UserPlaylist]->(p)) OR p.status.privacyStatus = 'public'
+   RETURN p
+   ORDER BY p.title`,
+  { channelId: channelId }
+);
+
+return result.records.map(record => {
+  const playlist = record.get('p').properties;
+  return {
+    id: playlist.id,
+    playlistId: playlist.playlistId,
+    title: playlist.title,
+    description: playlist.description,
+    thumbnails: playlist.thumbnails,
+    channelTitle: playlist.channelTitle,
+    itemCount: playlist.itemCount,
+    status: playlist.status
+  };
+});
+''',
+        props: '''
+const activeTab = args.contextData.activeTab;
+const playlists = args.contextData.playlists || [];
+
+if (activeTab() !== "Playlists") {
+  return { as: "" };
+}
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "playlistList",
+        loop: true,
+        props: '''
+const playlists = args.contextData.playlists || [];
+if (playlists.length === 0) {
+  return {
+    data: [{
+      id: "empty",
+      isEmpty: true
+    }]
+  };
+}
+return {
+  data: playlists
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.playlistList;
+if (item.isEmpty) {
+  return {
+    as: "p",
+    text: "No playlists found"
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOPlaylistCard",
+        props: '''
+const item = args.contextData.playlistList;
+if (item.isEmpty) {
+  return { as: "" };
+}
+return {
+  playlist: JSON.stringify(item),
+  onClick: `args.navigate('/yto/playlist/${item.playlistId}')`
+};
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const activeTab = args.contextData.activeTab;
+const channel = args.contextData.channel;
+
+if (activeTab() !== "About" || !channel) {
+  return { as: "" };
+}
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 0.75rem;
+  
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "About"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const channel = args.contextData.channel;
+return {
+  as: "p",
+  text: channel.description || "No description available"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  white-space: pre-wrap;
+  
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page1", E: "layout1" },
+    { id: "e2", T: "Attr", S: "page1", E: "1" },
+    { id: "e3", T: "Attr", S: "1", E: "2" },
+    { id: "e4", T: "Attr", S: "2", E: "3" },
+    { id: "e5", T: "Attr", S: "3", E: "4" },
+    { id: "e6", T: "Attr", S: "2", E: "5" },
+    { id: "e7", T: "Attr", S: "5", E: "6" },
+    { id: "e8", T: "Attr", S: "5", E: "7" },
+    { id: "e9", T: "Attr", S: "7", E: "8" },
+    { id: "e10", T: "Attr", S: "7", E: "9" },
+    { id: "e11", T: "Attr", S: "2", E: "10" },
+    { id: "e12", T: "Attr", S: "2", E: "11" },
+    { id: "e13", T: "Attr", S: "11", E: "12" },
+    { id: "e14", T: "Attr", S: "12", E: "13" },
+    { id: "e15", T: "Attr", S: "13", E: "14" },
+    { id: "e16", T: "Attr", S: "13", E: "15" },
+    { id: "e17", T: "Attr", S: "11", E: "16" },
+    { id: "e18", T: "Attr", S: "16", E: "17" },
+    { id: "e19", T: "Attr", S: "17", E: "18" },
+    { id: "e20", T: "Attr", S: "17", E: "19" },
+    { id: "e21", T: "Attr", S: "11", E: "20" },
+    { id: "e22", T: "Attr", S: "20", E: "21" },
+    { id: "e23", T: "Attr", S: "20", E: "22" }
+  ]
+}

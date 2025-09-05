@@ -1,0 +1,288 @@
+{
+  vertexes: [
+    {
+      id: "1",
+      L: "Component",
+      P: {
+        key: "YTOChannelCard",
+        name: "YouTube Organizer Channel Card",
+        description: "Accessible card component for displaying channel information"
+      }
+    },
+    {
+      id: "2",
+      L: "ComponentVariant",
+      P: {
+        key: "channel",
+        type: "string",
+        defValue: "{}"
+      }
+    },
+    {
+      id: "3",
+      L: "ComponentVariant",
+      P: {
+        key: "onClick",
+        type: "string",
+        defValue: ""
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+return {
+  formatSubscribers: (count) => {
+    if (!count) return "0 subscribers";
+    const num = parseInt(count);
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + "M subscribers";
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + "K subscribers";
+    }
+    return num + " subscribers";
+  }
+};
+''',
+        props: '''
+const channelData = args.contextData.props?.channel;
+const channel = typeof channelData === 'string' ? JSON.parse(channelData) : channelData || {};
+const onClick = args.contextData.props?.onClick;
+return {
+  as: "article",
+  onClick: onClick ? () => eval(onClick) : undefined,
+  role: "article",
+  tabIndex: 0,
+  "aria-label": `${channel.title || "Channel"} channel card`
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:focus {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+  
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const channelData = args.contextData.props?.channel;
+const channel = typeof channelData === 'string' ? JSON.parse(channelData) : channelData || {};
+const thumbnailUrl = channel.thumbnails?.default?.url || '';
+const channelTitle = channel.title || "Channel";
+return {
+  as: "img",
+  src: thumbnailUrl,
+  alt: channelTitle + " profile picture",
+  loading: "lazy",
+  onerror: "this.style.display='none'"
+};
+''',
+        css: '''
+return `._id {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: ${args.theme.var.color.background_dark_200};
+  flex-shrink: 0;
+  
+  @media (min-width: 768px) {
+    width: 80px;
+    height: 80px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const channelData = args.contextData.props?.channel;
+const channel = typeof channelData === 'string' ? JSON.parse(channelData) : channelData || {};
+return {
+  as: "h3",
+  text: channel.title || "Unknown Channel"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  
+  @media (min-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const channelData = args.contextData.props?.channel;
+const channel = typeof channelData === 'string' ? JSON.parse(channelData) : channelData || {};
+const subscribers = args.fns.formatSubscribers(channel.subscriberCount);
+const videoCount = channel.videoCount ? channel.videoCount + " videos" : "";
+const separator = subscribers && videoCount ? " • " : "";
+return {
+  as: "p",
+  text: subscribers + separator + videoCount
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const channelData = args.contextData.props?.channel;
+const channel = typeof channelData === 'string' ? JSON.parse(channelData) : channelData || {};
+const description = channel.description || "";
+const truncated = description.length > 100 ? description.substring(0, 100) + "..." : description;
+return {
+  as: "p",
+  text: truncated,
+  title: description
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.8125rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+  
+  @media (max-width: 767px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "material-symbols:chevron-right-rounded",
+  width: 24,
+  height: 24,
+  "aria-hidden": "true"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.5;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  
+  ${args.parentItems[0].ref()}:hover & {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "1", E: "2" },
+    { id: "e2", T: "ComponentVariant", S: "1", E: "3" },
+    { id: "e3", T: "Attr", S: "1", E: "4" },
+    { id: "e4", T: "Attr", S: "4", E: "5" },
+    { id: "e5", T: "Attr", S: "4", E: "6" },
+    { id: "e6", T: "Attr", S: "6", E: "7" },
+    { id: "e7", T: "Attr", S: "6", E: "8" },
+    { id: "e8", T: "Attr", S: "6", E: "9" },
+    { id: "e9", T: "Attr", S: "4", E: "10" }
+  ]
+}

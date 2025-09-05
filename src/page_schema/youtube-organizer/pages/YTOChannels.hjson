@@ -1,0 +1,785 @@
+{
+  vertexes: [
+    {
+      id: "page1",
+      L: "Page",
+      P: {
+        key: "YTOChannels",
+        name: "YouTube Organizer Channels",
+        description: "Manage YouTube channels",
+        url: "/yto/channels"
+      }
+    },
+    {
+      id: "layout1",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+return {
+  showAddModal: () => {
+    const [modalOpen, setModalOpen] = args.contextData.modalState || [false, () => {}];
+    setModalOpen(true);
+  },
+  closeModal: () => {
+    const [modalOpen, setModalOpen] = args.contextData.modalState || [false, () => {}];
+    const [channelUrl, setChannelUrl] = args.contextData.urlState || ["", () => {}];
+    const [apiKey, setApiKey] = args.contextData.apiKeyState || ["", () => {}];
+    setModalOpen(false);
+    setChannelUrl("");
+    setApiKey("");
+  },
+  addChannel: async () => {
+    const [channelUrl] = args.contextData.urlState || [""];
+    const [apiKey] = args.contextData.apiKeyState || [""];
+    const [loading, setLoading] = args.contextData.loadingState || [false, () => {}];
+    
+    if (!channelUrl) {
+      args.showErrorToast("Please enter a channel URL");
+      return;
+    }
+    
+    if (!apiKey && !process.env.YOUTUBE_API_KEY) {
+      args.showErrorToast("Please enter a YouTube API key");
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const result = await args.executeServerFunction('fetchYouTubeChannel', {
+        channelUrl: channelUrl,
+        apiKey: apiKey
+      });
+      
+      if (result.success) {
+        args.showSuccessToast(`Channel "${result.data.channel.snippet.title}" added successfully with ${result.data.videosAdded} videos`);
+        args.fns.closeModal();
+        // Refresh the page to show new channel
+        window.location.reload();
+      } else {
+        args.showErrorToast(result.error || "Failed to add channel");
+      }
+    } catch (error) {
+      args.showErrorToast(error.message || "Failed to add channel");
+    } finally {
+      setLoading(false);
+    }
+  }
+};
+''',
+        props: '''
+// Initialize modal and form state
+const [modalOpen, setModalOpen] = args.createSignal(false);
+const [channelUrl, setChannelUrl] = args.createSignal("");
+const [apiKey, setApiKey] = args.createSignal("");
+const [loading, setLoading] = args.createSignal(false);
+
+return {
+  data: {
+    modalState: [modalOpen, setModalOpen],
+    urlState: [channelUrl, setChannelUrl],
+    apiKeyState: [apiKey, setApiKey],
+    loadingState: [loading, setLoading]
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: calc(100vh - 8rem);
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "My Channels"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  
+  @media (min-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "channels",
+        serverFunction: '''
+// Fetch user's channels
+if (!args.user) {
+  return [];
+}
+
+const result = await args.session.run(
+  `MATCH (u:User {id: $userId})-[uc:UserChannel]->(c:Channel)
+   RETURN c
+   ORDER BY c.title`,
+  { userId: args.user.id }
+);
+
+return result.records.map(record => {
+  const channel = record.get('c').properties;
+  return {
+    id: channel.id,
+    channelId: channel.channelId,
+    title: channel.title,
+    description: channel.description,
+    thumbnails: channel.thumbnails,
+    subscriberCount: channel.subscriberCount,
+    videoCount: channel.videoCount
+  };
+});
+''',
+        props: '''
+const channels = args.contextData.channels || [];
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "channelList",
+        loop: true,
+        props: '''
+const channels = args.contextData.channels || [];
+if (channels.length === 0) {
+  return {
+    data: [{
+      id: "empty",
+      isEmpty: true
+    }]
+  };
+}
+return {
+  data: channels
+};
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.channelList;
+if (item.isEmpty) {
+  // Empty state
+  return {
+    as: "div"
+  };
+}
+// Channel card wrapper
+return {
+  as: "div"
+};
+''',
+        css: '''
+const item = args.contextData.channelList;
+if (item.isEmpty) {
+  return `._id {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: ${args.theme.var.color.text};
+    opacity: 0.6;
+  }`;
+}
+return "";
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.channelList;
+if (item.isEmpty) {
+  return {
+    as: "icon",
+    icon: "material-symbols:subscriptions-outline",
+    width: 64,
+    height: 64
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.channelList;
+if (item.isEmpty) {
+  return {
+    as: "p",
+    text: "No channels added yet"
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.channelList;
+if (item.isEmpty) {
+  return {
+    as: "p",
+    text: "Click the + button to add your first channel"
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "YTOChannelCard",
+        props: '''
+const item = args.contextData.channelList;
+if (item.isEmpty) {
+  return { as: "" };
+}
+return {
+  channel: JSON.stringify(item),
+  onClick: `args.navigate('/yto/channel/${item.channelId}')`
+};
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "YTOFloatingButton",
+        props: '''
+return {
+  icon: "material-symbols:add-rounded",
+  label: "Add Channel",
+  onClick: "args.fns.showAddModal()"
+};
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const [modalOpen] = args.contextData.modalState || [false];
+if (!modalOpen()) return { as: "" };
+
+return {
+  as: "portal"
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  role: "dialog",
+  "aria-modal": "true",
+  "aria-labelledby": "modal-title"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Add YouTube Channel",
+  id: "modal-title"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1.5rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  htmlFor: "channel-url"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Channel URL"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const [channelUrl, setChannelUrl] = args.contextData.urlState || ["", () => {}];
+return {
+  as: "input",
+  type: "url",
+  id: "channel-url",
+  placeholder: "https://youtube.com/@channelname",
+  value: channelUrl(),
+  onInput: (e) => setChannelUrl(e.target.value),
+  required: true
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: border-color 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  htmlFor: "api-key"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "YouTube API Key (optional)"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const [apiKey, setApiKey] = args.contextData.apiKeyState || ["", () => {}];
+return {
+  as: "input",
+  type: "password",
+  id: "api-key",
+  placeholder: "Enter your YouTube API key",
+  value: apiKey(),
+  onInput: (e) => setApiKey(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: border-color 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "22",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Note: If no API key is provided, the system will use the default key if available."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "23",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "24",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  type: "button",
+  text: "Cancel",
+  onClick: () => args.fns.closeModal()
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1.5rem;
+  background: ${args.theme.var.color.background_dark_200};
+  color: ${args.theme.var.color.text};
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_300};
+  }
+  
+  &:focus {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "25",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const [loading] = args.contextData.loadingState || [false];
+return {
+  as: "button",
+  type: "button",
+  text: loading() ? "Adding..." : "Add Channel",
+  onClick: () => args.fns.addChannel(),
+  disabled: loading()
+};
+''',
+        css: '''
+const [loading] = args.contextData.loadingState || [false];
+return `._id {
+  padding: 0.75rem 1.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  &:focus {
+    outline: 2px solid ${args.theme.var.color.primary};
+    outline-offset: 2px;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page1", E: "layout1" },
+    { id: "e2", T: "Attr", S: "page1", E: "1" },
+    { id: "e3", T: "Attr", S: "1", E: "2" },
+    { id: "e4", T: "Attr", S: "2", E: "3" },
+    { id: "e5", T: "Attr", S: "1", E: "4" },
+    { id: "e6", T: "Attr", S: "4", E: "5" },
+    { id: "e7", T: "Attr", S: "5", E: "6" },
+    { id: "e8", T: "Attr", S: "6", E: "7" },
+    { id: "e9", T: "Attr", S: "6", E: "8" },
+    { id: "e10", T: "Attr", S: "6", E: "9" },
+    { id: "e11", T: "Attr", S: "6", E: "10" },
+    { id: "e12", T: "Attr", S: "1", E: "11" },
+    { id: "e13", T: "Attr", S: "1", E: "12" },
+    { id: "e14", T: "Attr", S: "12", E: "13" },
+    { id: "e15", T: "Attr", S: "13", E: "14" },
+    { id: "e16", T: "Attr", S: "13", E: "15" },
+    { id: "e17", T: "Attr", S: "15", E: "16" },
+    { id: "e18", T: "Attr", S: "16", E: "17" },
+    { id: "e19", T: "Attr", S: "16", E: "18" },
+    { id: "e20", T: "Attr", S: "15", E: "19" },
+    { id: "e21", T: "Attr", S: "19", E: "20" },
+    { id: "e22", T: "Attr", S: "19", E: "21" },
+    { id: "e23", T: "Attr", S: "15", E: "22" },
+    { id: "e24", T: "Attr", S: "13", E: "23" },
+    { id: "e25", T: "Attr", S: "23", E: "24" },
+    { id: "e26", T: "Attr", S: "23", E: "25" }
+  ]
+}

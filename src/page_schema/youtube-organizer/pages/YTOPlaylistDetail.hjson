@@ -1,0 +1,678 @@
+{
+  vertexes: [
+    {
+      id: "page1",
+      L: "Page",
+      P: {
+        key: "YTOPlaylistDetail",
+        name: "YouTube Organizer Playlist Detail",
+        description: "View playlist videos",
+        url: "/yto/playlist/:playlistId"
+      }
+    },
+    {
+      id: "layout1",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+return {
+  getPlaylistId: () => {
+    const path = args.location.pathname;
+    const match = path.match(/\/yto\/playlist\/(.+)/);
+    return match ? match[1] : null;
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: calc(100vh - 8rem);
+}`;
+'''
+      }
+    },
+    {
+      id: "2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "playlist",
+        serverFunction: '''
+// Fetch playlist details
+const playlistId = args.contextData.playlistId;
+if (!playlistId) {
+  return null;
+}
+
+const result = await args.session.run(
+  `MATCH (p:Playlist {playlistId: $playlistId})
+   RETURN p`,
+  { playlistId: playlistId }
+);
+
+if (result.records.length === 0) {
+  return null;
+}
+
+const playlist = result.records[0].get('p').properties;
+return {
+  id: playlist.id,
+  playlistId: playlist.playlistId,
+  title: playlist.title,
+  description: playlist.description,
+  thumbnails: playlist.thumbnails,
+  channelTitle: playlist.channelTitle,
+  channelId: playlist.channelId,
+  itemCount: playlist.itemCount,
+  status: playlist.status,
+  publishedAt: playlist.publishedAt
+};
+''',
+        props: '''
+const playlistId = args.fns.getPlaylistId();
+const playlist = args.contextData.playlist;
+
+if (!playlist) {
+  return {
+    as: "div",
+    data: {
+      playlistId: playlistId
+    }
+  };
+}
+
+return {
+  as: "div",
+  data: {
+    playlistId: playlistId
+  }
+};
+'''
+      }
+    },
+    {
+      id: "3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+if (!playlist) {
+  return {
+    as: "div"
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+if (!playlist) {
+  return {
+    as: "p",
+    text: "Playlist not found"
+  };
+}
+return { as: "" };
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "5",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+if (!playlist) return { as: "" };
+
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: 1rem;
+  overflow: hidden;
+  
+  @media (min-width: 768px) {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "6",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+const thumbnailUrl = playlist.thumbnails?.high?.url || playlist.thumbnails?.medium?.url || playlist.thumbnails?.default?.url || '';
+return {
+  as: "div",
+  style: `background-image: url('${thumbnailUrl}')`
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding-top: 56.25%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: ${args.theme.var.color.background_dark_300};
+  position: relative;
+  
+  @media (min-width: 768px) {
+    padding-top: 0;
+    height: 100%;
+    min-height: 200px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "7",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+const privacy = playlist.status?.privacyStatus || "public";
+if (privacy === "public") return { as: "" };
+
+const privacyText = privacy === "private" ? "Private" : "Unlisted";
+const privacyIcon = privacy === "private" ? "material-symbols:lock-rounded" : "material-symbols:link-rounded";
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 0.375rem;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "8",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+const privacy = playlist.status?.privacyStatus || "public";
+const privacyIcon = privacy === "private" ? "material-symbols:lock-rounded" : "material-symbols:link-rounded";
+return {
+  as: "icon",
+  icon: privacyIcon,
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "9",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+const privacy = playlist.status?.privacyStatus || "public";
+const privacyText = privacy === "private" ? "Private" : "Unlisted";
+return {
+  as: "span",
+  text: privacyText
+};
+'''
+      }
+    },
+    {
+      id: "10",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  
+  @media (min-width: 768px) {
+    padding: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "11",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+return {
+  as: "h1",
+  text: playlist.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "12",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+return {
+  as: "p",
+  text: playlist.channelTitle
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  margin: 0 0 0.5rem 0;
+  cursor: pointer;
+  
+  &:hover {
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "13",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+const itemCount = playlist.itemCount || 0;
+const itemText = itemCount === 1 ? "1 video" : itemCount + " videos";
+
+const formatDate = (date) => {
+  if (!date) return "";
+  const published = new Date(date);
+  return published.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+};
+
+const publishedDate = formatDate(playlist.publishedAt);
+const separator = itemText && publishedDate ? " • " : "";
+
+return {
+  as: "p",
+  text: itemText + separator + publishedDate
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  margin: 0 0 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "14",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.playlist;
+if (!playlist.description) return { as: "" };
+
+return {
+  as: "p",
+  text: playlist.description
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.8;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  
+  @media (min-width: 768px) {
+    font-size: 0.9375rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "15",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        contextName: "videos",
+        serverFunction: '''
+// Fetch playlist videos
+const playlistId = args.contextData.playlistId;
+if (!playlistId) {
+  return [];
+}
+
+const result = await args.session.run(
+  `MATCH (p:Playlist {playlistId: $playlistId})-[pv:PlaylistVideo]->(v:Video)
+   RETURN v, pv.position as position
+   ORDER BY pv.position`,
+  { playlistId: playlistId }
+);
+
+return result.records.map((record, index) => {
+  const video = record.get('v').properties;
+  const position = record.get('position');
+  return {
+    id: video.id,
+    videoId: video.videoId,
+    title: video.title,
+    description: video.description,
+    thumbnails: video.thumbnails,
+    publishedAt: video.publishedAt,
+    channelId: video.channelId,
+    channelTitle: video.channelTitle,
+    viewCount: video.viewCount,
+    duration: video.duration,
+    position: position || index + 1
+  };
+});
+''',
+        props: '''
+const videos = args.contextData.videos || [];
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "16",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const videos = args.contextData.videos || [];
+const videoCount = videos.length;
+const videoText = videoCount === 1 ? "1 video" : videoCount + " videos";
+return {
+  as: "h2",
+  text: videoText
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.5rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "17",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "videoList",
+        loop: true,
+        props: '''
+const videos = args.contextData.videos || [];
+if (videos.length === 0) {
+  return {
+    data: [{
+      id: "empty",
+      isEmpty: true
+    }]
+  };
+}
+return {
+  data: videos
+};
+'''
+      }
+    },
+    {
+      id: "18",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.videoList;
+if (item.isEmpty) {
+  return {
+    as: "p",
+    text: "No videos in this playlist"
+  };
+}
+return {
+  as: "div"
+};
+''',
+        css: '''
+const item = args.contextData.videoList;
+if (item.isEmpty) {
+  return `._id {
+    text-align: center;
+    padding: 2rem;
+    color: ${args.theme.var.color.text};
+    opacity: 0.6;
+  }`;
+}
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}`;
+'''
+      }
+    },
+    {
+      id: "19",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.videoList;
+if (item.isEmpty) return { as: "" };
+
+return {
+  as: "span",
+  text: item.position || "1"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  width: 2rem;
+  text-align: center;
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+  
+  @media (max-width: 767px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.videoList;
+if (item.isEmpty) return { as: "" };
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "21",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOVideoCard",
+        props: '''
+const item = args.contextData.videoList;
+return {
+  video: JSON.stringify(item)
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page1", E: "layout1" },
+    { id: "e2", T: "Attr", S: "page1", E: "1" },
+    { id: "e3", T: "Attr", S: "1", E: "2" },
+    { id: "e4", T: "Attr", S: "2", E: "3" },
+    { id: "e5", T: "Attr", S: "3", E: "4" },
+    { id: "e6", T: "Attr", S: "2", E: "5" },
+    { id: "e7", T: "Attr", S: "5", E: "6" },
+    { id: "e8", T: "Attr", S: "6", E: "7" },
+    { id: "e9", T: "Attr", S: "7", E: "8" },
+    { id: "e10", T: "Attr", S: "7", E: "9" },
+    { id: "e11", T: "Attr", S: "5", E: "10" },
+    { id: "e12", T: "Attr", S: "10", E: "11" },
+    { id: "e13", T: "Attr", S: "10", E: "12" },
+    { id: "e14", T: "Attr", S: "10", E: "13" },
+    { id: "e15", T: "Attr", S: "10", E: "14" },
+    { id: "e16", T: "Attr", S: "2", E: "15" },
+    { id: "e17", T: "Attr", S: "15", E: "16" },
+    { id: "e18", T: "Attr", S: "15", E: "17" },
+    { id: "e19", T: "Attr", S: "17", E: "18" },
+    { id: "e20", T: "Attr", S: "18", E: "19" },
+    { id: "e21", T: "Attr", S: "18", E: "20" },
+    { id: "e22", T: "Attr", S: "20", E: "21" }
+  ]
+}
