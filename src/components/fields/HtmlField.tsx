@@ -90,6 +90,46 @@ export function replacePlaceholderWithUrl(
 }
 
 // HtmlField
+// Helper function to parse serverFunction and extract accessed properties
+function parseContextProperties(functionBody: string): string[] {
+  const properties: string[] = [];
+  
+  // Match patterns like args.contextData.propertyName or args.contextData['propertyName']
+  // This regex captures:
+  // 1. args.contextData.propertyName (dot notation)
+  // 2. args.contextData['propertyName'] (bracket notation with single quotes)
+  // 3. args.contextData["propertyName"] (bracket notation with double quotes)
+  const regex = /args\.contextData\.(\w+)|args\.contextData\[['"]([^'"]+)['"]\]/g;
+  
+  let match;
+  while ((match = regex.exec(functionBody)) !== null) {
+    // match[1] is for dot notation, match[2] is for bracket notation
+    const property = match[1] || match[2];
+    if (property && !properties.includes(property)) {
+      properties.push(property);
+    }
+  }
+  
+  return properties;
+}
+
+// Helper function to create a new context object from the proxy
+function createContextObject(contextData: any, functionBody: string) {
+  // Parse the function to find which properties are accessed
+  const accessedProperties = parseContextProperties(functionBody);
+  
+  // Create a new object with only the accessed properties
+  const newContext: any = {};
+  
+  for (const prop of accessedProperties) {
+    // if (prop in contextData) {
+      newContext[prop] = contextData[prop];
+    // }
+  }
+  
+  return newContext;
+}
+
 export function HtmlField(
   props: JSX.HTMLAttributes<HTMLDivElement> & {
     as?: string;
@@ -154,7 +194,7 @@ export function HtmlField(
           return executeServerFunction(
             {
               functionBody: local.serverFunction,
-              contextData: contextData,
+              contextData: createContextObject(contextData, local.serverFunction),
             },
             {
               nodes: {},
