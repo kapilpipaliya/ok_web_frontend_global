@@ -107,7 +107,8 @@ The application uses a page schema system for defining reusable components, page
   └── [website_name]/
       ├── components/     # Component definitions in hjson format
       ├── pages/         # Page templates in hjson format
-      └── themes/        # Theme definitions in hjson format
+      ├── themes/        # Theme definitions in hjson format
+      └── functions/      # Server-side functions in hjson format
 ```
 
 **Example:**
@@ -121,17 +122,24 @@ The application uses a page schema system for defining reusable components, page
   │   ├── pages/
   │   │   ├── DemoHomePage.hjson
   │   │   └── DemoContactForm.hjson
-  │   └── themes/
-  │       ├── DefaultTheme.hjson
-  │       └── DarkTheme.hjson
+  │   ├── themes/
+  │   │   ├── DefaultTheme.hjson
+  │   │   └── DarkTheme.hjson
+  │   └── functions/
+  │       ├── getUserData.hjson
+  │       ├── submitForm.hjson
+  │       └── calculatePrice.hjson
   └── mywebsite/
       ├── components/
       │   └── CustomButton.hjson
       ├── pages/
       │   └── LandingPage.hjson
-      └── themes/
-          ├── BrandTheme.hjson
-          └── MinimalTheme.hjson
+      ├── themes/
+      │   ├── BrandTheme.hjson
+      │   └── MinimalTheme.hjson
+      └── functions/
+          ├── fetchProducts.hjson
+          └── processPayment.hjson
 ```
 
 **Schema Format:**
@@ -163,6 +171,58 @@ Components and pages are defined using hjson files with the following structure:
 }
 ```
 
+**Page Layouts:**
+Pages can have layout components that wrap the page content. To add layouts to a page:
+1. Create a `PageLayout` vertex with properties:
+   - `componentName`: The name of the Component to use as layout
+   - `displayOrder`: Number to determine the order of multiple layouts
+2. Connect it to the Page vertex with edge type `PageLayout`: `Page-[PageLayout]->PageLayout`
+3. Multiple layouts can be added and they will wrap the page content in order of `displayOrder`
+
+**Example Page with Layout:**
+```hjson
+{
+  vertexes: [
+    {
+      id: "page1",
+      L: "Page",
+      P: {
+        key: "HomePage"
+      }
+    },
+    {
+      id: "layout1",
+      L: "PageLayout",
+      P: {
+        componentName: "MainLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "layout2",
+      L: "PageLayout",
+      P: {
+        componentName: "ThemeLayout",
+        displayOrder: 2
+      }
+    },
+    // ... page content vertices
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page1", E: "layout1" },
+    { id: "e2", T: "PageLayout", S: "page1", E: "layout2" },
+    // ... other edges
+  ]
+}
+```
+
+In this example, the page content will be wrapped first by `ThemeLayout` (displayOrder: 2), then by `MainLayout` (displayOrder: 1), creating a nested structure:
+```
+MainLayout
+  └── ThemeLayout
+      └── Page content
+```
+
 **Important Notes:**
 - When `componentName` is "Html", the `as` property must be included in the props return statement or in the Properties object
 - If `as` is omitted, the component behaves as a fragment and only renders children
@@ -177,10 +237,81 @@ The `~/page_schema/loader.ts` module provides several utility functions:
 - `getWebsiteSchemasSync(websiteName)` - Gets schemas for a specific website
 
 **Note:** 
-- If multiple websites have components, pages, or themes with the same name, only the last one loaded will be used.
+- If multiple websites have components, pages, themes, or functions with the same name, only the last one loaded will be used.
 - Components are registered under the "Component" label
 - Pages are registered under the "Page" label  
 - Themes are registered under the "Theme" label
+- Functions are registered under the "Function" label
+
+**Server Functions:**
+Server functions allow you to execute server-side code and return results to the client. They are defined in the `functions` directory:
+
+**Function Schema Format (hjson):**
+```hjson
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getUserData",
+        description: "Fetches user data from the database",
+        body: '''
+// This function runs on the server
+// It has access to args object with:
+// - args.params: Request parameters
+// - args.session: Current session
+// - args.graph: Graph interface
+
+const userId = args.params.userId;
+if (!userId) {
+  throw new Error("User ID is required");
+}
+
+// Example: Fetch user from database
+const user = await args.graph.getVertex(userId);
+
+// Return data to client
+return {
+  success: true,
+  data: {
+    id: user.id,
+    name: user.P.name,
+    email: user.P.email,
+    balance: user.P.raBalance
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}
+```
+
+**Function Properties:**
+- `key`: Unique identifier for the function
+- `description`: Brief description of what the function does
+- `body`: Function body that will be executed server-side
+
+**Available in Function Body:**
+The function body has access to an `args` object containing:
+- `args.params`: Request parameters sent from the client
+- `args.session`: Current user session
+- `args.graph`: Graph interface for database operations
+- `args.user`: Current authenticated user (if available)
+
+**Calling Server Functions from Components:**
+```javascript
+// In component props or fns:
+const result = await args.executeServerFunction('getUserData', {
+  userId: 'user123'
+});
+
+if (result.success) {
+  console.log('User data:', result.data);
+}
+```
 
 **Schema Creation Guidelines:**
 When creating component and page schemas, follow the guidelines in `/src/routes/api/chat/SYSTEM_PROMPT.md`. Key points:
@@ -753,11 +884,12 @@ The application implements a role-based access control system:
 
 - `/src` - Main application code
   - `/components` - Reusable UI components
-  - `/page_schema` - Page, component, and theme schemas organized by website
+  - `/page_schema` - Page, component, theme, and function schemas organized by website
     - `/[website_name]/` - Website-specific schemas
       - `/components/` - Component definitions in hjson format
       - `/pages/` - Page templates in hjson format
       - `/themes/` - Theme definitions in hjson format
+      - `/functions/` - Server-side function definitions in hjson format
     - `loader.ts` - Dynamic schema loader module
   - `/cypher` - Neo4j database operations
     - `/constants` - Reserved keywords for Cypher queries

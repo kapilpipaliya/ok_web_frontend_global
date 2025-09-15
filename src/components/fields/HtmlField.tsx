@@ -90,19 +90,34 @@ export function replacePlaceholderWithUrl(
 }
 
 // HtmlField
-// Helper function to parse serverFunction and extract accessed properties
-function parseContextProperties(functionBody: string): string[] {
+// Helper function to parse serverFunction and extract accessed properties and function calls
+function parseContextAccess(functionBody: string): { properties: string[], functionCalls: Array<{match: string, property: string}> } {
   const properties: string[] = [];
+  const functionCalls: Array<{match: string, property: string}> = [];
   
-  // Match patterns like args.contextData.propertyName or args.contextData['propertyName']
-  // This regex captures:
-  // 1. args.contextData.propertyName (dot notation)
-  // 2. args.contextData['propertyName'] (bracket notation with single quotes)
-  // 3. args.contextData["propertyName"] (bracket notation with double quotes)
-  const regex = /args\.contextData\.(\w+)|args\.contextData\[['"]([^'"]+)['"]\]/g;
+  // Match function calls like args.contextData.propertyName()
+  const functionRegex = /args\.contextData\.(\w+)\(\)|args\.contextData\[['"]([^'"]+)['"]\]\(\)/g;
   
   let match;
-  while ((match = regex.exec(functionBody)) !== null) {
+  while ((match = functionRegex.exec(functionBody)) !== null) {
+    const property = match[1] || match[2];
+    if (property) {
+      functionCalls.push({
+        match: match[0],
+        property: property
+      });
+    }
+  }
+  
+  // Match property access (non-function)
+  // This regex captures:
+  // 1. args.contextData.propertyName (dot notation, not followed by parentheses)
+  // 2. args.contextData['propertyName'] (bracket notation with single quotes, not followed by parentheses)
+  // 3. args.contextData["propertyName"] (bracket notation with double quotes, not followed by parentheses)
+  const propertyRegex = /args\.contextData\.(\w+)(?!\()|args\.contextData\[['"]([^'"]+)['"]\](?!\()/g;
+  
+  match = null;
+  while ((match = propertyRegex.exec(functionBody)) !== null) {
     // match[1] is for dot notation, match[2] is for bracket notation
     const property = match[1] || match[2];
     if (property && !properties.includes(property)) {
@@ -110,24 +125,41 @@ function parseContextProperties(functionBody: string): string[] {
     }
   }
   
-  return properties;
+  return { properties, functionCalls };
 }
 
-// Helper function to create a new context object from the proxy
-function createContextObject(contextData: any, functionBody: string) {
-  // Parse the function to find which properties are accessed
-  const accessedProperties = parseContextProperties(functionBody);
+// Helper function to create a new context object from the proxy and process function body
+function createContextObject(contextData: any, functionBody: string): { context: any, processedFunctionBody: string } {
+  // Parse the function to find properties and function calls
+  const { properties, functionCalls } = parseContextAccess(functionBody);
   
   // Create a new object with only the accessed properties
   const newContext: any = {};
   
-  for (const prop of accessedProperties) {
-    // if (prop in contextData) {
-      newContext[prop] = contextData[prop];
-    // }
+  for (const prop of properties) {
+    newContext[prop] = contextData[prop];
   }
   
-  return newContext;
+  // Process function calls and replace them with their values
+  let processedFunctionBody = functionBody;
+  
+  for (const { match, property } of functionCalls) {
+    if (typeof contextData[property] === 'function') {
+      try {
+        const result = contextData[property]();
+        // Replace the function call with its result (properly stringified)
+        processedFunctionBody = processedFunctionBody.replace(
+          match,
+          JSON.stringify(result)
+        );
+      } catch (error) {
+        console.error(`Error calling contextData.${property}():`, error);
+        // If function call fails, leave it as is
+      }
+    }
+  }
+  
+  return { context: newContext, processedFunctionBody };
 }
 
 export function HtmlField(
@@ -191,10 +223,11 @@ export function HtmlField(
 
         // If serverFunction is provided, execute it
         if (local.serverFunction) {
+          const { context, processedFunctionBody } = createContextObject(contextData, local.serverFunction);
           return executeServerFunction(
             {
-              functionBody: local.serverFunction,
-              contextData: createContextObject(contextData, local.serverFunction),
+              functionBody: processedFunctionBody,
+              contextData: context,
             },
             {
               nodes: {},
