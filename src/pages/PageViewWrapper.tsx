@@ -37,6 +37,8 @@ import type {
   FetchFormMetaDataResult,
 } from "~/pages/functions/fetchPageData";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
+import {SaveCancelButton} from "~/components/form/SaveCancelButton";
+import {isDisabledTxn} from "~/lib/graph/transaction/value/isDisabledTxn";
 
 export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const [graph, setGraph] = useGraph();
@@ -338,12 +340,12 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
                 }
               >
                 <Content />
-                {/* <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
+                <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
                 <SaveCancelButton
                   closePopUp={props.closePopUp}
                   disabled={isDisabledTxn(formStore().P.txnId, graph)}
                 />
-              </Show> */}
+              </Show>
               </Match>
             </Switch>
           </FormContext.Provider>

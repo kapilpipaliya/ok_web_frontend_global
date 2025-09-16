@@ -78,6 +78,18 @@ export const SETTINGS_CONSTANTS = {
           border-radius: 4px;
           cursor: pointer;
           border: none;
+          transition: opacity 0.2s ease, background-color 0.2s ease;
+          
+          &:hover:not(:disabled) {
+            background-color: \${args.theme.var.color.primary_dark_100};
+          }
+          
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: \${args.theme.var.color.background_light_300};
+            color: \${args.theme.var.color.background_light_300_text};
+          }
         }\`;`,
     },
     CONTAINER_CSS: `return \`._id {
