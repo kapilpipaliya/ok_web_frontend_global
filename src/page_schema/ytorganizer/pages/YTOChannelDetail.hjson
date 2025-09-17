@@ -1,0 +1,657 @@
+{
+  vertexes: [
+    {
+      id: "yto_channel_detail_page",
+      L: "Page",
+      P: {
+        key: "YTOChannelDetail",
+        url: "/yto/channel",
+        title: "Channel Details - YouTube Organizer",
+        description: "View channel details with videos and playlists tabs"
+      }
+    },
+    {
+      id: "yto_channel_detail_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "yto_channel_detail_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary}, ${args.theme.var.color.primary_dark_200});
+  color: ${args.theme.var.color.primary_text};
+  padding: 2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="1" fill="white" opacity="0.05"/><circle cx="40" cy="80" r="1.5" fill="white" opacity="0.08"/></svg>') repeat;
+    pointer-events: none;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_header_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_back_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.navigate('/yto/channels')
+};
+''',
+        css: '''
+return `._id {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  
+  &:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateX(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.625rem;
+    margin-bottom: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_back_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-left",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_back_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Back to Channels"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    text-align: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_avatar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 120px;
+  height: 120px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 3px solid rgba(255,255,255,0.2);
+  
+  @media (max-width: 768px) {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_avatar_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:api-1",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  opacity: 0.7;
+  
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_meta",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+// Get channel data from query parameters
+const channelId = args.searchParams?.channelId;
+const channelTitle = 'Sample Channel';
+
+return {
+  as: "h1",
+  text: channelTitle
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.2;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_stats",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+    gap: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_subscriber_count",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const subscriberCount = '0';
+
+return {
+  as: "span",
+  text: `${subscriberCount} subscribers`
+};
+''',
+        css: '''
+return `._id {
+  background: rgba(255,255,255,0.15);
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_subscriber_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:user-multiple",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_video_count",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const videoCount = '0';
+
+return {
+  as: "span",
+  text: `${videoCount} videos`
+};
+''',
+        css: '''
+return `._id {
+  background: rgba(255,255,255,0.15);
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_video_count_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:video",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_description",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const description = 'This channel will load from YouTube API.';
+
+return {
+  as: "p",
+  text: description
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+  opacity: 0.9;
+  max-width: 600px;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_tabs",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOTabBar",
+        props: '''
+return {
+  tabs: [
+    { id: 'videos', label: 'Videos', icon: 'carbon:video' },
+    { id: 'playlists', label: 'Playlists', icon: 'carbon:playlist' }
+  ],
+  activeTab: 'videos'
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 1rem;
+  border: 2px dashed ${args.theme.var.color.border};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_empty_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 80px;
+  height: 80px;
+  background: ${args.theme.var.color.info_light_100};
+  color: ${args.theme.var.color.info};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    width: 64px;
+    height: 64px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_empty_icon_svg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:video",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  @media (max-width: 768px) {
+    width: 32px;
+    height: 32px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_empty_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "No Content Yet"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: ${args.theme.var.color.text};
+  
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_empty_description",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "This channel's content is being loaded or no content is available yet. Check back soon."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  max-width: 400px;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e0", T: "PageLayout", S: "yto_channel_detail_page", E: "yto_channel_detail_layout" },
+    { id: "e1", T: "Attr", S: "yto_channel_detail_page", E: "yto_channel_detail_root" },
+    { id: "e2", T: "Attr", S: "yto_channel_detail_root", E: "yto_channel_detail_header" },
+    { id: "e3", T: "Attr", S: "yto_channel_detail_header", E: "yto_channel_detail_header_content" },
+    { id: "e4", T: "Attr", S: "yto_channel_detail_header_content", E: "yto_channel_detail_back_button" },
+    { id: "e5", T: "Attr", S: "yto_channel_detail_back_button", E: "yto_channel_detail_back_icon" },
+    { id: "e6", T: "Attr", S: "yto_channel_detail_back_button", E: "yto_channel_detail_back_text" },
+    { id: "e7", T: "Attr", S: "yto_channel_detail_header_content", E: "yto_channel_detail_info" },
+    { id: "e8", T: "Attr", S: "yto_channel_detail_info", E: "yto_channel_detail_avatar" },
+    { id: "e9", T: "Attr", S: "yto_channel_detail_avatar", E: "yto_channel_detail_avatar_icon" },
+    { id: "e10", T: "Attr", S: "yto_channel_detail_info", E: "yto_channel_detail_meta" },
+    { id: "e11", T: "Attr", S: "yto_channel_detail_meta", E: "yto_channel_detail_title" },
+    { id: "e12", T: "Attr", S: "yto_channel_detail_meta", E: "yto_channel_detail_stats" },
+    { id: "e13", T: "Attr", S: "yto_channel_detail_stats", E: "yto_channel_detail_subscriber_count" },
+    { id: "e14", T: "Attr", S: "yto_channel_detail_subscriber_count", E: "yto_channel_detail_subscriber_icon" },
+    { id: "e15", T: "Attr", S: "yto_channel_detail_stats", E: "yto_channel_detail_video_count" },
+    { id: "e16", T: "Attr", S: "yto_channel_detail_video_count", E: "yto_channel_detail_video_count_icon" },
+    { id: "e17", T: "Attr", S: "yto_channel_detail_meta", E: "yto_channel_detail_description" },
+    { id: "e18", T: "Attr", S: "yto_channel_detail_root", E: "yto_channel_detail_container" },
+    { id: "e19", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_tabs" },
+    { id: "e20", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_content" },
+    { id: "e21", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_empty_state" },
+    { id: "e22", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_icon" },
+    { id: "e23", T: "Attr", S: "yto_channel_detail_empty_icon", E: "yto_channel_detail_empty_icon_svg" },
+    { id: "e24", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_title" },
+    { id: "e25", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_description" }
+  ]
+}
