@@ -5,7 +5,7 @@
       L: "Page",
       P: {
         key: "YTOPlaylists",
-        url: "/yto/playlists",
+        url: "/playlists",
         title: "Playlists - YouTube Organizer",
         description: "Manage your YouTube playlists with custom ordering and organization"
       }

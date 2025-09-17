@@ -5,7 +5,7 @@
       L: "Page",
       P: {
         key: "YTOChannels",
-        url: "/yto/channels",
+        url: "/channels",
         title: "Channels - YouTube Organizer",
         description: "Manage your favorite YouTube channels and discover new content"
       }

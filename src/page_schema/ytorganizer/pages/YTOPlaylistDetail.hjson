@@ -5,7 +5,7 @@
       L: "Page",
       P: {
         key: "YTOPlaylistDetail",
-        url: "/yto/playlist",
+        url: "/playlist",
         title: "Playlist Details - YouTube Organizer",
         description: "View and manage videos in your YouTube playlist with custom ordering"
       }
@@ -98,7 +98,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.navigate('/yto/playlists')
+  onClick: () => args.navigate('/playlists')
 };
 ''',
         css: '''

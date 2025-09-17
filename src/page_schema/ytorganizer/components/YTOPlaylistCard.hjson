@@ -40,7 +40,7 @@ const defaultOnClick = () => {
     const params = new URLSearchParams({
       playlistId: playlist.id,
     });
-    args.navigate(`/yto/playlist?${params.toString()}`);
+    args.navigate(`/playlist?${params.toString()}`);
   }
 };
 

@@ -745,7 +745,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.navigate("/yto/channels")
+  onClick: () => args.navigate("/channels")
 };
 ''',
         css: '''
@@ -828,7 +828,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.navigate("/yto/playlists")
+  onClick: () => args.navigate("/playlists")
 };
 ''',
         css: '''
@@ -911,7 +911,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.navigate("/yto/channels")
+  onClick: () => args.navigate("/channels")
 };
 ''',
         css: '''

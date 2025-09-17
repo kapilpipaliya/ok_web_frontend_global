@@ -120,16 +120,16 @@ return `._id {
         componentName: "Html",
         props: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath === '/yto' || currentPath === '/yto/';
+const isActive = currentPath === '' || currentPath === '/';
 
 return {
   as: "button",
-  onClick: () => args.navigate('/yto')
+  onClick: () => args.navigate('')
 };
 ''',
         css: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath === '/yto' || currentPath === '/yto/';
+const isActive = currentPath === '' || currentPath === '/';
 
 return `._id {
   background: ${isActive ? args.theme.var.color.primary : 'transparent'};
@@ -216,16 +216,16 @@ return `._id {
         componentName: "Html",
         props: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/yto/channels');
+const isActive = currentPath.includes('/channels');
 
 return {
   as: "button",
-  onClick: () => args.navigate('/yto/channels')
+  onClick: () => args.navigate('/channels')
 };
 ''',
         css: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/yto/channels');
+const isActive = currentPath.includes('/channels');
 
 return `._id {
   background: ${isActive ? args.theme.var.color.primary : 'transparent'};
@@ -312,16 +312,16 @@ return `._id {
         componentName: "Html",
         props: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/yto/playlists');
+const isActive = currentPath.includes('/playlists');
 
 return {
   as: "button",
-  onClick: () => args.navigate('/yto/playlists')
+  onClick: () => args.navigate('/playlists')
 };
 ''',
         css: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/yto/playlists');
+const isActive = currentPath.includes('/playlists');
 
 return `._id {
   background: ${isActive ? args.theme.var.color.primary : 'transparent'};
@@ -408,7 +408,7 @@ return `._id {
         componentName: "Html",
         props: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/yto/search');
+const isActive = currentPath.includes('/search');
 
 return {
   as: "button",
@@ -417,7 +417,7 @@ return {
 ''',
         css: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/yto/search');
+const isActive = currentPath.includes('/search');
 
 return `._id {
   background: ${isActive ? args.theme.var.color.primary : 'transparent'};
@@ -504,7 +504,7 @@ return `._id {
         componentName: "Html",
         props: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/yto/settings');
+const isActive = currentPath.includes('/settings');
 
 return {
   as: "button",
@@ -513,7 +513,7 @@ return {
 ''',
         css: '''
 const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/yto/settings');
+const isActive = currentPath.includes('/settings');
 
 return `._id {
   background: ${isActive ? args.theme.var.color.primary : 'transparent'};

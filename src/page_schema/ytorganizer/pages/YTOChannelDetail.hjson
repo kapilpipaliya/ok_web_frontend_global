@@ -5,7 +5,7 @@
       L: "Page",
       P: {
         key: "YTOChannelDetail",
-        url: "/yto/channel",
+        url: "/channel",
         title: "Channel Details - YouTube Organizer",
         description: "View channel details with videos and playlists tabs"
       }
@@ -98,7 +98,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.navigate('/yto/channels')
+  onClick: () => args.navigate('/channels')
 };
 ''',
         css: '''
