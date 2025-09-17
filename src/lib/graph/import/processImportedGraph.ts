@@ -37,16 +37,17 @@ export function processImportedGraph(
 ): ProcessedGraphResult {
   const { metaTxnId, rootVertexIds, vertexIdMap } = importResult;
 
-  // First, check if ANY imported vertex (not just roots) has Label "Page", "Component", or "Theme"
+  // First, check if ANY imported vertex (not just roots) has Label "Page", "Component", "Theme", or "Function"
   for (const [, newId] of vertexIdMap) {
     const vertex = graph.vertexes[newId];
     if (
       vertex &&
       (vertex.L.includes("Page") ||
         vertex.L.includes("Component") ||
-        vertex.L.includes("Theme"))
+        vertex.L.includes("Theme") ||
+        vertex.L.includes("Function"))
     ) {
-      // Found an existing Page/Component/Theme, use it as the parent
+      // Found an existing Page/Component/Theme/Function, use it as the parent
       return {
         metaTxnId,
         parentId: newId,

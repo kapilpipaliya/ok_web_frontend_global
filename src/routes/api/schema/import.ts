@@ -48,7 +48,7 @@ type SetGraphType = ReturnType<typeof createAppState>[1];
 
 async function findExistingVertex(
   session: Session,
-  label: "Component" | "Page" | "Theme",
+  label: "Component" | "Page" | "Theme" | "Function",
   key: string,
 ): Promise<string | null> {
   const result = await session.run(
@@ -136,6 +136,23 @@ async function deleteExistingItems(
         console.log(`Deleting existing theme: ${themeKey}`);
         await deleteVertex(dbSession, existingThemeId, user);
         deletedItems.push(`Theme: ${themeKey}`);
+      }
+    }
+  }
+
+  // Delete existing functions
+  if (websiteSchemas.functions) {
+    for (const functionKey of Object.keys(websiteSchemas.functions)) {
+      const existingFunctionId = await findExistingVertex(
+        dbSession,
+        "Function",
+        functionKey,
+      );
+
+      if (existingFunctionId) {
+        console.log(`Deleting existing function: ${functionKey}`);
+        await deleteVertex(dbSession, existingFunctionId, user);
+        deletedItems.push(`Function: ${functionKey}`);
       }
     }
   }
@@ -286,7 +303,7 @@ async function importSingleSchema(
   schema: ImportGraphData,
   graph: GraphType,
   setGraph: SetGraphType,
-  type: "Component" | "Page" | "Theme",
+  type: "Component" | "Page" | "Theme" | "Function",
   key: string,
   tx: Transaction,
 ): Promise<SchemaImportResult> {
@@ -414,6 +431,27 @@ async function importSchemas(
     }
   }
 
+  // Process functions
+  if (websiteSchemas.functions) {
+    for (const [functionKey, schema] of Object.entries(websiteSchemas.functions)) {
+      const result = await importSingleSchema(
+        schema,
+        graph,
+        setGraph,
+        "Function",
+        functionKey,
+        tx,
+      );
+
+      // Save to database
+      await mutateData(result.commitData, tx);
+
+      stats.importedItems.push(`Function: ${functionKey}`);
+      stats.totalVertices += result.vertexCount;
+      stats.totalEdges += result.edgeCount;
+    }
+  }
+
   return stats;
 }
 
@@ -435,6 +473,7 @@ async function buildSuccessResponse(
       components: Object.keys(websiteSchemas.components || {}).length,
       pages: Object.keys(websiteSchemas.pages || {}).length,
       themes: Object.keys(websiteSchemas.themes || {}).length,
+      functions: Object.keys(websiteSchemas.functions || {}).length,
     },
   };
 }
@@ -455,7 +494,8 @@ export async function GET({ request }: APIEvent) {
     if (
       !websiteSchemas.components &&
       !websiteSchemas.pages &&
-      !websiteSchemas.themes
+      !websiteSchemas.themes &&
+      !websiteSchemas.functions
     ) {
       throw new APIError(`No schemas found for website: ${websiteName}`, 404);
     }

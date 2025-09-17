@@ -4,7 +4,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { APIError } from "~/lib/api/server/apiErrorHandler";
 import type { Vertex } from "~/lib/graph/type/vertex";
 
-export type DeletableVertexType = "Page" | "EmailTemplate" | "Component" | "Function";
+export type DeletableVertexType = "Page" | "EmailTemplate" | "Component" | "Function" | "Theme";
 
 export async function deleteVertex(
   dbSession: Session,
@@ -41,11 +41,13 @@ export async function deleteVertex(
       vertexType = "Component";
     } else if (labels.includes("Function")) {
       vertexType = "Function";
+    } else if (labels.includes("Theme")) {
+      vertexType = "Theme";
     }
 
     if (!vertexType) {
       throw new APIError(
-        "Vertex is not a Page, EmailTemplate, Component, or Function",
+        `Vertex is not a Page, EmailTemplate, Component, Function, or Theme. Found labels: ${labels.join(", ")}. Vertex ID: ${vertexId}. Vertex key: ${deletedVertex.P.key || "undefined"}`,
         400,
       );
     }
@@ -270,6 +272,9 @@ export async function deleteVertex(
     } else if (vertexType === "Component") {
       activityType = "component_delete";
       description = `Deleted component: ${deletedVertex.P.key || vertexId}`;
+    } else if (vertexType === "Theme") {
+      activityType = "theme_delete";
+      description = `Deleted theme: ${deletedVertex.P.key || vertexId}`;
     } else {
       activityType = "function_delete";
       description = `Deleted function: ${deletedVertex.P.key || vertexId}`;
