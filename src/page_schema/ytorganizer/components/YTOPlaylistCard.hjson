@@ -1,0 +1,560 @@
+{
+  vertexes: [
+    {
+      id: "yto_playlist_card_component",
+      L: "Component",
+      P: {
+        key: "YTOPlaylistCard"
+      }
+    },
+    {
+      id: "yto_playlist_card_variant_playlist",
+      L: "ComponentVariant",
+      P: {
+        key: "playlist",
+        type: "object",
+        defValue: null
+      }
+    },
+    {
+      id: "yto_playlist_card_variant_onclick",
+      L: "ComponentVariant",
+      P: {
+        key: "onClick",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "yto_playlist_card_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.props?.playlist;
+
+// Default click handler navigates to playlist detail with query parameters
+const defaultOnClick = () => {
+  if (playlist?.id) {
+    const params = new URLSearchParams({
+      playlistId: playlist.id,
+    });
+    args.navigate(`/yto/playlist?${params.toString()}`);
+  }
+};
+
+return {
+  as: "div",
+  onClick: defaultOnClick
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.surface};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: ${args.theme.var.color.success_light_300};
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    gap: 0.625rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_thumbnail_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: ${args.theme.var.color.videoBackground};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_thumbnail",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.props?.playlist;
+const thumbnailUrl = playlist?.thumbnail || '';
+
+if (thumbnailUrl) {
+  return {
+    as: "img",
+    src: thumbnailUrl,
+    alt: playlist?.title || 'Playlist thumbnail'
+  };
+} else {
+  return {
+    as: "div"
+  };
+}
+''',
+        css: '''
+const playlist = args.contextData.props?.playlist;
+const thumbnailUrl = playlist?.thumbnail || '';
+
+if (thumbnailUrl) {
+  return `._id {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }`;
+} else {
+  return `._id {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${args.theme.var.color.success_light_100};
+    color: ${args.theme.var.color.success};
+  }`;
+}
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_placeholder_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.props?.playlist;
+const thumbnailUrl = playlist?.thumbnail || '';
+
+if (!thumbnailUrl) {
+  return {
+    as: "icon",
+    icon: "carbon:playlist",
+    width: 48,
+    height: 48
+  };
+} else {
+  return { as: "div", style: "display: none;" };
+}
+''',
+        css: '''
+return `._id {
+  opacity: 0.7;
+  
+  @media (max-width: 768px) {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_video_count",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.props?.playlist;
+const videoCount = playlist?.videoCount || 0;
+
+return {
+  as: "div",
+  text: `${videoCount} videos`
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+  
+  @media (max-width: 768px) {
+    bottom: 0.375rem;
+    right: 0.375rem;
+    font-size: 0.6875rem;
+    padding: 0.1875rem 0.375rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.props?.playlist;
+const title = playlist?.title || 'Untitled Playlist';
+
+return {
+  as: "h3",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: ${args.theme.var.color.text};
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_description",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.props?.playlist;
+const description = playlist?.description || '';
+
+if (description) {
+  return {
+    as: "p",
+    text: description
+  };
+} else {
+  return { as: "div", style: "display: none;" };
+}
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_meta",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_stats",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.props?.playlist;
+const videoCount = playlist?.videoCount || 0;
+const lastUpdated = playlist?.lastUpdated || '';
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_video_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:video",
+  width: 14,
+  height: 14
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_video_count_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const playlist = args.contextData.props?.playlist;
+const videoCount = playlist?.videoCount || 0;
+
+return {
+  as: "span",
+  text: `${videoCount} videos`
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  
+  ._id:hover & {
+    opacity: 1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_play_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: (e) => {
+    e.stopPropagation();
+    args.showWarningToast("Play playlist functionality coming soon!");
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.success};
+  color: ${args.theme.var.color.success_text};
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: ${args.theme.var.color.success_dark_200};
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_play_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:play",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_menu_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: (e) => {
+    e.stopPropagation();
+    args.showWarningToast("Playlist menu coming soon!");
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  padding: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_card_menu_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:overflow-menu-horizontal",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "yto_playlist_card_component", E: "yto_playlist_card_variant_playlist" },
+    { id: "e2", T: "ComponentVariant", S: "yto_playlist_card_component", E: "yto_playlist_card_variant_onclick" },
+    { id: "e3", T: "Attr", S: "yto_playlist_card_component", E: "yto_playlist_card_root" },
+    { id: "e4", T: "Attr", S: "yto_playlist_card_root", E: "yto_playlist_card_thumbnail_container" },
+    { id: "e5", T: "Attr", S: "yto_playlist_card_thumbnail_container", E: "yto_playlist_card_thumbnail" },
+    { id: "e6", T: "Attr", S: "yto_playlist_card_thumbnail", E: "yto_playlist_card_placeholder_icon" },
+    { id: "e7", T: "Attr", S: "yto_playlist_card_thumbnail_container", E: "yto_playlist_card_video_count" },
+    { id: "e8", T: "Attr", S: "yto_playlist_card_root", E: "yto_playlist_card_content" },
+    { id: "e9", T: "Attr", S: "yto_playlist_card_content", E: "yto_playlist_card_title" },
+    { id: "e10", T: "Attr", S: "yto_playlist_card_content", E: "yto_playlist_card_description" },
+    { id: "e11", T: "Attr", S: "yto_playlist_card_content", E: "yto_playlist_card_meta" },
+    { id: "e12", T: "Attr", S: "yto_playlist_card_meta", E: "yto_playlist_card_stats" },
+    { id: "e13", T: "Attr", S: "yto_playlist_card_stats", E: "yto_playlist_card_video_icon" },
+    { id: "e14", T: "Attr", S: "yto_playlist_card_stats", E: "yto_playlist_card_video_count_text" },
+    { id: "e15", T: "Attr", S: "yto_playlist_card_meta", E: "yto_playlist_card_actions" },
+    { id: "e16", T: "Attr", S: "yto_playlist_card_actions", E: "yto_playlist_card_play_button" },
+    { id: "e17", T: "Attr", S: "yto_playlist_card_play_button", E: "yto_playlist_card_play_icon" },
+    { id: "e18", T: "Attr", S: "yto_playlist_card_actions", E: "yto_playlist_card_menu_button" },
+    { id: "e19", T: "Attr", S: "yto_playlist_card_menu_button", E: "yto_playlist_card_menu_icon" }
+  ]
+}

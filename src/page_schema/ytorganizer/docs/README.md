@@ -257,15 +257,17 @@ Users can set their preferred language through LanguageSetting vertex:
 1. Navigate to Channels page
 2. Tap floating button
 3. Enter YouTube channel URL or ID
-4. System fetches channel info and videos via API
-5. Creates ChannelSetting and Channel vertices with relationships
+4. System calls server function with `?channelUrl=...` query parameter
+5. Server fetches channel info and videos via API
+6. Creates ChannelSetting and Channel vertices with relationships
 
 ### Adding a Playlist
 1. Navigate to Playlists page  
 2. Tap floating button
 3. Enter YouTube playlist URL or ID
-4. System fetches playlist info and videos via API
-5. Creates PlaylistSetting and Playlist vertices with relationships
+4. System calls server function with `?playlistId=...` query parameter
+5. Server fetches playlist info and videos via API
+6. Creates PlaylistSetting and Playlist vertices with relationships
 
 ### Browsing Content
 1. Use bottom navigation to switch between sections
@@ -307,6 +309,24 @@ Users can set their preferred language through LanguageSetting vertex:
 - Provide offline fallbacks where possible
 - Implement proper error handling
 - Use dynamic imports for external libraries in server functions
+- **Use query parameters for data passing**: Pass data to server functions via `args.searchParams`
+
+#### Query Parameter Usage
+```javascript
+// In component - calling server function with query parameters:
+const result = await args.executeServerFunction('fetchYouTubeChannel', {}, {
+  searchParams: { channelUrl: 'https://youtube.com/@channel' }
+});
+
+// Or navigate to page with query parameters:
+args.navigate('/channel-detail', { 
+  search: '?channelId=UCxyz123' 
+});
+
+// In server function - accessing query parameters:
+const channelUrl = args.searchParams?.channelUrl;
+const playlistId = args.searchParams?.playlistId;
+```
 
 #### Example Server Function Pattern
 ```javascript
@@ -324,10 +344,17 @@ try {
     auth: YOUTUBE_API_KEY
   });
   
+  // Extract channel ID from query parameters
+  const channelUrl = args.searchParams?.channelUrl;
+  
+  if (!channelUrl) {
+    throw new Error('Channel URL is required as query parameter');
+  }
+  
   // Extract channel ID from URL or use directly
-  const channelId = args.params.channelUrl.includes('youtube.com') 
-    ? extractChannelId(args.params.channelUrl)
-    : args.params.channelUrl;
+  const channelId = channelUrl.includes('youtube.com') 
+    ? extractChannelId(channelUrl)
+    : channelUrl;
   
   // Fetch channel data
   const channelResponse = await youtube.channels.list({
@@ -414,10 +441,17 @@ try {
     auth: YOUTUBE_API_KEY
   });
   
+  // Extract playlist ID from query parameters
+  const playlistId = args.searchParams?.playlistId;
+  
+  if (!playlistId) {
+    throw new Error('Playlist ID is required as query parameter');
+  }
+  
   // Fetch playlist details
   const playlistResponse = await youtube.playlists.list({
     part: ['snippet', 'contentDetails'],
-    id: [args.params.playlistId]
+    id: [playlistId]
   });
   
   // Fetch playlist items with pagination
@@ -427,7 +461,7 @@ try {
   do {
     const itemsResponse = await youtube.playlistItems.list({
       part: ['snippet', 'contentDetails'],
-      playlistId: args.params.playlistId,
+      playlistId: playlistId,
       maxResults: 50,
       pageToken: nextPageToken
     });
@@ -447,7 +481,7 @@ try {
     RETURN p
     `,
     {
-      playlistId: args.params.playlistId,
+      playlistId: playlistId,
       title: playlistResponse.data.items[0].snippet.title,
       description: playlistResponse.data.items[0].snippet.description,
       thumbnail: playlistResponse.data.items[0].snippet.thumbnails.high.url,
@@ -476,7 +510,7 @@ try {
         description: item.snippet.description,
         thumbnail: item.snippet.thumbnails.high.url,
         publishedAt: item.snippet.publishedAt,
-        playlistId: args.params.playlistId,
+        playlistId: playlistId,
         index: index,
         position: item.snippet.position
       }
@@ -497,7 +531,7 @@ try {
     `,
     {
       userId: args.user.id,
-      playlistId: args.params.playlistId,
+      playlistId: playlistId,
       videoIds: videoIds
     }
   );

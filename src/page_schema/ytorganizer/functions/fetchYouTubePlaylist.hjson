@@ -1,0 +1,137 @@
+{
+  vertexes: [
+    {
+      id: "fetch_youtube_playlist_function",
+      L: "Function",
+      P: {
+        key: "fetchYouTubePlaylist",
+        description: "Fetches YouTube playlist information and videos via YouTube Data API v3 using query parameters",
+        body: '''
+// YouTube API key - replace with actual key
+const YOUTUBE_API_KEY = 'YOUR_API_KEY_HERE';
+
+try {
+  const { google } = await import('googleapis');
+  const youtube = google.youtube({
+    version: 'v3',
+    auth: YOUTUBE_API_KEY
+  });
+  
+  // Extract playlist ID from query parameters
+  const playlistId = args.searchParams?.playlistId || args.location?.query?.playlistId;
+  
+  if (!playlistId) {
+    throw new Error('Playlist ID is required as query parameter');
+  }
+  
+  // Fetch playlist details
+  const playlistResponse = await youtube.playlists.list({
+    part: ['snippet', 'contentDetails'],
+    id: [playlistId]
+  });
+  
+  if (!playlistResponse.data.items || playlistResponse.data.items.length === 0) {
+    throw new Error('Playlist not found');
+  }
+  
+  // Fetch playlist items with pagination
+  let allVideos = [];
+  let nextPageToken = null;
+  
+  do {
+    const itemsResponse = await youtube.playlistItems.list({
+      part: ['snippet', 'contentDetails'],
+      playlistId: playlistId,
+      maxResults: 50,
+      pageToken: nextPageToken
+    });
+    
+    allVideos = allVideos.concat(itemsResponse.data.items);
+    nextPageToken = itemsResponse.data.nextPageToken;
+  } while (nextPageToken);
+  
+  // Store playlist
+  await args.session.run(
+    `
+    MERGE (p:Playlist {id: $playlistId})
+    SET p.title = $title,
+        p.description = $description,
+        p.thumbnail = $thumbnail,
+        p.itemCount = $itemCount
+    RETURN p
+    `,
+    {
+      playlistId: playlistId,
+      title: playlistResponse.data.items[0].snippet.title,
+      description: playlistResponse.data.items[0].snippet.description,
+      thumbnail: playlistResponse.data.items[0].snippet.thumbnails.high.url,
+      itemCount: playlistResponse.data.items[0].contentDetails.itemCount
+    }
+  );
+  
+  // Store videos with playlist index
+  for (const [index, item] of allVideos.entries()) {
+    await args.session.run(
+      `
+      MERGE (v:Video {id: $videoId})
+      SET v.title = $title,
+          v.description = $description,
+          v.thumbnail = $thumbnail,
+          v.publishedAt = $publishedAt
+      WITH v
+      MATCH (p:Playlist {id: $playlistId})
+      MERGE (p)-[r:PlaylistVideo]->(v)
+      SET r.playlistIndex = $index,
+          r.position = $position
+      `,
+      {
+        videoId: item.contentDetails.videoId,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnail: item.snippet.thumbnails.high.url,
+        publishedAt: item.snippet.publishedAt,
+        playlistId: playlistId,
+        index: index,
+        position: item.snippet.position
+      }
+    );
+  }
+  
+  // Initialize PlaylistSetting for user with default order
+  const videoIds = allVideos.map(v => v.contentDetails.videoId);
+  await args.session.run(
+    `
+    MATCH (u:User {id: $userId})
+    MATCH (p:Playlist {id: $playlistId})
+    MERGE (u)-[:UserPlaylist]->(ps:PlaylistSetting)
+    MERGE (ps)-[:PlaylistSettingPlaylist]->(p)
+    SET ps.customOrder = $videoIds,
+        ps.sortBy = 'index',
+        ps.lastUpdated = datetime()
+    `,
+    {
+      userId: args.user.id,
+      playlistId: playlistId,
+      videoIds: videoIds
+    }
+  );
+  
+  return {
+    success: true,
+    playlist: playlistResponse.data.items[0].snippet,
+    videoCount: allVideos.length
+  };
+  
+} catch (error) {
+  console.error('YouTube API Error:', error);
+  return {
+    success: false,
+    error: error.message
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

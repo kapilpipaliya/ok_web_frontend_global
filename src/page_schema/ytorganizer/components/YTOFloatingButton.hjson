@@ -1,0 +1,285 @@
+{
+  vertexes: [
+    {
+      id: "yto_floating_button_component",
+      L: "Component",
+      P: {
+        key: "YTOFloatingButton"
+      }
+    },
+    {
+      id: "yto_floating_button_variant_icon",
+      L: "ComponentVariant",
+      P: {
+        key: "icon",
+        type: "string",
+        defValue: "carbon:add"
+      }
+    },
+    {
+      id: "yto_floating_button_variant_label",
+      L: "ComponentVariant",
+      P: {
+        key: "label",
+        type: "string",
+        defValue: "Add"
+      }
+    },
+    {
+      id: "yto_floating_button_variant_onclick",
+      L: "ComponentVariant",
+      P: {
+        key: "onClick",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "yto_floating_button_variant_color",
+      L: "ComponentVariant",
+      P: {
+        key: "color",
+        type: "string",
+        defValue: "primary"
+      }
+    },
+    {
+      id: "yto_floating_button_option_primary",
+      L: "ComponentVariantOption",
+      P: {
+        key: "primary",
+        value: "primary",
+        description: "Primary theme color"
+      }
+    },
+    {
+      id: "yto_floating_button_option_success",
+      L: "ComponentVariantOption",
+      P: {
+        key: "success",
+        value: "success",
+        description: "Success theme color"
+      }
+    },
+    {
+      id: "yto_floating_button_option_info",
+      L: "ComponentVariantOption",
+      P: {
+        key: "info",
+        value: "info",
+        description: "Info theme color"
+      }
+    },
+    {
+      id: "yto_floating_button_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const icon = args.contextData.props?.icon || "carbon:add";
+const label = args.contextData.props?.label || "Add";
+const onClick = args.contextData.props?.onClick;
+const color = args.contextData.props?.color || "primary";
+
+return {
+  as: "button",
+  onClick: onClick || (() => {})
+};
+''',
+        css: '''
+const color = args.contextData.props?.color || "primary";
+
+// Get color variables based on color prop
+const getColorVars = (colorName) => {
+  switch(colorName) {
+    case "success":
+      return {
+        bg: args.theme.var.color.success,
+        bgHover: args.theme.var.color.success_dark_200,
+        text: args.theme.var.color.success_text
+      };
+    case "info":
+      return {
+        bg: args.theme.var.color.info,
+        bgHover: args.theme.var.color.info_dark_200,
+        text: args.theme.var.color.info_text
+      };
+    default: // primary
+      return {
+        bg: args.theme.var.color.primary,
+        bgHover: args.theme.var.color.primary_dark_200,
+        text: args.theme.var.color.primary_text
+      };
+  }
+};
+
+const colorVars = getColorVars(color);
+
+return `._id {
+  position: fixed;
+  bottom: 6rem;
+  right: 1.5rem;
+  width: 56px;
+  height: 56px;
+  background: ${colorVars.bg};
+  color: ${colorVars.text};
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 50;
+  
+  &:hover {
+    background: ${colorVars.bgHover};
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.15);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+    transition-duration: 0.1s;
+  }
+  
+  &:focus {
+    outline: 2px solid ${colorVars.bg};
+    outline-offset: 4px;
+  }
+  
+  @media (max-width: 768px) {
+    bottom: 5.5rem;
+    right: 1rem;
+    width: 48px;
+    height: 48px;
+  }
+  
+  /* Accessibility: Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+    
+    &:hover {
+      transform: none;
+    }
+    
+    &:active {
+      transform: none;
+    }
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_floating_button_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const icon = args.contextData.props?.icon || "carbon:add";
+
+return {
+  as: "icon",
+  icon: icon,
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  @media (max-width: 768px) {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_floating_button_tooltip",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const label = args.contextData.props?.label || "Add";
+
+return {
+  as: "div",
+  text: label
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: ${args.theme.var.color.text};
+  color: ${args.theme.var.color.background};
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-right: 0.75rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  
+  /* Tooltip arrow */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-left-color: ${args.theme.var.color.text};
+  }
+  
+  ._id:hover &,
+  ._id:focus & {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.625rem;
+    margin-right: 0.5rem;
+    
+    &::after {
+      border-width: 5px;
+    }
+  }
+  
+  /* Hide tooltip on very small screens */
+  @media (max-width: 480px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "yto_floating_button_component", E: "yto_floating_button_variant_icon" },
+    { id: "e2", T: "ComponentVariant", S: "yto_floating_button_component", E: "yto_floating_button_variant_label" },
+    { id: "e3", T: "ComponentVariant", S: "yto_floating_button_component", E: "yto_floating_button_variant_onclick" },
+    { id: "e4", T: "ComponentVariant", S: "yto_floating_button_component", E: "yto_floating_button_variant_color" },
+    { id: "e5", T: "ComponentVariantOption", S: "yto_floating_button_variant_color", E: "yto_floating_button_option_primary" },
+    { id: "e6", T: "ComponentVariantOption", S: "yto_floating_button_variant_color", E: "yto_floating_button_option_success" },
+    { id: "e7", T: "ComponentVariantOption", S: "yto_floating_button_variant_color", E: "yto_floating_button_option_info" },
+    { id: "e8", T: "Attr", S: "yto_floating_button_component", E: "yto_floating_button_root" },
+    { id: "e9", T: "Attr", S: "yto_floating_button_root", E: "yto_floating_button_icon" },
+    { id: "e10", T: "Attr", S: "yto_floating_button_root", E: "yto_floating_button_tooltip" }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  vertexes: [
+    {
+      id: "fetch_youtube_channel_function",
+      L: "Function",
+      P: {
+        key: "fetchYouTubeChannel",
+        description: "Fetches YouTube channel information and videos via YouTube Data API v3 using query parameters",
+        body: '''
+// YouTube API key - replace with actual key
+const YOUTUBE_API_KEY = 'YOUR_API_KEY_HERE';
+
+// Helper function to extract channel ID from URL
+function extractChannelId(url) {
+  // Handle various YouTube URL formats
+  const patterns = [
+    /youtube\.com\/channel\/([a-zA-Z0-9_-]+)/,
+    /youtube\.com\/c\/([a-zA-Z0-9_-]+)/,
+    /youtube\.com\/@([a-zA-Z0-9_-]+)/,
+    /youtube\.com\/user\/([a-zA-Z0-9_-]+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  
+  return url; // Assume it's already a channel ID
+}
+
+try {
+  // Dynamic import of googleapis
+  const { google } = await import('googleapis');
+  
+  // Initialize YouTube API client
+  const youtube = google.youtube({
+    version: 'v3',
+    auth: YOUTUBE_API_KEY
+  });
+  
+  // Extract channel URL from query parameters
+  const channelUrl = args.searchParams?.channelUrl || args.location?.query?.channelUrl;
+  
+  if (!channelUrl) {
+    throw new Error('Channel URL is required as query parameter');
+  }
+  
+  // Extract channel ID from URL or use directly
+  const channelId = channelUrl.includes('youtube.com') 
+    ? extractChannelId(channelUrl)
+    : channelUrl;
+  
+  // Fetch channel data
+  const channelResponse = await youtube.channels.list({
+    part: ['snippet', 'contentDetails', 'statistics'],
+    id: [channelId]
+  });
+  
+  if (!channelResponse.data.items || channelResponse.data.items.length === 0) {
+    throw new Error('Channel not found');
+  }
+  
+  // Fetch channel videos
+  const videosResponse = await youtube.search.list({
+    part: ['snippet'],
+    channelId: channelId,
+    order: 'date',
+    maxResults: 50,
+    type: 'video'
+  });
+  
+  // Store channel in database using args.session
+  const result = await args.session.run(
+    `
+    MERGE (c:Channel {id: $channelId})
+    SET c.title = $title, 
+        c.description = $description,
+        c.thumbnail = $thumbnail,
+        c.subscriberCount = $subscriberCount
+    RETURN c
+    `,
+    {
+      channelId,
+      title: channelResponse.data.items[0].snippet.title,
+      description: channelResponse.data.items[0].snippet.description,
+      thumbnail: channelResponse.data.items[0].snippet.thumbnails.high.url,
+      subscriberCount: channelResponse.data.items[0].statistics.subscriberCount
+    }
+  );
+  
+  // Process and store videos
+  for (const video of videosResponse.data.items) {
+    await args.session.run(
+      `
+      MERGE (v:Video {id: $videoId})
+      SET v.title = $title,
+          v.description = $description,
+          v.thumbnail = $thumbnail,
+          v.publishedAt = $publishedAt
+      WITH v
+      MATCH (c:Channel {id: $channelId})
+      MERGE (c)-[:ChannelVideo]->(v)
+      `,
+      {
+        videoId: video.id.videoId,
+        title: video.snippet.title,
+        description: video.snippet.description,
+        thumbnail: video.snippet.thumbnails.high.url,
+        publishedAt: video.snippet.publishedAt,
+        channelId
+      }
+    );
+  }
+  
+  // Initialize ChannelSetting for user
+  await args.session.run(
+    `
+    MATCH (u:User {id: $userId})
+    MATCH (c:Channel {id: $channelId})
+    MERGE (u)-[:UserChannelSetting]->(cs:ChannelSetting)
+    MERGE (cs)-[:ChannelSettingChannel]->(c)
+    SET cs.lastUpdated = datetime()
+    `,
+    {
+      userId: args.user.id,
+      channelId: channelId
+    }
+  );
+  
+  return {
+    success: true,
+    channel: result.records[0].get('c').properties,
+    videoCount: videosResponse.data.items.length
+  };
+  
+} catch (error) {
+  console.error('YouTube API Error:', error);
+  return {
+    success: false,
+    error: error.message
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}
