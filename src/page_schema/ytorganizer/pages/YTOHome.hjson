@@ -7,7 +7,13 @@
         key: "YTOHome",
         url: "/",
         title: "YouTube Organizer",
-        description: "Dashboard overview of your YouTube channels and playlists"
+        description: "Dashboard overview of your YouTube channels and playlists",
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  enabled: true
+};
+'''
       }
     },
     {
@@ -101,7 +107,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "ph:youtube-logo-fill",
+  icon: "carbon:logo-youtube",
   width: 32,
   height: 32
 };
@@ -311,7 +317,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "ph:television-bold",
+  icon: "carbon:television",
   width: 24,
   height: 24
 };
@@ -453,7 +459,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "ph:playlist-bold",
+  icon: "carbon:playlist",
   width: 24,
   height: 24
 };
@@ -595,7 +601,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "ph:video-bold",
+  icon: "carbon:video",
   width: 24,
   height: 24
 };
@@ -791,7 +797,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "ph:plus-circle-bold",
+  icon: "carbon:add",
   width: 32,
   height: 32
 };
@@ -874,7 +880,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "ph:list-plus-bold",
+  icon: "carbon:playlist",
   width: 32,
   height: 32
 };
@@ -957,7 +963,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "ph:compass-bold",
+  icon: "carbon:explore",
   width: 32,
   height: 32
 };
@@ -1040,7 +1046,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "ph:gear-bold",
+  icon: "carbon:settings",
   width: 32,
   height: 32
 };

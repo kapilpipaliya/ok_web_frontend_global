@@ -7,7 +7,13 @@
         key: "YTOChannelDetail",
         url: "/channel",
         title: "Channel Details - YouTube Organizer",
-        description: "View channel details with videos and playlists tabs"
+        description: "View channel details with videos and playlists tabs",
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  enabled: true
+};
+'''
       }
     },
     {

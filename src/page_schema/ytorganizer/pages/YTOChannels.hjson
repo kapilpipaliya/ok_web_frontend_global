@@ -7,7 +7,13 @@
         key: "YTOChannels",
         url: "/channels",
         title: "Channels - YouTube Organizer",
-        description: "Manage your favorite YouTube channels and discover new content"
+        description: "Manage your favorite YouTube channels and discover new content",
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  enabled: true
+};
+'''
       }
     },
     {
@@ -28,6 +34,10 @@
 return {
   as: "div"
 };
+''',
+        fns: '''
+// State for showing/hiding the add channel form
+const [showAddForm, setShowAddForm] = args.useState(false);
 '''
       }
     },
@@ -344,7 +354,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.showWarningToast("Add channel functionality coming soon!")
+  onClick: () => setShowAddForm(true)
 };
 ''',
         css: '''
@@ -421,7 +431,7 @@ return {
 return {
   icon: "carbon:add",
   label: "Add Channel",
-  onClick: () => args.showWarningToast("Add channel functionality coming soon!"),
+  onClick: () => setShowAddForm(true),
   color: "primary"
 };
 '''

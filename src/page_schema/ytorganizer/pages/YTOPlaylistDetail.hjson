@@ -7,7 +7,13 @@
         key: "YTOPlaylistDetail",
         url: "/playlist",
         title: "Playlist Details - YouTube Organizer",
-        description: "View and manage videos in your YouTube playlist with custom ordering"
+        description: "View and manage videos in your YouTube playlist with custom ordering",
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  enabled: true
+};
+'''
       }
     },
     {
