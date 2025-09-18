@@ -64,7 +64,25 @@ const handleSubmit = async (e) => {
       }
     });
 
-    if (result.success) {
+    if (result.error) {
+      args.showErrorToast(result.error);
+    } else if (result.result && result.result.success) {
+      args.showSuccessToast(result.result.message);
+
+      // Call parent onSubmit if provided
+      if (onSubmit) {
+        onSubmit({
+          url: url,
+          name: name,
+          result: result.result.data
+        });
+      }
+
+      // Reset form and close modal
+      setUrlValue("");
+      setNameValue("");
+      setShowModal(false);
+    } else if (result.success) {
       args.showSuccessToast(result.message);
 
       // Call parent onSubmit if provided
@@ -81,7 +99,7 @@ const handleSubmit = async (e) => {
       setNameValue("");
       setShowModal(false);
     } else {
-      args.showErrorToast(result.message || "Failed to save playlist");
+      args.showErrorToast(result.result?.message || result.message || "Failed to save playlist");
     }
   } catch (error) {
     console.error("Error saving playlist:", error);

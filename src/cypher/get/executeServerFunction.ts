@@ -6,6 +6,7 @@ import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import {executeNamedServerFunction} from "~/cypher/get/executeNamedServerFunction";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import { convertNodeToJson } from "../conversion/convertNodeToJson";
 
 interface ServerFunctionRequest {
   functionBody: string;
@@ -51,6 +52,7 @@ export async function executeServerFunction(
       vertexes: context.vertexes || [],
       executeNamedServerFunction,
       getUserFromSession,
+      convertNodeToJson,
       graph: {
         nodes: context.nodes,
         relationships: context.relationships,

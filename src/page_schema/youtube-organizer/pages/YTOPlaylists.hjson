@@ -61,13 +61,20 @@ return {
         apiKey: apiKey
       }});
       
-      if (result.success) {
+      if (result.error) {
+        args.showErrorToast(result.error);
+      } else if (result.result && result.result.success) {
+        args.showSuccessToast(`Playlist "${result.result.data.playlist.snippet.title}" added successfully with ${result.result.data.videosAdded} videos`);
+        args.fns.closeModal();
+        // Refresh the page to show new playlist
+        window.location.reload();
+      } else if (result.success) {
         args.showSuccessToast(`Playlist "${result.data.playlist.snippet.title}" added successfully with ${result.data.videosAdded} videos`);
         args.fns.closeModal();
         // Refresh the page to show new playlist
         window.location.reload();
       } else {
-        args.showErrorToast(result.error || "Failed to add playlist");
+        args.showErrorToast(result.result?.error || result.error || "Failed to add playlist");
       }
     } catch (error) {
       args.showErrorToast(error.message || "Failed to add playlist");

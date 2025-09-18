@@ -1,0 +1,76 @@
+{
+  vertexes: [
+    {
+      id: "get_user_channels_function",
+      L: "Function",
+      P: {
+        key: "getUserChannels",
+        description: "Fetches all channels saved by the current user with their custom settings",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Cypher query to fetch all user's channels with their settings
+  const query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
+    RETURN c, cs
+    ORDER BY cs.createdAt DESC
+  `;
+
+  // Execute the query
+  const result = await args.session.run(query, {
+    userUuid: user.P.uuid
+  });
+
+  // Return raw converted nodes for frontend processing
+  const channels = result.records.map(record => ({
+    channel: args.convertNodeToJson(record.get('c')),
+    channelSettings: args.convertNodeToJson(record.get('cs'))
+  }));
+
+  return {
+    success: true,
+    data: {
+      channels,
+      totalCount: channels.length,
+      userId: user.id
+    },
+    message: `Found ${channels.length} channels`
+  };
+
+} catch (error) {
+  console.error("Error fetching user channels:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to fetch channels. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to view your channels.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    },
+    data: {
+      channels: [],
+      totalCount: 0
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

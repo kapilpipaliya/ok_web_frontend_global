@@ -126,7 +126,6 @@ const fetchChannelData = async (channelIdentifier) => {
   // Fetch ALL channel videos from the uploads playlist
   // This is the most reliable way to get every video uploaded to the channel
   let allVideos = [];
-  const uploadsPlaylistId = channel.contentDetails?.relatedPlaylists?.uploads;
 
   if (uploadsPlaylistId) {
     let nextPageToken = null;
@@ -236,7 +235,7 @@ try {
   const channelSettingKey = `channel_setting_${user.id}_${channelData.channel.id}`;
 
   const mergeChannelSettingQuery = `
-    MATCH (u:User) WHERE elementId(u) = $userId
+    MATCH (u:User {uuid: $userUuid})
     MATCH (c:Channel {youtubeId: $channelId})
     MERGE (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
     ON CREATE SET
@@ -252,7 +251,7 @@ try {
   `;
 
   await args.session.run(mergeChannelSettingQuery, {
-    userId: user.id,
+    userUuid: user.P.uuid,
     channelId: channelData.channel.id,
     channelSettingKey,
     customName: name || null
@@ -328,7 +327,7 @@ try {
     const videoSettingKey = `video_setting_${user.id}_${video.id}`;
 
     const mergeVideoSettingQuery = `
-      MATCH (u:User) WHERE elementId(u) = $userId
+      MATCH (u:User {uuid: $userUuid})
       MATCH (v:Video {youtubeId: $videoId})
       MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
       ON CREATE SET
@@ -345,7 +344,7 @@ try {
     `;
 
     await args.session.run(mergeVideoSettingQuery, {
-      userId: user.id,
+      userUuid: user.P.uuid,
       videoId: video.id,
       videoSettingKey,
       position: video.snippet.position,
@@ -377,7 +376,11 @@ try {
         }
       });
 
-      if (result.success) {
+      if (result.error) {
+        console.error(`Error from savePlaylist function for ${playlist.id}:`, result.error);
+      } else if (result.result && result.result.success) {
+        savedPlaylists++;
+      } else if (result.success) {
         savedPlaylists++;
       }
 

@@ -5,6 +5,7 @@ import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
+import { convertNodeToJson } from "../conversion/convertNodeToJson";
 
 interface NamedServerFunctionRequest {
   functionName: string;
@@ -74,6 +75,7 @@ export async function executeNamedServerFunction(
       vertexes: context.vertexes || [],
       executeNamedServerFunction,
       getUserFromSession,
+      convertNodeToJson,
       graph: {
         nodes: context.nodes,
         relationships: context.relationships,

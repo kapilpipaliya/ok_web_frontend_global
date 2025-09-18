@@ -61,13 +61,20 @@ return {
         apiKey: apiKey
       }});
       
-      if (result.success) {
+      if (result.error) {
+        args.showErrorToast(result.error);
+      } else if (result.result && result.result.success) {
+        args.showSuccessToast(`Channel "${result.result.data.channel.snippet.title}" added successfully with ${result.result.data.videosAdded} videos`);
+        args.fns.closeModal();
+        // Refresh the page to show new channel
+        window.location.reload();
+      } else if (result.success) {
         args.showSuccessToast(`Channel "${result.data.channel.snippet.title}" added successfully with ${result.data.videosAdded} videos`);
         args.fns.closeModal();
         // Refresh the page to show new channel
         window.location.reload();
       } else {
-        args.showErrorToast(result.error || "Failed to add channel");
+        args.showErrorToast(result.result?.error || result.error || "Failed to add channel");
       }
     } catch (error) {
       args.showErrorToast(error.message || "Failed to add channel");

@@ -1,0 +1,148 @@
+{
+  vertexes: [
+    {
+      id: "get_channel_contents_function",
+      L: "Function",
+      P: {
+        key: "getChannelContents",
+        description: "Fetches a single channel's videos and playlists for the current user",
+        body: '''
+try {
+  // Extract channel ID from request parameters
+  const { channelId } = args.contextData;
+
+  if (!channelId) {
+    throw new Error("Channel ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Verify user has access to this channel
+  const channelAccessQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    RETURN c, cs
+  `;
+
+  const channelAccessResult = await args.session.run(channelAccessQuery, {
+    userUuid: user.P.uuid,
+    channelId
+  });
+
+  if (channelAccessResult.records.length === 0) {
+    throw new Error("Channel not found or access denied");
+  }
+
+  const channelRecord = channelAccessResult.records[0];
+  const channel = args.convertNodeToJson(channelRecord.get('c'));
+  const channelSettings = args.convertNodeToJson(channelRecord.get('cs'));
+
+  // Fetch all videos in this channel with user settings
+  const videosQuery = `
+    MATCH (c:Channel {youtubeId: $channelId})-[:ChannelVideo]->(v:Video)
+    MATCH (u:User {uuid: $userUuid})
+    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    RETURN v, vs
+    ORDER BY COALESCE(vs.channelPosition, 0) ASC, v.publishedAt DESC
+  `;
+
+  const videosResult = await args.session.run(videosQuery, {
+    channelId,
+    userUuid: user.P.uuid
+  });
+
+  // Fetch all playlists in this channel with user settings
+  const playlistsQuery = `
+    MATCH (c:Channel {youtubeId: $channelId})-[:ChannelPlaylist]->(p:Playlist)
+    MATCH (u:User {uuid: $userUuid})
+    OPTIONAL MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    RETURN p, ps
+    ORDER BY p.publishedAt DESC
+  `;
+
+  const playlistsResult = await args.session.run(playlistsQuery, {
+    channelId,
+    userUuid: user.P.uuid
+  });
+
+  // Return raw converted nodes for frontend processing
+  const videos = videosResult.records.map(record => ({
+    video: args.convertNodeToJson(record.get('v')),
+    videoSettings: record.get('vs') ? args.convertNodeToJson(record.get('vs')) : null
+  }));
+
+  // Return raw converted nodes for frontend processing
+  const playlists = playlistsResult.records.map(record => ({
+    playlist: args.convertNodeToJson(record.get('p')),
+    playlistSettings: record.get('ps') ? args.convertNodeToJson(record.get('ps')) : null
+  }));
+
+  // Return raw converted nodes for frontend processing
+  const channelData = {
+    channel: channel,
+    channelSettings: channelSettings
+  };
+
+  return {
+    success: true,
+    data: {
+      channel: channelData,
+      videos,
+      playlists,
+      statistics: {
+        totalVideos: videos.length,
+        totalPlaylists: playlists.length,
+        watchedVideos: videos.filter(v => v.watched).length,
+        userSavedPlaylists: playlists.filter(p => p.isUserSaved).length
+      },
+      userId: user.id
+    },
+    message: `Found ${videos.length} videos and ${playlists.length} playlists in channel "${channelData.displayName}"`
+  };
+
+} catch (error) {
+  console.error("Error fetching channel contents:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to fetch channel contents. Please try again.";
+
+  if (error.message.includes("Channel ID is required")) {
+    userMessage = "Channel ID is required.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to view channel contents.";
+  } else if (error.message.includes("Channel not found or access denied")) {
+    userMessage = "Channel not found or you don't have access to it.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    },
+    data: {
+      channel: null,
+      videos: [],
+      playlists: [],
+      statistics: {
+        totalVideos: 0,
+        totalPlaylists: 0,
+        watchedVideos: 0,
+        userSavedPlaylists: 0
+      }
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

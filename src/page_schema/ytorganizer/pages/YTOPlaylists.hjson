@@ -32,14 +32,86 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  onMount: () => args.fns.loadPlaylists()
 };
 ''',
         fns: '''
+// State for playlists data
+const [playlists, setPlaylists] = args.createSignal([]);
+const [loading, setLoading] = args.createSignal(true);
+const [error, setError] = args.createSignal(null);
+
+// Load playlists when component mounts
+const loadPlaylists = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "getUserPlaylists",
+      contextData: {}
+    });
+
+    if (result.error) {
+      const errorMessage = result.error;
+      setError(errorMessage);
+      args.showErrorToast(errorMessage);
+    } else if (result.result && result.result.success) {
+      // Process playlists to handle Vertex format (properties in P field)
+      const processedPlaylists = result.result.data.playlists.map(item => {
+        const playlist = item.playlist;
+        const playlistSettings = item.playlistSettings;
+        const channel = item.channel;
+
+        return {
+          // Playlist data from YouTube (accessing P field)
+          playlistId: playlist.P.youtubeId,
+          title: playlist.P.title,
+          description: playlist.P.description,
+          thumbnails: playlist.P.thumbnails,
+          itemCount: playlist.P.itemCount,
+          publishedAt: playlist.P.publishedAt,
+
+          // User-specific settings (accessing P field)
+          customName: playlistSettings.P.customName,
+          displayName: playlistSettings.P.customName || playlist.P.title,
+          isUserSaved: true,
+
+          // Parent channel info (accessing P field)
+          parentChannelId: channel?.P.youtubeId || null,
+          parentChannelTitle: channel?.P.title || null
+        };
+      });
+
+      setPlaylists(processedPlaylists);
+    } else {
+      const errorMessage = result.result?.message || result.message || "Failed to load playlists";
+      setError(errorMessage);
+      args.showErrorToast(errorMessage);
+    }
+  } catch (err) {
+    console.error("Error loading playlists:", err);
+    setError("Failed to load playlists");
+    args.showErrorToast("Failed to load playlists");
+  } finally {
+    setLoading(false);
+  }
+};
+
 // Handle playlist submission
 const handlePlaylistSubmit = (data) => {
-  args.showSuccessToast(`Playlist "${data.name || 'from URL'}" will be added soon!`);
-  console.log("Playlist data:", data);
+  args.showSuccessToast(`Playlist "${data.result.title}" added successfully!`);
+  // Reload playlists after adding new one
+  loadPlaylists();
+};
+
+return {
+  playlists,
+  loading,
+  error,
+  loadPlaylists,
+  handlePlaylistSubmit
 };
 '''
       }
@@ -163,9 +235,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const playlistCount = args.fns.playlists().length;
 return {
   as: "div",
-  text: "0 playlists"
+  text: `${playlistCount} playlist${playlistCount !== 1 ? 's' : ''}`
 };
 ''',
         css: '''
@@ -216,8 +289,12 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const playlists = args.fns.playlists();
+const loading = args.fns.loading();
+
 return {
-  as: "div"
+  as: "div",
+  hide: loading || playlists.length > 0
 };
 ''',
         css: '''
@@ -425,10 +502,149 @@ return {
       }
     },
     {
-      id: "yto_playlists_add_button",
+      id: "yto_playlists_loading",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const loading = args.fns.loading();
+
+return {
+  as: "div",
+  hide: !loading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlists_loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 40px;
+  height: 40px;
+  border: 3px solid ${args.theme.var.color.background_light_300};
+  border-top-color: ${args.theme.var.color.primary};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlists_loading_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Loading your playlists..."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlists_list",
       L: "Attr",
       P: {
         displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const playlists = args.fns.playlists();
+const loading = args.fns.loading();
+
+return {
+  as: "div",
+  hide: loading || playlists.length === 0
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlists_list_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        props: '''
+const playlists = args.fns.playlists();
+
+return {
+  data: playlists,
+  loop: true,
+  name: "playlist"
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlists_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOPlaylistCard",
+        props: '''
+const playlist = args.contextData.playlist;
+
+return {
+  playlist: playlist,
+  onClick: () => {
+    args.navigate(`/playlists/${playlist.playlistId}`);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlists_add_button",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
         componentName: "YTOAddPlaylistButton",
         props: '''
 return {
@@ -456,6 +672,12 @@ return {
     { id: "e14", T: "Attr", S: "yto_playlists_empty_state", E: "yto_playlists_empty_action" },
     { id: "e15", T: "Attr", S: "yto_playlists_empty_action", E: "yto_playlists_empty_action_icon" },
     { id: "e16", T: "Attr", S: "yto_playlists_empty_action", E: "yto_playlists_empty_action_text" },
-    { id: "e17", T: "Attr", S: "yto_playlists_root", E: "yto_playlists_add_button" }
+    { id: "e17", T: "Attr", S: "yto_playlists_container", E: "yto_playlists_loading" },
+    { id: "e18", T: "Attr", S: "yto_playlists_loading", E: "yto_playlists_loading_spinner" },
+    { id: "e19", T: "Attr", S: "yto_playlists_loading", E: "yto_playlists_loading_text" },
+    { id: "e20", T: "Attr", S: "yto_playlists_container", E: "yto_playlists_list" },
+    { id: "e21", T: "Attr", S: "yto_playlists_list", E: "yto_playlists_list_data" },
+    { id: "e22", T: "Attr", S: "yto_playlists_list_data", E: "yto_playlists_card" },
+    { id: "e23", T: "Attr", S: "yto_playlists_root", E: "yto_playlists_add_button" }
   ]
 }

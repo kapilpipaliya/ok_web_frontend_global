@@ -32,14 +32,91 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  onMount: () => args.fns.loadChannels()
 };
 ''',
         fns: '''
+// State for channels data
+const [channels, setChannels] = args.createSignal([]);
+const [loading, setLoading] = args.createSignal(true);
+const [error, setError] = args.createSignal(null);
+
+// Load channels when component mounts
+const loadChannels = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "getUserChannels",
+      contextData: {}
+    });
+
+    if (result.error) {
+      const errorMessage = result.error;
+      setError(errorMessage);
+      args.showErrorToast(errorMessage);
+    } else if (result.result && result.result.success) {
+      // Process raw vertex data from convertNodeToJson
+      const processedChannels = result.result.data.channels.map(item => {
+        const channel = item.channel;
+        const channelSettings = item.channelSettings;
+
+        return {
+          // Channel data from YouTube (accessing P field)
+          channelId: channel.P.youtubeId,
+          title: channel.P.title,
+          description: channel.P.description || '',
+          thumbnail: channel.P.thumbnail || '',
+          customUrl: channel.P.customUrl || '',
+          country: channel.P.country || '',
+          videoCount: channel.P.videoCount || 0,
+          viewCount: channel.P.viewCount || 0,
+          subscriberCount: channel.P.subscriberCount || 0,
+          publishedAt: channel.P.publishedAt,
+          updatedAt: channel.P.updatedAt,
+
+          // User-specific settings (accessing P field)
+          customName: channelSettings.P.customName,
+          notifications: channelSettings.P.notifications || false,
+          autoDownload: channelSettings.P.autoDownload || false,
+          priority: channelSettings.P.priority || 'normal',
+          addedAt: channelSettings.P.createdAt,
+          settingsUpdatedAt: channelSettings.P.updatedAt,
+
+          // Display name (custom name or channel title)
+          displayName: channelSettings.P.customName || channel.P.title
+        };
+      });
+      setChannels(processedChannels);
+    } else {
+      const errorMessage = result.result?.message || result.message || "Failed to load channels";
+      setError(errorMessage);
+      args.showErrorToast(errorMessage);
+    }
+  } catch (err) {
+    console.error("Error loading channels:", err);
+    setError("Failed to load channels");
+    args.showErrorToast("Failed to load channels");
+  } finally {
+    setLoading(false);
+  }
+};
+
 // Handle channel submission
 const handleChannelSubmit = (data) => {
-  args.showSuccessToast(`Channel "${data.name || 'from URL'}" will be added soon!`);
-  console.log("Channel data:", data);
+  args.showSuccessToast(`Channel "${data.result.title}" added successfully!`);
+  // Reload channels after adding new one
+  loadChannels();
+};
+
+return {
+  channels,
+  loading,
+  error,
+  loadChannels,
+  handleChannelSubmit
 };
 '''
       }
@@ -163,9 +240,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const channelCount = args.fns.channels().length;
 return {
   as: "div",
-  text: "0 channels"
+  text: `${channelCount} channel${channelCount !== 1 ? 's' : ''}`
 };
 ''',
         css: '''
@@ -216,8 +294,12 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const channels = args.fns.channels();
+const loading = args.fns.loading();
+
 return {
-  as: "div"
+  as: "div",
+  hide: loading || channels.length > 0
 };
 ''',
         css: '''
@@ -425,10 +507,149 @@ return {
       }
     },
     {
-      id: "yto_channels_add_button",
+      id: "yto_channels_loading",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const loading = args.fns.loading();
+
+return {
+  as: "div",
+  hide: !loading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channels_loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 40px;
+  height: 40px;
+  border: 3px solid ${args.theme.var.color.background_light_300};
+  border-top-color: ${args.theme.var.color.primary};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channels_loading_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Loading your channels..."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channels_list",
       L: "Attr",
       P: {
         displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const channels = args.fns.channels();
+const loading = args.fns.loading();
+
+return {
+  as: "div",
+  hide: loading || channels.length === 0
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channels_list_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        props: '''
+const channels = args.fns.channels();
+
+return {
+  data: channels,
+  loop: true,
+  name: "channel"
+};
+'''
+      }
+    },
+    {
+      id: "yto_channels_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOChannelCard",
+        props: '''
+const channel = args.contextData.channel;
+
+return {
+  channel: channel,
+  onClick: () => {
+    args.navigate(`/channels/${channel.channelId}`);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "yto_channels_add_button",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
         componentName: "YTOAddChannelButton",
         props: '''
 return {
@@ -456,6 +677,12 @@ return {
     { id: "e14", T: "Attr", S: "yto_channels_empty_state", E: "yto_channels_empty_action" },
     { id: "e15", T: "Attr", S: "yto_channels_empty_action", E: "yto_channels_empty_action_icon" },
     { id: "e16", T: "Attr", S: "yto_channels_empty_action", E: "yto_channels_empty_action_text" },
-    { id: "e17", T: "Attr", S: "yto_channels_root", E: "yto_channels_add_button" }
+    { id: "e17", T: "Attr", S: "yto_channels_container", E: "yto_channels_loading" },
+    { id: "e18", T: "Attr", S: "yto_channels_loading", E: "yto_channels_loading_spinner" },
+    { id: "e19", T: "Attr", S: "yto_channels_loading", E: "yto_channels_loading_text" },
+    { id: "e20", T: "Attr", S: "yto_channels_container", E: "yto_channels_list" },
+    { id: "e21", T: "Attr", S: "yto_channels_list", E: "yto_channels_list_data" },
+    { id: "e22", T: "Attr", S: "yto_channels_list_data", E: "yto_channels_card" },
+    { id: "e23", T: "Attr", S: "yto_channels_root", E: "yto_channels_add_button" }
   ]
 }

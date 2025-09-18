@@ -161,7 +161,7 @@ try {
   const videoIds = playlistData.videos.map(v => v.id);
 
   const mergePlaylistSettingQuery = `
-    MATCH (u:User) WHERE elementId(u) = $userId
+    MATCH (u:User {uuid: $userUuid})
     MATCH (p:Playlist {youtubeId: $playlistId})
     MERGE (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
     ON CREATE SET
@@ -181,7 +181,7 @@ try {
   `;
 
   await args.session.run(mergePlaylistSettingQuery, {
-    userId: user.id,
+    userUuid: user.P.uuid,
     playlistId,
     playlistSettingKey,
     customName: name || null,
@@ -258,7 +258,7 @@ try {
     const videoSettingKey = `video_setting_${user.id}_${video.id}`;
 
     const mergeVideoSettingQuery = `
-      MATCH (u:User) WHERE elementId(u) = $userId
+      MATCH (u:User {uuid: $userUuid})
       MATCH (v:Video {youtubeId: $videoId})
       MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
       ON CREATE SET
@@ -275,7 +275,7 @@ try {
     `;
 
     await args.session.run(mergeVideoSettingQuery, {
-      userId: user.id,
+      userUuid: user.P.uuid,
       videoId: video.id,
       videoSettingKey,
       position: video.snippet.position,

@@ -32,7 +32,130 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  onMount: () => args.fns.loadChannelContents()
+};
+''',
+        fns: '''
+// State for channel data
+const [channelData, setChannelData] = args.createSignal(null);
+const [videos, setVideos] = args.createSignal([]);
+const [playlists, setPlaylists] = args.createSignal([]);
+const [loading, setLoading] = args.createSignal(true);
+const [error, setError] = args.createSignal(null);
+const [activeTab, setActiveTab] = args.createSignal('videos');
+
+// Get channel ID from URL params
+const channelId = args.searchParams?.channelId || args.params?.channelId;
+
+// Load channel contents when component mounts
+const loadChannelContents = async () => {
+  if (!channelId) {
+    setError("Channel ID not provided");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError(null);
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "getChannelContents",
+      contextData: { channelId }
+    });
+
+    if (result.error) {
+      const errorMessage = result.error;
+      setError(errorMessage);
+      args.showErrorToast(errorMessage);
+    } else if (result.result && result.result.success) {
+      // Process channel data to handle Vertex format (properties in P field)
+      const channelData = result.result.data.channel;
+      const processedChannelData = {
+        // Channel data from YouTube (accessing P field)
+        channelId: channelData.channel.P.youtubeId,
+        title: channelData.channel.P.title,
+        description: channelData.channel.P.description,
+        thumbnail: channelData.channel.P.thumbnail,
+        subscriberCount: channelData.channel.P.subscriberCount,
+        videoCount: channelData.channel.P.videoCount,
+
+        // User-specific settings (accessing P field)
+        customName: channelData.channelSettings.P.customName,
+        displayName: channelData.channelSettings.P.customName || channelData.channel.P.title,
+        isUserSaved: true
+      };
+
+      // Process videos to handle Vertex format (properties in P field)
+      const processedVideos = result.result.data.videos.map(item => {
+        const video = item.video;
+        const videoSettings = item.videoSettings;
+
+        return {
+          // Video data from YouTube (accessing P field)
+          videoId: video.P.youtubeId,
+          title: video.P.title,
+          description: video.P.description,
+          thumbnails: video.P.thumbnails,
+          duration: video.P.duration,
+          publishedAt: video.P.publishedAt,
+          viewCount: video.P.viewCount,
+
+          // User-specific settings (accessing P field)
+          watched: videoSettings?.P.watched || false,
+          notes: videoSettings?.P.notes || '',
+          customPosition: videoSettings?.P.channelPosition || 0
+        };
+      });
+
+      // Process playlists to handle Vertex format (properties in P field)
+      const processedPlaylists = result.result.data.playlists.map(item => {
+        const playlist = item.playlist;
+        const playlistSettings = item.playlistSettings;
+
+        return {
+          // Playlist data from YouTube (accessing P field)
+          playlistId: playlist.P.youtubeId,
+          title: playlist.P.title,
+          description: playlist.P.description,
+          thumbnails: playlist.P.thumbnails,
+          itemCount: playlist.P.itemCount,
+          publishedAt: playlist.P.publishedAt,
+
+          // User-specific settings (accessing P field)
+          customName: playlistSettings?.P.customName,
+          displayName: playlistSettings?.P.customName || playlist.P.title,
+          isUserSaved: playlistSettings !== null
+        };
+      });
+
+      setChannelData(processedChannelData);
+      setVideos(processedVideos);
+      setPlaylists(processedPlaylists);
+    } else {
+      const errorMessage = result.result?.message || result.message || "Failed to load channel contents";
+      setError(errorMessage);
+      args.showErrorToast(errorMessage);
+    }
+  } catch (err) {
+    console.error("Error loading channel contents:", err);
+    setError("Failed to load channel contents");
+    args.showErrorToast("Failed to load channel contents");
+  } finally {
+    setLoading(false);
+  }
+};
+
+return {
+  channelData,
+  videos,
+  playlists,
+  loading,
+  error,
+  activeTab,
+  setActiveTab,
+  loadChannelContents
 };
 '''
       }
@@ -276,9 +399,10 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-// Get channel data from query parameters
-const channelId = args.searchParams?.channelId;
-const channelTitle = 'Sample Channel';
+const channelData = args.fns.channelData();
+const loading = args.fns.loading();
+
+const channelTitle = loading ? 'Loading...' : (channelData?.displayName || 'Unknown Channel');
 
 return {
   as: "h1",
@@ -333,11 +457,26 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const subscriberCount = '0';
+const channelData = args.fns.channelData();
+const loading = args.fns.loading();
+
+if (loading) {
+  return {
+    as: "span",
+    text: "Loading..."
+  };
+}
+
+const subscriberCount = channelData?.subscriberCount || 0;
+const formattedCount = subscriberCount >= 1000000
+  ? `${(subscriberCount / 1000000).toFixed(1)}M`
+  : subscriberCount >= 1000
+    ? `${(subscriberCount / 1000).toFixed(1)}K`
+    : subscriberCount.toString();
 
 return {
   as: "span",
-  text: `${subscriberCount} subscribers`
+  text: `${formattedCount} subscribers`
 };
 ''',
         css: '''
@@ -377,7 +516,18 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const videoCount = '0';
+const channelData = args.fns.channelData();
+const videos = args.fns.videos();
+const loading = args.fns.loading();
+
+if (loading) {
+  return {
+    as: "span",
+    text: "Loading..."
+  };
+}
+
+const videoCount = videos.length || 0;
 
 return {
   as: "span",
@@ -421,7 +571,17 @@ return {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const description = 'This channel will load from YouTube API.';
+const channelData = args.fns.channelData();
+const loading = args.fns.loading();
+
+if (loading) {
+  return {
+    as: "p",
+    text: "Loading channel description..."
+  };
+}
+
+const description = channelData?.description || 'No description available.';
 
 return {
   as: "p",
@@ -465,12 +625,17 @@ return `._id {
         displayOrder: 1,
         componentName: "YTOTabBar",
         props: '''
+const videos = args.fns.videos();
+const playlists = args.fns.playlists();
+const activeTab = args.fns.activeTab();
+
 return {
   tabs: [
-    { id: 'videos', label: 'Videos', icon: 'carbon:video' },
-    { id: 'playlists', label: 'Playlists', icon: 'carbon:playlist' }
+    { id: 'videos', label: `Videos (${videos.length})`, icon: 'carbon:video' },
+    { id: 'playlists', label: `Playlists (${playlists.length})`, icon: 'carbon:playlist' }
   ],
-  activeTab: 'videos'
+  activeTab: activeTab,
+  onTabChange: (tabId) => args.fns.setActiveTab(tabId)
 };
 '''
       }
@@ -498,7 +663,33 @@ return `._id {
       }
     },
     {
-      id: "yto_channel_detail_empty_state",
+      id: "yto_channel_detail_loading",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const loading = args.fns.loading();
+
+return {
+  as: "div",
+  hide: !loading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_loading_spinner",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -506,6 +697,199 @@ return `._id {
         props: '''
 return {
   as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 40px;
+  height: 40px;
+  border: 3px solid ${args.theme.var.color.background_light_300};
+  border-top-color: ${args.theme.var.color.primary};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_loading_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Loading channel contents..."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_videos_tab",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const activeTab = args.fns.activeTab();
+const loading = args.fns.loading();
+const videos = args.fns.videos();
+
+return {
+  as: "div",
+  hide: loading || activeTab !== 'videos'
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_videos_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        props: '''
+const videos = args.fns.videos();
+
+return {
+  data: videos,
+  loop: true,
+  name: "video"
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_video_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOVideoCard",
+        props: '''
+const video = args.contextData.video;
+
+return {
+  video: video,
+  onClick: () => {
+    window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank');
+  }
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_playlists_tab",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const activeTab = args.fns.activeTab();
+const loading = args.fns.loading();
+const playlists = args.fns.playlists();
+
+return {
+  as: "div",
+  hide: loading || activeTab !== 'playlists'
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_playlists_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Data",
+        props: '''
+const playlists = args.fns.playlists();
+
+return {
+  data: playlists,
+  loop: true,
+  name: "playlist"
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_playlist_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOPlaylistCard",
+        props: '''
+const playlist = args.contextData.playlist;
+
+return {
+  playlist: playlist,
+  onClick: () => {
+    if (playlist.isUserSaved) {
+      args.navigate(`/playlists/${playlist.playlistId}`);
+    } else {
+      window.open(`https://www.youtube.com/playlist?list=${playlist.playlistId}`, '_blank');
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const activeTab = args.fns.activeTab();
+const loading = args.fns.loading();
+const videos = args.fns.videos();
+const playlists = args.fns.playlists();
+
+const showEmpty = !loading && (
+  (activeTab === 'videos' && videos.length === 0) ||
+  (activeTab === 'playlists' && playlists.length === 0)
+);
+
+return {
+  as: "div",
+  hide: !showEmpty
 };
 ''',
         css: '''
@@ -519,7 +903,7 @@ return `._id {
   background: ${args.theme.var.color.background_dark_50};
   border-radius: 1rem;
   border: 2px dashed ${args.theme.var.color.border};
-  
+
   @media (max-width: 768px) {
     padding: 3rem 1.5rem;
   }
@@ -549,7 +933,7 @@ return `._id {
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  
+
   @media (max-width: 768px) {
     width: 64px;
     height: 64px;
@@ -565,9 +949,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const activeTab = args.fns.activeTab();
+
 return {
   as: "icon",
-  icon: "carbon:video",
+  icon: activeTab === 'videos' ? "carbon:video" : "carbon:playlist",
   width: 40,
   height: 40
 };
@@ -589,9 +975,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const activeTab = args.fns.activeTab();
+
 return {
   as: "h3",
-  text: "No Content Yet"
+  text: activeTab === 'videos' ? "No Videos" : "No Playlists"
 };
 ''',
         css: '''
@@ -600,7 +988,7 @@ return `._id {
   font-weight: 600;
   margin: 0 0 0.75rem 0;
   color: ${args.theme.var.color.text};
-  
+
   @media (max-width: 768px) {
     font-size: 1.125rem;
   }
@@ -615,9 +1003,15 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const activeTab = args.fns.activeTab();
+
+const message = activeTab === 'videos'
+  ? "This channel doesn't have any videos yet or they haven't been loaded."
+  : "This channel doesn't have any playlists yet or they haven't been loaded.";
+
 return {
   as: "p",
-  text: "This channel's content is being loaded or no content is available yet. Check back soon."
+  text: message
 };
 ''',
         css: '''
@@ -654,10 +1048,19 @@ return `._id {
     { id: "e18", T: "Attr", S: "yto_channel_detail_root", E: "yto_channel_detail_container" },
     { id: "e19", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_tabs" },
     { id: "e20", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_content" },
-    { id: "e21", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_empty_state" },
-    { id: "e22", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_icon" },
-    { id: "e23", T: "Attr", S: "yto_channel_detail_empty_icon", E: "yto_channel_detail_empty_icon_svg" },
-    { id: "e24", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_title" },
-    { id: "e25", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_description" }
+    { id: "e21", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_loading" },
+    { id: "e22", T: "Attr", S: "yto_channel_detail_loading", E: "yto_channel_detail_loading_spinner" },
+    { id: "e23", T: "Attr", S: "yto_channel_detail_loading", E: "yto_channel_detail_loading_text" },
+    { id: "e24", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_videos_tab" },
+    { id: "e25", T: "Attr", S: "yto_channel_detail_videos_tab", E: "yto_channel_detail_videos_data" },
+    { id: "e26", T: "Attr", S: "yto_channel_detail_videos_data", E: "yto_channel_detail_video_card" },
+    { id: "e27", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_playlists_tab" },
+    { id: "e28", T: "Attr", S: "yto_channel_detail_playlists_tab", E: "yto_channel_detail_playlists_data" },
+    { id: "e29", T: "Attr", S: "yto_channel_detail_playlists_data", E: "yto_channel_detail_playlist_card" },
+    { id: "e30", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_empty_state" },
+    { id: "e31", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_icon" },
+    { id: "e32", T: "Attr", S: "yto_channel_detail_empty_icon", E: "yto_channel_detail_empty_icon_svg" },
+    { id: "e33", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_title" },
+    { id: "e34", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_description" }
   ]
 }

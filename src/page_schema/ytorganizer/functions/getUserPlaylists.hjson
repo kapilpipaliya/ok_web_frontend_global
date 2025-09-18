@@ -1,0 +1,78 @@
+{
+  vertexes: [
+    {
+      id: "get_user_playlists_function",
+      L: "Function",
+      P: {
+        key: "getUserPlaylists",
+        description: "Fetches all playlists saved by the current user with their custom settings",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Cypher query to fetch all user's playlists with their settings and channel info
+  const query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+    OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
+    RETURN p, ps, c
+    ORDER BY ps.createdAt DESC
+  `;
+
+  // Execute the query
+  const result = await args.session.run(query, {
+    userUuid: user.P.uuid
+  });
+
+  // Return raw converted nodes for frontend processing
+  const playlists = result.records.map(record => ({
+    playlist: args.convertNodeToJson(record.get('p')),
+    playlistSettings: args.convertNodeToJson(record.get('ps')),
+    channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null
+  }));
+
+  return {
+    success: true,
+    data: {
+      playlists,
+      totalCount: playlists.length,
+      userId: user.id
+    },
+    message: `Found ${playlists.length} playlists`
+  };
+
+} catch (error) {
+  console.error("Error fetching user playlists:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to fetch playlists. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to view your playlists.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    },
+    data: {
+      playlists: [],
+      totalCount: 0
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

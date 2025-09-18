@@ -1,0 +1,149 @@
+{
+  vertexes: [
+    {
+      id: "get_playlist_videos_function",
+      L: "Function",
+      P: {
+        key: "getPlaylistVideos",
+        description: "Fetches a single playlist's videos for the current user",
+        body: '''
+try {
+  // Extract playlist ID from request parameters
+  const { playlistId } = args.contextData;
+
+  if (!playlistId) {
+    throw new Error("Playlist ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Verify user has access to this playlist
+  const playlistAccessQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    RETURN p, ps
+  `;
+
+  const playlistAccessResult = await args.session.run(playlistAccessQuery, {
+    userUuid: user.P.uuid,
+    playlistId
+  });
+
+  if (playlistAccessResult.records.length === 0) {
+    throw new Error("Playlist not found or access denied");
+  }
+
+  const playlistRecord = playlistAccessResult.records[0];
+  const playlist = args.convertNodeToJson(playlistRecord.get('p'));
+  const playlistSettings = args.convertNodeToJson(playlistRecord.get('ps'));
+
+  // Fetch all videos in this playlist with user settings
+  const videosQuery = `
+    MATCH (p:Playlist {youtubeId: $playlistId})-[:PlaylistVideo]->(v:Video)
+    MATCH (u:User {uuid: $userUuid})
+    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    RETURN v, vs
+    ORDER BY COALESCE(vs.playlistIndex, 0) ASC, v.publishedAt ASC
+  `;
+
+  const videosResult = await args.session.run(videosQuery, {
+    playlistId,
+    userUuid: user.P.uuid
+  });
+
+  // Check if playlist belongs to a saved channel
+  const channelQuery = `
+    MATCH (p:Playlist {youtubeId: $playlistId})
+    OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
+    OPTIONAL MATCH (u:User {uuid: $userUuid})
+    OPTIONAL MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
+    RETURN c, cs
+  `;
+
+  const channelResult = await args.session.run(channelQuery, {
+    playlistId,
+    userUuid: user.P.uuid
+  });
+
+  let parentChannel = null;
+  if (channelResult.records.length > 0 && channelResult.records[0].get('c')) {
+    const channel = args.convertNodeToJson(channelResult.records[0].get('c'));
+    const channelSettings = channelResult.records[0].get('cs') ? args.convertNodeToJson(channelResult.records[0].get('cs')) : null;
+
+    parentChannel = {
+      channelId: channel.youtubeId,
+      title: channel.title,
+      thumbnail: channel.thumbnail || '',
+      isUserSaved: channelSettings !== null,
+      displayName: channelSettings?.customName || channel.title
+    };
+  }
+
+  // Return raw converted nodes for frontend processing
+  const videos = videosResult.records.map(record => ({
+    video: args.convertNodeToJson(record.get('v')),
+    videoSettings: record.get('vs') ? args.convertNodeToJson(record.get('vs')) : null
+  }));
+
+  // Return raw converted nodes for frontend processing
+  const playlistData = {
+    playlist: playlist,
+    playlistSettings: playlistSettings,
+    parentChannel: parentChannel
+  };
+
+  return {
+    success: true,
+    data: {
+      playlist: playlistData,
+      videos,
+      userId: user.id
+    },
+    message: `Found ${videos.length} videos in playlist`
+  };
+
+} catch (error) {
+  console.error("Error fetching playlist videos:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to fetch playlist videos. Please try again.";
+
+  if (error.message.includes("Playlist ID is required")) {
+    userMessage = "Playlist ID is required.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to view playlist videos.";
+  } else if (error.message.includes("Playlist not found or access denied")) {
+    userMessage = "Playlist not found or you don't have access to it.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    },
+    data: {
+      playlist: null,
+      videos: [],
+      statistics: {
+        totalVideos: 0,
+        watchedVideos: 0,
+        unwatchedVideos: 0,
+        videosWithNotes: 0
+      }
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}
