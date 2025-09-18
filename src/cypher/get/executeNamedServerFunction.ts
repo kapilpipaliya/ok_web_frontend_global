@@ -4,6 +4,7 @@ import type { EvalExpressionContext } from "../types/EvalExpressionContext";
 import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 interface NamedServerFunctionRequest {
   functionName: string;
@@ -71,6 +72,8 @@ export async function executeNamedServerFunction(
       context: context,
       contextData: request.contextData || {},
       vertexes: context.vertexes || [],
+      executeNamedServerFunction,
+      getUserFromSession,
       graph: {
         nodes: context.nodes,
         relationships: context.relationships,

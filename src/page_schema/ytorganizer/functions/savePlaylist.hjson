@@ -1,0 +1,340 @@
+{
+  vertexes: [
+    {
+      id: "save_playlist_function",
+      L: "Function",
+      P: {
+        key: "savePlaylist",
+        description: "Fetches playlist data from YouTube API and saves all videos to the database",
+        body: '''
+/**
+ * Extract playlist ID from various YouTube URL formats
+ * Supports: ?list=ID, &list=ID, playlist?list=ID
+ */
+const extractPlaylistId = (url) => {
+  if (!url) return null;
+
+  // Handle different YouTube playlist URL formats
+  const patterns = [
+    /[?&]list=([a-zA-Z0-9_-]+)/,        // ?list=ID or &list=ID
+    /playlist\?list=([a-zA-Z0-9_-]+)/,  // Direct playlist URL: /playlist?list=ID
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+
+  return null;
+};
+
+// YouTube API key - replace with your actual API key
+const YOUTUBE_API_KEY = 'AIzaSyC_CClo37bSKqLUFNKEsDaZgYzTxEQfuds';
+
+/**
+ * Fetch complete playlist data from YouTube Data API v3
+ * Includes: playlist info and ALL videos with pagination
+ */
+const fetchPlaylistData = async (playlistId) => {
+  // Dynamic import of googleapis library
+  const { google } = await import('googleapis');
+
+  // Initialize YouTube API client with authentication
+  const youtube = google.youtube({
+    version: 'v3',
+    auth: YOUTUBE_API_KEY
+  });
+
+  // Fetch playlist details (metadata, not videos yet)
+  const playlistResponse = await youtube.playlists.list({
+    part: ['snippet', 'contentDetails', 'status'],
+    id: [playlistId]
+  });
+
+  if (!playlistResponse.data.items || playlistResponse.data.items.length === 0) {
+    throw new Error('Playlist not found or is private/deleted');
+  }
+
+  const playlist = playlistResponse.data.items[0];
+
+  // Fetch ALL playlist videos with pagination (no limit)
+  let allVideos = [];
+  let nextPageToken = null;
+
+  do {
+    // Fetch videos in batches of 50 (YouTube API limit)
+    const itemsResponse = await youtube.playlistItems.list({
+      part: ['snippet', 'contentDetails'],
+      playlistId: playlistId,
+      maxResults: 50,                    // Maximum allowed per request
+      pageToken: nextPageToken           // For pagination
+    });
+
+    if (itemsResponse.data.items) {
+      allVideos = allVideos.concat(itemsResponse.data.items);
+    }
+
+    // Get the token for the next page of results
+    nextPageToken = itemsResponse.data.nextPageToken;
+  } while (nextPageToken); // Continue until all videos are fetched
+
+  // Format the response to match our expected structure
+  return {
+    id: playlistId,
+    snippet: playlist.snippet,
+    status: playlist.status,
+    contentDetails: playlist.contentDetails,
+    videos: allVideos.map((item, index) => ({
+      id: item.contentDetails.videoId,
+      snippet: {
+        ...item.snippet,
+        position: item.snippet.position || index
+      },
+      contentDetails: item.contentDetails
+    }))
+  };
+};
+
+try {
+  // Extract input parameters from the request
+  const { url, name } = args.contextData;
+
+  if (!url) {
+    throw new Error("Playlist URL is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Extract playlist ID from the provided URL
+  const playlistId = extractPlaylistId(url);
+  if (!playlistId) {
+    throw new Error("Invalid YouTube playlist URL. Please provide a valid playlist URL.");
+  }
+
+  // Fetch complete playlist data from YouTube API
+  const playlistData = await fetchPlaylistData(playlistId);
+
+  // STEP 1: Create or update the main Playlist vertex (global data)
+  const playlistKey = `playlist_${playlistId}`;
+
+  const mergePlaylistQuery = `
+    MERGE (p:Playlist {youtubeId: $playlistId})
+    ON CREATE SET
+      p.key = $key,
+      p.youtubeId = $playlistId,
+      p.createdAt = datetime()
+    SET
+      p.title = $title,
+      p.description = $description,
+      p.thumbnail = $thumbnail,
+      p.channelTitle = $channelTitle,
+      p.channelId = $channelId,
+      p.privacyStatus = $privacyStatus,
+      p.itemCount = $itemCount,
+      p.publishedAt = datetime($publishedAt),
+      p.updatedAt = datetime()
+    RETURN p
+  `;
+
+  const playlistResult = await args.session.run(mergePlaylistQuery, {
+    key: playlistKey,
+    playlistId,
+    title: playlistData.snippet.title,
+    description: playlistData.snippet.description || "",
+    thumbnail: playlistData.snippet.thumbnails?.high?.url ||
+               playlistData.snippet.thumbnails?.medium?.url ||
+               playlistData.snippet.thumbnails?.default?.url || "",
+    channelTitle: playlistData.snippet.channelTitle,
+    channelId: playlistData.snippet.channelId,
+    privacyStatus: playlistData.status?.privacyStatus || "unknown",
+    itemCount: playlistData.contentDetails?.itemCount || playlistData.videos.length,
+    publishedAt: playlistData.snippet.publishedAt
+  });
+
+  // STEP 2: Create user-specific PlaylistSetting
+  // This stores the user's personal preferences for this playlist
+  const playlistSettingKey = `playlist_setting_${user.id}_${playlistId}`;
+  const videoIds = playlistData.videos.map(v => v.id);
+
+  const mergePlaylistSettingQuery = `
+    MATCH (u:User) WHERE elementId(u) = $userId
+    MATCH (p:Playlist {youtubeId: $playlistId})
+    MERGE (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    ON CREATE SET
+      ps.key = $playlistSettingKey,
+      ps.createdAt = datetime()
+    SET
+      ps.customName = $customName,
+      ps.customOrder = $customOrder,
+      ps.sortBy = 'index',
+      ps.displayPreferences = {
+        showThumbnails: true,
+        viewMode: 'list'
+      },
+      ps.lastUpdated = datetime(),
+      ps.updatedAt = datetime()
+    RETURN ps
+  `;
+
+  await args.session.run(mergePlaylistSettingQuery, {
+    userId: user.id,
+    playlistId,
+    playlistSettingKey,
+    customName: name || null,
+    customOrder: videoIds
+  });
+
+  // STEP 3: Process all playlist videos
+  // This creates individual Video vertices and relationships
+  let savedVideos = 0;
+  let updatedVideos = 0;
+
+  for (const video of playlistData.videos) {
+    if (!video.id || !video.snippet) {
+      console.warn('Skipping invalid video:', video);
+      continue;
+    }
+
+    const videoKey = `video_${video.id}`;
+
+    // Create or update individual Video vertex with MERGE (upsert)
+    const mergeVideoQuery = `
+      MERGE (v:Video {youtubeId: $videoId})
+      ON CREATE SET
+        v.key = $key,
+        v.youtubeId = $videoId,
+        v.createdAt = datetime()
+      ON MATCH SET
+        v.updatedCount = COALESCE(v.updatedCount, 0) + 1
+      SET
+        v.title = $title,
+        v.description = $description,
+        v.thumbnail = $thumbnail,
+        v.channelTitle = $channelTitle,
+        v.channelId = $channelId,
+        v.publishedAt = datetime($publishedAt),
+        v.updatedAt = datetime()
+      RETURN v, v.createdAt = v.updatedAt AS isNew
+    `;
+
+    const videoResult = await args.session.run(mergeVideoQuery, {
+      key: videoKey,
+      videoId: video.id,
+      title: video.snippet.title,
+      description: video.snippet.description || "",
+      thumbnail: video.snippet.thumbnails?.high?.url ||
+                 video.snippet.thumbnails?.medium?.url ||
+                 video.snippet.thumbnails?.default?.url || "",
+      channelTitle: video.snippet.channelTitle || "",
+      channelId: video.snippet.channelId || "",
+      publishedAt: video.snippet.publishedAt
+    });
+
+    const isNewVideo = videoResult.records[0].get('isNew');
+    if (isNewVideo) {
+      savedVideos++;
+    } else {
+      updatedVideos++;
+    }
+
+    // Create Playlist -> Video relationship (no data stored on edge)
+    const playlistVideoQuery = `
+      MATCH (p:Playlist {youtubeId: $playlistId})
+      MATCH (v:Video {youtubeId: $videoId})
+      MERGE (p)-[:PlaylistVideo]->(v)
+    `;
+
+    await args.session.run(playlistVideoQuery, {
+      playlistId,
+      videoId: video.id
+    });
+
+    // Create user-specific VideoSetting for this video
+    // This stores user preferences like watched status, notes, custom ordering
+    const videoSettingKey = `video_setting_${user.id}_${video.id}`;
+
+    const mergeVideoSettingQuery = `
+      MATCH (u:User) WHERE elementId(u) = $userId
+      MATCH (v:Video {youtubeId: $videoId})
+      MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+      ON CREATE SET
+        vs.key = $videoSettingKey,
+        vs.createdAt = datetime()
+      SET
+        vs.watched = false,
+        vs.notes = null,
+        vs.customPosition = $position,
+        vs.playlistIndex = $playlistIndex,
+        vs.addedToPlaylistAt = datetime(),
+        vs.updatedAt = datetime()
+      RETURN vs
+    `;
+
+    await args.session.run(mergeVideoSettingQuery, {
+      userId: user.id,
+      videoId: video.id,
+      videoSettingKey,
+      position: video.snippet.position,
+      playlistIndex: video.snippet.position
+    });
+  }
+
+  return {
+    success: true,
+    message: `Playlist "${playlistData.snippet.title}" added to your collection!`,
+    data: {
+      playlistId,
+      title: playlistData.snippet.title,
+      customName: name,
+      totalVideos: playlistData.videos.length,
+      savedVideos,
+      updatedVideos,
+      channelTitle: playlistData.snippet.channelTitle,
+      userId: user.id,
+      userSpecific: true,
+      videoIds: playlistData.videos.map(v => v.id).filter(id => id) // Return video IDs for channel processing
+    }
+  };
+
+} catch (error) {
+  console.error("Error saving playlist:", error);
+
+  // Handle specific YouTube API errors
+  let userMessage = "Failed to save playlist. Please try again.";
+
+  if (error.message.includes("Playlist not found")) {
+    userMessage = "Playlist not found. Please check the URL and make sure the playlist is public.";
+  } else if (error.message.includes("Invalid YouTube playlist URL")) {
+    userMessage = "Invalid playlist URL. Please provide a valid YouTube playlist URL.";
+  } else if (error.message.includes("quota")) {
+    userMessage = "YouTube API quota exceeded. Please try again later.";
+  } else if (error.message.includes("API key")) {
+    userMessage = "YouTube API configuration error. Please contact support.";
+  } else if (error.message.includes("private")) {
+    userMessage = "This playlist is private and cannot be accessed.";
+  } else if (error.code === 404) {
+    userMessage = "Playlist not found or has been deleted.";
+  } else if (error.code === 403) {
+    userMessage = "Access denied. The playlist may be private or restricted.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "YouTubeAPIError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

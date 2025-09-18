@@ -34,27 +34,61 @@ const [showModal, setShowModal] = args.createSignal(false);
 // Form state
 const [urlValue, setUrlValue] = args.createSignal("");
 const [nameValue, setNameValue] = args.createSignal("");
+const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 
 // Get onSubmit callback from props
 const onSubmit = args.contextData.props?.onSubmit;
 
 // Handle form submission
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (onSubmit) {
-    onSubmit({
-      url: urlValue(),
-      name: nameValue()
-    });
-  } else {
-    args.showSuccessToast("Add Playlist functionality coming soon!");
+  const url = urlValue().trim();
+  const name = nameValue().trim();
+
+  if (!url) {
+    args.showErrorToast("Please enter a playlist URL");
+    return;
   }
 
-  // Reset form and close modal
-  setUrlValue("");
-  setNameValue("");
-  setShowModal(false);
+  // Set loading state
+  setIsSubmitting(true);
+
+  try {
+    // Call the savePlaylist server function
+    const result = await args.executeNamedServerFunction({
+      functionName: "savePlaylist",
+      contextData: {
+        url: url,
+        name: name || null
+      }
+    });
+
+    if (result.success) {
+      args.showSuccessToast(result.message);
+
+      // Call parent onSubmit if provided
+      if (onSubmit) {
+        onSubmit({
+          url: url,
+          name: name,
+          result: result.data
+        });
+      }
+
+      // Reset form and close modal
+      setUrlValue("");
+      setNameValue("");
+      setShowModal(false);
+    } else {
+      args.showErrorToast(result.message || "Failed to save playlist");
+    }
+  } catch (error) {
+    console.error("Error saving playlist:", error);
+    args.showErrorToast("An error occurred while saving the playlist. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
 };
 
 // Return functions to be accessible in children
@@ -65,6 +99,7 @@ return {
   setUrlValue,
   nameValue,
   setNameValue,
+  isSubmitting,
   handleSubmit
 };
 '''
@@ -496,7 +531,8 @@ return `._id {
 return {
   as: "button",
   type: "submit",
-  text: "Add Playlist"
+  text: args.fns.isSubmitting() ? "Adding Playlist..." : "Add Playlist",
+  disabled: args.fns.isSubmitting()
 };
 ''',
         css: '''
@@ -504,19 +540,24 @@ return `._id {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 0.5rem;
-  background: ${args.theme.var.color.success};
-  color: ${args.theme.var.color.success_text};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 
-  &:hover {
-    background: ${args.theme.var.color.success_dark_200};
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary_dark_200};
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   @media (max-width: 768px) {

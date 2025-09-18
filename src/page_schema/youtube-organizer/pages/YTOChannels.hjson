@@ -165,7 +165,7 @@ if (!args.user) {
 }
 
 const result = await args.session.run(
-  `MATCH (u:User {id: $userId})-[uc:UserChannel]->(c:Channel)
+  `MATCH (u:User {id: $userId})-[uc:UserChannelSetting]->(c:Channel)
    RETURN c
    ORDER BY c.title`,
   { userId: args.user.id }

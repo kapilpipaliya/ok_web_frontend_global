@@ -5,6 +5,7 @@ import { getDBSessionForSubdomain } from "../session/getSessionForSubdomain";
 import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import {executeNamedServerFunction} from "~/cypher/get/executeNamedServerFunction";
+import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 
 interface ServerFunctionRequest {
   functionBody: string;
@@ -49,6 +50,7 @@ export async function executeServerFunction(
       contextData: request.contextData || {},
       vertexes: context.vertexes || [],
       executeNamedServerFunction,
+      getUserFromSession,
       graph: {
         nodes: context.nodes,
         relationships: context.relationships,
