@@ -1,0 +1,1242 @@
+{
+  vertexes: [
+    {
+      id: "yto_settings_page",
+      L: "Page",
+      P: {
+        key: "YTOSettings",
+        url: "/settings",
+        title: "Settings - YouTube Organizer",
+        description: "Manage your YouTube Organizer preferences and configuration",
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  enabled: true
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "yto_settings_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        fns: '''
+// Settings state
+const [autoRefresh, setAutoRefresh] = args.createSignal(true);
+const [refreshInterval, setRefreshInterval] = args.createSignal(30);
+const [defaultView, setDefaultView] = args.createSignal("grid");
+const [showThumbnails, setShowThumbnails] = args.createSignal(true);
+const [notifications, setNotifications] = args.createSignal(true);
+const [darkMode, setDarkMode] = args.createSignal(false);
+
+// Save settings
+const saveSettings = () => {
+  const settings = {
+    autoRefresh: autoRefresh(),
+    refreshInterval: refreshInterval(),
+    defaultView: defaultView(),
+    showThumbnails: showThumbnails(),
+    notifications: notifications(),
+    darkMode: darkMode()
+  };
+
+  // Simulate saving settings
+  console.log("Saving settings:", settings);
+  args.showSuccessToast("Settings saved successfully!");
+};
+
+// Reset settings
+const resetSettings = () => {
+  setAutoRefresh(true);
+  setRefreshInterval(30);
+  setDefaultView("grid");
+  setShowThumbnails(true);
+  setNotifications(true);
+  setDarkMode(false);
+  args.showInfoToast("Settings reset to defaults");
+};
+
+return {
+  autoRefresh,
+  setAutoRefresh,
+  refreshInterval,
+  setRefreshInterval,
+  defaultView,
+  setDefaultView,
+  showThumbnails,
+  setShowThumbnails,
+  notifications,
+  setNotifications,
+  darkMode,
+  setDarkMode,
+  saveSettings,
+  resetSettings
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.warning};
+  color: ${args.theme.var.color.warning_text};
+  padding: 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_header_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_title_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:settings",
+  width: 32,
+  height: 32
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 60vh;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_form",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "form",
+  onSubmit: (e) => {
+    e.preventDefault();
+    args.fns.saveSettings();
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_general",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_general_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "General Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_general_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:settings-adjust",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_general_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_auto_refresh",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_auto_refresh_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_auto_refresh_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Auto Refresh"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  display: block;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_auto_refresh_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Automatically refresh content at regular intervals"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_auto_refresh_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.autoRefresh(),
+  onChange: (e) => args.fns.setAutoRefresh(e.target.checked)
+};
+''',
+        css: '''
+return `._id {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_refresh_interval",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: !args.fns.autoRefresh()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_refresh_interval_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Refresh Interval (minutes)"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_refresh_interval_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "number",
+  min: 5,
+  max: 120,
+  value: args.fns.refreshInterval(),
+  onChange: (e) => args.fns.setRefreshInterval(parseInt(e.target.value))
+};
+''',
+        css: '''
+return `._id {
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.25rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_default_view",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_default_view_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Default View"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_default_view_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "select",
+  value: args.fns.defaultView(),
+  onChange: (e) => args.fns.setDefaultView(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.25rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  min-width: 120px;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_view_option_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "grid",
+  text: "Grid View"
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_view_option_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "list",
+  text: "List View"
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_display",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_display_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Display Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_display_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:view",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_display_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_show_thumbnails",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_thumbnails_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_thumbnails_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Show Thumbnails"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  display: block;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_thumbnails_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Display video and playlist thumbnails"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_thumbnails_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.showThumbnails(),
+  onChange: (e) => args.fns.setShowThumbnails(e.target.checked)
+};
+''',
+        css: '''
+return `._id {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_dark_mode",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_dark_mode_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_dark_mode_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Dark Mode"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  display: block;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_dark_mode_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Use dark theme for better visibility in low light"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_dark_mode_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.darkMode(),
+  onChange: (e) => args.fns.setDarkMode(e.target.checked)
+};
+''',
+        css: '''
+return `._id {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_notifications",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_notifications_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Notification Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_notifications_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:notification",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_notifications_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_notifications_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_notifications_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Enable Notifications"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  display: block;
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_notifications_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Receive notifications for new videos and updates"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_notifications_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.notifications(),
+  onChange: (e) => args.fns.setNotifications(e.target.checked)
+};
+''',
+        css: '''
+return `._id {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  padding-top: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_save_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  type: "submit",
+  text: "Save Settings"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.warning};
+  color: ${args.theme.var.color.warning_text};
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background: ${args.theme.var.color.warning_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_save_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:save",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_reset_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  type: "button",
+  text: "Reset to Defaults",
+  onClick: args.fns.resetSettings
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_300};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_reset_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:reset",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e0", T: "PageLayout", S: "yto_settings_page", E: "yto_settings_layout" },
+    { id: "e1", T: "Attr", S: "yto_settings_page", E: "yto_settings_root" },
+    { id: "e2", T: "Attr", S: "yto_settings_root", E: "yto_settings_header" },
+    { id: "e3", T: "Attr", S: "yto_settings_header", E: "yto_settings_header_content" },
+    { id: "e4", T: "Attr", S: "yto_settings_header_content", E: "yto_settings_title_section" },
+    { id: "e5", T: "Attr", S: "yto_settings_title_section", E: "yto_settings_icon" },
+    { id: "e6", T: "Attr", S: "yto_settings_title_section", E: "yto_settings_title" },
+    { id: "e7", T: "Attr", S: "yto_settings_root", E: "yto_settings_container" },
+    { id: "e8", T: "Attr", S: "yto_settings_container", E: "yto_settings_form" },
+    { id: "e9", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_general" },
+    { id: "e10", T: "Attr", S: "yto_settings_section_general", E: "yto_settings_section_general_title" },
+    { id: "e11", T: "Attr", S: "yto_settings_section_general_title", E: "yto_settings_section_general_icon" },
+    { id: "e12", T: "Attr", S: "yto_settings_section_general", E: "yto_settings_general_grid" },
+    { id: "e13", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_auto_refresh" },
+    { id: "e14", T: "Attr", S: "yto_settings_auto_refresh", E: "yto_settings_auto_refresh_label" },
+    { id: "e15", T: "Attr", S: "yto_settings_auto_refresh_label", E: "yto_settings_auto_refresh_title" },
+    { id: "e16", T: "Attr", S: "yto_settings_auto_refresh_label", E: "yto_settings_auto_refresh_desc" },
+    { id: "e17", T: "Attr", S: "yto_settings_auto_refresh", E: "yto_settings_auto_refresh_toggle" },
+    { id: "e18", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_refresh_interval" },
+    { id: "e19", T: "Attr", S: "yto_settings_refresh_interval", E: "yto_settings_refresh_interval_label" },
+    { id: "e20", T: "Attr", S: "yto_settings_refresh_interval", E: "yto_settings_refresh_interval_input" },
+    { id: "e21", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_default_view" },
+    { id: "e22", T: "Attr", S: "yto_settings_default_view", E: "yto_settings_default_view_label" },
+    { id: "e23", T: "Attr", S: "yto_settings_default_view", E: "yto_settings_default_view_select" },
+    { id: "e24", T: "Attr", S: "yto_settings_default_view_select", E: "yto_settings_view_option_grid" },
+    { id: "e25", T: "Attr", S: "yto_settings_default_view_select", E: "yto_settings_view_option_list" },
+    { id: "e26", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_display" },
+    { id: "e27", T: "Attr", S: "yto_settings_section_display", E: "yto_settings_section_display_title" },
+    { id: "e28", T: "Attr", S: "yto_settings_section_display_title", E: "yto_settings_section_display_icon" },
+    { id: "e29", T: "Attr", S: "yto_settings_section_display", E: "yto_settings_display_grid" },
+    { id: "e30", T: "Attr", S: "yto_settings_display_grid", E: "yto_settings_show_thumbnails" },
+    { id: "e31", T: "Attr", S: "yto_settings_show_thumbnails", E: "yto_settings_thumbnails_label" },
+    { id: "e32", T: "Attr", S: "yto_settings_thumbnails_label", E: "yto_settings_thumbnails_title" },
+    { id: "e33", T: "Attr", S: "yto_settings_thumbnails_label", E: "yto_settings_thumbnails_desc" },
+    { id: "e34", T: "Attr", S: "yto_settings_show_thumbnails", E: "yto_settings_thumbnails_toggle" },
+    { id: "e35", T: "Attr", S: "yto_settings_display_grid", E: "yto_settings_dark_mode" },
+    { id: "e36", T: "Attr", S: "yto_settings_dark_mode", E: "yto_settings_dark_mode_label" },
+    { id: "e37", T: "Attr", S: "yto_settings_dark_mode_label", E: "yto_settings_dark_mode_title" },
+    { id: "e38", T: "Attr", S: "yto_settings_dark_mode_label", E: "yto_settings_dark_mode_desc" },
+    { id: "e39", T: "Attr", S: "yto_settings_dark_mode", E: "yto_settings_dark_mode_toggle" },
+    { id: "e40", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_notifications" },
+    { id: "e41", T: "Attr", S: "yto_settings_section_notifications", E: "yto_settings_section_notifications_title" },
+    { id: "e42", T: "Attr", S: "yto_settings_section_notifications_title", E: "yto_settings_section_notifications_icon" },
+    { id: "e43", T: "Attr", S: "yto_settings_section_notifications", E: "yto_settings_notifications_toggle" },
+    { id: "e44", T: "Attr", S: "yto_settings_notifications_toggle", E: "yto_settings_notifications_label" },
+    { id: "e45", T: "Attr", S: "yto_settings_notifications_label", E: "yto_settings_notifications_title" },
+    { id: "e46", T: "Attr", S: "yto_settings_notifications_label", E: "yto_settings_notifications_desc" },
+    { id: "e47", T: "Attr", S: "yto_settings_notifications_toggle", E: "yto_settings_notifications_checkbox" },
+    { id: "e48", T: "Attr", S: "yto_settings_form", E: "yto_settings_actions" },
+    { id: "e49", T: "Attr", S: "yto_settings_actions", E: "yto_settings_save_button" },
+    { id: "e50", T: "Attr", S: "yto_settings_save_button", E: "yto_settings_save_icon" },
+    { id: "e51", T: "Attr", S: "yto_settings_actions", E: "yto_settings_reset_button" },
+    { id: "e52", T: "Attr", S: "yto_settings_reset_button", E: "yto_settings_reset_icon" }
+  ]
+}

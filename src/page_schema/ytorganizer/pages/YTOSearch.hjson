@@ -1,0 +1,885 @@
+{
+  vertexes: [
+    {
+      id: "yto_search_page",
+      L: "Page",
+      P: {
+        key: "YTOSearch",
+        url: "/search",
+        title: "Search - YouTube Organizer",
+        description: "Search across your YouTube channels, playlists, and videos",
+        props: '''
+return {
+  isNoPermissionCheck: true,
+  enabled: true
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "yto_search_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        fns: '''
+// Search state
+const [searchQuery, setSearchQuery] = args.createSignal("");
+const [searchFilter, setSearchFilter] = args.createSignal("all");
+const [searchResults, setSearchResults] = args.createSignal([]);
+const [isSearching, setIsSearching] = args.createSignal(false);
+
+// Handle search
+const handleSearch = async (e) => {
+  e.preventDefault();
+  const query = searchQuery().trim();
+
+  if (!query) {
+    args.showWarningToast("Please enter a search term");
+    return;
+  }
+
+  setIsSearching(true);
+
+  // Simulate search - replace with actual search functionality
+  setTimeout(() => {
+    const mockResults = [
+      {
+        id: 1,
+        type: "channel",
+        title: "Tech Channel",
+        description: "Technology tutorials and reviews",
+        thumbnail: "https://picsum.photos/120/90?random=1"
+      },
+      {
+        id: 2,
+        type: "playlist",
+        title: "JavaScript Tutorials",
+        description: "Complete JavaScript learning series",
+        thumbnail: "https://picsum.photos/120/90?random=2"
+      },
+      {
+        id: 3,
+        type: "video",
+        title: "React vs Vue Comparison",
+        description: "Detailed comparison of React and Vue frameworks",
+        thumbnail: "https://picsum.photos/120/90?random=3"
+      }
+    ].filter(item =>
+      searchFilter() === "all" || item.type === searchFilter()
+    ).filter(item =>
+      item.title.toLowerCase().includes(query.toLowerCase()) ||
+      item.description.toLowerCase().includes(query.toLowerCase())
+    );
+
+    setSearchResults(mockResults);
+    setIsSearching(false);
+
+    if (mockResults.length === 0) {
+      args.showInfoToast("No results found for your search");
+    } else {
+      args.showSuccessToast(`Found ${mockResults.length} result(s)`);
+    }
+  }, 1000);
+};
+
+// Clear search
+const clearSearch = () => {
+  setSearchQuery("");
+  setSearchResults([]);
+  setSearchFilter("all");
+};
+
+return {
+  searchQuery,
+  setSearchQuery,
+  searchFilter,
+  setSearchFilter,
+  searchResults,
+  isSearching,
+  handleSearch,
+  clearSearch
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.info};
+  color: ${args.theme.var.color.info_text};
+  padding: 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_header_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_title_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:search",
+  width: 32,
+  height: 32
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Search"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 60vh;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_form_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid ${args.theme.var.color.border};
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_form",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "form",
+  onSubmit: args.fns.handleSearch
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_input_group",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "text",
+  placeholder: "Search channels, playlists, or videos...",
+  value: args.fns.searchQuery(),
+  onChange: (e) => args.fns.setSearchQuery(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.info};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.info_light_100};
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_filter_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "select",
+  value: args.fns.searchFilter(),
+  onChange: (e) => args.fns.setSearchFilter(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  min-width: 150px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.info};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.info_light_100};
+  }
+
+  @media (max-width: 768px) {
+    min-width: unset;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_filter_option_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "all",
+  text: "All Types"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_filter_option_channels",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "channel",
+  text: "Channels"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_filter_option_playlists",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "playlist",
+  text: "Playlists"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_filter_option_videos",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "video",
+  text: "Videos"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  type: "submit",
+  disabled: args.fns.isSearching()
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.info};
+  color: ${args.theme.var.color.info_text};
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 120px;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.info_dark_200};
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_button_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: args.fns.isSearching() ? "carbon:loading" : "carbon:search",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  ${args.fns.isSearching() ? "animation: spin 1s linear infinite;" : ""}
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_button_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: args.fns.isSearching() ? "Searching..." : "Search"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_clear_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  type: "button",
+  text: "Clear",
+  onClick: args.fns.clearSearch
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_300};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_results_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: args.fns.searchResults().length === 0
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_results_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const count = args.fns.searchResults().length;
+return {
+  as: "h2",
+  text: `Search Results (${count})`
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_results_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "result",
+        loop: true,
+        props: '''
+return {
+  data: args.fns.searchResults()
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_result_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-color: ${args.theme.var.color.info_light_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_result_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_result_thumbnail",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const result = args.contextData.result;
+return {
+  as: "img",
+  src: result.thumbnail,
+  alt: result.title
+};
+''',
+        css: '''
+return `._id {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_result_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_result_type_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const result = args.contextData.result;
+return {
+  as: "span",
+  text: result.type.charAt(0).toUpperCase() + result.type.slice(1)
+};
+''',
+        css: '''
+const result = args.contextData.result;
+const getTypeColor = (type) => {
+  switch(type) {
+    case "channel": return args.theme.var.color.primary;
+    case "playlist": return args.theme.var.color.success;
+    case "video": return args.theme.var.color.info;
+    default: return args.theme.var.color.muted;
+  }
+};
+
+return `._id {
+  display: inline-block;
+  background: ${getTypeColor(result.type)};
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_result_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const result = args.contextData.result;
+return {
+  as: "h3",
+  text: result.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: ${args.theme.var.color.text};
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_result_description",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const result = args.contextData.result;
+return {
+  as: "p",
+  text: result.description
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e0", T: "PageLayout", S: "yto_search_page", E: "yto_search_layout" },
+    { id: "e1", T: "Attr", S: "yto_search_page", E: "yto_search_root" },
+    { id: "e2", T: "Attr", S: "yto_search_root", E: "yto_search_header" },
+    { id: "e3", T: "Attr", S: "yto_search_header", E: "yto_search_header_content" },
+    { id: "e4", T: "Attr", S: "yto_search_header_content", E: "yto_search_title_section" },
+    { id: "e5", T: "Attr", S: "yto_search_title_section", E: "yto_search_icon" },
+    { id: "e6", T: "Attr", S: "yto_search_title_section", E: "yto_search_title" },
+    { id: "e7", T: "Attr", S: "yto_search_root", E: "yto_search_container" },
+    { id: "e8", T: "Attr", S: "yto_search_container", E: "yto_search_form_container" },
+    { id: "e9", T: "Attr", S: "yto_search_form_container", E: "yto_search_form" },
+    { id: "e10", T: "Attr", S: "yto_search_form", E: "yto_search_input_group" },
+    { id: "e11", T: "Attr", S: "yto_search_input_group", E: "yto_search_input" },
+    { id: "e12", T: "Attr", S: "yto_search_input_group", E: "yto_search_filter_select" },
+    { id: "e13", T: "Attr", S: "yto_search_filter_select", E: "yto_search_filter_option_all" },
+    { id: "e14", T: "Attr", S: "yto_search_filter_select", E: "yto_search_filter_option_channels" },
+    { id: "e15", T: "Attr", S: "yto_search_filter_select", E: "yto_search_filter_option_playlists" },
+    { id: "e16", T: "Attr", S: "yto_search_filter_select", E: "yto_search_filter_option_videos" },
+    { id: "e17", T: "Attr", S: "yto_search_form", E: "yto_search_actions" },
+    { id: "e18", T: "Attr", S: "yto_search_actions", E: "yto_search_button" },
+    { id: "e19", T: "Attr", S: "yto_search_button", E: "yto_search_button_icon" },
+    { id: "e20", T: "Attr", S: "yto_search_button", E: "yto_search_button_text" },
+    { id: "e21", T: "Attr", S: "yto_search_actions", E: "yto_search_clear_button" },
+    { id: "e22", T: "Attr", S: "yto_search_container", E: "yto_search_results_container" },
+    { id: "e23", T: "Attr", S: "yto_search_results_container", E: "yto_search_results_header" },
+    { id: "e24", T: "Attr", S: "yto_search_results_container", E: "yto_search_results_grid" },
+    { id: "e25", T: "Attr", S: "yto_search_results_grid", E: "yto_search_result_card" },
+    { id: "e26", T: "Attr", S: "yto_search_result_card", E: "yto_search_result_header" },
+    { id: "e27", T: "Attr", S: "yto_search_result_header", E: "yto_search_result_thumbnail" },
+    { id: "e28", T: "Attr", S: "yto_search_result_header", E: "yto_search_result_info" },
+    { id: "e29", T: "Attr", S: "yto_search_result_info", E: "yto_search_result_type_badge" },
+    { id: "e30", T: "Attr", S: "yto_search_result_info", E: "yto_search_result_title" },
+    { id: "e31", T: "Attr", S: "yto_search_result_card", E: "yto_search_result_description" }
+  ]
+}

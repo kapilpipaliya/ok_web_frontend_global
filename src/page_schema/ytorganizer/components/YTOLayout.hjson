@@ -124,7 +124,7 @@ const isActive = currentPath === '' || currentPath === '/';
 
 return {
   as: "button",
-  onClick: () => args.navigate('')
+  onClick: () => args.navigate('/')
 };
 ''',
         css: '''
@@ -412,7 +412,7 @@ const isActive = currentPath.includes('/search');
 
 return {
   as: "button",
-  onClick: () => args.showWarningToast("Search coming soon!")
+  onClick: () => args.navigate('/search')
 };
 ''',
         css: '''
@@ -508,7 +508,7 @@ const isActive = currentPath.includes('/settings');
 
 return {
   as: "button",
-  onClick: () => args.showWarningToast("Settings coming soon!")
+  onClick: () => args.navigate('/settings')
 };
 ''',
         css: '''
