@@ -56,8 +56,10 @@ All components follow the YTO prefix naming convention:
 - **YTOLayout**: Main layout with bottom navigation
 - **YTOTabBar**: Tab navigation for channel/playlist detail views
 
-#### UI Components  
-- **YTOFloatingButton**: Floating action button for adding channels/playlists
+#### UI Components
+- **YTOFloatingButton**: Basic floating action button component
+- **YTOAddChannelButton**: Specialized button with modal for adding YouTube channels
+- **YTOAddPlaylistButton**: Specialized button with modal for adding YouTube playlists
 - **YTOChannelCard**: Channel display card with thumbnail and info
 - **YTOPlaylistCard**: Playlist display card with thumbnail and info
 - **YTOVideoCard**: Video display card with thumbnail and metadata
@@ -231,7 +233,9 @@ Users can set their preferred language through LanguageSetting vertex:
 /src/page_schema/ytorganizer/
 ├── components/
 │   ├── YTOLayout.hjson              # Main layout with bottom nav
-│   ├── YTOFloatingButton.hjson      # Floating action button
+│   ├── YTOFloatingButton.hjson      # Basic floating action button
+│   ├── YTOAddChannelButton.hjson    # Channel add button with modal
+│   ├── YTOAddPlaylistButton.hjson   # Playlist add button with modal
 │   ├── YTOChannelCard.hjson         # Channel display card
 │   ├── YTOPlaylistCard.hjson        # Playlist display card
 │   ├── YTOVideoCard.hjson           # Video display card
@@ -280,6 +284,42 @@ Users can set their preferred language through LanguageSetting vertex:
 2. Custom order is saved to PlaylistSetting vertex
 3. Switch between sort modes: 'custom', 'date', 'title', 'index' (original YouTube order)
 4. Custom order persists across sessions for each user
+
+## Component Architecture
+
+### Add Button Components
+The system uses specialized add button components that encapsulate both the floating action button and the modal form:
+
+#### YTOAddChannelButton
+- **Purpose**: Handles adding new YouTube channels
+- **Features**: Floating button + modal with channel-specific form
+- **Styling**: Uses primary theme color (red)
+- **Form Fields**:
+  - YouTube Channel URL (required)
+  - Custom Name (optional)
+- **Usage**:
+  ```javascript
+  <YTOAddChannelButton onSubmit={handleChannelSubmit} />
+  ```
+
+#### YTOAddPlaylistButton
+- **Purpose**: Handles adding new YouTube playlists
+- **Features**: Floating button + modal with playlist-specific form
+- **Styling**: Uses success theme color (green)
+- **Form Fields**:
+  - YouTube Playlist URL (required)
+  - Custom Name (optional)
+- **Usage**:
+  ```javascript
+  <YTOAddPlaylistButton onSubmit={handlePlaylistSubmit} />
+  ```
+
+#### Component Benefits
+- **Single Responsibility**: Each component handles one specific add action
+- **Encapsulation**: Button and modal logic contained within component
+- **Reusability**: Can be used across different pages
+- **Consistency**: Standardized form behavior and validation
+- **Maintainability**: Changes to add functionality isolated to specific components
 
 ## Development Guidelines
 

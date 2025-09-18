@@ -1,0 +1,551 @@
+{
+  vertexes: [
+    {
+      id: "yto_add_playlist_button_component",
+      L: "Component",
+      P: {
+        key: "YTOAddPlaylistButton"
+      }
+    },
+    {
+      id: "yto_add_playlist_button_variant_on_submit",
+      L: "ComponentVariant",
+      P: {
+        key: "onSubmit",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "yto_add_playlist_button_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        fns: '''
+// State for showing/hiding the modal
+const [showModal, setShowModal] = args.createSignal(false);
+
+// Form state
+const [urlValue, setUrlValue] = args.createSignal("");
+const [nameValue, setNameValue] = args.createSignal("");
+
+// Get onSubmit callback from props
+const onSubmit = args.contextData.props?.onSubmit;
+
+// Handle form submission
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  if (onSubmit) {
+    onSubmit({
+      url: urlValue(),
+      name: nameValue()
+    });
+  } else {
+    args.showSuccessToast("Add Playlist functionality coming soon!");
+  }
+
+  // Reset form and close modal
+  setUrlValue("");
+  setNameValue("");
+  setShowModal(false);
+};
+
+// Return functions to be accessible in children
+return {
+  showModal,
+  setShowModal,
+  urlValue,
+  setUrlValue,
+  nameValue,
+  setNameValue,
+  handleSubmit
+};
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_fab",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOFloatingButton",
+        props: '''
+return {
+  icon: "carbon:add",
+  label: "Add Playlist",
+  onClick: () => args.fns.setShowModal(true),
+  color: "success"
+};
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_modal_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: !args.fns.showModal(),
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.fns.setShowModal(false);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 1;
+  visibility: visible;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_modal_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation()
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.surface};
+  border-radius: 1rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_modal_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_modal_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Add New Playlist"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_modal_close",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.fns.setShowModal(false)
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_modal_close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_modal_form",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "form",
+  onSubmit: args.fns.handleSubmit
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_url_group",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_url_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "YouTube Playlist URL"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_url_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "url",
+  placeholder: "https://www.youtube.com/playlist?list=...",
+  required: true,
+  value: args.fns.urlValue(),
+  onChange: (e) => args.fns.setUrlValue(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.success};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.success_light_100};
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_name_group",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_name_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Custom Name (Optional)"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_name_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "text",
+  placeholder: "Leave empty to use playlist title",
+  value: args.fns.nameValue(),
+  onChange: (e) => args.fns.setNameValue(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.success};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.success_light_100};
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_cancel",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  type: "button",
+  text: "Cancel",
+  onClick: () => args.fns.setShowModal(false)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_100};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_submit",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  type: "submit",
+  text: "Add Playlist"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.success};
+  color: ${args.theme.var.color.success_text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.success_dark_200};
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.5rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "yto_add_playlist_button_component", E: "yto_add_playlist_button_variant_on_submit" },
+    { id: "e2", T: "Attr", S: "yto_add_playlist_button_component", E: "yto_add_playlist_button_root" },
+    { id: "e3", T: "Attr", S: "yto_add_playlist_button_root", E: "yto_add_playlist_button_fab" },
+    { id: "e4", T: "Attr", S: "yto_add_playlist_button_root", E: "yto_add_playlist_button_modal_overlay" },
+    { id: "e5", T: "Attr", S: "yto_add_playlist_button_modal_overlay", E: "yto_add_playlist_button_modal_container" },
+    { id: "e6", T: "Attr", S: "yto_add_playlist_button_modal_container", E: "yto_add_playlist_button_modal_header" },
+    { id: "e7", T: "Attr", S: "yto_add_playlist_button_modal_header", E: "yto_add_playlist_button_modal_title" },
+    { id: "e8", T: "Attr", S: "yto_add_playlist_button_modal_header", E: "yto_add_playlist_button_modal_close" },
+    { id: "e9", T: "Attr", S: "yto_add_playlist_button_modal_close", E: "yto_add_playlist_button_modal_close_icon" },
+    { id: "e10", T: "Attr", S: "yto_add_playlist_button_modal_container", E: "yto_add_playlist_button_modal_form" },
+    { id: "e11", T: "Attr", S: "yto_add_playlist_button_modal_form", E: "yto_add_playlist_button_url_group" },
+    { id: "e12", T: "Attr", S: "yto_add_playlist_button_url_group", E: "yto_add_playlist_button_url_label" },
+    { id: "e13", T: "Attr", S: "yto_add_playlist_button_url_group", E: "yto_add_playlist_button_url_input" },
+    { id: "e14", T: "Attr", S: "yto_add_playlist_button_modal_form", E: "yto_add_playlist_button_name_group" },
+    { id: "e15", T: "Attr", S: "yto_add_playlist_button_name_group", E: "yto_add_playlist_button_name_label" },
+    { id: "e16", T: "Attr", S: "yto_add_playlist_button_name_group", E: "yto_add_playlist_button_name_input" },
+    { id: "e17", T: "Attr", S: "yto_add_playlist_button_modal_form", E: "yto_add_playlist_button_actions" },
+    { id: "e18", T: "Attr", S: "yto_add_playlist_button_actions", E: "yto_add_playlist_button_cancel" },
+    { id: "e19", T: "Attr", S: "yto_add_playlist_button_actions", E: "yto_add_playlist_button_submit" }
+  ]
+}

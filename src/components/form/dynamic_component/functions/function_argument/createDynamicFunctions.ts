@@ -3,6 +3,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
 import type { Accessor } from "solid-js";
+import { createLazyMemo } from "@solid-primitives/memo";
 
 /**
  * Creates dynamic functions for the component
@@ -37,11 +38,13 @@ export function createDynamicFunctions(
       return undefined;
     };
 
+    const metaFnsMemo = createLazyMemo(() => evaluateFns(meta.P.fns));
+
     return new Proxy(
       {},
       {
         get(_, key: string) {
-          const metaFns = evaluateFns(meta.P.fns);
+          const metaFns = metaFnsMemo();
           if (metaFns && key in metaFns) {
             return metaFns[key];
           }

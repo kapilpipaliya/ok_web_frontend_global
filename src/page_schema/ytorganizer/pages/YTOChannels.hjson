@@ -36,8 +36,11 @@ return {
 };
 ''',
         fns: '''
-// State for showing/hiding the add channel form
-const [showAddForm, setShowAddForm] = args.useState(false);
+// Handle channel submission
+const handleChannelSubmit = (data) => {
+  args.showSuccessToast(`Channel "${data.name || 'from URL'}" will be added soon!`);
+  console.log("Channel data:", data);
+};
 '''
       }
     },
@@ -354,7 +357,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => setShowAddForm(true)
+  onClick: () => args.showWarningToast("Use the floating button to add channels!")
 };
 ''',
         css: '''
@@ -422,17 +425,14 @@ return {
       }
     },
     {
-      id: "yto_channels_floating_button",
+      id: "yto_channels_add_button",
       L: "Attr",
       P: {
         displayOrder: 3,
-        componentName: "YTOFloatingButton",
+        componentName: "YTOAddChannelButton",
         props: '''
 return {
-  icon: "carbon:add",
-  label: "Add Channel",
-  onClick: () => setShowAddForm(true),
-  color: "primary"
+  onSubmit: args.fns.handleChannelSubmit
 };
 '''
       }
@@ -456,6 +456,6 @@ return {
     { id: "e14", T: "Attr", S: "yto_channels_empty_state", E: "yto_channels_empty_action" },
     { id: "e15", T: "Attr", S: "yto_channels_empty_action", E: "yto_channels_empty_action_icon" },
     { id: "e16", T: "Attr", S: "yto_channels_empty_action", E: "yto_channels_empty_action_text" },
-    { id: "e17", T: "Attr", S: "yto_channels_root", E: "yto_channels_floating_button" }
+    { id: "e17", T: "Attr", S: "yto_channels_root", E: "yto_channels_add_button" }
   ]
 }
