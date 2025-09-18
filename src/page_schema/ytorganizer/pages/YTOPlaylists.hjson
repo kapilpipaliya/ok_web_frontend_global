@@ -57,14 +57,14 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.success};
-  color: ${args.theme.var.color.success_text};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
   padding: 1.5rem;
   position: sticky;
   top: 0;
   z-index: 10;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  
+
   @media (max-width: 768px) {
     padding: 1rem;
   }
@@ -255,14 +255,14 @@ return {
 return `._id {
   width: 80px;
   height: 80px;
-  background: ${args.theme.var.color.success_light_100};
-  color: ${args.theme.var.color.success};
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary};
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  
+
   @media (max-width: 768px) {
     width: 64px;
     height: 64px;
@@ -362,8 +362,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.success};
-  color: ${args.theme.var.color.success_text};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
   border: none;
   border-radius: 0.75rem;
   padding: 1rem 2rem;
@@ -375,17 +375,17 @@ return `._id {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  
+
   &:hover {
-    background: ${args.theme.var.color.success_dark_200};
+    background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   @media (max-width: 768px) {
     padding: 0.875rem 1.5rem;
     font-size: 0.875rem;

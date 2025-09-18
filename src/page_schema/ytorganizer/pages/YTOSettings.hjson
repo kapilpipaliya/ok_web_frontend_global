@@ -103,8 +103,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.warning};
-  color: ${args.theme.var.color.warning_text};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
   padding: 1.5rem;
   position: sticky;
   top: 0;
@@ -504,6 +504,12 @@ return `._id {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   text-align: center;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+  }
 }`;
 '''
       }
@@ -570,6 +576,12 @@ return `._id {
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   min-width: 120px;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+  }
 }`;
 '''
       }
@@ -1095,8 +1107,8 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.warning};
-  color: ${args.theme.var.color.warning_text};
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
   border: none;
   border-radius: 0.5rem;
   padding: 1rem 2rem;
@@ -1109,7 +1121,7 @@ return `._id {
   gap: 0.5rem;
 
   &:hover {
-    background: ${args.theme.var.color.warning_dark_200};
+    background: ${args.theme.var.color.primary_dark_200};
   }
 }`;
 '''

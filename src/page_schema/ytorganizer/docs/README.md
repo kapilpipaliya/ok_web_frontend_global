@@ -80,7 +80,7 @@ The system uses the `googleapis` library dynamically imported in server function
 ##### Dynamic Import Pattern
 ```javascript
 // Dynamic import of googleapis library in server functions
-const YOUTUBE_API_KEY = 'YOUR_API_KEY_HERE'; // Define API key as constant
+const YOUTUBE_API_KEY = 'AIzaSyC_CClo37bSKqLUFNKEsDaZgYzTxEQfuds';
 const { google } = await import('googleapis');
 const youtube = google.youtube({
   version: 'v3',
