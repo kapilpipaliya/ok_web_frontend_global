@@ -615,14 +615,15 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
+        componentName: "Html",
         props: '''
 const channels = args.fns.channels();
 
 return {
   data: channels,
   loop: true,
-  name: "channel"
+  name: "channel",
+  contextName: "channel"
 };
 '''
       }

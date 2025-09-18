@@ -152,7 +152,7 @@ Components and pages are defined using hjson files with the following structure:
       L: "Attr",       // Label (always "Attr" for page elements)
       P: {             // Properties object
         displayOrder: number,
-        componentName: string,  // "Html", "Data", "Slot", or custom component
+        componentName: string,  // "Html", "Slot", or custom component
         props: string,         // Function body returning props object
         css: string,          // Function body returning CSS styles
         fns: string,          // Optional: Function definitions
@@ -318,7 +318,7 @@ When creating component and page schemas, follow the guidelines in `/src/routes/
 
 1. **Component Properties:**
    - `displayOrder`: Required number for sibling ordering
-   - `componentName`: "Html", "Data", "Slot", or custom component name
+   - `componentName`: "Html", "Slot", or custom component name
    - `props`: Function body returning dynamic properties
    - `css`: Function body returning CSS with `._id` selector
    - `fns`: Function body for shared functions
@@ -329,11 +329,6 @@ When creating component and page schemas, follow the guidelines in `/src/routes/
    - Use theme variables: `${args.theme.var.color.primary}`
    - Use rem units for consistent scaling
    - Include responsive breakpoints
-
-3. **Data Components:**
-   - Use for repeating patterns with `loop: true`
-   - Provide `name` for data context
-   - Access data in children via `args.contextData.name`
 
 **Example Component Schema:**
 ```hjson
@@ -406,7 +401,7 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
 
 **Attr Vertex (Page Builder Items):**
 - `displayOrder`: number - Determines item order among siblings
-- `componentName`: string - Component type ('Html', 'Data', 'Slot', or custom component)
+- `componentName`: string - Component type ('Html', 'Slot', or custom component)
 - `fns`: Function body string - JavaScript functions for dynamic properties
 - `props`: Function body string - Dynamic properties returning key-value pairs
 - `css`: Function body string - CSS styling with `._id` selector for current element (returns string or array of strings)
@@ -418,98 +413,7 @@ The Page Builder uses a graph-based structure with vertices and edges to represe
    - `text`: Text content to render
    - For icons: requires `icon`, `height`, `width` properties
 
-2. **Data Component** (for repeating patterns):
-   - `name`: string - Data context name (required)
-   - `loop`: boolean - Enable iteration over children (set to true)
-   - `expression`: string - Data evaluation expression
-   - Access iteration data via `args.contextData.name` in child components
-   
-   **Example Data Component with Loop:**
-   ```hjson
-   {
-     vertexes: [
-       {
-         id: "1",
-         L: "Attr",
-         P: {
-           displayOrder: 1,
-           componentName: "Html",
-           contextName: "items",
-           loop: true,
-           props: '''
-   return {
-     data: [
-       { id: 1, title: "Item 1", description: "First item" },
-       { id: 2, title: "Item 2", description: "Second item" },
-       { id: 3, title: "Item 3", description: "Third item" }
-     ]
-   };
-   '''
-         }
-       },
-       {
-         id: "2",
-         L: "Attr",
-         P: {
-           displayOrder: 1,
-           componentName: "Html",
-           props: '''
-   const item = args.contextData.items;
-   return {
-     as: "div"
-   };
-   ''',
-           css: '''
-   return `._id {
-     padding: 1rem;
-     margin-bottom: 0.5rem;
-     background: ${args.theme.var.color.background_light_100};
-     color: ${args.theme.var.color.background_light_100_text};
-     border-radius: 0.5rem;
-   }`;
-   '''
-         }
-       },
-       {
-         id: "3",
-         L: "Attr",
-         P: {
-           displayOrder: 1,
-           componentName: "Html",
-           props: '''
-   const item = args.contextData.items;
-   return {
-     as: "h3",
-     text: item.title
-   };
-   '''
-         }
-       },
-       {
-         id: "4",
-         L: "Attr",
-         P: {
-           displayOrder: 2,
-           componentName: "Html",
-           props: '''
-   const item = args.contextData.items;
-   return {
-     as: "p",
-     text: item.description
-   };
-   '''
-         }
-       }
-     ],
-     edges: [
-       { id: "e1", T: "Attr", S: "1", E: "2" },
-       { id: "e2", T: "Attr", S: "2", E: "3" },
-       { id: "e3", T: "Attr", S: "2", E: "4" }
-     ]
-   }
-   ```
-
-3. **Slot Component**:
+2. **Slot Component**:
    - `name`: string - Slot name (default: 'children')
 
 **Function Arguments Available:**

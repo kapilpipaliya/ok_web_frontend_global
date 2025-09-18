@@ -771,14 +771,14 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
+        componentName: "Html",
         props: '''
 const videos = args.fns.videos();
 
 return {
   data: videos,
   loop: true,
-  name: "video"
+  contextName: "video"
 };
 '''
       }
@@ -836,14 +836,15 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
+        componentName: "Html",
         props: '''
 const playlists = args.fns.playlists();
 
 return {
   data: playlists,
   loop: true,
-  name: "playlist"
+  name: "playlist",
+  contextName: "playlist"
 };
 '''
       }

@@ -1063,7 +1063,7 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Data",
+        componentName: "Html",
         props: '''
 const videos = args.fns.videos();
 const sortBy = args.fns.sortBy();
@@ -1093,7 +1093,7 @@ switch (sortBy) {
 return {
   data: sortedVideos,
   loop: true,
-  name: "video"
+  contextName: "video"
 };
 '''
       }
