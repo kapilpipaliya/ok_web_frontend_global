@@ -56,10 +56,10 @@ return {
     setLoading(true);
     
     try {
-      const result = await args.executeServerFunction('fetchYouTubeChannel', {
+      const result = await args.executeNamedServerFunction({functionName: 'fetchYouTubeChannel', contextData: {
         channelUrl: channelUrl,
         apiKey: apiKey
-      });
+      }});
       
       if (result.success) {
         args.showSuccessToast(`Channel "${result.data.channel.snippet.title}" added successfully with ${result.data.videosAdded} videos`);

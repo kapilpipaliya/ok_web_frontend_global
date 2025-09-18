@@ -27,6 +27,8 @@ import { runWithParentOwnerFunction } from "~/components/form/dynamic_component/
 import { useDataContext } from "~/features/page_attr_render/context/DataContext";
 import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
+import { executeServerFunction } from "~/cypher/get/executeServerFunction";
+import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
@@ -248,5 +250,7 @@ export function createFunctionArgumentBase(
     saveUserSetting: (settings: Record<string, unknown>) => {
       return saveUserSetting(settings, hooks.graph, hooks.setGraph);
     },
+    executeServerFunction,
+    executeNamedServerFunction
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;
 }

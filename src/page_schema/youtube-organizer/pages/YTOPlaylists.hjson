@@ -56,10 +56,10 @@ return {
     setLoading(true);
     
     try {
-      const result = await args.executeServerFunction('fetchYouTubePlaylist', {
+      const result = await args.executeNamedServerFunction({functionName: 'fetchYouTubePlaylist', contextData: {
         playlistUrl: playlistUrl,
         apiKey: apiKey
-      });
+      }});
       
       if (result.success) {
         args.showSuccessToast(`Playlist "${result.data.playlist.snippet.title}" added successfully with ${result.data.videosAdded} videos`);

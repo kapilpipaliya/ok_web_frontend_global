@@ -1,7 +1,7 @@
 import type { Owner } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 
-import type { GraphData } from "~/cypher/types/ServerResult";
+import type { GraphData, ServerResult } from "~/cypher/types/ServerResult";
 import type {
   PageRenderObject,
   PageRenderStore,
@@ -99,7 +99,8 @@ export interface FunctionArgumentBaseType {
   userSetting: Record<string, unknown> | undefined;
   saveUserSetting: (settings: Record<string, unknown>) => void;
   // Server function execution
-  executeServerFunction: (functionKey: string, params?: Record<string, unknown>) => Promise<any>;
+  executeServerFunction: (request: {functionBody: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
+  executeNamedServerFunction: (request: {functionName: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>
 }
 
 export interface FunctionArgumentType extends FunctionArgumentBaseType {
