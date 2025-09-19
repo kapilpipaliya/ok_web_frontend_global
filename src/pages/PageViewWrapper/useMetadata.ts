@@ -36,6 +36,14 @@ export function useMetadata(
       if (constants.pageKeyName === "favicon.ico") {
         return { error: "No meta data found" };
       }
+      const fetchFormMetaDataArgs = [
+        constants.pageVertexName,
+        constants.formId,
+        constants.expression,
+        constants.isDesignMode,
+        constants.pageKeyName,
+        constants.url,
+      ] as const;
       if (constants.formMetaId) {
         if (props.getFormData) {
           try {
@@ -50,14 +58,7 @@ export function useMetadata(
         }
         return {};
       }
-      const metaResult = await fetchFormMetaData(
-        constants.pageVertexName,
-        constants.formId,
-        constants.expression,
-        constants.isDesignMode,
-        constants.pageKeyName,
-        constants.url,
-      );
+      const metaResult = await fetchFormMetaData(...fetchFormMetaDataArgs);
       if (!metaResult) {
         return { error: "404" };
       }
