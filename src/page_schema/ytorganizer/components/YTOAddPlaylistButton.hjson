@@ -151,7 +151,7 @@ return {
   icon: "carbon:add",
   label: "Add Playlist",
   onClick: () => args.fns.setShowModal(true),
-  color: "success"
+  color: "primary"
 };
 '''
       }

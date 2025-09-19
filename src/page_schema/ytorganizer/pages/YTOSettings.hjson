@@ -150,110 +150,14 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
+        componentName: "YTOPageHeader",
         props: '''
 return {
-  as: "header"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  padding: 1.5rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_settings_header_content",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_settings_title_section",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_settings_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
   icon: "carbon:settings",
-  width: 32,
-  height: 32
+  title: "Settings",
+  stats: null,
+  color: "primary"
 };
-'''
-      }
-    },
-    {
-      id: "yto_settings_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h1",
-  text: "Settings"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-  }
-}`;
 '''
       }
     },
@@ -1496,65 +1400,61 @@ return {
     { id: "e0", T: "PageLayout", S: "yto_settings_page", E: "yto_settings_layout" },
     { id: "e1", T: "Attr", S: "yto_settings_page", E: "yto_settings_root" },
     { id: "e2", T: "Attr", S: "yto_settings_root", E: "yto_settings_header" },
-    { id: "e3", T: "Attr", S: "yto_settings_header", E: "yto_settings_header_content" },
-    { id: "e4", T: "Attr", S: "yto_settings_header_content", E: "yto_settings_title_section" },
-    { id: "e5", T: "Attr", S: "yto_settings_title_section", E: "yto_settings_icon" },
-    { id: "e6", T: "Attr", S: "yto_settings_title_section", E: "yto_settings_title" },
-    { id: "e7", T: "Attr", S: "yto_settings_root", E: "yto_settings_container" },
-    { id: "e8", T: "Attr", S: "yto_settings_container", E: "yto_settings_form" },
-    { id: "e9", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_general" },
-    { id: "e10", T: "Attr", S: "yto_settings_section_general", E: "yto_settings_section_general_title" },
-    { id: "e11", T: "Attr", S: "yto_settings_section_general_title", E: "yto_settings_section_general_icon" },
-    { id: "e12", T: "Attr", S: "yto_settings_section_general", E: "yto_settings_general_grid" },
-    { id: "e13", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_auto_refresh" },
-    { id: "e14", T: "Attr", S: "yto_settings_auto_refresh", E: "yto_settings_auto_refresh_label" },
-    { id: "e15", T: "Attr", S: "yto_settings_auto_refresh_label", E: "yto_settings_auto_refresh_title" },
-    { id: "e16", T: "Attr", S: "yto_settings_auto_refresh_label", E: "yto_settings_auto_refresh_desc" },
-    { id: "e17", T: "Attr", S: "yto_settings_auto_refresh", E: "yto_settings_auto_refresh_toggle" },
-    { id: "e18", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_refresh_interval" },
-    { id: "e19", T: "Attr", S: "yto_settings_refresh_interval", E: "yto_settings_refresh_interval_label" },
-    { id: "e20", T: "Attr", S: "yto_settings_refresh_interval", E: "yto_settings_refresh_interval_input" },
-    { id: "e21", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_default_view" },
-    { id: "e22", T: "Attr", S: "yto_settings_default_view", E: "yto_settings_default_view_label" },
-    { id: "e23", T: "Attr", S: "yto_settings_default_view", E: "yto_settings_default_view_select" },
-    { id: "e24", T: "Attr", S: "yto_settings_default_view_select", E: "yto_settings_view_option_grid" },
-    { id: "e25", T: "Attr", S: "yto_settings_default_view_select", E: "yto_settings_view_option_list" },
-    { id: "e26", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_display" },
-    { id: "e27", T: "Attr", S: "yto_settings_section_display", E: "yto_settings_section_display_title" },
-    { id: "e28", T: "Attr", S: "yto_settings_section_display_title", E: "yto_settings_section_display_icon" },
-    { id: "e29", T: "Attr", S: "yto_settings_section_display", E: "yto_settings_display_grid" },
-    { id: "e30", T: "Attr", S: "yto_settings_display_grid", E: "yto_settings_show_thumbnails" },
-    { id: "e31", T: "Attr", S: "yto_settings_show_thumbnails", E: "yto_settings_thumbnails_label" },
-    { id: "e32", T: "Attr", S: "yto_settings_thumbnails_label", E: "yto_settings_thumbnails_title" },
-    { id: "e33", T: "Attr", S: "yto_settings_thumbnails_label", E: "yto_settings_thumbnails_desc" },
-    { id: "e34", T: "Attr", S: "yto_settings_show_thumbnails", E: "yto_settings_thumbnails_toggle" },
-    { id: "e35", T: "Attr", S: "yto_settings_display_grid", E: "yto_settings_dark_mode" },
-    { id: "e36", T: "Attr", S: "yto_settings_dark_mode", E: "yto_settings_dark_mode_label" },
-    { id: "e37", T: "Attr", S: "yto_settings_dark_mode_label", E: "yto_settings_dark_mode_title" },
-    { id: "e38", T: "Attr", S: "yto_settings_dark_mode_label", E: "yto_settings_dark_mode_desc" },
-    { id: "e39", T: "Attr", S: "yto_settings_dark_mode", E: "yto_settings_dark_mode_toggle" },
-    { id: "e40", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_notifications" },
-    { id: "e41", T: "Attr", S: "yto_settings_section_notifications", E: "yto_settings_section_notifications_title" },
-    { id: "e42", T: "Attr", S: "yto_settings_section_notifications_title", E: "yto_settings_section_notifications_icon" },
-    { id: "e43", T: "Attr", S: "yto_settings_section_notifications", E: "yto_settings_notifications_toggle" },
-    { id: "e44", T: "Attr", S: "yto_settings_notifications_toggle", E: "yto_settings_notifications_label" },
-    { id: "e45", T: "Attr", S: "yto_settings_notifications_label", E: "yto_settings_notifications_title" },
-    { id: "e46", T: "Attr", S: "yto_settings_notifications_label", E: "yto_settings_notifications_desc" },
-    { id: "e47", T: "Attr", S: "yto_settings_notifications_toggle", E: "yto_settings_notifications_checkbox" },
-    { id: "e48", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_data" },
-    { id: "e49", T: "Attr", S: "yto_settings_section_data", E: "yto_settings_section_data_title" },
-    { id: "e50", T: "Attr", S: "yto_settings_section_data_title", E: "yto_settings_section_data_icon" },
-    { id: "e51", T: "Attr", S: "yto_settings_section_data", E: "yto_settings_clear_data_container" },
-    { id: "e52", T: "Attr", S: "yto_settings_clear_data_container", E: "yto_settings_clear_data_warning" },
-    { id: "e53", T: "Attr", S: "yto_settings_clear_data_warning", E: "yto_settings_clear_data_title" },
-    { id: "e54", T: "Attr", S: "yto_settings_clear_data_warning", E: "yto_settings_clear_data_description" },
-    { id: "e55", T: "Attr", S: "yto_settings_clear_data_container", E: "yto_settings_clear_data_button" },
-    { id: "e56", T: "Attr", S: "yto_settings_clear_data_button", E: "yto_settings_clear_data_icon" },
-    { id: "e57", T: "Attr", S: "yto_settings_clear_data_button", E: "yto_settings_clear_data_text" },
-    { id: "e58", T: "Attr", S: "yto_settings_form", E: "yto_settings_actions" },
-    { id: "e59", T: "Attr", S: "yto_settings_actions", E: "yto_settings_save_button" },
-    { id: "e60", T: "Attr", S: "yto_settings_save_button", E: "yto_settings_save_icon" },
-    { id: "e61", T: "Attr", S: "yto_settings_actions", E: "yto_settings_reset_button" },
-    { id: "e62", T: "Attr", S: "yto_settings_reset_button", E: "yto_settings_reset_icon" }
+    { id: "e3", T: "Attr", S: "yto_settings_root", E: "yto_settings_container" },
+    { id: "e4", T: "Attr", S: "yto_settings_container", E: "yto_settings_form" },
+    { id: "e5", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_general" },
+    { id: "e6", T: "Attr", S: "yto_settings_section_general", E: "yto_settings_section_general_title" },
+    { id: "e7", T: "Attr", S: "yto_settings_section_general_title", E: "yto_settings_section_general_icon" },
+    { id: "e8", T: "Attr", S: "yto_settings_section_general", E: "yto_settings_general_grid" },
+    { id: "e9", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_auto_refresh" },
+    { id: "e10", T: "Attr", S: "yto_settings_auto_refresh", E: "yto_settings_auto_refresh_label" },
+    { id: "e11", T: "Attr", S: "yto_settings_auto_refresh_label", E: "yto_settings_auto_refresh_title" },
+    { id: "e12", T: "Attr", S: "yto_settings_auto_refresh_label", E: "yto_settings_auto_refresh_desc" },
+    { id: "e13", T: "Attr", S: "yto_settings_auto_refresh", E: "yto_settings_auto_refresh_toggle" },
+    { id: "e14", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_refresh_interval" },
+    { id: "e15", T: "Attr", S: "yto_settings_refresh_interval", E: "yto_settings_refresh_interval_label" },
+    { id: "e16", T: "Attr", S: "yto_settings_refresh_interval", E: "yto_settings_refresh_interval_input" },
+    { id: "e17", T: "Attr", S: "yto_settings_general_grid", E: "yto_settings_default_view" },
+    { id: "e18", T: "Attr", S: "yto_settings_default_view", E: "yto_settings_default_view_label" },
+    { id: "e19", T: "Attr", S: "yto_settings_default_view", E: "yto_settings_default_view_select" },
+    { id: "e20", T: "Attr", S: "yto_settings_default_view_select", E: "yto_settings_view_option_grid" },
+    { id: "e21", T: "Attr", S: "yto_settings_default_view_select", E: "yto_settings_view_option_list" },
+    { id: "e22", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_display" },
+    { id: "e23", T: "Attr", S: "yto_settings_section_display", E: "yto_settings_section_display_title" },
+    { id: "e24", T: "Attr", S: "yto_settings_section_display_title", E: "yto_settings_section_display_icon" },
+    { id: "e25", T: "Attr", S: "yto_settings_section_display", E: "yto_settings_display_grid" },
+    { id: "e26", T: "Attr", S: "yto_settings_display_grid", E: "yto_settings_show_thumbnails" },
+    { id: "e27", T: "Attr", S: "yto_settings_show_thumbnails", E: "yto_settings_thumbnails_label" },
+    { id: "e28", T: "Attr", S: "yto_settings_thumbnails_label", E: "yto_settings_thumbnails_title" },
+    { id: "e29", T: "Attr", S: "yto_settings_thumbnails_label", E: "yto_settings_thumbnails_desc" },
+    { id: "e30", T: "Attr", S: "yto_settings_show_thumbnails", E: "yto_settings_thumbnails_toggle" },
+    { id: "e31", T: "Attr", S: "yto_settings_display_grid", E: "yto_settings_dark_mode" },
+    { id: "e32", T: "Attr", S: "yto_settings_dark_mode", E: "yto_settings_dark_mode_label" },
+    { id: "e33", T: "Attr", S: "yto_settings_dark_mode_label", E: "yto_settings_dark_mode_title" },
+    { id: "e34", T: "Attr", S: "yto_settings_dark_mode_label", E: "yto_settings_dark_mode_desc" },
+    { id: "e35", T: "Attr", S: "yto_settings_dark_mode", E: "yto_settings_dark_mode_toggle" },
+    { id: "e36", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_notifications" },
+    { id: "e37", T: "Attr", S: "yto_settings_section_notifications", E: "yto_settings_section_notifications_title" },
+    { id: "e38", T: "Attr", S: "yto_settings_section_notifications_title", E: "yto_settings_section_notifications_icon" },
+    { id: "e39", T: "Attr", S: "yto_settings_section_notifications", E: "yto_settings_notifications_toggle" },
+    { id: "e40", T: "Attr", S: "yto_settings_notifications_toggle", E: "yto_settings_notifications_label" },
+    { id: "e41", T: "Attr", S: "yto_settings_notifications_label", E: "yto_settings_notifications_title" },
+    { id: "e42", T: "Attr", S: "yto_settings_notifications_label", E: "yto_settings_notifications_desc" },
+    { id: "e43", T: "Attr", S: "yto_settings_notifications_toggle", E: "yto_settings_notifications_checkbox" },
+    { id: "e44", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_data" },
+    { id: "e45", T: "Attr", S: "yto_settings_section_data", E: "yto_settings_section_data_title" },
+    { id: "e46", T: "Attr", S: "yto_settings_section_data_title", E: "yto_settings_section_data_icon" },
+    { id: "e47", T: "Attr", S: "yto_settings_section_data", E: "yto_settings_clear_data_container" },
+    { id: "e48", T: "Attr", S: "yto_settings_clear_data_container", E: "yto_settings_clear_data_warning" },
+    { id: "e49", T: "Attr", S: "yto_settings_clear_data_warning", E: "yto_settings_clear_data_title" },
+    { id: "e50", T: "Attr", S: "yto_settings_clear_data_warning", E: "yto_settings_clear_data_description" },
+    { id: "e51", T: "Attr", S: "yto_settings_clear_data_container", E: "yto_settings_clear_data_button" },
+    { id: "e52", T: "Attr", S: "yto_settings_clear_data_button", E: "yto_settings_clear_data_icon" },
+    { id: "e53", T: "Attr", S: "yto_settings_clear_data_button", E: "yto_settings_clear_data_text" },
+    { id: "e54", T: "Attr", S: "yto_settings_form", E: "yto_settings_actions" },
+    { id: "e55", T: "Attr", S: "yto_settings_actions", E: "yto_settings_save_button" },
+    { id: "e56", T: "Attr", S: "yto_settings_save_button", E: "yto_settings_save_icon" },
+    { id: "e57", T: "Attr", S: "yto_settings_actions", E: "yto_settings_reset_button" },
+    { id: "e58", T: "Attr", S: "yto_settings_reset_button", E: "yto_settings_reset_icon" }
   ]
 }

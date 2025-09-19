@@ -47,76 +47,13 @@ return `._id {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
+        componentName: "YTOPageHeader",
         props: '''
 return {
-  as: "header"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_home_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h1",
-  text: "YouTube Organizer"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_home_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
   icon: "carbon:logo-youtube",
-  width: 32,
-  height: 32
+  title: "YouTube Organizer",
+  color: "primary"
 };
-''',
-        css: '''
-return `._id {
-  display: inline-block;
-  vertical-align: middle;
-}`;
 '''
       }
     },
@@ -743,7 +680,7 @@ return `._id {
       }
     },
     {
-      id: "yto_home_action_add_channel",
+      id: "yto_home_action_channels",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -769,17 +706,17 @@ return `._id {
   transition: all 0.2s ease;
   font-family: inherit;
   min-height: 120px;
-  
+
   &:hover {
     background: ${args.theme.var.color.primary_dark_200};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   @media (max-width: 768px) {
     padding: 1.25rem 0.75rem;
     min-height: 100px;
@@ -789,7 +726,7 @@ return `._id {
       }
     },
     {
-      id: "yto_home_action_add_channel_icon",
+      id: "yto_home_action_channels_icon",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -797,7 +734,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "carbon:add",
+  icon: "carbon:channels",
   width: 32,
   height: 32
 };
@@ -805,7 +742,7 @@ return {
       }
     },
     {
-      id: "yto_home_action_add_channel_text",
+      id: "yto_home_action_channels_text",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -813,7 +750,7 @@ return {
         props: '''
 return {
   as: "span",
-  text: "Add Channel"
+  text: "Channels"
 };
 ''',
         css: '''
@@ -826,7 +763,7 @@ return `._id {
       }
     },
     {
-      id: "yto_home_action_add_playlist",
+      id: "yto_home_action_playlists",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -852,17 +789,17 @@ return `._id {
   transition: all 0.2s ease;
   font-family: inherit;
   min-height: 120px;
-  
+
   &:hover {
     background: ${args.theme.var.color.success_dark_200};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   @media (max-width: 768px) {
     padding: 1.25rem 0.75rem;
     min-height: 100px;
@@ -872,7 +809,7 @@ return `._id {
       }
     },
     {
-      id: "yto_home_action_add_playlist_icon",
+      id: "yto_home_action_playlists_icon",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -888,7 +825,7 @@ return {
       }
     },
     {
-      id: "yto_home_action_add_playlist_text",
+      id: "yto_home_action_playlists_text",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -896,7 +833,7 @@ return {
         props: '''
 return {
   as: "span",
-  text: "Add Playlist"
+  text: "Playlists"
 };
 ''',
         css: '''
@@ -909,7 +846,7 @@ return `._id {
       }
     },
     {
-      id: "yto_home_action_browse",
+      id: "yto_home_action_search",
       L: "Attr",
       P: {
         displayOrder: 3,
@@ -917,7 +854,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.navigate("/channels")
+  onClick: () => args.navigate("/search")
 };
 ''',
         css: '''
@@ -935,17 +872,17 @@ return `._id {
   transition: all 0.2s ease;
   font-family: inherit;
   min-height: 120px;
-  
+
   &:hover {
     background: ${args.theme.var.color.info_dark_200};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   @media (max-width: 768px) {
     padding: 1.25rem 0.75rem;
     min-height: 100px;
@@ -955,7 +892,7 @@ return `._id {
       }
     },
     {
-      id: "yto_home_action_browse_icon",
+      id: "yto_home_action_search_icon",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -963,7 +900,7 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: "carbon:explore",
+  icon: "carbon:search",
   width: 32,
   height: 32
 };
@@ -971,7 +908,7 @@ return {
       }
     },
     {
-      id: "yto_home_action_browse_text",
+      id: "yto_home_action_search_text",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -979,7 +916,7 @@ return {
         props: '''
 return {
   as: "span",
-  text: "Browse All"
+  text: "Search"
 };
 ''',
         css: '''
@@ -1000,7 +937,7 @@ return `._id {
         props: '''
 return {
   as: "button",
-  onClick: () => args.showWarningToast("Settings coming soon!")
+  onClick: () => args.navigate("/settings")
 };
 ''',
         css: '''
@@ -1018,17 +955,17 @@ return `._id {
   transition: all 0.2s ease;
   font-family: inherit;
   min-height: 120px;
-  
+
   &:hover {
     background: ${args.theme.var.color.background_dark_200};
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   @media (max-width: 768px) {
     padding: 1.25rem 0.75rem;
     min-height: 100px;
@@ -1073,26 +1010,24 @@ return `._id {
 }`;
 '''
       }
-    }
+    },
   ],
   edges: [
     { id: "e0", T: "PageLayout", S: "yto_home_page", E: "yto_home_layout" },
     { id: "e1", T: "Attr", S: "yto_home_page", E: "yto_home_root" },
     { id: "e2", T: "Attr", S: "yto_home_root", E: "yto_home_header" },
-    { id: "e3", T: "Attr", S: "yto_home_header", E: "yto_home_title" },
-    { id: "e4", T: "Attr", S: "yto_home_title", E: "yto_home_icon" },
-    { id: "e5", T: "Attr", S: "yto_home_root", E: "yto_home_container" },
-    { id: "e6", T: "Attr", S: "yto_home_container", E: "yto_home_welcome" },
-    { id: "e7", T: "Attr", S: "yto_home_welcome", E: "yto_home_welcome_title" },
-    { id: "e8", T: "Attr", S: "yto_home_welcome", E: "yto_home_welcome_text" },
-    { id: "e9", T: "Attr", S: "yto_home_container", E: "yto_home_stats" },
-    { id: "e10", T: "Attr", S: "yto_home_stats", E: "yto_home_stat_channels" },
-    { id: "e11", T: "Attr", S: "yto_home_stat_channels", E: "yto_home_stat_channels_icon" },
-    { id: "e12", T: "Attr", S: "yto_home_stat_channels_icon", E: "yto_home_stat_channels_icon_svg" },
-    { id: "e13", T: "Attr", S: "yto_home_stat_channels", E: "yto_home_stat_channels_content" },
-    { id: "e14", T: "Attr", S: "yto_home_stat_channels_content", E: "yto_home_stat_channels_label" },
-    { id: "e15", T: "Attr", S: "yto_home_stat_channels_content", E: "yto_home_stat_channels_value" },
-    { id: "e16", T: "Attr", S: "yto_home_stats", E: "yto_home_stat_playlists" },
+    { id: "e3", T: "Attr", S: "yto_home_root", E: "yto_home_container" },
+    { id: "e4", T: "Attr", S: "yto_home_container", E: "yto_home_welcome" },
+    { id: "e5", T: "Attr", S: "yto_home_welcome", E: "yto_home_welcome_title" },
+    { id: "e6", T: "Attr", S: "yto_home_welcome", E: "yto_home_welcome_text" },
+    { id: "e7", T: "Attr", S: "yto_home_container", E: "yto_home_stats" },
+    { id: "e8", T: "Attr", S: "yto_home_stats", E: "yto_home_stat_channels" },
+    { id: "e9", T: "Attr", S: "yto_home_stat_channels", E: "yto_home_stat_channels_icon" },
+    { id: "e10", T: "Attr", S: "yto_home_stat_channels_icon", E: "yto_home_stat_channels_icon_svg" },
+    { id: "e11", T: "Attr", S: "yto_home_stat_channels", E: "yto_home_stat_channels_content" },
+    { id: "e12", T: "Attr", S: "yto_home_stat_channels_content", E: "yto_home_stat_channels_label" },
+    { id: "e13", T: "Attr", S: "yto_home_stat_channels_content", E: "yto_home_stat_channels_value" },
+    { id: "e14", T: "Attr", S: "yto_home_stats", E: "yto_home_stat_playlists" },
     { id: "e17", T: "Attr", S: "yto_home_stat_playlists", E: "yto_home_stat_playlists_icon" },
     { id: "e18", T: "Attr", S: "yto_home_stat_playlists_icon", E: "yto_home_stat_playlists_icon_svg" },
     { id: "e19", T: "Attr", S: "yto_home_stat_playlists", E: "yto_home_stat_playlists_content" },
@@ -1107,15 +1042,15 @@ return `._id {
     { id: "e28", T: "Attr", S: "yto_home_container", E: "yto_home_quick_actions" },
     { id: "e29", T: "Attr", S: "yto_home_quick_actions", E: "yto_home_quick_actions_title" },
     { id: "e30", T: "Attr", S: "yto_home_quick_actions", E: "yto_home_quick_actions_grid" },
-    { id: "e31", T: "Attr", S: "yto_home_quick_actions_grid", E: "yto_home_action_add_channel" },
-    { id: "e32", T: "Attr", S: "yto_home_action_add_channel", E: "yto_home_action_add_channel_icon" },
-    { id: "e33", T: "Attr", S: "yto_home_action_add_channel", E: "yto_home_action_add_channel_text" },
-    { id: "e34", T: "Attr", S: "yto_home_quick_actions_grid", E: "yto_home_action_add_playlist" },
-    { id: "e35", T: "Attr", S: "yto_home_action_add_playlist", E: "yto_home_action_add_playlist_icon" },
-    { id: "e36", T: "Attr", S: "yto_home_action_add_playlist", E: "yto_home_action_add_playlist_text" },
-    { id: "e37", T: "Attr", S: "yto_home_quick_actions_grid", E: "yto_home_action_browse" },
-    { id: "e38", T: "Attr", S: "yto_home_action_browse", E: "yto_home_action_browse_icon" },
-    { id: "e39", T: "Attr", S: "yto_home_action_browse", E: "yto_home_action_browse_text" },
+    { id: "e31", T: "Attr", S: "yto_home_quick_actions_grid", E: "yto_home_action_channels" },
+    { id: "e32", T: "Attr", S: "yto_home_action_channels", E: "yto_home_action_channels_icon" },
+    { id: "e33", T: "Attr", S: "yto_home_action_channels", E: "yto_home_action_channels_text" },
+    { id: "e34", T: "Attr", S: "yto_home_quick_actions_grid", E: "yto_home_action_playlists" },
+    { id: "e35", T: "Attr", S: "yto_home_action_playlists", E: "yto_home_action_playlists_icon" },
+    { id: "e36", T: "Attr", S: "yto_home_action_playlists", E: "yto_home_action_playlists_text" },
+    { id: "e37", T: "Attr", S: "yto_home_quick_actions_grid", E: "yto_home_action_search" },
+    { id: "e38", T: "Attr", S: "yto_home_action_search", E: "yto_home_action_search_icon" },
+    { id: "e39", T: "Attr", S: "yto_home_action_search", E: "yto_home_action_search_text" },
     { id: "e40", T: "Attr", S: "yto_home_quick_actions_grid", E: "yto_home_action_settings" },
     { id: "e41", T: "Attr", S: "yto_home_action_settings", E: "yto_home_action_settings_icon" },
     { id: "e42", T: "Attr", S: "yto_home_action_settings", E: "yto_home_action_settings_text" }
