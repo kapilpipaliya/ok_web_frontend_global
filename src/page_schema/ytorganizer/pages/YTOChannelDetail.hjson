@@ -541,6 +541,98 @@ return `._id {
       }
     },
     {
+      id: "yto_channel_detail_youtube_link",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const channelData = args.fns.channelData();
+const loading = args.fns.loading();
+
+if (loading) {
+  return { hide: true };
+}
+
+const channelId = channelData?.channel?.P?.youtubeId;
+const customUrl = channelData?.channel?.P?.customUrl;
+
+return {
+  as: "button",
+  onClick: () => {
+    let channelUrl = '';
+    if (customUrl) {
+      channelUrl = `https://www.youtube.com/${customUrl}`;
+    } else if (channelId) {
+      channelUrl = `https://www.youtube.com/channel/${channelId}`;
+    }
+
+    if (channelUrl) {
+      window.open(channelUrl, '_blank');
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: ${args.theme.var.color.primary_text};
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  &:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_youtube_link_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:logo-youtube",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_youtube_link_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Open in YouTube"
+};
+'''
+      }
+    },
+    {
       id: "yto_channel_detail_container",
       L: "Attr",
       P: {
@@ -987,6 +1079,9 @@ return `._id {
     { id: "e15", T: "Attr", S: "yto_channel_detail_stats", E: "yto_channel_detail_video_count" },
     { id: "e16", T: "Attr", S: "yto_channel_detail_video_count", E: "yto_channel_detail_video_count_icon" },
     { id: "e17", T: "Attr", S: "yto_channel_detail_meta", E: "yto_channel_detail_description" },
+    { id: "e17a", T: "Attr", S: "yto_channel_detail_meta", E: "yto_channel_detail_youtube_link" },
+    { id: "e17b", T: "Attr", S: "yto_channel_detail_youtube_link", E: "yto_channel_detail_youtube_link_icon" },
+    { id: "e17c", T: "Attr", S: "yto_channel_detail_youtube_link", E: "yto_channel_detail_youtube_link_text" },
     { id: "e18", T: "Attr", S: "yto_channel_detail_root", E: "yto_channel_detail_container" },
     { id: "e19", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_tabs" },
     { id: "e20", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_content" },

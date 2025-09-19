@@ -542,6 +542,91 @@ return `._id {
       }
     },
     {
+      id: "yto_playlist_detail_youtube_link",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const playlistData = args.fns.playlistData();
+const loading = args.fns.loading();
+
+// Don't show for custom playlists or while loading
+if (loading || playlistData?.playlist?.P?.isCustom) {
+  return { hide: true };
+}
+
+const youtubeId = playlistData?.playlist?.P?.youtubeId;
+
+return {
+  as: "button",
+  onClick: () => {
+    if (youtubeId) {
+      window.open(`https://www.youtube.com/playlist?list=${youtubeId}`, '_blank');
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: ${args.theme.var.color.success_text};
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
+  &:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_youtube_link_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:logo-youtube",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_youtube_link_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Open in YouTube"
+};
+'''
+      }
+    },
+    {
       id: "yto_playlist_detail_container",
       L: "Attr",
       P: {
@@ -753,9 +838,10 @@ return {
 return `._id {
   display: flex;
   gap: 0.75rem;
-  
+
   @media (max-width: 768px) {
     justify-content: center;
+    flex-wrap: wrap;
   }
 }`;
 '''
@@ -1493,6 +1579,9 @@ return {
     { id: "e15", T: "Attr", S: "yto_playlist_detail_stats", E: "yto_playlist_detail_duration" },
     { id: "e16", T: "Attr", S: "yto_playlist_detail_duration", E: "yto_playlist_detail_duration_icon" },
     { id: "e17", T: "Attr", S: "yto_playlist_detail_meta", E: "yto_playlist_detail_description" },
+    { id: "e17a", T: "Attr", S: "yto_playlist_detail_meta", E: "yto_playlist_detail_youtube_link" },
+    { id: "e17b", T: "Attr", S: "yto_playlist_detail_youtube_link", E: "yto_playlist_detail_youtube_link_icon" },
+    { id: "e17c", T: "Attr", S: "yto_playlist_detail_youtube_link", E: "yto_playlist_detail_youtube_link_text" },
     { id: "e18", T: "Attr", S: "yto_playlist_detail_root", E: "yto_playlist_detail_container" },
     { id: "e19", T: "Attr", S: "yto_playlist_detail_container", E: "yto_playlist_detail_controls" },
     { id: "e20", T: "Attr", S: "yto_playlist_detail_controls", E: "yto_playlist_detail_sort_section" },
