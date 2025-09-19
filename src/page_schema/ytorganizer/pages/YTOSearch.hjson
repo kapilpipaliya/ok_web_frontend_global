@@ -52,14 +52,24 @@ const [loading, setLoading] = args.createSignal(false);
 const [error, setError] = args.createSignal(null);
 const [activeTab, setActiveTab] = args.createSignal('all');
 
+// Pagination state
+const [currentPage, setCurrentPage] = args.createSignal(1);
+const [itemsPerPage, setItemsPerPage] = args.createSignal(20);
+
+// Regex search state
+const [isRegexSearch, setIsRegexSearch] = args.createSignal(false);
+
 // Perform search
-const performSearch = async () => {
+const performSearch = async (page = null) => {
   const query = searchQuery().trim();
 
   if (!query) {
     args.showWarningToast("Please enter a search query");
     return;
   }
+
+  // Use provided page or current page
+  const searchPage = page !== null ? page : currentPage();
 
   try {
     setLoading(true);
@@ -70,7 +80,9 @@ const performSearch = async () => {
       contextData: {
         query,
         type: searchType(),
-        limit: 50
+        limit: itemsPerPage(),
+        page: searchPage,
+        isRegex: isRegexSearch()
       }
     });
 
@@ -165,8 +177,14 @@ const performSearch = async () => {
         playlists: processedPlaylists,
         videos: processedVideos,
         totalResults: data.totalResults,
-        query: data.query
+        query: data.query,
+        pagination: data.pagination
       });
+
+      // Update current page state from pagination data
+      if (data.pagination && data.pagination.page) {
+        setCurrentPage(data.pagination.page);
+      }
 
       // Set active tab based on results
       if (processedChannels.length > 0 && processedPlaylists.length === 0 && processedVideos.length === 0) {
@@ -199,6 +217,32 @@ const handleKeyPress = (e) => {
   }
 };
 
+// Pagination functions
+const goToPage = (page) => {
+  setCurrentPage(page);
+  performSearch(page);
+};
+
+const goToNextPage = () => {
+  const results = searchResults();
+  if (results?.pagination?.hasNextPage) {
+    goToPage(currentPage() + 1);
+  }
+};
+
+const goToPrevPage = () => {
+  const results = searchResults();
+  if (results?.pagination?.hasPrevPage) {
+    goToPage(currentPage() - 1);
+  }
+};
+
+const changeItemsPerPage = (newLimit) => {
+  setItemsPerPage(newLimit);
+  setCurrentPage(1); // Reset to first page
+  performSearch(1);
+};
+
 return {
   searchQuery,
   setSearchQuery,
@@ -209,8 +253,18 @@ return {
   error,
   activeTab,
   setActiveTab,
+  currentPage,
+  setCurrentPage,
+  itemsPerPage,
+  setItemsPerPage,
+  isRegexSearch,
+  setIsRegexSearch,
   performSearch,
-  handleKeyPress
+  handleKeyPress,
+  goToPage,
+  goToNextPage,
+  goToPrevPage,
+  changeItemsPerPage
 };
 '''
       }
@@ -591,10 +645,85 @@ return {
       }
     },
     {
-      id: "yto_search_button",
+      id: "yto_search_regex_checkbox",
       L: "Attr",
       P: {
         displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+  user-select: none;
+
+  @media (max-width: 768px) {
+    font-size: 0.8125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_regex_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.isRegexSearch(),
+  onChange: (e) => {
+    args.fns.setIsRegexSearch(e.target.checked);
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 1rem;
+  height: 1rem;
+  accent-color: ${args.theme.var.color.info};
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_regex_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Regex search"
+};
+''',
+        css: '''
+return `._id {
+  cursor: pointer;
+  color: ${args.theme.var.color.muted};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
         componentName: "Html",
         props: '''
 return {
@@ -1569,6 +1698,503 @@ return {
 };
 '''
       }
+    },
+    {
+      id: "yto_search_pagination",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const searchResults = args.fns.searchResults();
+const pagination = searchResults?.pagination;
+
+if (!searchResults || !pagination || pagination.totalPages <= 1) {
+  return { as: "div", style: "display: none;" };
+}
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 2rem 1.5rem;
+  background: ${args.theme.var.color.background};
+  border-top: 1px solid ${args.theme.var.color.border};
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const searchResults = args.fns.searchResults();
+const pagination = searchResults?.pagination;
+console.log(pagination)
+if (!pagination) return { as: "div", style: "display: none;" };
+
+const { startIndex, endIndex, totalCount, page, totalPages } = pagination;
+
+return {
+  as: "div",
+  text: `Showing ${startIndex}-${endIndex} of ${totalCount} results (Page ${page} of ${totalPages})`
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_controls",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const searchResults = args.fns.searchResults();
+const pagination = searchResults?.pagination;
+
+// Only show navigation controls if there are multiple pages
+if (!pagination || pagination.totalPages <= 1) {
+  return { as: "div", style: "display: none;" };
+}
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_prev",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const searchResults = args.fns.searchResults();
+const pagination = searchResults?.pagination;
+
+return {
+  as: "button",
+  text: "Previous",
+  disabled: !pagination?.hasPrevPage,
+  onClick: () => {
+    if (pagination?.hasPrevPage) {
+      args.fns.goToPrevPage();
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_light_100};
+    border-color: ${args.theme.var.color.info};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_pages",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_pages_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const searchResults = args.fns.searchResults();
+const pagination = searchResults?.pagination;
+const currentPage = args.fns.currentPage();
+
+if (!pagination) return { data: [] };
+
+const { totalPages } = pagination;
+const maxVisible = 7;
+let pages = [];
+
+if (totalPages <= maxVisible) {
+  // Show all pages
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
+} else {
+  // Show first page, last page, and pages around current
+  const start = Math.max(2, currentPage - 2);
+  const end = Math.min(totalPages - 1, currentPage + 2);
+
+  pages.push(1);
+
+  if (start > 2) {
+    pages.push('...');
+  }
+
+  for (let i = start; i <= end; i++) {
+    if (i !== 1 && i !== totalPages) {
+      pages.push(i);
+    }
+  }
+
+  if (end < totalPages - 1) {
+    pages.push('...');
+  }
+
+  if (totalPages > 1) {
+    pages.push(totalPages);
+  }
+}
+
+return {
+  data: pages.map(page => ({ page, isCurrent: page === currentPage }))
+};
+''',
+        loop: true,
+        contextName: "pageItem"
+      }
+    },
+    {
+      id: "yto_search_pagination_page_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const pageItem = args.contextData.pageItem;
+const { page, isCurrent } = pageItem;
+
+if (page === '...') {
+  return {
+    as: "span",
+    text: "..."
+  };
+}
+
+return {
+  as: "button",
+  text: page,
+  onClick: () => {
+    if (!isCurrent) {
+      args.fns.goToPage(page);
+    }
+  }
+};
+''',
+        css: '''
+const pageItem = args.contextData.pageItem;
+const { page, isCurrent } = pageItem;
+
+if (page === '...') {
+  return `._id {
+    padding: 0.5rem 0.75rem;
+    color: ${args.theme.var.color.muted};
+    font-size: 0.875rem;
+  }`;
+}
+
+return `._id {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid ${isCurrent ? args.theme.var.color.info : args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${isCurrent ? args.theme.var.color.info : args.theme.var.color.background};
+  color: ${isCurrent ? args.theme.var.color.info_text : args.theme.var.color.text};
+  font-size: 0.875rem;
+  font-weight: ${isCurrent ? '600' : '500'};
+  cursor: ${isCurrent ? 'default' : 'pointer'};
+  transition: all 0.2s ease;
+  min-width: 2.5rem;
+
+  &:hover {
+    ${!isCurrent ? `
+      background: ${args.theme.var.color.background_light_100};
+      border-color: ${args.theme.var.color.info};
+    ` : ''}
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    min-width: 2.25rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_next",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const searchResults = args.fns.searchResults();
+const pagination = searchResults?.pagination;
+
+return {
+  as: "button",
+  text: "Next",
+  disabled: !pagination?.hasNextPage,
+  onClick: () => {
+    if (pagination?.hasNextPage) {
+      args.fns.goToNextPage();
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_light_100};
+    border-color: ${args.theme.var.color.info};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_per_page",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.8125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_per_page_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Items per page:"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_per_page_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const currentLimit = args.fns.itemsPerPage();
+
+return {
+  as: "select",
+  value: currentLimit,
+  onChange: (e) => {
+    const newLimit = parseInt(e.target.value);
+    args.fns.changeItemsPerPage(newLimit);
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.25rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.info};
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.8125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_per_page_option_10",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: 10,
+  text: "10"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_per_page_option_20",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: 20,
+  text: "20"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_per_page_option_50",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: 50,
+  text: "50"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_pagination_per_page_option_100",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: 100,
+  text: "100"
+};
+'''
+      }
     }
   ],
   edges: [
@@ -1589,41 +2215,60 @@ return {
     { id: "e14", T: "Attr", S: "yto_search_type_select", E: "yto_search_type_channels" },
     { id: "e15", T: "Attr", S: "yto_search_type_select", E: "yto_search_type_playlists" },
     { id: "e16", T: "Attr", S: "yto_search_type_select", E: "yto_search_type_videos" },
-    { id: "e17", T: "Attr", S: "yto_search_filters", E: "yto_search_button" },
-    { id: "e18", T: "Attr", S: "yto_search_button", E: "yto_search_button_icon" },
-    { id: "e19", T: "Attr", S: "yto_search_button", E: "yto_search_button_text" },
-    { id: "e20", T: "Attr", S: "yto_search_root", E: "yto_search_container" },
-    { id: "e21", T: "Attr", S: "yto_search_container", E: "yto_search_results_header" },
-    { id: "e22", T: "Attr", S: "yto_search_results_header", E: "yto_search_results_summary" },
-    { id: "e23", T: "Attr", S: "yto_search_results_header", E: "yto_search_tabs" },
-    { id: "e24", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_all" },
-    { id: "e25", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_channels" },
-    { id: "e26", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_playlists" },
-    { id: "e27", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_videos" },
-    { id: "e28", T: "Attr", S: "yto_search_container", E: "yto_search_content" },
-    { id: "e29", T: "Attr", S: "yto_search_content", E: "yto_search_loading" },
-    { id: "e30", T: "Attr", S: "yto_search_loading", E: "yto_search_loading_spinner" },
-    { id: "e31", T: "Attr", S: "yto_search_loading", E: "yto_search_loading_text" },
-    { id: "e32", T: "Attr", S: "yto_search_content", E: "yto_search_empty_state" },
-    { id: "e33", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_icon" },
-    { id: "e34", T: "Attr", S: "yto_search_empty_icon", E: "yto_search_empty_icon_svg" },
-    { id: "e35", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_title" },
-    { id: "e36", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_description" },
-    { id: "e37", T: "Attr", S: "yto_search_content", E: "yto_search_results_container" },
-    { id: "e38", T: "Attr", S: "yto_search_results_container", E: "yto_search_channels_section" },
-    { id: "e39", T: "Attr", S: "yto_search_channels_section", E: "yto_search_channels_title" },
-    { id: "e40", T: "Attr", S: "yto_search_channels_section", E: "yto_search_channels_grid" },
-    { id: "e41", T: "Attr", S: "yto_search_channels_grid", E: "yto_search_channels_data" },
-    { id: "e42", T: "Attr", S: "yto_search_channels_data", E: "yto_search_channel_card" },
-    { id: "e43", T: "Attr", S: "yto_search_results_container", E: "yto_search_playlists_section" },
-    { id: "e44", T: "Attr", S: "yto_search_playlists_section", E: "yto_search_playlists_title" },
-    { id: "e45", T: "Attr", S: "yto_search_playlists_section", E: "yto_search_playlists_grid" },
-    { id: "e46", T: "Attr", S: "yto_search_playlists_grid", E: "yto_search_playlists_data" },
-    { id: "e47", T: "Attr", S: "yto_search_playlists_data", E: "yto_search_playlist_card" },
-    { id: "e48", T: "Attr", S: "yto_search_results_container", E: "yto_search_videos_section" },
-    { id: "e49", T: "Attr", S: "yto_search_videos_section", E: "yto_search_videos_title" },
-    { id: "e50", T: "Attr", S: "yto_search_videos_section", E: "yto_search_videos_grid" },
-    { id: "e51", T: "Attr", S: "yto_search_videos_grid", E: "yto_search_videos_data" },
-    { id: "e52", T: "Attr", S: "yto_search_videos_data", E: "yto_search_video_card" }
+    { id: "e17", T: "Attr", S: "yto_search_filters", E: "yto_search_regex_checkbox" },
+    { id: "e17a", T: "Attr", S: "yto_search_regex_checkbox", E: "yto_search_regex_input" },
+    { id: "e17b", T: "Attr", S: "yto_search_regex_checkbox", E: "yto_search_regex_label" },
+    { id: "e18", T: "Attr", S: "yto_search_filters", E: "yto_search_button" },
+    { id: "e19", T: "Attr", S: "yto_search_button", E: "yto_search_button_icon" },
+    { id: "e20", T: "Attr", S: "yto_search_button", E: "yto_search_button_text" },
+    { id: "e21", T: "Attr", S: "yto_search_root", E: "yto_search_container" },
+    { id: "e22", T: "Attr", S: "yto_search_container", E: "yto_search_results_header" },
+    { id: "e23", T: "Attr", S: "yto_search_results_header", E: "yto_search_results_summary" },
+    { id: "e24", T: "Attr", S: "yto_search_results_header", E: "yto_search_tabs" },
+    { id: "e25", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_all" },
+    { id: "e26", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_channels" },
+    { id: "e27", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_playlists" },
+    { id: "e28", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_videos" },
+    { id: "e29", T: "Attr", S: "yto_search_container", E: "yto_search_content" },
+    { id: "e30", T: "Attr", S: "yto_search_content", E: "yto_search_loading" },
+    { id: "e31", T: "Attr", S: "yto_search_loading", E: "yto_search_loading_spinner" },
+    { id: "e32", T: "Attr", S: "yto_search_loading", E: "yto_search_loading_text" },
+    { id: "e33", T: "Attr", S: "yto_search_content", E: "yto_search_empty_state" },
+    { id: "e34", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_icon" },
+    { id: "e35", T: "Attr", S: "yto_search_empty_icon", E: "yto_search_empty_icon_svg" },
+    { id: "e36", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_title" },
+    { id: "e37", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_description" },
+    { id: "e38", T: "Attr", S: "yto_search_content", E: "yto_search_results_container" },
+    { id: "e39", T: "Attr", S: "yto_search_results_container", E: "yto_search_channels_section" },
+    { id: "e40", T: "Attr", S: "yto_search_channels_section", E: "yto_search_channels_title" },
+    { id: "e41", T: "Attr", S: "yto_search_channels_section", E: "yto_search_channels_grid" },
+    { id: "e42", T: "Attr", S: "yto_search_channels_grid", E: "yto_search_channels_data" },
+    { id: "e43", T: "Attr", S: "yto_search_channels_data", E: "yto_search_channel_card" },
+    { id: "e44", T: "Attr", S: "yto_search_results_container", E: "yto_search_playlists_section" },
+    { id: "e45", T: "Attr", S: "yto_search_playlists_section", E: "yto_search_playlists_title" },
+    { id: "e46", T: "Attr", S: "yto_search_playlists_section", E: "yto_search_playlists_grid" },
+    { id: "e47", T: "Attr", S: "yto_search_playlists_grid", E: "yto_search_playlists_data" },
+    { id: "e48", T: "Attr", S: "yto_search_playlists_data", E: "yto_search_playlist_card" },
+    { id: "e49", T: "Attr", S: "yto_search_results_container", E: "yto_search_videos_section" },
+    { id: "e50", T: "Attr", S: "yto_search_videos_section", E: "yto_search_videos_title" },
+    { id: "e51", T: "Attr", S: "yto_search_videos_section", E: "yto_search_videos_grid" },
+    { id: "e52", T: "Attr", S: "yto_search_videos_grid", E: "yto_search_videos_data" },
+    { id: "e53", T: "Attr", S: "yto_search_videos_data", E: "yto_search_video_card" },
+    { id: "e54", T: "Attr", S: "yto_search_container", E: "yto_search_pagination" },
+    { id: "e55", T: "Attr", S: "yto_search_pagination", E: "yto_search_pagination_container" },
+    { id: "e56", T: "Attr", S: "yto_search_pagination_container", E: "yto_search_pagination_info" },
+    { id: "e57", T: "Attr", S: "yto_search_pagination_container", E: "yto_search_pagination_controls" },
+    { id: "e58", T: "Attr", S: "yto_search_pagination_controls", E: "yto_search_pagination_prev" },
+    { id: "e59", T: "Attr", S: "yto_search_pagination_controls", E: "yto_search_pagination_pages" },
+    { id: "e60", T: "Attr", S: "yto_search_pagination_pages", E: "yto_search_pagination_pages_data" },
+    { id: "e61", T: "Attr", S: "yto_search_pagination_pages_data", E: "yto_search_pagination_page_button" },
+    { id: "e62", T: "Attr", S: "yto_search_pagination_controls", E: "yto_search_pagination_next" },
+    { id: "e63", T: "Attr", S: "yto_search_pagination_container", E: "yto_search_pagination_per_page" },
+    { id: "e64", T: "Attr", S: "yto_search_pagination_per_page", E: "yto_search_pagination_per_page_label" },
+    { id: "e65", T: "Attr", S: "yto_search_pagination_per_page", E: "yto_search_pagination_per_page_select" },
+    { id: "e66", T: "Attr", S: "yto_search_pagination_per_page_select", E: "yto_search_pagination_per_page_option_10" },
+    { id: "e67", T: "Attr", S: "yto_search_pagination_per_page_select", E: "yto_search_pagination_per_page_option_20" },
+    { id: "e68", T: "Attr", S: "yto_search_pagination_per_page_select", E: "yto_search_pagination_per_page_option_50" },
+    { id: "e69", T: "Attr", S: "yto_search_pagination_per_page_select", E: "yto_search_pagination_per_page_option_100" }
   ]
 }
