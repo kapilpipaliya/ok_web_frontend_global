@@ -1,0 +1,201 @@
+{
+  vertexes: [
+    {
+      id: "search_user_content_function",
+      L: "Function",
+      P: {
+        key: "searchUserContent",
+        description: "Search across user's channels, playlists, and videos with optional filters",
+        body: '''
+try {
+  // Extract search parameters from request
+  const { query, type, limit = 50 } = args.contextData;
+
+  // Ensure limit is a valid integer (Neo4j requires integers, not floats)
+  let validLimit = 50; // default
+  if (limit !== undefined && limit !== null) {
+    const parsed = parseInt(String(limit), 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      validLimit = Math.min(1000, parsed); // Cap at 1000
+    }
+  }
+
+  if (!query || query.trim().length === 0) {
+    return {
+      success: true,
+      data: {
+        channels: [],
+        playlists: [],
+        videos: [],
+        totalResults: 0
+      },
+      message: "Please enter a search query"
+    };
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Prepare search pattern for case-insensitive matching
+  const searchPattern = `(?i).*${query.trim()}.*`;
+
+  const results = {
+    channels: [],
+    playlists: [],
+    videos: []
+  };
+
+  // SEARCH CHANNELS
+  if (!type || type === 'all' || type === 'channels') {
+    const channelsQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
+      WHERE c.title =~ $pattern OR
+            c.description =~ $pattern OR
+            cs.customName =~ $pattern
+      RETURN c, cs
+      ORDER BY cs.createdAt DESC
+      LIMIT ${validLimit}
+    `;
+
+    const channelsResult = await args.session.run(channelsQuery, {
+      userUuid: user.P.uuid,
+      pattern: searchPattern
+    });
+
+    results.channels = channelsResult.records.map(record => ({
+      channel: args.convertNodeToJson(record.get('c')),
+      channelSettings: args.convertNodeToJson(record.get('cs')),
+      matchType: 'channel'
+    }));
+  }
+
+  // SEARCH PLAYLISTS
+  if (!type || type === 'all' || type === 'playlists') {
+    const playlistsQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+      WHERE p.title =~ $pattern OR
+            p.description =~ $pattern OR
+            ps.customName =~ $pattern
+      OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
+      RETURN p, ps, c
+      ORDER BY ps.createdAt DESC
+      LIMIT ${validLimit}
+    `;
+
+    const playlistsResult = await args.session.run(playlistsQuery, {
+      userUuid: user.P.uuid,
+      pattern: searchPattern
+    });
+
+    results.playlists = playlistsResult.records.map(record => ({
+      playlist: args.convertNodeToJson(record.get('p')),
+      playlistSettings: args.convertNodeToJson(record.get('ps')),
+      channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null,
+      matchType: 'playlist'
+    }));
+  }
+
+  // SEARCH VIDEOS
+  if (!type || type === 'all' || type === 'videos') {
+    const videosQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
+      WHERE v.title =~ $pattern OR
+            v.description =~ $pattern OR
+            v.channelTitle =~ $pattern OR
+            vs.notes =~ $pattern
+      OPTIONAL MATCH (p:Playlist)-[:PlaylistVideo]->(v)
+      OPTIONAL MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+      WITH v, vs, COLLECT(DISTINCT {playlist: p, playlistSettings: ps}) as playlists
+      RETURN v, vs, playlists[0] as firstPlaylist
+      ORDER BY vs.updatedAt DESC
+      LIMIT ${validLimit}
+    `;
+
+    const videosResult = await args.session.run(videosQuery, {
+      userUuid: user.P.uuid,
+      pattern: searchPattern
+    });
+
+    results.videos = videosResult.records.map(record => {
+      const firstPlaylist = record.get('firstPlaylist');
+      return {
+        video: args.convertNodeToJson(record.get('v')),
+        videoSettings: args.convertNodeToJson(record.get('vs')),
+        parentPlaylist: firstPlaylist && firstPlaylist.playlist ? {
+          playlist: args.convertNodeToJson(firstPlaylist.playlist),
+          playlistSettings: firstPlaylist.playlistSettings ?
+            args.convertNodeToJson(firstPlaylist.playlistSettings) : null
+        } : null,
+        matchType: 'video'
+      };
+    });
+  }
+
+  // Calculate total results
+  const totalResults = results.channels.length +
+                       results.playlists.length +
+                       results.videos.length;
+
+  // Prepare summary message
+  let message = `Found ${totalResults} result${totalResults !== 1 ? 's' : ''}`;
+  const parts = [];
+  if (results.channels.length > 0) parts.push(`${results.channels.length} channel${results.channels.length !== 1 ? 's' : ''}`);
+  if (results.playlists.length > 0) parts.push(`${results.playlists.length} playlist${results.playlists.length !== 1 ? 's' : ''}`);
+  if (results.videos.length > 0) parts.push(`${results.videos.length} video${results.videos.length !== 1 ? 's' : ''}`);
+
+  if (parts.length > 0) {
+    message += `: ${parts.join(', ')}`;
+  }
+
+  return {
+    success: true,
+    data: {
+      channels: results.channels,
+      playlists: results.playlists,
+      videos: results.videos,
+      totalResults,
+      query,
+      type: type || 'all'
+    },
+    message
+  };
+
+} catch (error) {
+  console.error("Error searching content:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to search content. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to search your content.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "SearchError",
+      details: error.message
+    },
+    data: {
+      channels: [],
+      playlists: [],
+      videos: [],
+      totalResults: 0
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

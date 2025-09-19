@@ -105,6 +105,7 @@ return `._id {
         componentName: "Html",
         props: '''
 const playlist = args.contextData.props?.playlist;
+
 const thumbnailUrl = playlist?.thumbnail || '';
 
 if (thumbnailUrl) {
@@ -184,7 +185,7 @@ return `._id {
         componentName: "Html",
         props: '''
 const playlist = args.contextData.props?.playlist;
-const videoCount = playlist?.videoCount || 0;
+const videoCount = playlist?.itemCount || 0;
 
 return {
   as: "div",
@@ -378,7 +379,7 @@ return {
         componentName: "Html",
         props: '''
 const playlist = args.contextData.props?.playlist;
-const videoCount = playlist?.videoCount || 0;
+const videoCount = playlist?.itemCount || 0;
 
 return {
   as: "span",

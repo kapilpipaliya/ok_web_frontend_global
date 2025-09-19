@@ -7,7 +7,7 @@
         key: "YTOSearch",
         url: "/search",
         title: "Search - YouTube Organizer",
-        description: "Search across your YouTube channels, playlists, and videos",
+        description: "Search your YouTube channels, playlists, and videos",
         props: '''
 return {
   isNoPermissionCheck: true,
@@ -32,86 +32,185 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "div",
+  onMount: () => {
+    // Check if there's a query in URL params and search immediately
+    const urlQuery = args.searchParams?.q || args.params?.q;
+    if (urlQuery) {
+      args.fns.setSearchQuery(urlQuery);
+      args.fns.performSearch();
+    }
+  }
 };
 ''',
         fns: '''
-// Search state
-const [searchQuery, setSearchQuery] = args.createSignal("");
-const [searchFilter, setSearchFilter] = args.createSignal("all");
-const [searchResults, setSearchResults] = args.createSignal([]);
-const [isSearching, setIsSearching] = args.createSignal(false);
+// State for search functionality
+const [searchQuery, setSearchQuery] = args.createSignal('');
+const [searchType, setSearchType] = args.createSignal('all');
+const [searchResults, setSearchResults] = args.createSignal(null);
+const [loading, setLoading] = args.createSignal(false);
+const [error, setError] = args.createSignal(null);
+const [activeTab, setActiveTab] = args.createSignal('all');
 
-// Handle search
-const handleSearch = async (e) => {
-  e.preventDefault();
+// Perform search
+const performSearch = async () => {
   const query = searchQuery().trim();
 
   if (!query) {
-    args.showWarningToast("Please enter a search term");
+    args.showWarningToast("Please enter a search query");
     return;
   }
 
-  setIsSearching(true);
+  try {
+    setLoading(true);
+    setError(null);
 
-  // Simulate search - replace with actual search functionality
-  setTimeout(() => {
-    const mockResults = [
-      {
-        id: 1,
-        type: "channel",
-        title: "Tech Channel",
-        description: "Technology tutorials and reviews",
-        thumbnail: "https://picsum.photos/120/90?random=1"
-      },
-      {
-        id: 2,
-        type: "playlist",
-        title: "JavaScript Tutorials",
-        description: "Complete JavaScript learning series",
-        thumbnail: "https://picsum.photos/120/90?random=2"
-      },
-      {
-        id: 3,
-        type: "video",
-        title: "React vs Vue Comparison",
-        description: "Detailed comparison of React and Vue frameworks",
-        thumbnail: "https://picsum.photos/120/90?random=3"
+    const result = await args.executeNamedServerFunction({
+      functionName: "searchUserContent",
+      contextData: {
+        query,
+        type: searchType(),
+        limit: 50
       }
-    ].filter(item =>
-      searchFilter() === "all" || item.type === searchFilter()
-    ).filter(item =>
-      item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.description.toLowerCase().includes(query.toLowerCase())
-    );
+    });
 
-    setSearchResults(mockResults);
-    setIsSearching(false);
+    if (result.error) {
+      const errorMessage = result.error;
+      setError(errorMessage);
+      args.showErrorToast(errorMessage);
+    } else if (result.result && result.result.success) {
+      // Process search results to handle Vertex format (properties in P field)
+      const data = result.result.data;
 
-    if (mockResults.length === 0) {
-      args.showInfoToast("No results found for your search");
+      // Process channels
+      const processedChannels = data.channels.map(item => {
+        const channel = item.channel;
+        const channelSettings = item.channelSettings;
+
+        return {
+          // Channel data from YouTube (accessing P field)
+          channelId: channel.P.youtubeId,
+          title: channel.P.title,
+          description: channel.P.description,
+          thumbnail: channel.P.thumbnail,
+          subscriberCount: channel.P.subscriberCount,
+          videoCount: channel.P.videoCount,
+
+          // User-specific settings (accessing P field)
+          customName: channelSettings.P.customName,
+          displayName: channelSettings.P.customName || channel.P.title,
+          isUserSaved: true
+        };
+      });
+
+      // Process playlists
+      const processedPlaylists = data.playlists.map(item => {
+        const playlist = item.playlist;
+        const playlistSettings = item.playlistSettings;
+        const channel = item.channel;
+
+        return {
+          // Playlist data from YouTube (accessing P field)
+          playlistId: playlist.P.youtubeId,
+          title: playlist.P.title,
+          description: playlist.P.description,
+          thumbnails: playlist.P.thumbnails,
+          itemCount: playlist.P.itemCount,
+          publishedAt: playlist.P.publishedAt,
+
+          // User-specific settings (accessing P field)
+          customName: playlistSettings.P.customName,
+          displayName: playlistSettings.P.customName || playlist.P.title,
+          isUserSaved: true,
+
+          // Parent channel info (accessing P field)
+          parentChannelId: channel?.P.youtubeId || null,
+          parentChannelTitle: channel?.P.title || null
+        };
+      });
+
+      // Process videos
+      const processedVideos = data.videos.map(item => {
+        const video = item.video;
+        const videoSettings = item.videoSettings;
+        const parentPlaylist = item.parentPlaylist;
+
+        return {
+          // Video data from YouTube (accessing P field)
+          videoId: video.P.youtubeId,
+          title: video.P.title,
+          description: video.P.description,
+          thumbnails: video.P.thumbnails,
+          thumbnail: video.P.thumbnails?.medium?.url || video.P.thumbnails?.default?.url || null,
+          duration: video.P.duration,
+          publishedAt: video.P.publishedAt,
+          viewCount: video.P.viewCount,
+          channelTitle: video.P.channelTitle,
+
+          // User-specific settings (accessing P field)
+          watched: videoSettings.P.watched || false,
+          notes: videoSettings.P.notes || '',
+
+          // Parent playlist info
+          parentPlaylist: parentPlaylist ? {
+            playlistId: parentPlaylist.playlist.P.youtubeId,
+            title: parentPlaylist.playlist.P.title,
+            displayName: parentPlaylist.playlistSettings?.P.customName || parentPlaylist.playlist.P.title
+          } : null
+        };
+      });
+
+      setSearchResults({
+        channels: processedChannels,
+        playlists: processedPlaylists,
+        videos: processedVideos,
+        totalResults: data.totalResults,
+        query: data.query
+      });
+
+      // Set active tab based on results
+      if (processedChannels.length > 0 && processedPlaylists.length === 0 && processedVideos.length === 0) {
+        setActiveTab('channels');
+      } else if (processedPlaylists.length > 0 && processedChannels.length === 0 && processedVideos.length === 0) {
+        setActiveTab('playlists');
+      } else if (processedVideos.length > 0 && processedChannels.length === 0 && processedPlaylists.length === 0) {
+        setActiveTab('videos');
+      } else {
+        setActiveTab('all');
+      }
     } else {
-      args.showSuccessToast(`Found ${mockResults.length} result(s)`);
+      const errorMessage = result.result?.message || result.message || "Failed to search";
+      setError(errorMessage);
+      args.showErrorToast(errorMessage);
     }
-  }, 1000);
+  } catch (err) {
+    console.error("Error performing search:", err);
+    setError("Failed to search. Please try again.");
+    args.showErrorToast("Failed to search. Please try again.");
+  } finally {
+    setLoading(false);
+  }
 };
 
-// Clear search
-const clearSearch = () => {
-  setSearchQuery("");
-  setSearchResults([]);
-  setSearchFilter("all");
+// Handle enter key in search input
+const handleKeyPress = (e) => {
+  if (e.key === 'Enter') {
+    performSearch();
+  }
 };
 
 return {
   searchQuery,
   setSearchQuery,
-  searchFilter,
-  setSearchFilter,
+  searchType,
+  setSearchType,
   searchResults,
-  isSearching,
-  handleSearch,
-  clearSearch
+  loading,
+  error,
+  activeTab,
+  setActiveTab,
+  performSearch,
+  handleKeyPress
 };
 '''
       }
@@ -129,16 +228,16 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  padding: 1.5rem;
+  background: linear-gradient(135deg, ${args.theme.var.color.info}, ${args.theme.var.color.info_dark_200});
+  color: ${args.theme.var.color.info_text};
+  padding: 2rem 1.5rem;
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: 1.5rem 1rem;
   }
 }`;
 '''
@@ -159,16 +258,12 @@ return {
 return `._id {
   max-width: 1400px;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
 }`;
 '''
       }
     },
     {
-      id: "yto_search_title_section",
+      id: "yto_search_title_row",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -182,7 +277,13 @@ return {
 return `._id {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
 }`;
 '''
       }
@@ -200,6 +301,14 @@ return {
   width: 32,
   height: 32
 };
+''',
+        css: '''
+return `._id {
+  @media (max-width: 768px) {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}`;
 '''
       }
     },
@@ -212,7 +321,7 @@ return {
         props: '''
 return {
   as: "h1",
-  text: "Search"
+  text: "Search Your Content"
 };
 ''',
         css: '''
@@ -229,82 +338,10 @@ return `._id {
       }
     },
     {
-      id: "yto_search_container",
+      id: "yto_search_input_container",
       L: "Attr",
       P: {
         displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "main"
-};
-''',
-        css: '''
-return `._id {
-  padding: 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 60vh;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_search_form_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_50};
-  border-radius: 1rem;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  border: 1px solid ${args.theme.var.color.border};
-
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_search_form",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "form",
-  onSubmit: args.fns.handleSearch
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_search_input_group",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
@@ -315,9 +352,34 @@ return {
 return `._id {
   display: flex;
   gap: 1rem;
+  align-items: center;
 
   @media (max-width: 768px) {
     flex-direction: column;
+    gap: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_input_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  position: relative;
+
+  @media (max-width: 768px) {
+    width: 100%;
   }
 }`;
 '''
@@ -335,133 +397,74 @@ return {
   type: "text",
   placeholder: "Search channels, playlists, or videos...",
   value: args.fns.searchQuery(),
-  onChange: (e) => args.fns.setSearchQuery(e.target.value)
+  onInput: (e) => args.fns.setSearchQuery(e.target.value),
+  onKeyPress: args.fns.handleKeyPress
 };
 ''',
         css: '''
 return `._id {
-  flex: 1;
-  padding: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  background: rgba(255,255,255,0.95);
+  border: 2px solid transparent;
+  border-radius: 0.75rem;
   font-size: 1rem;
+  color: ${args.theme.var.color.text};
   transition: all 0.2s ease;
 
   &:focus {
     outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+    border-color: ${args.theme.var.color.info_light_300};
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
   &::placeholder {
     color: ${args.theme.var.color.muted};
   }
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 0.875rem 0.75rem 2.5rem;
+    font-size: 0.875rem;
+  }
 }`;
 '''
       }
     },
     {
-      id: "yto_search_filter_select",
+      id: "yto_search_input_icon",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
-  as: "select",
-  value: args.fns.searchFilter(),
-  onChange: (e) => args.fns.setSearchFilter(e.target.value)
+  as: "icon",
+  icon: "carbon:search",
+  width: 20,
+  height: 20
 };
 ''',
         css: '''
 return `._id {
-  padding: 1rem;
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
-  font-size: 1rem;
-  min-width: 150px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:focus {
-    outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
-  }
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: ${args.theme.var.color.muted};
+  pointer-events: none;
 
   @media (max-width: 768px) {
-    min-width: unset;
+    left: 0.75rem;
+    width: 18px !important;
+    height: 18px !important;
   }
 }`;
 '''
       }
     },
     {
-      id: "yto_search_filter_option_all",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "option",
-  value: "all",
-  text: "All Types"
-};
-'''
-      }
-    },
-    {
-      id: "yto_search_filter_option_channels",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "option",
-  value: "channel",
-  text: "Channels"
-};
-'''
-      }
-    },
-    {
-      id: "yto_search_filter_option_playlists",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "option",
-  value: "playlist",
-  text: "Playlists"
-};
-'''
-      }
-    },
-    {
-      id: "yto_search_filter_option_videos",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "option",
-  value: "video",
-  text: "Videos"
-};
-'''
-      }
-    },
-    {
-      id: "yto_search_actions",
+      id: "yto_search_filters",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -474,12 +477,116 @@ return {
         css: '''
 return `._id {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
 
   @media (max-width: 768px) {
-    flex-direction: column;
+    width: 100%;
+    justify-content: space-between;
   }
 }`;
+'''
+      }
+    },
+    {
+      id: "yto_search_type_select",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "select",
+  value: args.fns.searchType(),
+  onChange: (e) => args.fns.setSearchType(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.875rem 2.5rem 0.875rem 1rem;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="white" d="M2 0L0 2h4L2 0zM2 5L0 3h4L2 5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.65rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    background-color: rgba(255,255,255,0.3);
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 2rem 0.75rem 0.875rem;
+    font-size: 0.75rem;
+    flex: 1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_type_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "all",
+  text: "All Content"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_type_channels",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "channels",
+  text: "Channels"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_type_playlists",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "playlists",
+  text: "Playlists"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_type_videos",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "option",
+  value: "videos",
+  text: "Videos"
+};
 '''
       }
     },
@@ -487,39 +594,51 @@ return `._id {
       id: "yto_search_button",
       L: "Attr",
       P: {
-        displayOrder: 1,
+        displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
   as: "button",
-  type: "submit",
-  disabled: args.fns.isSearching()
+  onClick: args.fns.performSearch,
+  disabled: args.fns.loading()
 };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
+  background: rgba(255,255,255,0.95);
+  color: ${args.theme.var.color.info};
   border: none;
-  border-radius: 0.5rem;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: 500;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: inherit;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  min-width: 120px;
-  justify-content: center;
+  white-space: nowrap;
 
   &:hover:not(:disabled) {
-    background: ${args.theme.var.color.primary_dark_200};
+    background: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.75rem;
+    flex: 1;
   }
 }`;
 '''
@@ -534,18 +653,18 @@ return `._id {
         props: '''
 return {
   as: "icon",
-  icon: args.fns.isSearching() ? "carbon:loading" : "carbon:search",
-  width: 20,
-  height: 20
+  icon: args.fns.loading() ? "carbon:hourglass" : "carbon:search",
+  width: 16,
+  height: 16
 };
 ''',
         css: '''
+const loading = args.fns.loading();
 return `._id {
-  ${args.fns.isSearching() ? "animation: spin 1s linear infinite;" : ""}
+  ${loading ? 'animation: spin 1s linear infinite;' : ''}
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }`;
 '''
@@ -560,55 +679,28 @@ return `._id {
         props: '''
 return {
   as: "span",
-  text: args.fns.isSearching() ? "Searching..." : "Search"
+  text: args.fns.loading() ? "Searching..." : "Search"
 };
 '''
       }
     },
     {
-      id: "yto_search_clear_button",
+      id: "yto_search_container",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
-  as: "button",
-  type: "button",
-  text: "Clear",
-  onClick: args.fns.clearSearch
+  as: "main"
 };
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_light_200};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.5rem;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_300};
-  }
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 60vh;
 }`;
-'''
-      }
-    },
-    {
-      id: "yto_search_results_container",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.searchResults().length === 0
-};
 '''
       }
     },
@@ -619,33 +711,595 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const count = args.fns.searchResults().length;
+const results = args.fns.searchResults();
+
 return {
-  as: "h2",
-  text: `Search Results (${count})`
+  as: "div",
+  hide: !results || args.fns.loading()
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0 0 1.5rem 0;
-  color: ${args.theme.var.color.text};
+  padding: 1.5rem;
+  background: ${args.theme.var.color.background_light_50};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 }`;
 '''
       }
     },
     {
-      id: "yto_search_results_grid",
+      id: "yto_search_results_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+
+if (!results) return { as: "div", hide: true };
+
+const text = `Found ${results.totalResults} result${results.totalResults !== 1 ? 's' : ''} for "${results.query}"`;
+
+return {
+  as: "h2",
+  text
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.text};
+
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_tabs",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
-        contextName: "result",
-        loop: true,
+        props: '''
+const results = args.fns.searchResults();
+
+return {
+  as: "div",
+  hide: !results || results.totalResults === 0
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+
+  @media (max-width: 768px) {
+    gap: 0.375rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_tab_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+const activeTab = args.fns.activeTab();
+const totalCount = results ? results.totalResults : 0;
+
+return {
+  as: "button",
+  onClick: () => args.fns.setActiveTab('all'),
+  text: `All (${totalCount})`
+};
+''',
+        css: '''
+const activeTab = args.fns.activeTab();
+const isActive = activeTab === 'all';
+
+return `._id {
+  background: ${isActive ? args.theme.var.color.info : args.theme.var.color.background};
+  color: ${isActive ? args.theme.var.color.info_text : args.theme.var.color.text};
+  border: 1px solid ${isActive ? args.theme.var.color.info : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${isActive ? args.theme.var.color.info_dark_200 : args.theme.var.color.background_light_100};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_tab_channels",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+const activeTab = args.fns.activeTab();
+const count = results ? results.channels.length : 0;
+
+return {
+  as: "button",
+  onClick: () => args.fns.setActiveTab('channels'),
+  hide: !results || results.channels.length === 0,
+  text: `Channels (${count})`
+};
+''',
+        css: '''
+const activeTab = args.fns.activeTab();
+const isActive = activeTab === 'channels';
+
+return `._id {
+  background: ${isActive ? args.theme.var.color.info : args.theme.var.color.background};
+  color: ${isActive ? args.theme.var.color.info_text : args.theme.var.color.text};
+  border: 1px solid ${isActive ? args.theme.var.color.info : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${isActive ? args.theme.var.color.info_dark_200 : args.theme.var.color.background_light_100};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_tab_playlists",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+const activeTab = args.fns.activeTab();
+const count = results ? results.playlists.length : 0;
+
+return {
+  as: "button",
+  onClick: () => args.fns.setActiveTab('playlists'),
+  hide: !results || results.playlists.length === 0,
+  text: `Playlists (${count})`
+};
+''',
+        css: '''
+const activeTab = args.fns.activeTab();
+const isActive = activeTab === 'playlists';
+
+return `._id {
+  background: ${isActive ? args.theme.var.color.info : args.theme.var.color.background};
+  color: ${isActive ? args.theme.var.color.info_text : args.theme.var.color.text};
+  border: 1px solid ${isActive ? args.theme.var.color.info : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${isActive ? args.theme.var.color.info_dark_200 : args.theme.var.color.background_light_100};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_tab_videos",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+const activeTab = args.fns.activeTab();
+const count = results ? results.videos.length : 0;
+
+return {
+  as: "button",
+  onClick: () => args.fns.setActiveTab('videos'),
+  hide: !results || results.videos.length === 0,
+  text: `Videos (${count})`
+};
+''',
+        css: '''
+const activeTab = args.fns.activeTab();
+const isActive = activeTab === 'videos';
+
+return `._id {
+  background: ${isActive ? args.theme.var.color.info : args.theme.var.color.background};
+  color: ${isActive ? args.theme.var.color.info_text : args.theme.var.color.text};
+  border: 1px solid ${isActive ? args.theme.var.color.info : args.theme.var.color.border};
+  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${isActive ? args.theme.var.color.info_dark_200 : args.theme.var.color.background_light_100};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
         props: '''
 return {
-  data: args.fns.searchResults()
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_loading",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const loading = args.fns.loading();
+
+return {
+  as: "div",
+  hide: !loading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 40px;
+  height: 40px;
+  border: 3px solid ${args.theme.var.color.background_light_300};
+  border-top-color: ${args.theme.var.color.info};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_loading_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Searching your content..."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+const loading = args.fns.loading();
+
+return {
+  as: "div",
+  hide: loading || (results && results.totalResults > 0)
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: ${args.theme.var.color.background_dark_50};
+  border-radius: 1rem;
+  border: 2px dashed ${args.theme.var.color.border};
+
+  @media (max-width: 768px) {
+    padding: 3rem 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_empty_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 80px;
+  height: 80px;
+  background: ${args.theme.var.color.info_light_100};
+  color: ${args.theme.var.color.info};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    width: 64px;
+    height: 64px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_empty_icon_svg",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:search-locate",
+  width: 40,
+  height: 40
+};
+''',
+        css: '''
+return `._id {
+  @media (max-width: 768px) {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_empty_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+
+return {
+  as: "h3",
+  text: results ? "No Results Found" : "Start Searching"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: ${args.theme.var.color.text};
+
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_empty_description",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+
+const text = results
+  ? `No results found for "${results.query}". Try a different search term.`
+  : "Search through all your saved channels, playlists, and videos.";
+
+return {
+  as: "p",
+  text
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  max-width: 400px;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_results_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+const loading = args.fns.loading();
+
+return {
+  as: "div",
+  hide: loading || !results || results.totalResults === 0
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_channels_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+const activeTab = args.fns.activeTab();
+
+return {
+  as: "section",
+  hide: !results || results.channels.length === 0 || (activeTab !== 'all' && activeTab !== 'channels')
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_channels_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const activeTab = args.fns.activeTab();
+
+return {
+  as: "h3",
+  text: "Channels",
+  hide: activeTab === 'channels'
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_channels_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
 };
 ''',
         css: '''
@@ -663,187 +1317,256 @@ return `._id {
       }
     },
     {
-      id: "yto_search_result_card",
+      id: "yto_search_channels_data",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_50};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 1rem;
-  padding: 1.5rem;
-  transition: all 0.2s ease;
-  cursor: pointer;
+const results = args.fns.searchResults();
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    border-color: ${args.theme.var.color.primary_light_200};
-  }
-}`;
+return {
+  data: results ? results.channels : [],
+  loop: true,
+  contextName: "channel"
+};
 '''
       }
     },
     {
-      id: "yto_search_result_header",
+      id: "yto_search_channel_card",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
+        componentName: "YTOChannelCard",
         props: '''
+const channel = args.contextData.channel;
+
 return {
-  as: "div"
+  channel: channel
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}`;
 '''
       }
     },
     {
-      id: "yto_search_result_thumbnail",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const result = args.contextData.result;
-return {
-  as: "img",
-  src: result.thumbnail,
-  alt: result.title
-};
-''',
-        css: '''
-return `._id {
-  width: 80px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: 0.5rem;
-  flex-shrink: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_search_result_info",
+      id: "yto_search_playlists_section",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const results = args.fns.searchResults();
+const activeTab = args.fns.activeTab();
+
 return {
-  as: "div"
+  as: "section",
+  hide: !results || results.playlists.length === 0 || (activeTab !== 'all' && activeTab !== 'playlists')
 };
 ''',
         css: '''
 return `._id {
-  flex: 1;
-  min-width: 0;
+  margin-bottom: 2rem;
 }`;
 '''
       }
     },
     {
-      id: "yto_search_result_type_badge",
+      id: "yto_search_playlists_title",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const result = args.contextData.result;
-return {
-  as: "span",
-  text: result.type.charAt(0).toUpperCase() + result.type.slice(1)
-};
-''',
-        css: '''
-const result = args.contextData.result;
-const getTypeColor = (type) => {
-  switch(type) {
-    case "channel": return args.theme.var.color.primary;
-    case "playlist": return args.theme.var.color.success;
-    case "video": return args.theme.var.color.info;
-    default: return args.theme.var.color.muted;
-  }
-};
+const activeTab = args.fns.activeTab();
 
-return `._id {
-  display: inline-block;
-  background: ${getTypeColor(result.type)};
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: 1rem;
-  margin-bottom: 0.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_search_result_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const result = args.contextData.result;
 return {
   as: "h3",
-  text: result.title
+  text: "Playlists",
+  hide: activeTab === 'playlists'
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 1rem 0;
   color: ${args.theme.var.color.text};
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
 }`;
 '''
       }
     },
     {
-      id: "yto_search_result_description",
+      id: "yto_search_playlists_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_playlists_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+
+return {
+  data: results ? results.playlists : [],
+  loop: true,
+  contextName: "playlist"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_playlist_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOPlaylistCard",
+        props: '''
+const playlist = args.contextData.playlist;
+
+return {
+  playlist: playlist
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_videos_section",
       L: "Attr",
       P: {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const result = args.contextData.result;
+const results = args.fns.searchResults();
+const activeTab = args.fns.activeTab();
+
 return {
-  as: "p",
-  text: result.description
+  as: "section",
+  hide: !results || results.videos.length === 0 || (activeTab !== 'all' && activeTab !== 'videos')
 };
 ''',
         css: '''
 return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  margin-bottom: 2rem;
 }`;
+'''
+      }
+    },
+    {
+      id: "yto_search_videos_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const activeTab = args.fns.activeTab();
+
+return {
+  as: "h3",
+  text: "Videos",
+  hide: activeTab === 'videos'
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.text};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.125rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_videos_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_search_videos_data",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const results = args.fns.searchResults();
+
+return {
+  data: results ? results.videos : [],
+  loop: true,
+  contextName: "video"
+};
+'''
+      }
+    },
+    {
+      id: "yto_search_video_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOVideoCard",
+        props: '''
+const video = args.contextData.video;
+
+return {
+  video: video
+};
 '''
       }
     }
@@ -853,33 +1576,54 @@ return `._id {
     { id: "e1", T: "Attr", S: "yto_search_page", E: "yto_search_root" },
     { id: "e2", T: "Attr", S: "yto_search_root", E: "yto_search_header" },
     { id: "e3", T: "Attr", S: "yto_search_header", E: "yto_search_header_content" },
-    { id: "e4", T: "Attr", S: "yto_search_header_content", E: "yto_search_title_section" },
-    { id: "e5", T: "Attr", S: "yto_search_title_section", E: "yto_search_icon" },
-    { id: "e6", T: "Attr", S: "yto_search_title_section", E: "yto_search_title" },
-    { id: "e7", T: "Attr", S: "yto_search_root", E: "yto_search_container" },
-    { id: "e8", T: "Attr", S: "yto_search_container", E: "yto_search_form_container" },
-    { id: "e9", T: "Attr", S: "yto_search_form_container", E: "yto_search_form" },
-    { id: "e10", T: "Attr", S: "yto_search_form", E: "yto_search_input_group" },
-    { id: "e11", T: "Attr", S: "yto_search_input_group", E: "yto_search_input" },
-    { id: "e12", T: "Attr", S: "yto_search_input_group", E: "yto_search_filter_select" },
-    { id: "e13", T: "Attr", S: "yto_search_filter_select", E: "yto_search_filter_option_all" },
-    { id: "e14", T: "Attr", S: "yto_search_filter_select", E: "yto_search_filter_option_channels" },
-    { id: "e15", T: "Attr", S: "yto_search_filter_select", E: "yto_search_filter_option_playlists" },
-    { id: "e16", T: "Attr", S: "yto_search_filter_select", E: "yto_search_filter_option_videos" },
-    { id: "e17", T: "Attr", S: "yto_search_form", E: "yto_search_actions" },
-    { id: "e18", T: "Attr", S: "yto_search_actions", E: "yto_search_button" },
-    { id: "e19", T: "Attr", S: "yto_search_button", E: "yto_search_button_icon" },
-    { id: "e20", T: "Attr", S: "yto_search_button", E: "yto_search_button_text" },
-    { id: "e21", T: "Attr", S: "yto_search_actions", E: "yto_search_clear_button" },
-    { id: "e22", T: "Attr", S: "yto_search_container", E: "yto_search_results_container" },
-    { id: "e23", T: "Attr", S: "yto_search_results_container", E: "yto_search_results_header" },
-    { id: "e24", T: "Attr", S: "yto_search_results_container", E: "yto_search_results_grid" },
-    { id: "e25", T: "Attr", S: "yto_search_results_grid", E: "yto_search_result_card" },
-    { id: "e26", T: "Attr", S: "yto_search_result_card", E: "yto_search_result_header" },
-    { id: "e27", T: "Attr", S: "yto_search_result_header", E: "yto_search_result_thumbnail" },
-    { id: "e28", T: "Attr", S: "yto_search_result_header", E: "yto_search_result_info" },
-    { id: "e29", T: "Attr", S: "yto_search_result_info", E: "yto_search_result_type_badge" },
-    { id: "e30", T: "Attr", S: "yto_search_result_info", E: "yto_search_result_title" },
-    { id: "e31", T: "Attr", S: "yto_search_result_card", E: "yto_search_result_description" }
+    { id: "e4", T: "Attr", S: "yto_search_header_content", E: "yto_search_title_row" },
+    { id: "e5", T: "Attr", S: "yto_search_title_row", E: "yto_search_icon" },
+    { id: "e6", T: "Attr", S: "yto_search_title_row", E: "yto_search_title" },
+    { id: "e7", T: "Attr", S: "yto_search_header_content", E: "yto_search_input_container" },
+    { id: "e8", T: "Attr", S: "yto_search_input_container", E: "yto_search_input_wrapper" },
+    { id: "e9", T: "Attr", S: "yto_search_input_wrapper", E: "yto_search_input" },
+    { id: "e10", T: "Attr", S: "yto_search_input_wrapper", E: "yto_search_input_icon" },
+    { id: "e11", T: "Attr", S: "yto_search_input_container", E: "yto_search_filters" },
+    { id: "e12", T: "Attr", S: "yto_search_filters", E: "yto_search_type_select" },
+    { id: "e13", T: "Attr", S: "yto_search_type_select", E: "yto_search_type_all" },
+    { id: "e14", T: "Attr", S: "yto_search_type_select", E: "yto_search_type_channels" },
+    { id: "e15", T: "Attr", S: "yto_search_type_select", E: "yto_search_type_playlists" },
+    { id: "e16", T: "Attr", S: "yto_search_type_select", E: "yto_search_type_videos" },
+    { id: "e17", T: "Attr", S: "yto_search_filters", E: "yto_search_button" },
+    { id: "e18", T: "Attr", S: "yto_search_button", E: "yto_search_button_icon" },
+    { id: "e19", T: "Attr", S: "yto_search_button", E: "yto_search_button_text" },
+    { id: "e20", T: "Attr", S: "yto_search_root", E: "yto_search_container" },
+    { id: "e21", T: "Attr", S: "yto_search_container", E: "yto_search_results_header" },
+    { id: "e22", T: "Attr", S: "yto_search_results_header", E: "yto_search_results_summary" },
+    { id: "e23", T: "Attr", S: "yto_search_results_header", E: "yto_search_tabs" },
+    { id: "e24", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_all" },
+    { id: "e25", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_channels" },
+    { id: "e26", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_playlists" },
+    { id: "e27", T: "Attr", S: "yto_search_tabs", E: "yto_search_tab_videos" },
+    { id: "e28", T: "Attr", S: "yto_search_container", E: "yto_search_content" },
+    { id: "e29", T: "Attr", S: "yto_search_content", E: "yto_search_loading" },
+    { id: "e30", T: "Attr", S: "yto_search_loading", E: "yto_search_loading_spinner" },
+    { id: "e31", T: "Attr", S: "yto_search_loading", E: "yto_search_loading_text" },
+    { id: "e32", T: "Attr", S: "yto_search_content", E: "yto_search_empty_state" },
+    { id: "e33", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_icon" },
+    { id: "e34", T: "Attr", S: "yto_search_empty_icon", E: "yto_search_empty_icon_svg" },
+    { id: "e35", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_title" },
+    { id: "e36", T: "Attr", S: "yto_search_empty_state", E: "yto_search_empty_description" },
+    { id: "e37", T: "Attr", S: "yto_search_content", E: "yto_search_results_container" },
+    { id: "e38", T: "Attr", S: "yto_search_results_container", E: "yto_search_channels_section" },
+    { id: "e39", T: "Attr", S: "yto_search_channels_section", E: "yto_search_channels_title" },
+    { id: "e40", T: "Attr", S: "yto_search_channels_section", E: "yto_search_channels_grid" },
+    { id: "e41", T: "Attr", S: "yto_search_channels_grid", E: "yto_search_channels_data" },
+    { id: "e42", T: "Attr", S: "yto_search_channels_data", E: "yto_search_channel_card" },
+    { id: "e43", T: "Attr", S: "yto_search_results_container", E: "yto_search_playlists_section" },
+    { id: "e44", T: "Attr", S: "yto_search_playlists_section", E: "yto_search_playlists_title" },
+    { id: "e45", T: "Attr", S: "yto_search_playlists_section", E: "yto_search_playlists_grid" },
+    { id: "e46", T: "Attr", S: "yto_search_playlists_grid", E: "yto_search_playlists_data" },
+    { id: "e47", T: "Attr", S: "yto_search_playlists_data", E: "yto_search_playlist_card" },
+    { id: "e48", T: "Attr", S: "yto_search_results_container", E: "yto_search_videos_section" },
+    { id: "e49", T: "Attr", S: "yto_search_videos_section", E: "yto_search_videos_title" },
+    { id: "e50", T: "Attr", S: "yto_search_videos_section", E: "yto_search_videos_grid" },
+    { id: "e51", T: "Attr", S: "yto_search_videos_grid", E: "yto_search_videos_data" },
+    { id: "e52", T: "Attr", S: "yto_search_videos_data", E: "yto_search_video_card" }
   ]
 }
