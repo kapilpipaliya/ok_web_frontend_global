@@ -45,6 +45,11 @@ const [loading, setLoading] = args.createSignal(true);
 const [error, setError] = args.createSignal(null);
 const [activeTab, setActiveTab] = args.createSignal('videos');
 
+// Search state
+const [searchQuery, setSearchQuery] = args.createSignal('');
+const [filteredVideos, setFilteredVideos] = args.createSignal([]);
+const [filteredPlaylists, setFilteredPlaylists] = args.createSignal([]);
+
 // Get channel ID from URL params
 const channelId = args.searchParams?.channelId || args.params?.channelId;
 
@@ -74,6 +79,9 @@ const loadChannelContents = async () => {
       setChannelData(result.result.data.channel);
       setVideos(result.result.data.videos);
       setPlaylists(result.result.data.playlists);
+      // Initialize filtered data
+      setFilteredVideos(result.result.data.videos);
+      setFilteredPlaylists(result.result.data.playlists);
     } else {
       const errorMessage = result.result?.message || result.message || "Failed to load channel contents";
       setError(errorMessage);
@@ -88,15 +96,60 @@ const loadChannelContents = async () => {
   }
 };
 
+// Search function
+const performSearch = (query) => {
+  setSearchQuery(query); // Keep the original query with capitals
+
+  const searchTerm = query.toLowerCase().trim(); // Convert to lowercase only for searching
+
+  if (!searchTerm) {
+    // Reset to show all content
+    setFilteredVideos(videos());
+    setFilteredPlaylists(playlists());
+    return;
+  }
+
+  // Filter videos
+  const videoResults = videos().filter(video => {
+    const title = video.video?.P?.title || '';
+    const description = video.video?.P?.description || '';
+    return title.toLowerCase().includes(searchTerm) ||
+           description.toLowerCase().includes(searchTerm);
+  });
+
+  // Filter playlists
+  const playlistResults = playlists().filter(playlist => {
+    const title = playlist.playlist?.P?.title || '';
+    const description = playlist.playlist?.P?.description || '';
+    return title.toLowerCase().includes(searchTerm) ||
+           description.toLowerCase().includes(searchTerm);
+  });
+
+  setFilteredVideos(videoResults);
+  setFilteredPlaylists(playlistResults);
+};
+
+// Clear search
+const clearSearch = () => {
+  setSearchQuery('');
+  setFilteredVideos(videos());
+  setFilteredPlaylists(playlists());
+};
+
 return {
   channelData,
   videos,
   playlists,
+  filteredVideos,
+  filteredPlaylists,
   loading,
   error,
   activeTab,
   setActiveTab,
-  loadChannelContents
+  searchQuery,
+  loadChannelContents,
+  performSearch,
+  clearSearch
 };
 '''
       }
@@ -655,17 +708,26 @@ return `._id {
       id: "yto_channel_detail_tabs",
       L: "Attr",
       P: {
-        displayOrder: 1,
+        displayOrder: 2,
         componentName: "YTOTabBar",
         props: '''
-const videos = args.fns.videos();
-const playlists = args.fns.playlists();
+const filteredVideos = args.fns.filteredVideos();
+const filteredPlaylists = args.fns.filteredPlaylists();
 const activeTab = args.fns.activeTab();
+const hasSearch = args.fns.searchQuery().length > 0;
 
 return {
   tabs: [
-    { id: 'videos', label: `Videos (${videos.length})`, icon: 'carbon:video' },
-    { id: 'playlists', label: `Playlists (${playlists.length})`, icon: 'carbon:playlist' }
+    {
+      id: 'videos',
+      label: hasSearch ? `Videos (${filteredVideos.length})` : `Videos (${filteredVideos.length})`,
+      icon: 'carbon:video'
+    },
+    {
+      id: 'playlists',
+      label: hasSearch ? `Playlists (${filteredPlaylists.length})` : `Playlists (${filteredPlaylists.length})`,
+      icon: 'carbon:playlist'
+    }
   ],
   activeTab: activeTab,
   onTabChange: (tabId) => args.fns.setActiveTab(tabId)
@@ -674,10 +736,186 @@ return {
       }
     },
     {
-      id: "yto_channel_detail_content",
+      id: "yto_channel_detail_search",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem 1.5rem;
+  background: ${args.theme.var.color.background_light_50};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_search_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "text",
+  placeholder: "Search videos and playlists in this channel...",
+  value: args.fns.searchQuery(),
+  onInput: (e) => args.fns.performSearch(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  color: ${args.theme.var.color.text};
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 0.875rem 0.75rem 2.5rem;
+    font-size: 0.875rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_search_icon",
       L: "Attr",
       P: {
         displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:search",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: ${args.theme.var.color.muted};
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    left: 0.75rem;
+    width: 18px !important;
+    height: 18px !important;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_search_clear",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const hasQuery = args.fns.searchQuery().length > 0;
+return {
+  as: "button",
+  onClick: args.fns.clearSearch,
+  hide: !hasQuery
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.text};
+    background: ${args.theme.var.color.background_light_100};
+  }
+
+  @media (max-width: 768px) {
+    right: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_search_clear_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_content",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
         componentName: "Html",
         props: '''
 return {
@@ -806,7 +1044,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const videos = args.fns.videos();
+const videos = args.fns.filteredVideos();
 
 return {
   data: videos,
@@ -871,7 +1109,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const playlists = args.fns.playlists();
+const playlists = args.fns.filteredPlaylists();
 
 return {
   data: playlists,
@@ -1083,7 +1321,13 @@ return `._id {
     { id: "e17b", T: "Attr", S: "yto_channel_detail_youtube_link", E: "yto_channel_detail_youtube_link_icon" },
     { id: "e17c", T: "Attr", S: "yto_channel_detail_youtube_link", E: "yto_channel_detail_youtube_link_text" },
     { id: "e18", T: "Attr", S: "yto_channel_detail_root", E: "yto_channel_detail_container" },
-    { id: "e19", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_tabs" },
+    { id: "e19", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_search" },
+    { id: "e19a", T: "Attr", S: "yto_channel_detail_search", E: "yto_channel_detail_search_container" },
+    { id: "e19b", T: "Attr", S: "yto_channel_detail_search_container", E: "yto_channel_detail_search_input" },
+    { id: "e19c", T: "Attr", S: "yto_channel_detail_search_container", E: "yto_channel_detail_search_icon" },
+    { id: "e19d", T: "Attr", S: "yto_channel_detail_search_container", E: "yto_channel_detail_search_clear" },
+    { id: "e19e", T: "Attr", S: "yto_channel_detail_search_clear", E: "yto_channel_detail_search_clear_icon" },
+    { id: "e19f", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_tabs" },
     { id: "e20", T: "Attr", S: "yto_channel_detail_container", E: "yto_channel_detail_content" },
     { id: "e21", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_loading" },
     { id: "e22", T: "Attr", S: "yto_channel_detail_loading", E: "yto_channel_detail_loading_spinner" },

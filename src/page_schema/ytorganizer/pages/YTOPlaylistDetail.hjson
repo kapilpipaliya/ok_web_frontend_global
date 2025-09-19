@@ -44,6 +44,10 @@ const [loading, setLoading] = args.createSignal(true);
 const [error, setError] = args.createSignal(null);
 const [sortBy, setSortBy] = args.createSignal('index');
 
+// Search state
+const [searchQuery, setSearchQuery] = args.createSignal('');
+const [filteredVideos, setFilteredVideos] = args.createSignal([]);
+
 // Get playlist ID from URL params
 const playlistId = args.searchParams?.playlistId || args.params?.playlistId;
 
@@ -73,6 +77,7 @@ const loadPlaylistVideos = async () => {
       const playlistData = result.result.data.playlist;
       setPlaylistData(playlistData);
       setVideos(result.result.data.videos);
+      setFilteredVideos(result.result.data.videos);
       setSortBy(playlistData.playlistSettings?.P?.sortBy || 'index');
     } else {
       const errorMessage = result.result?.message || result.message || "Failed to load playlist videos";
@@ -88,6 +93,75 @@ const loadPlaylistVideos = async () => {
   }
 };
 
+// Search functionality
+const performSearch = (query) => {
+  setSearchQuery(query); // Keep the original query with capitals
+
+  const searchTerm = query.toLowerCase().trim(); // Convert to lowercase only for searching
+
+  if (!searchTerm) {
+    setFilteredVideos(videos());
+    return;
+  }
+
+  const filtered = videos().filter(video => {
+    const title = (video.video?.P?.title || '').toLowerCase();
+    const description = (video.video?.P?.description || '').toLowerCase();
+    return title.includes(searchTerm) || description.includes(searchTerm);
+  });
+
+  setFilteredVideos(filtered);
+};
+
+const clearSearch = () => {
+  setSearchQuery('');
+  setFilteredVideos(videos());
+};
+
+// Clear playlist user settings
+const clearPlaylistSettings = async () => {
+  const confirmed = confirm(
+    "⚠️ WARNING: This will clear all your personal settings for this playlist including:\n\n" +
+    "• Custom playlist name\n" +
+    "• Custom video ordering\n" +
+    "• Sort preferences\n" +
+    "• Display preferences\n\n" +
+    "This action CANNOT be undone.\n\n" +
+    "Are you sure you want to continue?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  if (!playlistId) {
+    args.showErrorToast("Playlist ID not available");
+    return;
+  }
+
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "clearPlaylistUserSettings",
+      contextData: { playlistId }
+    });
+
+    if (result.error) {
+      const errorMessage = result.error;
+      args.showErrorToast(errorMessage);
+    } else if (result.result && result.result.success) {
+      args.showSuccessToast("Playlist user settings cleared successfully!");
+      // Reload playlist data to reflect changes
+      loadPlaylistVideos();
+    } else {
+      const errorMessage = result.result?.message || result.message || "Failed to clear playlist settings";
+      args.showErrorToast(errorMessage);
+    }
+  } catch (err) {
+    console.error("Error clearing playlist settings:", err);
+    args.showErrorToast("Failed to clear playlist settings. Please try again.");
+  }
+};
+
 // Handle video addition
 const handleVideoSubmit = (data) => {
   // Reload playlist videos after adding new video
@@ -97,10 +171,15 @@ const handleVideoSubmit = (data) => {
 return {
   playlistData,
   videos,
+  filteredVideos,
   loading,
   error,
   sortBy,
   setSortBy,
+  searchQuery,
+  performSearch,
+  clearSearch,
+  clearPlaylistSettings,
   loadPlaylistVideos,
   handleVideoSubmit
 };
@@ -988,6 +1067,254 @@ return {
       }
     },
     {
+      id: "yto_playlist_detail_clear_settings",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.fns.clearPlaylistSettings()
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_text};
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background: ${args.theme.var.color.error_dark_200};
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_clear_settings_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:trash-can",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_clear_settings_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Clear Settings"
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_search_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_search_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+
+  @media (max-width: 768px) {
+    max-width: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const searchQuery = args.fns.searchQuery();
+
+return {
+  as: "input",
+  type: "text",
+  placeholder: "Search videos in this playlist...",
+  value: searchQuery,
+  onInput: (e) => args.fns.performSearch(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_search_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:search",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: ${args.theme.var.color.muted};
+  pointer-events: none;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_search_clear",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const searchQuery = args.fns.searchQuery();
+
+return {
+  as: "button",
+  type: "button",
+  onClick: () => args.fns.clearSearch(),
+  hide: !searchQuery
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: ${args.theme.var.color.text};
+    background: ${args.theme.var.color.background_light_200};
+  }
+
+  &:active {
+    background: ${args.theme.var.color.background_light_300};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_search_clear_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 14,
+  height: 14
+};
+'''
+      }
+    },
+    {
       id: "yto_playlist_detail_videos",
       L: "Attr",
       P: {
@@ -1105,7 +1432,7 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const videos = args.fns.videos();
+const videos = args.fns.filteredVideos();
 const sortBy = args.fns.sortBy();
 
 // Sort videos based on user preference
@@ -1591,13 +1918,22 @@ return {
     { id: "e24", T: "Attr", S: "yto_playlist_detail_sort_select", E: "yto_playlist_detail_sort_option_custom" },
     { id: "e25", T: "Attr", S: "yto_playlist_detail_sort_select", E: "yto_playlist_detail_sort_option_date" },
     { id: "e26", T: "Attr", S: "yto_playlist_detail_sort_select", E: "yto_playlist_detail_sort_option_title" },
-    { id: "e27", T: "Attr", S: "yto_playlist_detail_controls", E: "yto_playlist_detail_actions" },
+    { id: "e27", T: "Attr", S: "yto_playlist_detail_controls", E: "yto_playlist_detail_search_section" },
+    { id: "e27a", T: "Attr", S: "yto_playlist_detail_search_section", E: "yto_playlist_detail_search_container" },
+    { id: "e27b", T: "Attr", S: "yto_playlist_detail_search_container", E: "yto_playlist_detail_search_input" },
+    { id: "e27c", T: "Attr", S: "yto_playlist_detail_search_container", E: "yto_playlist_detail_search_icon" },
+    { id: "e27d", T: "Attr", S: "yto_playlist_detail_search_container", E: "yto_playlist_detail_search_clear" },
+    { id: "e27e", T: "Attr", S: "yto_playlist_detail_search_clear", E: "yto_playlist_detail_search_clear_icon" },
+    { id: "e27f", T: "Attr", S: "yto_playlist_detail_controls", E: "yto_playlist_detail_actions" },
     { id: "e28", T: "Attr", S: "yto_playlist_detail_actions", E: "yto_playlist_detail_play_all" },
     { id: "e29", T: "Attr", S: "yto_playlist_detail_play_all", E: "yto_playlist_detail_play_all_icon" },
     { id: "e30", T: "Attr", S: "yto_playlist_detail_play_all", E: "yto_playlist_detail_play_all_text" },
     { id: "e31", T: "Attr", S: "yto_playlist_detail_actions", E: "yto_playlist_detail_shuffle" },
     { id: "e32", T: "Attr", S: "yto_playlist_detail_shuffle", E: "yto_playlist_detail_shuffle_icon" },
     { id: "e33", T: "Attr", S: "yto_playlist_detail_shuffle", E: "yto_playlist_detail_shuffle_text" },
+    { id: "e33a", T: "Attr", S: "yto_playlist_detail_actions", E: "yto_playlist_detail_clear_settings" },
+    { id: "e33b", T: "Attr", S: "yto_playlist_detail_clear_settings", E: "yto_playlist_detail_clear_settings_icon" },
+    { id: "e33c", T: "Attr", S: "yto_playlist_detail_clear_settings", E: "yto_playlist_detail_clear_settings_text" },
     { id: "e34", T: "Attr", S: "yto_playlist_detail_container", E: "yto_playlist_detail_videos" },
     { id: "e35", T: "Attr", S: "yto_playlist_detail_videos", E: "yto_playlist_detail_loading" },
     { id: "e36", T: "Attr", S: "yto_playlist_detail_loading", E: "yto_playlist_detail_loading_spinner" },

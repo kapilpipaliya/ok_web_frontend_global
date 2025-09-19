@@ -1,0 +1,96 @@
+{
+  vertexes: [
+    {
+      id: "clear_playlist_user_settings_function",
+      L: "Function",
+      P: {
+        key: "clearPlaylistUserSettings",
+        description: "Clears all user-specific settings for a playlist including custom name, sort preferences, and display preferences",
+        body: '''
+// Get the playlist ID from the context
+const playlistId = args.contextData.playlistId;
+
+if (!playlistId) {
+  throw new Error("Playlist ID is required");
+}
+
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Check if the playlist exists and user has access to it
+  // Following the correct schema: (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+  const playlistQuery = `
+    MATCH (p:Playlist {youtubeId: $playlistId})
+    OPTIONAL MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    RETURN p, ps
+  `;
+
+  const playlistResult = await args.session.run(playlistQuery, {
+    playlistId: playlistId,
+    userUuid: user.uuid
+  });
+
+  if (playlistResult.records.length === 0) {
+    throw new Error("Playlist not found");
+  }
+
+  const record = playlistResult.records[0];
+  const playlist = record.get('p');
+  const playlistSettings = record.get('ps');
+
+  if (!playlistSettings) {
+    return {
+      success: true,
+      message: "No user settings found for this playlist",
+      data: {
+        playlistId: playlistId,
+        settingsCleared: false
+      }
+    };
+  }
+
+  // Reset the playlist settings to default values instead of deleting
+  // This maintains the relationship structure and follows the same pattern as savePlaylist
+  const resetQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    SET ps.customName = null,
+        ps.customOrder = null,
+        ps.sortBy = 'index',
+        ps.showThumbnails = true,
+        ps.viewMode = 'list',
+        ps.lastUpdated = datetime(),
+        ps.updatedAt = datetime()
+    RETURN ps
+  `;
+
+  const resetResult = await args.session.run(resetQuery, {
+    playlistId: playlistId,
+    userUuid: user.uuid
+  });
+
+  const wasReset = resetResult.records.length > 0;
+
+  return {
+    success: true,
+    message: wasReset ? "Playlist settings have been reset to defaults" : "No user settings found for this playlist",
+    data: {
+      playlistId: playlistId,
+      settingsCleared: wasReset,
+      resetCount: wasReset ? 1 : 0
+    }
+  };
+
+} catch (error) {
+  console.error('Error clearing playlist user settings:', error);
+  throw new Error(`Failed to clear playlist settings: ${error.message}`);
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}
