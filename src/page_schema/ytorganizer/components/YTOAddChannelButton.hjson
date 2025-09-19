@@ -82,22 +82,6 @@ const handleSubmit = async (e) => {
       setUrlValue("");
       setNameValue("");
       setShowModal(false);
-    } else if (result.success) {
-      args.showSuccessToast(result.message);
-
-      // Call parent onSubmit if provided
-      if (onSubmit) {
-        onSubmit({
-          url: url,
-          name: name,
-          result: result.data
-        });
-      }
-
-      // Reset form and close modal
-      setUrlValue("");
-      setNameValue("");
-      setShowModal(false);
     } else {
       args.showErrorToast(result.result?.message || result.message || "Failed to save channel");
     }

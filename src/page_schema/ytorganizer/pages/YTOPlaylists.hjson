@@ -76,7 +76,6 @@ const loadPlaylists = async () => {
 
 // Handle playlist submission
 const handlePlaylistSubmit = (data) => {
-  args.showSuccessToast(`Playlist "${data.result.title}" added successfully!`);
   // Reload playlists after adding new one
   loadPlaylists();
 };

@@ -76,7 +76,6 @@ const loadChannels = async () => {
 
 // Handle channel submission
 const handleChannelSubmit = (data) => {
-  args.showSuccessToast(`Channel "${data.result.title}" added successfully!`);
   // Reload channels after adding new one
   loadChannels();
 };
