@@ -20,11 +20,12 @@ return {
 ''',
         css: '''
 return `._id {
-  min-height: 100vh;
+  height: 100vh;
   background: ${args.theme.var.color.background};
   color: ${args.theme.var.color.text};
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }`;
 '''
       }
@@ -43,8 +44,29 @@ return {
         css: '''
 return `._id {
   flex: 1;
-  padding-bottom: 5rem; /* Space for bottom navigation */
   overflow-x: hidden;
+  overflow-y: auto;
+
+  /* Thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: ${args.theme.var.color.border} transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: ${args.theme.var.color.border};
+    border-radius: 3px;
+
+    &:hover {
+      background-color: ${args.theme.var.color.muted};
+    }
+  }
 }`;
 '''
       }
@@ -71,17 +93,13 @@ return {
 ''',
         css: '''
 return `._id {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex-shrink: 0;
   background: ${args.theme.var.color.surface};
   border-top: 1px solid ${args.theme.var.color.border};
   padding: 0.75rem;
-  z-index: 100;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
   backdrop-filter: blur(10px);
-  
+
   @media (max-width: 768px) {
     padding: 0.5rem;
   }
