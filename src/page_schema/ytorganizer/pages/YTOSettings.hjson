@@ -43,6 +43,7 @@ const [defaultView, setDefaultView] = args.createSignal("grid");
 const [showThumbnails, setShowThumbnails] = args.createSignal(true);
 const [notifications, setNotifications] = args.createSignal(true);
 const [darkMode, setDarkMode] = args.createSignal(false);
+const [isClearing, setIsClearing] = args.createSignal(false);
 
 // Save settings
 const saveSettings = () => {
@@ -71,6 +72,58 @@ const resetSettings = () => {
   args.showInfoToast("Settings reset to defaults");
 };
 
+// Clear all user data
+const clearAllData = async () => {
+  const confirmed = confirm(
+    "⚠️ WARNING: This will permanently delete all your personal YouTube Organizer data including:\n\n" +
+    "• All saved channels and their settings\n" +
+    "• All saved playlists and their settings\n" +
+    "• All video watch history and notes\n" +
+    "• All personal preferences and configurations\n\n" +
+    "This action CANNOT be undone.\n\n" +
+    "Are you absolutely sure you want to continue?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    setIsClearing(true);
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "clearAllUserData",
+      contextData: {}
+    });
+
+    if (result.error) {
+      const errorMessage = result.error;
+      args.showErrorToast(errorMessage);
+    } else if (result.result && result.result.success) {
+      const data = result.result.data;
+      args.showSuccessToast(
+        `Successfully cleared ${data.totalItemsDeleted} items: ` +
+        `${data.channelSettingsDeleted} channels, ` +
+        `${data.playlistSettingsDeleted} playlists, ` +
+        `${data.videoSettingsDeleted} videos`
+      );
+
+      // Optionally redirect to home page after clearing
+      setTimeout(() => {
+        args.navigate('/');
+      }, 2000);
+    } else {
+      const errorMessage = result.result?.message || result.message || "Failed to clear data";
+      args.showErrorToast(errorMessage);
+    }
+  } catch (err) {
+    console.error("Error clearing data:", err);
+    args.showErrorToast("Failed to clear data. Please try again.");
+  } finally {
+    setIsClearing(false);
+  }
+};
+
 return {
   autoRefresh,
   setAutoRefresh,
@@ -84,8 +137,10 @@ return {
   setNotifications,
   darkMode,
   setDarkMode,
+  isClearing,
   saveSettings,
-  resetSettings
+  resetSettings,
+  clearAllData
 };
 '''
       }
@@ -1068,10 +1123,251 @@ return `._id {
       }
     },
     {
-      id: "yto_settings_actions",
+      id: "yto_settings_section_data",
       L: "Attr",
       P: {
         displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error_light_50};
+  border: 1px solid ${args.theme.var.color.error_light_300};
+  border-radius: 1rem;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_data_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Data Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: ${args.theme.var.color.error};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_section_data_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:warning",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_clear_data_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.error_light_400};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_clear_data_warning",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_clear_data_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Clear All Personal Data"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_clear_data_description",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "This will permanently remove all your saved channels, playlists, video settings, and preferences. This action cannot be undone."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_clear_data_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isClearing = args.fns.isClearing();
+
+return {
+  as: "button",
+  type: "button",
+  disabled: isClearing,
+  onClick: args.fns.clearAllData
+};
+''',
+        css: '''
+const isClearing = args.fns.isClearing();
+
+return `._id {
+  background: ${isClearing ? args.theme.var.color.error_light_200 : args.theme.var.color.error};
+  color: ${isClearing ? args.theme.var.color.error : args.theme.var.color.error_text};
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: ${isClearing ? 'not-allowed' : 'pointer'};
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: ${isClearing ? '0.6' : '1'};
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.error_dark_200};
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_clear_data_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isClearing = args.fns.isClearing();
+
+return {
+  as: "icon",
+  icon: isClearing ? "carbon:load" : "carbon:delete",
+  width: 18,
+  height: 18
+};
+''',
+        css: '''
+const isClearing = args.fns.isClearing();
+
+return `._id {
+  ${isClearing ? 'animation: spin 1s linear infinite;' : ''}
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_settings_clear_data_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isClearing = args.fns.isClearing();
+
+return {
+  as: "span",
+  text: isClearing ? "Clearing Data..." : "Clear All Data"
+};
+'''
+      }
+    },
+    {
+      id: "yto_settings_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
         componentName: "Html",
         props: '''
 return {
@@ -1245,10 +1541,20 @@ return {
     { id: "e45", T: "Attr", S: "yto_settings_notifications_label", E: "yto_settings_notifications_title" },
     { id: "e46", T: "Attr", S: "yto_settings_notifications_label", E: "yto_settings_notifications_desc" },
     { id: "e47", T: "Attr", S: "yto_settings_notifications_toggle", E: "yto_settings_notifications_checkbox" },
-    { id: "e48", T: "Attr", S: "yto_settings_form", E: "yto_settings_actions" },
-    { id: "e49", T: "Attr", S: "yto_settings_actions", E: "yto_settings_save_button" },
-    { id: "e50", T: "Attr", S: "yto_settings_save_button", E: "yto_settings_save_icon" },
-    { id: "e51", T: "Attr", S: "yto_settings_actions", E: "yto_settings_reset_button" },
-    { id: "e52", T: "Attr", S: "yto_settings_reset_button", E: "yto_settings_reset_icon" }
+    { id: "e48", T: "Attr", S: "yto_settings_form", E: "yto_settings_section_data" },
+    { id: "e49", T: "Attr", S: "yto_settings_section_data", E: "yto_settings_section_data_title" },
+    { id: "e50", T: "Attr", S: "yto_settings_section_data_title", E: "yto_settings_section_data_icon" },
+    { id: "e51", T: "Attr", S: "yto_settings_section_data", E: "yto_settings_clear_data_container" },
+    { id: "e52", T: "Attr", S: "yto_settings_clear_data_container", E: "yto_settings_clear_data_warning" },
+    { id: "e53", T: "Attr", S: "yto_settings_clear_data_warning", E: "yto_settings_clear_data_title" },
+    { id: "e54", T: "Attr", S: "yto_settings_clear_data_warning", E: "yto_settings_clear_data_description" },
+    { id: "e55", T: "Attr", S: "yto_settings_clear_data_container", E: "yto_settings_clear_data_button" },
+    { id: "e56", T: "Attr", S: "yto_settings_clear_data_button", E: "yto_settings_clear_data_icon" },
+    { id: "e57", T: "Attr", S: "yto_settings_clear_data_button", E: "yto_settings_clear_data_text" },
+    { id: "e58", T: "Attr", S: "yto_settings_form", E: "yto_settings_actions" },
+    { id: "e59", T: "Attr", S: "yto_settings_actions", E: "yto_settings_save_button" },
+    { id: "e60", T: "Attr", S: "yto_settings_save_button", E: "yto_settings_save_icon" },
+    { id: "e61", T: "Attr", S: "yto_settings_actions", E: "yto_settings_reset_button" },
+    { id: "e62", T: "Attr", S: "yto_settings_reset_button", E: "yto_settings_reset_icon" }
   ]
 }

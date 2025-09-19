@@ -1,0 +1,97 @@
+{
+  vertexes: [
+    {
+      id: "clear_all_user_data_function",
+      L: "Function",
+      P: {
+        key: "clearAllUserData",
+        description: "Clears all user-specific data (channel settings, playlist settings, video settings) without deleting the actual channels, playlists, or videos",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Step 1: Delete all user channel settings and relationships
+  const deleteChannelSettingsQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+    DETACH DELETE cs
+  `;
+
+  const channelSettingsResult = await args.session.run(deleteChannelSettingsQuery, {
+    userUuid: user.P.uuid
+  });
+
+  // Step 2: Delete all user playlist settings and relationships
+  const deletePlaylistSettingsQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+    DETACH DELETE ps
+  `;
+
+  const playlistSettingsResult = await args.session.run(deletePlaylistSettingsQuery, {
+    userUuid: user.P.uuid
+  });
+
+  // Step 3: Delete all user video settings and relationships
+  const deleteVideoSettingsQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserVideoSetting]->(vs:VideoSetting)
+    DETACH DELETE vs
+  `;
+
+  const videoSettingsResult = await args.session.run(deleteVideoSettingsQuery, {
+    userUuid: user.P.uuid
+  });
+
+  // Get statistics for the response
+  const channelSettingsDeleted = channelSettingsResult.summary.counters.updates().nodesDeleted || 0;
+  const playlistSettingsDeleted = playlistSettingsResult.summary.counters.updates().nodesDeleted || 0;
+  const videoSettingsDeleted = videoSettingsResult.summary.counters.updates().nodesDeleted || 0;
+
+  return {
+    success: true,
+    message: "All your personal data has been cleared successfully.",
+    data: {
+      channelSettingsDeleted,
+      playlistSettingsDeleted,
+      videoSettingsDeleted,
+      totalItemsDeleted: channelSettingsDeleted + playlistSettingsDeleted + videoSettingsDeleted,
+      userId: user.id,
+      clearedAt: new Date().toISOString()
+    }
+  };
+
+} catch (error) {
+  console.error("Error clearing user data:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to clear data. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to clear your data.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    },
+    data: {
+      channelSettingsDeleted: 0,
+      playlistSettingsDeleted: 0,
+      videoSettingsDeleted: 0,
+      totalItemsDeleted: 0
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}
