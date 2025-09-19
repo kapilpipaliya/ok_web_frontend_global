@@ -17,15 +17,6 @@
       }
     },
     {
-      id: "yto_playlist_card_variant_onclick",
-      L: "ComponentVariant",
-      P: {
-        key: "onClick",
-        type: "function",
-        defValue: null
-      }
-    },
-    {
       id: "yto_playlist_card_root",
       L: "Attr",
       P: {
@@ -36,9 +27,9 @@ const playlist = args.contextData.props?.playlist;
 
 // Default click handler navigates to playlist detail with query parameters
 const defaultOnClick = () => {
-  if (playlist?.id) {
+  if (playlist?.playlistId) {
     const params = new URLSearchParams({
-      playlistId: playlist.id,
+      playlistId: playlist.playlistId,
     });
     args.navigate(`/playlist?${params.toString()}`);
   }
@@ -538,7 +529,6 @@ return {
   ],
   edges: [
     { id: "e1", T: "ComponentVariant", S: "yto_playlist_card_component", E: "yto_playlist_card_variant_playlist" },
-    { id: "e2", T: "ComponentVariant", S: "yto_playlist_card_component", E: "yto_playlist_card_variant_onclick" },
     { id: "e3", T: "Attr", S: "yto_playlist_card_component", E: "yto_playlist_card_root" },
     { id: "e4", T: "Attr", S: "yto_playlist_card_root", E: "yto_playlist_card_thumbnail_container" },
     { id: "e5", T: "Attr", S: "yto_playlist_card_thumbnail_container", E: "yto_playlist_card_thumbnail" },

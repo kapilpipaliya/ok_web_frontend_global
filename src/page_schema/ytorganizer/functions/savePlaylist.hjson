@@ -171,10 +171,8 @@ try {
       ps.customName = $customName,
       ps.customOrder = $customOrder,
       ps.sortBy = 'index',
-      ps.displayPreferences = {
-        showThumbnails: true,
-        viewMode: 'list'
-      },
+      ps.showThumbnails = true,
+      ps.viewMode = 'list',
       ps.lastUpdated = datetime(),
       ps.updatedAt = datetime()
     RETURN ps

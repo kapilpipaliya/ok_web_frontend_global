@@ -639,9 +639,6 @@ const channel = args.contextData.channel;
 
 return {
   channel: channel,
-  onClick: () => {
-    args.navigate(`/channels/${channel.channelId}`);
-  }
 };
 '''
       }

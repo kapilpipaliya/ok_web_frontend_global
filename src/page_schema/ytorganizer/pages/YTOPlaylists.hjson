@@ -633,9 +633,6 @@ const playlist = args.contextData.playlist;
 
 return {
   playlist: playlist,
-  onClick: () => {
-    args.navigate(`/playlists/${playlist.playlistId}`);
-  }
 };
 '''
       }
