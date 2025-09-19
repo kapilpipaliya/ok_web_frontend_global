@@ -58,38 +58,8 @@ const loadChannels = async () => {
       setError(errorMessage);
       args.showErrorToast(errorMessage);
     } else if (result.result && result.result.success) {
-      // Process raw vertex data from convertNodeToJson
-      const processedChannels = result.result.data.channels.map(item => {
-        const channel = item.channel;
-        const channelSettings = item.channelSettings;
-
-        return {
-          // Channel data from YouTube (accessing P field)
-          channelId: channel.P.youtubeId,
-          title: channel.P.title,
-          description: channel.P.description || '',
-          thumbnail: channel.P.thumbnail || '',
-          customUrl: channel.P.customUrl || '',
-          country: channel.P.country || '',
-          videoCount: channel.P.videoCount || 0,
-          viewCount: channel.P.viewCount || 0,
-          subscriberCount: channel.P.subscriberCount || 0,
-          publishedAt: channel.P.publishedAt,
-          updatedAt: channel.P.updatedAt,
-
-          // User-specific settings (accessing P field)
-          customName: channelSettings.P.customName,
-          notifications: channelSettings.P.notifications || false,
-          autoDownload: channelSettings.P.autoDownload || false,
-          priority: channelSettings.P.priority || 'normal',
-          addedAt: channelSettings.P.createdAt,
-          settingsUpdatedAt: channelSettings.P.updatedAt,
-
-          // Display name (custom name or channel title)
-          displayName: channelSettings.P.customName || channel.P.title
-        };
-      });
-      setChannels(processedChannels);
+      // Use raw vertex data directly
+      setChannels(result.result.data.channels);
     } else {
       const errorMessage = result.result?.message || result.message || "Failed to load channels";
       setError(errorMessage);

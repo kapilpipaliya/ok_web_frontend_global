@@ -41,7 +41,10 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
 const onClick = args.contextData.props?.onClick;
 const draggable = args.contextData.props?.draggable || false;
 
@@ -193,14 +196,17 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const thumbnailUrl = video?.thumbnail || '';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const thumbnailUrl = video?.P?.thumbnail || '';
 
 if (thumbnailUrl) {
   return {
     as: "img",
     src: thumbnailUrl,
-    alt: video?.title || 'Video thumbnail'
+    alt: video?.P?.title || 'Video thumbnail'
   };
 } else {
   return {
@@ -209,8 +215,11 @@ if (thumbnailUrl) {
 }
 ''',
         css: '''
-const video = args.contextData.props?.video;
-const thumbnailUrl = video?.thumbnail || '';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const thumbnailUrl = video?.P?.thumbnail || '';
 
 if (thumbnailUrl) {
   return `._id {
@@ -239,8 +248,11 @@ if (thumbnailUrl) {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const thumbnailUrl = video?.thumbnail || '';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const thumbnailUrl = video?.P?.thumbnail || '';
 
 if (!thumbnailUrl) {
   return {
@@ -272,8 +284,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const duration = video?.duration || '';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const duration = video?.P?.duration || '';
 
 if (duration) {
   return {
@@ -395,8 +410,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const title = video?.title || 'Untitled Video';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const title = video?.P?.title || 'Untitled Video';
 
 return {
   as: "h4",
@@ -430,8 +448,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const channelName = video?.channelName || '';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const channelName = video?.P?.channelTitle || '';
 
 if (channelName) {
   return {
@@ -481,9 +502,12 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const publishedAt = video?.publishedAt || '';
-const viewCount = video?.viewCount || '';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const publishedAt = video?.P?.publishedAt || '';
+const viewCount = video?.P?.viewCount || '';
 
 return {
   as: "div"
@@ -508,8 +532,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const publishedAt = video?.publishedAt || '';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const publishedAt = video?.P?.publishedAt || '';
 
 if (publishedAt) {
   // Format date (in real implementation, this would be properly formatted)
@@ -531,8 +558,11 @@ if (publishedAt) {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const viewCount = video?.viewCount || '';
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const viewCount = video?.P?.viewCount || '';
 
 if (viewCount) {
   return {
@@ -695,8 +725,11 @@ return {
         displayOrder: 4,
         componentName: "Html",
         props: '''
-const video = args.contextData.props?.video;
-const watched = video?.watched || false;
+const videoData = args.contextData.props?.video;
+const video = videoData?.video;
+const videoSettings = videoData?.videoSettings;
+const parentPlaylist = videoData?.parentPlaylist;
+const watched = videoSettings?.P?.watched || false;
 
 if (watched) {
   return {

@@ -340,7 +340,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
                 }
               >
                 <Content />
-                <Show when={isNoPermissionCheck() && !props.hideSaveCancelButton}>
+                <Show when={isNoPermissionCheck() && !(props.hideSaveCancelButton ?? true)}>
                 <SaveCancelButton
                   closePopUp={props.closePopUp}
                   disabled={isDisabledTxn(formStore().P.txnId, graph)}

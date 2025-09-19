@@ -41,6 +41,8 @@ The graph must represent a valid Page Builder Item tree.
   - Use 'props' for dynamic props. It is a Function Body string that should return an object with key-value pairs.
   - You can add static props directly to the vertex properties, prefer the 'props' when value is dynamic.
 - `css`: Function Body string - css for the Item e.g. "return \`._id {color: \${args.theme.var.color.primary}}\`;" Its the place where you add javascript code to generate css for the Item.
+- `hide`: boolean - controls visibility of the Item. If true, the Item will be hidden. Can be a static boolean property or returned from 'props' function e.g. "return { hide: args.contextData.someCondition === true }"
+- `show`: boolean - controls visibility of the Item. If false, the Item will be hidden. Can be a static boolean property or returned from 'props' function e.g. "return { show: args.contextData.someCondition === true }"
 
 ### Property Types
 **Important**: All vertex properties should be primitives (string, number, boolean, null) and not complex types like arrays or objects. For complex data structures, use the 'props' function body to return them dynamically.

@@ -23,13 +23,16 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const playlist = args.contextData.props?.playlist;
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
 
 // Default click handler navigates to playlist detail with query parameters
 const defaultOnClick = () => {
-  if (playlist?.playlistId) {
+  if (playlist?.P?.youtubeId) {
     const params = new URLSearchParams({
-      playlistId: playlist.playlistId,
+      playlistId: playlist.P.youtubeId,
     });
     args.navigate(`/playlist?${params.toString()}`);
   }
@@ -104,15 +107,18 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const playlist = args.contextData.props?.playlist;
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
 
-const thumbnailUrl = playlist?.thumbnail || '';
+const thumbnailUrl = playlist?.P?.thumbnail || '';
 
 if (thumbnailUrl) {
   return {
     as: "img",
     src: thumbnailUrl,
-    alt: playlist?.title || 'Playlist thumbnail'
+    alt: playlist?.P?.title || 'Playlist thumbnail'
   };
 } else {
   return {
@@ -121,8 +127,11 @@ if (thumbnailUrl) {
 }
 ''',
         css: '''
-const playlist = args.contextData.props?.playlist;
-const thumbnailUrl = playlist?.thumbnail || '';
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
+const thumbnailUrl = playlist?.P?.thumbnail || '';
 
 if (thumbnailUrl) {
   return `._id {
@@ -151,8 +160,11 @@ if (thumbnailUrl) {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const playlist = args.contextData.props?.playlist;
-const thumbnailUrl = playlist?.thumbnail || '';
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
+const thumbnailUrl = playlist?.P?.thumbnail || '';
 
 if (!thumbnailUrl) {
   return {
@@ -184,8 +196,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const playlist = args.contextData.props?.playlist;
-const videoCount = playlist?.itemCount || 0;
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
+const videoCount = playlist?.P?.itemCount || 0;
 
 return {
   as: "div",
@@ -243,8 +258,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const playlist = args.contextData.props?.playlist;
-const title = playlist?.title || 'Untitled Playlist';
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
+const title = playlist?.P?.title || 'Untitled Playlist';
 
 return {
   as: "h3",
@@ -277,8 +295,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const playlist = args.contextData.props?.playlist;
-const description = playlist?.description || '';
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
+const description = playlist?.P?.description || '';
 
 if (description) {
   return {
@@ -336,9 +357,12 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const playlist = args.contextData.props?.playlist;
-const videoCount = playlist?.videoCount || 0;
-const lastUpdated = playlist?.lastUpdated || '';
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
+const videoCount = playlist?.P?.itemCount || 0;
+const lastUpdated = playlist?.P?.updatedAt || '';
 
 return {
   as: "div"
@@ -378,8 +402,11 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const playlist = args.contextData.props?.playlist;
-const videoCount = playlist?.itemCount || 0;
+const playlistData = args.contextData.props?.playlist;
+const playlist = playlistData?.playlist;
+const playlistSettings = playlistData?.playlistSettings;
+const channel = playlistData?.channel;
+const videoCount = playlist?.P?.itemCount || 0;
 
 return {
   as: "span",

@@ -58,33 +58,8 @@ const loadPlaylists = async () => {
       setError(errorMessage);
       args.showErrorToast(errorMessage);
     } else if (result.result && result.result.success) {
-      // Process playlists to handle Vertex format (properties in P field)
-      const processedPlaylists = result.result.data.playlists.map(item => {
-        const playlist = item.playlist;
-        const playlistSettings = item.playlistSettings;
-        const channel = item.channel;
-
-        return {
-          // Playlist data from YouTube (accessing P field)
-          playlistId: playlist.P.youtubeId,
-          title: playlist.P.title,
-          description: playlist.P.description,
-          thumbnails: playlist.P.thumbnails,
-          itemCount: playlist.P.itemCount,
-          publishedAt: playlist.P.publishedAt,
-
-          // User-specific settings (accessing P field)
-          customName: playlistSettings.P.customName,
-          displayName: playlistSettings.P.customName || playlist.P.title,
-          isUserSaved: true,
-
-          // Parent channel info (accessing P field)
-          parentChannelId: channel?.P.youtubeId || null,
-          parentChannelTitle: channel?.P.title || null
-        };
-      });
-
-      setPlaylists(processedPlaylists);
+      // Use raw vertex data directly
+      setPlaylists(result.result.data.playlists);
     } else {
       const errorMessage = result.result?.message || result.message || "Failed to load playlists";
       setError(errorMessage);

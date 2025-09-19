@@ -91,6 +91,79 @@ The application uses Neo4j as its primary database. The data model is graph-base
 
 Session management and transaction handling are crucial when working with Neo4j. The app implements proper connection pooling and session management.
 
+#### Vertex Format Best Practices
+
+**IMPORTANT: Always maintain vertex format throughout the application. Never process or transform vertex data unnecessarily.**
+
+When working with Neo4j data in functions and frontend components:
+
+1. **Keep Raw Vertex Format**:
+   - Data from Neo4j comes as vertex objects with properties in the `P` field
+   - DO NOT transform vertex data into custom objects
+   - Pass raw vertex data directly from backend to frontend
+
+2. **Vertex Structure**:
+   ```javascript
+   // Vertex format from Neo4j
+   {
+     id: "4:uuid:123",       // Neo4j internal ID
+     L: ["Channel"],         // Labels
+     P: {                    // Properties
+       youtubeId: "UC123",
+       title: "Channel Name",
+       description: "...",
+       // ... all properties
+     },
+     IN: {},                 // Incoming edges
+     OUT: {}                 // Outgoing edges
+   }
+   ```
+
+3. **Accessing Properties**:
+   ```javascript
+   // CORRECT - Access via P field
+   const title = channel.P.title;
+   const id = channel.P.youtubeId;
+
+   // WRONG - Don't transform to flat object
+   const channel = {
+     title: vertex.P.title,
+     id: vertex.P.youtubeId
+   };
+   ```
+
+4. **In Components**:
+   ```javascript
+   // Component receives vertex format data
+   const channelData = args.contextData.props?.channel;
+   const channel = channelData?.channel;        // The vertex
+   const settings = channelData?.channelSettings; // Related vertex
+
+   // Access properties via P field
+   const title = channel?.P?.title;
+   const customName = settings?.P?.customName;
+   ```
+
+5. **Benefits**:
+   - Reduced code complexity (no transformation layers)
+   - Better performance (no data processing overhead)
+   - Single source of truth for data structure
+   - New vertex properties automatically available
+   - Easier debugging with consistent data format
+
+6. **Function Returns**:
+   ```javascript
+   // Server functions should return vertex data directly
+   return {
+     success: true,
+     data: {
+       channels: channelsResult,  // Array of {channel: vertex, channelSettings: vertex}
+       playlists: playlistsResult, // Array of {playlist: vertex, playlistSettings: vertex}
+       // Don't process or flatten these!
+     }
+   };
+   ```
+
 #### Component System
 The application has a component-based architecture where:
 - Components can be dragged and dropped in the page designer
@@ -902,11 +975,20 @@ The application implements a role-based access control system:
 When implementing new features:
 
 1. Understand the Neo4j data model for the relevant domain
-2. Follow the existing patterns for components and styling
-3. Implement proper permission checks where needed
-4. Add appropriate error handling
-5. Use the project's CSS-in-JS system for styling
-6. Write Playwright tests for new functionality
+2. **ALWAYS use vertex format directly - never transform vertex data into custom objects**
+3. Follow the existing patterns for components and styling
+4. Implement proper permission checks where needed
+5. Add appropriate error handling
+6. Use the project's CSS-in-JS system for styling
+7. Write Playwright tests for new functionality
+
+### Data Handling Guidelines
+
+When working with Neo4j data:
+- **Keep vertex format**: Access properties via `vertex.P.propertyName`
+- **Don't process data**: Pass raw vertex data from backend to frontend
+- **Component props**: Pass entire vertex objects, not extracted properties
+- **Avoid transformations**: No `.map()` to flatten or restructure vertex data
 
 ## Color Shade System
 - Explicit light/dark shades

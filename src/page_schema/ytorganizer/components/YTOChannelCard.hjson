@@ -23,13 +23,17 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
+const channelData = args.contextData.props?.channel;
+
+// Extract vertex data - channelData has structure: { channel: vertex, channelSettings: vertex, matchType: string }
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
 
 // Default click handler navigates to channel detail with query parameters
 const defaultOnClick = () => {
-  if (channel?.channelId) {
+  if (channel?.P?.youtubeId) {
     const params = new URLSearchParams({
-      channelId: channel.channelId
+      channelId: channel.P.youtubeId
     });
     args.navigate(`/channel?${params.toString()}`);
   }
@@ -112,14 +116,16 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const avatarUrl = channel?.avatar || '';
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const avatarUrl = channel?.P?.thumbnail || '';
 
 if (avatarUrl) {
   return {
     as: "img",
     src: avatarUrl,
-    alt: channel?.title || 'Channel avatar'
+    alt: channel?.P?.title || 'Channel avatar'
   };
 } else {
   return {
@@ -128,8 +134,10 @@ if (avatarUrl) {
 }
 ''',
         css: '''
-const channel = args.contextData.props?.channel;
-const avatarUrl = channel?.avatar || '';
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const avatarUrl = channel?.P?.thumbnail || '';
 
 if (avatarUrl) {
   return `._id {
@@ -157,8 +165,10 @@ if (avatarUrl) {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const avatarUrl = channel?.avatar || '';
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const avatarUrl = channel?.P?.thumbnail || '';
 
 if (!avatarUrl) {
   return {
@@ -190,8 +200,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const isVerified = channel?.verified || false;
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const isVerified = channel?.P?.verified || false;
 
 if (isVerified) {
   return {
@@ -278,8 +290,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const title = channel?.title || 'Untitled Channel';
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const title = channel?.P?.title || 'Untitled Channel';
 
 return {
   as: "h3",
@@ -312,8 +326,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const description = channel?.description || '';
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const description = channel?.P?.description || '';
 
 if (description) {
   return {
@@ -374,8 +390,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const subscriberCount = channel?.subscriberCount || 0;
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const subscriberCount = channel?.P?.subscriberCount || 0;
 
 // Format subscriber count (simplified)
 const formatCount = (count) => {
@@ -405,8 +423,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const subscriberCount = channel?.subscriberCount || 0;
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const subscriberCount = channel?.P?.subscriberCount || 0;
 
 // Format subscriber count
 const formatCount = (count) => {
@@ -464,8 +484,10 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const videoCount = channel?.videoCount || 0;
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const videoCount = channel?.P?.videoCount || 0;
 
 return {
   as: "div"
@@ -488,8 +510,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const channel = args.contextData.props?.channel;
-const videoCount = channel?.videoCount || 0;
+const channelData = args.contextData.props?.channel;
+const channel = channelData?.channel;
+const channelSettings = channelData?.channelSettings;
+const videoCount = channel?.P?.videoCount || 0;
 
 return {
   as: "span",

@@ -70,69 +70,10 @@ const loadChannelContents = async () => {
       setError(errorMessage);
       args.showErrorToast(errorMessage);
     } else if (result.result && result.result.success) {
-      // Process channel data to handle Vertex format (properties in P field)
-      const channelData = result.result.data.channel;
-      const processedChannelData = {
-        // Channel data from YouTube (accessing P field)
-        channelId: channelData.channel.P.youtubeId,
-        title: channelData.channel.P.title,
-        description: channelData.channel.P.description,
-        thumbnail: channelData.channel.P.thumbnail,
-        subscriberCount: channelData.channel.P.subscriberCount,
-        videoCount: channelData.channel.P.videoCount,
-
-        // User-specific settings (accessing P field)
-        customName: channelData.channelSettings.P.customName,
-        displayName: channelData.channelSettings.P.customName || channelData.channel.P.title,
-        isUserSaved: true
-      };
-
-      // Process videos to handle Vertex format (properties in P field)
-      const processedVideos = result.result.data.videos.map(item => {
-        const video = item.video;
-        const videoSettings = item.videoSettings;
-
-        return {
-          // Video data from YouTube (accessing P field)
-          videoId: video.P.youtubeId,
-          title: video.P.title,
-          description: video.P.description,
-          thumbnails: video.P.thumbnails,
-          duration: video.P.duration,
-          publishedAt: video.P.publishedAt,
-          viewCount: video.P.viewCount,
-
-          // User-specific settings (accessing P field)
-          watched: videoSettings?.P.watched || false,
-          notes: videoSettings?.P.notes || '',
-          customPosition: videoSettings?.P.channelPosition || 0
-        };
-      });
-
-      // Process playlists to handle Vertex format (properties in P field)
-      const processedPlaylists = result.result.data.playlists.map(item => {
-        const playlist = item.playlist;
-        const playlistSettings = item.playlistSettings;
-
-        return {
-          // Playlist data from YouTube (accessing P field)
-          playlistId: playlist.P.youtubeId,
-          title: playlist.P.title,
-          description: playlist.P.description,
-          thumbnails: playlist.P.thumbnails,
-          itemCount: playlist.P.itemCount,
-          publishedAt: playlist.P.publishedAt,
-
-          // User-specific settings (accessing P field)
-          customName: playlistSettings?.P.customName,
-          displayName: playlistSettings?.P.customName || playlist.P.title,
-          isUserSaved: playlistSettings !== null
-        };
-      });
-
-      setChannelData(processedChannelData);
-      setVideos(processedVideos);
-      setPlaylists(processedPlaylists);
+      // Use raw vertex data directly
+      setChannelData(result.result.data.channel);
+      setVideos(result.result.data.videos);
+      setPlaylists(result.result.data.playlists);
     } else {
       const errorMessage = result.result?.message || result.message || "Failed to load channel contents";
       setError(errorMessage);
@@ -402,7 +343,7 @@ return {
 const channelData = args.fns.channelData();
 const loading = args.fns.loading();
 
-const channelTitle = loading ? 'Loading...' : (channelData?.displayName || 'Unknown Channel');
+const channelTitle = loading ? 'Loading...' : (channelData?.channelSettings?.P?.customName || channelData?.channel?.P?.title || 'Unknown Channel');
 
 return {
   as: "h1",
@@ -467,7 +408,7 @@ if (loading) {
   };
 }
 
-const subscriberCount = channelData?.subscriberCount || 0;
+const subscriberCount = channelData?.channel?.P?.subscriberCount || 0;
 const formattedCount = subscriberCount >= 1000000
   ? `${(subscriberCount / 1000000).toFixed(1)}M`
   : subscriberCount >= 1000
@@ -581,7 +522,7 @@ if (loading) {
   };
 }
 
-const description = channelData?.description || 'No description available.';
+const description = channelData?.channel?.P?.description || 'No description available.';
 
 return {
   as: "p",
@@ -795,7 +736,7 @@ const video = args.contextData.video;
 return {
   video: video,
   onClick: () => {
-    window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank');
+    window.open(`https://www.youtube.com/watch?v=${video.video?.P?.youtubeId}`, '_blank');
   }
 };
 '''
@@ -861,10 +802,10 @@ const playlist = args.contextData.playlist;
 return {
   playlist: playlist,
   onClick: () => {
-    if (playlist.isUserSaved) {
-      args.navigate(`/playlists/${playlist.playlistId}`);
+    if (playlist.playlistSettings?.P?.isUserSaved) {
+      args.navigate(`/playlist?playlistId=${playlist.playlist?.P?.youtubeId}`);
     } else {
-      window.open(`https://www.youtube.com/playlist?list=${playlist.playlistId}`, '_blank');
+      window.open(`https://www.youtube.com/playlist?list=${playlist.playlist?.P?.youtubeId}`, '_blank');
     }
   }
 };

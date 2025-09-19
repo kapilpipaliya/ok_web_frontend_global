@@ -91,91 +91,15 @@ const performSearch = async (page = null) => {
       setError(errorMessage);
       args.showErrorToast(errorMessage);
     } else if (result.result && result.result.success) {
-      // Process search results to handle Vertex format (properties in P field)
+      // Use raw vertex format data directly
       const data = result.result.data;
 
-      // Process channels
-      const processedChannels = data.channels.map(item => {
-        const channel = item.channel;
-        const channelSettings = item.channelSettings;
 
-        return {
-          // Channel data from YouTube (accessing P field)
-          channelId: channel.P.youtubeId,
-          title: channel.P.title,
-          description: channel.P.description,
-          thumbnail: channel.P.thumbnail,
-          subscriberCount: channel.P.subscriberCount,
-          videoCount: channel.P.videoCount,
-
-          // User-specific settings (accessing P field)
-          customName: channelSettings.P.customName,
-          displayName: channelSettings.P.customName || channel.P.title,
-          isUserSaved: true
-        };
-      });
-
-      // Process playlists
-      const processedPlaylists = data.playlists.map(item => {
-        const playlist = item.playlist;
-        const playlistSettings = item.playlistSettings;
-        const channel = item.channel;
-
-        return {
-          // Playlist data from YouTube (accessing P field)
-          playlistId: playlist.P.youtubeId,
-          title: playlist.P.title,
-          description: playlist.P.description,
-          thumbnails: playlist.P.thumbnails,
-          itemCount: playlist.P.itemCount,
-          publishedAt: playlist.P.publishedAt,
-
-          // User-specific settings (accessing P field)
-          customName: playlistSettings.P.customName,
-          displayName: playlistSettings.P.customName || playlist.P.title,
-          isUserSaved: true,
-
-          // Parent channel info (accessing P field)
-          parentChannelId: channel?.P.youtubeId || null,
-          parentChannelTitle: channel?.P.title || null
-        };
-      });
-
-      // Process videos
-      const processedVideos = data.videos.map(item => {
-        const video = item.video;
-        const videoSettings = item.videoSettings;
-        const parentPlaylist = item.parentPlaylist;
-
-        return {
-          // Video data from YouTube (accessing P field)
-          videoId: video.P.youtubeId,
-          title: video.P.title,
-          description: video.P.description,
-          thumbnails: video.P.thumbnails,
-          thumbnail: video.P.thumbnails?.medium?.url || video.P.thumbnails?.default?.url || null,
-          duration: video.P.duration,
-          publishedAt: video.P.publishedAt,
-          viewCount: video.P.viewCount,
-          channelTitle: video.P.channelTitle,
-
-          // User-specific settings (accessing P field)
-          watched: videoSettings.P.watched || false,
-          notes: videoSettings.P.notes || '',
-
-          // Parent playlist info
-          parentPlaylist: parentPlaylist ? {
-            playlistId: parentPlaylist.playlist.P.youtubeId,
-            title: parentPlaylist.playlist.P.title,
-            displayName: parentPlaylist.playlistSettings?.P.customName || parentPlaylist.playlist.P.title
-          } : null
-        };
-      });
 
       setSearchResults({
-        channels: processedChannels,
-        playlists: processedPlaylists,
-        videos: processedVideos,
+        channels: data.channels,
+        playlists: data.playlists,
+        videos: data.videos,
         totalResults: data.totalResults,
         query: data.query,
         pagination: data.pagination
@@ -187,11 +111,11 @@ const performSearch = async (page = null) => {
       }
 
       // Set active tab based on results
-      if (processedChannels.length > 0 && processedPlaylists.length === 0 && processedVideos.length === 0) {
+      if (data.channels.length > 0 && data.playlists.length === 0 && data.videos.length === 0) {
         setActiveTab('channels');
-      } else if (processedPlaylists.length > 0 && processedChannels.length === 0 && processedVideos.length === 0) {
+      } else if (data.playlists.length > 0 && data.channels.length === 0 && data.videos.length === 0) {
         setActiveTab('playlists');
-      } else if (processedVideos.length > 0 && processedChannels.length === 0 && processedPlaylists.length === 0) {
+      } else if (data.videos.length > 0 && data.channels.length === 0 && data.playlists.length === 0) {
         setActiveTab('videos');
       } else {
         setActiveTab('all');
@@ -1469,10 +1393,11 @@ return {
         displayOrder: 1,
         componentName: "YTOChannelCard",
         props: '''
-const channel = args.contextData.channel;
+const channelItem = args.contextData.channel;
 
+// channelItem has structure: { channel: vertex, channelSettings: vertex, matchType: string }
 return {
-  channel: channel
+  channel: channelItem
 };
 '''
       }
@@ -1580,10 +1505,11 @@ return {
         displayOrder: 1,
         componentName: "YTOPlaylistCard",
         props: '''
-const playlist = args.contextData.playlist;
+const playlistItem = args.contextData.playlist;
 
+// playlistItem has structure: { playlist: vertex, playlistSettings: vertex, channel: vertex, matchType: string }
 return {
-  playlist: playlist
+  playlist: playlistItem
 };
 '''
       }
@@ -1691,10 +1617,11 @@ return {
         displayOrder: 1,
         componentName: "YTOVideoCard",
         props: '''
-const video = args.contextData.video;
+const videoItem = args.contextData.video;
 
+// videoItem has structure: { video: vertex, videoSettings: vertex, parentPlaylist: {playlist: vertex, playlistSettings: vertex}, matchType: string }
 return {
-  video: video
+  video: videoItem
 };
 '''
       }

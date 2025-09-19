@@ -69,62 +69,11 @@ const loadPlaylistVideos = async () => {
       setError(errorMessage);
       args.showErrorToast(errorMessage);
     } else if (result.result && result.result.success) {
-      // Process playlist data to handle Vertex format (properties in P field)
+      // Use raw vertex data directly
       const playlistData = result.result.data.playlist;
-      const processedPlaylistData = {
-        // Playlist data from YouTube (accessing P field)
-        playlistId: playlistData.playlist.P.youtubeId,
-        title: playlistData.playlist.P.title,
-        description: playlistData.playlist.P.description,
-        thumbnails: playlistData.playlist.P.thumbnails,
-        itemCount: playlistData.playlist.P.itemCount,
-        publishedAt: playlistData.playlist.P.publishedAt,
-
-        // User-specific settings (accessing P field)
-        customName: playlistData.playlistSettings.P.customName,
-        displayName: playlistData.playlistSettings.P.customName || playlistData.playlist.P.title,
-        sortBy: playlistData.playlistSettings.P.sortBy,
-        isUserSaved: true,
-
-        // Parent channel info (accessing P field)
-        parentChannel: playlistData.parentChannel ? {
-          channelId: playlistData.parentChannel.channelId,
-          title: playlistData.parentChannel.title,
-          thumbnail: playlistData.parentChannel.thumbnail,
-          isUserSaved: playlistData.parentChannel.isUserSaved,
-          displayName: playlistData.parentChannel.displayName
-        } : null
-      };
-
-      // Process videos to handle Vertex format (properties in P field)
-      const processedVideos = result.result.data.videos.map(item => {
-        const video = item.video;
-        const videoSettings = item.videoSettings;
-
-        return {
-          // Video data from YouTube (accessing P field)
-          videoId: video.P.youtubeId,
-          title: video.P.title,
-          description: video.P.description,
-          thumbnails: video.P.thumbnails,
-          duration: video.P.duration,
-          publishedAt: video.P.publishedAt,
-          viewCount: video.P.viewCount,
-          channelTitle: video.P.channelTitle,
-
-          // User-specific settings (accessing P field)
-          watched: videoSettings?.P.watched || false,
-          notes: videoSettings?.P.notes || '',
-          playlistIndex: videoSettings?.P.playlistIndex || 0,
-
-          // For thumbnail display
-          thumbnail: video.P.thumbnails?.medium?.url || video.P.thumbnails?.default?.url || null
-        };
-      });
-
-      setPlaylistData(processedPlaylistData);
-      setVideos(processedVideos);
-      setSortBy(processedPlaylistData.sortBy || 'index');
+      setPlaylistData(playlistData);
+      setVideos(result.result.data.videos);
+      setSortBy(playlistData.playlistSettings?.P?.sortBy || 'index');
     } else {
       const errorMessage = result.result?.message || result.message || "Failed to load playlist videos";
       setError(errorMessage);
@@ -395,7 +344,7 @@ return {
 const playlistData = args.fns.playlistData();
 const loading = args.fns.loading();
 
-const playlistTitle = loading ? 'Loading...' : (playlistData?.displayName || 'Unknown Playlist');
+const playlistTitle = loading ? 'Loading...' : (playlistData?.playlistSettings?.P?.customName || playlistData?.playlist?.P?.title || 'Unknown Playlist');
 
 return {
   as: "h1",
@@ -569,7 +518,7 @@ if (loading) {
   };
 }
 
-const description = playlistData?.description || 'No description available.';
+const description = playlistData?.playlist?.P?.description || 'No description available.';
 
 return {
   as: "p",
@@ -1073,13 +1022,13 @@ let sortedVideos = [...videos];
 
 switch (sortBy) {
   case 'title':
-    sortedVideos.sort((a, b) => a.title.localeCompare(b.title));
+    sortedVideos.sort((a, b) => (a.video?.P?.title || '').localeCompare(b.video?.P?.title || ''));
     break;
   case 'published':
-    sortedVideos.sort((a, b) => new Date(a.publishedAt) - new Date(b.publishedAt));
+    sortedVideos.sort((a, b) => new Date(a.video?.P?.publishedAt || 0) - new Date(b.video?.P?.publishedAt || 0));
     break;
   case 'published_desc':
-    sortedVideos.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+    sortedVideos.sort((a, b) => new Date(b.video?.P?.publishedAt || 0) - new Date(a.video?.P?.publishedAt || 0));
     break;
   case 'custom':
     // Custom order is already applied in the API
@@ -1110,7 +1059,7 @@ const video = args.contextData.video;
 return {
   as: "div",
   onClick: () => {
-    window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank');
+    window.open(`https://www.youtube.com/watch?v=${video.video?.P?.youtubeId}`, '_blank');
   }
 };
 ''',
@@ -1152,7 +1101,7 @@ const video = args.contextData.video;
 
 return {
   as: "div",
-  style: video.thumbnail ? `background-image: url(${video.thumbnail}); background-size: cover; background-position: center;` : ''
+  style: video.video?.P?.thumbnail ? `background-image: url(${video.video.P.thumbnail}); background-size: cover; background-position: center;` : ''
 };
 ''',
         css: '''
@@ -1189,7 +1138,7 @@ return {
   icon: "carbon:play",
   width: 24,
   height: 24,
-  hide: !!video.thumbnail
+  hide: !!video.video?.P?.thumbnail
 };
 ''',
         css: '''
@@ -1236,7 +1185,7 @@ const video = args.contextData.video;
 
 return {
   as: "h4",
-  text: video.title
+  text: video.video?.P?.title || 'Untitled'
 };
 ''',
         css: '''
@@ -1266,7 +1215,7 @@ const video = args.contextData.video;
 
 return {
   as: "p",
-  text: video.channelTitle
+  text: video.video?.P?.channelTitle || ''
 };
 ''',
         css: '''
@@ -1318,7 +1267,7 @@ const video = args.contextData.video;
 
 return {
   as: "span",
-  text: video.watched ? "Watched" : "Unwatched"
+  text: video.videoSettings?.P?.watched ? "Watched" : "Unwatched"
 };
 ''',
         css: '''
@@ -1329,7 +1278,7 @@ return `._id {
   font-weight: 500;
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
-  ${video.watched ? `
+  ${video.videoSettings?.P?.watched ? `
     background: ${args.theme.var.color.success_light_100};
     color: ${args.theme.var.color.success};
   ` : `
@@ -1349,8 +1298,8 @@ return `._id {
         props: '''
 const video = args.contextData.video;
 
-const publishedDate = new Date(video.publishedAt);
-const formattedDate = publishedDate.toLocaleDateString();
+const publishedDate = video.video?.P?.publishedAt ? new Date(video.video.P.publishedAt) : null;
+const formattedDate = publishedDate ? publishedDate.toLocaleDateString() : '';
 
 return {
   as: "span",
