@@ -19,7 +19,7 @@ The system uses the following Neo4j graph relationships:
 
 ```
 (User)-[:UserChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)
-(User)-[:UserPlaylist]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+(User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
 (User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 (User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
 (Channel)-[:ChannelVideo]->(Video)
@@ -143,7 +143,7 @@ const youtube = google.youtube({
   - Extracts playlist ID from various YouTube URL formats
   - Fetches complete playlist metadata and all videos with pagination
   - Creates user-specific playlist and video settings
-  - Implements proper database structure: (User)-[:UserPlaylist]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+  - Implements proper database structure: (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
   - Creates VideoSetting for each video: (User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
   - Handles playlist-video relationships: (Playlist)-[:PlaylistVideo]->(Video)
   - Uses `args.getUserFromSession()` for user authentication
@@ -766,7 +766,7 @@ try {
   await args.session.run(\`
     MATCH (u:User) WHERE elementId(u) = $userId
     MATCH (p:Playlist {youtubeId: $playlistId})
-    MERGE (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    MERGE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
     ON CREATE SET ps.key = $playlistSettingKey, ps.createdAt = datetime()
     SET ps.customName = $customName, ps.customOrder = $customOrder,
         ps.sortBy = 'index', ps.displayPreferences = {
@@ -861,7 +861,7 @@ try {
 
 **Key Database Structure Features:**
 - **User Authentication**: Uses `args.getUserFromSession()` for secure user identification
-- **Proper Relationships**: Follows (User)-[:UserPlaylist]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+- **Proper Relationships**: Follows (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
 - **Video Settings**: Creates (User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 - **Clean Edges**: No data stored on relationships, all settings in dedicated vertices
 - **User Privacy**: Each user has independent playlist and video settings

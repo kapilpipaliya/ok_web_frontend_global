@@ -24,7 +24,7 @@ try {
   // Verify user has access to this playlist
   const playlistAccessQuery = `
     MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
     RETURN p, ps
   `;
 

@@ -59,7 +59,7 @@ try {
   const playlistsQuery = `
     MATCH (c:Channel {youtubeId: $channelId})-[:ChannelPlaylist]->(p:Playlist)
     MATCH (u:User {uuid: $userUuid})
-    OPTIONAL MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    OPTIONAL MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
     RETURN p, ps
     ORDER BY p.publishedAt DESC
   `;

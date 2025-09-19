@@ -163,7 +163,7 @@ try {
   const mergePlaylistSettingQuery = `
     MATCH (u:User {uuid: $userUuid})
     MATCH (p:Playlist {youtubeId: $playlistId})
-    MERGE (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    MERGE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
     ON CREATE SET
       ps.key = $playlistSettingKey,
       ps.createdAt = datetime()

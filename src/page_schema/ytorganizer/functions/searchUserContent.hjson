@@ -126,7 +126,7 @@ try {
     // Get total count for pagination
     const playlistsCountQuery = `
       MATCH (u:User {uuid: $userUuid})
-      MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+      MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
       WHERE p.title =~ $pattern OR
             p.description =~ $pattern OR
             ps.customName =~ $pattern
@@ -144,7 +144,7 @@ try {
     // Get paginated results
     const playlistsQuery = `
       MATCH (u:User {uuid: $userUuid})
-      MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+      MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
       WHERE p.title =~ $pattern OR
             p.description =~ $pattern OR
             ps.customName =~ $pattern
@@ -198,7 +198,7 @@ try {
             v.channelTitle =~ $pattern OR
             vs.notes =~ $pattern
       OPTIONAL MATCH (p:Playlist)-[:PlaylistVideo]->(v)
-      OPTIONAL MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+      OPTIONAL MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
       WITH v, vs, COLLECT(DISTINCT {playlist: p, playlistSettings: ps}) as playlists
       RETURN v, vs, playlists[0] as firstPlaylist
       ORDER BY vs.updatedAt DESC

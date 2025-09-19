@@ -396,6 +396,34 @@ try {
         playlistId: playlist.id
       });
 
+      // Create user-specific PlaylistSetting relationship
+      // This ensures the user has access to this playlist
+      const playlistSettingKey = `playlist_setting_${user.id}_${playlist.id}`;
+
+      const mergePlaylistSettingQuery = `
+        MATCH (u:User {uuid: $userUuid})
+        MATCH (p:Playlist {youtubeId: $playlistId})
+        MERGE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+        ON CREATE SET
+          ps.key = $playlistSettingKey,
+          ps.createdAt = datetime()
+        SET
+          ps.customName = null,
+          ps.notifications = true,
+          ps.autoDownload = false,
+          ps.sortBy = 'index',
+          ps.showThumbnails = true,
+          ps.viewMode = 'list',
+          ps.updatedAt = datetime()
+        RETURN ps
+      `;
+
+      await args.session.run(mergePlaylistSettingQuery, {
+        userUuid: user.P.uuid,
+        playlistId: playlist.id,
+        playlistSettingKey
+      });
+
     } catch (playlistError) {
       console.error(`Error saving playlist ${playlist.id}:`, playlistError);
       // Continue processing other playlists even if one fails

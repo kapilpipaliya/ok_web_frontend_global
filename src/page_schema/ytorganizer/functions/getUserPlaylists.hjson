@@ -17,7 +17,7 @@ try {
   // Cypher query to fetch all user's playlists with their settings and channel info
   const query = `
     MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserPlaylist]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
     OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
     RETURN p, ps, c
     ORDER BY ps.createdAt DESC
