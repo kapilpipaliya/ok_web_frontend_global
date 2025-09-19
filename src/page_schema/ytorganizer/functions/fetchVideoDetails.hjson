@@ -1,0 +1,227 @@
+{
+  vertexes: [
+    {
+      id: "fetch_video_details_function",
+      L: "Function",
+      P: {
+        key: "fetchVideoDetails",
+        description: "Fetches video details from YouTube API and saves to database if it doesn't exist",
+        body: '''
+/**
+ * Extract video ID from various YouTube URL formats
+ */
+const extractVideoId = (url) => {
+  if (!url) return null;
+
+  // Handle different YouTube video URL formats
+  const patterns = [
+    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,        // Standard: /watch?v=ID
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,          // Embed: /embed/ID
+    /youtube\.com\/v\/([a-zA-Z0-9_-]+)/,             // Old format: /v/ID
+    /youtu\.be\/([a-zA-Z0-9_-]+)/,                    // Short: youtu.be/ID
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/         // Shorts: /shorts/ID
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+
+  // If no pattern matches, check if it's already a video ID (11 characters)
+  if (/^[a-zA-Z0-9_-]{11}$/.test(url.trim())) {
+    return url.trim();
+  }
+
+  return null;
+};
+
+// YouTube API key - using the same key as saveChannel function
+const YOUTUBE_API_KEY = 'AIzaSyC_CClo37bSKqLUFNKEsDaZgYzTxEQfuds';
+
+/**
+ * Fetch video details from YouTube Data API v3
+ */
+const fetchVideoFromYouTube = async (videoId) => {
+  // Dynamic import of googleapis library
+  const { google } = await import('googleapis');
+
+  // Initialize YouTube API client
+  const youtube = google.youtube({
+    version: 'v3',
+    auth: YOUTUBE_API_KEY
+  });
+
+  // Fetch video details
+  const videoResponse = await youtube.videos.list({
+    part: ['snippet', 'contentDetails', 'statistics'],
+    id: [videoId]
+  });
+
+  if (!videoResponse.data.items || videoResponse.data.items.length === 0) {
+    throw new Error('Video not found or is private/deleted');
+  }
+
+  return videoResponse.data.items[0];
+};
+
+try {
+  // Extract input parameters from the request
+  const { videoUrl } = args.contextData;
+
+  if (!videoUrl) {
+    throw new Error("Video URL is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Extract video ID from the provided URL
+  const videoId = extractVideoId(videoUrl);
+  if (!videoId) {
+    throw new Error("Invalid YouTube video URL. Please provide a valid video URL.");
+  }
+
+  // Check if video already exists in database
+  const existingVideoQuery = `
+    MATCH (v:Video {youtubeId: $videoId})
+    RETURN v
+  `;
+
+  const existingVideoResult = await args.session.run(existingVideoQuery, {
+    videoId
+  });
+
+  let video;
+  let isNewVideo = false;
+
+  if (existingVideoResult.records.length > 0) {
+    // Video already exists, use existing data
+    video = args.convertNodeToJson(existingVideoResult.records[0].get('v'));
+  } else {
+    // Video doesn't exist, fetch from YouTube API and save
+    const youtubeVideo = await fetchVideoFromYouTube(videoId);
+
+    const videoKey = `video_${videoId}`;
+
+    // Create new Video vertex
+    const createVideoQuery = `
+      CREATE (v:Video {
+        key: $key,
+        youtubeId: $videoId,
+        title: $title,
+        description: $description,
+        thumbnail: $thumbnail,
+        channelTitle: $channelTitle,
+        channelId: $channelId,
+        publishedAt: datetime($publishedAt),
+        duration: $duration,
+        viewCount: $viewCount,
+        likeCount: $likeCount,
+        commentCount: $commentCount,
+        createdAt: datetime(),
+        updatedAt: datetime()
+      })
+      RETURN v
+    `;
+
+    const createVideoResult = await args.session.run(createVideoQuery, {
+      key: videoKey,
+      videoId: videoId,
+      title: youtubeVideo.snippet.title,
+      description: youtubeVideo.snippet.description || "",
+      thumbnail: youtubeVideo.snippet.thumbnails?.high?.url ||
+                 youtubeVideo.snippet.thumbnails?.medium?.url ||
+                 youtubeVideo.snippet.thumbnails?.default?.url || "",
+      channelTitle: youtubeVideo.snippet.channelTitle || "",
+      channelId: youtubeVideo.snippet.channelId || "",
+      publishedAt: youtubeVideo.snippet.publishedAt,
+      duration: youtubeVideo.contentDetails?.duration || "",
+      viewCount: parseInt(youtubeVideo.statistics?.viewCount || "0"),
+      likeCount: parseInt(youtubeVideo.statistics?.likeCount || "0"),
+      commentCount: parseInt(youtubeVideo.statistics?.commentCount || "0")
+    });
+
+    video = args.convertNodeToJson(createVideoResult.records[0].get('v'));
+    isNewVideo = true;
+  }
+
+  // Create user-specific VideoSetting if it doesn't exist
+  const videoSettingKey = `video_setting_${user.id}_${videoId}`;
+
+  const mergeVideoSettingQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (v:Video {youtubeId: $videoId})
+    MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    ON CREATE SET
+      vs.key = $videoSettingKey,
+      vs.createdAt = datetime()
+    SET
+      vs.watched = false,
+      vs.notes = null,
+      vs.customPosition = null,
+      vs.addedAt = datetime(),
+      vs.updatedAt = datetime()
+    RETURN vs
+  `;
+
+  const videoSettingResult = await args.session.run(mergeVideoSettingQuery, {
+    userUuid: user.P.uuid,
+    videoId: videoId,
+    videoSettingKey
+  });
+
+  const videoSettings = args.convertNodeToJson(videoSettingResult.records[0].get('vs'));
+
+  return {
+    success: true,
+    message: isNewVideo ? `Video "${video.P.title}" fetched and saved successfully!` : `Video "${video.P.title}" found in database.`,
+    data: {
+      video: video,
+      videoSettings: videoSettings,
+      isNewVideo: isNewVideo,
+      videoId: videoId,
+      userId: user.id
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching video details:", error);
+
+  // Handle specific YouTube API errors
+  let userMessage = "Failed to fetch video details. Please try again.";
+
+  if (error.message.includes("Video not found")) {
+    userMessage = "Video not found. Please check the URL and make sure the video exists and is public.";
+  } else if (error.message.includes("Invalid YouTube video URL")) {
+    userMessage = "Invalid video URL. Please provide a valid YouTube video URL.";
+  } else if (error.message.includes("quota")) {
+    userMessage = "YouTube API quota exceeded. Please try again later.";
+  } else if (error.message.includes("API key")) {
+    userMessage = "YouTube API configuration error. Please contact support.";
+  } else if (error.message.includes("private")) {
+    userMessage = "This video is private and cannot be accessed.";
+  } else if (error.code === 404) {
+    userMessage = "Video not found or has been deleted.";
+  } else if (error.code === 403) {
+    userMessage = "Access denied. The video may be private or restricted.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "YouTubeAPIError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

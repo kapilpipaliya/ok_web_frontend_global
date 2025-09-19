@@ -1,0 +1,131 @@
+{
+  vertexes: [
+    {
+      id: "create_custom_playlist_function",
+      L: "Function",
+      P: {
+        key: "createCustomPlaylist",
+        description: "Creates a custom user playlist that can contain any videos",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { name, description } = args.contextData;
+
+  if (!name || name.trim().length === 0) {
+    throw new Error("Playlist name is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Generate unique playlist ID for custom playlists
+  // Use timestamp + random string to ensure uniqueness
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 8);
+  const customPlaylistId = `custom_${timestamp}_${randomString}`;
+
+  // Step 1: Create the Playlist vertex
+  const playlistKey = `playlist_${customPlaylistId}`;
+
+  const createPlaylistQuery = `
+    CREATE (p:Playlist {
+      key: $key,
+      youtubeId: $playlistId,
+      title: $title,
+      description: $description,
+      thumbnail: $thumbnail,
+      itemCount: 0,
+      isCustom: true,
+      createdByUserId: $userId,
+      publishedAt: datetime(),
+      createdAt: datetime(),
+      updatedAt: datetime()
+    })
+    RETURN p
+  `;
+
+  const playlistResult = await args.session.run(createPlaylistQuery, {
+    key: playlistKey,
+    playlistId: customPlaylistId,
+    title: name.trim(),
+    description: description?.trim() || "",
+    thumbnail: "", // Custom playlists start with no thumbnail
+    userId: user.id
+  });
+
+  const playlist = args.convertNodeToJson(playlistResult.records[0].get('p'));
+
+  // Step 2: Create user-specific PlaylistSetting
+  const playlistSettingKey = `playlist_setting_${user.id}_${customPlaylistId}`;
+
+  const createPlaylistSettingQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (p:Playlist {youtubeId: $playlistId})
+    CREATE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    SET
+      ps.key = $playlistSettingKey,
+      ps.customName = $customName,
+      ps.notifications = true,
+      ps.autoDownload = false,
+      ps.sortBy = 'custom',
+      ps.showThumbnails = true,
+      ps.viewMode = 'list',
+      ps.isCustom = true,
+      ps.createdAt = datetime(),
+      ps.updatedAt = datetime()
+    RETURN ps
+  `;
+
+  const playlistSettingResult = await args.session.run(createPlaylistSettingQuery, {
+    userUuid: user.P.uuid,
+    playlistId: customPlaylistId,
+    playlistSettingKey,
+    customName: null // Use original name for custom playlists
+  });
+
+  const playlistSettings = args.convertNodeToJson(playlistSettingResult.records[0].get('ps'));
+
+  return {
+    success: true,
+    message: `Custom playlist "${name}" created successfully!`,
+    data: {
+      playlist: playlist,
+      playlistSettings: playlistSettings,
+      playlistId: customPlaylistId,
+      userId: user.id,
+      isCustom: true
+    }
+  };
+
+} catch (error) {
+  console.error("Error creating custom playlist:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to create custom playlist. Please try again.";
+
+  if (error.message.includes("Playlist name is required")) {
+    userMessage = "Playlist name is required.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to create a custom playlist.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

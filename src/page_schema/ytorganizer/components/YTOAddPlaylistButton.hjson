@@ -34,6 +34,8 @@ const [showModal, setShowModal] = args.createSignal(false);
 // Form state
 const [urlValue, setUrlValue] = args.createSignal("");
 const [nameValue, setNameValue] = args.createSignal("");
+const [descriptionValue, setDescriptionValue] = args.createSignal("");
+const [isCustomPlaylist, setIsCustomPlaylist] = args.createSignal(false);
 const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 
 // Get onSubmit callback from props
@@ -45,24 +47,47 @@ const handleSubmit = async (e) => {
 
   const url = urlValue().trim();
   const name = nameValue().trim();
+  const description = descriptionValue().trim();
+  const isCustom = isCustomPlaylist();
 
-  if (!url) {
-    args.showErrorToast("Please enter a playlist URL");
-    return;
+  // Validation based on playlist type
+  if (isCustom) {
+    if (!name) {
+      args.showErrorToast("Please enter a playlist name");
+      return;
+    }
+  } else {
+    if (!url) {
+      args.showErrorToast("Please enter a playlist URL");
+      return;
+    }
   }
 
   // Set loading state
   setIsSubmitting(true);
 
   try {
-    // Call the savePlaylist server function
-    const result = await args.executeNamedServerFunction({
-      functionName: "savePlaylist",
-      contextData: {
-        url: url,
-        name: name || null
-      }
-    });
+    let result;
+
+    if (isCustom) {
+      // Call the createCustomPlaylist server function
+      result = await args.executeNamedServerFunction({
+        functionName: "createCustomPlaylist",
+        contextData: {
+          name: name,
+          description: description || null
+        }
+      });
+    } else {
+      // Call the savePlaylist server function
+      result = await args.executeNamedServerFunction({
+        functionName: "savePlaylist",
+        contextData: {
+          url: url,
+          name: name || null
+        }
+      });
+    }
 
     if (result.error) {
       args.showErrorToast(result.error);
@@ -74,6 +99,8 @@ const handleSubmit = async (e) => {
         onSubmit({
           url: url,
           name: name,
+          description: description,
+          isCustom: isCustom,
           result: result.result.data
         });
       }
@@ -81,6 +108,8 @@ const handleSubmit = async (e) => {
       // Reset form and close modal
       setUrlValue("");
       setNameValue("");
+      setDescriptionValue("");
+      setIsCustomPlaylist(false);
       setShowModal(false);
     } else {
       args.showErrorToast(result.result?.message || result.message || "Failed to save playlist");
@@ -101,6 +130,10 @@ return {
   setUrlValue,
   nameValue,
   setNameValue,
+  descriptionValue,
+  setDescriptionValue,
+  isCustomPlaylist,
+  setIsCustomPlaylist,
   isSubmitting,
   handleSubmit
 };
@@ -220,9 +253,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const isCustom = args.fns.isCustomPlaylist();
 return {
   as: "h2",
-  text: "Add New Playlist"
+  text: isCustom ? "Create Custom Playlist" : "Add YouTube Playlist"
 };
 ''',
         css: '''
@@ -282,10 +316,84 @@ return {
       }
     },
     {
-      id: "yto_add_playlist_button_modal_form",
+      id: "yto_add_playlist_button_type_switch",
       L: "Attr",
       P: {
         displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_type_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "input",
+  type: "checkbox",
+  id: "custom-playlist-toggle",
+  checked: args.fns.isCustomPlaylist(),
+  onChange: (e) => args.fns.setIsCustomPlaylist(e.target.checked)
+};
+''',
+        css: '''
+return `._id {
+  width: 18px;
+  height: 18px;
+  accent-color: ${args.theme.var.color.primary};
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_type_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  for: "custom-playlist-toggle",
+  text: "Create custom playlist (add any videos manually)"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_modal_form",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
         componentName: "Html",
         props: '''
 return {
@@ -309,8 +417,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const isCustom = args.fns.isCustomPlaylist();
 return {
-  as: "div"
+  as: "div",
+  hide: isCustom
 };
 ''',
         css: '''
@@ -409,9 +519,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const isCustom = args.fns.isCustomPlaylist();
 return {
   as: "label",
-  text: "Custom Name (Optional)"
+  text: isCustom ? "Playlist Name" : "Custom Name (Optional)"
 };
 ''',
         css: '''
@@ -430,10 +541,12 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const isCustom = args.fns.isCustomPlaylist();
 return {
   as: "input",
   type: "text",
-  placeholder: "Leave empty to use playlist title",
+  placeholder: isCustom ? "Enter playlist name" : "Leave empty to use playlist title",
+  required: isCustom,
   value: args.fns.nameValue(),
   onChange: (e) => args.fns.setNameValue(e.target.value)
 };
@@ -462,10 +575,94 @@ return `._id {
       }
     },
     {
-      id: "yto_add_playlist_button_actions",
+      id: "yto_add_playlist_button_description_group",
       L: "Attr",
       P: {
         displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const isCustom = args.fns.isCustomPlaylist();
+return {
+  as: "div",
+  hide: !isCustom
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_description_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Description (Optional)"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_description_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "textarea",
+  placeholder: "Enter playlist description (optional)",
+  rows: 3,
+  value: args.fns.descriptionValue(),
+  onChange: (e) => args.fns.setDescriptionValue(e.target.value)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_100};
+  }
+
+  &::placeholder {
+    color: ${args.theme.var.color.muted};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_add_playlist_button_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
         componentName: "Html",
         props: '''
 return {
@@ -530,11 +727,15 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const isCustom = args.fns.isCustomPlaylist();
+const isSubmitting = args.fns.isSubmitting();
 return {
   as: "button",
   type: "submit",
-  text: args.fns.isSubmitting() ? "Adding Playlist..." : "Add Playlist",
-  disabled: args.fns.isSubmitting()
+  text: isSubmitting
+    ? (isCustom ? "Creating Playlist..." : "Adding Playlist...")
+    : (isCustom ? "Create Playlist" : "Add Playlist"),
+  disabled: isSubmitting
 };
 ''',
         css: '''
@@ -580,13 +781,19 @@ return `._id {
     { id: "e7", T: "Attr", S: "yto_add_playlist_button_modal_header", E: "yto_add_playlist_button_modal_title" },
     { id: "e8", T: "Attr", S: "yto_add_playlist_button_modal_header", E: "yto_add_playlist_button_modal_close" },
     { id: "e9", T: "Attr", S: "yto_add_playlist_button_modal_close", E: "yto_add_playlist_button_modal_close_icon" },
-    { id: "e10", T: "Attr", S: "yto_add_playlist_button_modal_container", E: "yto_add_playlist_button_modal_form" },
+    { id: "e10", T: "Attr", S: "yto_add_playlist_button_modal_container", E: "yto_add_playlist_button_type_switch" },
+    { id: "e10a", T: "Attr", S: "yto_add_playlist_button_type_switch", E: "yto_add_playlist_button_type_checkbox" },
+    { id: "e10b", T: "Attr", S: "yto_add_playlist_button_type_switch", E: "yto_add_playlist_button_type_label" },
+    { id: "e10c", T: "Attr", S: "yto_add_playlist_button_modal_container", E: "yto_add_playlist_button_modal_form" },
     { id: "e11", T: "Attr", S: "yto_add_playlist_button_modal_form", E: "yto_add_playlist_button_url_group" },
     { id: "e12", T: "Attr", S: "yto_add_playlist_button_url_group", E: "yto_add_playlist_button_url_label" },
     { id: "e13", T: "Attr", S: "yto_add_playlist_button_url_group", E: "yto_add_playlist_button_url_input" },
     { id: "e14", T: "Attr", S: "yto_add_playlist_button_modal_form", E: "yto_add_playlist_button_name_group" },
     { id: "e15", T: "Attr", S: "yto_add_playlist_button_name_group", E: "yto_add_playlist_button_name_label" },
     { id: "e16", T: "Attr", S: "yto_add_playlist_button_name_group", E: "yto_add_playlist_button_name_input" },
+    { id: "e16a", T: "Attr", S: "yto_add_playlist_button_modal_form", E: "yto_add_playlist_button_description_group" },
+    { id: "e16b", T: "Attr", S: "yto_add_playlist_button_description_group", E: "yto_add_playlist_button_description_label" },
+    { id: "e16c", T: "Attr", S: "yto_add_playlist_button_description_group", E: "yto_add_playlist_button_description_input" },
     { id: "e17", T: "Attr", S: "yto_add_playlist_button_modal_form", E: "yto_add_playlist_button_actions" },
     { id: "e18", T: "Attr", S: "yto_add_playlist_button_actions", E: "yto_add_playlist_button_cancel" },
     { id: "e19", T: "Attr", S: "yto_add_playlist_button_actions", E: "yto_add_playlist_button_submit" }

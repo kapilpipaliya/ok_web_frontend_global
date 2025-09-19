@@ -1,0 +1,189 @@
+{
+  vertexes: [
+    {
+      id: "add_video_to_playlist_function",
+      L: "Function",
+      P: {
+        key: "addVideoToPlaylist",
+        description: "Adds a video to a custom playlist, fetching video details if needed",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { playlistId, videoUrl } = args.contextData;
+
+  if (!playlistId) {
+    throw new Error("Playlist ID is required");
+  }
+
+  if (!videoUrl) {
+    throw new Error("Video URL is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Verify user has access to this playlist
+  const playlistAccessQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    RETURN p, ps
+  `;
+
+  const playlistAccessResult = await args.session.run(playlistAccessQuery, {
+    userUuid: user.P.uuid,
+    playlistId
+  });
+
+  if (playlistAccessResult.records.length === 0) {
+    throw new Error("Playlist not found or access denied");
+  }
+
+  const playlist = args.convertNodeToJson(playlistAccessResult.records[0].get('p'));
+  const playlistSettings = args.convertNodeToJson(playlistAccessResult.records[0].get('ps'));
+
+  // Step 1: Fetch or get video details
+  const videoResult = await args.executeNamedServerFunction({
+    functionName: "fetchVideoDetails",
+    contextData: { videoUrl }
+  });
+
+  if (videoResult.error) {
+    throw new Error(videoResult.error);
+  }
+
+  if (!videoResult.result || !videoResult.result.success) {
+    throw new Error(videoResult.result?.message || "Failed to fetch video details");
+  }
+
+  const videoData = videoResult.result.data;
+  const video = videoData.video;
+
+  // Step 2: Check if video is already in this playlist
+  const existingVideoQuery = `
+    MATCH (p:Playlist {youtubeId: $playlistId})-[r:PlaylistVideo]->(v:Video {youtubeId: $videoId})
+    RETURN r
+  `;
+
+  const existingVideoResult = await args.session.run(existingVideoQuery, {
+    playlistId,
+    videoId: video.P.youtubeId
+  });
+
+  if (existingVideoResult.records.length > 0) {
+    return {
+      success: false,
+      message: `Video "${video.P.title}" is already in this playlist.`,
+      data: {
+        video: video,
+        playlist: playlist,
+        isAlreadyAdded: true
+      }
+    };
+  }
+
+  // Step 3: Get current video count for position
+  const countQuery = `
+    MATCH (p:Playlist {youtubeId: $playlistId})-[:PlaylistVideo]->(v:Video)
+    RETURN COUNT(v) as videoCount
+  `;
+
+  const countResult = await args.session.run(countQuery, { playlistId });
+  const videoCountValue = countResult.records[0].get('videoCount');
+  const currentCount = videoCountValue.low || videoCountValue || 0;
+  const newPosition = currentCount;
+
+  // Step 4: Add video to playlist
+  const addVideoQuery = `
+    MATCH (p:Playlist {youtubeId: $playlistId})
+    MATCH (v:Video {youtubeId: $videoId})
+    CREATE (p)-[:PlaylistVideo {
+      position: $position,
+      addedAt: datetime(),
+      addedByUserId: $userId
+    }]->(v)
+    RETURN p, v
+  `;
+
+  await args.session.run(addVideoQuery, {
+    playlistId,
+    videoId: video.P.youtubeId,
+    position: newPosition,
+    userId: user.id
+  });
+
+  // Step 5: Update playlist item count and thumbnail
+  const updatePlaylistQuery = `
+    MATCH (p:Playlist {youtubeId: $playlistId})
+    SET
+      p.itemCount = $newCount,
+      p.updatedAt = datetime()
+    ${currentCount === 0 ? ', p.thumbnail = $thumbnail' : ''}
+    RETURN p
+  `;
+
+  const updateParams = {
+    playlistId,
+    newCount: currentCount + 1
+  };
+
+  // Set thumbnail to first video's thumbnail if playlist is empty
+  if (currentCount === 0) {
+    updateParams.thumbnail = video.P.thumbnail || "";
+  }
+
+  await args.session.run(updatePlaylistQuery, updateParams);
+
+  return {
+    success: true,
+    message: `Video "${video.P.title}" added to playlist successfully!`,
+    data: {
+      video: video,
+      playlist: playlist,
+      playlistSettings: playlistSettings,
+      position: newPosition,
+      totalVideos: currentCount + 1,
+      isNewVideo: videoData.isNewVideo,
+      userId: user.id
+    }
+  };
+
+} catch (error) {
+  console.error("Error adding video to playlist:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to add video to playlist. Please try again.";
+
+  if (error.message.includes("Playlist ID is required")) {
+    userMessage = "Playlist ID is required.";
+  } else if (error.message.includes("Video URL is required")) {
+    userMessage = "Video URL is required.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to add videos to playlists.";
+  } else if (error.message.includes("Playlist not found or access denied")) {
+    userMessage = "Playlist not found or you don't have access to it.";
+  } else if (error.message.includes("Failed to fetch video details")) {
+    userMessage = "Could not fetch video details. Please check the video URL.";
+  } else if (error.message.includes("already in this playlist")) {
+    userMessage = error.message;
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

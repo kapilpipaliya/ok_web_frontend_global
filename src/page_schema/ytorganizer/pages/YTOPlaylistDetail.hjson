@@ -88,7 +88,11 @@ const loadPlaylistVideos = async () => {
   }
 };
 
-// Load playlist videos function (called by onMount)
+// Handle video addition
+const handleVideoSubmit = (data) => {
+  // Reload playlist videos after adding new video
+  loadPlaylistVideos();
+};
 
 return {
   playlistData,
@@ -97,7 +101,8 @@ return {
   error,
   sortBy,
   setSortBy,
-  loadPlaylistVideos
+  loadPlaylistVideos,
+  handleVideoSubmit
 };
 '''
       }
@@ -1451,6 +1456,22 @@ return `._id {
 }`;
 '''
       }
+    },
+    {
+      id: "yto_playlist_detail_add_video_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "YTOAddVideoToPlaylistButton",
+        props: '''
+const playlistId = args.searchParams?.playlistId || args.params?.playlistId;
+
+return {
+  playlistId: playlistId,
+  onSubmit: args.fns.handleVideoSubmit
+};
+'''
+      }
     }
   ],
   edges: [
@@ -1507,6 +1528,7 @@ return `._id {
     { id: "e50", T: "Attr", S: "yto_playlist_detail_empty_state", E: "yto_playlist_detail_empty_icon" },
     { id: "e51", T: "Attr", S: "yto_playlist_detail_empty_icon", E: "yto_playlist_detail_empty_icon_svg" },
     { id: "e52", T: "Attr", S: "yto_playlist_detail_empty_state", E: "yto_playlist_detail_empty_title" },
-    { id: "e53", T: "Attr", S: "yto_playlist_detail_empty_state", E: "yto_playlist_detail_empty_description" }
+    { id: "e53", T: "Attr", S: "yto_playlist_detail_empty_state", E: "yto_playlist_detail_empty_description" },
+    { id: "e54", T: "Attr", S: "yto_playlist_detail_root", E: "yto_playlist_detail_add_video_button" }
   ]
 }
