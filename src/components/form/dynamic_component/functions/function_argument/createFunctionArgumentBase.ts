@@ -56,7 +56,6 @@ export function createFunctionArgumentBase(
     componentName: Accessor<string | Component | undefined>;
     isNoPermissionCheck: () => boolean;
     isViewMode: () => boolean | undefined;
-    isReadOnly: () => boolean | undefined;
     mounted: () => boolean;
     parentMeta: () => Vertex | undefined;
     ref: () => HTMLElement | null;
@@ -178,9 +177,6 @@ export function createFunctionArgumentBase(
       return options.parentMeta();
     },
     parentRenderContext: hooks.parentRenderContext(),
-    get readOnly() {
-      return options.isReadOnly();
-    },
     theme: hooks.theme,
     ref: options.ref,
     setRef: options.setRef,

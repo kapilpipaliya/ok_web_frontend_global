@@ -54,7 +54,6 @@ export interface FunctionArgumentBaseType {
   parentItems: PageRenderStore[];
   parentMeta: Vertex;
   parentRenderContext: PageRenderObject;
-  readOnly: boolean | null | undefined;
   ref: () => HTMLElement | null;
   setRef: (ref: HTMLElement | null) => void;
   removeTxnIdAndCreateNew: (txnId: number) => number;

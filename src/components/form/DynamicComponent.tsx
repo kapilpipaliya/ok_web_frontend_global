@@ -57,7 +57,6 @@ export type DynamicComponentProps = Readonly<{
   isRealTime?: boolean;
   isTableInside?: boolean;
   isViewMode?: boolean;
-  isReadOnly?: boolean;
   meta: Vertex;
   noLabel?: boolean;
   onChange?: (data: unknown) => void;
@@ -149,7 +148,6 @@ export function DynamicComponent(props: DynamicComponentProps) {
         componentName: () => componentName(),
         isNoPermissionCheck,
         isViewMode: () => isViewMode(),
-        isReadOnly: () => isReadOnly(),
         mounted,
         parentMeta,
         ref,
@@ -187,12 +185,6 @@ export function DynamicComponent(props: DynamicComponentProps) {
     graph,
     getFunctionArgumentWithValue,
   });
-
-  const isReadOnly = () =>
-    props.isReadOnly ??
-    dynamicProps().readOnly ??
-    props.meta.P.readOnly ??
-    parentRenderContext()?.context?.readOnly;
 
   useComponentName({
     props,
@@ -274,7 +266,6 @@ export function DynamicComponent(props: DynamicComponentProps) {
                 isDisabledByPermissions() ??
                 props.meta.P.disabled)
           }
-          readOnly={isReadOnly}
           ref={ref}
           setRef={setRef}
           isNoPermissionCheck={isNoPermissionCheck}

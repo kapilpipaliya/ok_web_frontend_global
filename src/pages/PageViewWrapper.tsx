@@ -98,7 +98,6 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
         componentName,
         isNoPermissionCheck: () => props.isNoPermissionCheck || false,
         isViewMode: () => false,
-        isReadOnly: () => false,
         mounted,
         parentMeta,
         ref,
