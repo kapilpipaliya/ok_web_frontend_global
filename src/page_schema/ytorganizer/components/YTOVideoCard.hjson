@@ -206,7 +206,8 @@ if (thumbnailUrl) {
   return {
     as: "img",
     src: thumbnailUrl,
-    alt: video?.P?.title || 'Video thumbnail'
+    alt: video?.P?.title || 'Video thumbnail',
+    loading: "lazy"
   };
 } else {
   return {

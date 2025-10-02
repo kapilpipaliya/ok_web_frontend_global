@@ -1,0 +1,120 @@
+{
+  vertexes: [
+    {
+      id: "delete_goal_function",
+      L: "Function",
+      P: {
+        key: "deleteGoal",
+        description: "Deletes a rule goal and cleans up all associated data",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { goalId } = args.contextData;
+
+  // Validate required fields
+  if (!goalId) {
+    throw new Error("Goal ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Check if goal exists and belongs to user
+  const goalCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+    WHERE elementId(rg) = $goalId
+    RETURN rg, r.title as ruleTitle
+  `;
+
+  const goalResult = await args.session.run(goalCheckQuery, {
+    userUuid: user.P.uuid,
+    goalId
+  });
+
+  if (goalResult.records.length === 0) {
+    throw new Error("Goal not found or does not belong to user");
+  }
+
+  const goalNode = goalResult.records[0].get('rg');
+  const goal = args.convertNodeToJson(goalNode);
+  const ruleTitle = goalResult.records[0].get('ruleTitle');
+
+  // Start transaction for atomic deletion
+  const tx = args.session.beginTransaction();
+
+  try {
+    // Delete the goal and all its relationships
+    const deleteGoalQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+      WHERE elementId(rg) = $goalId
+      DETACH DELETE rg
+    `;
+
+    await tx.run(deleteGoalQuery, {
+      userUuid: user.P.uuid,
+      goalId
+    });
+
+    // Commit the transaction
+    await tx.commit();
+
+    const goalTitle = goal.P.title;
+
+    // Build success message
+    let message = `Goal "${goalTitle}" deleted successfully`;
+    if (ruleTitle) {
+      message += ` (linked to rule: "${ruleTitle}")`;
+    }
+
+    return {
+      success: true,
+      message,
+      data: {
+        goalId: goalId,
+        goalTitle,
+        ruleTitle,
+        userId: user.P.uuid
+      }
+    };
+
+  } catch (txError) {
+    // Rollback the transaction on error
+    await tx.rollback();
+    throw txError;
+  }
+
+} catch (error) {
+  console.error("Error deleting goal:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to delete goal. Please try again.";
+
+  if (error.message.includes("Goal ID is required")) {
+    userMessage = "Goal ID is required to delete a goal.";
+  } else if (error.message.includes("Goal not found")) {
+    userMessage = "The goal was not found or does not belong to you.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("constraint")) {
+    userMessage = "Cannot delete goal due to database constraints. Please contact support.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "GoalDeletionError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

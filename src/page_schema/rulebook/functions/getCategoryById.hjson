@@ -1,0 +1,144 @@
+{
+  vertexes: [
+    {
+      id: "get_category_by_id_function",
+      L: "Function",
+      P: {
+        key: "getCategoryById",
+        description: "Retrieves a specific category by ID with rule count and related data",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { categoryId } = args.contextData;
+
+  // Validate required fields
+  if (!categoryId) {
+    throw new Error("Category ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Query to get specific category with rule count and statistics
+  const categoryQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+    WHERE elementId(rc) = $categoryId
+    OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule)
+    OPTIONAL MATCH (r)<-[:RuleTrackingRule]-(rt:RuleTracking)<-[:UserRuleTracking]-(u)
+    OPTIONAL MATCH (r)<-[:RuleStreakRule]-(rs:RuleStreak)<-[:UserRuleStreak]-(u)
+    WITH rc, r,
+         collect(DISTINCT rt) as trackingRecords,
+         collect(DISTINCT rs) as streakRecords
+    WITH rc,
+         count(DISTINCT r) as ruleCount,
+         collect({
+           rule: r,
+           trackingCount: size(trackingRecords),
+           bestStreak: CASE
+             WHEN size(streakRecords) > 0
+             THEN reduce(maxStreak = 0, streak IN streakRecords |
+               CASE WHEN streak.currentStreak > maxStreak
+               THEN streak.currentStreak ELSE maxStreak END)
+             ELSE 0 END
+         }) as ruleStats
+    RETURN rc,
+           ruleCount,
+           ruleStats
+  `;
+
+  const categoryResult = await args.session.run(categoryQuery, {
+    userUuid: user.P.uuid,
+    categoryId
+  });
+
+  if (categoryResult.records.length === 0) {
+    throw new Error("Category not found or does not belong to user");
+  }
+
+  // Format the result
+  const categoryRecord = categoryResult.records[0];
+  const categoryNode = categoryRecord.get('rc');
+  const ruleCount = args.neo4jConvert.js(categoryRecord.get('ruleCount')) || 0;
+  const ruleStats = args.neo4jConvert.js(categoryRecord.get('ruleStats')) || [];
+
+  // Convert Neo4j node to proper Vertex format
+  const category = args.convertNodeToJson(categoryNode);
+
+  // Calculate category-level statistics
+  let totalCompletionRate = 0;
+  let activeRulesCount = 0;
+  let bestOverallStreak = 0;
+
+  ruleStats.forEach(ruleStat => {
+    if (ruleStat.rule) { // Only count rules that exist
+      activeRulesCount++;
+
+      // Calculate completion rate (example: tracking count / 30 days * 100)
+      const completionRate = Math.min(100, Math.round((ruleStat.trackingCount / 30) * 100));
+      totalCompletionRate += completionRate;
+
+      // Track best streak
+      if (ruleStat.bestStreak > bestOverallStreak) {
+        bestOverallStreak = ruleStat.bestStreak;
+      }
+    }
+  });
+
+  const averageCompletionRate = activeRulesCount > 0 ?
+    Math.round(totalCompletionRate / activeRulesCount) : 0;
+
+  const categoryData = {
+    category,
+    ruleCount,
+    stats: {
+      totalRules: ruleCount,
+      completionRate: averageCompletionRate,
+      bestStreak: bestOverallStreak,
+      activeRules: activeRulesCount
+    }
+  };
+
+  return {
+    success: true,
+    message: `Category "${category.P.name}" found successfully`,
+    data: {
+      category: categoryData,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching category by ID:", error);
+
+  // Handle specific errors
+  let userMessage = "Failed to load category. Please try again.";
+
+  if (error.message.includes("Category ID is required")) {
+    userMessage = "Category ID is required to fetch category details.";
+  } else if (error.message.includes("Category not found")) {
+    userMessage = "The requested category was not found or does not belong to you.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please contact support if this persists.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "CategoryFetchError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

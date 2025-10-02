@@ -9,6 +9,8 @@ import {
   Switch,
   getOwner,
   ErrorBoundary,
+  createMemo,
+  untrack,
 } from "solid-js";
 import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
@@ -75,7 +77,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
   const formVertex = () =>
     formId ? (graph.vertexes[formId] as Vertex<FormStoreObject>) : undefined;
   const [ref, setRef] = createSignal<HTMLElement | null>(null);
-  const [mounted, setMounted] = createSignal(false);
+  const [mounted, setMounted] = createSignal<null | boolean>(null);
   const [componentName, setComponentName] = createSignal<string>("Html");
 
   // Context hooks
@@ -126,7 +128,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
   // Create dynamic functions for the component
   const dynamicFns = createDynamicFunctions(
     graph,
-    props.meta,
+    () => props.meta,
     () => getFunctionArgumentWithValue(),
     parentRenderContext,
     componentName,
@@ -178,8 +180,9 @@ export function DynamicComponent(props: DynamicComponentProps) {
       },
     );
 
-  const getFunctionArgumentWithValue = () =>
-    createFunctionArgumentWithValue(getFunctionArgument, value);
+  const getFunctionArgumentWithValue = createMemo(() =>
+    createFunctionArgumentWithValue(getFunctionArgument, value)
+  );
 
   const dynamicProps = createDynamicPropsMemo(props, {
     graph,
@@ -218,27 +221,47 @@ export function DynamicComponent(props: DynamicComponentProps) {
     getFunctionArgumentWithValue,
   });
 
-  const { initializeBeforeMount, setupMount, setupCleanup } =
-    useComponentLifecycle({
-      dynamicProps,
-      getFunctionArgumentWithValue,
-      setMounted,
-    });
 
-  // Initialize lifecycle handlers
-  initializeBeforeMount();
-  onMount(() => {
-    setupMount();
-  });
-  onCleanup(() => {
-    setupCleanup();
-  });
 
   const repeaterStore = createStore({
     get context() {
       return getFunctionArgumentWithValue();
     },
   });
+  const ContentWrapperWithMount = () => {
+    useComponentLifecycle({
+      dynamicProps,
+      getFunctionArgumentWithValue,
+      setMounted,
+    });
+
+  onCleanup(() => {
+    setRef(null);
+    setMounted(false);
+  });
+
+    return  <ContentWrapper
+          meta={props.meta}
+          data={props.data}
+          children={props.children}
+          dynamicProps={dynamicProps}
+          mergedClasses={mergedClasses}
+          permissions={permissions}
+          component={component}
+          processedText={processedText}
+          // disabled={
+          //   isNoPermissionCheck()
+          //     ? props.meta.P.disabled
+          //     : (props.disabled ??
+          //       previewStore?.isViewOnly ??
+          //       isDisabledByPermissions() ??
+          //       props.meta.P.disabled)
+          // }
+          ref={ref}
+          setRef={setRef}
+          isNoPermissionCheck={isNoPermissionCheck}
+        />
+  }
 
   // Create the main content component that will be wrapped conditionally
   const ContentInner = () => (
@@ -249,27 +272,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
       <Match
         when={component() && (isNoPermissionCheck() || hasPermission())}
       >
-        <ContentWrapper
-          meta={props.meta}
-          data={props.data}
-          children={props.children}
-          dynamicProps={dynamicProps}
-          mergedClasses={mergedClasses}
-          permissions={permissions}
-          component={component}
-          processedText={processedText}
-          disabled={
-            isNoPermissionCheck()
-              ? props.meta.P.disabled
-              : (props.disabled ??
-                previewStore?.isViewOnly ??
-                isDisabledByPermissions() ??
-                props.meta.P.disabled)
-          }
-          ref={ref}
-          setRef={setRef}
-          isNoPermissionCheck={isNoPermissionCheck}
-        />
+       <ContentWrapperWithMount/>
       </Match>
       <Match when={getGlobalStore(graph).P.isDevelopment}>
         Hidden component

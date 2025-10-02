@@ -69,7 +69,7 @@ const resetSettings = () => {
   setShowThumbnails(true);
   setNotifications(true);
   setDarkMode(false);
-  args.showInfoToast("Settings reset to defaults");
+  args.showSuccessToast("Settings reset to defaults");
 };
 
 // Clear all user data

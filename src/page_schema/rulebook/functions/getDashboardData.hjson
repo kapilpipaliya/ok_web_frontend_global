@@ -1,0 +1,171 @@
+{
+  vertexes: [
+    {
+      id: "get_dashboard_data_function",
+      L: "Function",
+      P: {
+        key: "getDashboardData",
+        description: "Retrieves comprehensive dashboard data including progress, rules, and tracking for today",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Get all user rules with today's tracking data
+  const rulesQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+    WHERE r.isActive = true
+    OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+    OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking {date: date($today)})-[:RuleTrackingRule]->(r)
+    OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r)
+    WITH r, rc, rt, rs
+    RETURN r, rc, rt, rs
+    ORDER BY r.priority DESC, r.createdAt DESC
+  `;
+
+  const rulesResult = await args.session.run(rulesQuery, {
+    userUuid: user.P.uuid,
+    today: today
+  });
+
+  // Process rules and calculate progress
+  const rules = [];
+  let totalActiveRules = 0;
+  let completedToday = 0;
+  let partialToday = 0;
+  let missedToday = 0;
+  let skippedToday = 0;
+  let untrackedToday = 0;
+  let longestStreak = 0;
+
+  for (const record of rulesResult.records) {
+    if (!record) continue;
+
+    const ruleNode = record.get('r');
+    const categoryNode = record.get('rc');
+    const trackingNode = record.get('rt');
+    const streakNode = record.get('rs');
+
+    if (!ruleNode) continue;
+
+    try {
+      const rule = args.convertNodeToJson(ruleNode);
+      const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+      const todayTracking = trackingNode ? args.convertNodeToJson(trackingNode) : null;
+      const streak = streakNode ? args.convertNodeToJson(streakNode) : null;
+
+      totalActiveRules++;
+
+      // Count tracking status
+      if (todayTracking) {
+        const status = todayTracking.P?.status;
+        if (status === 'completed') {
+          completedToday++;
+        } else if (status === 'partial') {
+          partialToday++;
+        } else if (status === 'missed') {
+          missedToday++;
+        } else if (status === 'skipped') {
+          skippedToday++;
+        }
+      } else {
+        untrackedToday++;
+      }
+
+      // Track longest streak
+      if (streak?.P?.currentStreak) {
+        longestStreak = Math.max(longestStreak, streak.P.currentStreak);
+      }
+
+      rules.push({
+        rule,
+        category,
+        todayTracking,
+        streak
+      });
+
+    } catch (e) {
+      console.warn('Failed to convert rule node:', e);
+      continue;
+    }
+  }
+
+  // Calculate progress statistics
+  const trackedToday = completedToday + partialToday + missedToday + skippedToday;
+  const effectiveCompletions = completedToday + (partialToday * 0.7);
+  const completionRate = totalActiveRules > 0 ? Math.round((effectiveCompletions / totalActiveRules) * 100) : 0;
+
+  // Create progress summary
+  const progressSummary = {
+    totalActiveRules,
+    trackedToday,
+    untrackedToday,
+    completedToday,
+    partialToday,
+    missedToday,
+    skippedToday,
+    completionRate,
+    longestStreak
+  };
+
+  // Generate progress text
+  let progressText = "";
+  if (totalActiveRules === 0) {
+    progressText = "No active rules. Add your first rule to get started!";
+  } else {
+    const parts = [];
+    if (completedToday > 0) parts.push(`${completedToday} completed`);
+    if (partialToday > 0) parts.push(`${partialToday} partial`);
+    if (untrackedToday > 0) parts.push(`${untrackedToday} not tracked yet`);
+
+    if (parts.length > 0) {
+      progressText = parts.join(', ') + ` of ${totalActiveRules} rule${totalActiveRules === 1 ? '' : 's'} (${completionRate}%)`;
+    } else {
+      progressText = `All ${totalActiveRules} rule${totalActiveRules === 1 ? '' : 's'} tracked (${completionRate}%)`;
+    }
+  }
+
+  return {
+    success: true,
+    message: "Dashboard data retrieved successfully",
+    data: {
+      rules: rules.slice(0, 3), // Only first 3 rules for quick actions
+      allRules: rules,
+      progress: progressSummary,
+      progressText,
+      today: today,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching dashboard data:", error);
+
+  let userMessage = "Failed to load dashboard data. Please try again.";
+  if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please contact support if this persists.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DashboardDataError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

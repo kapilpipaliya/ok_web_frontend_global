@@ -1,0 +1,1903 @@
+{
+  vertexes: [
+    {
+      id: "layout_root",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBConfirmProvider",
+      }
+    },
+    {
+      id: "layout_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}
+
+@media (min-width: 768px) {
+  ._id {
+    flex-direction: row;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "main_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  padding-bottom: 80px;
+  overflow-y: auto;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  ._id {
+    padding-bottom: 0;
+    margin-left: 240px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "slot_main",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        slot: "1children"
+      }
+    },
+    {
+      id: "navigation_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+// Get navigation state from RBConfirmProvider context
+// This controls when the overlay should be visible
+const isNavigating = args.fns.isNavigating?.();
+
+return {
+  as: "div",
+  style: {
+    // Show overlay during navigation, hide when complete
+    // Uses flex to center the loading spinner
+    display: isNavigating ? 'flex' : 'none'
+  }
+};
+''',
+        css: '''
+return `._id {
+  /* Full-screen overlay positioning */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* Match theme background for seamless appearance */
+  background: ${args.theme.var.color.background};
+
+  /* Position spinner at top instead of center */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: ${args.theme.var.spacing.xxl};
+
+  /* High z-index to appear above all content */
+  z-index: 1000;
+
+  /* Start invisible and fade in smoothly */
+  opacity: 0;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Smooth fade-in animation for overlay appearance */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "navigation_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBLoadingSpinner",
+        props: '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  ._id {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: ${args.theme.var.color.background};
+    border-right: 1px solid ${args.theme.var.color.border};
+    flex-direction: column;
+    padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.lg};
+    z-index: ${args.theme.var.zIndex.dropdown};
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+  padding-bottom: ${args.theme.var.spacing.lg};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "📝 Rulebook"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_menu",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "main_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "main_section_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "management_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "management_section_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  padding: 0 ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "management_section_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "insights_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "insights_section_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Insights"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  padding: 0 ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "insights_section_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "other_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "other_section_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+  padding-top: ${args.theme.var.spacing.md};
+  border-top: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_home",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname === "/rb" || args.location.pathname === "/rb/";
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_home_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname === "/rb" || args.location.pathname === "/rb/";
+return {
+  as: "a",
+  href: "/rb",
+  "aria-label": "Home",
+  title: "Dashboard and overview",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname === "/rb" || args.location.pathname === "/rb/";
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_home_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:home",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_home_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Home"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_rules",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/rules");
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_rules_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/rules");
+return {
+  as: "a",
+  href: "/rb/rules",
+  "aria-label": "Rules",
+  title: "View and manage all rules",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/rules");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/rules");
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_rules_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:list-checked",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_rules_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Rules"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_track",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/tracking");
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_track_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/tracking");
+return {
+  as: "a",
+  href: "/rb/tracking",
+  "aria-label": "Track Rules",
+  title: "Daily habit tracking",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/tracking");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/tracking");
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_track_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:add-alt",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_track_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Track"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_categories",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/categories");
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_categories_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/categories");
+return {
+  as: "a",
+  href: "/rb/categories",
+  "aria-label": "Categories",
+  title: "Organize rules by category",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/categories");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/categories");
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_categories_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:category",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_categories_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Categories"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_goals",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/goals");
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_goals_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/goals");
+return {
+  as: "a",
+  href: "/rb/goals",
+  "aria-label": "Goals",
+  title: "Set and track achievement goals",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/goals");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/goals");
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_goals_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:trophy",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_goals_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Goals"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_reports",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/reports");
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_reports_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/reports");
+return {
+  as: "a",
+  href: "/rb/reports",
+  "aria-label": "Reports",
+  title: "View progress analytics and statistics",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/reports");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/reports");
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_reports_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:analytics",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_reports_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Reports"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_settings",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/settings");
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_settings_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/settings");
+return {
+  as: "a",
+  href: "/rb/settings",
+  "aria-label": "Settings",
+  title: "App configuration and preferences",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/settings");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/settings");
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_settings_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:settings",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_settings_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Settings"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_logout",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_logout_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  "aria-label": "Logout",
+  title: "Sign out of your account",
+  onClick: () => {
+    args.fns.navigateTo?.("/auth/logout");
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: transparent;
+  border: none;
+  color: ${args.theme.var.color.error};
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all ${args.theme.var.animation.fast} ease;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: inherit;
+  font-family: inherit;
+
+  &:hover {
+    background: ${args.theme.var.color.error_light_100};
+    color: ${args.theme.var.color.error_dark_200};
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_nav_logout_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:logout",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "left_nav_logout_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Logout"
+};
+'''
+      }
+    },
+    {
+      id: "bottom_nav",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: ${args.theme.var.color.background};
+  border-top: 1px solid ${args.theme.var.color.border};
+  z-index: ${args.theme.var.zIndex.dropdown};
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  padding: ${args.theme.var.spacing.sm} 0;
+}
+
+._id .slider-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 0 ${args.theme.var.spacing.sm};
+  gap: ${args.theme.var.spacing.xs};
+}
+
+/* Make each nav item equally distributed */
+._id .slider-container > * {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Responsive adjustment - hide on desktop */
+@media (min-width: 768px) {
+  ._id {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_slider_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  className: "slider-container"
+};
+'''
+      }
+    },
+    {
+      id: "nav_home",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname === "/rb" || args.location.pathname === "/rb/";
+return {
+  as: "a",
+  href: "/rb",
+  "aria-label": "Home",
+  title: "Dashboard and overview",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname === "/rb" || args.location.pathname === "/rb/";
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_home_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:home",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "nav_home_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Home"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_rules",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/rules");
+return {
+  as: "a",
+  href: "/rb/rules",
+  "aria-label": "Rules",
+  title: "View and manage all rules",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/rules");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/categories");
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_rules_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:list-checked",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "nav_rules_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Rules"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_categories",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/categories");
+return {
+  as: "a",
+  href: "/rb/categories",
+  "aria-label": "Categories",
+  title: "Organize rules by category",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/categories");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/categories");
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_categories_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:category",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "nav_categories_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Categories"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_goals",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/goals");
+return {
+  as: "a",
+  href: "/rb/goals",
+  "aria-label": "Goals",
+  title: "Set and track achievement goals",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/goals");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/goals");
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_goals_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:trophy",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "nav_goals_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Goals"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_settings",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/settings");
+return {
+  as: "a",
+  href: "/rb/settings",
+  "aria-label": "Settings",
+  title: "App configuration and preferences",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/settings");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/settings");
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_settings_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:settings",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "nav_settings_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_track",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/tracking");
+return {
+  as: "a",
+  href: "/rb/tracking",
+  "aria-label": "Track Rules",
+  title: "Daily habit tracking",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/tracking");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/tracking");
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+  position: relative;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_track_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:add-alt",
+  width: 28,
+  height: 28
+};
+'''
+      }
+    },
+    {
+      id: "nav_track_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Track"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 500;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_reports",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const isActive = args.location.pathname.startsWith("/rb/reports");
+return {
+  as: "a",
+  href: "/rb/reports",
+  "aria-label": "Reports",
+  title: "View progress analytics and statistics",
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.("/rb/reports");
+  }
+};
+''',
+        css: '''
+const isActive = args.location.pathname.startsWith("/rb/reports");
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_reports_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:analytics",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "nav_reports_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Reports"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "layout_root", E: "layout_container" },
+    { id: "e2", T: "Attr", S: "layout_container", E: "main_content" },
+    { id: "e3", T: "Attr", S: "main_content", E: "slot_main" },
+    { id: "e3b", T: "Attr", S: "main_content", E: "navigation_overlay" },
+    { id: "e3c", T: "Attr", S: "navigation_overlay", E: "navigation_spinner" },
+    { id: "e4", T: "Attr", S: "layout_container", E: "left_nav" },
+    { id: "e5", T: "Attr", S: "left_nav", E: "left_nav_header" },
+    { id: "e6", T: "Attr", S: "left_nav_header", E: "left_nav_logo" },
+    { id: "e7", T: "Attr", S: "left_nav", E: "left_nav_menu" },
+    { id: "e8", T: "Attr", S: "left_nav_menu", E: "main_section" },
+    { id: "e9", T: "Attr", S: "main_section", E: "main_section_list" },
+    { id: "e10", T: "Attr", S: "left_nav_menu", E: "management_section" },
+    { id: "e11", T: "Attr", S: "management_section", E: "management_section_title" },
+    { id: "e12", T: "Attr", S: "management_section", E: "management_section_list" },
+    { id: "e13", T: "Attr", S: "left_nav_menu", E: "insights_section" },
+    { id: "e14", T: "Attr", S: "insights_section", E: "insights_section_title" },
+    { id: "e15", T: "Attr", S: "insights_section", E: "insights_section_list" },
+    { id: "e16", T: "Attr", S: "left_nav_menu", E: "other_section" },
+    { id: "e17", T: "Attr", S: "other_section", E: "other_section_list" },
+    { id: "e18", T: "Attr", S: "main_section_list", E: "left_nav_home" },
+    { id: "e19", T: "Attr", S: "left_nav_home", E: "left_nav_home_link" },
+    { id: "e20", T: "Attr", S: "left_nav_home_link", E: "left_nav_home_icon" },
+    { id: "e21", T: "Attr", S: "left_nav_home_link", E: "left_nav_home_text" },
+    { id: "e22", T: "Attr", S: "main_section_list", E: "left_nav_track" },
+    { id: "e23", T: "Attr", S: "left_nav_track", E: "left_nav_track_link" },
+    { id: "e24", T: "Attr", S: "left_nav_track_link", E: "left_nav_track_icon" },
+    { id: "e25", T: "Attr", S: "left_nav_track_link", E: "left_nav_track_text" },
+    { id: "e26", T: "Attr", S: "management_section_list", E: "left_nav_rules" },
+    { id: "e27", T: "Attr", S: "left_nav_rules", E: "left_nav_rules_link" },
+    { id: "e28", T: "Attr", S: "left_nav_rules_link", E: "left_nav_rules_icon" },
+    { id: "e29", T: "Attr", S: "left_nav_rules_link", E: "left_nav_rules_text" },
+    { id: "e30", T: "Attr", S: "management_section_list", E: "left_nav_categories" },
+    { id: "e31", T: "Attr", S: "left_nav_categories", E: "left_nav_categories_link" },
+    { id: "e32", T: "Attr", S: "left_nav_categories_link", E: "left_nav_categories_icon" },
+    { id: "e33", T: "Attr", S: "left_nav_categories_link", E: "left_nav_categories_text" },
+    { id: "e34", T: "Attr", S: "management_section_list", E: "left_nav_goals" },
+    { id: "e35", T: "Attr", S: "left_nav_goals", E: "left_nav_goals_link" },
+    { id: "e36", T: "Attr", S: "left_nav_goals_link", E: "left_nav_goals_icon" },
+    { id: "e37", T: "Attr", S: "left_nav_goals_link", E: "left_nav_goals_text" },
+    { id: "e38", T: "Attr", S: "insights_section_list", E: "left_nav_reports" },
+    { id: "e39", T: "Attr", S: "left_nav_reports", E: "left_nav_reports_link" },
+    { id: "e40", T: "Attr", S: "left_nav_reports_link", E: "left_nav_reports_icon" },
+    { id: "e41", T: "Attr", S: "left_nav_reports_link", E: "left_nav_reports_text" },
+    { id: "e42", T: "Attr", S: "other_section_list", E: "left_nav_settings" },
+    { id: "e43", T: "Attr", S: "left_nav_settings", E: "left_nav_settings_link" },
+    { id: "e44", T: "Attr", S: "left_nav_settings_link", E: "left_nav_settings_icon" },
+    { id: "e45", T: "Attr", S: "left_nav_settings_link", E: "left_nav_settings_text" },
+    { id: "e46", T: "Attr", S: "other_section_list", E: "left_nav_logout" },
+    { id: "e47", T: "Attr", S: "left_nav_logout", E: "left_nav_logout_link" },
+    { id: "e48", T: "Attr", S: "left_nav_logout_link", E: "left_nav_logout_icon" },
+    { id: "e49", T: "Attr", S: "left_nav_logout_link", E: "left_nav_logout_text" },
+    { id: "e50", T: "Attr", S: "layout_container", E: "bottom_nav" },
+    { id: "e51", T: "Attr", S: "bottom_nav", E: "nav_slider_container" },
+    { id: "e52", T: "Attr", S: "nav_slider_container", E: "nav_home" },
+    { id: "e53", T: "Attr", S: "nav_home", E: "nav_home_icon" },
+    { id: "e54", T: "Attr", S: "nav_home", E: "nav_home_text" },
+    { id: "e55", T: "Attr", S: "nav_slider_container", E: "nav_rules" },
+    { id: "e56", T: "Attr", S: "nav_rules", E: "nav_rules_icon" },
+    { id: "e57", T: "Attr", S: "nav_rules", E: "nav_rules_text" },
+    { id: "e58", T: "Attr", S: "nav_slider_container", E: "nav_categories" },
+    { id: "e59", T: "Attr", S: "nav_categories", E: "nav_categories_icon" },
+    { id: "e60", T: "Attr", S: "nav_categories", E: "nav_categories_text" },
+    { id: "e61", T: "Attr", S: "nav_slider_container", E: "nav_track" },
+    { id: "e62", T: "Attr", S: "nav_track", E: "nav_track_icon" },
+    { id: "e63", T: "Attr", S: "nav_track", E: "nav_track_text" },
+    { id: "e64", T: "Attr", S: "nav_slider_container", E: "nav_goals" },
+    { id: "e65", T: "Attr", S: "nav_goals", E: "nav_goals_icon" },
+    { id: "e66", T: "Attr", S: "nav_goals", E: "nav_goals_text" },
+    { id: "e67", T: "Attr", S: "nav_slider_container", E: "nav_reports" },
+    { id: "e68", T: "Attr", S: "nav_reports", E: "nav_reports_icon" },
+    { id: "e69", T: "Attr", S: "nav_reports", E: "nav_reports_text" },
+    { id: "e70", T: "Attr", S: "nav_slider_container", E: "nav_settings" },
+    { id: "e71", T: "Attr", S: "nav_settings", E: "nav_settings_icon" },
+    { id: "e72", T: "Attr", S: "nav_settings", E: "nav_settings_text" }
+  ]
+}

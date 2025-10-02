@@ -1,0 +1,1131 @@
+{
+  vertexes: [
+    {
+      id: "website_layout_root",
+      L: "Component",
+      P: {
+        key: "RBWebsiteLayout"
+      }
+    },
+    {
+      id: "main_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: ${args.theme.var.color.background};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  background: ${args.theme.var.color.background}CC;
+}`;
+'''
+      }
+    },
+    {
+      id: "header_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.xl};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header_logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+}
+
+._id .icon {
+  color: ${args.theme.var.color.primary};
+}
+
+._id h1 {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  margin: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+._id h1:hover {
+  color: ${args.theme.var.color.primary_dark_200};
+}
+
+@media (max-width: 768px) {
+  ._id h1 {
+    font-size: ${args.theme.var.fontSize.lg};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "logo_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:rule-test",
+  width: 32,
+  height: 32
+};
+'''
+      }
+    },
+    {
+      id: "logo_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Personal Rulebook",
+  onClick: () => {
+    args.navigate("/");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "header_nav",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "nav"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.xl};
+  align-items: center;
+}
+
+._id a {
+  color: ${args.theme.var.color.text};
+  text-decoration: none;
+  font-weight: 500;
+  padding: ${args.theme.var.spacing.sm} 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+._id a:hover {
+  color: ${args.theme.var.color.primary};
+  border-bottom-color: ${args.theme.var.color.primary_light_200};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_about",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "About",
+  onClick: () => {
+    args.navigate("/about");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "nav_features",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Features",
+  onClick: () => {
+    args.navigate("/features");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "nav_contact",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Contact",
+  onClick: () => {
+    args.navigate("/contact");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "header_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  align-items: center;
+}
+
+._id button {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.lg};
+  border-radius: ${args.theme.var.borderRadius.md};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.sm};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+._id .login-btn {
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  border-color: ${args.theme.var.color.border};
+}
+
+._id .login-btn:hover {
+  background: ${args.theme.var.color.background_light_100};
+  border-color: ${args.theme.var.color.primary_light_200};
+  color: ${args.theme.var.color.primary};
+}
+
+._id .signup-btn {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border-color: ${args.theme.var.color.primary};
+}
+
+._id .signup-btn:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  border-color: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px ${args.theme.var.color.primary_light_400};
+}
+
+@media (max-width: 768px) {
+  ._id button {
+    padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.md};
+    font-size: ${args.theme.var.fontSize.xs};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "login_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Log In",
+  onClick: () => {
+    args.navigate("/auth/signin");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "signup_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Sign Up",
+  onClick: () => {
+    args.navigate("/auth/signup");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "main_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "content_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        props: '''
+return {
+  name: "children"
+};
+'''
+      }
+    },
+    {
+      id: "footer_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border-top: 1px solid ${args.theme.var.color.border};
+  margin-top: ${args.theme.var.spacing.xxl};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing.xxl} ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: ${args.theme.var.spacing.xxl};
+  margin-bottom: ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: ${args.theme.var.spacing.xl};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_brand",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id h3 {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.md};
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}
+
+._id .icon {
+  color: ${args.theme.var.color.primary};
+}
+
+._id p {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_brand_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3"
+};
+'''
+      }
+    },
+    {
+      id: "footer_brand_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:rule-test",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "footer_brand_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  text: "Personal Rulebook"
+};
+'''
+      }
+    },
+    {
+      id: "footer_brand_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Transform your personal principles into trackable habits and build the life you want through consistent daily actions."
+};
+'''
+      }
+    },
+    {
+      id: "footer_product",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id h4 {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.lg};
+  font-size: ${args.theme.var.fontSize.md};
+}
+
+._id ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+._id li {
+  margin-bottom: ${args.theme.var.spacing.sm};
+}
+
+._id a {
+  color: ${args.theme.var.color.muted};
+  text-decoration: none;
+  font-size: ${args.theme.var.fontSize.sm};
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id a:hover {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_product_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Product"
+};
+'''
+      }
+    },
+    {
+      id: "footer_product_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+'''
+      }
+    },
+    {
+      id: "footer_product_features",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "footer_product_features_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Features",
+  onClick: () => {
+    args.navigate("/features");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer_product_pricing",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "footer_product_pricing_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Pricing",
+  onClick: () => {
+    args.navigate("/pricing");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer_product_roadmap",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "footer_product_roadmap_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Docs",
+  onClick: () => {
+    args.navigate("/docs");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer_company",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id h4 {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.lg};
+  font-size: ${args.theme.var.fontSize.md};
+}
+
+._id ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+._id li {
+  margin-bottom: ${args.theme.var.spacing.sm};
+}
+
+._id a {
+  color: ${args.theme.var.color.muted};
+  text-decoration: none;
+  font-size: ${args.theme.var.fontSize.sm};
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id a:hover {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_company_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Company"
+};
+'''
+      }
+    },
+    {
+      id: "footer_company_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+'''
+      }
+    },
+    {
+      id: "footer_company_about",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "footer_company_about_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "About",
+  onClick: () => {
+    args.navigate("/about");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer_company_contact",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "footer_company_contact_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Contact",
+  onClick: () => {
+    args.navigate("/contact");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer_support",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id h4 {
+  color: ${args.theme.var.color.text};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.lg};
+  font-size: ${args.theme.var.fontSize.md};
+}
+
+._id ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+._id li {
+  margin-bottom: ${args.theme.var.spacing.sm};
+}
+
+._id a {
+  color: ${args.theme.var.color.muted};
+  text-decoration: none;
+  font-size: ${args.theme.var.fontSize.sm};
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id a:hover {
+  color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_support_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Support"
+};
+'''
+      }
+    },
+    {
+      id: "footer_support_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+'''
+      }
+    },
+    {
+      id: "footer_support_documentation",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li"
+};
+'''
+      }
+    },
+    {
+      id: "footer_support_documentation_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Documentation",
+  onClick: () => {
+    args.navigate("/docs");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer_bottom",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding-top: ${args.theme.var.spacing.xl};
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+}
+
+._id .legal-links {
+  display: flex;
+  gap: ${args.theme.var.spacing.lg};
+}
+
+._id a {
+  color: ${args.theme.var.color.muted};
+  text-decoration: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+._id a:hover {
+  color: ${args.theme.var.color.primary};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: ${args.theme.var.spacing.lg};
+    text-align: center;
+  }
+
+  ._id .legal-links {
+    gap: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_copyright",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "© 2024 Personal Rulebook. All rights reserved."
+};
+'''
+      }
+    },
+    {
+      id: "footer_legal_links",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.lg};
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: ${args.theme.var.spacing.md};
+    align-items: flex-start;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "footer_privacy_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Privacy Policy",
+  onClick: () => {
+    args.navigate("/privacy");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer_terms_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Terms of Service",
+  onClick: () => {
+    args.navigate("/terms");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "footer_cookies_link",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  text: "Cookie Policy",
+  onClick: () => {
+    args.navigate("/cookies");
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "website_layout_root", E: "main_container" },
+    { id: "e2", T: "Attr", S: "main_container", E: "header_section" },
+    { id: "e3", T: "Attr", S: "header_section", E: "header_container" },
+    { id: "e4", T: "Attr", S: "header_container", E: "header_logo" },
+    { id: "e5", T: "Attr", S: "header_logo", E: "logo_icon" },
+    { id: "e6", T: "Attr", S: "header_logo", E: "logo_text" },
+    { id: "e7", T: "Attr", S: "header_container", E: "header_nav" },
+    { id: "e8", T: "Attr", S: "header_nav", E: "nav_about" },
+    { id: "e9", T: "Attr", S: "header_nav", E: "nav_features" },
+    { id: "e10", T: "Attr", S: "header_nav", E: "nav_contact" },
+    { id: "e11", T: "Attr", S: "header_container", E: "header_actions" },
+    { id: "e12", T: "Attr", S: "header_actions", E: "login_button" },
+    { id: "e13", T: "Attr", S: "header_actions", E: "signup_button" },
+    { id: "e14", T: "Attr", S: "main_container", E: "main_content" },
+    { id: "e15", T: "Attr", S: "main_content", E: "content_slot" },
+    { id: "e16", T: "Attr", S: "main_container", E: "footer_section" },
+    { id: "e17", T: "Attr", S: "footer_section", E: "footer_container" },
+    { id: "e18", T: "Attr", S: "footer_container", E: "footer_content" },
+    { id: "e19", T: "Attr", S: "footer_content", E: "footer_brand" },
+    { id: "e20", T: "Attr", S: "footer_brand", E: "footer_brand_title" },
+    { id: "e21", T: "Attr", S: "footer_brand_title", E: "footer_brand_icon" },
+    { id: "e22", T: "Attr", S: "footer_brand_title", E: "footer_brand_text" },
+    { id: "e23", T: "Attr", S: "footer_brand", E: "footer_brand_desc" },
+    { id: "e24", T: "Attr", S: "footer_content", E: "footer_product" },
+    { id: "e25", T: "Attr", S: "footer_product", E: "footer_product_title" },
+    { id: "e26", T: "Attr", S: "footer_product", E: "footer_product_list" },
+    { id: "e27", T: "Attr", S: "footer_product_list", E: "footer_product_features" },
+    { id: "e28", T: "Attr", S: "footer_product_features", E: "footer_product_features_link" },
+    { id: "e29", T: "Attr", S: "footer_product_list", E: "footer_product_pricing" },
+    { id: "e30", T: "Attr", S: "footer_product_pricing", E: "footer_product_pricing_link" },
+    { id: "e31", T: "Attr", S: "footer_product_list", E: "footer_product_roadmap" },
+    { id: "e32", T: "Attr", S: "footer_product_roadmap", E: "footer_product_roadmap_link" },
+    { id: "e33", T: "Attr", S: "footer_content", E: "footer_company" },
+    { id: "e34", T: "Attr", S: "footer_company", E: "footer_company_title" },
+    { id: "e35", T: "Attr", S: "footer_company", E: "footer_company_list" },
+    { id: "e36", T: "Attr", S: "footer_company_list", E: "footer_company_about" },
+    { id: "e37", T: "Attr", S: "footer_company_about", E: "footer_company_about_link" },
+    { id: "e38", T: "Attr", S: "footer_company_list", E: "footer_company_contact" },
+    { id: "e39", T: "Attr", S: "footer_company_contact", E: "footer_company_contact_link" },
+    { id: "e42", T: "Attr", S: "footer_content", E: "footer_support" },
+    { id: "e43", T: "Attr", S: "footer_support", E: "footer_support_title" },
+    { id: "e44", T: "Attr", S: "footer_support", E: "footer_support_list" },
+    { id: "e47", T: "Attr", S: "footer_support_list", E: "footer_support_documentation" },
+    { id: "e48", T: "Attr", S: "footer_support_documentation", E: "footer_support_documentation_link" },
+    { id: "e51", T: "Attr", S: "footer_container", E: "footer_bottom" },
+    { id: "e52", T: "Attr", S: "footer_bottom", E: "footer_copyright" },
+    { id: "e53", T: "Attr", S: "footer_bottom", E: "footer_legal_links" },
+    { id: "e54", T: "Attr", S: "footer_legal_links", E: "footer_privacy_link" },
+    { id: "e55", T: "Attr", S: "footer_legal_links", E: "footer_terms_link" },
+    { id: "e56", T: "Attr", S: "footer_legal_links", E: "footer_cookies_link" }
+  ]
+}

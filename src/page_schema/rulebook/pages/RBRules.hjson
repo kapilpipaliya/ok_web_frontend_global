@@ -1,0 +1,1471 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "RBRules",
+        url: "/rb/rules",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+// Modal state management
+const [showRuleModal, setShowRuleModal] = args.createSignal(false);
+const [modalMode, setModalMode] = args.createSignal("create");
+const [selectedRule, setSelectedRule] = args.createSignal(null);
+
+// Data loading state
+const [rules, setRules] = args.createSignal([]);
+const [categories, setCategories] = args.createSignal([]);
+const [isLoading, setIsLoading] = args.createSignal(true);
+const [error, setError] = args.createSignal(null);
+
+// Tab filtering state
+const [activeTab, setActiveTab] = args.createSignal("all");
+
+// Derived signal for filtered categories with rules
+const filteredCategoriesWithRules = args.createMemo(() => {
+  const categoriesData = categories();
+  const rulesData = rules();
+  const currentTab = activeTab();
+
+  if (!Array.isArray(categoriesData) || !Array.isArray(rulesData)) {
+    return [];
+  }
+
+  // Filter rules based on active tab
+  const filteredRules = rulesData.filter(ruleData => {
+    const rule = ruleData.rule;
+
+    if (currentTab === "active") {
+      return rule?.P?.isActive !== false;
+    } else if (currentTab === "paused") {
+      return rule?.P?.isActive === false;
+    }
+    return true; // "all" tab
+  });
+
+  // Group filtered rules by category
+  const result = categoriesData.map(categoryData => {
+    const category = categoryData.category;
+    const categoryRules = filteredRules.filter(ruleData => {
+      const rule = ruleData.rule;
+      const ruleCategory = ruleData.category;
+      return ruleCategory?.id === category?.id;
+    });
+
+    return {
+      ...categoryData,
+      rules: categoryRules
+    };
+  }).filter(categoryData => categoryData.rules.length > 0);
+
+  return result;
+});
+
+// Load rules and categories on page mount
+const loadData = async () => {
+  setIsLoading(true);
+  setError(null);
+
+  try {
+    // Load rules and categories in parallel
+    const [rulesResult, categoriesResult] = await Promise.all([
+      args.executeNamedServerFunction({
+        functionName: "getUserRules",
+        contextData: { includeInactive: false }
+      }),
+      args.executeNamedServerFunction({
+        functionName: "getCategories",
+        contextData: {}
+      })
+    ]);
+
+    // Handle rules result
+    if (rulesResult.error) {
+      throw new Error(rulesResult.error);
+    }
+    if (rulesResult.result && rulesResult.result.success) {
+      setRules(rulesResult.result.data.rules || []);
+    } else {
+      throw new Error(rulesResult.result?.message || "Failed to load rules");
+    }
+
+    // Handle categories result
+    if (categoriesResult.error) {
+      throw new Error(categoriesResult.error);
+    }
+    if (categoriesResult.result && categoriesResult.result.success) {
+      setCategories(categoriesResult.result.data.categories || []);
+    } else {
+      throw new Error(categoriesResult.result?.message || "Failed to load categories");
+    }
+
+  } catch (err) {
+    console.error("Error loading data:", err);
+    setError(err.message);
+    args.showErrorToast(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Load data on mount
+const onMount = () => {
+  loadData();
+};
+
+// Refresh data after save/delete operations
+const refreshData = () => {
+  loadData();
+};
+
+return {
+  isNoPermissionCheck: true,
+  contextName: "ruleModal",
+  onMount,
+  data: {
+    showRuleModal,
+    setShowRuleModal,
+    modalMode,
+    setModalMode,
+    selectedRule,
+    setSelectedRule,
+    rules,
+    categories,
+    isLoading,
+    error,
+    refreshData,
+    activeTab,
+    setActiveTab,
+    filteredCategoriesWithRules
+  }
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "RBLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "page_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_left",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "back_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/rb",
+  "aria-label": "Back to home"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  text-decoration: none;
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+    color: ${args.theme.var.color.text};
+  }
+}
+
+@media (min-width: 768px) {
+  ._id {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "back_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-left",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Rules"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "header_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "search_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  "aria-label": "Search rules"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  text-decoration: none;
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "search_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:search",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "add_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const setShowRuleModal = args.contextData?.ruleModal?.setShowRuleModal;
+const setModalMode = args.contextData?.ruleModal?.setModalMode;
+
+return {
+  as: "button",
+  "aria-label": "Add new rule",
+  onClick: () => {
+    setModalMode?.("create");
+    setShowRuleModal?.(true);
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "add_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:add",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "search_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBTextInput",
+        props: '''
+return {
+  placeholder: "🔍 Search rules..."
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "filter_tabs",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: ${args.theme.var.spacing.xs};
+  margin-bottom: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_dark_200};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "tab_all",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const [activeTab, setActiveTab] = args.createSignal("all");
+const isActive = activeTab() === "all";
+
+return {
+  as: "button",
+  onClick: () => setActiveTab("all"),
+  data: { activeTab, setActiveTab }
+};
+''',
+        css: '''
+const activeTab = args.contextData?.ruleModal?.activeTab?.();
+const isActive = activeTab === "all";
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isActive ? args.theme.var.color.background : 'transparent'};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  text-align: center;
+
+  &:hover {
+    background: ${args.theme.var.color.background};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "tab_all_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const rules = args.contextData?.ruleModal?.rules?.() || [];
+const allRulesCount = Array.isArray(rules) ? rules.length : 0;
+
+return {
+  text: `All (${allRulesCount})`
+};
+'''
+      }
+    },
+    {
+      id: "tab_active",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const activeTab = args.contextData?.ruleModal?.activeTab;
+const setActiveTab = args.contextData?.ruleModal?.setActiveTab;
+const isActive = activeTab?.() === "active";
+
+return {
+  as: "button",
+  onClick: () => setActiveTab?.("active")
+};
+''',
+        css: '''
+const activeTab = args.contextData?.ruleModal?.activeTab?.();
+const isActive = activeTab === "active";
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isActive ? args.theme.var.color.background : 'transparent'};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  text-align: center;
+
+  &:hover {
+    background: ${args.theme.var.color.background};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "tab_active_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const rules = args.contextData?.ruleModal?.rules?.() || [];
+const activeRulesCount = Array.isArray(rules) ? rules.filter(ruleData => {
+  const rule = ruleData.rule;
+  return rule?.P?.isActive !== false;
+}).length : 0;
+
+return {
+  text: `Active (${activeRulesCount})`
+};
+'''
+      }
+    },
+    {
+      id: "tab_paused",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const activeTab = args.contextData?.ruleModal?.activeTab;
+const setActiveTab = args.contextData?.ruleModal?.setActiveTab;
+const isActive = activeTab?.() === "paused";
+
+return {
+  as: "button",
+  onClick: () => setActiveTab?.("paused")
+};
+''',
+        css: '''
+const activeTab = args.contextData?.ruleModal?.activeTab?.();
+const isActive = activeTab === "paused";
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isActive ? args.theme.var.color.background : 'transparent'};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  text-align: center;
+
+  &:hover {
+    background: ${args.theme.var.color.background};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "tab_paused_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const rules = args.contextData?.ruleModal?.rules?.() || [];
+const pausedRulesCount = Array.isArray(rules) ? rules.filter(ruleData => {
+  const rule = ruleData.rule;
+  return rule?.P?.isActive === false;
+}).length : 0;
+
+return {
+  text: `Paused (${pausedRulesCount})`
+};
+'''
+      }
+    },
+    {
+      id: "loading_container",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const isLoading = args.contextData?.ruleModal?.isLoading?.();
+
+return {
+  as: "div",
+  hide: !isLoading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.xl};
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBLoadingSpinner",
+        props: '''
+return {
+  size: "medium",
+  color: "primary",
+  text: "Loading rules..."
+};
+'''
+      }
+    },
+    {
+      id: "error_container",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const error = args.contextData?.ruleModal?.error?.();
+
+return {
+  as: "div",
+  hide: !error,
+  text: error ? `Error: ${error}` : ""
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.error};
+  font-size: ${args.theme.var.fontSize.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "rules_container",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+// Use the pre-computed filtered data from the page signal
+const filteredData = args.contextData?.ruleModal?.filteredCategoriesWithRules?.() || [];
+const isLoading = args.contextData?.ruleModal?.isLoading?.();
+const error = args.contextData?.ruleModal?.error?.();
+
+return {
+  as: "div",
+  contextName: "rulesData",
+  loop: true,
+  data: filteredData,
+  hide: error
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "category_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const category = args.contextData?.rulesData;
+if (!category) return { as: "div", hide: true };
+
+return {
+  as: "section"
+};
+'''
+      }
+    },
+    {
+      id: "category_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const categoryData = args.contextData?.rulesData;
+if (!categoryData) return { as: "div", hide: true };
+
+const category = categoryData.category;
+return {
+  as: "h2",
+  text: `${category?.P?.icon || "📝"} ${category?.P?.name || "Category"}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  padding-left: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "category_rules",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const categoryData = args.contextData?.rulesData;
+if (!categoryData) return { as: "div", hide: true };
+
+const categoryRules = categoryData.rules || [];
+
+return {
+  as: "div",
+  contextName: "categoryRules",
+  loop: true,
+  data: categoryRules
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+if (!ruleData) return { as: "div", hide: true };
+
+const rule = ruleData.rule;
+const ruleId = rule?.P?.key || rule?.id;
+return {
+  as: "a",
+  href: `/rb/rule-detail?ruleId=${ruleId}`
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const stats = ruleData?.stats;
+const isCompleted = stats?.completionRate > 80;
+const isPaused = rule?.P?.isActive === false;
+
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.md};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  ${isPaused ? 'opacity: 0.7;' : ''}
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    ${isPaused ? 'opacity: 1;' : ''}
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const stats = ruleData?.stats;
+const isCompleted = stats?.completionRate > 80;
+const isPaused = rule?.P?.isActive === false;
+
+return `._id {
+  width: 20px;
+  height: 20px;
+  border: 2px solid ${isCompleted ? args.theme.var.color.success : (isPaused ? args.theme.var.color.muted : args.theme.var.color.border)};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: ${isCompleted ? args.theme.var.color.success : 'transparent'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_check",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const stats = ruleData?.stats;
+const isCompleted = stats?.completionRate > 80;
+
+return {
+  as: "icon",
+  icon: "carbon:checkmark",
+  width: 12,
+  height: 12,
+  hide: !isCompleted
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_details",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "rule_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+return {
+  as: "div",
+  text: rule?.P?.title || "Rule"
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const isPaused = rule?.P?.isActive === false;
+
+return `._id {
+  font-weight: 500;
+  color: ${isPaused ? args.theme.var.color.muted : args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_meta",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const frequency = rule?.P?.frequency || "daily";
+const priority = rule?.P?.priority || "medium";
+
+const frequencyText = frequency.charAt(0).toUpperCase() + frequency.slice(1);
+const priorityText = priority.charAt(0).toUpperCase() + priority.slice(1);
+
+return {
+  as: "div",
+  text: `${frequencyText} • ${priorityText} Priority`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_status",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const stats = ruleData?.stats;
+const streak = stats?.currentStreak || 0;
+const isPaused = rule?.P?.isActive === false;
+
+let statusText = "";
+if (isPaused) {
+  statusText = "⏸️ Paused";
+} else if (streak > 0) {
+  statusText = `🔥 ${streak} day streak`;
+} else {
+  statusText = "📝 Active";
+}
+
+return {
+  as: "div",
+  text: statusText
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const stats = ruleData?.stats;
+const isPaused = rule?.P?.isActive === false;
+const streak = stats?.currentStreak || 0;
+
+let statusColor = args.theme.var.color.primary;
+if (isPaused) {
+  statusColor = args.theme.var.color.warning;
+} else if (streak > 0) {
+  statusColor = args.theme.var.color.success;
+}
+
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${statusColor};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBFloatingMenu",
+        props: '''
+return {
+  placement: "bottom-end",
+  triggerIcon: "carbon:overflow-menu-vertical"
+};
+'''
+      }
+    },
+    {
+      id: "rule_menu_edit",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+const ruleData = args.contextData.categoryRules;
+const rule = ruleData?.rule;
+const category = ruleData?.category;
+const { setShowRuleModal, setModalMode, setSelectedRule } = args.contextData.ruleModal || {};
+
+return {
+  icon: "carbon:edit",
+  text: "Edit Rule",
+  onClick: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    args.fns.closeMenu?.();
+
+    if (rule) {
+      // Format rule data for modal (same pattern as rule detail page)
+      const ruleForModal = {
+        id: rule.id,
+        P: {
+          ...rule.P,
+          categoryId: category?.id // Add categoryId to P properties where modal expects it
+        }
+      };
+
+      setSelectedRule?.(ruleForModal);
+      setModalMode?.("edit");
+      setShowRuleModal?.(true);
+    } else {
+      args.showErrorToast("Rule data not available");
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "rule_menu_view",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+const ruleData = args.contextData.categoryRules;
+const rule = ruleData?.rule;
+const ruleId = rule?.id;
+
+return {
+  icon: "carbon:view",
+  text: "View Details",
+  href: `/rb/rule-detail?ruleId=${ruleId}`,
+  onClick: (e) => {
+    e.stopPropagation();
+    args.fns.closeMenu?.();
+  }
+};
+'''
+      }
+    },
+    {
+      id: "rule_menu_divider",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+return {
+  isDivider: true
+};
+'''
+      }
+    },
+    {
+      id: "rule_menu_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+const ruleData = args.contextData.categoryRules;
+const rule = ruleData?.rule;
+const ruleName = rule?.P?.title || "this rule";
+const { refreshData } = args.contextData.ruleModal || {};
+
+return {
+  icon: "carbon:trash-can",
+  text: "Delete",
+  type: "danger",
+  onClick: async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    let warningMessage = `⚠️ WARNING: This will permanently delete:\n• The rule "${ruleName}"`;
+    warningMessage += `\n• All tracking data for this rule`;
+    warningMessage += `\n• All goals linked to this rule`;
+    warningMessage += `\n• All streak data for this rule`;
+    warningMessage += `\n\nThis action cannot be undone!`;
+
+    // Use global confirm dialog
+    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    if (!rbConfirm) {
+      args.showErrorToast("Confirmation dialog not available");
+      return;
+    }
+
+    const confirmed = await rbConfirm({
+      title: `Delete "${ruleName}"`,
+      message: warningMessage,
+      confirmText: "Delete Rule",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+
+    if (confirmed) {
+      try {
+        const result = await args.executeNamedServerFunction({
+          functionName: "deleteRule",
+          contextData: {
+            ruleId: rule?.id
+          }
+        });
+
+        if (result.result?.success) {
+          args.showSuccessToast("Rule deleted successfully");
+          refreshData?.();
+        } else {
+          throw new Error(result.result?.message || "Failed to delete rule");
+        }
+      } catch (err) {
+        args.showErrorToast(err.message);
+      }
+    }
+    args.fns.closeMenu?.();
+  }
+};
+'''
+      }
+    },
+    {
+      id: "empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+const filteredData = args.contextData?.ruleModal?.filteredCategoriesWithRules?.() || [];
+const isLoading = args.contextData?.ruleModal?.isLoading?.();
+const error = args.contextData?.ruleModal?.error?.();
+
+return {
+  as: "div",
+  hide: isLoading || error || filteredData.length > 0
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.xxxl};
+  text-align: center;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "empty_message",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "No rules found. Create your first rule to get started!"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "empty_create_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const setShowRuleModal = args.contextData?.ruleModal?.setShowRuleModal;
+const setModalMode = args.contextData?.ruleModal?.setModalMode;
+
+return {
+  text: "Create Rule",
+  variant: "primary",
+  onClick: () => {
+    setModalMode?.("create");
+    setShowRuleModal?.(true);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "floating_add_button",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+const setShowRuleModal = args.contextData?.ruleModal?.setShowRuleModal;
+const setModalMode = args.contextData?.ruleModal?.setModalMode;
+
+return {
+  as: "button",
+  "aria-label": "Add new rule",
+  onClick: () => {
+    setModalMode?.("create");
+    setShowRuleModal?.(true);
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  bottom: 92px;
+  right: ${args.theme.var.spacing.lg};
+  width: 56px;
+  height: 56px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all ${args.theme.var.animation.fast} ease;
+  z-index: ${args.theme.var.zIndex.dropdown};
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+@media (min-width: 768px) {
+  ._id {
+    bottom: ${args.theme.var.spacing.lg};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "floating_add_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:add",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "rule_form_modal",
+      L: "Attr",
+      P: {
+        displayOrder: 999,
+        componentName: "RBRuleFormModal",
+        props: '''
+const showRuleModal = args.contextData.ruleModal?.showRuleModal;
+const modalMode = args.contextData.ruleModal?.modalMode;
+const selectedRule = args.contextData.ruleModal?.selectedRule;
+const setShowRuleModal = args.contextData.ruleModal?.setShowRuleModal;
+
+return {
+  isOpen: showRuleModal?.(),
+  mode: modalMode?.(),
+  ruleData: selectedRule?.(),
+  onClose: () => {
+    setShowRuleModal?.(false);
+  },
+  onSave: (result) => {
+    // Refresh rules data after successful save
+    const refreshData = args.contextData.ruleModal?.refreshData;
+    if (refreshData) {
+      refreshData();
+    }
+  },
+  onDelete: (result) => {
+    // Refresh rules data after successful delete
+    const refreshData = args.contextData.ruleModal?.refreshData;
+    if (refreshData) {
+      refreshData();
+    }
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
+    { id: "e3", T: "Attr", S: "page_content", E: "header" },
+    { id: "e4", T: "Attr", S: "header", E: "header_left" },
+    { id: "e5", T: "Attr", S: "header_left", E: "back_button" },
+    { id: "e6", T: "Attr", S: "back_button", E: "back_icon" },
+    { id: "e7", T: "Attr", S: "header_left", E: "page_title" },
+    { id: "e8", T: "Attr", S: "header", E: "header_actions" },
+    { id: "e9", T: "Attr", S: "header_actions", E: "search_button" },
+    { id: "e10", T: "Attr", S: "search_button", E: "search_icon" },
+    { id: "e11", T: "Attr", S: "header_actions", E: "add_button" },
+    { id: "e12", T: "Attr", S: "add_button", E: "add_icon" },
+    { id: "e13", T: "Attr", S: "page_content", E: "search_bar" },
+    { id: "e14", T: "Attr", S: "search_bar", E: "search_input" },
+    { id: "e15", T: "Attr", S: "page_content", E: "filter_tabs" },
+    { id: "e16", T: "Attr", S: "filter_tabs", E: "tab_all" },
+    { id: "e17", T: "Attr", S: "tab_all", E: "tab_all_text" },
+    { id: "e18", T: "Attr", S: "filter_tabs", E: "tab_active" },
+    { id: "e19", T: "Attr", S: "tab_active", E: "tab_active_text" },
+    { id: "e20", T: "Attr", S: "filter_tabs", E: "tab_paused" },
+    { id: "e21", T: "Attr", S: "tab_paused", E: "tab_paused_text" },
+    { id: "e22", T: "Attr", S: "page_content", E: "loading_container" },
+    { id: "e22a", T: "Attr", S: "loading_container", E: "loading_spinner" },
+    { id: "e22c", T: "Attr", S: "page_content", E: "error_container" },
+    { id: "e23", T: "Attr", S: "page_content", E: "rules_container" },
+    { id: "e24", T: "Attr", S: "rules_container", E: "category_section" },
+    { id: "e25", T: "Attr", S: "category_section", E: "category_header" },
+    { id: "e26", T: "Attr", S: "category_section", E: "category_rules" },
+    { id: "e27", T: "Attr", S: "category_rules", E: "rule_item" },
+    { id: "e28", T: "Attr", S: "rule_item", E: "rule_content" },
+    { id: "e29", T: "Attr", S: "rule_content", E: "rule_info" },
+    { id: "e30", T: "Attr", S: "rule_info", E: "rule_checkbox" },
+    { id: "e31", T: "Attr", S: "rule_checkbox", E: "rule_check" },
+    { id: "e32", T: "Attr", S: "rule_info", E: "rule_details" },
+    { id: "e33", T: "Attr", S: "rule_details", E: "rule_title" },
+    { id: "e34", T: "Attr", S: "rule_details", E: "rule_meta" },
+    { id: "e35", T: "Attr", S: "rule_details", E: "rule_status" },
+    { id: "e36", T: "Attr", S: "rule_content", E: "rule_actions" },
+    { id: "e37", T: "Attr", S: "rule_actions", E: "rule_menu_edit" },
+    { id: "e38", T: "Attr", S: "rule_actions", E: "rule_menu_view" },
+    { id: "e39", T: "Attr", S: "rule_actions", E: "rule_menu_divider" },
+    { id: "e40", T: "Attr", S: "rule_actions", E: "rule_menu_delete" },
+    { id: "e41", T: "Attr", S: "page_content", E: "empty_state" },
+    { id: "e42", T: "Attr", S: "empty_state", E: "empty_message" },
+    { id: "e43", T: "Attr", S: "empty_state", E: "empty_create_button" },
+    { id: "e44", T: "Attr", S: "page_content", E: "floating_add_button" },
+    { id: "e45", T: "Attr", S: "floating_add_button", E: "floating_add_icon" },
+    { id: "e46", T: "Attr", S: "page_content", E: "rule_form_modal" }
+  ]
+}

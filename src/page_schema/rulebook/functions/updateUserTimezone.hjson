@@ -1,0 +1,101 @@
+{
+  vertexes: [
+    {
+      id: "update_user_timezone_function",
+      L: "Function",
+      P: {
+        key: "updateUserTimezone",
+        description: "Updates the user's timezone preference in their User vertex",
+        body: '''
+try {
+  // Extract timezone from request
+  const { timezone } = args.contextData;
+
+  // Validate required fields
+  if (!timezone) {
+    throw new Error("Timezone is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Validate timezone format (basic IANA timezone validation)
+  const validTimezonePattern = /^[A-Za-z]+\/[A-Za-z_]+(?:\/[A-Za-z_]+)?$/;
+  const isValidFormat = validTimezonePattern.test(timezone) ||
+                        timezone === 'UTC' ||
+                        timezone.startsWith('Etc/');
+
+  if (!isValidFormat) {
+    throw new Error(`Invalid timezone format: ${timezone}`);
+  }
+
+  // Update user's timezone in the database
+  const updateQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    SET u.timeZone = $timezone,
+        u.updatedAt = datetime()
+    RETURN u.timeZone as newTimezone
+  `;
+
+  const result = await args.session.run(updateQuery, {
+    userUuid: user.P.uuid,
+    timezone
+  });
+
+  if (result.records.length === 0) {
+    throw new Error("Failed to update timezone. User not found.");
+  }
+
+  const newTimezone = result.records[0].get('newTimezone');
+
+  // Get current time in the new timezone for user feedback
+  const now = new Date();
+  const userLocalTime = new Intl.DateTimeFormat('en-US', {
+    timeZone: newTimezone,
+    dateStyle: 'full',
+    timeStyle: 'long'
+  }).format(now);
+
+  return {
+    success: true,
+    message: `Timezone updated to ${newTimezone}`,
+    data: {
+      timezone: newTimezone,
+      currentTime: userLocalTime,
+      previousTimezone: user.P.timeZone || 'UTC'
+    }
+  };
+
+} catch (error) {
+  console.error("Error updating user timezone:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to update timezone. Please try again.";
+
+  if (error.message.includes("Timezone is required")) {
+    userMessage = "Please select a timezone.";
+  } else if (error.message.includes("Invalid timezone format")) {
+    userMessage = error.message;
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "TimezoneUpdateError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

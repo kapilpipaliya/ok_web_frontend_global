@@ -1,0 +1,1065 @@
+{
+  vertexes: [
+    {
+      id: "docs_page",
+      L: "Page",
+      P: {
+        key: "RBDocs",
+        url: "/docs",
+        title: "Documentation - Personal Rulebook",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "docs_layout_1",
+      L: "PageLayout",
+      P: {
+        componentName: "RBWebsiteLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "docs_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.lg};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.lg} ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "docs_hero",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: ${args.theme.var.spacing.xxl};
+  padding: ${args.theme.var.spacing.xl} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "docs_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "📚 Documentation"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  text-shadow: 0 2px 4px ${args.theme.var.color.primary_light_200};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "docs_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Everything you need to know to master Personal Rulebook and build better habits."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.xl} 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "docs_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: ${args.theme.var.spacing.lg};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "getting_started_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: ${args.theme.var.spacing.xl};
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "getting_started_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:rocket",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "getting_started_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Getting Started"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "getting_started_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Learn the basics of Personal Rulebook and set up your first rules to start building better habits today."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "getting_started_list",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+._id li {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.sm} 0;
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+}
+
+._id li::before {
+  content: '→';
+  color: ${args.theme.var.color.primary};
+  font-weight: bold;
+}`;
+'''
+      }
+    },
+    {
+      id: "getting_started_item_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Create your account and profile"
+};
+'''
+      }
+    },
+    {
+      id: "getting_started_item_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Set up your first personal rule"
+};
+'''
+      }
+    },
+    {
+      id: "getting_started_item_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Start tracking and building streaks"
+};
+'''
+      }
+    },
+    {
+      id: "getting_started_item_4",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Monitor your progress and analytics"
+};
+'''
+      }
+    },
+    {
+      id: "features_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: ${args.theme.var.spacing.xl};
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "features_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:settings",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "features_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Features Guide"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "features_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Explore all the powerful features Personal Rulebook offers to help you achieve your goals and build lasting habits."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "features_list",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+._id li {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.sm} 0;
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+}
+
+._id li::before {
+  content: '⚙️';
+  font-size: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "features_item_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Rule management and organization"
+};
+'''
+      }
+    },
+    {
+      id: "features_item_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Progress tracking and streaks"
+};
+'''
+      }
+    },
+    {
+      id: "features_item_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Analytics and reports"
+};
+'''
+      }
+    },
+    {
+      id: "features_item_4",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Goal setting and achievement"
+};
+'''
+      }
+    },
+    {
+      id: "api_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: ${args.theme.var.spacing.xl};
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "api_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:api",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.info};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "api_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "API Reference"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "api_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Integrate Personal Rulebook with your own applications using our comprehensive API documentation."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "api_list",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+._id li {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.sm} 0;
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+}
+
+._id li::before {
+  content: '🔗';
+  font-size: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "api_item_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Authentication and authorization"
+};
+'''
+      }
+    },
+    {
+      id: "api_item_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Rules and tracking endpoints"
+};
+'''
+      }
+    },
+    {
+      id: "api_item_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Analytics and reporting API"
+};
+'''
+      }
+    },
+    {
+      id: "api_item_4",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Webhooks and integrations"
+};
+'''
+      }
+    },
+    {
+      id: "guides_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: ${args.theme.var.spacing.xl};
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "guides_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:book",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.warning};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "guides_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Best Practices"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "guides_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Learn proven strategies and best practices for creating effective rules and building sustainable habits."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "guides_list",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+._id li {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  padding: ${args.theme.var.spacing.sm} 0;
+  color: ${args.theme.var.color.text};
+  font-weight: 500;
+}
+
+._id li::before {
+  content: '💡';
+  font-size: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "guides_item_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "How to create effective rules"
+};
+'''
+      }
+    },
+    {
+      id: "guides_item_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Building sustainable habits"
+};
+'''
+      }
+    },
+    {
+      id: "guides_item_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Overcoming common challenges"
+};
+'''
+      }
+    },
+    {
+      id: "guides_item_4",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Maximizing your success rate"
+};
+'''
+      }
+    },
+    {
+      id: "cta_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-top: ${args.theme.var.spacing.xxl};
+  padding: ${args.theme.var.spacing.xl} 0;
+  background: ${args.theme.var.color.background_light_50};
+  border-radius: 1rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Ready to Start Building Better Habits?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Join thousands of people who are transforming their lives with Personal Rulebook."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.xl} 0;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "cta_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/auth/signup",
+  text: "Get Started Free"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+._id:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  ._id {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "docs_page", E: "docs_layout_1" },
+    { id: "e2", T: "Attr", S: "docs_page", E: "docs_container" },
+    { id: "e3", T: "Attr", S: "docs_container", E: "docs_hero" },
+    { id: "e4", T: "Attr", S: "docs_hero", E: "docs_title" },
+    { id: "e5", T: "Attr", S: "docs_hero", E: "docs_subtitle" },
+    { id: "e6", T: "Attr", S: "docs_container", E: "docs_grid" },
+    { id: "e7", T: "Attr", S: "docs_grid", E: "getting_started_section" },
+    { id: "e8", T: "Attr", S: "getting_started_section", E: "getting_started_icon" },
+    { id: "e9", T: "Attr", S: "getting_started_section", E: "getting_started_title" },
+    { id: "e10", T: "Attr", S: "getting_started_section", E: "getting_started_desc" },
+    { id: "e11", T: "Attr", S: "getting_started_section", E: "getting_started_list" },
+    { id: "e12", T: "Attr", S: "getting_started_list", E: "getting_started_item_1" },
+    { id: "e13", T: "Attr", S: "getting_started_list", E: "getting_started_item_2" },
+    { id: "e14", T: "Attr", S: "getting_started_list", E: "getting_started_item_3" },
+    { id: "e15", T: "Attr", S: "getting_started_list", E: "getting_started_item_4" },
+    { id: "e16", T: "Attr", S: "docs_grid", E: "features_section" },
+    { id: "e17", T: "Attr", S: "features_section", E: "features_icon" },
+    { id: "e18", T: "Attr", S: "features_section", E: "features_title" },
+    { id: "e19", T: "Attr", S: "features_section", E: "features_desc" },
+    { id: "e20", T: "Attr", S: "features_section", E: "features_list" },
+    { id: "e21", T: "Attr", S: "features_list", E: "features_item_1" },
+    { id: "e22", T: "Attr", S: "features_list", E: "features_item_2" },
+    { id: "e23", T: "Attr", S: "features_list", E: "features_item_3" },
+    { id: "e24", T: "Attr", S: "features_list", E: "features_item_4" },
+    { id: "e25", T: "Attr", S: "docs_grid", E: "api_section" },
+    { id: "e26", T: "Attr", S: "api_section", E: "api_icon" },
+    { id: "e27", T: "Attr", S: "api_section", E: "api_title" },
+    { id: "e28", T: "Attr", S: "api_section", E: "api_desc" },
+    { id: "e29", T: "Attr", S: "api_section", E: "api_list" },
+    { id: "e30", T: "Attr", S: "api_list", E: "api_item_1" },
+    { id: "e31", T: "Attr", S: "api_list", E: "api_item_2" },
+    { id: "e32", T: "Attr", S: "api_list", E: "api_item_3" },
+    { id: "e33", T: "Attr", S: "api_list", E: "api_item_4" },
+    { id: "e34", T: "Attr", S: "docs_grid", E: "guides_section" },
+    { id: "e35", T: "Attr", S: "guides_section", E: "guides_icon" },
+    { id: "e36", T: "Attr", S: "guides_section", E: "guides_title" },
+    { id: "e37", T: "Attr", S: "guides_section", E: "guides_desc" },
+    { id: "e38", T: "Attr", S: "guides_section", E: "guides_list" },
+    { id: "e39", T: "Attr", S: "guides_list", E: "guides_item_1" },
+    { id: "e40", T: "Attr", S: "guides_list", E: "guides_item_2" },
+    { id: "e41", T: "Attr", S: "guides_list", E: "guides_item_3" },
+    { id: "e42", T: "Attr", S: "guides_list", E: "guides_item_4" },
+    { id: "e43", T: "Attr", S: "docs_container", E: "cta_section" },
+    { id: "e44", T: "Attr", S: "cta_section", E: "cta_title" },
+    { id: "e45", T: "Attr", S: "cta_section", E: "cta_desc" },
+    { id: "e46", T: "Attr", S: "cta_section", E: "cta_button" }
+  ]
+}

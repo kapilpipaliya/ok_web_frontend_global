@@ -1,0 +1,271 @@
+{
+  vertexes: [
+    {
+      id: "update_goal_progress_function",
+      L: "Function",
+      P: {
+        key: "updateGoalProgress",
+        description: "Updates goal progress based on tracking data with automatic progress calculation and completion detection",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { goalId, manualProgress, ruleId } = args.contextData;
+
+  // Validate required fields
+  if (!goalId && !ruleId) {
+    throw new Error("Either Goal ID or Rule ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Build query to find goals
+  let goalQuery = '';
+  let queryParams = { userUuid: user.P.uuid };
+
+  if (goalId) {
+    goalQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      WHERE elementId(rg) = $goalId
+      RETURN rg, r
+    `;
+    queryParams.goalId = goalId;
+  } else if (ruleId) {
+    goalQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      WHERE elementId(r) = $ruleId
+      RETURN rg, r
+    `;
+    queryParams.ruleId = ruleId;
+  }
+
+  const goalResult = await args.session.run(goalQuery, queryParams);
+
+  if (goalResult.records.length === 0) {
+    throw new Error("No goals found for the specified criteria");
+  }
+
+  const results = [];
+
+  // Process each goal found
+  for (const record of goalResult.records) {
+    const goalNode = record.get('rg');
+    const ruleNode = record.get('r');
+    const goal = args.convertNodeToJson(goalNode);
+    const rule = args.convertNodeToJson(ruleNode);
+
+    // Skip if goal is already completed (unless manual progress is provided)
+    if (goal.P.isCompleted && manualProgress === undefined) {
+      continue;
+    }
+
+    const goalType = goal.P.goalType;
+    const targetValue = goal.P.targetValue;
+    let currentValue = goal.P.currentValue || 0;
+
+    // Calculate new current value based on goal type (unless manual progress is specified)
+    if (manualProgress !== undefined && manualProgress !== null) {
+      // Use manual progress value
+      currentValue = parseInt(manualProgress);
+
+      if (currentValue < 0) {
+        throw new Error("Manual progress value cannot be negative");
+      }
+    } else {
+      // Auto-calculate based on goal type
+      switch (goalType) {
+        case 'streak':
+          // Get current streak from streak data
+          const streakQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+            WHERE elementId(r) = $ruleId
+            RETURN COALESCE(rs.currentStreak, 0) as streakValue
+          `;
+
+          const streakResult = await args.session.run(streakQuery, {
+            userUuid: user.P.uuid,
+            ruleId: rule.id
+          });
+
+          if (streakResult.records.length > 0) {
+            currentValue = args.neo4jConvert.js(streakResult.records[0].get('streakValue')) || 0;
+          }
+          break;
+
+        case 'completion_count':
+          // Get total completions from streak data
+          const completionQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+            WHERE elementId(r) = $ruleId
+            RETURN COALESCE(rs.totalCompletions, 0) as completionValue
+          `;
+
+          const completionResult = await args.session.run(completionQuery, {
+            userUuid: user.P.uuid,
+            ruleId: rule.id
+          });
+
+          if (completionResult.records.length > 0) {
+            currentValue = args.neo4jConvert.js(completionResult.records[0].get('completionValue')) || 0;
+          }
+          break;
+
+        case 'time_based':
+          // Calculate based on days since goal creation
+          const createdAt = new Date(goal.P.createdAt);
+          const today = new Date();
+          const daysSinceCreation = Math.floor((today - createdAt) / (1000 * 60 * 60 * 24));
+
+          switch (goal.P.unit) {
+            case 'days':
+              currentValue = daysSinceCreation;
+              break;
+            case 'weeks':
+              currentValue = Math.floor(daysSinceCreation / 7);
+              break;
+            case 'months':
+              currentValue = Math.floor(daysSinceCreation / 30);
+              break;
+          }
+          break;
+
+        case 'percentage':
+          // Calculate completion percentage based on recent tracking data
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+          const percentageQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)
+            WHERE elementId(r) = $ruleId AND rt.date >= $startDate
+            WITH COUNT(*) as total,
+                 COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
+                 COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial
+            RETURN CASE
+              WHEN total > 0 THEN ROUND(((completed + (partial * 0.7)) / total) * 100)
+              ELSE 0
+            END as percentageValue
+          `;
+
+          const percentageResult = await args.session.run(percentageQuery, {
+            userUuid: user.P.uuid,
+            ruleId: rule.id,
+            startDate: thirtyDaysAgoStr
+          });
+
+          if (percentageResult.records.length > 0) {
+            currentValue = args.neo4jConvert.js(percentageResult.records[0].get('percentageValue')) || 0;
+          }
+          break;
+      }
+    }
+
+    // Check if goal is now completed
+    const isCompleted = currentValue >= targetValue;
+    const wasCompleted = goal.P.isCompleted;
+
+    // Calculate progress percentage
+    const progressPercentage = Math.min(Math.round((currentValue / targetValue) * 100), 100);
+
+    // Update the goal
+    const updateQuery = `
+      MATCH (rg:RuleGoal) WHERE elementId(rg) = $goalId
+      SET
+        rg.currentValue = $currentValue,
+        rg.isCompleted = $isCompleted,
+        rg.completedAt = CASE WHEN $isCompleted AND NOT rg.isCompleted THEN datetime() ELSE rg.completedAt END,
+        rg.updatedAt = datetime()
+      RETURN rg
+    `;
+
+    await args.session.run(updateQuery, {
+      goalId: goal.id,
+      currentValue,
+      isCompleted
+    });
+
+    results.push({
+      goalId: goal.id,
+      goalTitle: goal.P.title,
+      ruleId: rule.id,
+      ruleTitle: rule.P.title,
+      goalType: goal.P.goalType,
+      unit: goal.P.unit,
+      targetValue,
+      oldCurrentValue: goal.P.currentValue || 0,
+      newCurrentValue: currentValue,
+      progressPercentage,
+      isCompleted,
+      wasCompleted,
+      justCompleted: isCompleted && !wasCompleted,
+      reward: goal.P.reward
+    });
+  }
+
+  if (results.length === 0) {
+    return {
+      success: true,
+      message: "No goals required updates.",
+      data: {
+        updatedGoals: 0,
+        results: [],
+        userId: user.P.uuid
+      }
+    };
+  }
+
+  // Count newly completed goals
+  const newlyCompleted = results.filter(r => r.justCompleted).length;
+  const totalUpdated = results.length;
+
+  let message = `Updated ${totalUpdated} goal${totalUpdated > 1 ? 's' : ''}`;
+  if (newlyCompleted > 0) {
+    message += `. 🎉 ${newlyCompleted} goal${newlyCompleted > 1 ? 's' : ''} completed!`;
+  }
+
+  return {
+    success: true,
+    message,
+    data: {
+      updatedGoals: totalUpdated,
+      newlyCompleted,
+      results,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error updating goal progress:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to update goal progress. Please try again.";
+
+  if (error.message.includes("Goal ID or Rule ID is required")) {
+    userMessage = "Either Goal ID or Rule ID is required to update progress.";
+  } else if (error.message.includes("No goals found")) {
+    userMessage = "No goals were found for the specified criteria.";
+  } else if (error.message.includes("cannot be negative")) {
+    userMessage = "Progress value cannot be negative.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "GoalUpdateError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

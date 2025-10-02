@@ -48,6 +48,13 @@ const [sortBy, setSortBy] = args.createSignal('index');
 const [searchQuery, setSearchQuery] = args.createSignal('');
 const [filteredVideos, setFilteredVideos] = args.createSignal([]);
 
+// Custom order state
+const [customOrder, setCustomOrder] = args.createSignal([]);
+const [isDragging, setIsDragging] = args.createSignal(false);
+const [draggedVideoId, setDraggedVideoId] = args.createSignal(null);
+const [dragOverVideoId, setDragOverVideoId] = args.createSignal(null);
+const [isSavingOrder, setIsSavingOrder] = args.createSignal(false);
+
 // Get playlist ID from URL params
 const playlistId = args.searchParams?.playlistId || args.params?.playlistId;
 
@@ -79,6 +86,7 @@ const loadPlaylistVideos = async () => {
       setVideos(result.result.data.videos);
       setFilteredVideos(result.result.data.videos);
       setSortBy(playlistData.playlistSettings?.P?.sortBy || 'index');
+      setCustomOrder(playlistData.playlistSettings?.P?.customOrder || []);
     } else {
       const errorMessage = result.result?.message || result.message || "Failed to load playlist videos";
       setError(errorMessage);
@@ -162,6 +170,290 @@ const clearPlaylistSettings = async () => {
   }
 };
 
+// Save sort preference to database
+const saveSortPreference = async (newSortBy, newCustomOrder = null) => {
+  if (!playlistId) return;
+
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "updatePlaylistSortPreference",
+      contextData: {
+        playlistId,
+        sortBy: newSortBy,
+        customOrder: newCustomOrder
+      }
+    });
+
+    if (result.error) {
+      args.showErrorToast("Failed to save sort preference");
+    } else if (result.result && result.result.success) {
+      args.showSuccessToast("Sort preference saved");
+    }
+  } catch (err) {
+    console.error("Error saving sort preference:", err);
+    args.showErrorToast("Failed to save sort preference");
+  }
+};
+
+// Handle sort change
+const handleSortChange = async (newSortBy) => {
+  setSortBy(newSortBy);
+  await saveSortPreference(newSortBy, newSortBy === 'custom' ? customOrder() : null);
+};
+
+// Drag and drop handlers for custom ordering
+const handleDragStart = (videoId) => {
+  setIsDragging(true);
+  setDraggedVideoId(videoId);
+
+  // Add global mouse move listener for auto-scroll anywhere on screen
+  const globalMouseMoveHandler = (event) => {
+    if (draggedVideoId()) {
+      const scrolled = autoScroll(event.clientY);
+      if (scrolled) {
+        console.log('Mouse auto-scroll triggered at Y:', event.clientY);
+      }
+    }
+  };
+
+  document.addEventListener('mousemove', globalMouseMoveHandler);
+
+  // Store the global handler for cleanup
+  window._dragGlobalMouseHandler = globalMouseMoveHandler;
+
+  console.log('Mouse drag started, auto-scroll enabled');
+};
+
+const handleDragOver = (e, videoId) => {
+  e.preventDefault();
+  if (draggedVideoId() && draggedVideoId() !== videoId) {
+    setDragOverVideoId(videoId);
+
+    // Auto-scroll when dragging near top/bottom edges
+    autoScroll(e.clientY);
+
+    // Immediately reorder the visual list for better UX
+    const sourceVideoId = draggedVideoId();
+    const currentVideos = [...filteredVideos()];
+    const sourceIndex = currentVideos.findIndex(v => v.video?.P?.youtubeId === sourceVideoId);
+    const targetIndex = currentVideos.findIndex(v => v.video?.P?.youtubeId === videoId);
+
+    if (sourceIndex !== -1 && targetIndex !== -1 && sourceIndex !== targetIndex) {
+      // Reorder the array for immediate visual feedback
+      const [movedVideo] = currentVideos.splice(sourceIndex, 1);
+      currentVideos.splice(targetIndex, 0, movedVideo);
+      setFilteredVideos(currentVideos);
+
+      // Update the temporary custom order for visual feedback
+      const newOrder = currentVideos.map(v => v.video?.P?.youtubeId);
+      setCustomOrder(newOrder);
+    }
+  }
+};
+
+const handleDragEnd = () => {
+  setIsDragging(false);
+  setDraggedVideoId(null);
+  setDragOverVideoId(null);
+
+  // Clear auto-scroll interval
+  if (autoScrollInterval) {
+    clearInterval(autoScrollInterval);
+    autoScrollInterval = null;
+  }
+
+  // Remove global event listeners
+  if (window._dragGlobalTouchHandler) {
+    document.removeEventListener('touchmove', window._dragGlobalTouchHandler);
+    window._dragGlobalTouchHandler = null;
+  }
+  if (window._dragGlobalMouseHandler) {
+    document.removeEventListener('mousemove', window._dragGlobalMouseHandler);
+    window._dragGlobalMouseHandler = null;
+  }
+
+  console.log('Drag ended, auto-scroll disabled');
+};
+
+const handleDrop = async (e, targetVideoId) => {
+  e.preventDefault();
+
+  const sourceVideoId = draggedVideoId();
+  if (!sourceVideoId) {
+    handleDragEnd();
+    return;
+  }
+
+  // The reordering was already done in handleDragOver, so just save to database
+  const currentOrder = customOrder();
+  if (currentOrder.length > 0) {
+    setIsSavingOrder(true);
+    await saveSortPreference('custom', currentOrder);
+    setIsSavingOrder(false);
+  }
+
+  handleDragEnd();
+};
+
+// Auto-scroll helper for drag and drop
+const autoScroll = (clientY) => {
+  const isMobile = window.innerWidth <= 768;
+  const scrollThreshold = isMobile ? 200 : 150; // Much larger threshold
+  const scrollSpeed = isMobile ? 25 : 15; // Even faster scrolling
+  const viewportHeight = window.innerHeight;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+  // Account for footer on web (assume 100px footer height)
+  const footerHeight = isMobile ? 0 : 100;
+  const effectiveViewportHeight = viewportHeight - footerHeight;
+
+  console.log('AutoScroll called - clientY:', clientY, 'viewport:', viewportHeight, 'scrollY:', window.scrollY, 'maxScroll:', maxScroll);
+
+  // Check if near top edge
+  if (clientY < scrollThreshold && window.scrollY > 0) {
+    const scrollAmount = Math.max(2, (scrollThreshold - clientY) / 3);
+    const scrollDistance = -scrollAmount * scrollSpeed;
+    window.scrollBy(0, scrollDistance);
+    console.log('Scrolling UP:', scrollDistance, 'clientY:', clientY, 'threshold:', scrollThreshold);
+    return true;
+  }
+  // Check if near bottom edge (account for footer)
+  else if (clientY > effectiveViewportHeight - scrollThreshold && window.scrollY < maxScroll - 50) {
+    const scrollAmount = Math.max(2, (clientY - (effectiveViewportHeight - scrollThreshold)) / 3);
+    const scrollDistance = scrollAmount * scrollSpeed;
+    window.scrollBy(0, scrollDistance);
+    console.log('Scrolling DOWN:', scrollDistance, 'clientY:', clientY, 'threshold:', effectiveViewportHeight - scrollThreshold);
+    return true;
+  }
+
+  return false;
+};
+
+// Handle touch events for mobile drag and drop
+let touchItem = null;
+let touchOffset = { x: 0, y: 0 };
+let autoScrollInterval = null;
+
+const handleTouchStart = (e, videoId) => {
+  const touch = e.touches[0];
+  touchItem = videoId;
+  currentTouchY = touch.clientY;
+  const element = e.currentTarget;
+  const rect = element.getBoundingClientRect();
+  touchOffset = {
+    x: touch.clientX - rect.left,
+    y: touch.clientY - rect.top
+  };
+
+  setIsDragging(true);
+  setDraggedVideoId(videoId);
+
+  // Add visual feedback
+  element.style.opacity = '0.5';
+
+  // Add global touch move listener for auto-scroll anywhere on screen
+  const globalTouchMoveHandler = (event) => {
+    if (touchItem && event.touches && event.touches[0]) {
+      currentTouchY = event.touches[0].clientY;
+      // Immediate auto-scroll on touch move
+      autoScroll(currentTouchY);
+    }
+  };
+
+  document.addEventListener('touchmove', globalTouchMoveHandler, { passive: false });
+
+  // Start very aggressive auto-scroll interval for mobile
+  autoScrollInterval = setInterval(() => {
+    if (touchItem && currentTouchY) {
+      const scrolled = autoScroll(currentTouchY);
+      if (scrolled) {
+        console.log('Interval auto-scroll triggered at Y:', currentTouchY);
+      }
+    }
+  }, 16); // 60fps for ultra-smooth scrolling
+
+  // Store the global handler for cleanup
+  window._dragGlobalTouchHandler = globalTouchMoveHandler;
+
+  console.log('Touch drag started at Y:', currentTouchY, 'auto-scroll enabled');
+};
+
+// Store current touch position for auto-scroll
+let currentTouchY = 0;
+
+const handleTouchMove = (e) => {
+  if (!touchItem) return;
+  e.preventDefault();
+
+  const touch = e.touches[0];
+  currentTouchY = touch.clientY; // Store for auto-scroll interval
+
+  // Force auto-scroll call on touch move
+  const scrolled = autoScroll(currentTouchY);
+  if (scrolled) {
+    console.log('Direct touchmove auto-scroll triggered at Y:', currentTouchY);
+  }
+
+  const elementBelow = document.elementFromPoint(
+    touch.clientX,
+    touch.clientY
+  );
+
+  if (elementBelow) {
+    const videoElement = elementBelow.closest('[data-video-id]');
+    if (videoElement) {
+      const videoId = videoElement.getAttribute('data-video-id');
+      if (videoId && videoId !== touchItem) {
+        setDragOverVideoId(videoId);
+
+        // Immediately reorder the visual list for better UX (same as handleDragOver)
+        const sourceVideoId = touchItem;
+        const currentVideos = [...filteredVideos()];
+        const sourceIndex = currentVideos.findIndex(v => v.video?.P?.youtubeId === sourceVideoId);
+        const targetIndex = currentVideos.findIndex(v => v.video?.P?.youtubeId === videoId);
+
+        if (sourceIndex !== -1 && targetIndex !== -1 && sourceIndex !== targetIndex) {
+          // Reorder the array for immediate visual feedback
+          const [movedVideo] = currentVideos.splice(sourceIndex, 1);
+          currentVideos.splice(targetIndex, 0, movedVideo);
+          setFilteredVideos(currentVideos);
+
+          // Update the temporary custom order for visual feedback
+          const newOrder = currentVideos.map(v => v.video?.P?.youtubeId);
+          setCustomOrder(newOrder);
+        }
+      }
+    }
+  }
+};
+
+const handleTouchEnd = async (e) => {
+  if (!touchItem) return;
+
+  const touch = e.changedTouches[0];
+  const elementBelow = document.elementFromPoint(
+    touch.clientX,
+    touch.clientY
+  );
+
+  // Reset visual feedback
+  e.currentTarget.style.opacity = '1';
+
+  if (elementBelow) {
+    const videoElement = elementBelow.closest('[data-video-id]');
+    if (videoElement) {
+      const targetVideoId = videoElement.getAttribute('data-video-id');
+      if (targetVideoId && targetVideoId !== touchItem) {
+        await handleDrop({ preventDefault: () => {} }, targetVideoId);
+      }
+    }
+  }
+
+  touchItem = null;
+  currentTouchY = 0;
+  handleDragEnd();
+};
+
 // Handle video addition
 const handleVideoSubmit = (data) => {
   // Reload playlist videos after adding new video
@@ -181,7 +473,21 @@ return {
   clearSearch,
   clearPlaylistSettings,
   loadPlaylistVideos,
-  handleVideoSubmit
+  handleVideoSubmit,
+  customOrder,
+  isDragging,
+  draggedVideoId,
+  dragOverVideoId,
+  isSavingOrder,
+  handleSortChange,
+  handleDragStart,
+  handleDragOver,
+  handleDragEnd,
+  handleDrop,
+  handleTouchStart,
+  handleTouchMove,
+  handleTouchEnd,
+  autoScroll
 };
 '''
       }
@@ -773,9 +1079,17 @@ return `._id {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  
+  flex-wrap: wrap;
+
   @media (max-width: 768px) {
     justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
   }
 }`;
 '''
@@ -815,7 +1129,7 @@ return {
   as: "select",
   value: sortBy,
   onChange: (e) => {
-    args.fns.setSortBy(e.target.value);
+    args.fns.handleSortChange(e.target.value);
   }
 };
 ''',
@@ -833,10 +1147,21 @@ return `._id {
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 0.65rem;
-  
+  min-width: 140px;
+
   &:focus {
     outline: 2px solid ${args.theme.var.color.primary};
     outline-offset: 2px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+    padding: 0.625rem 2rem 0.625rem 0.875rem;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    min-width: auto;
   }
 }`;
 '''
@@ -898,6 +1223,91 @@ return {
   as: "option",
   text: "Title (A-Z)",
   value: "title"
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_sort_help",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const sortBy = args.fns.sortBy();
+const isSavingOrder = args.fns.isSavingOrder();
+
+return {
+  as: "div",
+  hide: sortBy !== 'custom'
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: ${args.theme.var.color.primary_light_50};
+  border: 1px solid ${args.theme.var.color.primary_light_200};
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.primary_dark_300};
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.8125rem;
+    padding: 0.625rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_sort_help_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isSavingOrder = args.fns.isSavingOrder();
+
+return {
+  as: "icon",
+  icon: isSavingOrder ? "carbon:load" : "carbon:information",
+  width: 16,
+  height: 16
+};
+''',
+        css: '''
+const isSavingOrder = args.fns.isSavingOrder();
+
+return `._id {
+  color: ${args.theme.var.color.primary};
+  ${isSavingOrder ? 'animation: spin 1s linear infinite;' : ''}
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_sort_help_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isSavingOrder = args.fns.isSavingOrder();
+
+return {
+  as: "span",
+  text: isSavingOrder ?
+    "Saving custom order..." :
+    "Drag and drop videos to reorder them. Changes are saved automatically."
 };
 '''
       }
@@ -1410,10 +1820,23 @@ return `._id {
         props: '''
 const loading = args.fns.loading();
 const videos = args.fns.videos();
+const sortBy = args.fns.sortBy();
+const canDrag = sortBy === 'custom';
 
 return {
   as: "div",
-  hide: loading || videos.length === 0
+  hide: loading || videos.length === 0,
+  onDragOver: canDrag ? (e) => {
+    e.preventDefault();
+    // Auto-scroll when dragging over empty areas
+    args.fns.autoScroll(e.clientY);
+  } : undefined,
+  onTouchMove: canDrag ? (e) => {
+    // Auto-scroll when touch moving over empty areas
+    if (e.touches && e.touches[0]) {
+      args.fns.autoScroll(e.touches[0].clientY);
+    }
+  } : undefined
 };
 ''',
         css: '''
@@ -1421,6 +1844,11 @@ return `._id {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  /* Add padding at bottom for mobile drag-to-scroll area */
+  @media (max-width: 768px) {
+    padding-bottom: 12rem;
+  }
 }`;
 '''
       }
@@ -1449,7 +1877,18 @@ switch (sortBy) {
     sortedVideos.sort((a, b) => new Date(b.video?.P?.publishedAt || 0) - new Date(a.video?.P?.publishedAt || 0));
     break;
   case 'custom':
-    // Custom order is already applied in the API
+    // Apply custom order if available
+    const customOrder = args.fns.customOrder();
+    if (customOrder.length > 0) {
+      sortedVideos.sort((a, b) => {
+        const aIndex = customOrder.indexOf(a.video?.P?.youtubeId);
+        const bIndex = customOrder.indexOf(b.video?.P?.youtubeId);
+        if (aIndex === -1 && bIndex === -1) return 0;
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+      });
+    }
     break;
   case 'index':
   default:
@@ -1473,36 +1912,166 @@ return {
         componentName: "Html",
         props: '''
 const video = args.contextData.video;
+const sortBy = args.fns.sortBy();
+const isDragging = args.fns.isDragging();
+const draggedVideoId = args.fns.draggedVideoId();
+const dragOverVideoId = args.fns.dragOverVideoId();
+const videoId = video.video?.P?.youtubeId;
+
+const isDraggedItem = draggedVideoId === videoId;
+const isDragOver = dragOverVideoId === videoId;
+const canDrag = sortBy === 'custom';
 
 return {
   as: "div",
+  'data-video-id': videoId,
+  onDragOver: canDrag ? (e) => args.fns.handleDragOver(e, videoId) : undefined,
+  onDrop: canDrag ? (e) => args.fns.handleDrop(e, videoId) : undefined,
   onClick: () => {
     window.open(`https://www.youtube.com/watch?v=${video.video?.P?.youtubeId}`, '_blank');
   }
 };
 ''',
         css: '''
+const video = args.contextData.video;
+const sortBy = args.fns.sortBy();
+const isDragging = args.fns.isDragging();
+const draggedVideoId = args.fns.draggedVideoId();
+const dragOverVideoId = args.fns.dragOverVideoId();
+const videoId = video.video?.P?.youtubeId;
+
+const isDraggedItem = draggedVideoId === videoId;
+const isDragOver = dragOverVideoId === videoId;
+const canDrag = sortBy === 'custom';
+
 return `._id {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: ${canDrag ? 'min-content auto 1fr auto' : 'auto 1fr auto'};
   gap: 1rem;
   padding: 1rem;
-  background: ${args.theme.var.color.background_light_100};
+  background: ${isDraggedItem ? args.theme.var.color.primary_light_100 : args.theme.var.color.background_light_100};
   border-radius: 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid ${args.theme.var.color.border};
+  border: 1px solid ${isDragOver ? args.theme.var.color.primary : args.theme.var.color.border};
+  opacity: ${isDraggedItem ? '0.7' : '1'};
+  transform: ${isDraggedItem ? 'rotate(3deg) scale(1.02)' : (isDragOver ? 'translateY(-2px)' : 'none')};
+  position: relative;
+  user-select: ${canDrag ? 'none' : 'auto'};
 
   &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    transform: translateY(-1px);
+    background: ${isDraggedItem ? args.theme.var.color.primary_light_200 : args.theme.var.color.background_light_200};
+    transform: ${isDraggedItem ? 'rotate(3deg) scale(1.02)' : 'translateY(-1px)'};
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  &:active {
+    cursor: pointer;
   }
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
-    padding: 0.875rem;
+    gap: 0.375rem;
+    padding: 0.5rem;
+    align-items: center;
+    min-height: auto;
+    position: relative;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_video_drag_handle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const video = args.contextData.video;
+const sortBy = args.fns.sortBy();
+const canDrag = sortBy === 'custom';
+const videoId = video.video?.P?.youtubeId;
+
+return {
+  as: "div",
+  hide: !canDrag,
+  draggable: canDrag,
+  onDragStart: canDrag ? (e) => args.fns.handleDragStart(videoId) : undefined,
+  onDragEnd: canDrag ? () => args.fns.handleDragEnd() : undefined,
+  onTouchStart: canDrag ? (e) => {
+    e.stopPropagation(); // Prevent the video item click
+    args.fns.handleTouchStart(e, videoId);
+  } : undefined,
+  onTouchMove: canDrag ? (e) => args.fns.handleTouchMove(e) : undefined,
+  onTouchEnd: canDrag ? (e) => args.fns.handleTouchEnd(e) : undefined,
+  onMouseDown: (e) => e.stopPropagation() // Prevent video item click when dragging
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${args.theme.var.color.muted};
+  cursor: grab;
+  padding: 0.25rem;
+  margin-right: 0.375rem;
+  border-radius: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  touch-action: none;
+
+  &:hover {
+    color: ${args.theme.var.color.text};
+    background: ${args.theme.var.color.background_light_200};
+  }
+
+  &:active {
+    cursor: grabbing;
+    background: ${args.theme.var.color.background_light_300};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.125rem;
+    margin: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    position: absolute;
+    left: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: ${args.theme.var.color.primary};
+    border-radius: 0.375rem;
+    border: 2px solid ${args.theme.var.color.background};
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_video_drag_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:draggable",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  @media (max-width: 768px) {
+    width: 14px;
+    height: 14px;
+    color: white;
   }
 }`;
 '''
@@ -1583,11 +2152,16 @@ return `._id {
   flex-direction: column;
   justify-content: space-between;
   min-height: 68px;
-  overflow: hidden;
 
   @media (max-width: 768px) {
     min-height: auto;
+    gap: 0.125rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
   }
+  overflow: hidden;
 }`;
 '''
       }
@@ -1618,6 +2192,15 @@ return `._id {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.2;
+    -webkit-line-clamp: 1;
+    padding-left: 2.25rem;
+  }
 }`;
 '''
       }
@@ -1641,6 +2224,10 @@ return `._id {
   font-size: 0.875rem;
   color: ${args.theme.var.color.muted};
   margin: 0;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 }`;
 '''
       }
@@ -1918,6 +2505,9 @@ return {
     { id: "e24", T: "Attr", S: "yto_playlist_detail_sort_select", E: "yto_playlist_detail_sort_option_custom" },
     { id: "e25", T: "Attr", S: "yto_playlist_detail_sort_select", E: "yto_playlist_detail_sort_option_date" },
     { id: "e26", T: "Attr", S: "yto_playlist_detail_sort_select", E: "yto_playlist_detail_sort_option_title" },
+    { id: "e26a", T: "Attr", S: "yto_playlist_detail_sort_section", E: "yto_playlist_detail_sort_help" },
+    { id: "e26b", T: "Attr", S: "yto_playlist_detail_sort_help", E: "yto_playlist_detail_sort_help_icon" },
+    { id: "e26c", T: "Attr", S: "yto_playlist_detail_sort_help", E: "yto_playlist_detail_sort_help_text" },
     { id: "e27", T: "Attr", S: "yto_playlist_detail_controls", E: "yto_playlist_detail_search_section" },
     { id: "e27a", T: "Attr", S: "yto_playlist_detail_search_section", E: "yto_playlist_detail_search_container" },
     { id: "e27b", T: "Attr", S: "yto_playlist_detail_search_container", E: "yto_playlist_detail_search_input" },
@@ -1941,6 +2531,8 @@ return {
     { id: "e38", T: "Attr", S: "yto_playlist_detail_videos", E: "yto_playlist_detail_videos_list" },
     { id: "e39", T: "Attr", S: "yto_playlist_detail_videos_list", E: "yto_playlist_detail_videos_data" },
     { id: "e40", T: "Attr", S: "yto_playlist_detail_videos_data", E: "yto_playlist_detail_video_item" },
+    { id: "e40a", T: "Attr", S: "yto_playlist_detail_video_item", E: "yto_playlist_detail_video_drag_handle" },
+    { id: "e40b", T: "Attr", S: "yto_playlist_detail_video_drag_handle", E: "yto_playlist_detail_video_drag_icon" },
     { id: "e41", T: "Attr", S: "yto_playlist_detail_video_item", E: "yto_playlist_detail_video_thumbnail" },
     { id: "e42", T: "Attr", S: "yto_playlist_detail_video_thumbnail", E: "yto_playlist_detail_video_thumbnail_icon" },
     { id: "e43", T: "Attr", S: "yto_playlist_detail_video_item", E: "yto_playlist_detail_video_info" },

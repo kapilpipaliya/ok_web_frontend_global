@@ -1,0 +1,551 @@
+{
+  vertexes: [
+    {
+      id: "generate_sample_data_function",
+      L: "Function",
+      P: {
+        key: "generateSampleData",
+        description: "Generates comprehensive sample data including categories, rules, goals, and tracking history for demonstration purposes",
+        body: '''
+let tx;
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Start a transaction for all database operations
+  tx = args.session.beginTransaction();
+
+  // Sample categories data
+  const sampleCategories = [
+    {
+      name: "Health & Fitness",
+      description: "Physical health, exercise, and wellness habits",
+      color: "green",
+      icon: "💪",
+      displayOrder: 1
+    },
+    {
+      name: "Productivity",
+      description: "Work efficiency and time management",
+      color: "blue",
+      icon: "📈",
+      displayOrder: 2
+    },
+    {
+      name: "Learning",
+      description: "Education, skill development, and knowledge growth",
+      color: "purple",
+      icon: "📚",
+      displayOrder: 3
+    },
+    {
+      name: "Mindfulness",
+      description: "Mental health, meditation, and self-reflection",
+      color: "yellow",
+      icon: "🧘",
+      displayOrder: 4
+    },
+    {
+      name: "Social",
+      description: "Relationships, communication, and community",
+      color: "orange",
+      icon: "👥",
+      displayOrder: 5
+    }
+  ];
+
+  const createdCategories = {};
+
+  // Create categories
+  for (const category of sampleCategories) {
+    const categoryQuery = `
+      MATCH (u:User {uuid: $userUuid})
+
+      // Check if category already exists
+      OPTIONAL MATCH (u)-[:UserRuleCategory]->(existing:RuleCategory)
+      WHERE toLower(existing.name) = toLower($name)
+
+      // If doesn't exist, create new one
+      WITH u, existing
+      WHERE existing IS NULL
+      CREATE (u)-[:UserRuleCategory]->(rc:RuleCategory)
+      SET
+        rc.name = $name,
+        rc.description = $description,
+        rc.color = $color,
+        rc.icon = $icon,
+        rc.displayOrder = $displayOrder,
+        rc.isActive = true,
+        rc.createdAt = datetime(),
+        rc.updatedAt = datetime()
+      RETURN rc, elementId(rc) as categoryId
+    `;
+
+    const categoryResult = await tx.run(categoryQuery, {
+      userUuid: user.P.uuid,
+      name: category.name,
+      description: category.description,
+      color: category.color,
+      icon: category.icon,
+      displayOrder: category.displayOrder
+    });
+
+    if (categoryResult.records.length > 0) {
+      createdCategories[category.name] = categoryResult.records[0].get('categoryId');
+    }
+  }
+
+  // Sample rules data
+  const sampleRules = [
+    {
+      categoryName: "Health & Fitness",
+      title: "Morning Workout",
+      description: "30-minute exercise routine to start the day energized",
+      frequency: "daily",
+      priority: "high",
+      difficulty: 3,
+      reminderTime: "07:00"
+    },
+    {
+      categoryName: "Health & Fitness",
+      title: "Drink 8 Glasses of Water",
+      description: "Stay hydrated throughout the day",
+      frequency: "daily",
+      priority: "medium",
+      difficulty: 2,
+      reminderTime: null
+    },
+    {
+      categoryName: "Health & Fitness",
+      title: "Walk 10,000 Steps",
+      description: "Track daily steps for cardiovascular health",
+      frequency: "daily",
+      priority: "medium",
+      difficulty: 2,
+      reminderTime: null
+    },
+    {
+      categoryName: "Productivity",
+      title: "Review Daily Goals",
+      description: "Plan and prioritize tasks for the day",
+      frequency: "daily",
+      priority: "high",
+      difficulty: 1,
+      reminderTime: "09:00"
+    },
+    {
+      categoryName: "Productivity",
+      title: "Inbox Zero",
+      description: "Process and organize email inbox",
+      frequency: "daily",
+      priority: "medium",
+      difficulty: 3,
+      reminderTime: "17:00"
+    },
+    {
+      categoryName: "Productivity",
+      title: "Weekly Planning Session",
+      description: "Review week's accomplishments and plan next week",
+      frequency: "weekly",
+      priority: "high",
+      difficulty: 2,
+      reminderTime: null
+    },
+    {
+      categoryName: "Learning",
+      title: "Read for 30 Minutes",
+      description: "Daily reading for personal growth and knowledge",
+      frequency: "daily",
+      priority: "medium",
+      difficulty: 2,
+      reminderTime: "20:00"
+    },
+    {
+      categoryName: "Learning",
+      title: "Practice Coding",
+      description: "Improve programming skills through practice",
+      frequency: "daily",
+      priority: "high",
+      difficulty: 4,
+      reminderTime: null
+    },
+    {
+      categoryName: "Learning",
+      title: "Learn New Language",
+      description: "Practice Spanish vocabulary and grammar",
+      frequency: "daily",
+      priority: "medium",
+      difficulty: 3,
+      reminderTime: "19:00"
+    },
+    {
+      categoryName: "Mindfulness",
+      title: "Morning Meditation",
+      description: "10-minute mindfulness meditation to center thoughts",
+      frequency: "daily",
+      priority: "medium",
+      difficulty: 2,
+      reminderTime: "06:30"
+    },
+    {
+      categoryName: "Mindfulness",
+      title: "Gratitude Journal",
+      description: "Write down 3 things I'm grateful for",
+      frequency: "daily",
+      priority: "low",
+      difficulty: 1,
+      reminderTime: "22:00"
+    },
+    {
+      categoryName: "Mindfulness",
+      title: "Digital Detox Hour",
+      description: "One hour without screens before bedtime",
+      frequency: "daily",
+      priority: "medium",
+      difficulty: 3,
+      reminderTime: "21:00"
+    },
+    {
+      categoryName: "Social",
+      title: "Call Family Member",
+      description: "Stay connected with family relationships",
+      frequency: "weekly",
+      priority: "medium",
+      difficulty: 1,
+      reminderTime: null
+    },
+    {
+      categoryName: "Social",
+      title: "Random Act of Kindness",
+      description: "Do something kind for someone each day",
+      frequency: "daily",
+      priority: "low",
+      difficulty: 2,
+      reminderTime: null
+    },
+    {
+      categoryName: "Social",
+      title: "Network with Colleagues",
+      description: "Build professional relationships",
+      frequency: "weekly",
+      priority: "medium",
+      difficulty: 3,
+      reminderTime: null
+    }
+  ];
+
+  const createdRules = [];
+
+  // Create rules
+  for (const rule of sampleRules) {
+    const categoryId = createdCategories[rule.categoryName];
+    if (!categoryId) continue;
+
+    const ruleQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (rc:RuleCategory) WHERE elementId(rc) = $categoryId
+
+      // Check if rule already exists
+      OPTIONAL MATCH (u)-[:UserRule]->(existing:Rule)
+      WHERE toLower(existing.title) = toLower($title)
+
+      // If doesn't exist, create new one
+      WITH u, rc, existing
+      WHERE existing IS NULL
+      CREATE (u)-[:UserRule]->(r:Rule)
+      SET
+        r.title = $title,
+        r.description = $description,
+        r.type = 'habit',
+        r.frequency = $frequency,
+        r.priority = $priority,
+        r.difficulty = $difficulty,
+        r.isActive = true,
+        r.isPublic = false,
+        r.reminderTime = $reminderTime,
+        r.createdAt = datetime(),
+        r.updatedAt = datetime()
+      CREATE (r)-[:RuleCategory]->(rc)
+
+      // Create streak tracking
+      CREATE (u)-[:UserRuleStreak]->(rs:RuleStreak)
+      SET
+        rs.currentStreak = toInteger(rand() * 15) + 1,
+        rs.longestStreak = toInteger(rand() * 30) + 5,
+        rs.totalCompletions = toInteger(rand() * 50) + 10,
+        rs.lastCompletionDate = date(),
+        rs.streakStartDate = date() - duration({days: toInteger(rand() * 15) + 1}),
+        rs.freezeCount = 0,
+        rs.isActive = true,
+        rs.createdAt = datetime(),
+        rs.updatedAt = datetime()
+      CREATE (rs)-[:RuleStreakRule]->(r)
+
+      RETURN r, elementId(r) as ruleId, rs
+    `;
+
+    const ruleResult = await tx.run(ruleQuery, {
+      userUuid: user.P.uuid,
+      categoryId,
+      title: rule.title,
+      description: rule.description,
+      frequency: rule.frequency,
+      priority: rule.priority,
+      difficulty: rule.difficulty,
+      reminderTime: rule.reminderTime
+    });
+
+    if (ruleResult.records.length > 0) {
+      const ruleId = ruleResult.records[0].get('ruleId');
+      const streakData = args.convertNodeToJson(ruleResult.records[0].get('rs'));
+      createdRules.push({
+        id: ruleId,
+        title: rule.title,
+        frequency: rule.frequency,
+        currentStreak: streakData.P.currentStreak,
+        totalCompletions: streakData.P.totalCompletions
+      });
+    }
+  }
+
+  // Sample goals data
+  const sampleGoals = [
+    {
+      ruleTitle: "Morning Workout",
+      title: "30-Day Workout Streak",
+      description: "Complete 30 consecutive days of morning workouts",
+      goalType: "streak",
+      targetValue: 30,
+      unit: "days",
+      targetDate: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 25 days from now
+      reward: "New workout gear"
+    },
+    {
+      ruleTitle: "Read for 30 Minutes",
+      title: "Read 12 Books This Year",
+      description: "Complete reading 12 books for personal development",
+      goalType: "completion_count",
+      targetValue: 365,
+      unit: "times",
+      targetDate: new Date(new Date().getFullYear(), 11, 31).toISOString().split('T')[0], // End of year
+      reward: "Special bookshelf upgrade"
+    },
+    {
+      ruleTitle: "Practice Coding",
+      title: "80% Coding Consistency",
+      description: "Maintain 80% consistency in daily coding practice",
+      goalType: "percentage",
+      targetValue: 80,
+      unit: "percent",
+      targetDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 60 days from now
+      reward: "New development setup"
+    },
+    {
+      ruleTitle: "Morning Meditation",
+      title: "100 Meditation Sessions",
+      description: "Complete 100 meditation sessions for mindfulness",
+      goalType: "completion_count",
+      targetValue: 100,
+      unit: "times",
+      targetDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days from now
+      reward: "Meditation retreat"
+    }
+  ];
+
+  const createdGoals = [];
+
+  // Create goals
+  for (const goal of sampleGoals) {
+    const targetRule = createdRules.find(r => r.title === goal.ruleTitle);
+    if (!targetRule) continue;
+
+    // Calculate current value based on goal type
+    let currentValue = 0;
+    switch (goal.goalType) {
+      case 'streak':
+        currentValue = targetRule.currentStreak;
+        break;
+      case 'completion_count':
+        currentValue = targetRule.totalCompletions;
+        break;
+      case 'percentage':
+        currentValue = Math.min(75 + Math.floor(Math.random() * 20), 100); // 75-95%
+        break;
+    }
+
+    const goalQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (r:Rule) WHERE elementId(r) = $ruleId
+
+      // Check if goal already exists
+      OPTIONAL MATCH (u)-[:UserRuleGoal]->(existing:RuleGoal)-[:RuleGoalRule]->(r)
+      WHERE toLower(existing.title) = toLower($title)
+
+      // If doesn't exist, create new one
+      WITH u, r, existing
+      WHERE existing IS NULL
+      CREATE (u)-[:UserRuleGoal]->(rg:RuleGoal)
+      SET
+        rg.title = $title,
+        rg.description = $description,
+        rg.goalType = $goalType,
+        rg.targetValue = $targetValue,
+        rg.currentValue = $currentValue,
+        rg.unit = $unit,
+        rg.targetDate = date($targetDate),
+        rg.reward = $reward,
+        rg.isCompleted = $currentValue >= $targetValue,
+        rg.completedAt = CASE WHEN $currentValue >= $targetValue THEN datetime() ELSE null END,
+        rg.createdAt = datetime(),
+        rg.updatedAt = datetime()
+      CREATE (rg)-[:RuleGoalRule]->(r)
+      RETURN rg, elementId(rg) as goalId
+    `;
+
+    const goalResult = await tx.run(goalQuery, {
+      userUuid: user.P.uuid,
+      ruleId: targetRule.id,
+      title: goal.title,
+      description: goal.description,
+      goalType: goal.goalType,
+      targetValue: goal.targetValue,
+      currentValue: currentValue,
+      unit: goal.unit,
+      targetDate: goal.targetDate,
+      reward: goal.reward
+    });
+
+    if (goalResult.records.length > 0) {
+      createdGoals.push({
+        id: goalResult.records[0].get('goalId'),
+        title: goal.title,
+        ruleTitle: goal.ruleTitle
+      });
+    }
+  }
+
+  // Generate tracking history for the past 30 days
+  const today = new Date();
+  const trackingPromises = [];
+
+  for (const rule of createdRules) {
+    for (let i = 0; i < 30; i++) {
+      const trackingDate = new Date(today);
+      trackingDate.setDate(today.getDate() - i);
+      const dateStr = trackingDate.toISOString().split('T')[0];
+
+      // Generate realistic tracking data based on frequency
+      let shouldTrack = false;
+      if (rule.frequency === 'daily') {
+        shouldTrack = Math.random() > 0.15; // 85% completion rate
+      } else if (rule.frequency === 'weekly') {
+        shouldTrack = trackingDate.getDay() === 0 && Math.random() > 0.2; // Sundays, 80% completion
+      }
+
+      if (shouldTrack) {
+        const statuses = ['completed', 'completed', 'completed', 'partial']; // 75% completed, 25% partial
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        const notes = status === 'completed' ?
+          ['Great session!', 'Feeling accomplished', 'Stayed consistent', 'Good progress'][Math.floor(Math.random() * 4)] :
+          ['Did what I could', 'Partial effort today', 'Better than nothing'][Math.floor(Math.random() * 3)];
+
+        const trackingQuery = `
+          MATCH (u:User {uuid: $userUuid})
+          MATCH (r:Rule) WHERE elementId(r) = $ruleId
+
+          // Check if tracking already exists for this date
+          OPTIONAL MATCH (u)-[:UserRuleTracking]->(existing:RuleTracking)-[:RuleTrackingRule]->(r)
+          WHERE existing.date = date($date)
+
+          // If doesn't exist, create new tracking
+          WITH u, r, existing
+          WHERE existing IS NULL
+          CREATE (u)-[:UserRuleTracking]->(rt:RuleTracking)
+          SET
+            rt.date = date($date),
+            rt.status = $status,
+            rt.notes = $notes,
+            rt.trackedAt = datetime($date + 'T' +
+              CASE
+                WHEN $reminderTime IS NOT NULL THEN $reminderTime + ':00'
+                ELSE '12:00:00'
+              END),
+            rt.createdAt = datetime(),
+            rt.updatedAt = datetime()
+          CREATE (rt)-[:RuleTrackingRule]->(r)
+          RETURN rt
+        `;
+
+        trackingPromises.push(
+          tx.run(trackingQuery, {
+            userUuid: user.P.uuid,
+            ruleId: rule.id,
+            date: dateStr,
+            status: status,
+            notes: notes,
+            reminderTime: null // Use default time
+          })
+        );
+      }
+    }
+  }
+
+  // Execute all tracking promises
+  await Promise.all(trackingPromises);
+
+  // Commit the transaction
+  await tx.commit();
+
+  return {
+    success: true,
+    message: "Sample data generated successfully! You now have categories, rules, goals, and 30 days of tracking history.",
+    data: {
+      categoriesCreated: Object.keys(createdCategories).length,
+      rulesCreated: createdRules.length,
+      goalsCreated: createdGoals.length,
+      trackingEntriesCreated: trackingPromises.length,
+      categories: Object.keys(createdCategories),
+      rules: createdRules.map(r => r.title),
+      goals: createdGoals.map(g => g.title)
+    }
+  };
+
+} catch (error) {
+  console.error("Error generating sample data:", error);
+
+  // Rollback transaction if it exists
+  if (tx) {
+    try {
+      await tx.rollback();
+    } catch (rollbackError) {
+      console.error("Error rolling back transaction:", rollbackError);
+    }
+  }
+
+  let userMessage = "Failed to generate sample data. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("duplicate") || error.message.includes("already exists")) {
+    userMessage = "Some sample data already exists. Please delete existing data first or the function will skip duplicates.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "SampleDataGenerationError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

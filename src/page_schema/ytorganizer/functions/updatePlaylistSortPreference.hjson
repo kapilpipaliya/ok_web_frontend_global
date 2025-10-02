@@ -1,0 +1,66 @@
+{
+  vertexes: [
+    {
+      id: "update_playlist_sort_preference_function",
+      L: "Function",
+      P: {
+        key: "updatePlaylistSortPreference",
+        description: "Updates the sort preference and custom order for a user's playlist settings",
+        body: '''
+// Get the parameters from the context
+const { playlistId, sortBy, customOrder } = args.contextData;
+
+if (!playlistId || !sortBy) {
+  throw new Error("Playlist ID and sort preference are required");
+}
+
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Update the playlist settings with new sort preference
+  // Following the schema: (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
+  const updateQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    SET ps.sortBy = $sortBy,
+        ps.customOrder = $customOrder,
+        ps.lastUpdated = datetime(),
+        ps.updatedAt = datetime()
+    RETURN ps
+  `;
+
+  const updateResult = await args.session.run(updateQuery, {
+    playlistId: playlistId,
+    userUuid: user.P.uuid,
+    sortBy: sortBy,
+    customOrder: customOrder
+  });
+
+  if (updateResult.records.length === 0) {
+    throw new Error("Playlist settings not found for this user");
+  }
+
+  return {
+    success: true,
+    message: "Sort preference updated successfully",
+    data: {
+      playlistId: playlistId,
+      sortBy: sortBy,
+      customOrder: customOrder,
+      hasCustomOrder: Array.isArray(customOrder) && customOrder.length > 0
+    }
+  };
+
+} catch (error) {
+  console.error('Error updating playlist sort preference:', error);
+  throw new Error(`Failed to update sort preference: ${error.message}`);
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

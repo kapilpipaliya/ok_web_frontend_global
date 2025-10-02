@@ -1,0 +1,1364 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "RBTracking",
+        url: "/rb/tracking",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+// Data loading state
+const [rules, setRules] = args.createSignal([]);
+const [isLoading, setIsLoading] = args.createSignal(true);
+const [error, setError] = args.createSignal(null);
+const [selectedDate, setSelectedDate] = args.createSignal(new Date().toISOString().split('T')[0]);
+
+// Load rules with today's tracking status
+const loadRulesWithTracking = async (date) => {
+  setIsLoading(true);
+  setError(null);
+
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getUserRules",
+      contextData: {
+        includeInactive: false,
+        includeTracking: true,
+        trackingDate: date
+      }
+    });
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    if (result.result?.success) {
+      setRules(result.result.data?.rules || []);
+    } else {
+      throw new Error(result.result?.message || "Failed to load rules");
+    }
+  } catch (err) {
+    console.error("Error loading rules:", err);
+    setError(err.message);
+    args.showErrorToast(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Track a rule with the given status
+const trackRuleAction = async (ruleId, status, notes = "", completionPercentage = null) => {
+
+  // Ensure date is in YYYY-MM-DD format
+  const rawDate = selectedDate();
+  const date = typeof rawDate === 'string' ? rawDate : new Date(rawDate).toISOString().split('T')[0];
+
+  try {
+    // For partial status, prompt for completion percentage if not provided
+    if (status === 'partial' && completionPercentage === null) {
+      completionPercentage = prompt("Enter completion percentage (0-100):");
+      if (completionPercentage === null) return; // User cancelled
+      completionPercentage = parseInt(completionPercentage);
+      if (isNaN(completionPercentage) || completionPercentage < 0 || completionPercentage > 100) {
+        args.showErrorToast("Please enter a valid percentage between 0 and 100");
+        return;
+      }
+    }
+
+    const contextData = {
+      ruleId,
+      date,
+      status,
+      notes
+    };
+
+    if (status === 'partial') {
+      contextData.completionPercentage = completionPercentage;
+    }
+
+
+    const result = await args.executeNamedServerFunction({
+      functionName: "trackRule",
+      contextData
+    });
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    if (result.result?.success) {
+      args.showSuccessToast(result.result.message);
+      // Reload rules to update tracking status
+      loadRulesWithTracking(date);
+    } else {
+      throw new Error(result.result?.message || "Failed to track rule");
+    }
+  } catch (error) {
+    console.error("Error tracking rule:", error);
+    args.showErrorToast(error.message);
+  }
+};
+
+// Group rules by category
+const groupedRules = args.createMemo(() => {
+  const rulesData = rules();
+  return rulesData.reduce((acc, ruleData) => {
+    const category = ruleData.category;
+    const categoryKey = category?.P?.key || 'uncategorized';
+    const categoryName = category?.P?.name || 'Other';
+    const categoryIcon = category?.P?.icon || '📝';
+
+    if (!acc[categoryKey]) {
+      acc[categoryKey] = {
+        category,
+        categoryName,
+        categoryIcon,
+        rules: []
+      };
+    }
+    acc[categoryKey].rules.push(ruleData);
+    return acc;
+  }, {});
+});
+
+// Calculate progress
+const progressStats = args.createMemo(() => {
+  const rulesData = rules();
+  if (rulesData.length === 0) return { completed: 0, total: 0, percentage: 0 };
+
+  const completed = rulesData.filter(ruleData => {
+    const tracking = ruleData.tracking?.[0]; // Today's tracking
+    return tracking?.P?.status === 'completed';
+  }).length;
+
+  const total = rulesData.length;
+  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  return { completed, total, percentage };
+});
+
+// Complete all remaining rules
+const completeAllRemaining = async () => {
+  const rulesData = rules();
+  if (rulesData.length === 0) return;
+
+  const date = typeof selectedDate() === 'string' ? selectedDate() : new Date(selectedDate()).toISOString().split('T')[0];
+
+  // Find rules that are not completed yet
+  const incompleteRules = rulesData.filter(ruleData => {
+    try {
+      const tracking = ruleData?.tracking?.[0];
+      return !tracking || tracking?.P?.status !== 'completed';
+    } catch (e) {
+      console.warn('Error accessing tracking data for incomplete rules:', e);
+      return true; // Include rule if we can't determine status
+    }
+  });
+
+  if (incompleteRules.length === 0) {
+    args.showSuccessToast("All rules are already completed!");
+    return;
+  }
+
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const confirmed = await rbConfirm({
+    title: "Mark All Complete",
+    message: `Mark ${incompleteRules.length} remaining rules as completed?`,
+    confirmText: "Mark Complete",
+    cancelText: "Cancel",
+    variant: "primary"
+  });
+  if (!confirmed) return;
+
+  let successCount = 0;
+  let errorCount = 0;
+
+  for (const ruleData of incompleteRules) {
+    try {
+      const ruleId = ruleData?.rule?.id;
+      if (ruleId) {
+        const result = await args.executeNamedServerFunction({
+          functionName: "trackRule",
+          contextData: {
+            ruleId,
+            date,
+            status: 'completed'
+          }
+        });
+
+        if (result.result?.success) {
+          successCount++;
+        } else {
+          errorCount++;
+        }
+      }
+    } catch (error) {
+      console.error("Error completing rule:", error);
+      errorCount++;
+    }
+  }
+
+  // Show results and refresh data
+  if (successCount > 0) {
+    args.showSuccessToast(`Completed ${successCount} rules!${errorCount > 0 ? ` (${errorCount} failed)` : ''}`);
+    loadRulesWithTracking(date).catch(refreshError => {
+      console.error('Error refreshing data after bulk completion:', refreshError);
+    });
+  } else if (errorCount > 0) {
+    args.showErrorToast(`Failed to complete rules. Please try again.`);
+  }
+};
+
+// Load data on mount
+const onMount = () => {
+  loadRulesWithTracking(selectedDate());
+};
+
+return {
+  isNoPermissionCheck: true,
+  contextName: "trackingData",
+  onMount,
+  data: () => ({
+    rules,
+    isLoading,
+    error,
+    selectedDate,
+    setSelectedDate,
+    groupedRules,
+    progressStats,
+    trackRuleAction,
+    completeAllRemaining,
+    refreshData: () => {
+      const currentDate = selectedDate();
+      return loadRulesWithTracking(currentDate);
+    }
+  })
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "RBLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "page_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_left",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const selectedDate = args.contextData?.trackingData?.selectedDate;
+const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
+const today = new Date().toISOString().split('T')[0];
+const isToday = currentDate === today;
+
+const title = isToday ? "Daily Tracking" : "Rule Tracking";
+
+return {
+  as: "h1",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "date_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const selectedDate = args.contextData?.trackingData?.selectedDate;
+const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
+const today = new Date().toISOString().split('T')[0];
+
+const dateObj = new Date(currentDate + 'T00:00:00');
+const formattedDate = dateObj.toLocaleDateString('en-US', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+const isToday = currentDate === today;
+const dateText = isToday ? formattedDate : `${formattedDate} (Selected Date)`;
+
+return {
+  as: "p",
+  text: dateText
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "calendar_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const selectedDate = args.contextData?.trackingData?.selectedDate;
+const setSelectedDate = args.contextData?.trackingData?.setSelectedDate;
+const refreshData = args.contextData?.trackingData?.refreshData;
+
+const handleDateClick = () => {
+  const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
+  const newDate = prompt("Select date (YYYY-MM-DD):", currentDate);
+
+  if (newDate && newDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const dateObj = new Date(newDate + 'T00:00:00');
+    if (!isNaN(dateObj.getTime())) {
+      setSelectedDate?.(newDate);
+      try {
+        refreshData?.();
+      } catch (error) {
+        console.error('Error in refreshData:', error);
+      }
+    } else {
+      args.showErrorToast("Please enter a valid date");
+    }
+  } else if (newDate !== null) {
+    args.showErrorToast("Please enter date in YYYY-MM-DD format");
+  }
+};
+
+return {
+  as: "button",
+  "aria-label": "Select date",
+  title: `Current date: ${selectedDate?.() || 'Today'}. Click to change date.`,
+  onClick: handleDateClick
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "calendar_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:calendar",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "progress_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.contextData?.trackingData?.isLoading?.()
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stats = args.contextData?.trackingData?.progressStats?.();
+const completed = stats?.completed || 0;
+const total = stats?.total || 0;
+
+if (total === 0) {
+  return {
+    as: "div",
+    text: "No rules to track today"
+  };
+}
+
+return {
+  as: "div",
+  text: `Progress: ${completed}/${total} rules completed`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  border-radius: ${args.theme.var.borderRadius.full};
+  padding: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const completedRules = 6;
+const totalRules = 8;
+const percentage = Math.round((completedRules / totalRules) * 100);
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+const stats = args.contextData?.trackingData?.progressStats?.();
+const percentage = stats?.percentage || 0;
+
+return `._id {
+  width: ${percentage}%;
+  height: 12px;
+  background: ${args.theme.var.color.success};
+  border-radius: ${args.theme.var.borderRadius.full};
+  transition: width ${args.theme.var.animation.slow} ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => !args.contextData?.trackingData?.isLoading?.()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.xl};
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBLoadingSpinner",
+        props: '''
+return {
+  size: "medium",
+  color: "primary",
+  text: "Loading tracking data..."
+};
+'''
+      }
+    },
+    {
+      id: "empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "No rules to track today",
+  hide: () => {
+    const isLoading = args.contextData?.trackingData?.isLoading?.();
+    const groupedRules = args.contextData?.trackingData?.groupedRules?.();
+    return isLoading || (groupedRules && Object.keys(groupedRules).length > 0);
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  text-align: center;
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  contextName: "categoriesContainer",
+  loop: true,
+  data: () => {
+    const groupedRules = args.contextData?.trackingData?.groupedRules?.();
+    return Object.values(groupedRules || {});
+  },
+  hide: () => {
+    const groupedRules = args.contextData?.trackingData?.groupedRules?.();
+    return args.contextData?.trackingData?.isLoading?.() || !groupedRules || Object.keys(groupedRules).length === 0;
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "category_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section",
+  contextName: "categoryGroup"
+};
+'''
+      }
+    },
+    {
+      id: "category_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const categoryData = args.contextData?.categoriesContainer;
+const categoryIcon = categoryData?.categoryIcon || '📝';
+const categoryName = categoryData?.categoryName || 'Other';
+const totalRules = categoryData?.rules?.length || 0;
+const completedRules = categoryData?.rules?.filter(ruleData => {
+  const tracking = ruleData.tracking?.[0];
+  return tracking?.P?.status === 'completed';
+}).length || 0;
+
+return {
+  as: "h2",
+  text: `${categoryIcon} ${categoryName} (${completedRules}/${totalRules})`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "category_rules",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  contextName: "categoryRules",
+  loop: true,
+  data: () => {
+    const categoryData = args.contextData?.categoriesContainer;
+    return categoryData?.rules || [];
+  }
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  contextName: "ruleCard"
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const tracking = ruleData?.tracking?.[0];
+const status = tracking?.P?.status;
+
+let borderColor = '${args.theme.var.color.border}';
+if (status === 'completed') {
+  borderColor = '${args.theme.var.color.success}';
+} else if (status === 'partial') {
+  borderColor = '${args.theme.var.color.warning}';
+} else if (status === 'missed') {
+  borderColor = '${args.theme.var.color.error}';
+} else if (status === 'skipped') {
+  borderColor = '${args.theme.var.color.muted}';
+}
+
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 2px solid ${borderColor};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const title = rule?.P?.title || 'Untitled Rule';
+
+return {
+  as: "h3",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_streak",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const streak = ruleData?.streak;
+const currentStreak = streak?.P?.currentStreak || 0;
+
+return {
+  as: "div",
+  text: `🔥 Streak: ${currentStreak} days`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.warning};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: ${args.theme.var.spacing.sm};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "completed_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const ruleId = rule?.id;
+const trackRuleAction = args.contextData?.trackingData?.trackRuleAction;
+
+const handleClick = async () => {
+  if (ruleId && trackRuleAction) {
+    await trackRuleAction(ruleId, 'completed');
+  } else {
+    console.error('Missing data for tracking:', { ruleId, trackRuleAction: !!trackRuleAction });
+    args.showErrorToast('Unable to track rule - missing data');
+  }
+};
+
+return {
+  as: "button",
+  "aria-label": "Mark as completed",
+  title: "Mark this rule as completed (100%). This will continue or start your streak.",
+  onClick: handleClick
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const tracking = ruleData?.tracking?.[0];
+const status = tracking?.P?.status;
+const isActive = status === 'completed';
+
+return `._id {
+  background: ${isActive ? '${args.theme.var.color.success}' : '${args.theme.var.color.success_light_200}'};
+  color: ${isActive ? '${args.theme.var.color.success_text}' : '${args.theme.var.color.success_text}'};
+  border: none;
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  font-weight: 500;
+  opacity: ${isActive ? '1' : '0.7'};
+
+  &:hover {
+    background: ${args.theme.var.color.success_dark_200};
+    opacity: 1;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "completed_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:checkmark",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "completed_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Done"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "partial_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const ruleId = rule?.id;
+const trackRuleAction = args.contextData?.trackingData?.trackRuleAction;
+
+const handleClick = async () => {
+  if (ruleId && trackRuleAction) {
+    await trackRuleAction(ruleId, 'partial');
+  } else {
+    console.error('Missing data for tracking:', { ruleId, trackRuleAction: !!trackRuleAction });
+    args.showErrorToast('Unable to track rule - missing data');
+  }
+};
+
+return {
+  as: "button",
+  "aria-label": "Mark as partial",
+  title: "Mark this rule as partially completed. You'll be prompted to enter a completion percentage (0-100%).",
+  onClick: handleClick
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const tracking = ruleData?.tracking?.[0];
+const status = tracking?.P?.status;
+const isActive = status === 'partial';
+
+return `._id {
+  background: ${args.theme.var.color.warning};
+  color: ${args.theme.var.color.warning_text};
+  border: none;
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  font-weight: 500;
+  opacity: ${isActive ? '1' : '0.7'};
+
+  &:hover {
+    background: ${args.theme.var.color.warning_dark_200};
+    opacity: 1;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "partial_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:warning",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "partial_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Partial"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "missed_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const ruleId = rule?.id;
+const trackRuleAction = args.contextData?.trackingData?.trackRuleAction;
+
+const handleClick = async () => {
+  if (ruleId && trackRuleAction) {
+    await trackRuleAction(ruleId, 'missed');
+  } else {
+    console.error('Missing data for tracking:', { ruleId, trackRuleAction: !!trackRuleAction });
+    args.showErrorToast('Unable to track rule - missing data');
+  }
+};
+
+return {
+  as: "button",
+  "aria-label": "Mark as missed",
+  title: "Mark this rule as missed (0%). This will break your current streak.",
+  onClick: handleClick
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const tracking = ruleData?.tracking?.[0];
+const status = tracking?.P?.status;
+const isActive = status === 'missed';
+
+return `._id {
+  background: ${isActive ? '${args.theme.var.color.error}' : '${args.theme.var.color.error_light_200}'};
+  color: ${args.theme.var.color.error_text};
+  border: none;
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  font-weight: 500;
+  opacity: ${isActive ? '1' : '0.7'};
+
+  &:hover {
+    background: ${args.theme.var.color.error_dark_200};
+    opacity: 1;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "missed_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "missed_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Missed"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "skip_btn",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData?.categoryRules;
+const rule = ruleData?.rule;
+const ruleId = rule?.id;
+const trackRuleAction = args.contextData?.trackingData?.trackRuleAction;
+
+const handleClick = async () => {
+  if (ruleId && trackRuleAction) {
+    await trackRuleAction(ruleId, 'skipped');
+  } else {
+    console.error('Missing data for tracking:', { ruleId, trackRuleAction: !!trackRuleAction });
+    args.showErrorToast('Unable to track rule - missing data');
+  }
+};
+
+return {
+  as: "button",
+  "aria-label": "Skip for today",
+  title: "Skip this rule for today. This won't affect your streak or completion stats.",
+  onClick: handleClick
+};
+''',
+        css: '''
+const ruleData = args.contextData?.categoryRules;
+const tracking = ruleData?.tracking?.[0];
+const status = tracking?.P?.status;
+const isActive = status === 'skipped';
+
+return `._id {
+  background: ${isActive ? '${args.theme.var.color.muted}' : '${args.theme.var.color.muted_light_200}'};
+  color: ${isActive ? '${args.theme.var.color.muted_text}' : '${args.theme.var.color.muted_light_200_text}'};
+  border: none;
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  font-weight: 500;
+  opacity: ${isActive ? '1' : '0.7'};
+
+  &:hover {
+    background: ${args.theme.var.color.muted_dark_200};
+    opacity: 1;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "skip_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:skip-forward",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "skip_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Skip"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_notes",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RBTextArea",
+        props: '''
+return {
+  placeholder: "Add notes (optional)",
+  rows: 2,
+  resize: "vertical"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  min-height: 60px;
+}`;
+'''
+      }
+    },
+    {
+      id: "completed_all_button",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const completeAllRemaining = args.contextData?.trackingData?.completeAllRemaining;
+const progressStats = args.contextData?.trackingData?.progressStats?.();
+const isLoading = args.contextData?.trackingData?.isLoading?.();
+const groupedRules = args.contextData?.trackingData?.groupedRules?.();
+
+const handleClick = async () => {
+  if (completeAllRemaining) {
+    await completeAllRemaining();
+  }
+};
+
+return {
+  as: "button",
+  text: `Complete All Remaining${progressStats ? ` (${progressStats.total - progressStats.completed})` : ''}`,
+  onClick: handleClick,
+  disabled: isLoading || (progressStats && progressStats.completed === progressStats.total),
+  hide: isLoading || !groupedRules || Object.keys(groupedRules).length === 0
+};
+''',
+        css: '''
+const progressStats = args.contextData?.trackingData?.progressStats?.();
+const isLoading = args.contextData?.trackingData?.isLoading?.();
+const isDisabled = isLoading || (progressStats && progressStats.completed === progressStats.total);
+
+return `._id {
+  width: 100%;
+  background: ${isDisabled ? '${args.theme.var.color.muted}' : '${args.theme.var.color.primary}'};
+  color: ${isDisabled ? '${args.theme.var.color.muted_text}' : '${args.theme.var.color.primary_text}'};
+  border: none;
+  padding: ${args.theme.var.spacing.lg};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+  margin-top: ${args.theme.var.spacing.xl};
+  transition: all ${args.theme.var.animation.fast} ease;
+  opacity: ${isDisabled ? '0.6' : '1'};
+
+  ${!isDisabled ? `
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+  ` : ''}
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
+    { id: "e3", T: "Attr", S: "page_content", E: "header" },
+    { id: "e4", T: "Attr", S: "header", E: "header_left" },
+    { id: "e5", T: "Attr", S: "header_left", E: "page_title" },
+    { id: "e6", T: "Attr", S: "header_left", E: "date_subtitle" },
+    { id: "e7", T: "Attr", S: "header", E: "calendar_button" },
+    { id: "e8", T: "Attr", S: "calendar_button", E: "calendar_icon" },
+    { id: "e9", T: "Attr", S: "page_content", E: "progress_summary" },
+    { id: "e10", T: "Attr", S: "progress_summary", E: "progress_title" },
+    { id: "e11", T: "Attr", S: "progress_summary", E: "progress_bar_container" },
+    { id: "e12", T: "Attr", S: "progress_bar_container", E: "progress_bar" },
+    { id: "e13", T: "Attr", S: "page_content", E: "loading_state" },
+    { id: "e13-1", T: "Attr", S: "loading_state", E: "loading_spinner" },
+    { id: "e13a", T: "Attr", S: "page_content", E: "empty_state" },
+    { id: "e13b", T: "Attr", S: "page_content", E: "categories_section" },
+    { id: "e14", T: "Attr", S: "categories_section", E: "category_section" },
+    { id: "e15", T: "Attr", S: "category_section", E: "category_header" },
+    { id: "e16", T: "Attr", S: "category_section", E: "category_rules" },
+    { id: "e17", T: "Attr", S: "category_rules", E: "rule_card" },
+    { id: "e18", T: "Attr", S: "rule_card", E: "rule_header" },
+    { id: "e19", T: "Attr", S: "rule_header", E: "rule_title" },
+    { id: "e20", T: "Attr", S: "rule_header", E: "rule_streak" },
+    { id: "e21", T: "Attr", S: "rule_card", E: "rule_actions" },
+    { id: "e22", T: "Attr", S: "rule_actions", E: "completed_btn" },
+    { id: "e23", T: "Attr", S: "completed_btn", E: "completed_icon" },
+    { id: "e24", T: "Attr", S: "completed_btn", E: "completed_text" },
+    { id: "e25", T: "Attr", S: "rule_actions", E: "partial_btn" },
+    { id: "e26", T: "Attr", S: "partial_btn", E: "partial_icon" },
+    { id: "e27", T: "Attr", S: "partial_btn", E: "partial_text" },
+    { id: "e28", T: "Attr", S: "rule_actions", E: "missed_btn" },
+    { id: "e29", T: "Attr", S: "missed_btn", E: "missed_icon" },
+    { id: "e30", T: "Attr", S: "missed_btn", E: "missed_text" },
+    { id: "e31", T: "Attr", S: "rule_actions", E: "skip_btn" },
+    { id: "e32", T: "Attr", S: "skip_btn", E: "skip_icon" },
+    { id: "e33", T: "Attr", S: "skip_btn", E: "skip_text" },
+    { id: "e34", T: "Attr", S: "rule_card", E: "rule_notes" },
+    { id: "e35", T: "Attr", S: "page_content", E: "completed_all_button" }
+  ]
+}

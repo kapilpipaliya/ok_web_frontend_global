@@ -1,0 +1,84 @@
+{
+  vertexes: [
+    {
+      id: "get_categories_function",
+      L: "Function",
+      P: {
+        key: "getCategories",
+        description: "Retrieves all rule categories for the authenticated user with rule counts",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Query to get all categories for the user with rule counts
+  const categoriesQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+    OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule)
+    WITH rc, count(r) as ruleCount
+    RETURN rc, ruleCount
+    ORDER BY rc.displayOrder ASC, rc.createdAt ASC
+  `;
+
+  const categoriesResult = await args.session.run(categoriesQuery, {
+    userUuid: user.P.uuid
+  });
+
+  // Format the results
+  const categories = categoriesResult.records.map(record => {
+    const categoryNode = record.get('rc');
+    const ruleCount = args.neo4jConvert.js(record.get('ruleCount')) || 0;
+
+    // Convert Neo4j node to proper Vertex format
+    const category = args.convertNodeToJson(categoryNode);
+
+    return {
+      category,
+      ruleCount,
+      stats: {
+        totalRules: ruleCount
+      }
+    };
+  });
+
+  return {
+    success: true,
+    message: `Found ${categories.length} categories`,
+    data: {
+      categories,
+      total: categories.length,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching categories:", error);
+
+  // Handle specific errors
+  let userMessage = "Failed to load categories. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please contact support if this persists.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "CategoryFetchError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

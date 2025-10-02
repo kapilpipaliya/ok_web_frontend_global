@@ -1,0 +1,234 @@
+{
+  vertexes: [
+    {
+      id: "get_user_rules_function",
+      L: "Function",
+      P: {
+        key: "getUserRules",
+        description: "Retrieves all rules for the authenticated user with optional category filtering",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { categoryId, includeInactive, includeTracking, trackingDate } = args.contextData || {};
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Build the query based on parameters
+  let rulesQuery = '';
+  let queryParams = { userUuid: user.P.uuid };
+
+  if (categoryId) {
+    // Get rules for specific category
+    rulesQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+      WHERE elementId(rc) = $categoryId
+      ${includeInactive ? '' : 'AND r.isActive = true'}
+      OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r)
+      OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r)
+      OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r)
+      ${includeTracking && trackingDate ? 'OPTIONAL MATCH (u)-[:UserRuleTracking]->(todayTracking:RuleTracking {date: date($trackingDate)})-[:RuleTrackingRule]->(r)' : ''}
+      WITH r, rc, count(DISTINCT rt) as trackingCount, count(DISTINCT rs) as streakCount, count(DISTINCT rg) as goalCount
+      ${includeTracking && trackingDate ? ', collect(DISTINCT todayTracking) as todayTrackingList' : ''}
+      RETURN r, rc, trackingCount, streakCount, goalCount
+      ${includeTracking && trackingDate ? ', todayTrackingList' : ''}
+      ORDER BY r.priority DESC, r.createdAt DESC
+    `;
+    queryParams.categoryId = categoryId;
+    if (includeTracking && trackingDate) {
+      queryParams.trackingDate = trackingDate;
+    }
+  } else {
+    // Get all rules for user
+    rulesQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+      ${includeInactive ? '' : 'WHERE r.isActive = true'}
+      OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+      OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r)
+      OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r)
+      OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r)
+      ${includeTracking && trackingDate ? 'OPTIONAL MATCH (u)-[:UserRuleTracking]->(todayTracking:RuleTracking {date: date($trackingDate)})-[:RuleTrackingRule]->(r)' : ''}
+      WITH r, rc, count(DISTINCT rt) as trackingCount, count(DISTINCT rs) as streakCount, count(DISTINCT rg) as goalCount
+      ${includeTracking && trackingDate ? ', collect(DISTINCT todayTracking) as todayTrackingList' : ''}
+      RETURN r, rc, trackingCount, streakCount, goalCount
+      ${includeTracking && trackingDate ? ', todayTrackingList' : ''}
+      ORDER BY r.priority DESC, r.createdAt DESC
+    `;
+    if (includeTracking && trackingDate) {
+      queryParams.trackingDate = trackingDate;
+    }
+  }
+
+  const rulesResult = await args.session.run(rulesQuery, queryParams);
+
+  // Format the results
+  const rules = [];
+
+  for (const record of rulesResult.records) {
+    if (!record) continue;
+
+    const ruleNode = record.get('r');
+    if (!ruleNode) continue;
+
+    const categoryNode = record.get('rc');
+    const trackingCount = args.neo4jConvert.js(record.get('trackingCount')) || 0;
+    const streakCount = args.neo4jConvert.js(record.get('streakCount')) || 0;
+    const goalCount = args.neo4jConvert.js(record.get('goalCount')) || 0;
+
+    // Convert Neo4j nodes to proper Vertex format
+    let rule;
+    let category = null;
+
+    try {
+      rule = args.convertNodeToJson(ruleNode);
+      category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+    } catch (e) {
+      console.warn('Failed to convert rule or category node:', e);
+      continue; // Skip this rule if conversion fails
+    }
+
+    // Handle today's tracking data if requested
+    let todayTracking = [];
+    let streak = null;
+
+    if (includeTracking && trackingDate) {
+      try {
+        const todayTrackingList = record.get('todayTrackingList');
+        if (todayTrackingList && Array.isArray(todayTrackingList)) {
+          todayTracking = todayTrackingList
+            .filter(node => node !== null && node !== undefined)
+            .map(node => {
+              try {
+                return args.convertNodeToJson(node);
+              } catch (e) {
+                console.warn('Failed to convert tracking node:', e);
+                return null;
+              }
+            })
+            .filter(node => node !== null);
+        } else {
+          todayTracking = [];
+        }
+      } catch (e) {
+        console.warn('Error processing tracking data:', e);
+        todayTracking = [];
+      }
+
+      // Also get streak information for this rule
+      const ruleElementId = rule.id;
+      if (ruleElementId) {
+        try {
+          const streakQuery = `
+            MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+            WHERE elementId(r) = $ruleElementId
+            RETURN rs
+          `;
+
+          const streakResult = await args.session.run(streakQuery, {
+            userUuid: user.P.uuid,
+            ruleElementId,
+          });
+
+          if (streakResult && streakResult.records && streakResult.records.length > 0) {
+            const record = streakResult.records[0];
+            if (record) {
+              const streakNode = record.get('rs');
+              if (streakNode) {
+                try {
+                  streak = args.convertNodeToJson(streakNode);
+                } catch (e) {
+                  console.warn('Failed to convert streak node:', e);
+                  streak = null;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          // Streak lookup failed, continue without it
+          streak = null;
+        }
+      }
+    }
+
+    // Ensure all data is properly structured
+    const ruleData = {
+      rule: rule || null,
+      category: category || null,
+      tracking: Array.isArray(todayTracking) ? todayTracking : [],
+      streak: streak || null,
+      stats: {
+        trackingCount: Number(trackingCount) || 0,
+        streakCount: Number(streakCount) || 0,
+        goalCount: Number(goalCount) || 0,
+        totalActivity: Number(trackingCount + streakCount + goalCount) || 0
+      }
+    };
+
+    rules.push(ruleData);
+  }
+
+  // Group by category if no specific category filter
+  let groupedByCategory = null;
+  if (!categoryId) {
+    groupedByCategory = rules.reduce((acc, item) => {
+      const categoryKey = item.category?.P?.key || 'uncategorized';
+      const categoryName = item.category?.P?.name || 'Uncategorized';
+
+      if (!acc[categoryKey]) {
+        acc[categoryKey] = {
+          category: item.category,
+          categoryName,
+          rules: []
+        };
+      }
+      acc[categoryKey].rules.push(item);
+      return acc;
+    }, {});
+  }
+
+  return {
+    success: true,
+    message: `Found ${rules.length} rules`,
+    data: {
+      rules,
+      groupedByCategory,
+      total: rules.length,
+      filters: {
+        categoryId: categoryId || null,
+        includeInactive: !!includeInactive
+      },
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching user rules:", error);
+
+  // Handle specific errors
+  let userMessage = "Failed to load rules. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please contact support if this persists.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "RuleFetchError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

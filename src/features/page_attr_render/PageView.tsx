@@ -1,9 +1,18 @@
-import { createMemo, Match, Show, Switch, JSX } from "solid-js";
+import { createMemo, Match, Show, Switch, JSX, getOwner, createSignal, onMount, onCleanup, createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
+import { useSearchParams, useLocation, useNavigate } from "@solidjs/router";
+import { useToast } from "~/components/styled/modal/Toast";
+import { useZIndex } from "~/components/fields/ZIndex";
+import { useTheme } from "~/lib/theme/ThemeContext";
+import { useThemeToggle } from "~/lib/hooks/useThemeToggle";
+import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
+import { useDataContext } from "~/features/page_attr_render/context/DataContext";
+import { getLastItem } from "~/lib/data_structure/array/getLastItem";
 
 import { PageAttrRender } from "~/features/page_attr_render/PageAttrRender";
 import {
   PreviewContext,
+  usePreviewContext,
   type PreviewStoreObject,
 } from "~/features/page_designer/context/PreviewContext";
 import {
@@ -22,6 +31,12 @@ import { SlotContext } from "~/components/fields/component/contexts/SlotContext"
 import { evalExpression } from "~/lib/expression_eval";
 import { ComponentWrapper } from "./ComponentWrapper";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/entity/findVertex";
+import { createDynamicPropsMemo } from "~/components/form/dynamic_component/functions/createDynamicPropsMemo";
+import { createFunctionArgumentWithValue } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentWithValue";
+import { createFunctionArgumentBase } from "~/components/form/dynamic_component/functions/function_argument/createFunctionArgumentBase";
+import { createDynamicFunctions } from "~/components/form/dynamic_component/functions/function_argument/createDynamicFunctions";
+import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
+import { HtmlField } from "~/components/fields/HtmlField";
 
 export function PageView(
   props: Readonly<{
@@ -39,6 +54,44 @@ export function PageView(
 ) {
   const [graph, setGraph] = useGraph();
 
+  const [previewStore2] = usePreviewContext();
+  
+  // Context hooks needed for function arguments
+  const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const zIndex = useZIndex();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
+  const themeToggle = useThemeToggle();
+  const owner = getOwner();
+  const parentItems = usePageRenderContext();
+  const contextData = useDataContext() || {};
+  const [ref, setRef] = createSignal<HTMLElement | null>(null);
+  const [mounted, setMounted] = createSignal<null | boolean>(null);
+  const [componentName] = createSignal<string>("Html");
+
+  const parentRenderContext = () =>
+    getLastItem(parentItems)?.[0] as
+      | { context: FunctionArgumentType }
+      | undefined;
+  const parentMeta = () => parentRenderContext()?.context.meta;
+
+  // Create dynamic functions for the component
+  const dynamicFns = createDynamicFunctions(
+    graph,
+    () => props.metaVertex,
+    () => getFunctionArgumentWithValue(),
+    parentRenderContext,
+    componentName,
+  );
+
+  // Create function proxy
+  const functionProxy = createFunctionProxy(
+    () => dynamicFns,
+    parentRenderContext,
+  );
+
   const isViewOnlyForm = createMemo(() => {
     if (!(props.id || props.hasCreatePermission)) {
       return true;
@@ -46,6 +99,78 @@ export function PageView(
     if (props.id && !props.hasEditPermission) {
       return props.hasViewPermission;
     }
+  });
+
+  // Create a proper function argument for evaluating dynamic props
+  const getFunctionArgument = () => {
+    const meta = props.metaVertex;
+    if (!meta) return {} as FunctionArgumentType;
+
+    return createFunctionArgumentBase(
+      {
+        data: props.data,
+        meta,
+      },
+      {
+        formVertex: () => ({}) as any,
+        formId: "page-view",
+        componentName,
+        isNoPermissionCheck: () => props.isNoPermissionCheck || false,
+        isViewMode: () => false,
+        mounted,
+        parentMeta,
+        ref,
+        setRef,
+        updateValue: () => {},
+        onChange: () => {},
+        hasFullPermission: () => props.hasFullPermission || true,
+        hasEditPermission: () => props.hasEditPermission || true,
+        hasCreatePermission: () => props.hasCreatePermission || true,
+        hasViewPermission: () => props.hasViewPermission || true,
+      },
+      {
+        graph,
+        setGraph,
+        toast,
+        searchParams,
+        setSearchParams,
+        zIndex,
+        navigate,
+        location,
+        theme,
+        parentItems,
+        previewStore: previewStore2,
+        themeToggle,
+        owner: owner!,
+        parentRenderContext,
+        functionProxy,
+      },
+    );
+  };
+
+  const getFunctionArgumentWithValue = () =>
+    createFunctionArgumentWithValue(getFunctionArgument, () => undefined);
+
+  // Evaluate dynamic props from metaVertex
+  const dynamicProps = createDynamicPropsMemo(
+    { get meta() { return props.metaVertex } },
+    {
+      graph,
+      getFunctionArgumentWithValue,
+    },
+  );
+
+  // Lifecycle setup using useComponentLifecycle hook
+    useComponentLifecycle({
+      dynamicProps,
+      getFunctionArgumentWithValue,
+      setMounted,
+      reMount: true
+    });
+
+  onCleanup(() => {
+    setRef(null);
+    setMounted(false);
   });
 
   // Function to find and log layout vertexes
@@ -127,42 +252,6 @@ export function PageView(
     },
   });
 
-  const dynamicFns = createMemo(() => {
-    try {
-      // Helper to evaluate fns from a vertex
-      // need to pass object because getting error:
-      // get' on proxy: property 'Symbol(solid-proxy)' is a read-only and non-configurable data property on the proxy target but the proxy did not return its actual value
-      // (expected '#<Object>' but got 'undefined')
-      // because in createFunctionProxy we return dynamicFns() in case of $PROXY
-      const evaluateFns = (
-        fns:
-          | ((args: FunctionArgumentType) => Record<string, unknown>)
-          | string
-          | undefined
-          | null,
-      ) => {
-        if (typeof fns === "function") {
-          return fns(previewStore[0].context) || {};
-        }
-        if (typeof fns === "string") {
-          try {
-            return new Function("args", fns)(previewStore[0].context) || {};
-          } catch (error) {
-            console.error("Error evaluating fns:", error);
-            return {};
-          }
-        }
-        return {};
-      };
-
-      return evaluateFns(props.metaVertex?.P.fns);
-    } catch (error) {
-      console.error("Error in dynamicFns:", error);
-      return {};
-    }
-  });
-
-  const functionProxy = createFunctionProxy(dynamicFns, () => undefined);
   const repeterStore = createStore({
     get context() {
       return {
@@ -195,7 +284,7 @@ export function PageView(
       };
       
       return (
-        <SlotContext.Provider value={SlotChildren}>
+        <SlotContext.Provider value={[SlotChildren]}>
           {/*<Show*/}
           {/*  when={currentLayout()?.L[0] === "Component"}*/}
           {/*  fallback={*/}
@@ -237,6 +326,13 @@ export function PageView(
           isNoPermissionCheck={props.isNoPermissionCheck}
         />
       </Match>
+      <Match when={dynamicProps().data || dynamicProps().expression || dynamicProps().serverFunction}>
+        <PageAttrRender
+          data={props.data}
+          isNoPermissionCheck={props.isNoPermissionCheck!}
+          metaVertex={props.metaVertex!}
+        />
+      </Match>
       <Match when={true}>
         <DataContext.Provider value={{ index: 0 }}>
           <PageAttrRender
@@ -249,15 +345,35 @@ export function PageView(
     </Switch>
   );
 
+  const MainContentDataWrapper = () => (
+    <Switch>
+      <Match when={dynamicProps().data || dynamicProps().expression || dynamicProps().serverFunction}>
+        <HtmlField
+          data={dynamicProps().data}
+          expression={dynamicProps().expression}
+          serverFunction={dynamicProps().serverFunction}
+          loop={dynamicProps().loop}
+          contextName={dynamicProps().contextName}
+          renderChildren
+        >
+          <MainContent />
+        </HtmlField>
+      </Match>
+      <Match when={true}>
+        <MainContent />
+      </Match>
+    </Switch>
+  );
+
   return (
     <Show when={props.metaVertex}>
       <PreviewContext.Provider value={previewStore}>
         <PageRenderContextProvider store={repeterStore}>
           <Show
-            when={layouts().length > 0} 
-            fallback={<MainContent/>}
+            when={layouts().length > 0}
+            fallback={<MainContentDataWrapper/>}
           >
-            <LayoutRenderer index={0} content={<MainContent/>} />
+            <LayoutRenderer index={0} content={<MainContentDataWrapper/>} />
           </Show>
         </PageRenderContextProvider>
       </PreviewContext.Provider>

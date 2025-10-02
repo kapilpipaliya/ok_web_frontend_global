@@ -1,0 +1,223 @@
+{
+  vertexes: [
+    {
+      id: "save_category_function",
+      L: "Function",
+      P: {
+        key: "saveCategory",
+        description: "Creates or updates a rule category with validation and display order management",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { categoryId, name, description, color, icon, displayOrder, isActive } = args.contextData;
+
+  // Validate required fields
+  if (!name?.trim()) {
+    throw new Error("Category name is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  const isUpdate = Boolean(categoryId);
+  const finalCategoryId = categoryId || `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // No longer need category key - handle create/update separately
+
+  // Validate and normalize color format
+  let finalColor = color;
+  if (color) {
+    // Allow named colors used in the form
+    const allowedColors = ['blue', 'green', 'red', 'purple', 'orange', 'yellow'];
+    const isHexColor = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(color);
+    const isNamedColor = allowedColors.includes(color.toLowerCase());
+
+    if (!isHexColor && !isNamedColor) {
+      throw new Error("Color must be a valid hex color (e.g., #FF5733) or one of: " + allowedColors.join(', '));
+    }
+
+    // Use the color as provided (either hex or named color)
+    finalColor = color;
+  }
+
+  // Check for duplicate category names (case-insensitive) for the same user
+  // Always check for duplicates, but exclude the current category in update mode
+  const duplicateCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+    WHERE toLower(rc.name) = toLower($name)
+    ${isUpdate ? 'AND elementId(rc) <> $categoryId' : ''}
+    RETURN rc
+  `;
+
+  const duplicateResult = await args.session.run(duplicateCheckQuery, {
+    userUuid: user.P.uuid,
+    name: name.trim(),
+    ...(isUpdate && { categoryId })
+  });
+
+  if (duplicateResult.records.length > 0) {
+    throw new Error("A category with this name already exists");
+  }
+
+  // Calculate display order if not provided
+  let finalDisplayOrder = displayOrder;
+  if (!isUpdate && (displayOrder === undefined || displayOrder === null)) {
+    const maxOrderQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+      RETURN COALESCE(MAX(rc.displayOrder), 0) + 1 as nextOrder
+    `;
+
+    const maxOrderResult = await args.session.run(maxOrderQuery, {
+      userUuid: user.P.uuid
+    });
+
+    finalDisplayOrder = maxOrderResult.records[0]?.get('nextOrder') || 1;
+  }
+
+  // STEP 1: Create or update the RuleCategory vertex
+  let mergeCategoryQuery;
+  let queryParams;
+
+  if (isUpdate) {
+    // For updates, find by elementId and update properties
+    mergeCategoryQuery = `
+      MATCH (rc:RuleCategory)
+      WHERE elementId(rc) = $categoryId
+      SET
+        rc.name = $name,
+        rc.description = $description,
+        rc.color = $color,
+        rc.icon = $icon,
+        rc.displayOrder = $displayOrder,
+        rc.isActive = $isActive,
+        rc.updatedAt = datetime()
+      RETURN rc
+    `;
+    queryParams = {
+      categoryId,
+      name: name.trim(),
+      description: description?.trim() || "",
+      color: finalColor || "#6B7280",
+      icon: icon || "📋",
+      displayOrder: finalDisplayOrder,
+      isActive: isActive !== undefined ? isActive : true
+    };
+  } else {
+    // For creates, use CREATE to avoid key dependency
+    mergeCategoryQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      CREATE (u)-[:UserRuleCategory]->(rc:RuleCategory)
+      SET
+        rc.name = $name,
+        rc.description = $description,
+        rc.color = $color,
+        rc.icon = $icon,
+        rc.displayOrder = $displayOrder,
+        rc.isActive = $isActive,
+        rc.createdAt = datetime(),
+        rc.updatedAt = datetime()
+      RETURN rc, elementId(rc) as categoryElementId
+    `;
+    queryParams = {
+      userUuid: user.P.uuid,
+      name: name.trim(),
+      description: description?.trim() || "",
+      color: finalColor || "#6B7280",
+      icon: icon || "📋",
+      displayOrder: finalDisplayOrder,
+      isActive: isActive !== undefined ? isActive : true
+    };
+  }
+
+  const categoryResult = await args.session.run(mergeCategoryQuery, queryParams);
+
+  const categoryNode = categoryResult.records[0].get('rc');
+  const category = args.convertNodeToJson(categoryNode);
+
+  // For new categories, get the generated elementId
+  const categoryElementId = isUpdate ? categoryId : categoryResult.records[0].get('categoryElementId');
+
+  // STEP 2: If this is an update and displayOrder changed, reorder other categories
+  if (isUpdate && displayOrder !== undefined && displayOrder !== null) {
+    // Get current category's old display order
+    const oldOrderQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+      WHERE elementId(rc) = $categoryId
+      RETURN rc.displayOrder as oldOrder
+    `;
+
+    const oldOrderResult = await args.session.run(oldOrderQuery, {
+      userUuid: user.P.uuid,
+      categoryId: categoryElementId
+    });
+
+    if (oldOrderResult.records.length > 0) {
+      const oldOrder = oldOrderResult.records[0].get('oldOrder');
+
+      if (oldOrder !== displayOrder) {
+        // Reorder other categories to make room for the updated position
+        const reorderQuery = `
+          MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+          WHERE elementId(rc) <> $categoryId AND rc.displayOrder >= $newOrder
+          SET rc.displayOrder = rc.displayOrder + 1
+        `;
+
+        await args.session.run(reorderQuery, {
+          userUuid: user.P.uuid,
+          categoryId: categoryElementId,
+          newOrder: displayOrder
+        });
+      }
+    }
+  }
+
+  return {
+    success: true,
+    message: isUpdate ? "Category updated successfully!" : "Category created successfully!",
+    data: {
+      categoryId: categoryElementId,
+      name: name.trim(),
+      description: description?.trim() || "",
+      color: finalColor || "#6B7280",
+      icon: icon || "📋",
+      displayOrder: finalDisplayOrder,
+      isActive: isActive !== undefined ? isActive : true,
+      isUpdate,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error saving category:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to save category. Please try again.";
+
+  if (error.message.includes("name is required")) {
+    userMessage = "Category name is required.";
+  } else if (error.message.includes("already exists")) {
+    userMessage = "A category with this name already exists. Please choose a different name.";
+  } else if (error.message.includes("valid hex color")) {
+    userMessage = "Please select a valid color for the category.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "CategorySaveError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

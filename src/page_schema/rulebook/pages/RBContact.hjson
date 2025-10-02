@@ -1,0 +1,1326 @@
+{
+  vertexes: [
+    {
+      id: "contact_page",
+      L: "Page",
+      P: {
+        key: "RBContact",
+        url: "/contact",
+        title: "Contact & Support - Personal Rulebook",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "contact_layout_1",
+      L: "PageLayout",
+      P: {
+        componentName: "RBWebsiteLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "contact_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing.lg};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: ${args.theme.var.spacing.xxl};
+  padding: ${args.theme.var.spacing.xl} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Contact & Support"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  text-shadow: 0 2px 4px ${args.theme.var.color.primary_light_200};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We're here to help you succeed on your personal growth journey. Reach out anytime!"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  line-height: 1.6;
+  color: ${args.theme.var.color.muted};
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.lg};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "contact_methods_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xxl};
+}`;
+'''
+      }
+    },
+    {
+      id: "contact_methods_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Get in Touch"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xxl};
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  text-align: center;
+  margin-bottom: ${args.theme.var.spacing.xl};
+  position: relative;
+}
+
+._id::after {
+  content: '';
+  position: absolute;
+  bottom: -${args.theme.var.spacing.md};
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: ${args.theme.var.color.primary};
+  border-radius: 2px;
+}`;
+'''
+      }
+    },
+    {
+      id: "contact_methods_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: ${args.theme.var.spacing.lg};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "method_email",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: ${args.theme.var.borderRadius.xl};
+  border: 2px solid ${args.theme.var.color.primary_light_200};
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px ${args.theme.var.color.primary_light_300};
+  border-color: ${args.theme.var.color.primary_light_300};
+}
+
+._id .icon {
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}
+
+._id h3 {
+  color: ${args.theme.var.color.primary};
+  font-weight: 700;
+  font-size: ${args.theme.var.fontSize.xl};
+  margin-bottom: ${args.theme.var.spacing.md};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.lg};
+}
+
+._id .email {
+  color: ${args.theme.var.color.primary};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.lg};
+  text-decoration: none;
+  border-bottom: 2px solid ${args.theme.var.color.primary_light_200};
+  transition: all 0.2s ease;
+}
+
+._id .email:hover {
+  border-bottom-color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "method_email_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:email",
+  width: 56,
+  height: 56
+};
+'''
+      }
+    },
+    {
+      id: "method_email_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Email Support"
+};
+'''
+      }
+    },
+    {
+      id: "method_email_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "For general inquiries, feature requests, or detailed support questions. We typically respond within 24 hours."
+};
+'''
+      }
+    },
+    {
+      id: "method_email_address",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "mailto:support@personalrulebook.com",
+  text: "support@personalrulebook.com"
+};
+'''
+      }
+    },
+    {
+      id: "method_feedback",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: ${args.theme.var.borderRadius.xl};
+  border: 2px solid ${args.theme.var.color.success_light_200};
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px ${args.theme.var.color.success_light_300};
+  border-color: ${args.theme.var.color.success_light_300};
+}
+
+._id .icon {
+  color: ${args.theme.var.color.success};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}
+
+._id h3 {
+  color: ${args.theme.var.color.success};
+  font-weight: 700;
+  font-size: ${args.theme.var.fontSize.xl};
+  margin-bottom: ${args.theme.var.spacing.md};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.lg};
+}
+
+._id .email {
+  color: ${args.theme.var.color.success};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.lg};
+  text-decoration: none;
+  border-bottom: 2px solid ${args.theme.var.color.success_light_200};
+  transition: all 0.2s ease;
+}
+
+._id .email:hover {
+  border-bottom-color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "method_feedback_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:idea",
+  width: 56,
+  height: 56
+};
+'''
+      }
+    },
+    {
+      id: "method_feedback_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Feature Requests"
+};
+'''
+      }
+    },
+    {
+      id: "method_feedback_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Have an idea for a new feature or improvement? We love hearing from users about how we can make Personal Rulebook better."
+};
+'''
+      }
+    },
+    {
+      id: "method_feedback_address",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "mailto:feedback@personalrulebook.com",
+  text: "feedback@personalrulebook.com"
+};
+'''
+      }
+    },
+    {
+      id: "method_bug",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: ${args.theme.var.borderRadius.xl};
+  border: 2px solid ${args.theme.var.color.warning_light_300};
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px ${args.theme.var.color.warning_light_400};
+  border-color: ${args.theme.var.color.warning_light_400};
+}
+
+._id .icon {
+  color: ${args.theme.var.color.warning_dark_300};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}
+
+._id h3 {
+  color: ${args.theme.var.color.warning_dark_300};
+  font-weight: 700;
+  font-size: ${args.theme.var.fontSize.xl};
+  margin-bottom: ${args.theme.var.spacing.md};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.lg};
+}
+
+._id .email {
+  color: ${args.theme.var.color.warning_dark_300};
+  font-weight: 600;
+  font-size: ${args.theme.var.fontSize.lg};
+  text-decoration: none;
+  border-bottom: 2px solid ${args.theme.var.color.warning_light_300};
+  transition: all 0.2s ease;
+}
+
+._id .email:hover {
+  border-bottom-color: ${args.theme.var.color.warning_dark_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "method_bug_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:debug",
+  width: 56,
+  height: 56
+};
+'''
+      }
+    },
+    {
+      id: "method_bug_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Bug Reports"
+};
+'''
+      }
+    },
+    {
+      id: "method_bug_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Found something that's not working correctly? Let us know and we'll fix it as quickly as possible."
+};
+'''
+      }
+    },
+    {
+      id: "method_bug_address",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "mailto:bugs@personalrulebook.com",
+  text: "bugs@personalrulebook.com"
+};
+'''
+      }
+    },
+    {
+      id: "faq_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xxl};
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Frequently Asked Questions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xxl};
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+  text-align: center;
+  margin-bottom: ${args.theme.var.spacing.xl};
+  position: relative;
+}
+
+._id::after {
+  content: '';
+  position: absolute;
+  bottom: -${args.theme.var.spacing.md};
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: ${args.theme.var.color.primary};
+  border-radius: 2px;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: ${args.theme.var.spacing.lg};
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 2px solid ${args.theme.var.color.primary_light_200};
+}
+
+._id h3 {
+  color: ${args.theme.var.color.primary};
+  font-weight: 700;
+  font-size: ${args.theme.var.fontSize.lg};
+  margin-bottom: ${args.theme.var.spacing.md};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_1_question",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "How do I get started with Personal Rulebook?"
+};
+'''
+      }
+    },
+    {
+      id: "faq_1_answer",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Simply create an account and start by adding your first personal rule. Think about a principle or habit you want to follow consistently, give it a name, description, and choose how often you want to track it. Then use the tracking page each day to mark your progress!"
+};
+'''
+      }
+    },
+    {
+      id: "faq_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 2px solid ${args.theme.var.color.success_light_200};
+}
+
+._id h3 {
+  color: ${args.theme.var.color.success};
+  font-weight: 700;
+  font-size: ${args.theme.var.fontSize.lg};
+  margin-bottom: ${args.theme.var.spacing.md};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_2_question",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Is my personal data private and secure?"
+};
+'''
+      }
+    },
+    {
+      id: "faq_2_answer",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Absolutely! Your personal rules, tracking data, and notes are private to you. We use industry-standard encryption and security measures. You have complete control over your data and can export or delete it at any time. See our Privacy Policy for full details."
+};
+'''
+      }
+    },
+    {
+      id: "faq_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 2px solid ${args.theme.var.color.info_light_200};
+}
+
+._id h3 {
+  color: ${args.theme.var.color.info};
+  font-weight: 700;
+  font-size: ${args.theme.var.fontSize.lg};
+  margin-bottom: ${args.theme.var.spacing.md};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_3_question",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Can I use Personal Rulebook on my mobile device?"
+};
+'''
+      }
+    },
+    {
+      id: "faq_3_answer",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Yes! Personal Rulebook is designed mobile-first and works great on phones, tablets, and desktop computers. The interface adapts to your screen size for the best experience on any device."
+};
+'''
+      }
+    },
+    {
+      id: "faq_4",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 2px solid ${args.theme.var.color.warning_light_300};
+}
+
+._id h3 {
+  color: ${args.theme.var.color.warning_dark_300};
+  font-weight: 700;
+  font-size: ${args.theme.var.fontSize.lg};
+  margin-bottom: ${args.theme.var.spacing.md};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "faq_4_question",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "What if I miss a day of tracking?"
+};
+'''
+      }
+    },
+    {
+      id: "faq_4_answer",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "No worries! Life happens, and Personal Rulebook is designed to help you get back on track. You can mark days as 'skipped' for planned breaks, and your streak data helps you see your overall progress patterns rather than focusing on perfection."
+};
+'''
+      }
+    },
+    {
+      id: "response_time_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xxl};
+  padding: ${args.theme.var.spacing.xl};
+  background: ${args.theme.var.color.background_light_200};
+  border-radius: ${args.theme.var.borderRadius.xl};
+  border: 2px solid ${args.theme.var.color.info_light_200};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "response_time_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Our Response Times"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.info};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "response_time_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: ${args.theme.var.spacing.lg};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "response_general",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id h3 {
+  color: ${args.theme.var.color.primary};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.lg};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "response_general_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "General Inquiries"
+};
+'''
+      }
+    },
+    {
+      id: "response_general_time",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "24-48 hours"
+};
+'''
+      }
+    },
+    {
+      id: "response_bugs",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id h3 {
+  color: ${args.theme.var.color.warning_dark_300};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.lg};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "response_bugs_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Bug Reports"
+};
+'''
+      }
+    },
+    {
+      id: "response_bugs_time",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "12-24 hours"
+};
+'''
+      }
+    },
+    {
+      id: "response_features",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id h3 {
+  color: ${args.theme.var.color.success};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.sm};
+  font-size: ${args.theme.var.fontSize.lg};
+}
+
+._id p {
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "response_features_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Feature Requests"
+};
+'''
+      }
+    },
+    {
+      id: "response_features_time",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "2-5 business days"
+};
+'''
+      }
+    },
+    {
+      id: "response_note",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We read every message and strive to respond as quickly as possible. For urgent issues, please mention 'URGENT' in your subject line."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-style: italic;
+  font-size: ${args.theme.var.fontSize.sm};
+  line-height: 1.6;
+}`;
+'''
+      }
+    },
+    {
+      id: "community_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xxl} ${args.theme.var.spacing.xl};
+  background: linear-gradient(135deg, ${args.theme.var.color.primary}, ${args.theme.var.color.success});
+  border-radius: ${args.theme.var.borderRadius.xl};
+  color: ${args.theme.var.color.primary_text};
+  margin-bottom: ${args.theme.var.spacing.xl};
+}
+
+._id h2 {
+  font-size: ${args.theme.var.fontSize.xxl};
+  font-weight: 700;
+  margin-bottom: ${args.theme.var.spacing.lg};
+  color: ${args.theme.var.color.primary_text};
+}
+
+._id p {
+  font-size: ${args.theme.var.fontSize.lg};
+  margin-bottom: ${args.theme.var.spacing.xl};
+  opacity: 0.9;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+._id button {
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.primary};
+  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.xl};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.full};
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+._id button:hover {
+  background: ${args.theme.var.color.background_light_200};
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px ${args.theme.var.color.primary_light_400};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.xl};
+  }
+
+  ._id h2 {
+    font-size: ${args.theme.var.fontSize.xl};
+  }
+
+  ._id p {
+    font-size: ${args.theme.var.fontSize.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "community_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Join Our Community"
+};
+'''
+      }
+    },
+    {
+      id: "community_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Connect with other users, share your success stories, and get tips for building better habits. We're building something special together!"
+};
+'''
+      }
+    },
+    {
+      id: "community_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  text: "Get Started Today",
+  onClick: () => {
+    args.navigate("/auth/signup");
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "contact_page", E: "contact_layout_1" },
+    { id: "e2", T: "Attr", S: "contact_page", E: "contact_container" },
+    { id: "e3", T: "Attr", S: "contact_container", E: "hero_section" },
+    { id: "e4", T: "Attr", S: "hero_section", E: "hero_title" },
+    { id: "e5", T: "Attr", S: "hero_section", E: "hero_subtitle" },
+    { id: "e6", T: "Attr", S: "contact_container", E: "contact_methods_section" },
+    { id: "e7", T: "Attr", S: "contact_methods_section", E: "contact_methods_title" },
+    { id: "e8", T: "Attr", S: "contact_methods_section", E: "contact_methods_grid" },
+    { id: "e9", T: "Attr", S: "contact_methods_grid", E: "method_email" },
+    { id: "e10", T: "Attr", S: "method_email", E: "method_email_icon" },
+    { id: "e11", T: "Attr", S: "method_email", E: "method_email_title" },
+    { id: "e12", T: "Attr", S: "method_email", E: "method_email_desc" },
+    { id: "e13", T: "Attr", S: "method_email", E: "method_email_address" },
+    { id: "e14", T: "Attr", S: "contact_methods_grid", E: "method_feedback" },
+    { id: "e15", T: "Attr", S: "method_feedback", E: "method_feedback_icon" },
+    { id: "e16", T: "Attr", S: "method_feedback", E: "method_feedback_title" },
+    { id: "e17", T: "Attr", S: "method_feedback", E: "method_feedback_desc" },
+    { id: "e18", T: "Attr", S: "method_feedback", E: "method_feedback_address" },
+    { id: "e19", T: "Attr", S: "contact_methods_grid", E: "method_bug" },
+    { id: "e20", T: "Attr", S: "method_bug", E: "method_bug_icon" },
+    { id: "e21", T: "Attr", S: "method_bug", E: "method_bug_title" },
+    { id: "e22", T: "Attr", S: "method_bug", E: "method_bug_desc" },
+    { id: "e23", T: "Attr", S: "method_bug", E: "method_bug_address" },
+    { id: "e24", T: "Attr", S: "contact_container", E: "faq_section" },
+    { id: "e25", T: "Attr", S: "faq_section", E: "faq_title" },
+    { id: "e26", T: "Attr", S: "faq_section", E: "faq_list" },
+    { id: "e27", T: "Attr", S: "faq_list", E: "faq_1" },
+    { id: "e28", T: "Attr", S: "faq_1", E: "faq_1_question" },
+    { id: "e29", T: "Attr", S: "faq_1", E: "faq_1_answer" },
+    { id: "e30", T: "Attr", S: "faq_list", E: "faq_2" },
+    { id: "e31", T: "Attr", S: "faq_2", E: "faq_2_question" },
+    { id: "e32", T: "Attr", S: "faq_2", E: "faq_2_answer" },
+    { id: "e33", T: "Attr", S: "faq_list", E: "faq_3" },
+    { id: "e34", T: "Attr", S: "faq_3", E: "faq_3_question" },
+    { id: "e35", T: "Attr", S: "faq_3", E: "faq_3_answer" },
+    { id: "e36", T: "Attr", S: "faq_list", E: "faq_4" },
+    { id: "e37", T: "Attr", S: "faq_4", E: "faq_4_question" },
+    { id: "e38", T: "Attr", S: "faq_4", E: "faq_4_answer" },
+    { id: "e39", T: "Attr", S: "contact_container", E: "response_time_section" },
+    { id: "e40", T: "Attr", S: "response_time_section", E: "response_time_title" },
+    { id: "e41", T: "Attr", S: "response_time_section", E: "response_time_content" },
+    { id: "e42", T: "Attr", S: "response_time_content", E: "response_general" },
+    { id: "e43", T: "Attr", S: "response_general", E: "response_general_title" },
+    { id: "e44", T: "Attr", S: "response_general", E: "response_general_time" },
+    { id: "e45", T: "Attr", S: "response_time_content", E: "response_bugs" },
+    { id: "e46", T: "Attr", S: "response_bugs", E: "response_bugs_title" },
+    { id: "e47", T: "Attr", S: "response_bugs", E: "response_bugs_time" },
+    { id: "e48", T: "Attr", S: "response_time_content", E: "response_features" },
+    { id: "e49", T: "Attr", S: "response_features", E: "response_features_title" },
+    { id: "e50", T: "Attr", S: "response_features", E: "response_features_time" },
+    { id: "e51", T: "Attr", S: "response_time_section", E: "response_note" },
+    { id: "e52", T: "Attr", S: "contact_container", E: "community_section" },
+    { id: "e53", T: "Attr", S: "community_section", E: "community_title" },
+    { id: "e54", T: "Attr", S: "community_section", E: "community_desc" },
+    { id: "e55", T: "Attr", S: "community_section", E: "community_button" }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  vertexes: [
+    {
+      id: "delete_all_user_data_function",
+      L: "Function",
+      P: {
+        key: "deleteAllUserData",
+        description: "Deletes all rulebook data for the current user including rules, categories, tracking, goals, and streaks",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Get count of all data to be deleted
+  const countQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    OPTIONAL MATCH (u)-[:UserRuleCategory]->(rc:RuleCategory)
+    OPTIONAL MATCH (u)-[:UserRule]->(r:Rule)
+    OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking)
+    OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)
+    OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)
+    RETURN count(DISTINCT rc) as categoryCount,
+           count(DISTINCT r) as ruleCount,
+           count(DISTINCT rt) as trackingCount,
+           count(DISTINCT rg) as goalCount,
+           count(DISTINCT rs) as streakCount
+  `;
+
+  const countResult = await args.session.run(countQuery, {
+    userUuid: user.P.uuid
+  });
+
+  const counts = countResult.records[0];
+  const categoryCount = args.neo4jConvert.js(counts.get('categoryCount')) || 0;
+  const ruleCount = args.neo4jConvert.js(counts.get('ruleCount')) || 0;
+  const trackingCount = args.neo4jConvert.js(counts.get('trackingCount')) || 0;
+  const goalCount = args.neo4jConvert.js(counts.get('goalCount')) || 0;
+  const streakCount = args.neo4jConvert.js(counts.get('streakCount')) || 0;
+
+  const totalItems = categoryCount + ruleCount + trackingCount + goalCount + streakCount;
+
+  if (totalItems === 0) {
+    return {
+      success: true,
+      message: "No rulebook data found to delete.",
+      data: {
+        deleted: {
+          categories: 0,
+          rules: 0,
+          tracking: 0,
+          goals: 0,
+          streaks: 0,
+          total: 0
+        },
+        userId: user.P.uuid
+      }
+    };
+  }
+
+  // Start transaction for atomic deletion
+  const tx = args.session.beginTransaction();
+
+  try {
+    // Step 1: Delete all goals
+    if (goalCount > 0) {
+      const deleteGoalsQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+        DETACH DELETE rg
+      `;
+      await tx.run(deleteGoalsQuery, { userUuid: user.P.uuid });
+    }
+
+    // Step 2: Delete all tracking data
+    if (trackingCount > 0) {
+      const deleteTrackingQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)
+        DETACH DELETE rt
+      `;
+      await tx.run(deleteTrackingQuery, { userUuid: user.P.uuid });
+    }
+
+    // Step 3: Delete all streak data
+    if (streakCount > 0) {
+      const deleteStreaksQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)
+        DETACH DELETE rs
+      `;
+      await tx.run(deleteStreaksQuery, { userUuid: user.P.uuid });
+    }
+
+    // Step 4: Delete all rules
+    if (ruleCount > 0) {
+      const deleteRulesQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+        DETACH DELETE r
+      `;
+      await tx.run(deleteRulesQuery, { userUuid: user.P.uuid });
+    }
+
+    // Step 5: Delete all categories
+    if (categoryCount > 0) {
+      const deleteCategoriesQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+        DETACH DELETE rc
+      `;
+      await tx.run(deleteCategoriesQuery, { userUuid: user.P.uuid });
+    }
+
+    // Commit the transaction
+    await tx.commit();
+
+    // Build success message
+    const deletedItems = [];
+    if (categoryCount > 0) deletedItems.push(`${categoryCount} categories`);
+    if (ruleCount > 0) deletedItems.push(`${ruleCount} rules`);
+    if (trackingCount > 0) deletedItems.push(`${trackingCount} tracking records`);
+    if (goalCount > 0) deletedItems.push(`${goalCount} goals`);
+    if (streakCount > 0) deletedItems.push(`${streakCount} streaks`);
+
+    const message = `Successfully deleted all rulebook data: ${deletedItems.join(', ')}.`;
+
+    return {
+      success: true,
+      message,
+      data: {
+        deleted: {
+          categories: categoryCount,
+          rules: ruleCount,
+          tracking: trackingCount,
+          goals: goalCount,
+          streaks: streakCount,
+          total: totalItems
+        },
+        userId: user.P.uuid
+      }
+    };
+
+  } catch (txError) {
+    // Rollback the transaction on error
+    await tx.rollback();
+    throw txError;
+  }
+
+} catch (error) {
+  console.error("Error deleting all user data:", error);
+
+  let userMessage = "Failed to delete all data. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("constraint")) {
+    userMessage = "Cannot delete data due to database constraints. Please contact support.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DataDeletionError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

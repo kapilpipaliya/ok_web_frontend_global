@@ -1,0 +1,202 @@
+{
+  vertexes: [
+    {
+      id: "delete_category_function",
+      L: "Function",
+      P: {
+        key: "deleteCategory",
+        description: "Deletes a rule category and all associated rules, tracking data, and goals",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { categoryId } = args.contextData;
+
+  // Validate required fields
+  if (!categoryId) {
+    throw new Error("Category ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Check if category exists and belongs to user
+  const categoryCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+    WHERE elementId(rc) = $categoryId
+    OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule)
+    OPTIONAL MATCH (r)<-[:RuleTrackingRule]-(rt:RuleTracking)
+    OPTIONAL MATCH (r)<-[:RuleGoalRule]-(rg:RuleGoal)
+    RETURN rc,
+           count(DISTINCT r) as ruleCount,
+           count(DISTINCT rt) as trackingCount,
+           count(DISTINCT rg) as goalCount
+  `;
+
+  const categoryResult = await args.session.run(categoryCheckQuery, {
+    userUuid: user.P.uuid,
+    categoryId
+  });
+
+  if (categoryResult.records.length === 0) {
+    throw new Error("Category not found or does not belong to user");
+  }
+
+  const categoryNode = categoryResult.records[0].get('rc');
+  const category = args.convertNodeToJson(categoryNode);
+  const ruleCount = args.neo4jConvert.js(categoryResult.records[0].get('ruleCount')) || 0;
+  const trackingCount = args.neo4jConvert.js(categoryResult.records[0].get('trackingCount')) || 0;
+  const goalCount = args.neo4jConvert.js(categoryResult.records[0].get('goalCount')) || 0;
+
+  // Warn user about cascading deletes if there are related items
+  const cascadeInfo = {
+    ruleCount,
+    trackingCount,
+    goalCount,
+    totalAffected: ruleCount + trackingCount + goalCount
+  };
+
+  // Start transaction for atomic deletion
+  const tx = args.session.beginTransaction();
+
+  try {
+    // Step 1: Delete all goals associated with rules in this category
+    if (goalCount > 0) {
+      const deleteGoalsQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+        WHERE elementId(rc) = $categoryId
+        DETACH DELETE rg
+      `;
+
+      await tx.run(deleteGoalsQuery, {
+        userUuid: user.P.uuid,
+        categoryId
+      });
+    }
+
+    // Step 2: Delete all tracking data for rules in this category
+    if (trackingCount > 0) {
+      const deleteTrackingQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+        WHERE elementId(rc) = $categoryId
+        DETACH DELETE rt
+      `;
+
+      await tx.run(deleteTrackingQuery, {
+        userUuid: user.P.uuid,
+        categoryId
+      });
+
+      // Also delete streak data
+      const deleteStreaksQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+        WHERE elementId(rc) = $categoryId
+        DETACH DELETE rs
+      `;
+
+      await tx.run(deleteStreaksQuery, {
+        userUuid: user.P.uuid,
+        categoryId
+      });
+    }
+
+    // Step 3: Delete all rules in this category
+    if (ruleCount > 0) {
+      const deleteRulesQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+        WHERE elementId(rc) = $categoryId
+        DETACH DELETE r
+      `;
+
+      await tx.run(deleteRulesQuery, {
+        userUuid: user.P.uuid,
+        categoryId
+      });
+    }
+
+    // Step 4: Finally delete the category itself
+    const deleteCategoryQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+      WHERE elementId(rc) = $categoryId
+      DETACH DELETE rc
+    `;
+
+    await tx.run(deleteCategoryQuery, {
+      userUuid: user.P.uuid,
+      categoryId
+    });
+
+    // Commit the transaction
+    await tx.commit();
+
+    const categoryName = category.P.name;
+
+    // Build success message
+    let message = `Category "${categoryName}" deleted successfully`;
+    const deletedItems = [];
+
+    if (ruleCount > 0) {
+      deletedItems.push(`${ruleCount} rule${ruleCount > 1 ? 's' : ''}`);
+    }
+    if (trackingCount > 0) {
+      deletedItems.push(`${trackingCount} tracking record${trackingCount > 1 ? 's' : ''}`);
+    }
+    if (goalCount > 0) {
+      deletedItems.push(`${goalCount} goal${goalCount > 1 ? 's' : ''}`);
+    }
+
+    if (deletedItems.length > 0) {
+      message += `. Also deleted: ${deletedItems.join(', ')}.`;
+    }
+
+    return {
+      success: true,
+      message,
+      data: {
+        categoryId,
+        categoryName,
+        cascade: cascadeInfo,
+        userId: user.P.uuid
+      }
+    };
+
+  } catch (txError) {
+    // Rollback the transaction on error
+    await tx.rollback();
+    throw txError;
+  }
+
+} catch (error) {
+  console.error("Error deleting category:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to delete category. Please try again.";
+
+  if (error.message.includes("Category ID is required")) {
+    userMessage = "Category ID is required to delete a category.";
+  } else if (error.message.includes("Category not found")) {
+    userMessage = "The category was not found or does not belong to you.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("constraint")) {
+    userMessage = "Cannot delete category due to database constraints. Please contact support.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "CategoryDeletionError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

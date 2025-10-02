@@ -1,0 +1,403 @@
+{
+  vertexes: [
+    {
+      id: "get_streak_analytics_function",
+      L: "Function",
+      P: {
+        key: "getStreakAnalytics",
+        description: "Analyzes streak patterns and achievements to provide detailed streak insights",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { timePeriod, categoryIds, ruleIds, includeInactive } = args.contextData;
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Calculate date range based on time period
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  let startDate;
+
+  switch (timePeriod) {
+    case 'week':
+      const weekAgo = new Date(today);
+      weekAgo.setDate(today.getDate() - 7);
+      startDate = weekAgo.toISOString().split('T')[0];
+      break;
+    case 'month':
+      const monthAgo = new Date(today);
+      monthAgo.setMonth(today.getMonth() - 1);
+      startDate = monthAgo.toISOString().split('T')[0];
+      break;
+    case '3months':
+      const threeMonthsAgo = new Date(today);
+      threeMonthsAgo.setMonth(today.getMonth() - 3);
+      startDate = threeMonthsAgo.toISOString().split('T')[0];
+      break;
+    case 'year':
+      const yearAgo = new Date(today);
+      yearAgo.setFullYear(today.getFullYear() - 1);
+      startDate = yearAgo.toISOString().split('T')[0];
+      break;
+    case 'all':
+    default:
+      startDate = '2020-01-01'; // Far back date to include everything
+      break;
+  }
+
+  // Build filter conditions
+  let categoryFilter = '';
+  let ruleFilter = '';
+  let statusFilter = includeInactive ? '' : 'AND rs.isActive = true';
+
+  const queryParams = {
+    userUuid: user.P.uuid,
+    startDate,
+    endDate: todayStr
+  };
+
+  if (categoryIds && categoryIds.length > 0) {
+    categoryFilter = 'AND rc.id IN $categoryIds';
+    queryParams.categoryIds = categoryIds;
+  }
+
+  if (ruleIds && ruleIds.length > 0) {
+    ruleFilter = 'AND r.id IN $ruleIds';
+    queryParams.ruleIds = ruleIds;
+  }
+
+  // STEP 1: Get overall streak statistics
+  const overallStreakQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE 1=1 ${categoryFilter} ${ruleFilter} ${statusFilter}
+    RETURN
+      COUNT(*) as totalRules,
+      COUNT(CASE WHEN rs.currentStreak > 0 THEN 1 END) as activeStreaks,
+      AVG(rs.currentStreak) as avgCurrentStreak,
+      AVG(rs.longestStreak) as avgLongestStreak,
+      MAX(rs.currentStreak) as maxCurrentStreak,
+      MAX(rs.longestStreak) as maxLongestStreak,
+      SUM(rs.totalCompletions) as totalCompletions,
+      AVG(rs.totalCompletions) as avgCompletions
+  `;
+
+  const overallResult = await args.session.run(overallStreakQuery, queryParams);
+  const overallStats = overallResult.records[0];
+
+  // STEP 2: Get top current streaks
+  const topCurrentStreaksQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE rs.currentStreak > 0 ${categoryFilter} ${ruleFilter} ${statusFilter}
+    RETURN
+      r.id as ruleId,
+      r.title as ruleTitle,
+      r.frequency as frequency,
+      r.priority as priority,
+      rc.name as categoryName,
+      rc.color as categoryColor,
+      rc.icon as categoryIcon,
+      rs.currentStreak as currentStreak,
+      rs.longestStreak as longestStreak,
+      rs.totalCompletions as totalCompletions,
+      rs.streakStartDate as streakStartDate,
+      rs.lastCompletionDate as lastCompletionDate
+    ORDER BY rs.currentStreak DESC
+    LIMIT 10
+  `;
+
+  const topCurrentResult = await args.session.run(topCurrentStreaksQuery, queryParams);
+
+  // STEP 3: Get top longest streaks (all-time records)
+  const topLongestStreaksQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE rs.longestStreak > 0 ${categoryFilter} ${ruleFilter} ${statusFilter}
+    RETURN
+      r.id as ruleId,
+      r.title as ruleTitle,
+      r.frequency as frequency,
+      r.priority as priority,
+      rc.name as categoryName,
+      rc.color as categoryColor,
+      rc.icon as categoryIcon,
+      rs.currentStreak as currentStreak,
+      rs.longestStreak as longestStreak,
+      rs.totalCompletions as totalCompletions,
+      rs.streakStartDate as streakStartDate,
+      rs.lastCompletionDate as lastCompletionDate
+    ORDER BY rs.longestStreak DESC
+    LIMIT 10
+  `;
+
+  const topLongestResult = await args.session.run(topLongestStreaksQuery, queryParams);
+
+  // STEP 4: Get category-wise streak performance
+  const categoryStreakQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE 1=1 ${categoryFilter} ${ruleFilter} ${statusFilter}
+    WITH rc, rs
+    RETURN
+      rc.id as categoryId,
+      rc.name as categoryName,
+      rc.color as categoryColor,
+      rc.icon as categoryIcon,
+      COUNT(*) as totalRules,
+      COUNT(CASE WHEN rs.currentStreak > 0 THEN 1 END) as activeStreaks,
+      AVG(rs.currentStreak) as avgCurrentStreak,
+      AVG(rs.longestStreak) as avgLongestStreak,
+      MAX(rs.currentStreak) as maxCurrentStreak,
+      MAX(rs.longestStreak) as maxLongestStreak,
+      SUM(rs.totalCompletions) as totalCompletions
+    ORDER BY avgCurrentStreak DESC
+  `;
+
+  const categoryStreakResult = await args.session.run(categoryStreakQuery, queryParams);
+
+  // STEP 5: Get streak distribution analysis
+  const streakDistributionQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE 1=1 ${categoryFilter} ${ruleFilter} ${statusFilter}
+    WITH rs.currentStreak as streak
+    RETURN
+      COUNT(CASE WHEN streak = 0 THEN 1 END) as noStreak,
+      COUNT(CASE WHEN streak >= 1 AND streak <= 3 THEN 1 END) as shortStreak,
+      COUNT(CASE WHEN streak >= 4 AND streak <= 7 THEN 1 END) as weekStreak,
+      COUNT(CASE WHEN streak >= 8 AND streak <= 30 THEN 1 END) as monthStreak,
+      COUNT(CASE WHEN streak > 30 THEN 1 END) as longStreak
+  `;
+
+  const distributionResult = await args.session.run(streakDistributionQuery, queryParams);
+
+  // STEP 6: Get recent streak achievements (rules that hit milestone streaks)
+  const achievementsQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE rs.currentStreak IN [7, 14, 21, 30, 60, 90, 100, 365] ${categoryFilter} ${ruleFilter} ${statusFilter}
+    RETURN
+      r.id as ruleId,
+      r.title as ruleTitle,
+      rc.name as categoryName,
+      rc.color as categoryColor,
+      rs.currentStreak as milestone,
+      rs.streakStartDate as startDate,
+      rs.lastCompletionDate as lastDate
+    ORDER BY rs.currentStreak DESC
+  `;
+
+  const achievementsResult = await args.session.run(achievementsQuery, queryParams);
+
+  // STEP 7: Get streak trends (rules gaining/losing momentum)
+  const trendQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)
+    WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
+    OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+    WITH r, rc, rt
+    ORDER BY rt.date DESC
+    WITH r, rc, COLLECT(rt)[0..7] as recentTracking
+    WHERE SIZE(recentTracking) >= 3
+    WITH r, rc, recentTracking,
+         SIZE([t IN recentTracking WHERE t.status IN ['completed', 'partial']]) as recentSuccesses,
+         SIZE(recentTracking) as recentTotal
+    WHERE recentTotal > 0
+    RETURN
+      r.id as ruleId,
+      r.title as ruleTitle,
+      rc.name as categoryName,
+      rc.color as categoryColor,
+      recentSuccesses,
+      recentTotal,
+      ROUND((recentSuccesses * 100.0) / recentTotal) as recentSuccessRate
+    ORDER BY recentSuccessRate DESC
+    LIMIT 15
+  `;
+
+  const trendResult = await args.session.run(trendQuery, queryParams);
+
+  // Process results
+  const totalRules = args.neo4jConvert.js(overallStats.get('totalRules')) || 0;
+  const activeStreaks = args.neo4jConvert.js(overallStats.get('activeStreaks')) || 0;
+  const streakEngagementRate = totalRules > 0 ? (activeStreaks / totalRules) * 100 : 0;
+
+  // Process top current streaks
+  const topCurrentStreaks = topCurrentResult.records.map(record => ({
+    ruleId: record.get('ruleId'),
+    ruleTitle: record.get('ruleTitle'),
+    frequency: record.get('frequency'),
+    priority: record.get('priority'),
+    categoryName: record.get('categoryName'),
+    categoryColor: record.get('categoryColor'),
+    categoryIcon: record.get('categoryIcon'),
+    currentStreak: args.neo4jConvert.js(record.get('currentStreak')) || 0,
+    longestStreak: args.neo4jConvert.js(record.get('longestStreak')) || 0,
+    totalCompletions: args.neo4jConvert.js(record.get('totalCompletions')) || 0,
+    streakStartDate: record.get('streakStartDate'),
+    lastCompletionDate: record.get('lastCompletionDate')
+  }));
+
+  // Process top longest streaks
+  const topLongestStreaks = topLongestResult.records.map(record => ({
+    ruleId: record.get('ruleId'),
+    ruleTitle: record.get('ruleTitle'),
+    frequency: record.get('frequency'),
+    priority: record.get('priority'),
+    categoryName: record.get('categoryName'),
+    categoryColor: record.get('categoryColor'),
+    categoryIcon: record.get('categoryIcon'),
+    currentStreak: args.neo4jConvert.js(record.get('currentStreak')) || 0,
+    longestStreak: args.neo4jConvert.js(record.get('longestStreak')) || 0,
+    totalCompletions: args.neo4jConvert.js(record.get('totalCompletions')) || 0,
+    streakStartDate: record.get('streakStartDate'),
+    lastCompletionDate: record.get('lastCompletionDate')
+  }));
+
+  // Process category streaks
+  const categoryAnalysis = categoryStreakResult.records.map(record => ({
+    categoryId: record.get('categoryId'),
+    categoryName: record.get('categoryName'),
+    categoryColor: record.get('categoryColor'),
+    categoryIcon: record.get('categoryIcon'),
+    totalRules: args.neo4jConvert.js(record.get('totalRules')) || 0,
+    activeStreaks: args.neo4jConvert.js(record.get('activeStreaks')) || 0,
+    avgCurrentStreak: Math.round(record.get('avgCurrentStreak') || 0),
+    avgLongestStreak: Math.round(record.get('avgLongestStreak') || 0),
+    maxCurrentStreak: args.neo4jConvert.js(record.get('maxCurrentStreak')) || 0,
+    maxLongestStreak: args.neo4jConvert.js(record.get('maxLongestStreak')) || 0,
+    totalCompletions: args.neo4jConvert.js(record.get('totalCompletions')) || 0,
+    engagementRate: args.neo4jConvert.js(record.get('totalRules')) > 0 ?
+      Math.round((args.neo4jConvert.js(record.get('activeStreaks')) || 0) / (args.neo4jConvert.js(record.get('totalRules'))) * 100) : 0
+  }));
+
+  // Process streak distribution
+  const distribution = distributionResult.records[0];
+  const streakDistribution = {
+    noStreak: args.neo4jConvert.js(distribution.get('noStreak')) || 0,
+    shortStreak: args.neo4jConvert.js(distribution.get('shortStreak')) || 0,
+    weekStreak: args.neo4jConvert.js(distribution.get('weekStreak')) || 0,
+    monthStreak: args.neo4jConvert.js(distribution.get('monthStreak')) || 0,
+    longStreak: args.neo4jConvert.js(distribution.get('longStreak')) || 0
+  };
+
+  // Process achievements
+  const milestoneAchievements = achievementsResult.records.map(record => ({
+    ruleId: record.get('ruleId'),
+    ruleTitle: record.get('ruleTitle'),
+    categoryName: record.get('categoryName'),
+    categoryColor: record.get('categoryColor'),
+    milestone: args.neo4jConvert.js(record.get('milestone')) || 0,
+    startDate: record.get('startDate'),
+    lastDate: record.get('lastDate'),
+    milestoneType: getMilestoneType(args.neo4jConvert.js(record.get('milestone')) || 0)
+  }));
+
+  // Process trends
+  const performanceTrends = trendResult.records.map(record => ({
+    ruleId: record.get('ruleId'),
+    ruleTitle: record.get('ruleTitle'),
+    categoryName: record.get('categoryName'),
+    categoryColor: record.get('categoryColor'),
+    recentSuccesses: args.neo4jConvert.js(record.get('recentSuccesses')) || 0,
+    recentTotal: args.neo4jConvert.js(record.get('recentTotal')) || 0,
+    recentSuccessRate: args.neo4jConvert.js(record.get('recentSuccessRate')) || 0,
+    trend: getTrendDirection(args.neo4jConvert.js(record.get('recentSuccessRate')) || 0)
+  }));
+
+  // Helper function for milestone types
+  function getMilestoneType(streak) {
+    if (streak === 7) return '1 Week';
+    if (streak === 14) return '2 Weeks';
+    if (streak === 21) return '3 Weeks';
+    if (streak === 30) return '1 Month';
+    if (streak === 60) return '2 Months';
+    if (streak === 90) return '3 Months';
+    if (streak === 100) return '100 Days';
+    if (streak === 365) return '1 Year';
+    return `${streak} Days`;
+  }
+
+  // Helper function for trend direction
+  function getTrendDirection(rate) {
+    if (rate >= 80) return 'strong';
+    if (rate >= 60) return 'good';
+    if (rate >= 40) return 'moderate';
+    return 'needs_attention';
+  }
+
+  // Generate insights
+  const insights = [];
+
+  if (activeStreaks > 0) {
+    insights.push(`🔥 You have ${activeStreaks} active streak${activeStreaks > 1 ? 's' : ''} running!`);
+  }
+
+  const maxCurrent = args.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0;
+  if (maxCurrent >= 30) {
+    insights.push(`🏆 Amazing! Your longest current streak is ${maxCurrent} days.`);
+  } else if (maxCurrent >= 7) {
+    insights.push(`💪 Great momentum! Your longest current streak is ${maxCurrent} days.`);
+  }
+
+  if (streakEngagementRate >= 70) {
+    insights.push(`⭐ High engagement! ${Math.round(streakEngagementRate)}% of your rules have active streaks.`);
+  } else if (streakEngagementRate < 30 && totalRules > 0) {
+    insights.push('🎯 Focus on consistency to build more streaks and create lasting habits.');
+  }
+
+  if (categoryAnalysis.length > 0) {
+    const topCategory = categoryAnalysis[0];
+    if (topCategory.avgCurrentStreak >= 5) {
+      insights.push(`🌟 "${topCategory.categoryName}" shows the strongest streak performance.`);
+    }
+  }
+
+  return {
+    success: true,
+    message: "Streak analytics generated successfully!",
+    data: {
+      timePeriod: timePeriod || 'all',
+      period: {
+        startDate,
+        endDate: todayStr
+      },
+      summary: {
+        totalRules,
+        activeStreaks,
+        streakEngagementRate: Math.round(streakEngagementRate),
+        avgCurrentStreak: Math.round(overallStats.get('avgCurrentStreak') || 0),
+        avgLongestStreak: Math.round(overallStats.get('avgLongestStreak') || 0),
+        maxCurrentStreak: args.neo4jConvert.js(overallStats.get('maxCurrentStreak')) || 0,
+        maxLongestStreak: args.neo4jConvert.js(overallStats.get('maxLongestStreak')) || 0,
+        totalCompletions: args.neo4jConvert.js(overallStats.get('totalCompletions')) || 0
+      },
+      topCurrentStreaks,
+      topLongestStreaks,
+      categoryAnalysis,
+      streakDistribution,
+      milestoneAchievements,
+      performanceTrends,
+      insights,
+      generatedAt: new Date().toISOString(),
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error getting streak analytics:", error);
+
+  return {
+    success: false,
+    message: "Failed to generate streak analytics. Please try again.",
+    error: {
+      type: error.name || "StreakAnalyticsError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

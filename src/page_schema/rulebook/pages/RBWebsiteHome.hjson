@@ -1,0 +1,2219 @@
+{
+  vertexes: [
+    {
+      id: "website_home_page",
+      L: "Page",
+      P: {
+        key: "RBWebsiteHome",
+        url: "/",
+        title: "Personal Rulebook - Build Better Habits",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "website_home_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "RBWebsiteLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "main_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "main"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: linear-gradient(135deg, ${args.theme.var.color.primary} 0%, ${args.theme.var.color.primary_dark_300} 100%);
+  color: ${args.theme.var.color.primary_text};
+  padding: 4rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+._id::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  animation: float 20s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+._id > * {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Build Better Habits with Personal Rulebook"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Transform your daily routine into a powerful system for personal growth. Track habits, achieve goals, and build the life you want—one rule at a time."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  margin: 0 0 2.5rem 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.95;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "hero_cta",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  ._id {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "primary_cta_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/auth/signup",
+  text: "Start Your Journey"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.primary};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+}
+
+._id:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  border-color: ${args.theme.var.color.background_light_200};
+}
+
+._id:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  ._id {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "secondary_cta_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/features",
+  text: "Learn More"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+._id:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  ._id {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "app_preview_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 1rem;
+  background: ${args.theme.var.color.background_light_50};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "preview_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "preview_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Your Personal Command Center"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "preview_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "See your progress at a glance with our intuitive dashboard designed for habit builders and goal achievers."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 3rem 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "app_mockup",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 1rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin: 0 auto;
+  max-width: 800px;
+  border: 1px solid ${args.theme.var.color.border};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem;
+    margin: 0 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mockup_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}
+
+@media (max-width: 480px) {
+  ._id {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "mockup_greeting",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "mockup_greeting_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "⚡ Good Morning!"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.25rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "mockup_date",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const today = new Date().toLocaleDateString('en-US', {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric'
+});
+
+return {
+  as: "p",
+  text: today
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  font-size: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mockup_stats",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "🔥 15 day streak"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mockup_progress",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "📊 Today's Progress"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar_bg",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  border-radius: 1rem;
+  padding: 0.25rem;
+  margin-bottom: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar_fill",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 75%;
+  height: 0.75rem;
+  background: ${args.theme.var.color.primary};
+  border-radius: 0.75rem;
+  transition: width 0.5s ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "6 of 8 rules completed (75%)"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "mockup_rules",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mock_rule_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "mock_rule_1_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "mock_rule_1_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "🏃 Morning Run"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mock_rule_1_streak",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "🔥 15 day streak"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.primary};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "mock_rule_1_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Track"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mock_rule_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "mock_rule_2_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "mock_rule_2_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "💊 Take Vitamins"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "mock_rule_2_status",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "✓ Completed at 7:30 AM"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.success};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "mock_rule_2_done",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "✓ Done"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.success};
+  padding: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "features_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 1rem;
+  background: ${args.theme.var.color.background};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "features_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Everything You Need to Succeed"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Powerful features designed to help you build lasting habits and achieve your goals."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 3rem 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "features_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_1_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "🎯"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_1_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Smart Goal Setting"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_1_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Create meaningful goals and break them down into actionable daily rules that drive real progress."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_2_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "📊"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_2_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Progress Tracking"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_2_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Visualize your journey with detailed analytics, streaks, and progress reports that keep you motivated."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.primary_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_3_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "🔥"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_3_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Streak Building"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 0.75rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "feature_3_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Build momentum with streak tracking that celebrates your consistency and helps maintain long-term habits."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 1rem;
+  background: ${args.theme.var.color.background_light_50};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Join Thousands Building Better Lives"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 3rem 0;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonials_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_1_quote",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Personal Rulebook transformed how I approach my goals. The streak tracking keeps me motivated every single day."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+  font-style: italic;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_1_author",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_1_avatar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.primary_light_200};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.primary_light_200_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_1_avatar_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "SM"
+};
+'''
+      }
+    },
+    {
+      id: "testimonial_1_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "testimonial_1_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Sarah Martinez"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_1_role",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Product Designer"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_2_quote",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Finally, a habit tracker that actually works. The rule-based approach makes everything feel manageable and achievable."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+  font-style: italic;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_2_author",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_2_avatar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.success_light_200};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_2_avatar_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "MJ"
+};
+'''
+      }
+    },
+    {
+      id: "testimonial_2_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "testimonial_2_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Michael Johnson"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_2_role",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Software Engineer"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_3",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_3_quote",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "I've tried dozens of habit apps, but Personal Rulebook is different. It focuses on systems, not just tracking."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.1rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+  font-style: italic;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_3_author",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_3_avatar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  width: 3rem;
+  height: 3rem;
+  background: ${args.theme.var.color.warning_light_200};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.warning_dark_400};
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_3_avatar_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "EP"
+};
+'''
+      }
+    },
+    {
+      id: "testimonial_3_info",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "testimonial_3_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Emily Park"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "testimonial_3_role",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Entrepreneur"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "final_cta_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  padding: 5rem 1rem;
+  background: ${args.theme.var.color.background};
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 3rem 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "final_cta_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "final_cta_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Ready to Transform Your Life?"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 1rem 0;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "final_cta_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Join thousands of people who are building better habits and achieving their goals with Personal Rulebook."
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.2rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 2.5rem 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "final_cta_buttons",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  ._id {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "final_primary_cta",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/auth/signup",
+  text: "Get Started Free"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+._id:hover {
+  background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+._id:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  ._id {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "final_secondary_cta",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/contact",
+  text: "Have Questions?"
+};
+''',
+        css: '''
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: ${args.theme.var.color.text};
+  padding: 1rem 2rem;
+  border: 2px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.background_light_100};
+  border-color: ${args.theme.var.color.primary_light_300};
+  transform: translateY(-2px);
+}
+
+._id:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  ._id {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+  }
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "website_home_page", E: "website_home_layout" },
+    { id: "e2", T: "Attr", S: "website_home_page", E: "main_content" },
+    { id: "e3", T: "Attr", S: "main_content", E: "hero_section" },
+    { id: "e4", T: "Attr", S: "hero_section", E: "hero_container" },
+    { id: "e5", T: "Attr", S: "hero_container", E: "hero_title" },
+    { id: "e6", T: "Attr", S: "hero_container", E: "hero_subtitle" },
+    { id: "e7", T: "Attr", S: "hero_container", E: "hero_cta" },
+    { id: "e8", T: "Attr", S: "hero_cta", E: "primary_cta_button" },
+    { id: "e9", T: "Attr", S: "hero_cta", E: "secondary_cta_button" },
+    { id: "e10", T: "Attr", S: "main_content", E: "app_preview_section" },
+    { id: "e11", T: "Attr", S: "app_preview_section", E: "preview_container" },
+    { id: "e12", T: "Attr", S: "preview_container", E: "preview_title" },
+    { id: "e13", T: "Attr", S: "preview_container", E: "preview_subtitle" },
+    { id: "e14", T: "Attr", S: "preview_container", E: "app_mockup" },
+    { id: "e15", T: "Attr", S: "app_mockup", E: "mockup_header" },
+    { id: "e16", T: "Attr", S: "mockup_header", E: "mockup_greeting" },
+    { id: "e17", T: "Attr", S: "mockup_greeting", E: "mockup_greeting_title" },
+    { id: "e18", T: "Attr", S: "mockup_greeting", E: "mockup_date" },
+    { id: "e19", T: "Attr", S: "mockup_header", E: "mockup_stats" },
+    { id: "e20", T: "Attr", S: "app_mockup", E: "mockup_progress" },
+    { id: "e21", T: "Attr", S: "mockup_progress", E: "progress_header" },
+    { id: "e22", T: "Attr", S: "mockup_progress", E: "progress_bar_bg" },
+    { id: "e23", T: "Attr", S: "progress_bar_bg", E: "progress_bar_fill" },
+    { id: "e24", T: "Attr", S: "mockup_progress", E: "progress_text" },
+    { id: "e25", T: "Attr", S: "app_mockup", E: "mockup_rules" },
+    { id: "e26", T: "Attr", S: "mockup_rules", E: "mock_rule_1" },
+    { id: "e27", T: "Attr", S: "mock_rule_1", E: "mock_rule_1_info" },
+    { id: "e28", T: "Attr", S: "mock_rule_1_info", E: "mock_rule_1_title" },
+    { id: "e29", T: "Attr", S: "mock_rule_1_info", E: "mock_rule_1_streak" },
+    { id: "e30", T: "Attr", S: "mock_rule_1", E: "mock_rule_1_button" },
+    { id: "e31", T: "Attr", S: "mockup_rules", E: "mock_rule_2" },
+    { id: "e32", T: "Attr", S: "mock_rule_2", E: "mock_rule_2_info" },
+    { id: "e33", T: "Attr", S: "mock_rule_2_info", E: "mock_rule_2_title" },
+    { id: "e34", T: "Attr", S: "mock_rule_2_info", E: "mock_rule_2_status" },
+    { id: "e35", T: "Attr", S: "mock_rule_2", E: "mock_rule_2_done" },
+    { id: "e36", T: "Attr", S: "main_content", E: "features_section" },
+    { id: "e37", T: "Attr", S: "features_section", E: "features_container" },
+    { id: "e38", T: "Attr", S: "features_container", E: "features_title" },
+    { id: "e39", T: "Attr", S: "features_container", E: "features_subtitle" },
+    { id: "e40", T: "Attr", S: "features_container", E: "features_grid" },
+    { id: "e41", T: "Attr", S: "features_grid", E: "feature_1" },
+    { id: "e42", T: "Attr", S: "feature_1", E: "feature_1_icon" },
+    { id: "e43", T: "Attr", S: "feature_1", E: "feature_1_title" },
+    { id: "e44", T: "Attr", S: "feature_1", E: "feature_1_desc" },
+    { id: "e45", T: "Attr", S: "features_grid", E: "feature_2" },
+    { id: "e46", T: "Attr", S: "feature_2", E: "feature_2_icon" },
+    { id: "e47", T: "Attr", S: "feature_2", E: "feature_2_title" },
+    { id: "e48", T: "Attr", S: "feature_2", E: "feature_2_desc" },
+    { id: "e49", T: "Attr", S: "features_grid", E: "feature_3" },
+    { id: "e50", T: "Attr", S: "feature_3", E: "feature_3_icon" },
+    { id: "e51", T: "Attr", S: "feature_3", E: "feature_3_title" },
+    { id: "e52", T: "Attr", S: "feature_3", E: "feature_3_desc" },
+    { id: "e53", T: "Attr", S: "main_content", E: "testimonials_section" },
+    { id: "e54", T: "Attr", S: "testimonials_section", E: "testimonials_container" },
+    { id: "e55", T: "Attr", S: "testimonials_container", E: "testimonials_title" },
+    { id: "e56", T: "Attr", S: "testimonials_container", E: "testimonials_grid" },
+    { id: "e57", T: "Attr", S: "testimonials_grid", E: "testimonial_1" },
+    { id: "e58", T: "Attr", S: "testimonial_1", E: "testimonial_1_quote" },
+    { id: "e59", T: "Attr", S: "testimonial_1", E: "testimonial_1_author" },
+    { id: "e60", T: "Attr", S: "testimonial_1_author", E: "testimonial_1_avatar" },
+    { id: "e61", T: "Attr", S: "testimonial_1_avatar", E: "testimonial_1_avatar_text" },
+    { id: "e62", T: "Attr", S: "testimonial_1_author", E: "testimonial_1_info" },
+    { id: "e63", T: "Attr", S: "testimonial_1_info", E: "testimonial_1_name" },
+    { id: "e64", T: "Attr", S: "testimonial_1_info", E: "testimonial_1_role" },
+    { id: "e65", T: "Attr", S: "testimonials_grid", E: "testimonial_2" },
+    { id: "e66", T: "Attr", S: "testimonial_2", E: "testimonial_2_quote" },
+    { id: "e67", T: "Attr", S: "testimonial_2", E: "testimonial_2_author" },
+    { id: "e68", T: "Attr", S: "testimonial_2_author", E: "testimonial_2_avatar" },
+    { id: "e69", T: "Attr", S: "testimonial_2_avatar", E: "testimonial_2_avatar_text" },
+    { id: "e70", T: "Attr", S: "testimonial_2_author", E: "testimonial_2_info" },
+    { id: "e71", T: "Attr", S: "testimonial_2_info", E: "testimonial_2_name" },
+    { id: "e72", T: "Attr", S: "testimonial_2_info", E: "testimonial_2_role" },
+    { id: "e73", T: "Attr", S: "testimonials_grid", E: "testimonial_3" },
+    { id: "e74", T: "Attr", S: "testimonial_3", E: "testimonial_3_quote" },
+    { id: "e75", T: "Attr", S: "testimonial_3", E: "testimonial_3_author" },
+    { id: "e76", T: "Attr", S: "testimonial_3_author", E: "testimonial_3_avatar" },
+    { id: "e77", T: "Attr", S: "testimonial_3_avatar", E: "testimonial_3_avatar_text" },
+    { id: "e78", T: "Attr", S: "testimonial_3_author", E: "testimonial_3_info" },
+    { id: "e79", T: "Attr", S: "testimonial_3_info", E: "testimonial_3_name" },
+    { id: "e80", T: "Attr", S: "testimonial_3_info", E: "testimonial_3_role" },
+    { id: "e81", T: "Attr", S: "main_content", E: "final_cta_section" },
+    { id: "e82", T: "Attr", S: "final_cta_section", E: "final_cta_container" },
+    { id: "e83", T: "Attr", S: "final_cta_container", E: "final_cta_title" },
+    { id: "e84", T: "Attr", S: "final_cta_container", E: "final_cta_subtitle" },
+    { id: "e85", T: "Attr", S: "final_cta_container", E: "final_cta_buttons" },
+    { id: "e86", T: "Attr", S: "final_cta_buttons", E: "final_primary_cta" },
+    { id: "e87", T: "Attr", S: "final_cta_buttons", E: "final_secondary_cta" }
+  ]
+}

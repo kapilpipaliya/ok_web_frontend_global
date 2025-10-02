@@ -75,8 +75,8 @@ export function Content(props: ContentProps) {
           {...props.permissions()}
           component={props.component()}
           text={props.processedText()}
-          disabled={props.disabled}
-          props={null}
+          // disabled={props.disabled || undefined}
+          // props={null}
           ref={mergeRefs(props.setRef, props.dynamicProps().ref)}
         >
           <Show

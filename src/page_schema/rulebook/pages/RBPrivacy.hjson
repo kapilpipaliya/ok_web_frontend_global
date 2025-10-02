@@ -1,0 +1,1024 @@
+{
+  vertexes: [
+    {
+      id: "privacy_page",
+      L: "Page",
+      P: {
+        key: "RBPrivacy",
+        url: "/privacy",
+        title: "Privacy Policy - Personal Rulebook",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "privacy_layout_1",
+      L: "PageLayout",
+      P: {
+        componentName: "RBWebsiteLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "privacy_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: ${args.theme.var.spacing.lg};
+  color: ${args.theme.var.color.text};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header",
+  text: "Privacy Policy"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: ${args.theme.var.spacing.xl};
+  padding-bottom: ${args.theme.var.spacing.lg};
+  border-bottom: 2px solid ${args.theme.var.color.primary_light_200};
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.xxl};
+    margin-bottom: ${args.theme.var.spacing.lg};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_last_updated",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Last updated: December 2024"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+  font-style: italic;
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_intro_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "privacy_intro_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Personal Rulebook is committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, store, and protect your information when you use our personal rule management application."
+};
+''',
+        css: '''
+return `._id {
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.lg};
+  font-size: ${args.theme.var.fontSize.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "data_collection_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "data_collection_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Information We Collect"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  border-left: 4px solid ${args.theme.var.color.primary};
+  padding-left: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "data_collection_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  line-height: 1.6;
+}
+
+._id h3 {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: ${args.theme.var.spacing.lg} 0 ${args.theme.var.spacing.sm} 0;
+}
+
+._id ul {
+  margin: ${args.theme.var.spacing.sm} 0 ${args.theme.var.spacing.lg} 0;
+  padding-left: ${args.theme.var.spacing.lg};
+}
+
+._id li {
+  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${args.theme.var.color.text};
+}
+
+._id p {
+  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "account_info_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Account Information"
+};
+'''
+      }
+    },
+    {
+      id: "account_info_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+'''
+      }
+    },
+    {
+      id: "account_info_email",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Email address (for account creation and communication)"
+};
+'''
+      }
+    },
+    {
+      id: "account_info_username",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Username and password (securely encrypted)"
+};
+'''
+      }
+    },
+    {
+      id: "account_info_timezone",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Timezone and language preferences"
+};
+'''
+      }
+    },
+    {
+      id: "rule_data_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Rule and Tracking Data"
+};
+'''
+      }
+    },
+    {
+      id: "rule_data_list",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+'''
+      }
+    },
+    {
+      id: "rule_data_rules",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Personal rules and categories you create"
+};
+'''
+      }
+    },
+    {
+      id: "rule_data_tracking",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Daily tracking entries, completion rates, and notes"
+};
+'''
+      }
+    },
+    {
+      id: "rule_data_goals",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Goals, streaks, and achievement data"
+};
+'''
+      }
+    },
+    {
+      id: "usage_data_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Usage Information"
+};
+'''
+      }
+    },
+    {
+      id: "usage_data_list",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+'''
+      }
+    },
+    {
+      id: "usage_data_device",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Device information and browser type"
+};
+'''
+      }
+    },
+    {
+      id: "usage_data_ip",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "IP address and general location (for security purposes)"
+};
+'''
+      }
+    },
+    {
+      id: "usage_data_activity",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "App usage patterns and feature interactions (anonymized)"
+};
+'''
+      }
+    },
+    {
+      id: "data_use_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "data_use_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "How We Use Your Information"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  border-left: 4px solid ${args.theme.var.color.primary};
+  padding-left: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "data_use_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  line-height: 1.6;
+  margin: ${args.theme.var.spacing.sm} 0;
+  padding-left: ${args.theme.var.spacing.lg};
+}
+
+._id li {
+  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "data_use_service",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Provide and maintain the Personal Rulebook service"
+};
+'''
+      }
+    },
+    {
+      id: "data_use_personalize",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Personalize your experience and provide relevant insights"
+};
+'''
+      }
+    },
+    {
+      id: "data_use_analytics",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Generate progress reports and analytics for your personal use"
+};
+'''
+      }
+    },
+    {
+      id: "data_use_communicate",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Communicate important updates about the service"
+};
+'''
+      }
+    },
+    {
+      id: "data_use_improve",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Improve our service and develop new features"
+};
+'''
+      }
+    },
+    {
+      id: "data_use_security",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Ensure security and prevent fraud or abuse"
+};
+'''
+      }
+    },
+    {
+      id: "data_security_section",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "data_security_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Data Security and Storage"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  border-left: 4px solid ${args.theme.var.color.primary};
+  padding-left: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "data_security_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id p {
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}
+
+._id ul {
+  margin: ${args.theme.var.spacing.sm} 0 ${args.theme.var.spacing.lg} 0;
+  padding-left: ${args.theme.var.spacing.lg};
+}
+
+._id li {
+  margin-bottom: ${args.theme.var.spacing.xs};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "security_measures_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "We implement industry-standard security measures to protect your personal information:"
+};
+'''
+      }
+    },
+    {
+      id: "security_measures_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+'''
+      }
+    },
+    {
+      id: "security_encryption",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "All data is encrypted in transit and at rest"
+};
+'''
+      }
+    },
+    {
+      id: "security_passwords",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Passwords are hashed and salted using secure algorithms"
+};
+'''
+      }
+    },
+    {
+      id: "security_access",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Limited access controls for our development team"
+};
+'''
+      }
+    },
+    {
+      id: "security_monitoring",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Regular security monitoring and updates"
+};
+'''
+      }
+    },
+    {
+      id: "your_rights_section",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "your_rights_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Your Rights and Control"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.lg};
+  border-left: 4px solid ${args.theme.var.color.primary};
+  padding-left: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "your_rights_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "You have full control over your personal data and can:"
+};
+''',
+        css: '''
+return `._id {
+  line-height: 1.6;
+  margin-bottom: ${args.theme.var.spacing.md};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "your_rights_list",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "ul"
+};
+''',
+        css: '''
+return `._id {
+  margin: ${args.theme.var.spacing.sm} 0 ${args.theme.var.spacing.lg} 0;
+  padding-left: ${args.theme.var.spacing.lg};
+  line-height: 1.6;
+}
+
+._id li {
+  margin-bottom: ${args.theme.var.spacing.sm};
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "rights_access",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Access and view all your personal data through the app settings"
+};
+'''
+      }
+    },
+    {
+      id: "rights_update",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Update or correct your information at any time"
+};
+'''
+      }
+    },
+    {
+      id: "rights_export",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Export your data in a portable format"
+};
+'''
+      }
+    },
+    {
+      id: "rights_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Request complete deletion of your account and all associated data"
+};
+'''
+      }
+    },
+    {
+      id: "rights_opt_out",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "Opt out of non-essential communications"
+};
+'''
+      }
+    },
+    {
+      id: "contact_section",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+  padding: ${args.theme.var.spacing.lg};
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 1px solid ${args.theme.var.color.primary_light_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "contact_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Contact Us"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.primary};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "contact_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "If you have any questions about this Privacy Policy or how we handle your personal information, please contact us at privacy@personalrulebook.com or through our support page."
+};
+''',
+        css: '''
+return `._id {
+  line-height: 1.6;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "privacy_page", E: "privacy_layout_1" },
+    { id: "e2", T: "Attr", S: "privacy_page", E: "privacy_container" },
+    { id: "e3", T: "Attr", S: "privacy_container", E: "privacy_header" },
+    { id: "e4", T: "Attr", S: "privacy_container", E: "privacy_last_updated" },
+    { id: "e5", T: "Attr", S: "privacy_container", E: "privacy_intro_section" },
+    { id: "e6", T: "Attr", S: "privacy_intro_section", E: "privacy_intro_text" },
+    { id: "e7", T: "Attr", S: "privacy_container", E: "data_collection_section" },
+    { id: "e8", T: "Attr", S: "data_collection_section", E: "data_collection_title" },
+    { id: "e9", T: "Attr", S: "data_collection_section", E: "data_collection_content" },
+    { id: "e10", T: "Attr", S: "data_collection_content", E: "account_info_section" },
+    { id: "e11", T: "Attr", S: "data_collection_content", E: "account_info_list" },
+    { id: "e12", T: "Attr", S: "account_info_list", E: "account_info_email" },
+    { id: "e13", T: "Attr", S: "account_info_list", E: "account_info_username" },
+    { id: "e14", T: "Attr", S: "account_info_list", E: "account_info_timezone" },
+    { id: "e15", T: "Attr", S: "data_collection_content", E: "rule_data_section" },
+    { id: "e16", T: "Attr", S: "data_collection_content", E: "rule_data_list" },
+    { id: "e17", T: "Attr", S: "rule_data_list", E: "rule_data_rules" },
+    { id: "e18", T: "Attr", S: "rule_data_list", E: "rule_data_tracking" },
+    { id: "e19", T: "Attr", S: "rule_data_list", E: "rule_data_goals" },
+    { id: "e20", T: "Attr", S: "data_collection_content", E: "usage_data_section" },
+    { id: "e21", T: "Attr", S: "data_collection_content", E: "usage_data_list" },
+    { id: "e22", T: "Attr", S: "usage_data_list", E: "usage_data_device" },
+    { id: "e23", T: "Attr", S: "usage_data_list", E: "usage_data_ip" },
+    { id: "e24", T: "Attr", S: "usage_data_list", E: "usage_data_activity" },
+    { id: "e25", T: "Attr", S: "privacy_container", E: "data_use_section" },
+    { id: "e26", T: "Attr", S: "data_use_section", E: "data_use_title" },
+    { id: "e27", T: "Attr", S: "data_use_section", E: "data_use_list" },
+    { id: "e28", T: "Attr", S: "data_use_list", E: "data_use_service" },
+    { id: "e29", T: "Attr", S: "data_use_list", E: "data_use_personalize" },
+    { id: "e30", T: "Attr", S: "data_use_list", E: "data_use_analytics" },
+    { id: "e31", T: "Attr", S: "data_use_list", E: "data_use_communicate" },
+    { id: "e32", T: "Attr", S: "data_use_list", E: "data_use_improve" },
+    { id: "e33", T: "Attr", S: "data_use_list", E: "data_use_security" },
+    { id: "e34", T: "Attr", S: "privacy_container", E: "data_security_section" },
+    { id: "e35", T: "Attr", S: "data_security_section", E: "data_security_title" },
+    { id: "e36", T: "Attr", S: "data_security_section", E: "data_security_content" },
+    { id: "e37", T: "Attr", S: "data_security_content", E: "security_measures_text" },
+    { id: "e38", T: "Attr", S: "data_security_content", E: "security_measures_list" },
+    { id: "e39", T: "Attr", S: "security_measures_list", E: "security_encryption" },
+    { id: "e40", T: "Attr", S: "security_measures_list", E: "security_passwords" },
+    { id: "e41", T: "Attr", S: "security_measures_list", E: "security_access" },
+    { id: "e42", T: "Attr", S: "security_measures_list", E: "security_monitoring" },
+    { id: "e43", T: "Attr", S: "privacy_container", E: "your_rights_section" },
+    { id: "e44", T: "Attr", S: "your_rights_section", E: "your_rights_title" },
+    { id: "e45", T: "Attr", S: "your_rights_section", E: "your_rights_text" },
+    { id: "e46", T: "Attr", S: "your_rights_section", E: "your_rights_list" },
+    { id: "e47", T: "Attr", S: "your_rights_list", E: "rights_access" },
+    { id: "e48", T: "Attr", S: "your_rights_list", E: "rights_update" },
+    { id: "e49", T: "Attr", S: "your_rights_list", E: "rights_export" },
+    { id: "e50", T: "Attr", S: "your_rights_list", E: "rights_delete" },
+    { id: "e51", T: "Attr", S: "your_rights_list", E: "rights_opt_out" },
+    { id: "e52", T: "Attr", S: "privacy_container", E: "contact_section" },
+    { id: "e53", T: "Attr", S: "contact_section", E: "contact_title" },
+    { id: "e54", T: "Attr", S: "contact_section", E: "contact_text" }
+  ]
+}

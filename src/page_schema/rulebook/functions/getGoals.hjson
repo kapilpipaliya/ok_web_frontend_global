@@ -1,0 +1,168 @@
+{
+  vertexes: [
+    {
+      id: "get_goals_function",
+      L: "Function",
+      P: {
+        key: "getGoals",
+        description: "Retrieves all goals for the authenticated user with rule information and progress",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { ruleId, includeCompleted } = args.contextData || {};
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Build the query based on parameters
+  let goalsQuery = '';
+  let queryParams = { userUuid: user.P.uuid };
+
+  if (ruleId) {
+    // Get goals for specific rule
+    goalsQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      WHERE elementId(r) = $ruleId
+      ${includeCompleted ? '' : 'AND rg.isCompleted = false'}
+      OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+      RETURN rg, r, rc
+      ORDER BY rg.targetDate ASC, rg.createdAt DESC
+    `;
+    queryParams.ruleId = ruleId;
+  } else {
+    // Get all goals for user
+    goalsQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      ${includeCompleted ? '' : 'WHERE rg.isCompleted = false'}
+      OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+      RETURN rg, r, rc
+      ORDER BY rg.targetDate ASC, rg.createdAt DESC
+    `;
+  }
+
+  const goalsResult = await args.session.run(goalsQuery, queryParams);
+
+  // Format the results
+  const goals = goalsResult.records.map(record => {
+    const goalNode = record.get('rg');
+    const ruleNode = record.get('r');
+    const categoryNode = record.get('rc');
+
+    // Convert Neo4j nodes to proper Vertex format
+    const goal = args.convertNodeToJson(goalNode);
+    const rule = args.convertNodeToJson(ruleNode);
+    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+
+    // Calculate progress percentage
+    const currentValue = goal.P.currentValue || 0;
+    const targetValue = goal.P.targetValue || 1;
+    const progressPercentage = Math.round((currentValue / targetValue) * 100);
+
+    // Determine status
+    let status = 'active';
+    if (goal.P.isCompleted) {
+      status = 'completed';
+    } else if (goal.P.targetDate) {
+      const targetDate = new Date(goal.P.targetDate);
+      const now = new Date();
+      if (now > targetDate) {
+        status = 'overdue';
+      } else {
+        const daysUntilTarget = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+        if (daysUntilTarget <= 7) {
+          status = 'urgent';
+        }
+      }
+    }
+
+    return {
+      goal,
+      rule,
+      category,
+      progress: {
+        currentValue,
+        targetValue,
+        percentage: progressPercentage,
+        status,
+        isCompleted: goal.P.isCompleted || false
+      },
+      timeline: {
+        createdAt: goal.P.createdAt,
+        targetDate: goal.P.targetDate,
+        completedAt: goal.P.completedAt || null
+      }
+    };
+  });
+
+  // Group by category
+  const groupedByCategory = goals.reduce((acc, item) => {
+    const categoryKey = item.category?.P?.key || 'uncategorized';
+    const categoryName = item.category?.P?.name || 'Uncategorized';
+
+    if (!acc[categoryKey]) {
+      acc[categoryKey] = {
+        category: item.category,
+        categoryName,
+        goals: []
+      };
+    }
+    acc[categoryKey].goals.push(item);
+    return acc;
+  }, {});
+
+  // Calculate summary stats
+  const stats = {
+    total: goals.length,
+    completed: goals.filter(g => g.progress.isCompleted).length,
+    active: goals.filter(g => g.progress.status === 'active').length,
+    urgent: goals.filter(g => g.progress.status === 'urgent').length,
+    overdue: goals.filter(g => g.progress.status === 'overdue').length,
+    avgProgress: goals.length > 0 ? Math.round(goals.reduce((sum, g) => sum + g.progress.percentage, 0) / goals.length) : 0
+  };
+
+  return {
+    success: true,
+    message: `Found ${goals.length} goals`,
+    data: {
+      goals,
+      groupedByCategory,
+      stats,
+      filters: {
+        ruleId: ruleId || null,
+        includeCompleted: !!includeCompleted
+      },
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching goals:", error);
+
+  // Handle specific errors
+  let userMessage = "Failed to load goals. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please contact support if this persists.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "GoalFetchError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

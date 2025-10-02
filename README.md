@@ -17,3 +17,6 @@ Welcome to the project documentation. This repository has been organized into fo
 - [JavaScript Driver Manual](https://neo4j.com/docs/javascript-manual/current/)
 - [Local Development Server](http://localhost:3001)
 - [Neo4j Browser](http://localhost:7474/browser/) 
+
+to view md document onlie: https://stackedit.io/app
+best website to get design ideas: https://craftwork.design/curated/websites/

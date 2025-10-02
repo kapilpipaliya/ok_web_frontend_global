@@ -4,6 +4,10 @@ import {
   type Component,
   type Owner,
   createSignal,
+  createMemo,
+  createEffect,
+  onCleanup,
+  on
 } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -56,7 +60,7 @@ export function createFunctionArgumentBase(
     componentName: Accessor<string | Component | undefined>;
     isNoPermissionCheck: () => boolean;
     isViewMode: () => boolean | undefined;
-    mounted: () => boolean;
+    mounted: () => boolean | null;
     parentMeta: () => Vertex | undefined;
     ref: () => HTMLElement | null;
     setRef: (ref: HTMLElement | null) => void;
@@ -233,6 +237,10 @@ export function createFunctionArgumentBase(
     zIndex: hooks.zIndex,
     createSignal,
     createStore,
+    createMemo,
+    createEffect,
+    onCleanup,
+    on,
     // Theme toggle functions from useThemeToggle hook
     toggleTheme: hooks.themeToggle.toggleTheme,
     setColorMode: hooks.themeToggle.setColorMode,

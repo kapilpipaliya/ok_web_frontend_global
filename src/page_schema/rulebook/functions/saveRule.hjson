@@ -1,0 +1,283 @@
+{
+  vertexes: [
+    {
+      id: "save_rule_function",
+      L: "Function",
+      P: {
+        key: "saveRule",
+        description: "Creates or updates a personal rule with validation and tracking setup",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { ruleId, title, description, categoryId, frequency, priority, difficulty, reminderTime, isActive } = args.contextData;
+
+  // Validate required fields
+  if (!title?.trim()) {
+    throw new Error("Rule title is required");
+  }
+
+  if (!categoryId) {
+    throw new Error("Category is required");
+  }
+
+  if (!frequency) {
+    throw new Error("Frequency is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  const isUpdate = Boolean(ruleId);
+  const finalRuleId = ruleId || `rule_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // No longer need rule key - will handle create/update separately
+
+  // Validate frequency values
+  const validFrequencies = ['daily', 'weekly', 'monthly', 'as_needed'];
+  if (!validFrequencies.includes(frequency)) {
+    throw new Error(`Invalid frequency. Must be one of: ${validFrequencies.join(', ')}`);
+  }
+
+  // Validate priority values
+  const validPriorities = ['low', 'medium', 'high', 'critical'];
+  if (priority && !validPriorities.includes(priority)) {
+    throw new Error(`Invalid priority. Must be one of: ${validPriorities.join(', ')}`);
+  }
+
+  // Validate difficulty (1-5 scale)
+  if (difficulty !== null && difficulty !== undefined) {
+    const difficultyNum = parseInt(difficulty);
+    if (isNaN(difficultyNum) || difficultyNum < 1 || difficultyNum > 5) {
+      throw new Error("Difficulty must be a number between 1 and 5");
+    }
+  }
+
+  // Verify category exists and belongs to user
+  const categoryCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+    WHERE elementId(rc) = $categoryId
+    RETURN rc
+  `;
+
+  const categoryResult = await args.session.run(categoryCheckQuery, {
+    userUuid: user.P.uuid,
+    categoryId
+  });
+
+  if (categoryResult.records.length === 0) {
+    throw new Error("Category not found or does not belong to user");
+  }
+
+  let ruleResult;
+  let ruleElementId;
+
+  if (isUpdate) {
+    // STEP 1A: Update existing rule
+    const updateRuleQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+      WHERE elementId(r) = $ruleId
+      SET
+        r.title = $title,
+        r.description = $description,
+        r.type = 'habit',
+        r.frequency = $frequency,
+        r.priority = $priority,
+        r.difficulty = $difficulty,
+        r.isActive = $isActive,
+        r.isPublic = false,
+        r.reminderTime = $reminderTime,
+        r.updatedAt = datetime()
+      RETURN r
+    `;
+
+    ruleResult = await args.session.run(updateRuleQuery, {
+      userUuid: user.P.uuid,
+      ruleId,
+      title: title.trim(),
+      description: description?.trim() || "",
+      frequency,
+      priority: priority || "medium",
+      difficulty: difficulty ? parseInt(difficulty) : 3,
+      isActive: isActive !== undefined ? isActive : true,
+      reminderTime: reminderTime || null
+    });
+    ruleElementId = ruleId;
+  } else {
+    // STEP 1B: Create new rule
+    const createRuleQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      CREATE (u)-[:UserRule]->(r:Rule)
+      SET
+        r.title = $title,
+        r.description = $description,
+        r.type = 'habit',
+        r.frequency = $frequency,
+        r.priority = $priority,
+        r.difficulty = $difficulty,
+        r.isActive = $isActive,
+        r.isPublic = false,
+        r.reminderTime = $reminderTime,
+        r.createdAt = datetime(),
+        r.updatedAt = datetime()
+      RETURN r, elementId(r) as ruleElementId
+    `;
+
+    ruleResult = await args.session.run(createRuleQuery, {
+      userUuid: user.P.uuid,
+      ruleId: finalRuleId,
+      title: title.trim(),
+      description: description?.trim() || "",
+      frequency,
+      priority: priority || "medium",
+      difficulty: difficulty ? parseInt(difficulty) : 3,
+      isActive: isActive !== undefined ? isActive : true,
+      reminderTime: reminderTime || null
+    });
+    ruleElementId = ruleResult.records[0].get('ruleElementId');
+  }
+
+
+  const ruleNode = ruleResult.records[0].get('r');
+  const rule = args.convertNodeToJson(ruleNode);
+
+  // STEP 2: Update Rule -> Category relationship
+  if (isUpdate) {
+    // For updates, check if category has changed
+    const currentCategoryQuery = `
+      MATCH (r:Rule) WHERE elementId(r) = $ruleElementId
+      MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+      RETURN elementId(rc) as currentCategoryId
+    `;
+
+    const currentCategoryResult = await args.session.run(currentCategoryQuery, {
+      ruleElementId
+    });
+
+    const currentCategoryId = currentCategoryResult.records.length > 0 ?
+      currentCategoryResult.records[0].get('currentCategoryId') : null;
+
+    // Only update category relationship if it has changed
+    if (currentCategoryId !== categoryId) {
+      // Remove old category relationship
+      const removeOldCategoryQuery = `
+        MATCH (r:Rule)-[rel:RuleCategory]->()
+        WHERE elementId(r) = $ruleElementId
+        DELETE rel
+      `;
+
+      await args.session.run(removeOldCategoryQuery, {
+        ruleElementId
+      });
+
+      // Create new category relationship
+      const ruleCategoryQuery = `
+        MATCH (r:Rule) WHERE elementId(r) = $ruleElementId
+        MATCH (rc:RuleCategory) WHERE elementId(rc) = $categoryId
+        MERGE (r)-[:RuleCategory]->(rc)
+      `;
+
+      await args.session.run(ruleCategoryQuery, {
+        ruleElementId,
+        categoryId
+      });
+    }
+  } else {
+    // For new rules, simply create the category relationship
+    const ruleCategoryQuery = `
+      MATCH (r:Rule) WHERE elementId(r) = $ruleElementId
+      MATCH (rc:RuleCategory) WHERE elementId(rc) = $categoryId
+      MERGE (r)-[:RuleCategory]->(rc)
+    `;
+
+    await args.session.run(ruleCategoryQuery, {
+      ruleElementId,
+      categoryId
+    });
+  }
+
+  // STEP 3: Initialize streak tracking if this is a new rule
+  if (!isUpdate) {
+    const createStreakQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (r:Rule) WHERE elementId(r) = $ruleElementId
+      CREATE (u)-[:UserRuleStreak]->(rs:RuleStreak)
+      SET
+        rs.currentStreak = 0,
+        rs.longestStreak = 0,
+        rs.totalCompletions = 0,
+        rs.lastCompletionDate = null,
+        rs.streakStartDate = null,
+        rs.freezeCount = 0,
+        rs.isActive = true,
+        rs.createdAt = datetime(),
+        rs.updatedAt = datetime()
+      CREATE (rs)-[:RuleStreakRule]->(r)
+      RETURN rs
+    `;
+
+    await args.session.run(createStreakQuery, {
+      userUuid: user.P.uuid,
+      ruleElementId
+    });
+  }
+
+  return {
+    success: true,
+    message: isUpdate ? "Rule updated successfully!" : "Rule created successfully!",
+    data: {
+      ruleId: isUpdate ? ruleId : ruleElementId,
+      title: title.trim(),
+      description: description?.trim() || "",
+      categoryId,
+      frequency,
+      priority: priority || "medium",
+      difficulty: difficulty ? parseInt(difficulty) : 3,
+      isActive: isActive !== undefined ? isActive : true,
+      reminderTime: reminderTime || null,
+      isUpdate,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error saving rule:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to save rule. Please try again.";
+
+  if (error.message.includes("title is required")) {
+    userMessage = "Rule title is required.";
+  } else if (error.message.includes("Category is required")) {
+    userMessage = "Please select a category for the rule.";
+  } else if (error.message.includes("Frequency is required")) {
+    userMessage = "Please select how often you want to track this rule.";
+  } else if (error.message.includes("Invalid frequency")) {
+    userMessage = "Please select a valid frequency option.";
+  } else if (error.message.includes("Invalid priority")) {
+    userMessage = "Please select a valid priority level.";
+  } else if (error.message.includes("Difficulty must be")) {
+    userMessage = "Difficulty must be a number between 1 and 5.";
+  } else if (error.message.includes("Category not found")) {
+    userMessage = "The selected category was not found. Please try again.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "RuleSaveError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

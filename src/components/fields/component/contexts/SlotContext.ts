@@ -1,3 +1,7 @@
 import { createContext } from "solid-js";
 
-export const SlotContext = createContext<any>(null);
+export interface SlotContextType {
+  (props: { slot: string }): any;
+}
+
+export const SlotContext = createContext<SlotContextType[]>([]);

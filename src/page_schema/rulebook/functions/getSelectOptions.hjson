@@ -1,0 +1,141 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getSelectOptions",
+        description: "Get all select options for forms (categories, frequencies, priorities, difficulties, icons, colors)",
+        body: '''
+// This function returns all predefined options for select fields
+// Supports type and subType parameters for specific option retrieval
+
+try {
+  // Get request parameters
+  const requestedType = args.contextData.params?.type;
+  const requestedSubType = args.contextData.params?.subType;
+
+  // Frequency options for rule forms
+  const frequencyOptions = [
+    { value: 'daily', label: '📅 Daily', description: 'Perform this rule every day' },
+    { value: 'weekly', label: '📆 Weekly', description: 'Perform this rule once per week' },
+    { value: 'monthly', label: '🗓️ Monthly', description: 'Perform this rule once per month' },
+    { value: 'as_needed', label: '🔄 As Needed', description: 'Perform this rule when necessary' }
+  ];
+
+  // Priority options for rule forms
+  const priorityOptions = [
+    { value: 'low', label: '🟢 Low Priority', description: 'Nice to have, low impact' },
+    { value: 'medium', label: '🟡 Medium Priority', description: 'Moderately important' },
+    { value: 'high', label: '🟠 High Priority', description: 'Very important, high impact' },
+    { value: 'critical', label: '🔴 Critical', description: 'Must be done, highest priority' }
+  ];
+
+  // Difficulty options for rule forms (1-5 scale)
+  const difficultyOptions = [
+    { value: '1', label: '⭐ 1 - Very Easy', description: 'Takes minimal effort' },
+    { value: '2', label: '⭐⭐ 2 - Easy', description: 'Takes some effort' },
+    { value: '3', label: '⭐⭐⭐ 3 - Medium', description: 'Takes moderate effort' },
+    { value: '4', label: '⭐⭐⭐⭐ 4 - Hard', description: 'Takes significant effort' },
+    { value: '5', label: '⭐⭐⭐⭐⭐ 5 - Very Hard', description: 'Takes maximum effort' }
+  ];
+
+  // Icon options for category forms
+  const iconOptions = [
+    { value: '🏃', label: '🏃 Health & Fitness', description: 'Exercise, nutrition, wellness' },
+    { value: '📚', label: '📚 Learning', description: 'Education, skill development, reading' },
+    { value: '💰', label: '💰 Finance', description: 'Budgeting, saving, investments' },
+    { value: '👥', label: '👥 Relationships', description: 'Family, friends, networking' },
+    { value: '⚡', label: '⚡ Productivity', description: 'Work efficiency, time management' },
+    { value: '🧘', label: '🧘 Mindfulness', description: 'Meditation, mental health, relaxation' },
+    { value: '🎯', label: '🎯 Goals', description: 'Achievement, milestones, objectives' },
+    { value: '🔄', label: '🔄 Habits', description: 'Routine building, consistency' },
+    { value: '📝', label: '📝 General', description: 'Miscellaneous or uncategorized' }
+  ];
+
+  // Color options for category forms
+  const colorOptions = [
+    { value: 'blue', label: '🔵 Blue', description: 'Calm, trust, stability' },
+    { value: 'green', label: '🟢 Green', description: 'Growth, health, nature' },
+    { value: 'red', label: '🔴 Red', description: 'Energy, urgency, passion' },
+    { value: 'purple', label: '🟣 Purple', description: 'Creativity, wisdom, luxury' },
+    { value: 'orange', label: '🟠 Orange', description: 'Enthusiasm, warmth, adventure' },
+    { value: 'yellow', label: '🟡 Yellow', description: 'Happiness, optimism, clarity' }
+  ];
+
+  // Goal type options for goal forms
+  const goalTypeOptions = [
+    { value: 'streak', label: '🔥 Streak Goal', description: 'Consecutive days/weeks/months' },
+    { value: 'completion_count', label: '✅ Completion Goal', description: 'Total number of completions' },
+    { value: 'time_based', label: '⏰ Time-based Goal', description: 'Based on time duration' },
+    { value: 'percentage', label: '📊 Percentage Goal', description: 'Percentage-based achievement' }
+  ];
+
+  // Unit options for goal forms (grouped by goal type)
+  const unitOptions = {
+    streak: [
+      { value: 'days', label: 'Days' },
+      { value: 'weeks', label: 'Weeks' },
+      { value: 'months', label: 'Months' }
+    ],
+    completion_count: [
+      { value: 'times', label: 'Times' },
+      { value: 'completions', label: 'Completions' }
+    ],
+    time_based: [
+      { value: 'days', label: 'Days' },
+      { value: 'weeks', label: 'Weeks' },
+      { value: 'months', label: 'Months' }
+    ],
+    percentage: [
+      { value: 'percent', label: 'Percent' }
+    ]
+  };
+
+  // All options collection
+  const allOptions = {
+    frequency: frequencyOptions,
+    priority: priorityOptions,
+    difficulty: difficultyOptions,
+    icon: iconOptions,
+    color: colorOptions,
+    goalType: goalTypeOptions,
+    unit: unitOptions
+  };
+
+  // If no specific type requested, return all options
+  if (!requestedType) {
+    return allOptions;
+  }
+
+  // Handle unit options with subType
+  if (requestedType === 'unit') {
+    if (requestedSubType && unitOptions[requestedSubType]) {
+      return unitOptions[requestedSubType];
+    } else if (!requestedSubType) {
+      return unitOptions;
+    } else {
+      console.error(`Invalid unit subType: ${requestedSubType}`);
+      return [];
+    }
+  }
+
+  // Return specific option type
+  if (allOptions[requestedType]) {
+    return allOptions[requestedType];
+  }
+
+  // Return empty array if option type not found
+  console.error(`Invalid option type: ${requestedType}`);
+  return [];
+
+} catch (error) {
+  console.error("Error getting select options:", error);
+  return [];
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -29,6 +29,7 @@ interface ImportStats {
   deletedItems: string[];
   totalVertices: number;
   totalEdges: number;
+  activatedTheme?: string;
 }
 
 interface SchemaImportResult {
@@ -168,7 +169,7 @@ interface PreprocessResult {
 async function loadExistingNodesIntoGraph(
   existingNodeMap: Map<string, string>,
   tx: Transaction,
-  graph: GraphType,
+  _graph: GraphType,
   setGraph: SetGraphType,
 ): Promise<void> {
   const nodeIds = Array.from(existingNodeMap.values());
@@ -299,6 +300,31 @@ async function preprocessSchemaForExistingNodes(
   };
 }
 
+async function activateTheme(tx: Transaction, themeKey: string): Promise<void> {
+  try {
+    // First ensure GlobalSetting exists
+    await tx.run(`
+      MERGE (gs:GlobalSetting {key: 'Default'})
+    `);
+
+    // Remove any existing theme relationship
+    await tx.run(`
+      MATCH (gs:GlobalSetting)-[r:GlobalSettingTheme]->(:Theme)
+      DELETE r
+    `);
+
+    // Create new theme relationship
+    await tx.run(`
+      MATCH (gs:GlobalSetting {key: 'Default'})
+      MATCH (theme:Theme {key: $themeKey})
+      MERGE (gs)-[:GlobalSettingTheme]->(theme)
+    `, { themeKey });
+  } catch (error) {
+    console.error(`Failed to activate theme ${themeKey}:`, error);
+    // Don't throw - this is a nice-to-have feature
+  }
+}
+
 async function importSingleSchema(
   schema: ImportGraphData,
   graph: GraphType,
@@ -366,6 +392,9 @@ async function importSchemas(
     totalEdges: 0,
   };
 
+  // Keep track of imported theme keys for auto-activation
+  const importedThemeKeys: string[] = [];
+
   // Process components
   if (websiteSchemas.components) {
     for (const [componentKey, schema] of Object.entries(
@@ -428,6 +457,7 @@ async function importSchemas(
       stats.importedItems.push(`Theme: ${themeKey}`);
       stats.totalVertices += result.vertexCount;
       stats.totalEdges += result.edgeCount;
+      importedThemeKeys.push(themeKey);
     }
   }
 
@@ -452,6 +482,13 @@ async function importSchemas(
     }
   }
 
+  // If only one theme was imported, activate it automatically
+  if (importedThemeKeys.length === 1) {
+    await activateTheme(tx, importedThemeKeys[0]);
+    stats.activatedTheme = importedThemeKeys[0];
+    console.log(`Automatically activated theme: ${importedThemeKeys[0]}`);
+  }
+
   return stats;
 }
 
@@ -461,9 +498,17 @@ async function buildSuccessResponse(
   deletedItems: string[],
   websiteSchemas: WebsiteSchemas,
 ) {
+  let message = `Successfully imported ${stats.importedItems.length} schemas from website: ${websiteName}`;
+  if (deletedItems.length > 0) {
+    message += ` (deleted ${deletedItems.length} existing items)`;
+  }
+  if (stats.activatedTheme) {
+    message += `. Theme "${stats.activatedTheme}" was automatically activated.`;
+  }
+
   return {
     success: true,
-    message: `Successfully imported ${stats.importedItems.length} schemas from website: ${websiteName}${deletedItems.length > 0 ? ` (deleted ${deletedItems.length} existing items)` : ""}`,
+    message,
     details: {
       website: websiteName,
       importedItems: stats.importedItems,
@@ -474,6 +519,7 @@ async function buildSuccessResponse(
       pages: Object.keys(websiteSchemas.pages || {}).length,
       themes: Object.keys(websiteSchemas.themes || {}).length,
       functions: Object.keys(websiteSchemas.functions || {}).length,
+      activatedTheme: stats.activatedTheme,
     },
   };
 }
@@ -520,13 +566,17 @@ export async function GET({ request }: APIEvent) {
       stats.deletedItems = deletedItems;
 
       // Log the import activity
+      let activityMessage = `Imported ${stats.importedItems.length} schemas from website: ${websiteName}. Deleted ${deletedItems.length} existing items. Total vertices: ${stats.totalVertices}, Total edges: ${stats.totalEdges}`;
+      if (stats.activatedTheme) {
+        activityMessage += `. Activated theme: ${stats.activatedTheme}`;
+      }
       await createActivityLog(
         tx,
         "schema_import",
         "Schema",
         websiteName,
         user.P.email,
-        `Imported ${stats.importedItems.length} schemas from website: ${websiteName}. Deleted ${deletedItems.length} existing items. Total vertices: ${stats.totalVertices}, Total edges: ${stats.totalEdges}`,
+        activityMessage,
       );
 
       await tx.commit();

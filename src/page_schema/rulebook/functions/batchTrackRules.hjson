@@ -1,0 +1,364 @@
+{
+  vertexes: [
+    {
+      id: "batch_track_rules_function",
+      L: "Function",
+      P: {
+        key: "batchTrackRules",
+        description: "Tracks multiple rules for a specific date with efficient batch processing",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { date, trackingData } = args.contextData;
+
+  // Validate required fields
+  if (!date) {
+    throw new Error("Date is required");
+  }
+
+  if (!trackingData || !Array.isArray(trackingData) || trackingData.length === 0) {
+    throw new Error("Tracking data array is required and cannot be empty");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Validate date format (YYYY-MM-DD)
+  const dateRegex = /^\\d{4}-\\d{2}-\\d{2}$/;
+  if (!dateRegex.test(date)) {
+    throw new Error("Date must be in YYYY-MM-DD format");
+  }
+
+  // Validate tracking data structure
+  const validStatuses = ['completed', 'partial', 'missed', 'skipped'];
+  const validatedTrackingData = [];
+
+  for (let i = 0; i < trackingData.length; i++) {
+    const item = trackingData[i];
+
+    if (!item.ruleId) {
+      throw new Error(`Rule ID is required for tracking item ${i + 1}`);
+    }
+
+    if (!item.status || !validStatuses.includes(item.status)) {
+      throw new Error(`Invalid status for rule ${item.ruleId}. Must be one of: ${validStatuses.join(', ')}`);
+    }
+
+    // Calculate completion percentage
+    let finalCompletionPercentage = 0;
+    if (item.status === 'completed') {
+      finalCompletionPercentage = 100;
+    } else if (item.status === 'partial') {
+      if (item.completionPercentage === undefined || item.completionPercentage === null) {
+        throw new Error(`Completion percentage is required for partial status on rule ${item.ruleId}`);
+      }
+      const percentage = parseInt(item.completionPercentage);
+      if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+        throw new Error(`Completion percentage must be between 0 and 100 for rule ${item.ruleId}`);
+      }
+      finalCompletionPercentage = percentage;
+    } else if (item.status === 'missed') {
+      finalCompletionPercentage = 0;
+    } else if (item.status === 'skipped') {
+      finalCompletionPercentage = null;
+    }
+
+    // Validate mood and difficulty if provided
+    if (item.mood !== null && item.mood !== undefined) {
+      const moodNum = parseInt(item.mood);
+      if (isNaN(moodNum) || moodNum < 1 || moodNum > 5) {
+        throw new Error(`Mood must be between 1 and 5 for rule ${item.ruleId}`);
+      }
+    }
+
+    if (item.difficulty !== null && item.difficulty !== undefined) {
+      const difficultyNum = parseInt(item.difficulty);
+      if (isNaN(difficultyNum) || difficultyNum < 1 || difficultyNum > 5) {
+        throw new Error(`Difficulty must be between 1 and 5 for rule ${item.ruleId}`);
+      }
+    }
+
+    validatedTrackingData.push({
+      ruleId: item.ruleId,
+      status: item.status,
+      completionPercentage: finalCompletionPercentage,
+      notes: item.notes?.trim() || null,
+      mood: item.mood ? parseInt(item.mood) : null,
+      difficulty: item.difficulty ? parseInt(item.difficulty) : null,
+      timeSpent: item.timeSpent ? parseInt(item.timeSpent) : null
+    });
+  }
+
+  // Verify all rules exist and belong to user
+  const ruleIds = validatedTrackingData.map(item => item.ruleId);
+  const ruleCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+    WHERE elementId(r) IN $ruleIds
+    RETURN r.id as ruleId, r
+  `;
+
+  const ruleResult = await args.session.run(ruleCheckQuery, {
+    userUuid: user.P.uuid,
+    ruleIds
+  });
+
+  if (ruleResult.records.length !== ruleIds.length) {
+    const foundRuleIds = ruleResult.records.map(record => record.get('ruleId'));
+    const missingRuleIds = ruleIds.filter(id => !foundRuleIds.includes(id));
+    throw new Error(`Rules not found or do not belong to user: ${missingRuleIds.join(', ')}`);
+  }
+
+  // STEP 1: Batch create/update tracking entries
+  const results = [];
+  const streakUpdates = [];
+
+  for (const trackingItem of validatedTrackingData) {
+    // No longer need tracking key - will use unique properties
+
+    // Create tracking entry
+    const mergeTrackingQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (r:Rule) WHERE elementId(r) = $ruleId
+      // First try to find existing tracking for this rule and date
+      OPTIONAL MATCH (u)-[:UserRuleTracking]->(existing:RuleTracking)-[:RuleTrackingRule]->(r)
+      WHERE existing.date = date($date)
+      // If exists, update it; otherwise create new
+      FOREACH (x IN CASE WHEN existing IS NOT NULL THEN [1] ELSE [] END |
+        SET existing.status = $status,
+            existing.completionPercentage = $completionPercentage,
+            existing.notes = $notes,
+            existing.mood = $mood,
+            existing.difficulty = $difficulty,
+            existing.timeSpent = $timeSpent,
+            existing.updatedAt = datetime()
+      )
+      FOREACH (x IN CASE WHEN existing IS NULL THEN [1] ELSE [] END |
+        CREATE (u)-[:UserRuleTracking]->(newTracking:RuleTracking {
+          date: date($date),
+          status: $status,
+          completionPercentage: $completionPercentage,
+          notes: $notes,
+          mood: $mood,
+          difficulty: $difficulty,
+          timeSpent: $timeSpent,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        CREATE (newTracking)-[:RuleTrackingRule]->(r)
+      )
+      // Return the final tracking record
+      WITH r
+      MATCH (u)-[:UserRuleTracking]->(finalTracking:RuleTracking)-[:RuleTrackingRule]->(r)
+      WHERE finalTracking.date = date($date)
+      RETURN finalTracking as rt, r
+    `;
+
+    await args.session.run(mergeTrackingQuery, {
+      userUuid: user.P.uuid,
+      ruleId: trackingItem.ruleId,
+      date,
+      status: trackingItem.status,
+      completionPercentage: trackingItem.completionPercentage,
+      notes: trackingItem.notes,
+      mood: trackingItem.mood,
+      difficulty: trackingItem.difficulty,
+      timeSpent: trackingItem.timeSpent
+    });
+
+    results.push({
+      ruleId: trackingItem.ruleId,
+      status: trackingItem.status,
+      success: true
+    });
+
+    // Calculate streak updates (similar logic to trackRule)
+    // No longer need streak key - will use unique properties
+
+    // Get current streak data
+    const currentStreakQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+      WHERE elementId(r) = $ruleId
+      RETURN rs
+    `;
+
+    const currentStreakResult = await args.session.run(currentStreakQuery, {
+      userUuid: user.P.uuid,
+      ruleId: trackingItem.ruleId
+    });
+
+    let streakData = {
+      currentStreak: 0,
+      longestStreak: 0,
+      totalCompletions: 0,
+      lastCompletionDate: null,
+      streakStartDate: null,
+      freezeCount: 0,
+      isActive: true
+    };
+
+    if (currentStreakResult.records.length > 0) {
+      const currentStreakNode = currentStreakResult.records[0].get('rs');
+      const currentStreak = args.convertNodeToJson(currentStreakNode);
+      streakData = {
+        currentStreak: currentStreak.P.currentStreak || 0,
+        longestStreak: currentStreak.P.longestStreak || 0,
+        totalCompletions: currentStreak.P.totalCompletions || 0,
+        lastCompletionDate: currentStreak.P.lastCompletionDate,
+        streakStartDate: currentStreak.P.streakStartDate,
+        freezeCount: currentStreak.P.freezeCount || 0,
+        isActive: currentStreak.P.isActive !== false
+      };
+    }
+
+    // Calculate new streak values
+    let newStreakData = { ...streakData };
+
+    if (trackingItem.status === 'completed' ||
+        (trackingItem.status === 'partial' && trackingItem.completionPercentage >= 70)) {
+      newStreakData.totalCompletions = (streakData.totalCompletions || 0) + 1;
+      newStreakData.lastCompletionDate = date;
+
+      const yesterday = new Date(date);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+      if (!streakData.lastCompletionDate || streakData.lastCompletionDate === yesterdayStr) {
+        newStreakData.currentStreak = (streakData.currentStreak || 0) + 1;
+        if (!streakData.streakStartDate) {
+          newStreakData.streakStartDate = date;
+        }
+      } else {
+        newStreakData.currentStreak = 1;
+        newStreakData.streakStartDate = date;
+      }
+
+      if (newStreakData.currentStreak > newStreakData.longestStreak) {
+        newStreakData.longestStreak = newStreakData.currentStreak;
+      }
+    } else if (trackingItem.status === 'missed') {
+      newStreakData.currentStreak = 0;
+      newStreakData.streakStartDate = null;
+    }
+
+    // Store streak update for batch processing
+    streakUpdates.push({
+      ruleId: trackingItem.ruleId,
+      streakData: newStreakData
+    });
+  }
+
+  // STEP 2: Batch update streaks
+  for (const streakUpdate of streakUpdates) {
+    const updateStreakQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (r:Rule) WHERE elementId(r) = $ruleId
+      // First try to find existing streak for this rule
+      OPTIONAL MATCH (u)-[:UserRuleStreak]->(existing:RuleStreak)-[:RuleStreakRule]->(r)
+      // If exists, update it; otherwise create new
+      FOREACH (x IN CASE WHEN existing IS NOT NULL THEN [1] ELSE [] END |
+        SET existing.currentStreak = $currentStreak,
+            existing.longestStreak = $longestStreak,
+            existing.totalCompletions = $totalCompletions,
+            existing.lastCompletionDate = $lastCompletionDate,
+            existing.streakStartDate = $streakStartDate,
+            existing.freezeCount = $freezeCount,
+            existing.isActive = $isActive,
+            existing.updatedAt = datetime()
+      )
+      FOREACH (x IN CASE WHEN existing IS NULL THEN [1] ELSE [] END |
+        CREATE (u)-[:UserRuleStreak]->(newStreak:RuleStreak {
+          currentStreak: $currentStreak,
+          longestStreak: $longestStreak,
+          totalCompletions: $totalCompletions,
+          lastCompletionDate: $lastCompletionDate,
+          streakStartDate: $streakStartDate,
+          freezeCount: $freezeCount,
+          isActive: $isActive,
+          createdAt: datetime(),
+          updatedAt: datetime()
+        })
+        CREATE (newStreak)-[:RuleStreakRule]->(r)
+      )
+      // Return the final streak record
+      WITH r
+      MATCH (u)-[:UserRuleStreak]->(finalStreak:RuleStreak)-[:RuleStreakRule]->(r)
+      RETURN finalStreak as rs
+    `;
+
+    await args.session.run(updateStreakQuery, {
+      userUuid: user.P.uuid,
+      ruleId: streakUpdate.ruleId,
+      currentStreak: streakUpdate.streakData.currentStreak,
+      longestStreak: streakUpdate.streakData.longestStreak,
+      totalCompletions: streakUpdate.streakData.totalCompletions,
+      lastCompletionDate: streakUpdate.streakData.lastCompletionDate,
+      streakStartDate: streakUpdate.streakData.streakStartDate,
+      freezeCount: streakUpdate.streakData.freezeCount,
+      isActive: streakUpdate.streakData.isActive
+    });
+  }
+
+  const completedCount = results.filter(r => r.status === 'completed').length;
+  const partialCount = results.filter(r => r.status === 'partial').length;
+  const missedCount = results.filter(r => r.status === 'missed').length;
+  const skippedCount = results.filter(r => r.status === 'skipped').length;
+
+  return {
+    success: true,
+    message: `Batch tracking completed! ${completedCount} completed, ${partialCount} partial, ${missedCount} missed, ${skippedCount} skipped.`,
+    data: {
+      date,
+      totalRules: results.length,
+      completed: completedCount,
+      partial: partialCount,
+      missed: missedCount,
+      skipped: skippedCount,
+      completionRate: Math.round(((completedCount + (partialCount * 0.5)) / results.length) * 100),
+      results,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error batch tracking rules:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to process batch rule tracking. Please try again.";
+
+  if (error.message.includes("Date is required")) {
+    userMessage = "Date is required for batch tracking.";
+  } else if (error.message.includes("Tracking data array is required")) {
+    userMessage = "No rules provided for tracking.";
+  } else if (error.message.includes("Date must be in")) {
+    userMessage = "Please provide a valid date in YYYY-MM-DD format.";
+  } else if (error.message.includes("Rule ID is required")) {
+    userMessage = error.message;
+  } else if (error.message.includes("Invalid status")) {
+    userMessage = error.message;
+  } else if (error.message.includes("Completion percentage")) {
+    userMessage = error.message;
+  } else if (error.message.includes("Rules not found")) {
+    userMessage = "Some rules were not found. Please refresh and try again.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "BatchTrackingError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

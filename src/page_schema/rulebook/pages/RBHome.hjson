@@ -1,0 +1,1251 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "RBHome",
+        url: "/rb",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "RBLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "data_context",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+const [isDashboardLoading, setIsDashboardLoading] = args.createSignal(true);
+const [dashboardError, setDashboardError] = args.createSignal(null);
+const [dashboardData, setDashboardData] = args.createSignal(null);
+
+// Function to fetch dashboard data
+const fetchDashboardData = async () => {
+  try {
+    setIsDashboardLoading(true);
+    setDashboardError(null);
+
+    // Fetch all dashboard data with a single function call
+    const result = await args.executeNamedServerFunction({
+      functionName: 'getDashboardData',
+      contextData: {}
+    });
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    const response = result.result;
+    if (!response || !response.success) {
+      throw new Error(response?.message || 'Failed to fetch dashboard data');
+    }
+
+    setDashboardData({
+      ...response.data,
+      loading: false,
+      error: null
+    });
+
+  } catch (err) {
+    console.error('Dashboard data fetch error:', err);
+    setDashboardError(err.message || 'Failed to load dashboard data');
+  } finally {
+    setIsDashboardLoading(false);
+  }
+};
+
+// Fetch data on mount
+const onMount = () => {
+  fetchDashboardData();
+};
+
+return {
+  isDashboardLoading,
+  setIsDashboardLoading,
+  dashboardError,
+  setDashboardError,
+  dashboardData,
+  setDashboardData,
+  fetchDashboardData,
+  onMount
+};
+''',
+        props: '''
+return {
+  as: "div",
+  onMount: args.fns.onMount
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const dashboardData = args.fns.dashboardData?.();
+const isDashboardLoading = args.fns.isDashboardLoading?.();
+const dashboardError = args.fns.dashboardError?.();
+
+// Show loading state
+if (isDashboardLoading) {
+  return {
+    as: "div"
+  };
+}
+
+// Show error state
+if (dashboardError) {
+  return {
+    as: "div"
+  };
+}
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  min-height: 200px;
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => !args.fns.isDashboardLoading?.()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.xxl};
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBLoadingSpinner",
+        props: '''
+return {
+  size: "medium",
+  color: "primary",
+  text: "Loading dashboard..."
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_state",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => !args.fns.dashboardError?.()
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.xxl};
+  text-align: center;
+  background: ${args.theme.var.color.error_light_100};
+  border: 1px solid ${args.theme.var.color.error_light_200};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  margin: ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:warning",
+  width: 48,
+  height: 48
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Unable to Load Dashboard"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error};
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_message",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const dashboardError = args.fns.dashboardError?.();
+
+return {
+  as: "p",
+  text: dashboardError || "An unexpected error occurred"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error_dark_200};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  max-width: 400px;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_retry_button",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RBButton",
+        props: '''
+const fetchDashboardData = args.fns.fetchDashboardData;
+
+return {
+  text: "Try Again",
+  variant: "danger",
+  onClick: fetchDashboardData
+};
+'''
+      }
+    },
+    {
+      id: "main_content",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  hide: () => args.fns.isDashboardLoading?.() || args.fns.dashboardError?.()
+};
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentTime = new Date();
+const hour = currentTime.getHours();
+let greeting = "Good Evening";
+if (hour < 12) greeting = "Good Morning";
+else if (hour < 18) greeting = "Good Afternoon";
+
+const today = currentTime.toLocaleDateString('en-US', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "greeting_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "greeting_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentTime = new Date();
+const hour = currentTime.getHours();
+let greeting = "Good Evening";
+if (hour < 12) greeting = "Good Morning";
+else if (hour < 18) greeting = "Good Afternoon";
+
+const today = currentTime.toLocaleDateString('en-US', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "greeting_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const currentTime = new Date();
+const hour = currentTime.getHours();
+let greeting = "Good Evening";
+if (hour < 12) greeting = "Good Morning";
+else if (hour < 18) greeting = "Good Afternoon";
+
+return {
+  as: "h1",
+  text: `⚡ ${greeting}!`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "date_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const today = new Date().toLocaleDateString('en-US', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+return {
+  as: "p",
+  text: today
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "settings_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/rb/settings",
+  "aria-label": "Settings"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  text-decoration: none;
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "settings_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:settings",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "progress_card",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "📊 Today's Progress"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  border-radius: ${args.theme.var.borderRadius.full};
+  padding: ${args.theme.var.spacing.xs};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const dashboardData = args.fns.dashboardData?.();
+const progressData = dashboardData?.progress;
+
+// Calculate completion stats from real data
+const totalTracking = progressData?.summary?.totalTracking || 0;
+const completed = progressData?.summary?.completed || 0;
+const partial = progressData?.summary?.partial || 0;
+
+// Calculate effective completion percentage
+const effectiveCompletions = completed + (partial * 0.7);
+const percentage = totalTracking > 0 ? Math.round((effectiveCompletions / totalTracking) * 100) : 0;
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+const dashboardData = args.fns.dashboardData?.();
+const progress = dashboardData?.progress || {};
+
+const percentage = progress.completionRate || 0;
+const hasRules = progress.totalActiveRules > 0;
+
+return `._id {
+  width: ${Math.max(percentage, hasRules ? 2 : 0)}%;
+  height: 12px;
+  background: ${percentage === 0 ? args.theme.var.color.muted : args.theme.var.color.success};
+  border-radius: ${args.theme.var.borderRadius.full};
+  transition: width ${args.theme.var.animation.slow} ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_text",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const dashboardData = args.fns.dashboardData?.();
+const progressText = dashboardData?.progressText || "Loading...";
+
+return {
+  as: "p",
+  text: progressText
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: ${args.theme.var.spacing.md};
+  margin-top: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "streak_stat",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.md};
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "streak_number",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const dashboardData = args.fns.dashboardData?.();
+const progress = dashboardData?.progress || {};
+
+const longestStreak = progress.longestStreak || 0;
+
+return {
+  as: "div",
+  text: `🔥 ${longestStreak}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.streak};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "streak_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Day Streak"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "completed_stat",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.md};
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "completed_number",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const dashboardData = args.fns.dashboardData?.();
+const progress = dashboardData?.progress || {};
+
+const completed = progress.completedToday || 0;
+
+return {
+  as: "div",
+  text: `✅ ${completed}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.completed};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "completed_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Completed"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "weekly_stat",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.md};
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "weekly_number",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const dashboardData = args.fns.dashboardData?.();
+const progress = dashboardData?.progress || {};
+
+const completionRate = progress.completionRate || 0;
+
+return {
+  as: "div",
+  text: `📈 ${completionRate}%`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.info};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "weekly_label",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "This Week"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "quick_actions_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "quick_actions_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "📋 Quick Actions"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "rules_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        contextName: "rulesList",
+        loop: true,
+        componentName: "Html",
+        props: '''
+const dashboardData = args.fns.dashboardData?.();
+const rules = dashboardData?.rules || [];
+
+return {
+  as: "div",
+  data: rules
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData.rulesList;
+
+if (!ruleData?.rule?.P) {
+  return {
+    as: "div",
+    text: "No rules found. Create your first rule to get started!",
+    style: "text-align: center; color: #666; padding: 2rem;"
+  };
+}
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "rule_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData.rulesList;
+const rule = ruleData?.rule;
+const category = ruleData?.category;
+
+const title = rule?.P?.title || "Unknown Rule";
+const icon = category?.P?.icon || "📝";
+
+return {
+  as: "div",
+  text: `${icon} ${title}`
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_status",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData.rulesList;
+const todayTracking = ruleData?.todayTracking;
+const streak = ruleData?.streak;
+
+let statusText = "⏱️ Not tracked yet";
+
+if (todayTracking) {
+  const status = todayTracking.P?.status || "";
+  const completionPercentage = todayTracking.P?.completionPercentage || 0;
+
+  switch (status) {
+    case "completed":
+      statusText = "✓ Completed today";
+      break;
+    case "partial":
+      statusText = `⚡ ${completionPercentage}% completed`;
+      break;
+    case "missed":
+      statusText = "❌ Missed today";
+      break;
+    case "skipped":
+      statusText = "⏭️ Skipped today";
+      break;
+  }
+} else if (streak?.P?.currentStreak > 0) {
+  statusText = `🔥 ${streak.P.currentStreak} day streak`;
+}
+
+return {
+  as: "div",
+  text: statusText
+};
+''',
+        css: '''
+const ruleData = args.contextData.rulesList;
+const todayTracking = ruleData?.todayTracking;
+
+let colorKey = "muted";
+
+if (todayTracking) {
+  const status = todayTracking.P?.status || "";
+  switch (status) {
+    case "completed":
+      colorKey = "completed";
+      break;
+    case "partial":
+      colorKey = "partial";
+      break;
+    case "missed":
+      colorKey = "missed";
+      break;
+    case "skipped":
+      colorKey = "skipped";
+      break;
+  }
+} else {
+  colorKey = "streak";
+}
+
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color[colorKey]};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_action",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const ruleData = args.contextData.rulesList;
+const todayTracking = ruleData?.todayTracking;
+
+if (todayTracking?.P?.status === "completed") {
+  return {
+    as: "div",
+    text: "✓ Done"
+  };
+} else if (todayTracking) {
+  return {
+    as: "a",
+    text: "Update",
+    href: "/rb/tracking"
+  };
+} else {
+  return {
+    as: "a",
+    text: "Track",
+    href: "/rb/tracking"
+  };
+}
+''',
+        css: '''
+const ruleData = args.contextData.rulesList;
+const todayTracking = ruleData?.todayTracking;
+const isCompleted = todayTracking?.P?.status === "completed";
+
+if (isCompleted) {
+  return `._id {
+    color: ${args.theme.var.color.completed};
+    font-weight: 500;
+    padding: ${args.theme.var.spacing.sm};
+  }`;
+} else {
+  return `._id {
+    background: ${args.theme.var.color.primary};
+    color: ${args.theme.var.color.primary_text};
+    border: none;
+    padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+    border-radius: ${args.theme.var.borderRadius.sm};
+    font-weight: 500;
+    cursor: pointer;
+    min-height: ${args.theme.var.touch.minTarget};
+    transition: all ${args.theme.var.animation.fast} ease;
+    text-decoration: none;
+    display: inline-block;
+
+    &:hover {
+      background: ${args.theme.var.color.primary_dark_200};
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }`;
+}
+'''
+      }
+    },
+    {
+      id: "floating_add_button",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/rb/rules",
+  "aria-label": "Add new rule"
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  bottom: 92px;
+  right: ${args.theme.var.spacing.lg};
+  width: 56px;
+  height: 56px;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.full};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all ${args.theme.var.animation.fast} ease;
+  z-index: ${args.theme.var.zIndex.dropdown};
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+@media (min-width: 768px) {
+  ._id {
+    bottom: ${args.theme.var.spacing.lg};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "add_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:add",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e2", T: "Attr", S: "page_root", E: "data_context" },
+    { id: "e3", T: "Attr", S: "data_context", E: "page_content" },
+    { id: "e3a", T: "Attr", S: "page_content", E: "loading_state" },
+    { id: "e3b", T: "Attr", S: "loading_state", E: "loading_spinner" },
+    { id: "e3d", T: "Attr", S: "page_content", E: "error_state" },
+    { id: "e3e", T: "Attr", S: "error_state", E: "error_icon" },
+    { id: "e3f", T: "Attr", S: "error_state", E: "error_title" },
+    { id: "e3g", T: "Attr", S: "error_state", E: "error_message" },
+    { id: "e3h", T: "Attr", S: "error_state", E: "error_retry_button" },
+    { id: "e4", T: "Attr", S: "page_content", E: "main_content" },
+    { id: "e5", T: "Attr", S: "main_content", E: "header" },
+    { id: "e6", T: "Attr", S: "header", E: "greeting_container" },
+    { id: "e7", T: "Attr", S: "greeting_container", E: "greeting_text" },
+    { id: "e8", T: "Attr", S: "greeting_text", E: "greeting_title" },
+    { id: "e9", T: "Attr", S: "greeting_text", E: "date_text" },
+    { id: "e10", T: "Attr", S: "greeting_container", E: "settings_button" },
+    { id: "e11", T: "Attr", S: "settings_button", E: "settings_icon" },
+    { id: "e12", T: "Attr", S: "main_content", E: "progress_card" },
+    { id: "e13", T: "Attr", S: "progress_card", E: "progress_title" },
+    { id: "e14", T: "Attr", S: "progress_card", E: "progress_bar_container" },
+    { id: "e15", T: "Attr", S: "progress_bar_container", E: "progress_bar" },
+    { id: "e16", T: "Attr", S: "progress_card", E: "progress_text" },
+    { id: "e17", T: "Attr", S: "progress_card", E: "stats_grid" },
+    { id: "e18", T: "Attr", S: "stats_grid", E: "streak_stat" },
+    { id: "e19", T: "Attr", S: "streak_stat", E: "streak_number" },
+    { id: "e20", T: "Attr", S: "streak_stat", E: "streak_label" },
+    { id: "e21", T: "Attr", S: "stats_grid", E: "completed_stat" },
+    { id: "e22", T: "Attr", S: "completed_stat", E: "completed_number" },
+    { id: "e23", T: "Attr", S: "completed_stat", E: "completed_label" },
+    { id: "e24", T: "Attr", S: "stats_grid", E: "weekly_stat" },
+    { id: "e25", T: "Attr", S: "weekly_stat", E: "weekly_number" },
+    { id: "e26", T: "Attr", S: "weekly_stat", E: "weekly_label" },
+    { id: "e27", T: "Attr", S: "main_content", E: "quick_actions_section" },
+    { id: "e28", T: "Attr", S: "quick_actions_section", E: "quick_actions_title" },
+    { id: "e29", T: "Attr", S: "quick_actions_section", E: "rules_list" },
+    { id: "e30", T: "Attr", S: "rules_list", E: "rule_item" },
+    { id: "e31", T: "Attr", S: "rule_item", E: "rule_info" },
+    { id: "e32", T: "Attr", S: "rule_info", E: "rule_title" },
+    { id: "e33", T: "Attr", S: "rule_info", E: "rule_status" },
+    { id: "e34", T: "Attr", S: "rule_item", E: "rule_action" },
+    { id: "e35", T: "Attr", S: "main_content", E: "floating_add_button" },
+    { id: "e36", T: "Attr", S: "floating_add_button", E: "add_icon" }
+  ]
+}

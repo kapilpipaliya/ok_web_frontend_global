@@ -31,7 +31,7 @@ try {
 
   const playlistResult = await args.session.run(playlistQuery, {
     playlistId: playlistId,
-    userUuid: user.uuid
+    userUuid: user.P.uuid
   });
 
   if (playlistResult.records.length === 0) {
@@ -69,7 +69,7 @@ try {
 
   const resetResult = await args.session.run(resetQuery, {
     playlistId: playlistId,
-    userUuid: user.uuid
+    userUuid: user.P.uuid
   });
 
   const wasReset = resetResult.records.length > 0;

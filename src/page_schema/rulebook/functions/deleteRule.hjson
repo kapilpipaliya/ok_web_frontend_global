@@ -1,0 +1,186 @@
+{
+  vertexes: [
+    {
+      id: "delete_rule_function",
+      L: "Function",
+      P: {
+        key: "deleteRule",
+        description: "Deletes a rule and all associated tracking data, streak data, and goals",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { ruleId } = args.contextData;
+
+  // Validate required fields
+  if (!ruleId) {
+    throw new Error("Rule ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Check if rule exists and belongs to user
+  const ruleCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+    WHERE elementId(r) = $ruleId
+    RETURN r,
+           COUNT { (u)-[:UserRuleTracking]->(:RuleTracking)-[:RuleTrackingRule]->(r) } as trackingCount,
+           COUNT { (u)-[:UserRuleStreak]->(:RuleStreak)-[:RuleStreakRule]->(r) } as streakCount,
+           COUNT { (u)-[:UserRuleGoal]->(:RuleGoal)-[:RuleGoalRule]->(r) } as goalCount
+  `;
+
+  const ruleResult = await args.session.run(ruleCheckQuery, {
+    userUuid: user.P.uuid,
+    ruleId
+  });
+
+  if (ruleResult.records.length === 0) {
+    throw new Error("Rule not found or does not belong to user");
+  }
+
+  const ruleNode = ruleResult.records[0].get('r');
+  const rule = args.convertNodeToJson(ruleNode);
+  const ruleTitle = rule.P.title; // Store title before deletion
+  const trackingCount = args.neo4jConvert.js(ruleResult.records[0].get('trackingCount')) || 0;
+  const streakCount = args.neo4jConvert.js(ruleResult.records[0].get('streakCount')) || 0;
+  const goalCount = args.neo4jConvert.js(ruleResult.records[0].get('goalCount')) || 0;
+
+  // Build cascade info
+  const cascadeInfo = {
+    trackingCount,
+    streakCount,
+    goalCount,
+    totalAffected: trackingCount + streakCount + goalCount
+  };
+
+  // Start transaction for atomic deletion
+  const tx = args.session.beginTransaction();
+
+  try {
+    // Step 1: Delete all goals associated with this rule
+    if (goalCount > 0) {
+      const deleteGoalsQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+        WHERE elementId(r) = $ruleId
+        DETACH DELETE rg
+      `;
+
+      await tx.run(deleteGoalsQuery, {
+        userUuid: user.P.uuid,
+        ruleId
+      });
+    }
+
+    // Step 2: Delete all tracking data for this rule
+    if (trackingCount > 0) {
+      const deleteTrackingQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)
+        WHERE elementId(r) = $ruleId
+        DETACH DELETE rt
+      `;
+
+      await tx.run(deleteTrackingQuery, {
+        userUuid: user.P.uuid,
+        ruleId
+      });
+    }
+
+    // Step 3: Delete streak data for this rule
+    if (streakCount > 0) {
+      const deleteStreaksQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+        WHERE elementId(r) = $ruleId
+        DETACH DELETE rs
+      `;
+
+      await tx.run(deleteStreaksQuery, {
+        userUuid: user.P.uuid,
+        ruleId
+      });
+    }
+
+    // Step 4: Finally delete the rule itself
+    const deleteRuleQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+      WHERE elementId(r) = $ruleId
+      DETACH DELETE r
+    `;
+
+    await tx.run(deleteRuleQuery, {
+      userUuid: user.P.uuid,
+      ruleId
+    });
+
+    // Commit the transaction
+    await tx.commit();
+
+    // Build success message
+    let message = `Rule "${ruleTitle}" deleted successfully`;
+    const deletedItems = [];
+
+    if (trackingCount > 0) {
+      deletedItems.push(`${trackingCount} tracking record${trackingCount > 1 ? 's' : ''}`);
+    }
+    if (streakCount > 0) {
+      deletedItems.push(`${streakCount} streak record${streakCount > 1 ? 's' : ''}`);
+    }
+    if (goalCount > 0) {
+      deletedItems.push(`${goalCount} goal${goalCount > 1 ? 's' : ''}`);
+    }
+
+    if (deletedItems.length > 0) {
+      message += `. Also deleted: ${deletedItems.join(', ')}.`;
+    }
+
+    return {
+      success: true,
+      message,
+      data: {
+        ruleId: rule.id,
+        ruleTitle,
+        cascade: cascadeInfo,
+        userId: user.P.uuid
+      }
+    };
+
+  } catch (txError) {
+    // Rollback the transaction on error
+    await tx.rollback();
+    throw txError;
+  }
+
+} catch (error) {
+  console.error("Error deleting rule:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to delete rule. Please try again.";
+
+  if (error.message.includes("Rule ID is required")) {
+    userMessage = "Rule ID is required to delete a rule.";
+  } else if (error.message.includes("Rule not found")) {
+    userMessage = "The rule was not found or does not belong to you.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("constraint")) {
+    userMessage = "Cannot delete rule due to database constraints. Please contact support.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "RuleDeletionError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

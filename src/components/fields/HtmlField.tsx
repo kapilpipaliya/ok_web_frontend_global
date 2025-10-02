@@ -70,6 +70,7 @@ export function replacePlaceholderWithUrl(
   data: Vertex,
   graph: GraphInterface,
 ): string {
+  if (!value) return "";
   if (!value.includes("$1")) {
     return value;
   }
@@ -179,6 +180,7 @@ export function HtmlField(
     contextName?: string;
     // Server function props
     serverFunction?: string; // Function body as string
+    renderChildren?: boolean;
   },
 ) {
   const [graph, setGraph] = useGraph();
@@ -337,6 +339,17 @@ export function HtmlField(
                 );
               }}
             </For>
+          </Match>
+          <Match when={processedData().options && local.contextName && props.renderChildren}>
+            <DataInternal
+              data={data()}
+              index={0}
+              meta={meta()!}
+              contextName={local.contextName!}
+              repeaterValue={processedData().options}
+              children={local.children}
+              renderChildren
+            />
           </Match>
           <Match when={processedData().options && local.contextName}>
             <DataInternal

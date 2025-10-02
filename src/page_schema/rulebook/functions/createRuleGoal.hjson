@@ -1,0 +1,359 @@
+{
+  vertexes: [
+    {
+      id: "create_rule_goal_function",
+      L: "Function",
+      P: {
+        key: "createRuleGoal",
+        description: "Creates specific goals for rules with validation, target setting, and progress tracking setup",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { goalId, ruleId, title, description, goalType, targetValue, targetDate, unit, reward } = args.contextData;
+
+  // Validate required fields
+  if (!ruleId) {
+    throw new Error("Rule ID is required");
+  }
+
+  if (!title?.trim()) {
+    throw new Error("Goal title is required");
+  }
+
+  if (!goalType) {
+    throw new Error("Goal type is required");
+  }
+
+  if (!targetValue || targetValue <= 0) {
+    throw new Error("Target value must be a positive number");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Validate goal type
+  const validGoalTypes = ['streak', 'completion_count', 'time_based', 'percentage'];
+  if (!validGoalTypes.includes(goalType)) {
+    throw new Error(`Invalid goal type. Must be one of: ${validGoalTypes.join(', ')}`);
+  }
+
+  // Validate unit based on goal type
+  const validUnits = {
+    streak: ['days', 'weeks', 'months'],
+    completion_count: ['times', 'completions'],
+    time_based: ['days', 'weeks', 'months'],
+    percentage: ['percent']
+  };
+
+  if (!unit || !validUnits[goalType].includes(unit)) {
+    throw new Error(`Invalid unit for ${goalType}. Must be one of: ${validUnits[goalType].join(', ')}`);
+  }
+
+  // Validate target date if provided
+  if (targetDate) {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(targetDate)) {
+      throw new Error("Target date must be in YYYY-MM-DD format");
+    }
+
+    const target = new Date(targetDate);
+    const today = new Date();
+    if (target <= today) {
+      throw new Error("Target date must be in the future");
+    }
+  }
+
+  // Verify rule exists and belongs to user
+  const ruleCheckQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+    WHERE elementId(r) = $ruleId
+    RETURN r
+  `;
+
+  const ruleResult = await args.session.run(ruleCheckQuery, {
+    userUuid: user.P.uuid,
+    ruleId
+  });
+
+  if (ruleResult.records.length === 0) {
+    throw new Error("Rule not found or does not belong to user");
+  }
+
+  const ruleNode = ruleResult.records[0].get('r');
+  const rule = args.convertNodeToJson(ruleNode);
+
+  // Determine if this is an update or create operation
+  const isUpdate = Boolean(goalId);
+  const finalGoalId = goalId || `goal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  // For updates, verify the goal exists
+  if (isUpdate) {
+    const existingGoalQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+      WHERE elementId(rg) = $goalId
+      RETURN rg
+    `;
+
+    const existingGoalResult = await args.session.run(existingGoalQuery, {
+      userUuid: user.P.uuid,
+      goalId
+    });
+
+    if (existingGoalResult.records.length === 0) {
+      throw new Error("Goal not found for update");
+    }
+  }
+
+  // Check for duplicate goal titles for the same rule (if not updating)
+  if (!isUpdate) {
+    const duplicateCheckQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      WHERE toLower(rg.title) = toLower($title) AND elementId(r) = $ruleId
+      RETURN rg
+    `;
+
+    const duplicateResult = await args.session.run(duplicateCheckQuery, {
+      userUuid: user.P.uuid,
+      title: title.trim(),
+      ruleId
+    });
+
+    if (duplicateResult.records.length > 0) {
+      throw new Error("A goal with this title already exists for this rule");
+    }
+  }
+
+  // Calculate initial current value based on goal type
+  let initialCurrentValue = 0;
+  let calculationQuery = '';
+
+  switch (goalType) {
+    case 'streak':
+      // Get current streak for the rule
+      calculationQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+        WHERE elementId(r) = $ruleId
+        RETURN COALESCE(rs.currentStreak, 0) as currentValue
+      `;
+      break;
+
+    case 'completion_count':
+      // Count total completions
+      calculationQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+        WHERE elementId(r) = $ruleId
+        RETURN COALESCE(rs.totalCompletions, 0) as currentValue
+      `;
+      break;
+
+    case 'time_based':
+      // For time-based goals, current value starts at 0 and increases based on time period
+      initialCurrentValue = 0;
+      break;
+
+    case 'percentage':
+      // Calculate recent completion percentage (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+      calculationQuery = `
+        MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)
+        WHERE elementId(r) = $ruleId AND rt.date >= '${thirtyDaysAgoStr}'
+        WITH COUNT(*) as total,
+             COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
+             COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial
+        RETURN CASE
+          WHEN total > 0 THEN ROUND(((completed + (partial * 0.7)) / total) * 100)
+          ELSE 0
+        END as currentValue
+      `;
+      break;
+  }
+
+  if (calculationQuery && goalType !== 'time_based') {
+    const calculationResult = await args.session.run(calculationQuery, {
+      userUuid: user.P.uuid,
+      ruleId
+    });
+
+    if (calculationResult.records.length > 0) {
+      initialCurrentValue = args.neo4jConvert.js(calculationResult.records[0].get('currentValue')) || 0;
+    }
+  }
+
+  let goalResult;
+  let goalElementId;
+
+  if (isUpdate) {
+    // STEP 1A: Update existing goal
+    const updateGoalQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+      WHERE elementId(rg) = $goalId
+      SET
+        rg.title = $title,
+        rg.description = $description,
+        rg.goalType = $goalType,
+        rg.targetValue = $targetValue,
+        rg.currentValue = $currentValue,
+        rg.unit = $unit,
+        rg.targetDate = CASE WHEN $targetDate IS NOT NULL THEN date($targetDate) ELSE null END,
+        rg.reward = $reward,
+        rg.isCompleted = false,
+        rg.completedAt = null,
+        rg.updatedAt = datetime()
+      RETURN rg
+    `;
+
+    goalResult = await args.session.run(updateGoalQuery, {
+      userUuid: user.P.uuid,
+      goalId,
+      title: title.trim(),
+      description: description?.trim() || "",
+      goalType,
+      targetValue: parseInt(targetValue),
+      currentValue: initialCurrentValue,
+      unit,
+      targetDate: targetDate || null,
+      reward: reward?.trim() || null
+    });
+    goalElementId = goalId;
+  } else {
+    // STEP 1B: Create new goal
+    const createGoalQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      CREATE (u)-[:UserRuleGoal]->(rg:RuleGoal)
+      SET
+        rg.title = $title,
+        rg.description = $description,
+        rg.goalType = $goalType,
+        rg.targetValue = $targetValue,
+        rg.currentValue = $currentValue,
+        rg.unit = $unit,
+        rg.targetDate = CASE WHEN $targetDate IS NOT NULL THEN date($targetDate) ELSE null END,
+        rg.reward = $reward,
+        rg.isCompleted = false,
+        rg.completedAt = null,
+        rg.createdAt = datetime(),
+        rg.updatedAt = datetime()
+      RETURN rg, elementId(rg) as goalElementId
+    `;
+
+    goalResult = await args.session.run(createGoalQuery, {
+      userUuid: user.P.uuid,
+      goalId: finalGoalId,
+      title: title.trim(),
+      description: description?.trim() || "",
+      goalType,
+      targetValue: parseInt(targetValue),
+      currentValue: initialCurrentValue,
+      unit,
+      targetDate: targetDate || null,
+      reward: reward?.trim() || null
+    });
+    goalElementId = goalResult.records[0].get('goalElementId');
+  }
+
+  const goalNode = goalResult.records[0].get('rg');
+  const goal = args.convertNodeToJson(goalNode);
+
+  // STEP 2: Create RuleGoal -> Rule relationship (only for new goals)
+  if (!isUpdate) {
+    const goalRuleQuery = `
+      MATCH (rg:RuleGoal) WHERE elementId(rg) = $goalElementId
+      MATCH (r:Rule) WHERE elementId(r) = $ruleId
+      MERGE (rg)-[:RuleGoalRule]->(r)
+    `;
+
+    await args.session.run(goalRuleQuery, {
+      goalElementId,
+      ruleId
+    });
+  }
+
+  // Calculate progress percentage
+  const progressPercentage = Math.min(Math.round((initialCurrentValue / parseInt(targetValue)) * 100), 100);
+
+  // Determine if goal is already completed
+  const isCompleted = initialCurrentValue >= parseInt(targetValue);
+
+  if (isCompleted && !isUpdate) {
+    // Update the goal as completed
+    const completeGoalQuery = `
+      MATCH (rg:RuleGoal) WHERE elementId(rg) = $goalElementId
+      SET rg.isCompleted = true, rg.completedAt = datetime()
+    `;
+
+    await args.session.run(completeGoalQuery, { goalElementId });
+  }
+
+  return {
+    success: true,
+    message: isUpdate ? "Goal updated successfully!" : (isCompleted ? "Goal created and already completed! 🎉" : "Goal created successfully!"),
+    data: {
+      goalId: isUpdate ? goalId : goalElementId,
+      ruleId,
+      ruleTitle: rule.P.title,
+      title: title.trim(),
+      description: description?.trim() || "",
+      goalType,
+      targetValue: parseInt(targetValue),
+      currentValue: initialCurrentValue,
+      unit,
+      targetDate: targetDate || null,
+      reward: reward?.trim() || null,
+      isCompleted,
+      completedAt: isCompleted ? new Date().toISOString() : null,
+      progressPercentage,
+      isUpdate,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error creating rule goal:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to create goal. Please try again.";
+
+  if (error.message.includes("Rule ID is required")) {
+    userMessage = "Rule ID is required to create a goal.";
+  } else if (error.message.includes("title is required")) {
+    userMessage = "Goal title is required.";
+  } else if (error.message.includes("Goal type is required")) {
+    userMessage = "Please select a goal type.";
+  } else if (error.message.includes("Target value must be")) {
+    userMessage = "Please enter a valid target value greater than 0.";
+  } else if (error.message.includes("Invalid goal type")) {
+    userMessage = "Please select a valid goal type.";
+  } else if (error.message.includes("Invalid unit")) {
+    userMessage = "Please select a valid unit for the selected goal type.";
+  } else if (error.message.includes("Target date must be")) {
+    userMessage = error.message;
+  } else if (error.message.includes("already exists")) {
+    userMessage = "A goal with this title already exists for this rule. Please choose a different title.";
+  } else if (error.message.includes("Rule not found")) {
+    userMessage = "The selected rule was not found. Please try again.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "GoalCreationError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

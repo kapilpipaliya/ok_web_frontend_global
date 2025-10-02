@@ -1,0 +1,934 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "RBGoals",
+        url: "/rb/goals",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+const [showGoalModal, setShowGoalModal] = args.createSignal(false);
+const [modalMode, setModalMode] = args.createSignal("create");
+const [selectedGoal, setSelectedGoal] = args.createSignal(null);
+const [goals, setGoals] = args.createSignal([]);
+const [isLoading, setIsLoading] = args.createSignal(true);
+const [error, setError] = args.createSignal(null);
+
+const loadGoals = async () => {
+  setIsLoading(true);
+  setError(null);
+
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getGoals",
+      contextData: { includeCompleted: false }
+    });
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    if (result.result?.success) {
+      setGoals(result.result.data?.goals || []);
+    } else {
+      setError(result.result?.message || "Failed to load goals");
+    }
+  } catch (err) {
+    console.error("Error loading goals:", err);
+    setError("Failed to load goals. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const onMount = () => {
+  loadGoals();
+};
+
+return {
+  isNoPermissionCheck: true,
+  contextName: "goalModal",
+  onMount,
+  data: {
+    showGoalModal,
+    setShowGoalModal,
+    modalMode,
+    setModalMode,
+    selectedGoal,
+    setSelectedGoal,
+    goals,
+    setGoals,
+    isLoading,
+    error,
+    loadGoals
+  }
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "RBLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "page_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "🎯 Goals & Achievements"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "add_goal_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
+const setModalMode = args.contextData?.goalModal?.setModalMode;
+
+return {
+  text: "Add Goal",
+  variant: "primary",
+  onClick: () => {
+    setModalMode?.("create");
+    setShowGoalModal?.(true);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "loading_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isLoading = args.contextData?.goalModal?.isLoading?.();
+
+return {
+  as: "div",
+  hide: !isLoading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.xl};
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "goals_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const goals = args.contextData?.goalModal?.goals;
+const isLoading = args.contextData?.goalModal?.isLoading;
+const error = args.contextData?.goalModal?.error;
+
+if (error?.()) {
+  return {
+    as: "div",
+    text: `Error: ${error()}`
+  };
+}
+
+const goalsArray = goals?.() || [];
+
+if (goalsArray.length === 0 && !isLoading?.()) {
+  return {
+    as: "div",
+    contextName: "goalsGrid",
+    data: { goals: goalsArray },
+    text: "No goals found. Create your first goal to get started!"
+  };
+}
+
+return {
+  as: "div",
+  contextName: "goalsGrid",
+  data: { goals: goalsArray }
+};
+''',
+        css: '''
+const goals = args.contextData?.goalModal?.goals;
+const isLoading = args.contextData?.goalModal?.isLoading;
+const error = args.contextData?.goalModal?.error;
+
+if (error?.()) {
+  return `._id {
+    text-align: center;
+    padding: ${args.theme.var.spacing.xl};
+    color: ${args.theme.var.color.error};
+    font-size: ${args.theme.var.fontSize.lg};
+  }`;
+}
+
+const goalsArray = goals?.() || [];
+
+if (goalsArray.length === 0 && !isLoading?.()) {
+  return `._id {
+    text-align: center;
+    padding: ${args.theme.var.spacing.xl};
+    color: ${args.theme.var.color.muted};
+    font-size: ${args.theme.var.fontSize.lg};
+  }`;
+}
+
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBLoadingSpinner",
+        props: '''
+const isLoading = args.contextData?.goalModal?.isLoading?.();
+
+return {
+  size: "medium",
+  color: "primary",
+  text: "Loading goals...",
+  hide: !isLoading
+};
+'''
+      }
+    },
+    {
+      id: "goal_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const goals = args.contextData?.goalsGrid?.goals || [];
+
+return {
+  as: "div",
+  contextName: "goalCard",
+  loop: true,
+  data: goals
+};
+''',
+        css: '''
+return `._id > div {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_title_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const goal = goalItem?.goal;
+
+return {
+  as: "div",
+  onClick: (e) => {
+    if (goal) {
+      const goalId = goal.id;
+      args.navigate(`/rb/goal-detail?goalId=${goalId}`);
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  cursor: pointer;
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_menu",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBFloatingMenu",
+        props: '''
+return {
+  placement: "bottom-end",
+  triggerIcon: "carbon:overflow-menu-vertical"
+};
+'''
+      }
+    },
+    {
+      id: "goal_menu_edit",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
+const setModalMode = args.contextData?.goalModal?.setModalMode;
+const setSelectedGoal = args.contextData?.goalModal?.setSelectedGoal;
+const goalItem = args.contextData?.goalCard;
+
+return {
+  icon: "carbon:edit",
+  text: "Edit Goal",
+  onClick: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const goal = goalItem?.goal;
+    const rule = goalItem?.rule;
+
+    if (goal) {
+      const goalData = {
+        id: goal.id,
+        title: goal.P.title,
+        description: goal.P.description,
+        linkedRule: rule?.id,
+        goalType: goal.P.goalType,
+        targetValue: goal.P.targetValue,
+        unit: goal.P.unit,
+        targetDate: goal.P.targetDate,
+        reward: goal.P.reward,
+        currentValue: goal.P.currentValue
+      };
+      setSelectedGoal?.(goalData);
+      setModalMode?.("edit");
+      setShowGoalModal?.(true);
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "goal_menu_view",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const goal = goalItem?.goal;
+
+return {
+  icon: "carbon:view",
+  text: "View Details",
+  onClick: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (goal) {
+      const goalId = goal.id;
+      args.navigate(`/rb/goal-detail?goalId=${goalId}`);
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "goal_menu_duplicate",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
+const setModalMode = args.contextData?.goalModal?.setModalMode;
+const setSelectedGoal = args.contextData?.goalModal?.setSelectedGoal;
+const goalItem = args.contextData?.goalCard;
+
+return {
+  icon: "carbon:copy",
+  text: "Duplicate Goal",
+  onClick: (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const goal = goalItem?.goal;
+    const rule = goalItem?.rule;
+
+    if (goal) {
+      const goalData = {
+        title: `Copy of ${goal.P.title}`,
+        description: goal.P.description,
+        linkedRule: rule?.id,
+        goalType: goal.P.goalType,
+        targetValue: goal.P.targetValue,
+        unit: goal.P.unit,
+        targetDate: goal.P.targetDate,
+        reward: goal.P.reward,
+        currentValue: 0 // Reset progress for duplicate
+      };
+      setSelectedGoal?.(goalData);
+      setModalMode?.("create");
+      setShowGoalModal?.(true);
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "goal_menu_complete",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const loadGoals = args.contextData?.goalModal?.loadGoals;
+const goal = goalItem?.goal;
+
+return {
+  icon: "carbon:checkmark-filled",
+  text: "Mark Complete",
+  onClick: async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const confirmed = await rbConfirm({
+      title: "Mark Goal Complete",
+      message: "Are you sure you want to mark this goal as complete?",
+      confirmText: "Mark Complete",
+      cancelText: "Cancel",
+      variant: "primary"
+    });
+    if (confirmed) {
+      try {
+        const result = await args.executeNamedServerFunction({
+          functionName: "updateGoalProgress",
+          contextData: {
+            goalId: goal?.id,
+            isCompleted: true
+          }
+        });
+
+        if (result.error) {
+          args.showErrorToast(result.error);
+        } else if (result.result?.success) {
+          args.showSuccessToast("Goal marked as complete! 🏆");
+          if (loadGoals) loadGoals();
+        } else {
+          args.showErrorToast(result.result?.message || "Failed to complete goal");
+        }
+      } catch (error) {
+        console.error("Error completing goal:", error);
+        args.showErrorToast("Failed to complete goal. Please try again.");
+      }
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "goal_menu_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "RBMenuItem",
+        slot: "menu-items",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const loadGoals = args.contextData?.goalModal?.loadGoals;
+const goal = goalItem?.goal;
+
+return {
+  icon: "carbon:trash-can",
+  text: "Delete Goal",
+  type: "danger",
+  onClick: async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const confirmed = await rbConfirm({
+      title: "Delete Goal",
+      message: "Are you sure you want to delete this goal? This action cannot be undone and will permanently remove all progress data.",
+      confirmText: "Delete Goal",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+    if (confirmed) {
+      try {
+        const result = await args.executeNamedServerFunction({
+          functionName: "deleteGoal",
+          contextData: {
+            goalId: goal?.id
+          }
+        });
+
+        if (result.error) {
+          args.showErrorToast(result.error);
+        } else if (result.result?.success) {
+          args.showSuccessToast("Goal deleted successfully");
+          if (loadGoals) loadGoals();
+        } else {
+          args.showErrorToast(result.result?.message || "Failed to delete goal");
+        }
+      } catch (error) {
+        console.error("Error deleting goal:", error);
+        args.showErrorToast("Failed to delete goal. Please try again.");
+      }
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "goal_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const goalTitle = goalItem?.goal?.P?.title || "Untitled Goal";
+
+return {
+  as: "h3",
+  text: goalTitle
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_rule",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const rule = goalItem?.rule;
+const goal = goalItem?.goal;
+
+const ruleTitle = rule?.P?.title || "No rule linked";
+const targetDate = goal?.P?.targetDate;
+const formattedDate = targetDate ? new Date(targetDate).toLocaleDateString() : "No target date";
+
+return {
+  as: "p",
+  text: `${ruleTitle} • Target: ${formattedDate}`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_progress",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_bar_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  border-radius: ${args.theme.var.borderRadius.full};
+  padding: ${args.theme.var.spacing.xs};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_bar",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const progress = goalItem?.progress;
+const percentage = progress?.percentage || 0;
+
+return {
+  as: "div",
+  style: `width: ${percentage}%`
+};
+''',
+        css: '''
+return `._id {
+  height: 12px;
+  background: ${args.theme.var.color.primary};
+  border-radius: ${args.theme.var.borderRadius.full};
+  transition: width ${args.theme.var.animation.slow} ease;
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const progress = goalItem?.progress;
+const goal = goalItem?.goal;
+
+const currentValue = progress?.currentValue || 0;
+const targetValue = progress?.targetValue || 0;
+const unit = goal?.P?.unit || 'units';
+const remaining = Math.max(targetValue - currentValue, 0);
+
+return {
+  as: "div",
+  text: `${currentValue}/${targetValue} ${unit} • ${remaining} ${unit} remaining`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_reward",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const goal = goalItem?.goal;
+const reward = goal?.P?.reward;
+
+if (!reward) {
+  return { as: "div", hide: true };
+}
+
+return {
+  as: "div",
+  text: `🏆 Reward: ${reward}`
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.warning_light_300};
+  color: ${args.theme.var.color.warning_text};
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const goals = args.contextData?.goalModal?.goals?.() || [];
+const isLoading = args.contextData?.goalModal?.isLoading?.();
+const error = args.contextData?.goalModal?.error?.();
+
+return {
+  as: "div",
+  hide: isLoading || error || goals.length > 0
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.xxxl};
+  text-align: center;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "empty_message",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "No goals found. Create your first goal to get started!"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.md};
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "empty_create_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
+const setModalMode = args.contextData?.goalModal?.setModalMode;
+
+return {
+  text: "Create Goal",
+  variant: "primary",
+  onClick: () => {
+    setModalMode?.("create");
+    setShowGoalModal?.(true);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "goal_form_modal",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "RBGoalFormModal",
+        props: '''
+const showGoalModal = args.contextData?.goalModal?.showGoalModal;
+const modalMode = args.contextData?.goalModal?.modalMode;
+const selectedGoal = args.contextData?.goalModal?.selectedGoal;
+const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
+return {
+  isOpen: showGoalModal?.(),
+  mode: modalMode?.(),
+  goalData: selectedGoal?.(),
+  onClose: () => {
+    setShowGoalModal?.(false);
+  },
+  onSave: (result) => {
+    // Refresh goals data after successful save
+    const loadGoals = args.contextData?.goalModal?.loadGoals;
+    if (loadGoals) {
+      loadGoals();
+    }
+  },
+  onDelete: (result) => {
+    // Refresh goals data after successful delete
+    const loadGoals = args.contextData?.goalModal?.loadGoals;
+    if (loadGoals) {
+      loadGoals();
+    }
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
+    { id: "e3", T: "Attr", S: "page_content", E: "header" },
+    { id: "e4", T: "Attr", S: "header", E: "page_title" },
+    { id: "e5", T: "Attr", S: "header", E: "add_goal_button" },
+    { id: "e6", T: "Attr", S: "page_content", E: "loading_container" },
+    { id: "e6a", T: "Attr", S: "loading_container", E: "loading_spinner" },
+    { id: "e7", T: "Attr", S: "page_content", E: "goals_grid" },
+    { id: "e9", T: "Attr", S: "goals_grid", E: "goal_card" },
+    { id: "e10", T: "Attr", S: "goal_card", E: "goal_header" },
+    { id: "e11", T: "Attr", S: "goal_header", E: "goal_title_container" },
+    { id: "e12", T: "Attr", S: "goal_title_container", E: "goal_title" },
+    { id: "e13", T: "Attr", S: "goal_title_container", E: "goal_rule" },
+    { id: "e14", T: "Attr", S: "goal_header", E: "goal_menu" },
+    { id: "e15", T: "Attr", S: "goal_menu", E: "goal_menu_edit" },
+    { id: "e16", T: "Attr", S: "goal_menu", E: "goal_menu_view" },
+    { id: "e17", T: "Attr", S: "goal_menu", E: "goal_menu_duplicate" },
+    { id: "e18", T: "Attr", S: "goal_menu", E: "goal_menu_complete" },
+    { id: "e19", T: "Attr", S: "goal_menu", E: "goal_menu_delete" },
+    { id: "e20", T: "Attr", S: "goal_card", E: "goal_progress" },
+    { id: "e21", T: "Attr", S: "goal_progress", E: "goal_bar_container" },
+    { id: "e22", T: "Attr", S: "goal_bar_container", E: "goal_bar" },
+    { id: "e23", T: "Attr", S: "goal_progress", E: "goal_text" },
+    { id: "e24", T: "Attr", S: "goal_card", E: "goal_reward" },
+    { id: "e25", T: "Attr", S: "page_content", E: "empty_state" },
+    { id: "e26", T: "Attr", S: "empty_state", E: "empty_message" },
+    { id: "e27", T: "Attr", S: "empty_state", E: "empty_create_button" },
+    { id: "e28", T: "Attr", S: "page_content", E: "goal_form_modal" }
+  ]
+}

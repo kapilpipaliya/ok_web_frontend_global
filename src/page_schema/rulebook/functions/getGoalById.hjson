@@ -1,0 +1,130 @@
+{
+  vertexes: [
+    {
+      id: "get_goal_by_id_function",
+      L: "Function",
+      P: {
+        key: "getGoalById",
+        description: "Retrieves a specific goal with its related rule and progress data",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { goalId } = args.contextData;
+
+  // Validate required fields
+  if (!goalId) {
+    throw new Error("Goal ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Query to get goal with related rule and progress data
+  const goalQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+    WHERE elementId(rg) = $goalId
+    OPTIONAL MATCH (rg)-[:RuleGoalRule]->(r:Rule)
+    OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+    OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r)
+    RETURN rg, r, rc, rs
+  `;
+
+  const goalResult = await args.session.run(goalQuery, {
+    userUuid: user.P.uuid,
+    goalId
+  });
+
+  if (goalResult.records.length === 0) {
+    throw new Error("Goal not found or does not belong to user");
+  }
+
+  const record = goalResult.records[0];
+  const goalNode = record.get('rg');
+  const ruleNode = record.get('r');
+  const categoryNode = record.get('rc');
+  const streakNode = record.get('rs');
+
+  const goal = args.convertNodeToJson(goalNode);
+  const rule = ruleNode ? args.convertNodeToJson(ruleNode) : null;
+  const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+  const streak = streakNode ? args.convertNodeToJson(streakNode) : null;
+
+  // Calculate progress percentage
+  const targetValue = goal.P.targetValue || 1;
+  const currentValue = goal.P.currentValue || 0;
+  const progressPercentage = Math.min(Math.round((currentValue / targetValue) * 100), 100);
+  const remainingValue = Math.max(targetValue - currentValue, 0);
+
+  // Format dates
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null;
+    try {
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  // Build response data in vertex format
+  const responseData = {
+    goal: {
+      id: goal.id,
+      L: goal.L,
+      P: {
+        ...goal.P,
+        targetValue: targetValue,
+        currentValue: currentValue,
+        targetDateFormatted: formatDate(goal.P.targetDate),
+        progressPercentage,
+        remainingValue,
+        isCompleted: goal.P.isCompleted || false
+      }
+    },
+    rule: rule,
+    category: category,
+    streak: streak
+  };
+
+  return {
+    success: true,
+    message: "Goal retrieved successfully",
+    data: responseData
+  };
+
+} catch (error) {
+  console.error("Error retrieving goal:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to retrieve goal. Please try again.";
+
+  if (error.message.includes("Goal ID is required")) {
+    userMessage = "Goal ID is required to retrieve goal data.";
+  } else if (error.message.includes("Goal not found")) {
+    userMessage = "The goal was not found or does not belong to you.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "GoalRetrievalError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

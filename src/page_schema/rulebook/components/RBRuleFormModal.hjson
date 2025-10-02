@@ -1,0 +1,1136 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "RBRuleFormModal"
+      }
+    },
+    {
+      id: "variant_on_save",
+      L: "ComponentVariant",
+      P: {
+        key: "onSave",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_on_delete",
+      L: "ComponentVariant",
+      P: {
+        key: "onDelete",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "modal_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+// Form state management
+const [isSubmitting, setIsSubmitting] = args.createSignal(false);
+const [formData, setFormData] = args.createStore({
+  title: "",
+  description: "",
+  categoryId: "",
+  frequency: "daily",
+  priority: "medium",
+  difficulty: "3",
+  reminderTime: ""
+});
+
+// Categories state
+const [categories, setCategories] = args.createSignal([]);
+const [categoriesLoading, setCategoriesLoading] = args.createSignal(true);
+
+// Load categories
+const loadCategories = async () => {
+  setCategoriesLoading(true);
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getCategories",
+      contextData: {}
+    });
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    if (result.result?.success) {
+      const categoriesData = result.result.data.categories || [];
+      setCategories(categoriesData);
+    } else {
+      throw new Error(result.result?.message || "Failed to load categories");
+    }
+  } catch (err) {
+    console.error("Error loading categories:", err);
+    args.showErrorToast("Failed to load categories. Please try again.");
+    setCategories([]);
+  } finally {
+    setCategoriesLoading(false);
+  }
+};
+
+// Initialize form data based on props
+const initializeFormData = () => {
+  const ruleData = args.contextData.props?.ruleData;
+  const mode = args.contextData.props?.mode || "create";
+
+  if (mode === "edit" && ruleData) {
+    setFormData({
+      title: ruleData.P?.title || "",
+      description: ruleData.P?.description || "",
+      categoryId: ruleData.P?.categoryId || "",
+      frequency: ruleData.P?.frequency || "daily",
+      priority: ruleData.P?.priority || "medium",
+      difficulty: String(ruleData.P?.difficulty || 3),
+      reminderTime: ruleData.P?.reminderTime || ""
+    });
+  } else {
+    // For create mode, check if category is pre-selected
+    const preSelectedCategoryId = ruleData?.categoryId || "";
+
+    setFormData({
+      title: "",
+      description: "",
+      categoryId: preSelectedCategoryId,
+      frequency: "daily",
+      priority: "medium",
+      difficulty: "3",
+      reminderTime: ""
+    });
+  }
+};
+
+// Handle form submission
+const handleSave = async () => {
+  const data = formData;
+  const mode = args.contextData.props?.mode || "create";
+  const ruleData = args.contextData.props?.ruleData;
+  const onSaveCallback = args.contextData.props?.onSave;
+  const onClose = args.contextData.props?.onClose || (() => {});
+
+  // Validate required fields
+  if (!data.title.trim()) {
+    args.showErrorToast("Rule title is required");
+    return;
+  }
+
+  if (!data.categoryId) {
+    args.showErrorToast("Category is required");
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    // Prepare context data for server function
+    const contextData = {
+      title: data.title.trim(),
+      description: data.description.trim() || null,
+      categoryId: data.categoryId,
+      frequency: data.frequency,
+      priority: data.priority,
+      difficulty: parseInt(data.difficulty),
+      reminderTime: data.reminderTime || null
+    };
+
+    // Add ruleId for edit mode
+    if (mode === "edit" && ruleData) {
+      contextData.ruleId = ruleData.id;
+    }
+
+    // Call the saveRule server function
+    const result = await args.executeNamedServerFunction({
+      functionName: "saveRule",
+      contextData
+    });
+
+    if (result.error) {
+      args.showErrorToast(result.error);
+    } else if (result.result && result.result.success) {
+      args.showSuccessToast(result.result.message);
+
+      // Call parent callback if provided
+      if (onSaveCallback) {
+        onSaveCallback({
+          mode,
+          data: contextData,
+          result: result.result.data
+        });
+      }
+
+      onClose();
+    } else {
+      args.showErrorToast(result.result?.message || "Failed to save rule");
+    }
+  } catch (error) {
+    console.error("Error saving rule:", error);
+    args.showErrorToast("An error occurred while saving the rule. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+// Handle delete
+const handleDelete = async () => {
+  const mode = args.contextData.props?.mode || "create";
+  const ruleData = args.contextData.props?.ruleData;
+  const onDeleteCallback = args.contextData.props?.onDelete;
+  const onClose = args.contextData.props?.onClose || (() => {});
+
+  if (mode !== "edit" || !ruleData) {
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    // Call the deleteRule server function
+    const result = await args.executeNamedServerFunction({
+      functionName: "deleteRule",
+      contextData: {
+        ruleId: ruleData.id
+      }
+    });
+
+    if (result.error) {
+      args.showErrorToast(result.error);
+    } else if (result.result && result.result.success) {
+      args.showSuccessToast(result.result.message);
+
+      // Call parent callback if provided
+      if (onDeleteCallback) {
+        onDeleteCallback({
+          ruleId: ruleData.id,
+          ruleData,
+          result: result.result.data
+        });
+      }
+
+      onClose();
+    } else {
+      args.showErrorToast(result.result?.message || "Failed to delete rule");
+    }
+  } catch (error) {
+    console.error("Error deleting rule:", error);
+    args.showErrorToast("An error occurred while deleting the rule. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+// Update form field
+const updateField = (field, value) => {
+  setFormData(field, value);
+};
+
+return {
+  isSubmitting,
+  formData,
+  handleSave,
+  handleDelete,
+  updateField,
+  categories,
+  categoriesLoading,
+  initializeFormData,
+  loadCategories
+};
+''',
+        props: '''
+const isOpen = args.contextData.props?.isOpen || false;
+const mode = args.contextData.props?.mode || "create"; // "create" or "edit"
+const ruleData = args.contextData.props?.ruleData;
+const onClose = args.contextData.props?.onClose || (() => {});
+
+return {
+  as: "div",
+  hide: !isOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  },
+  onMount: () => {
+    args.fns.initializeFormData();
+    args.fns.loadCategories();
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: ${args.theme.var.spacing.md};
+  animation: fadeIn ${args.theme.var.animation.normal} ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 0;
+    align-items: flex-end;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp ${args.theme.var.animation.normal} ease;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+    animation: slideUpMobile ${args.theme.var.animation.normal} ease;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${args.theme.var.spacing.xl};
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const mode = args.contextData.props?.mode || "create";
+const title = mode === "edit" ? "Edit Rule" : "Create New Rule";
+
+return {
+  as: "h2",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "close_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const onClose = args.contextData.props?.onClose || (() => {});
+
+return {
+  as: "button",
+  onClick: onClose,
+  "aria-label": "Close modal"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_200};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "modal_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "form_element",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "form"
+};
+'''
+      }
+    },
+    {
+      id: "title_field",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "title_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Rule Title *"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "title_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBTextInput",
+        props: '''
+return {
+  type: "text",
+  value: args.fns.formData.title,
+  placeholder: "e.g. Exercise for 30 minutes daily",
+  required: true,
+  disabled: args.fns.isSubmitting(),
+  onChange: (e) => args.fns.updateField('title', e.target.value)
+};
+''',
+      }
+    },
+    {
+      id: "description_field",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "description_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Description"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "description_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBTextArea",
+        props: '''
+return {
+  value: args.fns.formData.description,
+  placeholder: "Detailed description and reasoning for this rule",
+  rows: 3,
+  disabled: args.fns.isSubmitting(),
+  onChange: (e) => args.fns.updateField('description', e.target.value)
+};
+'''
+      }
+    },
+    {
+      id: "category_field",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "category_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Category *"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "category_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBTomSelect",
+        props: '''
+const categories = args.fns.categories() || [];
+const categoryOptions = categories.map(cat => ({
+  value: cat.category?.id || '',
+  label: cat.category?.P?.name || 'Unknown Category'
+}));
+
+return {
+  value: args.fns.formData.categoryId || '',
+  options: categoryOptions,
+  placeholder: 'Select a category...',
+  disabled: args.fns.isSubmitting(),
+  required: true,
+  search: true,
+  noResultsText: 'No categories found',
+  onChange: (value) => args.fns.updateField('categoryId', value)
+};
+'''
+      }
+    },
+    {
+      id: "frequency_priority_row",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}
+
+@media (max-width: 480px) {
+  ._id {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "frequency_field",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "frequency_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Frequency *"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "frequency_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBTomSelect",
+        props: '''
+return {
+  value: args.fns.formData.frequency || 'daily',
+  optionType: 'frequency',
+  placeholder: 'Select frequency...',
+  disabled: args.fns.isSubmitting(),
+  required: true,
+  search: false,
+  onChange: (value) => args.fns.updateField('frequency', value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: ${args.theme.var.spacing.md};
+  font-size: ${args.theme.var.fontSize.md};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary}33;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_field",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "priority_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Priority *"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "priority_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBTomSelect",
+        props: '''
+return {
+  value: args.fns.formData.priority || 'medium',
+  optionType: 'priority',
+  placeholder: 'Select priority...',
+  disabled: args.fns.isSubmitting(),
+  required: true,
+  search: false,
+  onChange: (value) => args.fns.updateField('priority', value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: ${args.theme.var.spacing.md};
+  font-size: ${args.theme.var.fontSize.md};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary}33;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "difficulty_field",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "difficulty_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Difficulty Level"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "difficulty_select",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBTomSelect",
+        props: '''
+return {
+  value: String(args.fns.formData.difficulty || '3'),
+  optionType: 'difficulty',
+  placeholder: 'Select difficulty...',
+  disabled: args.fns.isSubmitting(),
+  search: false,
+  onChange: (value) => args.fns.updateField('difficulty', value)
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  padding: ${args.theme.var.spacing.md};
+  font-size: ${args.theme.var.fontSize.md};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+  transition: all ${args.theme.var.animation.fast} ease;
+
+  &:focus {
+    outline: none;
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary}33;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "reminder_field",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "reminder_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label",
+  text: "Reminder Time (Optional)"
+};
+''',
+        css: '''
+return `._id {
+  display: block;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "reminder_input",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBTextInput",
+        props: '''
+return {
+  type: "time",
+  value: args.fns.formData.reminderTime,
+  disabled: args.fns.isSubmitting(),
+  onChange: (e) => args.fns.updateField('reminderTime', e.target.value)
+};
+'''
+      }
+    },
+    {
+      id: "modal_footer",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "footer"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.xl};
+  border-top: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "cancel_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBButton",
+        props: '''
+const onClose = args.contextData.props?.onClose || (() => {});
+
+return {
+  text: "Cancel",
+  type: "button",
+  variant: "secondary",
+  fullWidth: true,
+  disabled: args.fns.isSubmitting(),
+  onClick: onClose
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "save_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const mode = args.contextData.props?.mode || "create";
+const isSubmitting = args.fns.isSubmitting();
+
+const buttonText = isSubmitting
+  ? (mode === "edit" ? "Saving..." : "Creating...")
+  : (mode === "edit" ? "Save Changes" : "Create Rule");
+
+return {
+  text: buttonText,
+  type: "submit",
+  variant: "primary",
+  fullWidth: true,
+  loading: isSubmitting,
+  disabled: isSubmitting,
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.handleSave();
+  }
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const mode = args.contextData.props?.mode || "create";
+
+return {
+  as: "div",
+  hide: mode !== "edit"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  border-top: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBButton",
+        props: '''
+return {
+  text: args.fns.isSubmitting() ? "Deleting..." : "🗑️ Delete Rule",
+  type: "button",
+  variant: "danger",
+  loading: args.fns.isSubmitting(),
+  disabled: args.fns.isSubmitting(),
+  onClick: async () => {
+    const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+    const confirmed = await rbConfirm({
+      title: "Delete Rule",
+      message: "Are you sure you want to delete this rule?\n\n⚠️ WARNING: This will permanently delete:\n• This rule\n• All tracking data for this rule\n• All streak data for this rule\n• All goals linked to this rule\n\nThis action cannot be undone!",
+      confirmText: "Delete Rule",
+      cancelText: "Cancel",
+      variant: "danger"
+    });
+    if (confirmed) {
+      args.fns.handleDelete();
+    }
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e0a", T: "ComponentVariant", S: "component_root", E: "variant_on_save" },
+    { id: "e0b", T: "ComponentVariant", S: "component_root", E: "variant_on_delete" },
+    { id: "e1", T: "Attr", S: "component_root", E: "modal_overlay" },
+    { id: "e2", T: "Attr", S: "modal_overlay", E: "modal_container" },
+    { id: "e3", T: "Attr", S: "modal_container", E: "modal_header" },
+    { id: "e4", T: "Attr", S: "modal_header", E: "modal_title" },
+    { id: "e5", T: "Attr", S: "modal_header", E: "close_button" },
+    { id: "e6", T: "Attr", S: "close_button", E: "close_icon" },
+    { id: "e7", T: "Attr", S: "modal_container", E: "modal_body" },
+    { id: "e8", T: "Attr", S: "modal_body", E: "form_element" },
+    { id: "e9", T: "Attr", S: "form_element", E: "title_field" },
+    { id: "e10", T: "Attr", S: "title_field", E: "title_label" },
+    { id: "e11", T: "Attr", S: "title_field", E: "title_input" },
+    { id: "e12", T: "Attr", S: "form_element", E: "description_field" },
+    { id: "e13", T: "Attr", S: "description_field", E: "description_label" },
+    { id: "e14", T: "Attr", S: "description_field", E: "description_input" },
+    { id: "e15", T: "Attr", S: "form_element", E: "category_field" },
+    { id: "e16", T: "Attr", S: "category_field", E: "category_label" },
+    { id: "e17", T: "Attr", S: "category_field", E: "category_select" },
+    { id: "e21", T: "Attr", S: "form_element", E: "frequency_priority_row" },
+    { id: "e22", T: "Attr", S: "frequency_priority_row", E: "frequency_field" },
+    { id: "e23", T: "Attr", S: "frequency_field", E: "frequency_label" },
+    { id: "e24", T: "Attr", S: "frequency_field", E: "frequency_select" },
+    { id: "e29", T: "Attr", S: "frequency_priority_row", E: "priority_field" },
+    { id: "e30", T: "Attr", S: "priority_field", E: "priority_label" },
+    { id: "e31", T: "Attr", S: "priority_field", E: "priority_select" },
+    { id: "e36", T: "Attr", S: "form_element", E: "difficulty_field" },
+    { id: "e37", T: "Attr", S: "difficulty_field", E: "difficulty_label" },
+    { id: "e38", T: "Attr", S: "difficulty_field", E: "difficulty_select" },
+    { id: "e44", T: "Attr", S: "form_element", E: "reminder_field" },
+    { id: "e45", T: "Attr", S: "reminder_field", E: "reminder_label" },
+    { id: "e46", T: "Attr", S: "reminder_field", E: "reminder_input" },
+    { id: "e47", T: "Attr", S: "modal_container", E: "modal_footer" },
+    { id: "e48", T: "Attr", S: "modal_footer", E: "cancel_button" },
+    { id: "e49", T: "Attr", S: "modal_footer", E: "save_button" },
+    { id: "e50", T: "Attr", S: "modal_container", E: "delete_section" },
+    { id: "e51", T: "Attr", S: "delete_section", E: "delete_button" }
+  ]
+}

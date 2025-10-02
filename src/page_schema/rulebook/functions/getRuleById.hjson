@@ -1,0 +1,158 @@
+{
+  vertexes: [
+    {
+      id: "get_rule_by_id_function",
+      L: "Function",
+      P: {
+        key: "getRuleById",
+        description: "Retrieves a specific rule by ID with category, tracking data, and streak statistics",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { ruleId } = args.contextData;
+
+  // Validate required fields
+  if (!ruleId) {
+    throw new Error("Rule ID is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Query to get specific rule with category and statistics
+  const ruleQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
+    WHERE elementId(r) = $ruleId
+    OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)<-[:UserRuleCategory]-(u)
+    OPTIONAL MATCH (r)<-[:RuleTrackingRule]-(rt:RuleTracking)<-[:UserRuleTracking]-(u)
+    OPTIONAL MATCH (r)<-[:RuleGoalRule]-(rg:RuleGoal)<-[:UserRuleGoal]-(u)
+    OPTIONAL MATCH (r)<-[:RuleStreakRule]-(rs:RuleStreak)<-[:UserRuleStreak]-(u)
+    WITH r, rc,
+         collect(DISTINCT rt) as trackingRecords,
+         collect(DISTINCT rg) as goals,
+         collect(DISTINCT rs) as streaks
+    RETURN r,
+           rc,
+           trackingRecords,
+           goals,
+           streaks,
+           size(trackingRecords) as trackingCount,
+           size(goals) as goalCount,
+           size(streaks) as streakCount
+  `;
+
+  const ruleResult = await args.session.run(ruleQuery, {
+    userUuid: user.P.uuid,
+    ruleId
+  });
+
+  if (ruleResult.records.length === 0) {
+    throw new Error("Rule not found or does not belong to user");
+  }
+
+  // Format the result
+  const ruleRecord = ruleResult.records[0];
+  const ruleNode = ruleRecord.get('r');
+  const categoryNode = ruleRecord.get('rc');
+  const trackingRecords = ruleRecord.get('trackingRecords') || [];
+  const goals = ruleRecord.get('goals') || [];
+  const streaks = ruleRecord.get('streaks') || [];
+  const trackingCount = args.neo4jConvert.js(ruleRecord.get('trackingCount')) || 0;
+  const goalCount = args.neo4jConvert.js(ruleRecord.get('goalCount')) || 0;
+  const streakCount = args.neo4jConvert.js(ruleRecord.get('streakCount')) || 0;
+
+  // Convert Neo4j nodes to proper Vertex format
+  const rule = args.convertNodeToJson(ruleNode);
+  const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+
+  // Calculate statistics
+  const completionRate = trackingCount > 0 ? Math.min(100, (trackingCount / 30) * 100) : 0;
+
+  // Get streak data
+  let currentStreak = 0;
+  let longestStreak = 0;
+  let totalCompletions = 0;
+  let lastCompletionDate = null;
+
+  if (streaks.length > 0) {
+    const streakData = args.convertNodeToJson(streaks[0]);
+    currentStreak = streakData.P.currentStreak || 0;
+    longestStreak = streakData.P.longestStreak || 0;
+    totalCompletions = streakData.P.totalCompletions || 0;
+    lastCompletionDate = streakData.P.lastCompletionDate || null;
+  }
+
+  const ruleData = {
+    rule,
+    category,
+    tracking: {
+      records: trackingRecords.map(t => args.convertNodeToJson(t)),
+      count: trackingCount
+    },
+    goals: {
+      records: goals.map(g => args.convertNodeToJson(g)),
+      count: goalCount
+    },
+    streaks: {
+      records: streaks.map(s => args.convertNodeToJson(s)),
+      count: streakCount,
+      current: currentStreak,
+      longest: longestStreak,
+      total: totalCompletions,
+      lastCompletion: lastCompletionDate
+    },
+    stats: {
+      completionRate: Math.round(completionRate),
+      currentStreak,
+      longestStreak,
+      totalCompletions,
+      totalTracking: trackingCount,
+      totalGoals: goalCount,
+      isActive: rule.P.isActive !== false
+    }
+  };
+
+  return {
+    success: true,
+    message: `Rule "${rule.P.title}" found successfully`,
+    data: {
+      rule: ruleData,
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching rule by ID:", error);
+
+  // Handle specific errors
+  let userMessage = "Failed to load rule. Please try again.";
+
+  if (error.message.includes("Rule ID is required")) {
+    userMessage = "Rule ID is required to fetch rule details.";
+  } else if (error.message.includes("Rule not found")) {
+    userMessage = "The requested rule was not found or does not belong to you.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please contact support if this persists.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "RuleFetchError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -1,0 +1,321 @@
+{
+  vertexes: [
+    {
+      id: "get_reports_data_function",
+      L: "Function",
+      P: {
+        key: "getReportsData",
+        description: "Retrieves comprehensive reports data including progress, streaks, and category performance",
+        body: '''
+try {
+  // Extract input parameters
+  const { reportType = 'week', includeStreaks = true, includeInsights = true } = args.contextData || {};
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+
+  // Calculate date range based on report type
+  let startDate;
+  let daysCount;
+
+  switch (reportType) {
+    case 'day':
+      startDate = todayStr;
+      daysCount = 1;
+      break;
+    case 'week':
+      const weekAgo = new Date(today);
+      weekAgo.setDate(today.getDate() - 6); // Last 7 days
+      startDate = weekAgo.toISOString().split('T')[0];
+      daysCount = 7;
+      break;
+    case 'month':
+      const monthAgo = new Date(today);
+      monthAgo.setMonth(today.getMonth() - 1);
+      startDate = monthAgo.toISOString().split('T')[0];
+      daysCount = 30;
+      break;
+    case 'year':
+      const yearAgo = new Date(today);
+      yearAgo.setFullYear(today.getFullYear() - 1);
+      startDate = yearAgo.toISOString().split('T')[0];
+      daysCount = 365;
+      break;
+    default:
+      const defaultWeek = new Date(today);
+      defaultWeek.setDate(today.getDate() - 6);
+      startDate = defaultWeek.toISOString().split('T')[0];
+      daysCount = 7;
+  }
+
+  const queryParams = {
+    userUuid: user.P.uuid,
+    startDate,
+    endDate: todayStr
+  };
+
+  // STEP 1: Get daily completion data for chart
+  const dailyCompletionQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)
+    WHERE rt.date >= date($startDate) AND rt.date <= date($endDate)
+    OPTIONAL MATCH (rt)-[:RuleTrackingRule]->(r:Rule)
+    WHERE r.isActive = true
+    WITH rt.date as trackingDate,
+         COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
+         COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial,
+         COUNT(CASE WHEN rt.status = 'missed' THEN 1 END) as missed,
+         COUNT(DISTINCT r) as totalRules
+    WHERE trackingDate IS NOT NULL
+    RETURN trackingDate, completed, partial, missed, totalRules
+    ORDER BY trackingDate
+  `;
+
+  const dailyResult = await args.session.run(dailyCompletionQuery, queryParams);
+
+  // Debug logging (can be removed in production)
+  // console.log('Daily completion query params:', queryParams);
+  // console.log('Daily result records count:', dailyResult.records.length);
+
+  // Process daily data for chart
+  const dailyData = {};
+  const labels = [];
+
+  // Initialize all days in range
+  for (let i = 0; i < daysCount; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (daysCount - 1 - i));
+    const dateStr = date.toISOString().split('T')[0];
+    const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short' });
+    labels.push(dayLabel);
+    dailyData[dateStr] = { completed: 0, partial: 0, missed: 0, total: 0 };
+  }
+
+  // Fill in actual data
+  for (const record of dailyResult.records) {
+    const date = record.get('trackingDate');
+    if (date && dailyData[date]) {
+      dailyData[date].completed = args.neo4jConvert.js(record.get('completed')) || 0;
+      dailyData[date].partial = args.neo4jConvert.js(record.get('partial')) || 0;
+      dailyData[date].missed = args.neo4jConvert.js(record.get('missed')) || 0;
+      dailyData[date].total = args.neo4jConvert.js(record.get('totalRules')) || 0;
+    }
+  }
+
+  // STEP 2: Get category performance
+  const categoryPerformanceQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
+    WHERE rc.isActive = true
+    OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule), (u)-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r)
+    WHERE rt.date >= date($startDate) AND rt.date <= date($endDate)
+    WITH rc,
+         COUNT(DISTINCT r) as totalRules,
+         COUNT(rt) as totalTracking,
+         COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
+         COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial,
+         COUNT(CASE WHEN rt.status = 'missed' THEN 1 END) as missed
+    WHERE totalTracking > 0
+    RETURN rc,
+           totalRules,
+           totalTracking,
+           completed,
+           partial,
+           missed,
+           CASE WHEN totalTracking > 0
+                THEN ROUND(((completed + partial * 0.7) * 100.0) / totalTracking)
+                ELSE 0 END as completionRate
+    ORDER BY completionRate DESC
+  `;
+
+  const categoryResult = await args.session.run(categoryPerformanceQuery, queryParams);
+
+  // Process category data and return as vertices
+  const categories = [];
+  for (const record of categoryResult.records) {
+    const categoryNode = record.get('rc');
+    const categoryVertex = args.convertNodeToJson(categoryNode);
+
+    const completionRate = args.neo4jConvert.js(record.get('completionRate')) || 0;
+    const completed = args.neo4jConvert.js(record.get('completed')) || 0;
+    const partial = args.neo4jConvert.js(record.get('partial')) || 0;
+    const missed = args.neo4jConvert.js(record.get('missed')) || 0;
+    const totalTracking = args.neo4jConvert.js(record.get('totalTracking')) || 0;
+
+    categories.push({
+      category: categoryVertex,  // Full vertex format with id, L, P, IN, OUT
+      stats: {
+        completionRate,
+        completed,
+        partial,
+        missed,
+        total: totalTracking
+      }
+    });
+  }
+
+  // STEP 3: Get top streaks if requested
+  let topStreaks = [];
+  if (includeStreaks) {
+    const streaksQuery = `
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+      WHERE rs.currentStreak > 0 AND rs.isActive = true AND r.isActive = true
+      OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+      RETURN r,
+             rc,
+             rs
+      ORDER BY rs.currentStreak DESC
+      LIMIT 5
+    `;
+
+    const streaksResult = await args.session.run(streaksQuery, queryParams);
+
+    for (const record of streaksResult.records) {
+      const ruleNode = record.get('r');
+      const categoryNode = record.get('rc');
+      const streakNode = record.get('rs');
+
+      const ruleVertex = args.convertNodeToJson(ruleNode);
+      const categoryVertex = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+      const streakVertex = args.convertNodeToJson(streakNode);
+
+      topStreaks.push({
+        rule: ruleVertex,      // Full vertex format
+        category: categoryVertex, // Full vertex format or null
+        streak: streakVertex    // Full vertex format
+      });
+    }
+  }
+
+  // STEP 4: Calculate overall statistics
+  const overallStatsQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)
+    WHERE rt.date >= date($startDate) AND rt.date <= date($endDate)
+    RETURN COUNT(*) as totalTracking,
+           COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
+           COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial,
+           COUNT(CASE WHEN rt.status = 'missed' THEN 1 END) as missed,
+           COUNT(CASE WHEN rt.status = 'skipped' THEN 1 END) as skipped
+  `;
+
+  const overallResult = await args.session.run(overallStatsQuery, queryParams);
+  const overallStats = overallResult.records[0];
+
+  const totalTracking = args.neo4jConvert.js(overallStats.get('totalTracking')) || 0;
+  const completedCount = args.neo4jConvert.js(overallStats.get('completed')) || 0;
+  const partialCount = args.neo4jConvert.js(overallStats.get('partial')) || 0;
+  const missedCount = args.neo4jConvert.js(overallStats.get('missed')) || 0;
+
+  const effectiveCompletions = completedCount + (partialCount * 0.7);
+  const overallCompletionRate = totalTracking > 0 ? Math.round((effectiveCompletions / totalTracking) * 100) : 0;
+
+  // STEP 5: Generate insights
+  const insights = [];
+  if (includeInsights) {
+    if (overallCompletionRate >= 80) {
+      insights.push({
+        type: 'success',
+        text: '🎉 Excellent performance! You are maintaining a high completion rate.'
+      });
+    } else if (overallCompletionRate >= 60) {
+      insights.push({
+        type: 'info',
+        text: '👍 Good progress! Focus on consistency to improve further.'
+      });
+    } else if (overallCompletionRate >= 40) {
+      insights.push({
+        type: 'warning',
+        text: '⚡ Room for improvement. Consider focusing on fewer rules.'
+      });
+    } else if (totalTracking > 0) {
+      insights.push({
+        type: 'warning',
+        text: '🎯 Try simplifying your rules to build momentum.'
+      });
+    }
+
+    if (topStreaks.length > 0 && topStreaks[0].streak?.P?.currentStreak >= 7) {
+      const topStreak = topStreaks[0];
+      const currentStreak = topStreak.streak?.P?.currentStreak || 0;
+      const ruleTitle = topStreak.rule?.P?.title || 'Unknown';
+      const streakText = `🔥 Amazing! Your longest streak is ${currentStreak} days for "${ruleTitle}".`;
+      insights.push({
+        type: 'success',
+        text: streakText
+      });
+    }
+
+    // Best performing category insight
+    if (categories.length > 0 && categories[0].stats?.completionRate >= 70) {
+      const bestCat = categories[0];
+      const categoryName = bestCat.category?.P?.name || 'Unknown';
+      const completionRate = bestCat.stats?.completionRate || 0;
+      const catText = `🌟 "${categoryName}" is your strongest category at ${completionRate}%.`;
+      insights.push({
+        type: 'success',
+        text: catText
+      });
+    }
+  }
+
+  // Prepare chart data
+  const chartData = {
+    labels,
+    completedData: Object.values(dailyData).map(d => d.completed),
+    partialData: Object.values(dailyData).map(d => d.partial),
+    missedData: Object.values(dailyData).map(d => d.missed),
+    totalData: Object.values(dailyData).map(d => d.total || 10) // Default to 10 if no rules
+  };
+
+  // Debug logging for chart data (can be removed in production)
+  // console.log('Processed daily data:', dailyData);
+  // console.log('Chart data:', chartData);
+
+  return {
+    success: true,
+    message: "Reports data retrieved successfully",
+    data: {
+      reportType,
+      period: {
+        startDate,
+        endDate: todayStr,
+        days: daysCount
+      },
+      chartData,
+      categories,
+      topStreaks,
+      summary: {
+        totalTracking,
+        completed: completedCount,
+        partial: partialCount,
+        missed: missedCount,
+        completionRate: overallCompletionRate
+      },
+      insights,
+      generatedAt: new Date().toISOString()
+    }
+  };
+
+} catch (error) {
+  console.error("Error getting reports data:", error);
+
+  return {
+    success: false,
+    message: "Failed to load reports data. Please try again.",
+    error: {
+      type: error.name || "ReportsDataError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -1,0 +1,343 @@
+{
+  vertexes: [
+    {
+      id: "generate_progress_report_function",
+      L: "Function",
+      P: {
+        key: "generateProgressReport",
+        description: "Generates comprehensive progress reports with analytics and insights for different time periods",
+        body: '''
+try {
+  // Extract input parameters from the request
+  const { reportType, startDate, endDate, categoryIds, ruleIds } = args.contextData;
+
+  // Validate required fields
+  if (!reportType) {
+    throw new Error("Report type is required");
+  }
+
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Validate report type
+  const validReportTypes = ['daily', 'weekly', 'monthly', 'yearly', 'custom'];
+  if (!validReportTypes.includes(reportType)) {
+    throw new Error(`Invalid report type. Must be one of: ${validReportTypes.join(', ')}`);
+  }
+
+  // Calculate date range based on report type
+  let finalStartDate, finalEndDate;
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+
+  switch (reportType) {
+    case 'daily':
+      finalStartDate = todayStr;
+      finalEndDate = todayStr;
+      break;
+    case 'weekly':
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+      finalStartDate = weekStart.toISOString().split('T')[0];
+      finalEndDate = todayStr;
+      break;
+    case 'monthly':
+      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+      finalStartDate = monthStart.toISOString().split('T')[0];
+      finalEndDate = todayStr;
+      break;
+    case 'yearly':
+      const yearStart = new Date(today.getFullYear(), 0, 1);
+      finalStartDate = yearStart.toISOString().split('T')[0];
+      finalEndDate = todayStr;
+      break;
+    case 'custom':
+      if (!startDate || !endDate) {
+        throw new Error("Start date and end date are required for custom reports");
+      }
+      // Validate date format
+      const dateRegex = /^\\d{4}-\\d{2}-\\d{2}$/;
+      if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
+        throw new Error("Dates must be in YYYY-MM-DD format");
+      }
+      finalStartDate = startDate;
+      finalEndDate = endDate;
+      break;
+  }
+
+  // Build filter conditions for categories and rules
+  let categoryFilter = '';
+  let ruleFilter = '';
+  const queryParams = {
+    userUuid: user.P.uuid,
+    startDate: finalStartDate,
+    endDate: finalEndDate
+  };
+
+  if (categoryIds && categoryIds.length > 0) {
+    categoryFilter = 'AND rc.id IN $categoryIds';
+    queryParams.categoryIds = categoryIds;
+  }
+
+  if (ruleIds && ruleIds.length > 0) {
+    ruleFilter = 'AND r.id IN $ruleIds';
+    queryParams.ruleIds = ruleIds;
+  }
+
+  // STEP 1: Get overall statistics
+  const overallStatsQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
+    WITH rt, r, rc
+    RETURN
+      COUNT(*) as totalTracking,
+      COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completedCount,
+      COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partialCount,
+      COUNT(CASE WHEN rt.status = 'missed' THEN 1 END) as missedCount,
+      COUNT(CASE WHEN rt.status = 'skipped' THEN 1 END) as skippedCount,
+      AVG(CASE WHEN rt.completionPercentage IS NOT NULL THEN rt.completionPercentage END) as avgCompletion,
+      AVG(CASE WHEN rt.mood IS NOT NULL THEN rt.mood END) as avgMood,
+      AVG(CASE WHEN rt.difficulty IS NOT NULL THEN rt.difficulty END) as avgDifficulty,
+      SUM(CASE WHEN rt.timeSpent IS NOT NULL THEN rt.timeSpent ELSE 0 END) as totalTimeSpent,
+      COUNT(DISTINCT r.id) as uniqueRules,
+      COUNT(DISTINCT rc.id) as uniqueCategories
+  `;
+
+  const overallResult = await args.session.run(overallStatsQuery, queryParams);
+  const overallStats = overallResult.records[0];
+
+  // STEP 2: Get category breakdown
+  const categoryBreakdownQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
+    WITH rc, rt
+    RETURN
+      rc.id as categoryId,
+      rc.name as categoryName,
+      rc.color as categoryColor,
+      rc.icon as categoryIcon,
+      COUNT(*) as totalTracking,
+      COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
+      COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial,
+      COUNT(CASE WHEN rt.status = 'missed' THEN 1 END) as missed,
+      COUNT(CASE WHEN rt.status = 'skipped' THEN 1 END) as skipped,
+      AVG(CASE WHEN rt.completionPercentage IS NOT NULL THEN rt.completionPercentage END) as avgCompletion
+    ORDER BY avgCompletion DESC
+  `;
+
+  const categoryResult = await args.session.run(categoryBreakdownQuery, queryParams);
+
+  // STEP 3: Get rule performance
+  const rulePerformanceQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
+    WITH r, rc, rt
+    RETURN
+      r.id as ruleId,
+      r.title as ruleTitle,
+      r.frequency as ruleFrequency,
+      r.priority as rulePriority,
+      rc.name as categoryName,
+      COUNT(*) as totalTracking,
+      COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
+      COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial,
+      COUNT(CASE WHEN rt.status = 'missed' THEN 1 END) as missed,
+      AVG(CASE WHEN rt.completionPercentage IS NOT NULL THEN rt.completionPercentage END) as avgCompletion
+    ORDER BY avgCompletion DESC
+    LIMIT 20
+  `;
+
+  const rulePerformanceResult = await args.session.run(rulePerformanceQuery, queryParams);
+
+  // STEP 4: Get daily breakdown for trend analysis
+  const dailyBreakdownQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
+    WITH rt.date as trackingDate, rt
+    RETURN
+      trackingDate,
+      COUNT(*) as totalTracking,
+      COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
+      COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial,
+      COUNT(CASE WHEN rt.status = 'missed' THEN 1 END) as missed,
+      AVG(CASE WHEN rt.completionPercentage IS NOT NULL THEN rt.completionPercentage END) as avgCompletion
+    ORDER BY trackingDate
+  `;
+
+  const dailyBreakdownResult = await args.session.run(dailyBreakdownQuery, queryParams);
+
+  // STEP 5: Get current streaks
+  const streakQuery = `
+    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    WHERE rs.currentStreak > 0 ${categoryFilter} ${ruleFilter}
+    RETURN
+      r.id as ruleId,
+      r.title as ruleTitle,
+      rc.name as categoryName,
+      rs.currentStreak as currentStreak,
+      rs.longestStreak as longestStreak,
+      rs.totalCompletions as totalCompletions
+    ORDER BY rs.currentStreak DESC
+    LIMIT 10
+  `;
+
+  const streakResult = await args.session.run(streakQuery, queryParams);
+
+  // Process results
+  const totalTracking = args.neo4jConvert.js(overallStats.get('totalTracking')) || 0;
+  const completedCount = args.neo4jConvert.js(overallStats.get('completedCount')) || 0;
+  const partialCount = args.neo4jConvert.js(overallStats.get('partialCount')) || 0;
+  const missedCount = args.neo4jConvert.js(overallStats.get('missedCount')) || 0;
+  const skippedCount = args.neo4jConvert.js(overallStats.get('skippedCount')) || 0;
+
+  // Calculate completion rate (completed + partial * 0.7)
+  const effectiveCompletions = completedCount + (partialCount * 0.7);
+  const completionRate = totalTracking > 0 ? (effectiveCompletions / totalTracking) * 100 : 0;
+
+  // Process category breakdown
+  const categoryBreakdown = categoryResult.records.map(record => ({
+    categoryId: record.get('categoryId'),
+    categoryName: record.get('categoryName'),
+    categoryColor: record.get('categoryColor'),
+    categoryIcon: record.get('categoryIcon'),
+    totalTracking: args.neo4jConvert.js(record.get('totalTracking')) || 0,
+    completed: args.neo4jConvert.js(record.get('completed')) || 0,
+    partial: args.neo4jConvert.js(record.get('partial')) || 0,
+    missed: args.neo4jConvert.js(record.get('missed')) || 0,
+    skipped: args.neo4jConvert.js(record.get('skipped')) || 0,
+    avgCompletion: Math.round(record.get('avgCompletion') || 0)
+  }));
+
+  // Process rule performance
+  const rulePerformance = rulePerformanceResult.records.map(record => ({
+    ruleId: record.get('ruleId'),
+    ruleTitle: record.get('ruleTitle'),
+    ruleFrequency: record.get('ruleFrequency'),
+    rulePriority: record.get('rulePriority'),
+    categoryName: record.get('categoryName'),
+    totalTracking: args.neo4jConvert.js(record.get('totalTracking')) || 0,
+    completed: args.neo4jConvert.js(record.get('completed')) || 0,
+    partial: args.neo4jConvert.js(record.get('partial')) || 0,
+    missed: args.neo4jConvert.js(record.get('missed')) || 0,
+    avgCompletion: Math.round(record.get('avgCompletion') || 0)
+  }));
+
+  // Process daily breakdown
+  const dailyBreakdown = dailyBreakdownResult.records.map(record => ({
+    date: record.get('trackingDate'),
+    totalTracking: args.neo4jConvert.js(record.get('totalTracking')) || 0,
+    completed: args.neo4jConvert.js(record.get('completed')) || 0,
+    partial: args.neo4jConvert.js(record.get('partial')) || 0,
+    missed: args.neo4jConvert.js(record.get('missed')) || 0,
+    avgCompletion: Math.round(record.get('avgCompletion') || 0)
+  }));
+
+  // Process streak data
+  const topStreaks = streakResult.records.map(record => ({
+    ruleId: record.get('ruleId'),
+    ruleTitle: record.get('ruleTitle'),
+    categoryName: record.get('categoryName'),
+    currentStreak: args.neo4jConvert.js(record.get('currentStreak')) || 0,
+    longestStreak: args.neo4jConvert.js(record.get('longestStreak')) || 0,
+    totalCompletions: args.neo4jConvert.js(record.get('totalCompletions')) || 0
+  }));
+
+  // Generate insights
+  const insights = [];
+
+  if (completionRate >= 80) {
+    insights.push("🎉 Excellent progress! You're maintaining a high completion rate.");
+  } else if (completionRate >= 60) {
+    insights.push("👍 Good progress! Consider focusing on consistency to improve further.");
+  } else if (completionRate >= 40) {
+    insights.push("⚡ There's room for improvement. Try focusing on fewer, more manageable rules.");
+  } else {
+    insights.push("🎯 Consider simplifying your rules or adjusting difficulty levels to build momentum.");
+  }
+
+  if (topStreaks.length > 0) {
+    const longestCurrentStreak = Math.max(...topStreaks.map(s => s.currentStreak));
+    if (longestCurrentStreak >= 7) {
+      insights.push(`🔥 Amazing! Your longest current streak is ${longestCurrentStreak} days.`);
+    }
+  }
+
+  if (categoryBreakdown.length > 0) {
+    const bestCategory = categoryBreakdown.reduce((best, cat) =>
+      cat.avgCompletion > best.avgCompletion ? cat : best
+    );
+    if (bestCategory.avgCompletion >= 70) {
+      insights.push(`🌟 "${bestCategory.categoryName}" is your strongest category with ${bestCategory.avgCompletion}% completion.`);
+    }
+  }
+
+  return {
+    success: true,
+    message: "Progress report generated successfully!",
+    data: {
+      reportType,
+      period: {
+        startDate: finalStartDate,
+        endDate: finalEndDate,
+        days: Math.ceil((new Date(finalEndDate) - new Date(finalStartDate)) / (1000 * 60 * 60 * 24)) + 1
+      },
+      summary: {
+        totalTracking,
+        completed: completedCount,
+        partial: partialCount,
+        missed: missedCount,
+        skipped: skippedCount,
+        completionRate: Math.round(completionRate),
+        avgMood: Math.round(overallStats.get('avgMood') || 0),
+        avgDifficulty: Math.round(overallStats.get('avgDifficulty') || 0),
+        totalTimeSpent: args.neo4jConvert.js(overallStats.get('totalTimeSpent')) || 0,
+        uniqueRules: args.neo4jConvert.js(overallStats.get('uniqueRules')) || 0,
+        uniqueCategories: args.neo4jConvert.js(overallStats.get('uniqueCategories')) || 0
+      },
+      categoryBreakdown,
+      rulePerformance,
+      dailyTrend: dailyBreakdown,
+      topStreaks,
+      insights,
+      generatedAt: new Date().toISOString(),
+      userId: user.P.uuid
+    }
+  };
+
+} catch (error) {
+  console.error("Error generating progress report:", error);
+
+  // Handle specific validation errors
+  let userMessage = "Failed to generate progress report. Please try again.";
+
+  if (error.message.includes("Report type is required")) {
+    userMessage = "Please specify the type of report to generate.";
+  } else if (error.message.includes("Invalid report type")) {
+    userMessage = "Please select a valid report type.";
+  } else if (error.message.includes("Start date and end date are required")) {
+    userMessage = "Please provide both start and end dates for custom reports.";
+  } else if (error.message.includes("Dates must be in")) {
+    userMessage = "Please provide dates in YYYY-MM-DD format.";
+  } else if (error.message.includes("User session not found")) {
+    userMessage = "Your session has expired. Please log in and try again.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "ReportGenerationError",
+      details: error.message,
+      code: error.code || null
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

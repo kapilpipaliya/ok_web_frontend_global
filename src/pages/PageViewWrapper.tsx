@@ -73,7 +73,7 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   const owner = getOwner();
   const parentItems = usePageRenderContext();
   const [ref, setRef] = createSignal<HTMLElement | null>(null);
-  const [mounted, setMounted] = createSignal(false);
+  const [mounted, setMounted] = createSignal<null | boolean>(null);
   const [componentName] = createSignal<string>("Html");
 
   const parentRenderContext = () =>

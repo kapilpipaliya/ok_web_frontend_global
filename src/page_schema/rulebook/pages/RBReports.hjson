@@ -1,0 +1,1737 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "RBReports",
+        url: "/rb/reports",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+// Create signals for state management
+const [reportType, setReportType] = args.createSignal('week');
+const [reportsData, setReportsData] = args.createSignal(null);
+const [isLoading, setIsLoading] = args.createSignal(true);
+const [error, setError] = args.createSignal(null);
+
+// Function to fetch reports data
+const fetchReportsData = async (type) => {
+  try {
+    setIsLoading(true);
+    setError(null);
+
+    const response = await args.executeNamedServerFunction({
+      functionName: 'getReportsData',
+      contextData: {
+        reportType: type,
+        includeStreaks: true,
+        includeInsights: true
+      }
+    });
+
+    // Handle error response
+    if (response.error) {
+      setError(response.error);
+      args.showErrorToast(response.error);
+      return;
+    }
+
+    // Handle success response
+    if (response.result && response.result.success) {
+      setReportsData(response.result.data);
+    } else {
+      const message = response.result?.message || 'Failed to load reports data';
+      setError(message);
+      args.showErrorToast(message);
+    }
+  } catch (err) {
+    console.error('Error fetching reports data:', err);
+    setError('Failed to load reports data. Please try again.');
+    args.showErrorToast('Failed to load reports data');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// Initial data fetch on mount
+const onMount = () => {
+  fetchReportsData(reportType());
+};
+
+return {
+  isNoPermissionCheck: true,
+  contextName: "reportsPageContext",
+  onMount,
+  data: {
+    reportType,
+    setReportType,
+    reportsData,
+    setReportsData,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+    fetchReportsData
+  }
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "RBLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "page_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.xl};
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 120px);
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${args.theme.var.spacing.xxl};
+  flex-wrap: wrap;
+  gap: ${args.theme.var.spacing.md};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    margin-bottom: ${args.theme.var.spacing.xl};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Reports & Analytics"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    font-size: ${args.theme.var.fontSize.xxl};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "export_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const exportData = () => {
+  const data = args.contextData?.reportsPageContext?.reportsData?.();
+  if (data) {
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rulebook-report-${data.reportType}-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    args.showSuccessToast('Report exported successfully!');
+  }
+};
+
+return {
+  as: "button",
+  "aria-label": "Export data",
+  onClick: exportData
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  color: ${args.theme.var.color.text};
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  transition: all ${args.theme.var.animation.normal} ease;
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  font-weight: 500;
+}
+
+._id:hover {
+  background: ${args.theme.var.color.background_dark_200};
+  border-color: ${args.theme.var.color.primary};
+  transform: translateY(-1px);
+}
+
+._id:active {
+  transform: translateY(0);
+}`;
+'''
+      }
+    },
+    {
+      id: "export_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:export",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "export_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Export"
+};
+''',
+        css: '''
+return `._id {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  ._id {
+    display: inline;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "time_tabs",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const reportType = args.contextData?.reportsPageContext?.reportType?.();
+const setReportType = args.contextData?.reportsPageContext?.setReportType;
+const fetchReportsData = args.contextData?.reportsPageContext?.fetchReportsData;
+
+return {
+  as: "div",
+  contextName: "timeTabs",
+  data: { reportType, setReportType, fetchReportsData }
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: ${args.theme.var.spacing.xs};
+  margin-bottom: ${args.theme.var.spacing.xxl};
+  background: ${args.theme.var.color.background_dark_200};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 640px) {
+  ._id {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "tab_day",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const reportType = args.contextData?.timeTabs?.reportType;
+const setReportType = args.contextData?.timeTabs?.setReportType;
+const fetchReportsData = args.contextData?.timeTabs?.fetchReportsData;
+const isActive = reportType === "day";
+
+const handleClick = () => {
+  if (setReportType && fetchReportsData) {
+    setReportType("day");
+    fetchReportsData("day");
+  }
+};
+
+return {
+  as: "button",
+  text: "Day",
+  onClick: handleClick
+};
+''',
+        css: '''
+const reportType = args.contextData?.timeTabs?.reportType;
+const isActive = reportType === "day";
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isActive ? args.theme.var.color.background : 'transparent'};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.normal} ease;
+  font-size: ${args.theme.var.fontSize.sm};
+}
+
+._id:hover:not(:disabled) {
+  background: ${isActive ? args.theme.var.color.background : args.theme.var.color.background_dark_100};
+}`;
+'''
+      }
+    },
+    {
+      id: "tab_week",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const reportType = args.contextData?.timeTabs?.reportType;
+const setReportType = args.contextData?.timeTabs?.setReportType;
+const fetchReportsData = args.contextData?.timeTabs?.fetchReportsData;
+const isActive = reportType === "week";
+
+const handleClick = () => {
+  if (setReportType && fetchReportsData) {
+    setReportType("week");
+    fetchReportsData("week");
+  }
+};
+
+return {
+  as: "button",
+  text: "Week",
+  onClick: handleClick
+};
+''',
+        css: '''
+const reportType = args.contextData?.timeTabs?.reportType;
+const isActive = reportType === "week";
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isActive ? args.theme.var.color.background : 'transparent'};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.normal} ease;
+  font-size: ${args.theme.var.fontSize.sm};
+}
+
+._id:hover:not(:disabled) {
+  background: ${isActive ? args.theme.var.color.background : args.theme.var.color.background_dark_100};
+}`;
+'''
+      }
+    },
+    {
+      id: "tab_month",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const reportType = args.contextData?.timeTabs?.reportType;
+const setReportType = args.contextData?.timeTabs?.setReportType;
+const fetchReportsData = args.contextData?.timeTabs?.fetchReportsData;
+const isActive = reportType === "month";
+
+const handleClick = () => {
+  if (setReportType && fetchReportsData) {
+    setReportType("month");
+    fetchReportsData("month");
+  }
+};
+
+return {
+  as: "button",
+  text: "Month",
+  onClick: handleClick
+};
+''',
+        css: '''
+const reportType = args.contextData?.timeTabs?.reportType;
+const isActive = reportType === "month";
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isActive ? args.theme.var.color.background : 'transparent'};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.normal} ease;
+  font-size: ${args.theme.var.fontSize.sm};
+}
+
+._id:hover:not(:disabled) {
+  background: ${isActive ? args.theme.var.color.background : args.theme.var.color.background_dark_100};
+}`;
+'''
+      }
+    },
+    {
+      id: "tab_year",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const reportType = args.contextData?.timeTabs?.reportType;
+const setReportType = args.contextData?.timeTabs?.setReportType;
+const fetchReportsData = args.contextData?.timeTabs?.fetchReportsData;
+const isActive = reportType === "year";
+
+const handleClick = () => {
+  if (setReportType && fetchReportsData) {
+    setReportType("year");
+    fetchReportsData("year");
+  }
+};
+
+return {
+  as: "button",
+  text: "Year",
+  onClick: handleClick
+};
+''',
+        css: '''
+const reportType = args.contextData?.timeTabs?.reportType;
+const isActive = reportType === "year";
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isActive ? args.theme.var.color.background : 'transparent'};
+  color: ${isActive ? args.theme.var.color.text : args.theme.var.color.muted};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-weight: ${isActive ? '600' : '500'};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.normal} ease;
+  font-size: ${args.theme.var.fontSize.sm};
+}
+
+._id:hover:not(:disabled) {
+  background: ${isActive ? args.theme.var.color.background : args.theme.var.color.background_dark_100};
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const isLoading = args.contextData?.reportsPageContext?.isLoading?.();
+
+return {
+  as: "div",
+  hide: !isLoading
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBLoadingSpinner",
+        props: '''
+return {
+  size: "medium",
+  color: "primary",
+  text: "Loading reports..."
+};
+'''
+      }
+    },
+    {
+      id: "error_state",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const error = args.contextData?.reportsPageContext?.error?.();
+
+return {
+  as: "div",
+  hide: !error
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error_light_100};
+  border: 1px solid ${args.theme.var.color.error_light_300};
+  color: ${args.theme.var.color.error_dark_700};
+  padding: ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const error = args.contextData?.reportsPageContext?.error?.();
+
+return {
+  as: "p",
+  text: error || "An error occurred loading the reports."
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "analytics_content",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const isLoading = args.contextData?.reportsPageContext?.isLoading?.();
+const error = args.contextData?.reportsPageContext?.error?.();
+
+return {
+  as: "div",
+  hide: isLoading || error
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  gap: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "summary_stats",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 640px) {
+  ._id {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_completion",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const rate = data?.summary?.completionRate || 0;
+const color = rate >= 80 ? args.theme.var.color.success :
+              rate >= 60 ? args.theme.var.color.info :
+              rate >= 40 ? args.theme.var.color.warning :
+              args.theme.var.color.error;
+
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  text-align: center;
+  transition: all ${args.theme.var.animation.normal} ease;
+}
+
+._id:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: ${color};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_label_1",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Completion Rate"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_value_1",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const rate = data?.summary?.completionRate || 0;
+
+return {
+  as: "p",
+  text: rate + "%"
+};
+''',
+        css: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const rate = data?.summary?.completionRate || 0;
+const color = rate >= 80 ? args.theme.var.color.success :
+              rate >= 60 ? args.theme.var.color.info :
+              rate >= 40 ? args.theme.var.color.warning :
+              args.theme.var.color.error;
+
+return `._id {
+  font-size: ${args.theme.var.fontSize.xxxl};
+  font-weight: 700;
+  color: ${color};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_completed",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  text-align: center;
+  transition: all ${args.theme.var.animation.normal} ease;
+}
+
+._id:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.success};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_label_2",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Completed"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_value_2",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const value = data?.summary?.completed || 0;
+
+return {
+  as: "p",
+  text: value.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xxxl};
+  font-weight: 700;
+  color: ${args.theme.var.color.success};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_partial",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  text-align: center;
+  transition: all ${args.theme.var.animation.normal} ease;
+}
+
+._id:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.warning};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_label_3",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Partial"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_value_3",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const value = data?.summary?.partial || 0;
+
+return {
+  as: "p",
+  text: value.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xxxl};
+  font-weight: 700;
+  color: ${args.theme.var.color.warning};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_missed",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  text-align: center;
+  transition: all ${args.theme.var.animation.normal} ease;
+}
+
+._id:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_label_4",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Missed"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  font-weight: 500;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_value_4",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const value = data?.summary?.missed || 0;
+
+return {
+  as: "p",
+  text: value.toString()
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xxxl};
+  font-weight: 700;
+  color: ${args.theme.var.color.error};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "completion_chart_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.xl};
+  padding: ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "chart_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "📊 Progress Trend"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xl} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "chart_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    height: 200px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_trend_chart",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBD3Chart",
+        props: '''
+const reportsData = args.contextData?.reportsPageContext?.reportsData?.();
+
+if (!reportsData?.chartData) {
+  const isMobile = window.innerWidth <= 768;
+  const chartWidth = isMobile ? Math.min(window.innerWidth - 60, 350) : 800;
+  const chartHeight = isMobile ? 200 : 300;
+
+  return {
+    chartType: "area",
+    width: chartWidth,
+    height: chartHeight,
+    data: null
+  };
+}
+
+const chartData = {
+  labels: reportsData.chartData?.labels || [],
+  datasets: [
+    {
+      label: 'Completed',
+      data: reportsData.chartData?.completedData || [],
+      backgroundColor: args.theme.var.color.success + '80',
+      borderColor: args.theme.var.color.success
+    },
+    {
+      label: 'Partial',
+      data: reportsData.chartData?.partialData || [],
+      backgroundColor: args.theme.var.color.warning + '60',
+      borderColor: args.theme.var.color.warning
+    },
+    {
+      label: 'Missed',
+      data: reportsData.chartData?.missedData || [],
+      backgroundColor: args.theme.var.color.error + '40',
+      borderColor: args.theme.var.color.error
+    }
+  ]
+};
+
+// Make chart responsive
+const isMobile = window.innerWidth <= 768;
+const chartWidth = isMobile ? Math.min(window.innerWidth - 60, 350) : 800;
+const chartHeight = isMobile ? 200 : 300;
+
+return {
+  chartType: "area",
+  width: chartWidth,
+  height: chartHeight,
+  data: chartData
+};
+'''
+      }
+    },
+    {
+      id: "charts_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: ${args.theme.var.spacing.xl};
+  margin-bottom: ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 1024px) {
+  ._id {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_section",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.xl};
+  padding: ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "category_pie_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.xl};
+  padding: ${args.theme.var.spacing.xl};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "📈 Category Performance"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "category_performance_chart",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBD3Chart",
+        props: '''
+const reportsData = args.contextData?.reportsPageContext?.reportsData?.();
+
+if (!reportsData?.categories || reportsData.categories.length === 0) {
+  const isMobile = window.innerWidth <= 768;
+  const chartWidth = isMobile ? Math.min(window.innerWidth - 60, 350) : 600;
+  const chartHeight = isMobile ? 200 : 300;
+
+  return {
+    chartType: "bar",
+    width: chartWidth,
+    height: chartHeight,
+    data: null
+  };
+}
+
+// Create bar chart data for category completion rates
+const categories = reportsData.categories ? reportsData.categories.slice(0, 8) : []; // Limit to top 8 categories
+
+const chartData = {
+  labels: categories.map(cat => cat.category?.P?.name || "Unnamed"),
+  datasets: [
+    {
+      label: 'Completion Rate (%)',
+      data: categories.map(cat => cat.stats?.completionRate || 0),
+      backgroundColor: categories.map(cat => cat.category?.P?.color || args.theme.var.color.primary + "80"),
+      borderColor: categories.map(cat => cat.category?.P?.color || args.theme.var.color.primary)
+    }
+  ]
+};
+
+// Make chart responsive
+const isMobile = window.innerWidth <= 768;
+const chartWidth = isMobile ? Math.min(window.innerWidth - 60, 350) : 600;
+const chartHeight = isMobile ? 200 : 300;
+
+return {
+  chartType: "bar",
+  width: chartWidth,
+  height: chartHeight,
+  data: chartData
+};
+'''
+      }
+    },
+    {
+      id: "pie_chart_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "📊 Status Distribution"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+  text-align: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "status_pie_chart",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBD3Chart",
+        props: '''
+const reportsData = args.contextData?.reportsPageContext?.reportsData?.();
+
+if (!reportsData?.summary) {
+  const isMobile = window.innerWidth <= 768;
+  const chartSize = isMobile ? Math.min(window.innerWidth - 60, 280) : 350;
+
+  return {
+    chartType: "pie",
+    width: chartSize,
+    height: chartSize,
+    data: null
+  };
+}
+
+// Debug: Log the summary data to see what's being received
+console.log('Summary Data:', reportsData.summary);
+
+const summary = reportsData.summary || {};
+const completed = summary.completed || 0;
+const partial = summary.partial || 0;
+const missed = summary.missed || 0;
+
+const chartData = {
+  labels: ["Completed", "Partial", "Missed"],
+  datasets: [
+    {
+      label: "Status Distribution",
+      data: [completed, partial, missed],
+      backgroundColor: [
+        args.theme.var.color.success + "80",
+        args.theme.var.color.warning + "80",
+        args.theme.var.color.error + "80"
+      ],
+      borderColor: [
+        args.theme.var.color.success,
+        args.theme.var.color.warning,
+        args.theme.var.color.error
+      ]
+    }
+  ]
+};
+
+// Make chart responsive
+const isMobile = window.innerWidth <= 768;
+const chartSize = isMobile ? Math.min(window.innerWidth - 60, 280) : 350;
+
+return {
+  chartType: "pie",
+  width: chartSize,
+  height: chartSize,
+  data: chartData
+};
+'''
+      }
+    },
+    {
+      id: "streaks_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const hasStreaks = data?.topStreaks && data.topStreaks.length > 0;
+
+return {
+  as: "section",
+  hide: !hasStreaks
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.xl};
+  padding: ${args.theme.var.spacing.xl};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "streaks_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "🔥 Top Streaks"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xl} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "streaks_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const streaks = data?.topStreaks || [];
+
+return {
+  as: "ol",
+  contextName: "streaksList",
+  loop: true,
+  data: streaks
+};
+''',
+        css: '''
+return `._id {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "streak_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const streak = args.contextData?.streaksList;
+
+return {
+  as: "li",
+  hide: !streak
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_dark_100};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  border: 1px solid ${args.theme.var.color.border};
+  transition: all ${args.theme.var.animation.normal} ease;
+}
+
+._id:hover {
+  transform: translateX(4px);
+  border-color: ${args.theme.var.color.streak};
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    },
+    {
+      id: "streak_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "streak_name",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const streak = args.contextData?.streaksList;
+
+return {
+  as: "span",
+  text: streak?.rule?.P?.title || "Rule"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.base};
+}`;
+'''
+      }
+    },
+    {
+      id: "streak_category",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const streak = args.contextData?.streaksList;
+
+return {
+  as: "span",
+  text: streak?.category?.P?.name || "",
+  hide: !streak?.category?.P?.name
+};
+''',
+        css: '''
+const streak = args.contextData?.streaksList;
+const color = streak?.category?.P?.color || args.theme.var.color.muted;
+
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${color};
+}`;
+'''
+      }
+    },
+    {
+      id: "streak_count",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const streak = args.contextData?.streaksList;
+const count = streak?.streak?.P?.currentStreak || 0;
+
+return {
+  as: "span",
+  text: "🔥 " + count + (count === 1 ? " day" : " days")
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 700;
+  color: ${args.theme.var.color.streak};
+  font-size: ${args.theme.var.fontSize.lg};
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "insights_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const hasInsights = data?.insights && data.insights.length > 0;
+
+return {
+  as: "section",
+  hide: !hasInsights
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+  margin-top: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "insights_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "💡 Insights"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "insights_list",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const data = args.contextData?.reportsPageContext?.reportsData?.();
+const insights = data?.insights || [];
+
+return {
+  as: "div",
+  contextName: "insightsList",
+  loop: true,
+  data: insights
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "insight_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const insight = args.contextData?.insightsList;
+
+return {
+  as: "div",
+  hide: !insight
+};
+''',
+        css: '''
+const insight = args.contextData?.insightsList;
+const type = insight?.type || 'info';
+const bgColor = type === 'success' ? args.theme.var.color.success_light_100 :
+                 type === 'warning' ? args.theme.var.color.warning_light_100 :
+                 type === 'error' ? args.theme.var.color.error_light_100 :
+                 args.theme.var.color.info_light_100;
+const borderColor = type === 'success' ? args.theme.var.color.success_light_300 :
+                    type === 'warning' ? args.theme.var.color.warning_light_300 :
+                    type === 'error' ? args.theme.var.color.error_light_300 :
+                    args.theme.var.color.info_light_300;
+const textColor = type === 'success' ? args.theme.var.color.success_dark_700 :
+                  type === 'warning' ? args.theme.var.color.warning_dark_700 :
+                  type === 'error' ? args.theme.var.color.error_dark_700 :
+                  args.theme.var.color.info_dark_700;
+
+return `._id {
+  background: ${bgColor};
+  border: 1px solid ${borderColor};
+  color: ${textColor};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  font-size: ${args.theme.var.fontSize.base};
+  line-height: 1.5;
+}`;
+'''
+      }
+    },
+    {
+      id: "insight_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const insight = args.contextData?.insightsList;
+
+return {
+  as: "p",
+  text: insight?.text || ""
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
+    { id: "e3", T: "Attr", S: "page_content", E: "header" },
+    { id: "e4", T: "Attr", S: "header", E: "page_title" },
+    { id: "e5", T: "Attr", S: "header", E: "export_button" },
+    { id: "e6", T: "Attr", S: "export_button", E: "export_icon" },
+    { id: "e6a", T: "Attr", S: "export_button", E: "export_text" },
+    { id: "e7", T: "Attr", S: "page_content", E: "time_tabs" },
+    { id: "e8", T: "Attr", S: "time_tabs", E: "tab_day" },
+    { id: "e9", T: "Attr", S: "time_tabs", E: "tab_week" },
+    { id: "e9a", T: "Attr", S: "time_tabs", E: "tab_month" },
+    { id: "e9b", T: "Attr", S: "time_tabs", E: "tab_year" },
+    { id: "e10", T: "Attr", S: "page_content", E: "loading_state" },
+    { id: "e10a", T: "Attr", S: "loading_state", E: "loading_spinner" },
+    { id: "e11", T: "Attr", S: "page_content", E: "error_state" },
+    { id: "e11a", T: "Attr", S: "error_state", E: "error_text" },
+    { id: "e12", T: "Attr", S: "page_content", E: "analytics_content" },
+    { id: "e13", T: "Attr", S: "analytics_content", E: "summary_stats" },
+    { id: "e14", T: "Attr", S: "summary_stats", E: "stat_completion" },
+    { id: "e15", T: "Attr", S: "stat_completion", E: "stat_label_1" },
+    { id: "e16", T: "Attr", S: "stat_completion", E: "stat_value_1" },
+    { id: "e17", T: "Attr", S: "summary_stats", E: "stat_completed" },
+    { id: "e18", T: "Attr", S: "stat_completed", E: "stat_label_2" },
+    { id: "e19", T: "Attr", S: "stat_completed", E: "stat_value_2" },
+    { id: "e20", T: "Attr", S: "summary_stats", E: "stat_partial" },
+    { id: "e21", T: "Attr", S: "stat_partial", E: "stat_label_3" },
+    { id: "e22", T: "Attr", S: "stat_partial", E: "stat_value_3" },
+    { id: "e23", T: "Attr", S: "summary_stats", E: "stat_missed" },
+    { id: "e24", T: "Attr", S: "stat_missed", E: "stat_label_4" },
+    { id: "e25", T: "Attr", S: "stat_missed", E: "stat_value_4" },
+    { id: "e26", T: "Attr", S: "analytics_content", E: "completion_chart_section" },
+    { id: "e27", T: "Attr", S: "completion_chart_section", E: "chart_title" },
+    { id: "e28", T: "Attr", S: "completion_chart_section", E: "chart_container" },
+    { id: "e29", T: "Attr", S: "chart_container", E: "progress_trend_chart" },
+    { id: "e30", T: "Attr", S: "analytics_content", E: "charts_grid" },
+    { id: "e31", T: "Attr", S: "charts_grid", E: "categories_section" },
+    { id: "e31a", T: "Attr", S: "charts_grid", E: "category_pie_section" },
+    { id: "e32", T: "Attr", S: "categories_section", E: "categories_title" },
+    { id: "e32a", T: "Attr", S: "categories_section", E: "category_performance_chart" },
+    { id: "e33", T: "Attr", S: "category_pie_section", E: "pie_chart_title" },
+    { id: "e33a", T: "Attr", S: "category_pie_section", E: "status_pie_chart" },
+    { id: "e39", T: "Attr", S: "analytics_content", E: "streaks_section" },
+    { id: "e40", T: "Attr", S: "streaks_section", E: "streaks_title" },
+    { id: "e41", T: "Attr", S: "streaks_section", E: "streaks_list" },
+    { id: "e42", T: "Attr", S: "streaks_list", E: "streak_item" },
+    { id: "e43", T: "Attr", S: "streak_item", E: "streak_info" },
+    { id: "e44", T: "Attr", S: "streak_info", E: "streak_name" },
+    { id: "e45", T: "Attr", S: "streak_info", E: "streak_category" },
+    { id: "e46", T: "Attr", S: "streak_item", E: "streak_count" },
+    { id: "e47", T: "Attr", S: "analytics_content", E: "insights_section" },
+    { id: "e48", T: "Attr", S: "insights_section", E: "insights_title" },
+    { id: "e49", T: "Attr", S: "insights_section", E: "insights_list" },
+    { id: "e50", T: "Attr", S: "insights_list", E: "insight_item" },
+    { id: "e51", T: "Attr", S: "insight_item", E: "insight_text" }
+  ]
+}

@@ -1,0 +1,2115 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "RBSettings",
+        url: "/rb/settings",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "RBLayout",
+        displayOrder: 1
+      }
+    },
+    {
+      id: "page_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.xl};
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Settings"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.title};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "settings_sections",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/rb/categories"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  text-decoration: none;
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "📂"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: ${args.theme.var.color.success_light_300};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "categories_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Manage Categories"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Organize and customize your rule categories"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+  margin: 0;
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "categories_arrow",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-right",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "goals_link",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "a",
+  href: "/rb/goals"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  text-decoration: none;
+
+  &:hover {
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "goals_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}`;
+'''
+      }
+    },
+    {
+      id: "goals_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "goals_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "🎯"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: ${args.theme.var.color.warning_light_300};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "goals_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "goals_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Goals & Achievements"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "goals_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Set and track your personal milestones"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+  margin: 0;
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "goals_arrow",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:arrow-right",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "preferences_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "preferences_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "⚙️ Preferences"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "theme_preference",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${args.theme.var.spacing.md} 0;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "theme_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "theme_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Theme"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "theme_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Choose your preferred app appearance"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "theme_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.toggleTheme(),
+  text: args.currentMode() === "dark" ? "🌙 Dark" : "☀️ Light"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  border: none;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all ${args.theme.var.animation.fast} ease;
+  text-decoration: none;
+
+  &:hover {
+    background: ${args.theme.var.color.primary_dark_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_preference",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        fns: '''
+const fetchTimezones = async () => {
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "getAvailableTimezones",
+      contextData: {}
+    });
+
+    if (response.error) {
+      return null;
+    }
+
+    if (response.result && response.result.success) {
+      return response.result.data;
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
+const saveTimezone = async (timezone) => {
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "updateUserTimezone",
+      contextData: { timezone }
+    });
+
+    if (response.error) {
+      args.showErrorToast(response.error);
+      return false;
+    }
+
+    if (response.result && response.result.success) {
+      args.showSuccessToast(response.result.message);
+      return true;
+    } else {
+      const errorMsg = response.result?.message || "Failed to update timezone";
+      args.showErrorToast(errorMsg);
+      return false;
+    }
+  } catch (error) {
+    args.showErrorToast("Error updating timezone: " + error.message);
+    return false;
+  }
+};
+
+return { fetchTimezones, saveTimezone };
+''',
+        props: '''
+const [timezoneData, setTimezoneData] = args.createSignal(null);
+const [selectedTimezone, setSelectedTimezone] = args.createSignal('');
+const [loading, setLoading] = args.createSignal(true);
+const [saving, setSaving] = args.createSignal(false);
+const [searchTerm, setSearchTerm] = args.createSignal('');
+const [showDropdown, setShowDropdown] = args.createSignal(false);
+
+const handleSave = async () => {
+  setSaving(true);
+  try {
+    const success = await args.fns.saveTimezone(selectedTimezone());
+    if (success) {
+      // Reload timezone data from server to get the updated value
+      const freshData = await args.fns.fetchTimezones();
+      if (freshData) {
+        setTimezoneData(freshData);
+        setSelectedTimezone(freshData.currentTimezone);
+        setSearchTerm(freshData.currentTimezone);
+      }
+    }
+  } catch (error) {
+    args.showErrorToast('Failed to save timezone');
+  } finally {
+    setSaving(false);
+  }
+};
+
+return {
+  as: "div",
+  data: {
+    timezoneData,
+    selectedTimezone,
+    setSelectedTimezone,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    showDropdown,
+    setShowDropdown,
+    saving,
+    setSaving,
+    handleSave
+  },
+  onMount: async () => {
+    // Load timezones when component mounts
+    const data = await args.fns.fetchTimezones();
+    if (data) {
+      setTimezoneData(data);
+      setSelectedTimezone(data.currentTimezone || 'UTC');
+      setSearchTerm(data.currentTimezone || 'UTC');
+    } else {
+      setSelectedTimezone('UTC');
+      setSearchTerm('UTC');
+    }
+    setLoading(false);
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md} 0;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+''',
+        contextName: "timezoneSection"
+      }
+    },
+    {
+      id: "timezone_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: ${args.theme.var.spacing.md};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Timezone"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const timezoneSection = args.contextData?.timezoneSection;
+if (!timezoneSection) {
+  return {
+    as: "div",
+    text: "Loading timezone information..."
+  };
+}
+
+const { selectedTimezone, loading } = timezoneSection;
+
+if (loading()) {
+  return {
+    as: "div",
+    text: "Loading timezone information..."
+  };
+}
+
+const tz = selectedTimezone() || 'UTC';
+const now = new Date();
+const timeString = now.toLocaleString('en-US', {
+  timeZone: tz,
+  dateStyle: 'medium',
+  timeStyle: 'short'
+});
+
+return {
+  as: "div",
+  text: `Current time: ${timeString}`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_selector",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+  min-width: 300px;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_input_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBTextInput",
+        props: '''
+const timezoneSection = args.contextData?.timezoneSection;
+if (!timezoneSection) {
+  return {
+    placeholder: "Loading...",
+    disabled: true
+  };
+}
+
+const {
+  selectedTimezone,
+  searchTerm,
+  setSearchTerm,
+  showDropdown,
+  setShowDropdown,
+  loading
+} = timezoneSection;
+
+return {
+  value: searchTerm() || '',
+  placeholder: loading() ? "Loading..." : "Search timezone...",
+  disabled: loading(),
+  onInput: (e) => {
+    setSearchTerm(e.target.value);
+    setShowDropdown(true);
+  },
+  onFocus: () => setShowDropdown(true),
+  onBlur: () => {
+    setTimeout(() => {
+      setShowDropdown(false);
+      if (!searchTerm()) {
+        setSearchTerm(selectedTimezone());
+      }
+    }, 200);
+  }
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_save_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const timezoneSection = args.contextData?.timezoneSection;
+if (!timezoneSection) {
+  return {
+    text: "Save",
+    variant: "primary",
+    disabled: true
+  };
+}
+
+const { saving, handleSave, selectedTimezone, timezoneData } = timezoneSection;
+const hasChanges = timezoneData() && selectedTimezone() !== timezoneData().currentTimezone;
+
+return {
+  text: saving() ? "Saving..." : "Save",
+  variant: "primary",
+  loading: saving(),
+  disabled: saving() || !hasChanges,
+  onClick: handleSave
+};
+'''
+      }
+    },
+    {
+      id: "timezone_dropdown",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+// Access timezone section context safely
+const timezoneSection = args.contextData?.timezoneSection;
+if (!timezoneSection) {
+  return { as: "div", show: false };
+}
+
+const { showDropdown, timezoneData, searchTerm } = timezoneSection;
+
+// Check if we have any timezones to show
+const hasTimezones = () => {
+  if (!timezoneData()) return false;
+  const search = searchTerm()?.toLowerCase() || '';
+
+  if (!search) {
+    return (timezoneData().allTimezones && timezoneData().allTimezones.length > 0);
+  }
+
+  return timezoneData().allTimezones && timezoneData().allTimezones.some(tz =>
+    tz.label.toLowerCase().includes(search) || tz.value.toLowerCase().includes(search)
+  );
+};
+
+return {
+  as: "div",
+  show: showDropdown() && hasTimezones()
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: calc(100% + ${args.theme.var.spacing.xs});
+  left: 0;
+  right: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}`;
+'''
+      }
+    },
+    {
+      id: "timezone_options",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "timezoneOptions",
+        loop: true,
+        props: '''
+const timezoneSection = args.contextData?.timezoneSection;
+if (!timezoneSection) {
+  return {
+    as: "div",
+    data: []
+  };
+}
+
+const {
+  timezoneData,
+  searchTerm
+} = timezoneSection;
+
+// Filter timezones based on search
+const getFilteredTimezones = () => {
+  if (!timezoneData()) return [];
+  const search = searchTerm()?.toLowerCase() || '';
+
+  if (!search) {
+    return timezoneData().allTimezones || [];
+  }
+
+  return timezoneData().allTimezones
+    .filter(tz => tz.label.toLowerCase().includes(search) || tz.value.toLowerCase().includes(search))
+    .slice(0, 25);
+};
+
+const filteredTimezones = getFilteredTimezones();
+
+return {
+  as: "div",
+  data: filteredTimezones
+};
+'''
+      }
+    },
+    {
+      id: "timezone_option_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const timezoneOption = args.contextData.timezoneOptions;
+const timezoneSection = args.contextData?.timezoneSection;
+
+if (!timezoneOption || !timezoneSection) {
+  return { as: "div" };
+}
+
+const {
+  setSelectedTimezone,
+  setSearchTerm,
+  setShowDropdown
+} = timezoneSection;
+
+return {
+  as: "div",
+  text: timezoneOption.label,
+  onClick: () => {
+    setSelectedTimezone(timezoneOption.value);
+    setSearchTerm(timezoneOption.value);
+    setShowDropdown(false);
+  }
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  cursor: pointer;
+  transition: background ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "admin_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        fns: '''
+const generateSampleData = async () => {
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "generateSampleData",
+      contextData: {}
+    });
+
+    if (response.error) {
+      args.showErrorToast(response.error);
+      return false;
+    }
+
+    if (response.result && response.result.success) {
+      args.showSuccessToast(response.result.message);
+      return true;
+    } else {
+      const errorMsg = response.result?.message || "Failed to generate sample data";
+      args.showErrorToast(errorMsg);
+      return false;
+    }
+  } catch (error) {
+    args.showErrorToast("Error generating sample data: " + error.message);
+    return false;
+  }
+};
+
+return { generateSampleData };
+''',
+        props: '''
+// Check if admin=true query parameter is present
+const isAdmin = args.searchParams?.admin === 'true';
+
+const [generating, setGenerating] = args.createSignal(false);
+
+const handleGenerateSampleData = async () => {
+  setGenerating(true);
+  try {
+    await args.fns.generateSampleData();
+  } finally {
+    setGenerating(false);
+  }
+};
+
+return {
+  as: "section",
+  show: isAdmin,
+  data: {
+    generating,
+    handleGenerateSampleData
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.info_light_100};
+  border: 1px solid ${args.theme.var.color.info_light_300};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+''',
+        contextName: "adminSection"
+      }
+    },
+    {
+      id: "admin_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "🔧 Admin Tools"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.info};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "sample_data_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${args.theme.var.spacing.md} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "sample_data_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  margin-right: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "sample_data_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Generate Sample Data"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "sample_data_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Create comprehensive sample data including categories, rules, goals, and 30 days of tracking history for testing and demonstration purposes."
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  font-size: ${args.theme.var.fontSize.sm};
+  margin: 0;
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "sample_data_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const { generating, handleGenerateSampleData } = args.contextData.adminSection;
+
+return {
+  as: "button",
+  text: generating() ? "Generating..." : "Generate Sample Data",
+  disabled: generating(),
+  onClick: handleGenerateSampleData
+};
+''',
+        css: '''
+const { generating } = args.contextData.adminSection;
+const isDisabled = generating();
+
+return `._id {
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${isDisabled ? args.theme.var.color.background_light_300 : args.theme.var.color.info};
+  color: ${isDisabled ? args.theme.var.color.muted : args.theme.var.color.info_text};
+  border: none;
+  border-radius: ${args.theme.var.borderRadius.md};
+  font-weight: 500;
+  cursor: ${isDisabled ? 'not-allowed' : 'pointer'};
+  transition: all ${args.theme.var.animation.fast} ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: ${isDisabled ? args.theme.var.color.background_light_300 : args.theme.var.color.info_dark_200};
+  }
+
+  &:active {
+    transform: ${isDisabled ? 'none' : 'scale(0.98)'};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "account_section",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "account_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Account"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_item",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: ${args.theme.var.spacing.md} 0;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}
+
+._id:last-child {
+  border-bottom: none;
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "logout_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "Sign Out"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.xs} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Sign out of your Personal Rulebook account on this device."
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "logout_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+return {
+  text: "Sign Out",
+  variant: "danger",
+  onClick: () => {
+    args.navigate("/auth/logout");
+  }
+};
+'''
+      }
+    },
+    {
+      id: "danger_section",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const [showDeleteConfirmation, setShowDeleteConfirmation] = args.createSignal(false);
+const [showAccountConfirmation, setShowAccountConfirmation] = args.createSignal(false);
+const [deleteDataLoading, setDeleteDataLoading] = args.createSignal(false);
+const [deleteAccountLoading, setDeleteAccountLoading] = args.createSignal(false);
+
+return {
+  as: "section",
+  data: {
+    showDeleteConfirmation,
+    setShowDeleteConfirmation,
+    showAccountConfirmation,
+    setShowAccountConfirmation,
+    deleteDataLoading,
+    setDeleteDataLoading,
+    deleteAccountLoading,
+    setDeleteAccountLoading
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error_light_100};
+  border: 1px solid ${args.theme.var.color.error_light_300};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+}`;
+''',
+        contextName: "dangerSection"
+      }
+    },
+    {
+      id: "danger_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "⚠️ Danger Zone"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.error};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_data_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md} 0;
+  border-bottom: 1px solid ${args.theme.var.color.error_light_300};
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_data_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_data_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "delete_data_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Delete All Rulebook Data"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.error};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_data_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Permanently delete all your rules, categories, tracking data, and goals. This action cannot be undone."
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.error_dark_200};
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_data_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const { showDeleteConfirmation, setShowDeleteConfirmation } = args.contextData.dangerSection;
+
+return {
+  text: "Delete All Data",
+  variant: "danger",
+  onClick: () => setShowDeleteConfirmation(!showDeleteConfirmation())
+};
+'''
+      }
+    },
+    {
+      id: "delete_data_confirmation",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const {
+  showDeleteConfirmation,
+  setShowDeleteConfirmation,
+  deleteDataLoading,
+  setDeleteDataLoading
+} = args.contextData.dangerSection;
+
+return {
+  as: "div",
+  show: showDeleteConfirmation()
+};
+''',
+        css: '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.error_light_50};
+  border: 1px solid ${args.theme.var.color.error_light_400};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_data_warning",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "⚠️ This will permanently delete ALL your rulebook data. This action cannot be undone. Are you absolutely sure?"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.error_dark_100};
+  margin-bottom: ${args.theme.var.spacing.md};
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_data_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.sm};
+  justify-content: flex-end;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_data_cancel",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBButton",
+        props: '''
+const { setShowDeleteConfirmation } = args.contextData.dangerSection;
+
+return {
+  text: "Cancel",
+  variant: "secondary",
+  onClick: () => setShowDeleteConfirmation(false)
+};
+'''
+      }
+    },
+    {
+      id: "delete_data_confirm",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const {
+  setShowDeleteConfirmation,
+  deleteDataLoading,
+  setDeleteDataLoading
+} = args.contextData.dangerSection;
+
+return {
+  text: deleteDataLoading() ? "Deleting..." : "Yes, Delete All Data",
+  variant: "danger",
+  loading: deleteDataLoading(),
+  disabled: deleteDataLoading(),
+  onClick: async () => {
+    setDeleteDataLoading(true);
+    try {
+      const response = await args.executeNamedServerFunction({
+        functionName: "deleteAllUserData",
+        contextData: {}
+      });
+
+      if (response.error) {
+        args.showErrorToast(response.error);
+        return;
+      }
+
+      const result = response.result;
+      if (result.success) {
+        args.showSuccessToast(result.message);
+        setShowDeleteConfirmation(false);
+        // Optionally redirect to home or reload page
+        setTimeout(() => {
+          args.navigate("/rb");
+        }, 1500);
+      } else {
+        args.showErrorToast(result.message || "Failed to delete data");
+      }
+    } catch (error) {
+      args.showErrorToast("Error deleting data: " + error.message);
+    } finally {
+      setDeleteDataLoading(false);
+    }
+  }
+};
+'''
+      }
+    },
+    {
+      id: "delete_account_section",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.md} 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_info",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "delete_account_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Delete Account Permanently"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.error};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_desc",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Permanently delete your entire account and all associated data across the system. This action is irreversible."
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.error_dark_200};
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const { showAccountConfirmation, setShowAccountConfirmation } = args.contextData.dangerSection;
+
+return {
+  text: "Delete Account",
+  variant: "danger",
+  onClick: () => setShowAccountConfirmation(!showAccountConfirmation())
+};
+'''
+      }
+    },
+    {
+      id: "delete_account_confirmation",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const {
+  showAccountConfirmation,
+  setShowAccountConfirmation,
+  deleteAccountLoading,
+  setDeleteAccountLoading
+} = args.contextData.dangerSection;
+
+return {
+  as: "div",
+  show: showAccountConfirmation()
+};
+''',
+        css: '''
+return `._id {
+  margin-top: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.error_light_50};
+  border: 1px solid ${args.theme.var.color.error_light_400};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_warning",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "🚨 FINAL WARNING: This will permanently delete your entire account and ALL data across the system. You will be logged out and cannot recover this account. Are you absolutely certain?"
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 600;
+  color: ${args.theme.var.color.error_dark_100};
+  margin-bottom: ${args.theme.var.spacing.md};
+  line-height: 1.4;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: ${args.theme.var.spacing.sm};
+  justify-content: flex-end;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_account_cancel",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBButton",
+        props: '''
+const { setShowAccountConfirmation } = args.contextData.dangerSection;
+
+return {
+  text: "Cancel",
+  variant: "secondary",
+  onClick: () => setShowAccountConfirmation(false)
+};
+'''
+      }
+    },
+    {
+      id: "delete_account_confirm",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "RBButton",
+        props: '''
+const {
+  setShowAccountConfirmation,
+  deleteAccountLoading,
+  setDeleteAccountLoading
+} = args.contextData.dangerSection;
+
+return {
+  text: deleteAccountLoading() ? "Deleting Account..." : "Yes, Delete My Account",
+  variant: "danger",
+  loading: deleteAccountLoading(),
+  disabled: deleteAccountLoading(),
+  onClick: async () => {
+    setDeleteAccountLoading(true);
+    try {
+      const response = await args.executeNamedServerFunction({
+        functionName: "deleteUserAccount",
+        contextData: { confirmed: true }
+      });
+
+      if (response.error) {
+        args.showErrorToast(response.error);
+        return;
+      }
+
+      const result = response.result;
+      if (result.success) {
+        args.showSuccessToast(result.message);
+        setShowAccountConfirmation(false);
+        // Redirect to login or home page after account deletion
+        setTimeout(() => {
+          args.navigate("/");
+        }, 2000);
+      } else {
+        args.showErrorToast(result.message || "Failed to delete account");
+      }
+    } catch (error) {
+      args.showErrorToast("Error deleting account: " + error.message);
+    } finally {
+      setDeleteAccountLoading(false);
+    }
+  }
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
+    { id: "e3", T: "Attr", S: "page_content", E: "header" },
+    { id: "e4", T: "Attr", S: "header", E: "page_title" },
+    { id: "e5", T: "Attr", S: "page_content", E: "settings_sections" },
+    { id: "e6", T: "Attr", S: "settings_sections", E: "categories_link" },
+    { id: "e7", T: "Attr", S: "categories_link", E: "categories_content" },
+    { id: "e8", T: "Attr", S: "categories_content", E: "categories_info" },
+    { id: "e9", T: "Attr", S: "categories_info", E: "categories_icon" },
+    { id: "e10", T: "Attr", S: "categories_info", E: "categories_text" },
+    { id: "e11", T: "Attr", S: "categories_text", E: "categories_title" },
+    { id: "e12", T: "Attr", S: "categories_text", E: "categories_desc" },
+    { id: "e13", T: "Attr", S: "categories_content", E: "categories_arrow" },
+    { id: "e14", T: "Attr", S: "settings_sections", E: "goals_link" },
+    { id: "e15", T: "Attr", S: "goals_link", E: "goals_content" },
+    { id: "e16", T: "Attr", S: "goals_content", E: "goals_info" },
+    { id: "e17", T: "Attr", S: "goals_info", E: "goals_icon" },
+    { id: "e18", T: "Attr", S: "goals_info", E: "goals_text" },
+    { id: "e19", T: "Attr", S: "goals_text", E: "goals_title" },
+    { id: "e20", T: "Attr", S: "goals_text", E: "goals_desc" },
+    { id: "e21", T: "Attr", S: "goals_content", E: "goals_arrow" },
+    { id: "e22", T: "Attr", S: "settings_sections", E: "preferences_section" },
+    { id: "e23", T: "Attr", S: "preferences_section", E: "preferences_title" },
+    { id: "e24", T: "Attr", S: "preferences_section", E: "theme_preference" },
+    { id: "e25", T: "Attr", S: "theme_preference", E: "theme_label" },
+    { id: "e26", T: "Attr", S: "theme_label", E: "theme_title" },
+    { id: "e27", T: "Attr", S: "theme_label", E: "theme_subtitle" },
+    { id: "e28", T: "Attr", S: "theme_preference", E: "theme_toggle" },
+    { id: "e29", T: "Attr", S: "preferences_section", E: "timezone_preference" },
+    { id: "e30", T: "Attr", S: "timezone_preference", E: "timezone_content" },
+    { id: "e31", T: "Attr", S: "timezone_content", E: "timezone_info" },
+    { id: "e32", T: "Attr", S: "timezone_info", E: "timezone_title" },
+    { id: "e33", T: "Attr", S: "timezone_info", E: "timezone_subtitle" },
+    { id: "e34", T: "Attr", S: "timezone_content", E: "timezone_selector" },
+    { id: "e35", T: "Attr", S: "timezone_selector", E: "timezone_input_wrapper" },
+    { id: "e36", T: "Attr", S: "timezone_input_wrapper", E: "timezone_input" },
+    { id: "e37", T: "Attr", S: "timezone_input_wrapper", E: "timezone_save_button" },
+    { id: "e38", T: "Attr", S: "timezone_selector", E: "timezone_dropdown" },
+    { id: "e39", T: "Attr", S: "timezone_dropdown", E: "timezone_options" },
+    { id: "e40", T: "Attr", S: "timezone_options", E: "timezone_option_item" },
+    { id: "e41", T: "Attr", S: "settings_sections", E: "admin_section" },
+    { id: "e42", T: "Attr", S: "admin_section", E: "admin_title" },
+    { id: "e43", T: "Attr", S: "admin_section", E: "sample_data_section" },
+    { id: "e44", T: "Attr", S: "sample_data_section", E: "sample_data_info" },
+    { id: "e45", T: "Attr", S: "sample_data_info", E: "sample_data_title" },
+    { id: "e46", T: "Attr", S: "sample_data_info", E: "sample_data_desc" },
+    { id: "e47", T: "Attr", S: "sample_data_section", E: "sample_data_button" },
+    { id: "e48", T: "Attr", S: "settings_sections", E: "account_section" },
+    { id: "e49", T: "Attr", S: "account_section", E: "account_title" },
+    { id: "e50", T: "Attr", S: "account_section", E: "logout_item" },
+    { id: "e51", T: "Attr", S: "logout_item", E: "logout_info" },
+    { id: "e52", T: "Attr", S: "logout_info", E: "logout_title" },
+    { id: "e53", T: "Attr", S: "logout_info", E: "logout_desc" },
+    { id: "e54", T: "Attr", S: "logout_item", E: "logout_button" },
+    { id: "e55", T: "Attr", S: "settings_sections", E: "danger_section" },
+    { id: "e56", T: "Attr", S: "danger_section", E: "danger_title" },
+    { id: "e57", T: "Attr", S: "danger_section", E: "delete_data_section" },
+    { id: "e58", T: "Attr", S: "delete_data_section", E: "delete_data_info" },
+    { id: "e59", T: "Attr", S: "delete_data_info", E: "delete_data_text" },
+    { id: "e60", T: "Attr", S: "delete_data_text", E: "delete_data_title" },
+    { id: "e61", T: "Attr", S: "delete_data_text", E: "delete_data_desc" },
+    { id: "e62", T: "Attr", S: "delete_data_info", E: "delete_data_button" },
+    { id: "e63", T: "Attr", S: "delete_data_section", E: "delete_data_confirmation" },
+    { id: "e64", T: "Attr", S: "delete_data_confirmation", E: "delete_data_warning" },
+    { id: "e65", T: "Attr", S: "delete_data_confirmation", E: "delete_data_actions" },
+    { id: "e66", T: "Attr", S: "delete_data_actions", E: "delete_data_cancel" },
+    { id: "e67", T: "Attr", S: "delete_data_actions", E: "delete_data_confirm" },
+    { id: "e68", T: "Attr", S: "danger_section", E: "delete_account_section" },
+    { id: "e69", T: "Attr", S: "delete_account_section", E: "delete_account_info" },
+    { id: "e70", T: "Attr", S: "delete_account_info", E: "delete_account_text" },
+    { id: "e71", T: "Attr", S: "delete_account_text", E: "delete_account_title" },
+    { id: "e72", T: "Attr", S: "delete_account_text", E: "delete_account_desc" },
+    { id: "e73", T: "Attr", S: "delete_account_info", E: "delete_account_button" },
+    { id: "e74", T: "Attr", S: "delete_account_section", E: "delete_account_confirmation" },
+    { id: "e75", T: "Attr", S: "delete_account_confirmation", E: "delete_account_warning" },
+    { id: "e76", T: "Attr", S: "delete_account_confirmation", E: "delete_account_actions" },
+    { id: "e77", T: "Attr", S: "delete_account_actions", E: "delete_account_cancel" },
+    { id: "e78", T: "Attr", S: "delete_account_actions", E: "delete_account_confirm" }
+  ]
+}
