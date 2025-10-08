@@ -72,7 +72,8 @@ try {
 
   // STEP 1: Get overall streak statistics
   const overallStreakQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE 1=1 ${categoryFilter} ${ruleFilter} ${statusFilter}
     RETURN
       COUNT(*) as totalRules,
@@ -90,21 +91,10 @@ try {
 
   // STEP 2: Get top current streaks
   const topCurrentStreaksQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE rs.currentStreak > 0 ${categoryFilter} ${ruleFilter} ${statusFilter}
-    RETURN
-      r.id as ruleId,
-      r.title as ruleTitle,
-      r.frequency as frequency,
-      r.priority as priority,
-      rc.name as categoryName,
-      rc.color as categoryColor,
-      rc.icon as categoryIcon,
-      rs.currentStreak as currentStreak,
-      rs.longestStreak as longestStreak,
-      rs.totalCompletions as totalCompletions,
-      rs.streakStartDate as streakStartDate,
-      rs.lastCompletionDate as lastCompletionDate
+    RETURN r, rc, rs
     ORDER BY rs.currentStreak DESC
     LIMIT 10
   `;
@@ -113,21 +103,10 @@ try {
 
   // STEP 3: Get top longest streaks (all-time records)
   const topLongestStreaksQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE rs.longestStreak > 0 ${categoryFilter} ${ruleFilter} ${statusFilter}
-    RETURN
-      r.id as ruleId,
-      r.title as ruleTitle,
-      r.frequency as frequency,
-      r.priority as priority,
-      rc.name as categoryName,
-      rc.color as categoryColor,
-      rc.icon as categoryIcon,
-      rs.currentStreak as currentStreak,
-      rs.longestStreak as longestStreak,
-      rs.totalCompletions as totalCompletions,
-      rs.streakStartDate as streakStartDate,
-      rs.lastCompletionDate as lastCompletionDate
+    RETURN r, rc, rs
     ORDER BY rs.longestStreak DESC
     LIMIT 10
   `;
@@ -136,14 +115,12 @@ try {
 
   // STEP 4: Get category-wise streak performance
   const categoryStreakQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE 1=1 ${categoryFilter} ${ruleFilter} ${statusFilter}
     WITH rc, rs
     RETURN
-      rc.id as categoryId,
-      rc.name as categoryName,
-      rc.color as categoryColor,
-      rc.icon as categoryIcon,
+      rc,
       COUNT(*) as totalRules,
       COUNT(CASE WHEN rs.currentStreak > 0 THEN 1 END) as activeStreaks,
       AVG(rs.currentStreak) as avgCurrentStreak,
@@ -158,7 +135,8 @@ try {
 
   // STEP 5: Get streak distribution analysis
   const streakDistributionQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE 1=1 ${categoryFilter} ${ruleFilter} ${statusFilter}
     WITH rs.currentStreak as streak
     RETURN
@@ -173,16 +151,10 @@ try {
 
   // STEP 6: Get recent streak achievements (rules that hit milestone streaks)
   const achievementsQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE rs.currentStreak IN [7, 14, 21, 30, 60, 90, 100, 365] ${categoryFilter} ${ruleFilter} ${statusFilter}
-    RETURN
-      r.id as ruleId,
-      r.title as ruleTitle,
-      rc.name as categoryName,
-      rc.color as categoryColor,
-      rs.currentStreak as milestone,
-      rs.streakStartDate as startDate,
-      rs.lastCompletionDate as lastDate
+    RETURN r, rc, rs
     ORDER BY rs.currentStreak DESC
   `;
 
@@ -190,7 +162,7 @@ try {
 
   // STEP 7: Get streak trends (rules gaining/losing momentum)
   const trendQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
     WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
     OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WITH r, rc, rt
@@ -202,10 +174,7 @@ try {
          SIZE(recentTracking) as recentTotal
     WHERE recentTotal > 0
     RETURN
-      r.id as ruleId,
-      r.title as ruleTitle,
-      rc.name as categoryName,
-      rc.color as categoryColor,
+      r, rc,
       recentSuccesses,
       recentTotal,
       ROUND((recentSuccesses * 100.0) / recentTotal) as recentSuccessRate
@@ -220,54 +189,69 @@ try {
   const activeStreaks = args.neo4jConvert.js(overallStats.get('activeStreaks')) || 0;
   const streakEngagementRate = totalRules > 0 ? (activeStreaks / totalRules) * 100 : 0;
 
-  // Process top current streaks
-  const topCurrentStreaks = topCurrentResult.records.map(record => ({
-    ruleId: record.get('ruleId'),
-    ruleTitle: record.get('ruleTitle'),
-    frequency: record.get('frequency'),
-    priority: record.get('priority'),
-    categoryName: record.get('categoryName'),
-    categoryColor: record.get('categoryColor'),
-    categoryIcon: record.get('categoryIcon'),
-    currentStreak: args.neo4jConvert.js(record.get('currentStreak')) || 0,
-    longestStreak: args.neo4jConvert.js(record.get('longestStreak')) || 0,
-    totalCompletions: args.neo4jConvert.js(record.get('totalCompletions')) || 0,
-    streakStartDate: record.get('streakStartDate'),
-    lastCompletionDate: record.get('lastCompletionDate')
-  }));
+  // Process top current streaks using vertex format
+  const topCurrentStreaks = topCurrentResult.records.map(record => {
+    const ruleNode = record.get('r');
+    const categoryNode = record.get('rc');
+    const streakNode = record.get('rs');
 
-  // Process top longest streaks
-  const topLongestStreaks = topLongestResult.records.map(record => ({
-    ruleId: record.get('ruleId'),
-    ruleTitle: record.get('ruleTitle'),
-    frequency: record.get('frequency'),
-    priority: record.get('priority'),
-    categoryName: record.get('categoryName'),
-    categoryColor: record.get('categoryColor'),
-    categoryIcon: record.get('categoryIcon'),
-    currentStreak: args.neo4jConvert.js(record.get('currentStreak')) || 0,
-    longestStreak: args.neo4jConvert.js(record.get('longestStreak')) || 0,
-    totalCompletions: args.neo4jConvert.js(record.get('totalCompletions')) || 0,
-    streakStartDate: record.get('streakStartDate'),
-    lastCompletionDate: record.get('lastCompletionDate')
-  }));
+    const rule = args.convertNodeToJson(ruleNode);
+    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+    const streak = args.convertNodeToJson(streakNode);
 
-  // Process category streaks
-  const categoryAnalysis = categoryStreakResult.records.map(record => ({
-    categoryId: record.get('categoryId'),
-    categoryName: record.get('categoryName'),
-    categoryColor: record.get('categoryColor'),
-    categoryIcon: record.get('categoryIcon'),
-    totalRules: args.neo4jConvert.js(record.get('totalRules')) || 0,
-    activeStreaks: args.neo4jConvert.js(record.get('activeStreaks')) || 0,
-    avgCurrentStreak: Math.round(record.get('avgCurrentStreak') || 0),
-    avgLongestStreak: Math.round(record.get('avgLongestStreak') || 0),
-    maxCurrentStreak: args.neo4jConvert.js(record.get('maxCurrentStreak')) || 0,
-    maxLongestStreak: args.neo4jConvert.js(record.get('maxLongestStreak')) || 0,
-    totalCompletions: args.neo4jConvert.js(record.get('totalCompletions')) || 0,
-    engagementRate: args.neo4jConvert.js(record.get('totalRules')) > 0 ?
-      Math.round((args.neo4jConvert.js(record.get('activeStreaks')) || 0) / (args.neo4jConvert.js(record.get('totalRules'))) * 100) : 0
-  }));
+    return {
+      rule,     // Full vertex format
+      category, // Full vertex format or null
+      streak    // Full vertex format
+    };
+  });
+
+  // Process top longest streaks using vertex format
+  const topLongestStreaks = topLongestResult.records.map(record => {
+    const ruleNode = record.get('r');
+    const categoryNode = record.get('rc');
+    const streakNode = record.get('rs');
+
+    const rule = args.convertNodeToJson(ruleNode);
+    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+    const streak = args.convertNodeToJson(streakNode);
+
+    return {
+      rule,     // Full vertex format
+      category, // Full vertex format or null
+      streak    // Full vertex format
+    };
+  });
+
+  // Process category streaks using vertex format
+  const categoryAnalysis = categoryStreakResult.records.map(record => {
+    const categoryNode = record.get('rc');
+    const category = args.convertNodeToJson(categoryNode);
+
+    const totalRules = args.neo4jConvert.js(record.get('totalRules')) || 0;
+    const activeStreaks = args.neo4jConvert.js(record.get('activeStreaks')) || 0;
+    const avgCurrentStreak = Math.round(record.get('avgCurrentStreak') || 0);
+    const avgLongestStreak = Math.round(record.get('avgLongestStreak') || 0);
+    const maxCurrentStreak = args.neo4jConvert.js(record.get('maxCurrentStreak')) || 0;
+    const maxLongestStreak = args.neo4jConvert.js(record.get('maxLongestStreak')) || 0;
+    const totalCompletions = args.neo4jConvert.js(record.get('totalCompletions')) || 0;
+    const engagementRate = totalRules > 0 ?
+      Math.round((activeStreaks / totalRules) * 100) : 0;
+
+    return {
+      category,           // Full vertex format
+      stats: {
+        totalRules,
+        activeStreaks,
+        avgCurrentStreak,
+        avgLongestStreak,
+        maxCurrentStreak,
+        maxLongestStreak,
+        totalCompletions,
+        engagementRate
+      }
+    };
+  });
 
   // Process streak distribution
   const distribution = distributionResult.records[0];
@@ -279,29 +263,50 @@ try {
     longStreak: args.neo4jConvert.js(distribution.get('longStreak')) || 0
   };
 
-  // Process achievements
-  const milestoneAchievements = achievementsResult.records.map(record => ({
-    ruleId: record.get('ruleId'),
-    ruleTitle: record.get('ruleTitle'),
-    categoryName: record.get('categoryName'),
-    categoryColor: record.get('categoryColor'),
-    milestone: args.neo4jConvert.js(record.get('milestone')) || 0,
-    startDate: record.get('startDate'),
-    lastDate: record.get('lastDate'),
-    milestoneType: getMilestoneType(args.neo4jConvert.js(record.get('milestone')) || 0)
-  }));
+  // Process achievements using vertex format
+  const milestoneAchievements = achievementsResult.records.map(record => {
+    const ruleNode = record.get('r');
+    const categoryNode = record.get('rc');
+    const streakNode = record.get('rs');
 
-  // Process trends
-  const performanceTrends = trendResult.records.map(record => ({
-    ruleId: record.get('ruleId'),
-    ruleTitle: record.get('ruleTitle'),
-    categoryName: record.get('categoryName'),
-    categoryColor: record.get('categoryColor'),
-    recentSuccesses: args.neo4jConvert.js(record.get('recentSuccesses')) || 0,
-    recentTotal: args.neo4jConvert.js(record.get('recentTotal')) || 0,
-    recentSuccessRate: args.neo4jConvert.js(record.get('recentSuccessRate')) || 0,
-    trend: getTrendDirection(args.neo4jConvert.js(record.get('recentSuccessRate')) || 0)
-  }));
+    const rule = args.convertNodeToJson(ruleNode);
+    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+    const streak = args.convertNodeToJson(streakNode);
+
+    const milestone = streak.P.currentStreak || 0;
+
+    return {
+      rule,     // Full vertex format
+      category, // Full vertex format or null
+      streak,   // Full vertex format
+      milestone,
+      milestoneType: getMilestoneType(milestone)
+    };
+  });
+
+  // Process trends using vertex format
+  const performanceTrends = trendResult.records.map(record => {
+    const ruleNode = record.get('r');
+    const categoryNode = record.get('rc');
+
+    const rule = args.convertNodeToJson(ruleNode);
+    const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
+
+    const recentSuccesses = args.neo4jConvert.js(record.get('recentSuccesses')) || 0;
+    const recentTotal = args.neo4jConvert.js(record.get('recentTotal')) || 0;
+    const recentSuccessRate = args.neo4jConvert.js(record.get('recentSuccessRate')) || 0;
+
+    return {
+      rule,     // Full vertex format
+      category, // Full vertex format or null
+      stats: {
+        recentSuccesses,
+        recentTotal,
+        recentSuccessRate,
+        trend: getTrendDirection(recentSuccessRate)
+      }
+    };
+  });
 
   // Helper function for milestone types
   function getMilestoneType(streak) {
@@ -346,8 +351,8 @@ try {
 
   if (categoryAnalysis.length > 0) {
     const topCategory = categoryAnalysis[0];
-    if (topCategory.avgCurrentStreak >= 5) {
-      insights.push(`🌟 "${topCategory.categoryName}" shows the strongest streak performance.`);
+    if (topCategory.stats.avgCurrentStreak >= 5) {
+      insights.push(`🌟 "${topCategory.category.P.name}" shows the strongest streak performance.`);
     }
   }
 

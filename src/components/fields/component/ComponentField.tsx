@@ -161,7 +161,7 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
     );
   };
 
-  const Children = (props: { slot: string }) => {
+  const Children = (props: { slot: string, class?: string }) => {
     const currentSlotComponents = useContext(SlotContext) || [];
 
     const slotFilter = (vertex: Vertex) => {
@@ -203,6 +203,7 @@ export function ComponentField(props: Readonly<{ children?: JSX.Element }>) {
                 }
                 metaVertex={meta() as Vertex}
                 filter={slotFilter}
+                class={props.class}
               />
             </Show>
           </PreviewContext.Provider>

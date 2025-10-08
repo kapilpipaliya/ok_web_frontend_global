@@ -27,11 +27,12 @@ try {
       MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
       WHERE elementId(rc) = $categoryId
       ${includeInactive ? '' : 'AND r.isActive = true'}
-      OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r)
-      OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r)
-      OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r)
-      ${includeTracking && trackingDate ? 'OPTIONAL MATCH (u)-[:UserRuleTracking]->(todayTracking:RuleTracking {date: date($trackingDate)})-[:RuleTrackingRule]->(r)' : ''}
-      WITH r, rc, count(DISTINCT rt) as trackingCount, count(DISTINCT rs) as streakCount, count(DISTINCT rg) as goalCount
+      OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
+      OPTIONAL MATCH (r)-[:RuleStreak]->(rs:RuleStreak)
+      OPTIONAL MATCH (r)-[:RuleGoal]->(rg:RuleGoal)
+      OPTIONAL MATCH (u)-[:UserRuleGoal]->(urg:RuleGoal)
+      ${includeTracking && trackingDate ? 'OPTIONAL MATCH (r)-[:RuleTracking]->(todayTracking:RuleTracking {date: date($trackingDate)})' : ''}
+      WITH r, rc, count(DISTINCT rt) as trackingCount, count(DISTINCT rs) as streakCount, count(DISTINCT rg) + count(DISTINCT urg) as goalCount
       ${includeTracking && trackingDate ? ', collect(DISTINCT todayTracking) as todayTrackingList' : ''}
       RETURN r, rc, trackingCount, streakCount, goalCount
       ${includeTracking && trackingDate ? ', todayTrackingList' : ''}
@@ -47,11 +48,12 @@ try {
       MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
       ${includeInactive ? '' : 'WHERE r.isActive = true'}
       OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
-      OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r)
-      OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r)
-      OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r)
-      ${includeTracking && trackingDate ? 'OPTIONAL MATCH (u)-[:UserRuleTracking]->(todayTracking:RuleTracking {date: date($trackingDate)})-[:RuleTrackingRule]->(r)' : ''}
-      WITH r, rc, count(DISTINCT rt) as trackingCount, count(DISTINCT rs) as streakCount, count(DISTINCT rg) as goalCount
+      OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
+      OPTIONAL MATCH (r)-[:RuleStreak]->(rs:RuleStreak)
+      OPTIONAL MATCH (r)-[:RuleGoal]->(rg:RuleGoal)
+      OPTIONAL MATCH (u)-[:UserRuleGoal]->(urg:RuleGoal)
+      ${includeTracking && trackingDate ? 'OPTIONAL MATCH (r)-[:RuleTracking]->(todayTracking:RuleTracking {date: date($trackingDate)})' : ''}
+      WITH r, rc, count(DISTINCT rt) as trackingCount, count(DISTINCT rs) as streakCount, count(DISTINCT rg) + count(DISTINCT urg) as goalCount
       ${includeTracking && trackingDate ? ', collect(DISTINCT todayTracking) as todayTrackingList' : ''}
       RETURN r, rc, trackingCount, streakCount, goalCount
       ${includeTracking && trackingDate ? ', todayTrackingList' : ''}
@@ -122,7 +124,7 @@ try {
       if (ruleElementId) {
         try {
           const streakQuery = `
-            MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+            MATCH (r:Rule)-[:RuleStreak]->(rs:RuleStreak)
             WHERE elementId(r) = $ruleElementId
             RETURN rs
           `;

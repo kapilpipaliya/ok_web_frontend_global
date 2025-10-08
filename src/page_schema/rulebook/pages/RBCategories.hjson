@@ -132,44 +132,11 @@ return `._id {
       }
     },
     {
-      id: "header",
+      id: "page_header",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "header"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${args.theme.var.spacing.xl};
-}`;
-'''
-      }
-    },
-    {
-      id: "header_left",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: ${args.theme.var.spacing.md};
-}`;
-'''
+        componentName: "RBHeader"
       }
     },
     {
@@ -178,6 +145,7 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
+        slot: "left",
         props: '''
 return {
   as: "a",
@@ -194,6 +162,10 @@ return `._id {
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
   transition: all ${args.theme.var.animation.fast} ease;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
 
   &:hover {
     background: ${args.theme.var.color.background_light_200};
@@ -229,21 +201,13 @@ return {
       id: "page_title",
       L: "Attr",
       P: {
-        displayOrder: 2,
-        componentName: "Html",
+        displayOrder: 1,
+        componentName: "RBPageTitle",
+        slot: "center",
         props: '''
 return {
-  as: "h1",
   text: "Categories"
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.title};
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0;
-}`;
 '''
       }
     },
@@ -251,50 +215,22 @@ return `._id {
       id: "add_button",
       L: "Attr",
       P: {
-        displayOrder: 2,
-        componentName: "Html",
+        displayOrder: 1,
+        componentName: "RBButton",
+        slot: "right",
         props: '''
 return {
-  as: "button",
+  text: "Add Category",
+  variant: "primary",
+  size: "medium",
+  leftIcon: "carbon:add",
   onClick: (e) => {
     e.preventDefault();
     e.stopPropagation();
     const { setShowCategoryModal, setModalMode } = args.contextData.categoryModal || {};
     setModalMode?.("create");
     setShowCategoryModal?.(true);
-  },
-  "aria-label": "Add new category"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.success};
-  color: ${args.theme.var.color.success_text};
-  border: none;
-  cursor: pointer;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
-
-  &:hover {
-    background: ${args.theme.var.color.success_dark_200};
   }
-}`;
-'''
-      }
-    },
-    {
-      id: "add_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:add",
-  width: 20,
-  height: 20
 };
 '''
       }
@@ -990,13 +926,11 @@ return {
   edges: [
     { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
     { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
-    { id: "e3", T: "Attr", S: "page_content", E: "header" },
-    { id: "e4", T: "Attr", S: "header", E: "header_left" },
-    { id: "e5", T: "Attr", S: "header_left", E: "back_button" },
-    { id: "e6", T: "Attr", S: "back_button", E: "back_icon" },
-    { id: "e7", T: "Attr", S: "header_left", E: "page_title" },
-    { id: "e8", T: "Attr", S: "header", E: "add_button" },
-    { id: "e9", T: "Attr", S: "add_button", E: "add_icon" },
+    { id: "e3", T: "Attr", S: "page_content", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "back_button" },
+    { id: "e5", T: "Attr", S: "back_button", E: "back_icon" },
+    { id: "e6", T: "Attr", S: "page_header", E: "page_title" },
+    { id: "e7", T: "Attr", S: "page_header", E: "add_button" },
     { id: "e10", T: "Attr", S: "page_content", E: "loading_state" },
     { id: "e11", T: "Attr", S: "loading_state", E: "loading_container" },
     { id: "e11a", T: "Attr", S: "loading_container", E: "loading_spinner" },

@@ -21,12 +21,14 @@ Personal Rulebook is a comprehensive page schema implementation that provides:
 The system uses the following Neo4j graph relationships:
 
 ```
+(User)-[:UserRule]->(Rule)
 (User)-[:UserRuleCategory]->(RuleCategory)
-(User)-[:UserRule]->(Rule)-[:RuleCategory]->(RuleCategory)
-(User)-[:UserRuleTracking]->(RuleTracking)-[:RuleTrackingRule]->(Rule)
-(User)-[:UserRuleGoal]->(RuleGoal)-[:RuleGoalRule]->(Rule)
-(User)-[:UserRuleNote]->(RuleNote)-[:RuleNoteRule]->(Rule)
-(User)-[:UserRuleStreak]->(RuleStreak)-[:RuleStreakRule]->(Rule)
+(User)-[:UserRuleGoal]->(RuleGoal)
+(Rule)-[:RuleCategory]->(RuleCategory)
+(Rule)-[:RuleTracking]->(RuleTracking)
+(Rule)-[:RuleGoal]->(RuleGoal)
+(Rule)-[:RuleNote]->(RuleNote)
+(Rule)-[:RuleStreak]->(RuleStreak)
 (User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
 ```
 
@@ -42,23 +44,31 @@ WHERE r.isActive = true
 
 #### Accessing User's Rule Tracking Data:
 ```cypher
-MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)
+MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
 WHERE rt.date >= date($startDate) AND rt.date <= date($endDate)
-OPTIONAL MATCH (rt)-[:RuleTrackingRule]->(r:Rule)
-WHERE r.isActive = true
+AND r.isActive = true
 ```
 
 #### Accessing Categories with Tracking Data:
 ```cypher
 MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
 WHERE rc.isActive = true
-OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule), (u)-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r)
-WHERE rt.date >= date($startDate) AND rt.date <= date($endDate)
+OPTIONAL MATCH (u)-[:UserRule]->(r:Rule)-[:RuleCategory]->(rc)
+OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
+WHERE rt.date >= date($startDate) AND rt.date <= date($endDate) AND r.isActive = true
+```
+
+#### Accessing User's Goals:
+```cypher
+MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+WHERE rg.isActive = true
+OPTIONAL MATCH (u)-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg)
+WHERE r.isActive = true
 ```
 
 #### Accessing Streaks:
 ```cypher
-MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
 WHERE rs.currentStreak > 0 AND rs.isActive = true AND r.isActive = true
 ```
 
@@ -66,7 +76,7 @@ WHERE rs.currentStreak > 0 AND rs.isActive = true AND r.isActive = true
 ```cypher
 MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
 WHERE r.isActive = true
-OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r)
+OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
 WHERE rt.date = date($targetDate)
 ```
 

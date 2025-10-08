@@ -272,71 +272,71 @@ MERGE (u)-[:UserRole]->(r)
 ### RealAssistant-Specific Relationships
 ```cypher
 // User has balance (one-to-one)
-(u:User)-[:HAS_BALANCE]->(b:Balance)
+(u:User)-[:UserBalance]->(b:Balance)
 
 // User has profile (one-to-one)
-(u:User)-[:HAS_PROFILE]->(p:Profile)
+(u:User)-[:UserProfile]->(p:Profile)
 
-// Assistant has stats (one-to-one)
-(a:User)-[:HAS_ASSISTANT_STATS]->(s:AssistantStats)
+// User has assistant stats (one-to-one)
+(a:User)-[:UserAssistantStats]->(s:AssistantStats)
 
-// Customer has stats (one-to-one)
-(c:User)-[:HAS_CUSTOMER_STATS]->(s:CustomerStats)
+// User has customer stats (one-to-one)
+(c:User)-[:UserCustomerStats]->(s:CustomerStats)
 
 // User has preferences (one-to-one)
-(u:User)-[:HAS_PREFERENCES]->(p:Preferences)
+(u:User)-[:UserPreferences]->(p:Preferences)
 
 // User submits problems
-(u:User)-[:SUBMITTED]->(p:Problem)
+(u:User)-[:UserProblem]->(p:Problem)
 
-// Assistant assigned to problem
-(a:User)-[:ASSIGNED_TO]->(p:Problem)
+// User assigned to problem (as assistant)
+(a:User)-[:UserAssignedProblem]->(p:Problem)
 
 // Problem has solution
-(p:Problem)-[:HAS_SOLUTION]->(s:Solution)
+(p:Problem)-[:ProblemSolution]->(s:Solution)
 
-// Solution provided by assistant
-(s:Solution)-[:PROVIDED_BY]->(a:User)
+// Solution provided by user (assistant)
+(s:Solution)-[:SolutionUser]->(a:User)
 
 // Problem in category
-(p:Problem)-[:IN_CATEGORY]->(c:Category)
+(p:Problem)-[:ProblemCategory]->(c:Category)
 
 // User makes transaction
-(u:User)-[:MADE_TRANSACTION]->(t:Transaction)
+(u:User)-[:UserTransaction]->(t:Transaction)
 
 // Transaction for problem
-(t:Transaction)-[:FOR_PROBLEM]->(p:Problem)
+(t:Transaction)-[:TransactionProblem]->(p:Problem)
 
 // Problem has messages
-(p:Problem)-[:HAS_MESSAGE]->(m:Message)
+(p:Problem)-[:ProblemMessage]->(m:Message)
 
 // Message sent by user
-(m:Message)-[:SENT_BY]->(u:User)
+(m:Message)-[:MessageUser]->(u:User)
 
 // Problem has rating
-(p:Problem)-[:HAS_RATING]->(r:Rating)
+(p:Problem)-[:ProblemRating]->(r:Rating)
 
 // Rating given by user
-(r:Rating)-[:RATED_BY]->(u:User)
+(r:Rating)-[:RatingUser]->(u:User)
 
-// Rating for assistant
-(r:Rating)-[:RATING_FOR]->(a:User)
+// Rating for user (assistant)
+(r:Rating)-[:RatingAssistant]->(a:User)
 
-// Assistant has expertise
-(a:User)-[:HAS_EXPERTISE {
+// User has expertise
+(a:User)-[:UserExpertise {
   level: string,          // "beginner" | "intermediate" | "expert"
   certified: boolean,
   certifiedAt: datetime?
 }]->(e:Expertise)
 
-// Assistant has schedule
-(a:User)-[:HAS_SCHEDULE]->(s:Schedule)
+// User has schedule
+(a:User)-[:UserSchedule]->(s:Schedule)
 
-// Assistant withdrawal request
-(a:User)-[:REQUESTED_WITHDRAWAL]->(w:Withdrawal)
+// User requested withdrawal
+(a:User)-[:UserWithdrawal]->(w:Withdrawal)
 
 // Withdrawal linked to transaction
-(w:Withdrawal)-[:WITHDRAWAL_TRANSACTION]->(t:Transaction)
+(w:Withdrawal)-[:WithdrawalTransaction]->(t:Transaction)
 ```
 
 ## Common Query Patterns
@@ -359,16 +359,16 @@ RETURN collect(r.key) as roles
 ### Get User Dashboard Data
 ```cypher
 MATCH (u:User {uuid: $userId})
-OPTIONAL MATCH (u)-[:HAS_BALANCE]->(b:Balance)
-OPTIONAL MATCH (u)-[:HAS_PROFILE]->(prof:Profile)
-OPTIONAL MATCH (u)-[:HAS_CUSTOMER_STATS]->(cs:CustomerStats)
-OPTIONAL MATCH (u)-[:HAS_ASSISTANT_STATS]->(as:AssistantStats)
-OPTIONAL MATCH (u)-[:HAS_PREFERENCES]->(pref:Preferences)
+OPTIONAL MATCH (u)-[:UserBalance]->(b:Balance)
+OPTIONAL MATCH (u)-[:UserProfile]->(prof:Profile)
+OPTIONAL MATCH (u)-[:UserCustomerStats]->(cs:CustomerStats)
+OPTIONAL MATCH (u)-[:UserAssistantStats]->(as:AssistantStats)
+OPTIONAL MATCH (u)-[:UserPreferences]->(pref:Preferences)
 OPTIONAL MATCH (u)-[:UserRole]->(role:Role)
 WHERE role.key IN ['Customer', 'Assistant', 'RealAssistantAdmin']
-OPTIONAL MATCH (u)-[:SUBMITTED]->(p:Problem)
+OPTIONAL MATCH (u)-[:UserProblem]->(p:Problem)
 WHERE p.status IN ['pending', 'assigned', 'in_progress', 'solution_provided']
-OPTIONAL MATCH (u)-[:MADE_TRANSACTION]->(t:Transaction)
+OPTIONAL MATCH (u)-[:UserTransaction]->(t:Transaction)
 WHERE t.createdAt > datetime() - duration('P30D')
 RETURN u {
   .*, 
@@ -388,7 +388,7 @@ RETURN u {
 ```cypher
 // First verify user has customer role and sufficient balance
 MATCH (u:User {uuid: $userId})-[:UserRole]->(:Role {key: 'Customer'})
-MATCH (u)-[:HAS_BALANCE]->(b:Balance)
+MATCH (u)-[:UserBalance]->(b:Balance)
 WHERE b.amount >= $estimatedCost
 MATCH (c:Category {key: $categoryKey})
 CREATE (p:Problem {
@@ -401,8 +401,8 @@ CREATE (p:Problem {
   createdAt: datetime(),
   updatedAt: datetime()
 })
-CREATE (u)-[:SUBMITTED]->(p)
-CREATE (p)-[:IN_CATEGORY]->(c)
+CREATE (u)-[:UserProblem]->(p)
+CREATE (p)-[:ProblemCategory]->(c)
 RETURN p
 ```
 
@@ -410,10 +410,10 @@ RETURN p
 ```cypher
 // Verify assistant role and expertise match
 MATCH (a:User {uuid: $assistantId})-[:UserRole]->(:Role {key: 'Assistant'})
-MATCH (p:Problem {id: $problemId})-[:IN_CATEGORY]->(c:Category)
-OPTIONAL MATCH (a)-[:HAS_EXPERTISE]->(e:Expertise {category: c.key})
+MATCH (p:Problem {id: $problemId})-[:ProblemCategory]->(c:Category)
+OPTIONAL MATCH (a)-[:UserExpertise]->(e:Expertise {category: c.key})
 WHERE p.status = 'pending'
-CREATE (a)-[:ASSIGNED_TO]->(p)
+CREATE (a)-[:UserAssignedProblem]->(p)
 SET p.status = 'assigned', 
     p.assignedAt = datetime(),
     p.updatedAt = datetime()
@@ -422,13 +422,13 @@ RETURN p, a
 
 ### Process Payment After Solution Approval
 ```cypher
-MATCH (u:User {uuid: $userId})-[:SUBMITTED]->(p:Problem {id: $problemId})
-MATCH (p)-[:HAS_SOLUTION]->(s:Solution)
-MATCH (s)-[:PROVIDED_BY]->(a:User)
-MATCH (u)-[:HAS_BALANCE]->(ub:Balance)
-MATCH (a)-[:HAS_BALANCE]->(ab:Balance)
-OPTIONAL MATCH (u)-[:HAS_CUSTOMER_STATS]->(ucs:CustomerStats)
-OPTIONAL MATCH (a)-[:HAS_ASSISTANT_STATS]->(aas:AssistantStats)
+MATCH (u:User {uuid: $userId})-[:UserProblem]->(p:Problem {id: $problemId})
+MATCH (p)-[:ProblemSolution]->(s:Solution)
+MATCH (s)-[:SolutionUser]->(a:User)
+MATCH (u)-[:UserBalance]->(ub:Balance)
+MATCH (a)-[:UserBalance]->(ab:Balance)
+OPTIONAL MATCH (u)-[:UserCustomerStats]->(ucs:CustomerStats)
+OPTIONAL MATCH (a)-[:UserAssistantStats]->(aas:AssistantStats)
 WHERE s.isApproved = true AND ub.amount >= p.actualCost
 CREATE (t:Transaction {
   id: randomUUID(),
@@ -440,8 +440,8 @@ CREATE (t:Transaction {
   createdAt: datetime(),
   processedAt: datetime()
 })
-CREATE (u)-[:MADE_TRANSACTION]->(t)
-CREATE (t)-[:FOR_PROBLEM]->(p)
+CREATE (u)-[:UserTransaction]->(t)
+CREATE (t)-[:TransactionProblem]->(p)
 SET ub.amount = ub.amount - p.actualCost,
     ub.lastUpdated = datetime(),
     ab.amount = ab.amount + (p.actualCost * 0.85), // 85% to assistant
@@ -461,10 +461,10 @@ RETURN t, ub.amount as newBalance
 ### Get Assistant Performance Metrics
 ```cypher
 MATCH (a:User {uuid: $assistantId})-[:UserRole]->(:Role {key: 'Assistant'})
-OPTIONAL MATCH (a)-[:HAS_ASSISTANT_STATS]->(stats:AssistantStats)
-OPTIONAL MATCH (a)-[:HAS_PROFILE]->(prof:Profile)
-OPTIONAL MATCH (a)-[:ASSIGNED_TO]->(p:Problem)
-OPTIONAL MATCH (p)-[:HAS_RATING]->(r:Rating)
+OPTIONAL MATCH (a)-[:UserAssistantStats]->(stats:AssistantStats)
+OPTIONAL MATCH (a)-[:UserProfile]->(prof:Profile)
+OPTIONAL MATCH (a)-[:UserAssignedProblem]->(p:Problem)
+OPTIONAL MATCH (p)-[:ProblemRating]->(r:Rating)
 WITH a, stats, prof, count(DISTINCT p) as totalProblems, 
      count(DISTINCT CASE WHEN p.status = 'completed' THEN p END) as completedProblems,
      avg(r.score) as avgRating,
@@ -551,7 +551,7 @@ SET r3.name = 'RealAssistant Administrator', r3.createdAt = datetime()
 ```cypher
 // Create Balance, Profile, Stats, and Preferences for existing users
 MATCH (u:User)
-WHERE NOT EXISTS((u)-[:HAS_BALANCE]->(:Balance))
+WHERE NOT EXISTS((u)-[:UserBalance]->(:Balance))
 
 // Create Balance
 CREATE (b:Balance {
@@ -561,29 +561,29 @@ CREATE (b:Balance {
   lastUpdated: datetime(),
   version: 1
 })
-CREATE (u)-[:HAS_BALANCE]->(b)
+CREATE (u)-[:UserBalance]->(b)
 
 // Create Profile
 WITH u
-WHERE NOT EXISTS((u)-[:HAS_PROFILE]->(:Profile))
+WHERE NOT EXISTS((u)-[:UserProfile]->(:Profile))
 CREATE (prof:Profile {
   id: randomUUID(),
   profileComplete: 50,
   timezone: 'UTC',
   lastUpdated: datetime()
 })
-CREATE (u)-[:HAS_PROFILE]->(prof)
+CREATE (u)-[:UserProfile]->(prof)
 
 // Create Preferences
 WITH u
-WHERE NOT EXISTS((u)-[:HAS_PREFERENCES]->(:Preferences))
+WHERE NOT EXISTS((u)-[:UserPreferences]->(:Preferences))
 CREATE (pref:Preferences {
   id: randomUUID(),
   language: 'en',
   theme: 'light',
   lastUpdated: datetime()
 })
-CREATE (u)-[:HAS_PREFERENCES]->(pref)
+CREATE (u)-[:UserPreferences]->(pref)
     
 // Assign default customer role to existing users
 MATCH (u:User)
@@ -593,7 +593,7 @@ CREATE (u)-[:UserRole]->(r)
 
 // Create CustomerStats for customers
 WITH u
-WHERE NOT EXISTS((u)-[:HAS_CUSTOMER_STATS]->(:CustomerStats))
+WHERE NOT EXISTS((u)-[:UserCustomerStats]->(:CustomerStats))
   AND EXISTS((u)-[:UserRole]->(:Role {key: 'Customer'}))
 CREATE (cs:CustomerStats {
   id: randomUUID(),
@@ -602,11 +602,11 @@ CREATE (cs:CustomerStats {
   lastActive: datetime(),
   lastUpdated: datetime()
 })
-CREATE (u)-[:HAS_CUSTOMER_STATS]->(cs)
+CREATE (u)-[:UserCustomerStats]->(cs)
 
 // Create AssistantStats for assistants
 WITH u
-WHERE NOT EXISTS((u)-[:HAS_ASSISTANT_STATS]->(:AssistantStats))
+WHERE NOT EXISTS((u)-[:UserAssistantStats]->(:AssistantStats))
   AND EXISTS((u)-[:UserRole]->(:Role {key: 'Assistant'}))
 CREATE (as:AssistantStats {
   id: randomUUID(),
@@ -617,7 +617,7 @@ CREATE (as:AssistantStats {
   totalProblems: 0,
   lastUpdated: datetime()
 })
-CREATE (u)-[:HAS_ASSISTANT_STATS]->(as)
+CREATE (u)-[:UserAssistantStats]->(as)
 ```
 
 ### 3. Create Categories
@@ -660,14 +660,14 @@ MATCH (a:User {uuid: $assistantId})-[:UserRole]->(:Role {key: 'Assistant'})
 // User can only access their own problems or assigned problems
 MATCH (u:User {uuid: $userId})
 MATCH (p:Problem {id: $problemId})
-WHERE EXISTS((u)-[:SUBMITTED]->(p)) OR EXISTS((u)-[:ASSIGNED_TO]->(p))
+WHERE EXISTS((u)-[:UserProblem]->(p)) OR EXISTS((u)-[:UserAssignedProblem]->(p))
 // ... rest of query
 ```
 
 ### 3. Balance Verification
 ```cypher
 // Always check balance before transactions
-MATCH (u:User {uuid: $userId})-[:HAS_BALANCE]->(b:Balance)
+MATCH (u:User {uuid: $userId})-[:UserBalance]->(b:Balance)
 WHERE b.amount >= $requiredAmount
 // ... rest of query
 ```

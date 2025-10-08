@@ -62,10 +62,8 @@ try {
 
   // STEP 1: Get daily completion data for chart
   const dailyCompletionQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)
-    WHERE rt.date >= date($startDate) AND rt.date <= date($endDate)
-    OPTIONAL MATCH (rt)-[:RuleTrackingRule]->(r:Rule)
-    WHERE r.isActive = true
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
+    WHERE rt.date >= date($startDate) AND rt.date <= date($endDate) AND r.isActive = true
     WITH rt.date as trackingDate,
          COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
          COUNT(CASE WHEN rt.status = 'partial' THEN 1 END) as partial,
@@ -111,7 +109,7 @@ try {
   const categoryPerformanceQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
     WHERE rc.isActive = true
-    OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule), (u)-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r)
+    OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule)<-[:UserRule]-(u), (r)-[:RuleTracking]->(rt:RuleTracking)
     WHERE rt.date >= date($startDate) AND rt.date <= date($endDate)
     WITH rc,
          COUNT(DISTINCT r) as totalRules,
@@ -162,7 +160,7 @@ try {
   let topStreaks = [];
   if (includeStreaks) {
     const streaksQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+      MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
       WHERE rs.currentStreak > 0 AND rs.isActive = true AND r.isActive = true
       OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
       RETURN r,
@@ -193,7 +191,7 @@ try {
 
   // STEP 4: Calculate overall statistics
   const overallStatsQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
     WHERE rt.date >= date($startDate) AND rt.date <= date($endDate)
     RETURN COUNT(*) as totalTracking,
            COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,

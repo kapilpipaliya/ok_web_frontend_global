@@ -1,0 +1,151 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "RBHeader"
+      }
+    },
+    {
+      id: "header_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "header"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${args.theme.var.spacing.md} ${args.theme.var.spacing.lg};
+  margin-bottom: ${args.theme.var.spacing.xl};
+  min-height: 60px;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: ${args.theme.var.spacing.md};
+    min-height: 48px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        slot: "left",
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "center_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Slot",
+        slot: "center",
+        css: '''
+return `._id {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 ${args.theme.var.spacing.md};
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    margin: 0 ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "right_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Slot",
+        slot: "right",
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "subtitle_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Slot",
+        slot: "subtitle",
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "below_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "below_slot",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Slot",
+        slot: "below"
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "component_root", E: "header_container" },
+    { id: "e2", T: "Attr", S: "header_container", E: "left_slot" },
+    { id: "e3", T: "Attr", S: "header_container", E: "center_slot" },
+    { id: "e4", T: "Attr", S: "header_container", E: "right_slot" },
+    { id: "e5", T: "Attr", S: "component_root", E: "subtitle_slot" },
+    { id: "e6", T: "Attr", S: "component_root", E: "below_container" },
+    { id: "e7", T: "Attr", S: "below_container", E: "below_slot" }
+  ]
+}

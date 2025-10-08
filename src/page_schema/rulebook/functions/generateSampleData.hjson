@@ -271,7 +271,7 @@ try {
       CREATE (r)-[:RuleCategory]->(rc)
 
       // Create streak tracking
-      CREATE (u)-[:UserRuleStreak]->(rs:RuleStreak)
+      CREATE (r)-[:RuleStreak]->(rs:RuleStreak)
       SET
         rs.currentStreak = toInteger(rand() * 15) + 1,
         rs.longestStreak = toInteger(rand() * 30) + 5,
@@ -282,7 +282,6 @@ try {
         rs.isActive = true,
         rs.createdAt = datetime(),
         rs.updatedAt = datetime()
-      CREATE (rs)-[:RuleStreakRule]->(r)
 
       RETURN r, elementId(r) as ruleId, rs
     `;
@@ -381,13 +380,13 @@ try {
       MATCH (r:Rule) WHERE elementId(r) = $ruleId
 
       // Check if goal already exists
-      OPTIONAL MATCH (u)-[:UserRuleGoal]->(existing:RuleGoal)-[:RuleGoalRule]->(r)
+      OPTIONAL MATCH (r)-[:RuleGoal]->(existing:RuleGoal)
       WHERE toLower(existing.title) = toLower($title)
 
       // If doesn't exist, create new one
       WITH u, r, existing
       WHERE existing IS NULL
-      CREATE (u)-[:UserRuleGoal]->(rg:RuleGoal)
+      CREATE (r)-[:RuleGoal]->(rg:RuleGoal)
       SET
         rg.title = $title,
         rg.description = $description,
@@ -401,7 +400,6 @@ try {
         rg.completedAt = CASE WHEN $currentValue >= $targetValue THEN datetime() ELSE null END,
         rg.createdAt = datetime(),
         rg.updatedAt = datetime()
-      CREATE (rg)-[:RuleGoalRule]->(r)
       RETURN rg, elementId(rg) as goalId
     `;
 
@@ -457,13 +455,13 @@ try {
           MATCH (r:Rule) WHERE elementId(r) = $ruleId
 
           // Check if tracking already exists for this date
-          OPTIONAL MATCH (u)-[:UserRuleTracking]->(existing:RuleTracking)-[:RuleTrackingRule]->(r)
+          OPTIONAL MATCH (r)-[:RuleTracking]->(existing:RuleTracking)
           WHERE existing.date = date($date)
 
           // If doesn't exist, create new tracking
           WITH u, r, existing
           WHERE existing IS NULL
-          CREATE (u)-[:UserRuleTracking]->(rt:RuleTracking)
+          CREATE (r)-[:RuleTracking]->(rt:RuleTracking)
           SET
             rt.date = date($date),
             rt.status = $status,
@@ -475,7 +473,6 @@ try {
               END),
             rt.createdAt = datetime(),
             rt.updatedAt = datetime()
-          CREATE (rt)-[:RuleTrackingRule]->(r)
           RETURN rt
         `;
 

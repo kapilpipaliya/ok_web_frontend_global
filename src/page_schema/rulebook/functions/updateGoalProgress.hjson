@@ -28,14 +28,18 @@ try {
 
   if (goalId) {
     goalQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      MATCH (u:User {uuid: $userUuid})
+      OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)
       WHERE elementId(rg) = $goalId
+      OPTIONAL MATCH (u)-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg)
+      WITH rg, r
+      WHERE rg IS NOT NULL
       RETURN rg, r
     `;
     queryParams.goalId = goalId;
   } else if (ruleId) {
     goalQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg:RuleGoal)
       WHERE elementId(r) = $ruleId
       RETURN rg, r
     `;
@@ -80,7 +84,7 @@ try {
         case 'streak':
           // Get current streak from streak data
           const streakQuery = `
-            MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+            MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
             WHERE elementId(r) = $ruleId
             RETURN COALESCE(rs.currentStreak, 0) as streakValue
           `;
@@ -98,7 +102,7 @@ try {
         case 'completion_count':
           // Get total completions from streak data
           const completionQuery = `
-            MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+            MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
             WHERE elementId(r) = $ruleId
             RETURN COALESCE(rs.totalCompletions, 0) as completionValue
           `;
@@ -139,7 +143,7 @@ try {
           const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
 
           const percentageQuery = `
-            MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)
+            MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
             WHERE elementId(r) = $ruleId AND rt.date >= $startDate
             WITH COUNT(*) as total,
                  COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,

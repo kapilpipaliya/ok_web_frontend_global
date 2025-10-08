@@ -19,8 +19,11 @@ const [error, setError] = args.createSignal(null);
 const [selectedDate, setSelectedDate] = args.createSignal(new Date().toISOString().split('T')[0]);
 
 // Load rules with today's tracking status
-const loadRulesWithTracking = async (date) => {
-  setIsLoading(true);
+const loadRulesWithTracking = async (date, isInitialLoad = false) => {
+  // Only show loading state on initial load
+  if (isInitialLoad) {
+    setIsLoading(true);
+  }
   setError(null);
 
   try {
@@ -47,7 +50,9 @@ const loadRulesWithTracking = async (date) => {
     setError(err.message);
     args.showErrorToast(err.message);
   } finally {
-    setIsLoading(false);
+    if (isInitialLoad) {
+      setIsLoading(false);
+    }
   }
 };
 
@@ -80,7 +85,6 @@ const trackRuleAction = async (ruleId, status, notes = "", completionPercentage 
     if (status === 'partial') {
       contextData.completionPercentage = completionPercentage;
     }
-
 
     const result = await args.executeNamedServerFunction({
       functionName: "trackRule",
@@ -216,7 +220,7 @@ const completeAllRemaining = async () => {
 
 // Load data on mount
 const onMount = () => {
-  loadRulesWithTracking(selectedDate());
+  loadRulesWithTracking(selectedDate(), true);
 };
 
 return {
@@ -235,7 +239,7 @@ return {
     completeAllRemaining,
     refreshData: () => {
       const currentDate = selectedDate();
-      return loadRulesWithTracking(currentDate);
+      return loadRulesWithTracking(currentDate, false);
     }
   })
 };
@@ -277,37 +281,11 @@ return `._id {
       }
     },
     {
-      id: "header",
+      id: "page_header",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "header"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${args.theme.var.spacing.xl};
-}`;
-'''
-      }
-    },
-    {
-      id: "header_left",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
+        componentName: "RBHeader"
       }
     },
     {
@@ -315,7 +293,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
+        componentName: "RBPageTitle",
+        slot: "center",
         props: '''
 const selectedDate = args.contextData?.trackingData?.selectedDate;
 const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
@@ -325,17 +304,8 @@ const isToday = currentDate === today;
 const title = isToday ? "Daily Tracking" : "Rule Tracking";
 
 return {
-  as: "h1",
   text: title
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.title};
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
-}`;
 '''
       }
     },
@@ -343,8 +313,9 @@ return `._id {
       id: "date_subtitle",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
+        slot: "subtitle",
         props: '''
 const selectedDate = args.contextData?.trackingData?.selectedDate;
 const currentDate = selectedDate?.() || new Date().toISOString().split('T')[0];
@@ -379,8 +350,9 @@ return `._id {
       id: "calendar_button",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
+        slot: "right",
         props: '''
 const selectedDate = args.contextData?.trackingData?.selectedDate;
 const setSelectedDate = args.contextData?.trackingData?.setSelectedDate;
@@ -423,6 +395,8 @@ return `._id {
   padding: ${args.theme.var.spacing.sm};
   border-radius: ${args.theme.var.borderRadius.sm};
   transition: all ${args.theme.var.animation.fast} ease;
+  display: flex;
+  align-items: center;
 
   &:hover {
     background: ${args.theme.var.color.background_light_200};
@@ -1324,12 +1298,11 @@ return `._id {
   edges: [
     { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
     { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
-    { id: "e3", T: "Attr", S: "page_content", E: "header" },
-    { id: "e4", T: "Attr", S: "header", E: "header_left" },
-    { id: "e5", T: "Attr", S: "header_left", E: "page_title" },
-    { id: "e6", T: "Attr", S: "header_left", E: "date_subtitle" },
-    { id: "e7", T: "Attr", S: "header", E: "calendar_button" },
-    { id: "e8", T: "Attr", S: "calendar_button", E: "calendar_icon" },
+    { id: "e3", T: "Attr", S: "page_content", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "page_title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "date_subtitle" },
+    { id: "e6", T: "Attr", S: "page_header", E: "calendar_button" },
+    { id: "e7", T: "Attr", S: "calendar_button", E: "calendar_icon" },
     { id: "e9", T: "Attr", S: "page_content", E: "progress_summary" },
     { id: "e10", T: "Attr", S: "progress_summary", E: "progress_title" },
     { id: "e11", T: "Attr", S: "progress_summary", E: "progress_bar_container" },

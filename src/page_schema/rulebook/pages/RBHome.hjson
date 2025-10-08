@@ -316,81 +316,11 @@ return {
       }
     },
     {
-      id: "header",
+      id: "page_header",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const currentTime = new Date();
-const hour = currentTime.getHours();
-let greeting = "Good Evening";
-if (hour < 12) greeting = "Good Morning";
-else if (hour < 18) greeting = "Good Afternoon";
-
-const today = currentTime.toLocaleDateString('en-US', {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
-});
-
-return {
-  as: "header"
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
-}`;
-'''
-      }
-    },
-    {
-      id: "greeting_container",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${args.theme.var.spacing.md};
-}`;
-'''
-      }
-    },
-    {
-      id: "greeting_text",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const currentTime = new Date();
-const hour = currentTime.getHours();
-let greeting = "Good Evening";
-if (hour < 12) greeting = "Good Morning";
-else if (hour < 18) greeting = "Good Afternoon";
-
-const today = currentTime.toLocaleDateString('en-US', {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
-});
-
-return {
-  as: "div"
-};
-'''
+        componentName: "RBHeader"
       }
     },
     {
@@ -398,7 +328,8 @@ return {
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
+        componentName: "RBPageTitle",
+        slot: "center",
         props: '''
 const currentTime = new Date();
 const hour = currentTime.getHours();
@@ -407,17 +338,8 @@ if (hour < 12) greeting = "Good Morning";
 else if (hour < 18) greeting = "Good Afternoon";
 
 return {
-  as: "h1",
   text: `⚡ ${greeting}!`
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.title};
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
-}`;
 '''
       }
     },
@@ -425,8 +347,9 @@ return `._id {
       id: "date_text",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
+        slot: "subtitle",
         props: '''
 const today = new Date().toLocaleDateString('en-US', {
   weekday: 'long',
@@ -448,55 +371,7 @@ return `._id {
 }`;
 '''
       }
-    },
-    {
-      id: "settings_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "a",
-  href: "/rb/settings",
-  "aria-label": "Settings"
-};
-''',
-        css: '''
-return `._id {
-  background: none;
-  border: none;
-  color: ${args.theme.var.color.muted};
-  cursor: pointer;
-  text-decoration: none;
-  padding: ${args.theme.var.spacing.sm};
-  border-radius: ${args.theme.var.borderRadius.sm};
-  transition: all ${args.theme.var.animation.fast} ease;
-
-  &:hover {
-    background: ${args.theme.var.color.background_light_200};
-    color: ${args.theme.var.color.text};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "settings_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:settings",
-  width: 24,
-  height: 24
-};
-'''
-      }
-    },
+    }
     {
       id: "progress_card",
       L: "Attr",
@@ -1135,72 +1010,6 @@ if (isCompleted) {
 }
 '''
       }
-    },
-    {
-      id: "floating_add_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "a",
-  href: "/rb/rules",
-  "aria-label": "Add new rule"
-};
-''',
-        css: '''
-return `._id {
-  position: fixed;
-  bottom: 92px;
-  right: ${args.theme.var.spacing.lg};
-  width: 56px;
-  height: 56px;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border: none;
-  border-radius: ${args.theme.var.borderRadius.full};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: all ${args.theme.var.animation.fast} ease;
-  z-index: ${args.theme.var.zIndex.dropdown};
-
-  &:hover {
-    background: ${args.theme.var.color.primary_dark_200};
-    transform: scale(1.05);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-}
-
-@media (min-width: 768px) {
-  ._id {
-    bottom: ${args.theme.var.spacing.lg};
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "add_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:add",
-  width: 24,
-  height: 24
-};
-'''
-      }
     }
   ],
   edges: [
@@ -1215,13 +1024,9 @@ return {
     { id: "e3g", T: "Attr", S: "error_state", E: "error_message" },
     { id: "e3h", T: "Attr", S: "error_state", E: "error_retry_button" },
     { id: "e4", T: "Attr", S: "page_content", E: "main_content" },
-    { id: "e5", T: "Attr", S: "main_content", E: "header" },
-    { id: "e6", T: "Attr", S: "header", E: "greeting_container" },
-    { id: "e7", T: "Attr", S: "greeting_container", E: "greeting_text" },
-    { id: "e8", T: "Attr", S: "greeting_text", E: "greeting_title" },
-    { id: "e9", T: "Attr", S: "greeting_text", E: "date_text" },
-    { id: "e10", T: "Attr", S: "greeting_container", E: "settings_button" },
-    { id: "e11", T: "Attr", S: "settings_button", E: "settings_icon" },
+    { id: "e5", T: "Attr", S: "main_content", E: "page_header" },
+    { id: "e6", T: "Attr", S: "page_header", E: "greeting_title" },
+    { id: "e7", T: "Attr", S: "page_header", E: "date_text" },
     { id: "e12", T: "Attr", S: "main_content", E: "progress_card" },
     { id: "e13", T: "Attr", S: "progress_card", E: "progress_title" },
     { id: "e14", T: "Attr", S: "progress_card", E: "progress_bar_container" },
@@ -1244,8 +1049,6 @@ return {
     { id: "e31", T: "Attr", S: "rule_item", E: "rule_info" },
     { id: "e32", T: "Attr", S: "rule_info", E: "rule_title" },
     { id: "e33", T: "Attr", S: "rule_info", E: "rule_status" },
-    { id: "e34", T: "Attr", S: "rule_item", E: "rule_action" },
-    { id: "e35", T: "Attr", S: "main_content", E: "floating_add_button" },
-    { id: "e36", T: "Attr", S: "floating_add_button", E: "add_icon" }
+    { id: "e34", T: "Attr", S: "rule_item", E: "rule_action" }
   ]
 }

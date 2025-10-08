@@ -375,7 +375,7 @@ const loadTomSelectLibrary = () => {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = 'https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css';
-    document.head.appendChild(link);
+    document.head.insertBefore(link, document.head.firstChild);
   }
 
   // Load TomSelect JS if not already loaded

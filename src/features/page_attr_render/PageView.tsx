@@ -37,6 +37,7 @@ import { createFunctionArgumentBase } from "~/components/form/dynamic_component/
 import { createDynamicFunctions } from "~/components/form/dynamic_component/functions/function_argument/createDynamicFunctions";
 import { useComponentLifecycle } from "~/components/form/dynamic_component/hooks/useComponentLifecycle";
 import { HtmlField } from "~/components/fields/HtmlField";
+import {DataInternal} from "~/components/fields/data/DataInternal";
 
 export function PageView(
   props: Readonly<{
@@ -334,13 +335,14 @@ export function PageView(
         />
       </Match>
       <Match when={true}>
-        <DataContext.Provider value={{ index: 0 }}>
-          <PageAttrRender
-            data={props.data}
-            isNoPermissionCheck={props.isNoPermissionCheck!}
-            metaVertex={props.metaVertex!}
-          />
-        </DataContext.Provider>
+        <DataInternal
+          data={props.data}
+          index={0}
+          meta={props.metaVertex!}
+          contextName={""}
+          repeaterValue={{ index: 0 }}
+          isNoPermissionCheck={props.isNoPermissionCheck!}
+        />
       </Match>
     </Switch>
   );

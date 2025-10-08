@@ -349,6 +349,7 @@ export function CreateGridHeaders(
                   <SchemaRenderer
                     form={gridState.editSchema!}
                     formDataId={info.row.original.id}
+                    hideSaveCancelButton={gridState.formMetaData().hideSaveCancelButton}
                   />
                 </Match>
                 <Match when={formNew.isInlineEditable}>
@@ -364,6 +365,7 @@ export function CreateGridHeaders(
                       )
                     }
                     fetchTableData={gridState.fetchTableData}
+                    hideSaveCancelButton={gridState.formMetaData().hideSaveCancelButton} // todo fix this
                   />
                 </Match>
                 <Match when={true}>
@@ -481,6 +483,7 @@ function InlineEditButton(props: {
   dataId: Id;
   disabled: boolean;
   fetchTableData: () => void;
+  hideSaveCancelButton?: boolean;
 }) {
   const [showEditModal, setShowEditModal] = createSignal(false);
   const [graph, setGraph] = useGraph();
@@ -555,6 +558,7 @@ function InlineEditButton(props: {
             pageVertexName={props.tableId}
             isNoPermissionCheck={true}
             initializeFormStoreParent={(id) => { formStoreId = id; }}
+            hideSaveCancelButton={props.hideSaveCancelButton}
             closePopUp={handleClose}
           />
         </CustomModal>

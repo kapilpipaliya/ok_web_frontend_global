@@ -5,6 +5,7 @@ import type {
 
 export const Function: IFormMetaData = {
   isInlineEditable: true,
+  hideSaveCancelButton: false,
   attributes: [
     // Key field
     {

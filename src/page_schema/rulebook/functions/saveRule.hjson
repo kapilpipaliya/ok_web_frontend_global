@@ -200,9 +200,8 @@ try {
   // STEP 3: Initialize streak tracking if this is a new rule
   if (!isUpdate) {
     const createStreakQuery = `
-      MATCH (u:User {uuid: $userUuid})
       MATCH (r:Rule) WHERE elementId(r) = $ruleElementId
-      CREATE (u)-[:UserRuleStreak]->(rs:RuleStreak)
+      CREATE (r)-[:RuleStreak]->(rs:RuleStreak)
       SET
         rs.currentStreak = 0,
         rs.longestStreak = 0,
@@ -213,12 +212,10 @@ try {
         rs.isActive = true,
         rs.createdAt = datetime(),
         rs.updatedAt = datetime()
-      CREATE (rs)-[:RuleStreakRule]->(r)
       RETURN rs
     `;
 
     await args.session.run(createStreakQuery, {
-      userUuid: user.P.uuid,
       ruleElementId
     });
   }

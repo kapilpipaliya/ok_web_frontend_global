@@ -216,7 +216,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Last updated: December 2024"
+  text: "Last updated: January 2025"
 };
 ''',
         css: '''
@@ -373,7 +373,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Chaitanya Alert is designed with privacy as the core principle. All your data stays on your device. We don't collect, store, or transmit any personal information to external servers."
+  text: "Chaitanya Alert is designed with privacy as the core principle. All your data stays on your device. We don't collect, store, or transmit any personal information to external servers. Advanced features include pattern profiles, backup/sync capabilities, and subscription services - all while maintaining complete privacy."
 };
 ''',
         css: '''
@@ -461,7 +461,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "To provide our notification management service, Chaitanya Alert requires access to:"
+  text: "To provide our comprehensive notification management service with advanced features like pattern profiles, backup/sync, and subscription services, Chaitanya Alert collects and stores the following information locally on your device only:"
 };
 ''',
         css: '''
@@ -584,7 +584,7 @@ return `._id {
         props: '''
 return {
   as: "span",
-  text: " We read notification content to identify the sender and apply your custom preferences."
+  text: " We read notification content from messaging apps (WhatsApp, Telegram, Discord, Signal, and other supported apps) to identify the sender and apply your custom preferences including sounds, vibration patterns, and flashlight alerts."
 };
 ''',
         css: '''
@@ -683,7 +683,7 @@ return `._id {
         props: '''
 return {
   as: "span",
-  text: " We store notification history and your preferences locally on your device."
+  text: " We store notification history, preferences, pattern profiles with scheduling settings, backup metadata, and subscription information locally on your device using secure SQLite database."
 };
 ''',
         css: '''
@@ -782,7 +782,7 @@ return `._id {
         props: '''
 return {
   as: "span",
-  text: " We control vibration, flashlight, and audio to provide custom notification alerts."
+  text: " We control vibration, flashlight, and audio hardware to provide custom notification alerts, plus exact alarm scheduling for time-based profile activation and Google Play billing for premium features."
 };
 ''',
         css: '''
@@ -954,7 +954,49 @@ return `._id {
         props: '''
 return {
   as: "li",
-  text: "• Import and export your preferences for backup purposes"
+  text: "• Manage pattern profiles and automatic time-based switching"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  padding-left: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "46a",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Create and restore local backups with optional cloud synchronization"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  line-height: 1.6;
+  padding-left: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "46b",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "li",
+  text: "• Handle premium subscription features and billing through Google Play"
 };
 ''',
         css: '''
@@ -1150,7 +1192,7 @@ return `._id {
         props: '''
 return {
   as: "h4",
-  text: "No Cloud Sync"
+  text: "Optional Cloud Backup"
 };
 ''',
         css: '''
@@ -1196,7 +1238,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "We don't offer cloud synchronization, ensuring your data never leaves your device."
+  text: "When you choose to use backup/sync features, encrypted backups may be stored in cloud storage services you authorize. All data is encrypted before cloud storage and you maintain complete control."
 };
 ''',
         css: '''
@@ -1352,7 +1394,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Chaitanya Alert does not integrate with any third-party services, analytics platforms, or advertising networks. The app operates completely independently without external dependencies."
+  text: "Chaitanya Alert integrates with Google Play Services for premium subscriptions and optional cloud storage services you authorize for backup/sync features. We do not integrate with analytics platforms or advertising networks. Premium subscription data is handled through Google Play's secure infrastructure."
 };
 ''',
         css: '''
@@ -1556,8 +1598,8 @@ return `._id {
         props: '''
 return {
   as: "a",
-  href: "/contact",
-  text: "Contact Us"
+  href: "/feedback",
+  text: "Send Feedback"
 };
 ''',
         css: '''
@@ -1686,6 +1728,8 @@ return `._id {
     { id: "e43", T: "Attr", S: "42", E: "44" },
     { id: "e44", T: "Attr", S: "42", E: "45" },
     { id: "e45", T: "Attr", S: "42", E: "46" },
+    { id: "e45a", T: "Attr", S: "42", E: "46a" },
+    { id: "e45b", T: "Attr", S: "42", E: "46b" },
     { id: "e46", T: "Attr", S: "19", E: "47" },
     { id: "e47", T: "Attr", S: "47", E: "48" },
     { id: "e48", T: "Attr", S: "47", E: "49" },

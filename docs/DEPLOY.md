@@ -16,7 +16,7 @@ on initial configuration on cyberpanel use: mail.decodeui.io (first we neet to s
 Test score should be 10/10:
 https://www.mail-tester.com
 
-sudo hostnamectl set-hostname server.decodeui.io
+sudo hostnamectl set-hostname mail.decodeui.io
 sudo nano /etc/hosts
 # https://cyberpanel.net/KnowledgeBase/home/install-cyberpanel/
 sudo apt update && sudo apt upgrade -y

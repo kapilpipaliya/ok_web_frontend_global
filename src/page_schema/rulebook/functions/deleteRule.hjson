@@ -27,9 +27,9 @@ try {
     MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
     WHERE elementId(r) = $ruleId
     RETURN r,
-           COUNT { (u)-[:UserRuleTracking]->(:RuleTracking)-[:RuleTrackingRule]->(r) } as trackingCount,
-           COUNT { (u)-[:UserRuleStreak]->(:RuleStreak)-[:RuleStreakRule]->(r) } as streakCount,
-           COUNT { (u)-[:UserRuleGoal]->(:RuleGoal)-[:RuleGoalRule]->(r) } as goalCount
+           COUNT { (r)-[:RuleTracking]->(:RuleTracking) } as trackingCount,
+           COUNT { (r)-[:RuleStreak]->(:RuleStreak) } as streakCount,
+           COUNT { (r)-[:RuleGoal]->(:RuleGoal) } as goalCount
   `;
 
   const ruleResult = await args.session.run(ruleCheckQuery, {
@@ -63,7 +63,7 @@ try {
     // Step 1: Delete all goals associated with this rule
     if (goalCount > 0) {
       const deleteGoalsQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg:RuleGoal)
         WHERE elementId(r) = $ruleId
         DETACH DELETE rg
       `;
@@ -77,7 +77,7 @@ try {
     // Step 2: Delete all tracking data for this rule
     if (trackingCount > 0) {
       const deleteTrackingQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
         WHERE elementId(r) = $ruleId
         DETACH DELETE rt
       `;
@@ -91,7 +91,7 @@ try {
     // Step 3: Delete streak data for this rule
     if (streakCount > 0) {
       const deleteStreaksQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
         WHERE elementId(r) = $ruleId
         DETACH DELETE rs
       `;

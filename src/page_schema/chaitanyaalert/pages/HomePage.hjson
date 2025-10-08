@@ -268,9 +268,39 @@ return {
         componentName: "ChaitanyaAlertFeatureCard",
         props: '''
 return {
-  icon: "ph:database",
-  title: "Local Storage",
-  description: "All your notifications are saved locally on your device. Complete privacy and offline access."
+  icon: "ph:calendar-check",
+  title: "Pattern Profiles",
+  description: "Create work, personal, and custom profiles with automatic time-based switching. Schedule different notification settings for different times of day."
+};
+'''
+      }
+    },
+    {
+      id: "16a",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "ChaitanyaAlertFeatureCard",
+        props: '''
+return {
+  icon: "ph:cloud-arrow-up",
+  title: "Backup & Sync",
+  description: "Local and cloud backup with compression, conflict resolution, and multi-device support. Your data stays secure with encryption."
+};
+'''
+      }
+    },
+    {
+      id: "16b",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "ChaitanyaAlertFeatureCard",
+        props: '''
+return {
+  icon: "ph:crown",
+  title: "Premium Features",
+  description: "Google Play subscription for advanced features including online sound libraries, enhanced profiles, and priority support."
 };
 '''
       }
@@ -607,7 +637,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Enable notification access permission so the app can capture your messaging notifications"
+  text: "Enable notification access and other permissions for full functionality including scheduled profiles and premium features"
 };
 ''',
         css: '''
@@ -718,7 +748,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Configure custom sounds, vibrations, and flashlight patterns for your important contacts"
+  text: "Configure custom sounds, vibrations, flashlight patterns, create pattern profiles, and set up backup preferences"
 };
 ''',
         css: '''
@@ -890,6 +920,8 @@ return `._id {
     { id: "e13", T: "Attr", S: "10", E: "14" },
     { id: "e14", T: "Attr", S: "10", E: "15" },
     { id: "e15", T: "Attr", S: "10", E: "16" },
+    { id: "e15a", T: "Attr", S: "10", E: "16a" },
+    { id: "e15b", T: "Attr", S: "10", E: "16b" },
     { id: "e16", T: "Attr", S: "4", E: "17" },
     { id: "e17", T: "Attr", S: "17", E: "18" },
     { id: "e18", T: "Attr", S: "18", E: "19" },

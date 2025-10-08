@@ -65,10 +65,11 @@ const initializeFormData = () => {
       reward: goalData.reward || ""
     });
   } else {
+    // For create mode, check if a rule was pre-selected
     setFormData({
       title: "",
       description: "",
-      ruleId: "",
+      ruleId: goalData?.linkedRule || "",  // Pre-select the rule if provided
       goalType: "streak",
       targetValue: "",
       unit: "",

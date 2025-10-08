@@ -68,48 +68,55 @@
         displayOrder: 1,
         componentName: "Html",
         fns: '''
-// Import floating UI functions
-const computePosition = args.computePosition || (async function() {
-  try {
-    const { computePosition: cp, flip, shift, offset } = await import("https://cdn.skypack.dev/@floating-ui/dom");
-    return cp;
-  } catch (e) {
-    console.error('Failed to load floating-ui:', e);
-    return null;
-  }
-})();
-
 // Menu state management
 const [isMenuOpen, setIsMenuOpen] = args.createSignal(false);
 const [triggerRef, setTriggerRef] = args.createSignal(null);
 const [menuRef, setMenuRef] = args.createSignal(null);
+let cleanup = null;
 
-// Position the floating menu
-const updatePosition = async () => {
+// Setup floating UI positioning with auto-update
+const setupFloatingUI = async () => {
   const trigger = triggerRef();
   const menu = menuRef();
-  if (!trigger || !menu || !computePosition) return;
+  if (!trigger || !menu) return;
 
   const placement = args.contextData.props?.placement || "bottom-end";
 
   try {
-    const { computePosition: cp, flip, shift, offset } = await import("https://cdn.skypack.dev/@floating-ui/dom");
+    const { computePosition, flip, shift, offset, autoUpdate } = await import("https://cdn.skypack.dev/@floating-ui/dom");
 
-    const { x, y } = await cp(trigger, menu, {
-      placement: placement,
-      middleware: [
-        offset(4),
-        flip(),
-        shift({ padding: 8 })
-      ]
-    });
+    // Function to update position
+    const updatePosition = async () => {
+      const { x, y } = await computePosition(trigger, menu, {
+        placement: placement,
+        strategy: 'fixed',
+        middleware: [
+          offset(4),
+          flip(),
+          shift({ padding: 8 })
+        ]
+      });
 
-    Object.assign(menu.style, {
-      left: `${x}px`,
-      top: `${y}px`,
+      Object.assign(menu.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    };
+
+    // Initial positioning
+    await updatePosition();
+
+    // Setup auto-update to handle scroll, resize, and other changes
+    cleanup = autoUpdate(trigger, menu, updatePosition, {
+      // Options to ensure scroll is tracked
+      ancestorScroll: true,
+      ancestorResize: true,
+      elementResize: true,
+      layoutShift: true,
+      animationFrame: false
     });
   } catch (e) {
-    console.error('Error computing position:', e);
+    console.error('Error setting up floating UI:', e);
   }
 };
 
@@ -120,13 +127,20 @@ const toggleMenu = (e) => {
   const newState = !isMenuOpen();
   setIsMenuOpen(newState);
   if (newState) {
-    requestAnimationFrame(updatePosition);
+    requestAnimationFrame(() => setupFloatingUI());
+  } else if (cleanup) {
+    cleanup();
+    cleanup = null;
   }
 };
 
 // Close menu
 const closeMenu = () => {
   setIsMenuOpen(false);
+  if (cleanup) {
+    cleanup();
+    cleanup = null;
+  }
 };
 
 // Handle clicks outside
@@ -143,10 +157,11 @@ const handleDocumentClick = (e) => {
 // Setup and cleanup event listeners
 const onMount = () => {
   document.addEventListener('click', handleDocumentClick);
-  window.addEventListener('resize', updatePosition);
   return () => {
     document.removeEventListener('click', handleDocumentClick);
-    window.removeEventListener('resize', updatePosition);
+    if (cleanup) {
+      cleanup();
+    }
   };
 };
 
@@ -159,7 +174,7 @@ return {
   setMenuRef,
   toggleMenu,
   closeMenu,
-  updatePosition,
+  setupFloatingUI,
   onMount
 };
 ''',
@@ -298,7 +313,16 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Slot",
-        slot: "menu-items"
+        slot: "menu-items",
+        props: '''
+// Provide closeMenu function to menu items
+return {
+  contextName: "floatingMenuContext",
+  data: {
+    closeMenu: args.fns.closeMenu
+  }
+};
+'''
       }
     }
   ],

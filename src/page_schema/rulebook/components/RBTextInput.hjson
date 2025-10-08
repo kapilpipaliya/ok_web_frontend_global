@@ -188,10 +188,110 @@
       }
     },
     {
-      id: "input_element",
+      id: "variant_left_icon",
+      L: "ComponentVariant",
+      P: {
+        key: "leftIcon",
+        type: "string",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_right_icon",
+      L: "ComponentVariant",
+      P: {
+        key: "rightIcon",
+        type: "string",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_icon_size",
+      L: "ComponentVariant",
+      P: {
+        key: "iconSize",
+        type: "number",
+        defValue: 20
+      }
+    },
+    {
+      id: "input_wrapper",
       L: "Attr",
       P: {
         displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const hasLeftIcon = !!args.contextData.props?.leftIcon;
+const hasRightIcon = !!args.contextData.props?.rightIcon;
+const iconSize = args.contextData.props?.iconSize || 20;
+
+return `._id {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: ${args.theme.var.color.background};
+  transition: all ${args.theme.var.animation.fast} ease;
+  min-height: ${args.theme.var.touch.input};
+
+  &:focus-within {
+    border-color: ${args.theme.var.color.primary};
+    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
+  }
+
+  &:hover:not(:focus-within) {
+    border-color: ${args.theme.var.color.border_dark_200};
+  }
+
+  &.disabled {
+    background: ${args.theme.var.color.background_light_100};
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "left_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const leftIcon = args.contextData.props?.leftIcon;
+const iconSize = args.contextData.props?.iconSize || 20;
+
+return {
+  as: "icon",
+  icon: leftIcon,
+  width: iconSize,
+  height: iconSize,
+  hide: !leftIcon
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  flex-shrink: 0;
+  margin-left: ${args.theme.var.spacing.md};
+  margin-right: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "input_element",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
@@ -201,7 +301,7 @@ return {
   placeholder: args.contextData.props?.placeholder || "",
   required: args.contextData.props?.required || false,
   disabled: args.contextData.props?.disabled || false,
-  readOnly: args.contextData.props?.readOnly || false,
+  // readOnly: args.contextData.props?.readOnly || false, // not work on server
   maxLength: args.contextData.props?.maxLength || undefined,
   minLength: args.contextData.props?.minLength || undefined,
   autoFocus: args.contextData.props?.autoFocus || false,
@@ -212,49 +312,56 @@ return {
 };
 ''',
         css: '''
+const hasLeftIcon = !!args.contextData.props?.leftIcon;
+const hasRightIcon = !!args.contextData.props?.rightIcon;
+
 return `._id {
+  flex: 1;
   width: 100%;
-  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.sm};
+  padding: ${args.theme.var.spacing.sm} ${hasRightIcon ? '0' : args.theme.var.spacing.md} ${args.theme.var.spacing.sm} ${hasLeftIcon ? '0' : args.theme.var.spacing.md};
+  border: none;
+  outline: none;
   font-size: ${args.theme.var.fontSize.md};
-  background: ${args.theme.var.color.background};
+  background: transparent;
   color: ${args.theme.var.color.text};
-  transition: all ${args.theme.var.animation.fast} ease;
-  min-height: ${args.theme.var.touch.input};
   line-height: 1.5;
-
-  &:focus {
-    outline: none;
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 0 0 3px ${args.theme.var.color.primary_light_200};
-  }
-
-  &:hover:not(:disabled):not(:focus) {
-    border-color: ${args.theme.var.color.border_dark_200};
-  }
-
-  &:disabled {
-    background: ${args.theme.var.color.background_light_100};
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &:read-only {
-    background: ${args.theme.var.color.background_light_50};
-    cursor: default;
-  }
 
   &::placeholder {
     color: ${args.theme.var.color.muted};
     opacity: 1;
   }
 
-  /* Mobile responsive adjustments */
-  @media (max-width: 768px) {
-    padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
-    font-size: ${args.theme.var.fontSize.md};
+  &:disabled {
+    cursor: not-allowed;
   }
+}`;
+'''
+      }
+    },
+    {
+      id: "right_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const rightIcon = args.contextData.props?.rightIcon;
+const iconSize = args.contextData.props?.iconSize || 20;
+
+return {
+  as: "icon",
+  icon: rightIcon,
+  width: iconSize,
+  height: iconSize,
+  hide: !rightIcon
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  flex-shrink: 0;
+  margin-left: ${args.theme.var.spacing.sm};
+  margin-right: ${args.theme.var.spacing.md};
 }`;
 '''
       }
@@ -281,6 +388,12 @@ return `._id {
     { id: "e18", T: "ComponentVariant", S: "component_root", E: "variant_on_focus" },
     { id: "e19", T: "ComponentVariant", S: "component_root", E: "variant_on_input" },
     { id: "e20", T: "ComponentVariant", S: "component_root", E: "variant_auto_focus" },
-    { id: "e21", T: "Attr", S: "component_root", E: "input_element" }
+    { id: "e21", T: "ComponentVariant", S: "component_root", E: "variant_left_icon" },
+    { id: "e22", T: "ComponentVariant", S: "component_root", E: "variant_right_icon" },
+    { id: "e23", T: "ComponentVariant", S: "component_root", E: "variant_icon_size" },
+    { id: "e24", T: "Attr", S: "component_root", E: "input_wrapper" },
+    { id: "e25", T: "Attr", S: "input_wrapper", E: "left_icon" },
+    { id: "e26", T: "Attr", S: "input_wrapper", E: "input_element" },
+    { id: "e27", T: "Attr", S: "input_wrapper", E: "right_icon" }
   ]
 }

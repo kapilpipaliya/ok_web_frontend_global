@@ -117,24 +117,14 @@ return `._id {
       }
     },
     {
-      id: "header",
+      id: "page_header",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "header"
-};
-''',
+        componentName: "RBHeader",
         css: '''
 return `._id {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: ${args.theme.var.spacing.xxl};
-  flex-wrap: wrap;
-  gap: ${args.theme.var.spacing.md};
 }
 
 @media (max-width: 768px) {
@@ -146,30 +136,16 @@ return `._id {
       }
     },
     {
-      id: "page_title",
+      id: "header_title",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
+        componentName: "RBPageTitle",
+        slot: "center",
         props: '''
 return {
-  as: "h1",
   text: "Reports & Analytics"
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.title};
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    font-size: ${args.theme.var.fontSize.xxl};
-  }
-}`;
 '''
       }
     },
@@ -179,6 +155,7 @@ return `._id {
       P: {
         displayOrder: 2,
         componentName: "Html",
+        slot: "right",
         props: '''
 const exportData = () => {
   const data = args.contextData?.reportsPageContext?.reportsData?.();
@@ -1289,9 +1266,6 @@ if (!reportsData?.summary) {
   };
 }
 
-// Debug: Log the summary data to see what's being received
-console.log('Summary Data:', reportsData.summary);
-
 const summary = reportsData.summary || {};
 const completed = summary.completed || 0;
 const partial = summary.partial || 0;
@@ -1681,9 +1655,9 @@ return `._id {
   edges: [
     { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
     { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
-    { id: "e3", T: "Attr", S: "page_content", E: "header" },
-    { id: "e4", T: "Attr", S: "header", E: "page_title" },
-    { id: "e5", T: "Attr", S: "header", E: "export_button" },
+    { id: "e3", T: "Attr", S: "page_content", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "header_title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "export_button" },
     { id: "e6", T: "Attr", S: "export_button", E: "export_icon" },
     { id: "e6a", T: "Attr", S: "export_button", E: "export_text" },
     { id: "e7", T: "Attr", S: "page_content", E: "time_tabs" },

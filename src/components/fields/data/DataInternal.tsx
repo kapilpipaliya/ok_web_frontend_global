@@ -16,6 +16,7 @@ export function DataInternal(props: {
   repeaterValue: any;
   children?: JSX.Element;
   renderChildren?: boolean;
+  isNoPermissionCheck?: boolean;
 }) {
   const context = useDataContext() || {};
   const repeaterStore = new Proxy(context, {
@@ -42,6 +43,7 @@ export function DataInternal(props: {
           <PageAttrRender
             data={isVertex(props.repeaterValue) ? props.repeaterValue : props.data}
             metaVertex={props.meta}
+            isNoPermissionCheck={props.isNoPermissionCheck}
           />
         </Match>
       </Switch>

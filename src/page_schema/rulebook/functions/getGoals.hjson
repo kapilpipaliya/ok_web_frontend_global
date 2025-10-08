@@ -24,7 +24,8 @@ try {
   if (ruleId) {
     // Get goals for specific rule
     goalsQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+      OPTIONAL MATCH (r:Rule)-[:RuleGoal]->(rg)
       WHERE elementId(r) = $ruleId
       ${includeCompleted ? '' : 'AND rg.isCompleted = false'}
       OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
@@ -35,7 +36,8 @@ try {
   } else {
     // Get all goals for user
     goalsQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+      OPTIONAL MATCH (r:Rule)-[:RuleGoal]->(rg)
       ${includeCompleted ? '' : 'WHERE rg.isCompleted = false'}
       OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
       RETURN rg, r, rc
@@ -53,7 +55,7 @@ try {
 
     // Convert Neo4j nodes to proper Vertex format
     const goal = args.convertNodeToJson(goalNode);
-    const rule = args.convertNodeToJson(ruleNode);
+    const rule = ruleNode ? args.convertNodeToJson(ruleNode) : null;
     const category = categoryNode ? args.convertNodeToJson(categoryNode) : null;
 
     // Calculate progress percentage

@@ -132,7 +132,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "The smart notification manager that puts you in control of your messaging experience"
+  text: "The comprehensive notification manager with advanced pattern profiles, backup/sync capabilities, and premium features"
 };
 ''',
         css: '''
@@ -265,7 +265,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "We believe that every notification should be meaningful and every user should have complete control over their digital experience. Chaitanya Alert was created to solve the frustration of generic notifications by providing a personalized, intelligent notification management system."
+  text: "We believe that every notification should be meaningful and every user should have complete control over their digital experience. Chaitanya Alert was created to solve the frustration of generic notifications by providing a personalized, intelligent notification management system with advanced features like pattern profiles, time-based scheduling, backup/sync capabilities, and premium subscription options."
 };
 ''',
         css: '''
@@ -287,7 +287,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Built with privacy in mind, all your data stays on your device. No cloud storage, no tracking, no privacy concerns - just pure functionality that works exactly the way you want it to."
+  text: "Built with privacy in mind, all your data primarily stays on your device. When you choose to use backup/sync features, data is encrypted before any cloud storage. No tracking, complete control over your data - just pure functionality that works exactly the way you want it to."
 };
 ''',
         css: '''
@@ -688,7 +688,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Advanced pattern matching with regex support. Create complex rules for different contacts and groups with ease."
+  text: "Advanced pattern matching with regex support, pattern profiles with time-based scheduling, and multi-app support. Create complex rules for different contacts and groups with ease."
 };
 ''',
         css: '''
@@ -805,7 +805,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Minimal battery usage, small app size, and lightning-fast performance. Built with efficiency in mind."
+  text: "Minimal battery usage, small app size, and lightning-fast performance. Advanced features like background scheduling, backup compression, and accessibility support - all built with efficiency in mind."
 };
 ''',
         css: '''
@@ -968,7 +968,7 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Chaitanya Alert is built using modern Android development practices with Kotlin and Jetpack Compose. The app uses Room database for efficient local storage and follows Material Design 3 principles for a consistent, beautiful user experience."
+  text: "Chaitanya Alert is built using modern Android development practices with Kotlin and Jetpack Compose. The app uses Room database for efficient local storage, WorkManager for background scheduling, Google Play Billing for subscriptions, and follows Material Design 3 principles for a consistent, beautiful user experience with accessibility support."
 };
 ''',
         css: '''
@@ -1089,6 +1089,54 @@ return {
 return `._id {
   background: ${args.theme.var.color.info}20;
   color: ${args.theme.var.color.info};
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "50a",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "WorkManager"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.warning}20;
+  color: ${args.theme.var.color.warning};
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "50b",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Google Play Billing"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error}20;
+  color: ${args.theme.var.color.error};
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -1355,6 +1403,8 @@ return `._id {
     { id: "e47", T: "Attr", S: "46", E: "48" },
     { id: "e48", T: "Attr", S: "46", E: "49" },
     { id: "e49", T: "Attr", S: "46", E: "50" },
+    { id: "e49a", T: "Attr", S: "46", E: "50a" },
+    { id: "e49b", T: "Attr", S: "46", E: "50b" },
     { id: "e50", T: "Attr", S: "4", E: "51" },
     { id: "e51", T: "Attr", S: "51", E: "52" },
     { id: "e52", T: "Attr", S: "52", E: "53" },

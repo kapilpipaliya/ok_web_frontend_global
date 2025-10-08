@@ -27,8 +27,8 @@ try {
     MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
     WHERE elementId(rc) = $categoryId
     OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule)
-    OPTIONAL MATCH (r)<-[:RuleTrackingRule]-(rt:RuleTracking)<-[:UserRuleTracking]-(u)
-    OPTIONAL MATCH (r)<-[:RuleStreakRule]-(rs:RuleStreak)<-[:UserRuleStreak]-(u)
+    OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
+    OPTIONAL MATCH (r)-[:RuleStreak]->(rs:RuleStreak)
     WITH rc, r,
          collect(DISTINCT rt) as trackingRecords,
          collect(DISTINCT rs) as streakRecords

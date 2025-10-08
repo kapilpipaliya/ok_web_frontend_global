@@ -26,10 +26,10 @@ try {
   const ruleQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
     WHERE elementId(r) = $ruleId
-    OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)<-[:UserRuleCategory]-(u)
-    OPTIONAL MATCH (r)<-[:RuleTrackingRule]-(rt:RuleTracking)<-[:UserRuleTracking]-(u)
-    OPTIONAL MATCH (r)<-[:RuleGoalRule]-(rg:RuleGoal)<-[:UserRuleGoal]-(u)
-    OPTIONAL MATCH (r)<-[:RuleStreakRule]-(rs:RuleStreak)<-[:UserRuleStreak]-(u)
+    OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
+    OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
+    OPTIONAL MATCH (r)-[:RuleGoal]->(rg:RuleGoal)
+    OPTIONAL MATCH (r)-[:RuleStreak]->(rs:RuleStreak)
     WITH r, rc,
          collect(DISTINCT rt) as trackingRecords,
          collect(DISTINCT rg) as goals,

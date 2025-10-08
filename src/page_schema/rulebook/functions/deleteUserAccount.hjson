@@ -26,9 +26,9 @@ try {
     MATCH (u:User {uuid: $userUuid})
     OPTIONAL MATCH (u)-[:UserRuleCategory]->(rc:RuleCategory)
     OPTIONAL MATCH (u)-[:UserRule]->(r:Rule)
-    OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking)
-    OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)
-    OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)
+    OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
+    OPTIONAL MATCH (r)-[:RuleGoal]->(rg:RuleGoal)
+    OPTIONAL MATCH (r)-[:RuleStreak]->(rs:RuleStreak)
     OPTIONAL MATCH (u)-[]->(other) WHERE NOT other:RuleCategory AND NOT other:Rule AND NOT other:RuleTracking AND NOT other:RuleGoal AND NOT other:RuleStreak
     RETURN count(DISTINCT rc) as categoryCount,
            count(DISTINCT r) as ruleCount,
@@ -63,7 +63,7 @@ try {
     // Step 1: Delete all rulebook-specific data first
     if (goalCount > 0) {
       const deleteGoalsQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg:RuleGoal)
         DETACH DELETE rg
       `;
       await tx.run(deleteGoalsQuery, { userUuid: user.P.uuid });
@@ -71,7 +71,7 @@ try {
 
     if (trackingCount > 0) {
       const deleteTrackingQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
         DETACH DELETE rt
       `;
       await tx.run(deleteTrackingQuery, { userUuid: user.P.uuid });
@@ -79,7 +79,7 @@ try {
 
     if (streakCount > 0) {
       const deleteStreaksQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
         DETACH DELETE rs
       `;
       await tx.run(deleteStreaksQuery, { userUuid: user.P.uuid });

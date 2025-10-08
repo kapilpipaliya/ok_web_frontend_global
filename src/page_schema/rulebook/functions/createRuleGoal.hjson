@@ -87,7 +87,6 @@ try {
 
   // Determine if this is an update or create operation
   const isUpdate = Boolean(goalId);
-  const finalGoalId = goalId || `goal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   // For updates, verify the goal exists
   if (isUpdate) {
@@ -110,7 +109,8 @@ try {
   // Check for duplicate goal titles for the same rule (if not updating)
   if (!isUpdate) {
     const duplicateCheckQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+      MATCH (r:Rule)-[:RuleGoal]->(rg)
       WHERE toLower(rg.title) = toLower($title) AND elementId(r) = $ruleId
       RETURN rg
     `;
@@ -134,7 +134,7 @@ try {
     case 'streak':
       // Get current streak for the rule
       calculationQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+        MATCH (r:Rule)-[:RuleStreak]->(rs:RuleStreak)
         WHERE elementId(r) = $ruleId
         RETURN COALESCE(rs.currentStreak, 0) as currentValue
       `;
@@ -143,7 +143,7 @@ try {
     case 'completion_count':
       // Count total completions
       calculationQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+        MATCH (r:Rule)-[:RuleStreak]->(rs:RuleStreak)
         WHERE elementId(r) = $ruleId
         RETURN COALESCE(rs.totalCompletions, 0) as currentValue
       `;
@@ -161,7 +161,7 @@ try {
       const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
 
       calculationQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)
+        MATCH (r:Rule)-[:RuleTracking]->(rt:RuleTracking)
         WHERE elementId(r) = $ruleId AND rt.date >= '${thirtyDaysAgoStr}'
         WITH COUNT(*) as total,
              COUNT(CASE WHEN rt.status = 'completed' THEN 1 END) as completed,
@@ -191,7 +191,7 @@ try {
   if (isUpdate) {
     // STEP 1A: Update existing goal
     const updateGoalQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+      MATCH (rg:RuleGoal)
       WHERE elementId(rg) = $goalId
       SET
         rg.title = $title,
@@ -225,7 +225,9 @@ try {
     // STEP 1B: Create new goal
     const createGoalQuery = `
       MATCH (u:User {uuid: $userUuid})
+      MATCH (r:Rule) WHERE elementId(r) = $ruleId
       CREATE (u)-[:UserRuleGoal]->(rg:RuleGoal)
+      CREATE (r)-[:RuleGoal]->(rg)
       SET
         rg.title = $title,
         rg.description = $description,
@@ -244,7 +246,7 @@ try {
 
     goalResult = await args.session.run(createGoalQuery, {
       userUuid: user.P.uuid,
-      goalId: finalGoalId,
+      ruleId,
       title: title.trim(),
       description: description?.trim() || "",
       goalType,
@@ -260,19 +262,7 @@ try {
   const goalNode = goalResult.records[0].get('rg');
   const goal = args.convertNodeToJson(goalNode);
 
-  // STEP 2: Create RuleGoal -> Rule relationship (only for new goals)
-  if (!isUpdate) {
-    const goalRuleQuery = `
-      MATCH (rg:RuleGoal) WHERE elementId(rg) = $goalElementId
-      MATCH (r:Rule) WHERE elementId(r) = $ruleId
-      MERGE (rg)-[:RuleGoalRule]->(r)
-    `;
-
-    await args.session.run(goalRuleQuery, {
-      goalElementId,
-      ruleId
-    });
-  }
+  // STEP 2: No need to create separate relationship - already done in create query
 
   // Calculate progress percentage
   const progressPercentage = Math.min(Math.round((initialCurrentValue / parseInt(targetValue)) * 100), 100);
@@ -280,7 +270,23 @@ try {
   // Determine if goal is already completed
   const isCompleted = initialCurrentValue >= parseInt(targetValue);
 
+  // Debug logging
+  console.log(`Goal Creation Debug: goalType=${goalType}, initialCurrentValue=${initialCurrentValue}, targetValue=${parseInt(targetValue)}, isCompleted=${isCompleted}`);
+
+  // For new goals, don't auto-complete unless it's really obvious (like streak goals with existing streaks)
+  // For percentage goals, be more conservative to avoid confusion
+  let shouldAutoComplete = false;
   if (isCompleted && !isUpdate) {
+    if (goalType === 'percentage') {
+      // For percentage goals, only auto-complete if current value is significantly higher
+      shouldAutoComplete = initialCurrentValue >= parseInt(targetValue) + 10; // 10% buffer
+    } else {
+      // For other goal types (streak, completion_count), auto-complete is fine
+      shouldAutoComplete = true;
+    }
+  }
+
+  if (shouldAutoComplete) {
     // Update the goal as completed
     const completeGoalQuery = `
       MATCH (rg:RuleGoal) WHERE elementId(rg) = $goalElementId
@@ -290,9 +296,12 @@ try {
     await args.session.run(completeGoalQuery, { goalElementId });
   }
 
+  // Update the isCompleted flag for the response
+  const finalIsCompleted = shouldAutoComplete;
+
   return {
     success: true,
-    message: isUpdate ? "Goal updated successfully!" : (isCompleted ? "Goal created and already completed! 🎉" : "Goal created successfully!"),
+    message: isUpdate ? "Goal updated successfully!" : (finalIsCompleted ? "Goal created and already completed! 🎉" : "Goal created successfully!"),
     data: {
       goalId: isUpdate ? goalId : goalElementId,
       ruleId,
@@ -305,8 +314,8 @@ try {
       unit,
       targetDate: targetDate || null,
       reward: reward?.trim() || null,
-      isCompleted,
-      completedAt: isCompleted ? new Date().toISOString() : null,
+      isCompleted: finalIsCompleted,
+      completedAt: finalIsCompleted ? new Date().toISOString() : null,
       progressPercentage,
       isUpdate,
       userId: user.P.uuid

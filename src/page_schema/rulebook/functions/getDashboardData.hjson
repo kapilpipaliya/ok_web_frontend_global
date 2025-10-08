@@ -21,8 +21,8 @@ try {
     MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)
     WHERE r.isActive = true
     OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
-    OPTIONAL MATCH (u)-[:UserRuleTracking]->(rt:RuleTracking {date: date($today)})-[:RuleTrackingRule]->(r)
-    OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r)
+    OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking {date: date($today)})
+    OPTIONAL MATCH (r)-[:RuleStreak]->(rs:RuleStreak)
     WITH r, rc, rt, rs
     RETURN r, rc, rt, rs
     ORDER BY r.priority DESC, r.createdAt DESC

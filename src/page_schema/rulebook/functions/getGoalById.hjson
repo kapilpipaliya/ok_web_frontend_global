@@ -23,12 +23,16 @@ try {
   }
 
   // Query to get goal with related rule and progress data
+  // First try User-direct relationship, then Rule-connected
   const goalQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+    MATCH (u:User {uuid: $userUuid})
+    OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)
     WHERE elementId(rg) = $goalId
-    OPTIONAL MATCH (rg)-[:RuleGoalRule]->(r:Rule)
+    OPTIONAL MATCH (u)-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg)
     OPTIONAL MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
-    OPTIONAL MATCH (u)-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r)
+    OPTIONAL MATCH (r)-[:RuleStreak]->(rs:RuleStreak)
+    WITH rg, r, rc, rs
+    WHERE rg IS NOT NULL
     RETURN rg, r, rc, rs
   `;
 

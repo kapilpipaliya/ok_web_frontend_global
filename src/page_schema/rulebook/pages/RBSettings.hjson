@@ -53,54 +53,66 @@ return `._id {
       }
     },
     {
-      id: "header",
+      id: "page_header",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "header"
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: ${args.theme.var.spacing.xl};
-}`;
-'''
+        componentName: "RBHeader"
       }
     },
     {
-      id: "page_title",
+      id: "header_title",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
+        componentName: "RBPageTitle",
+        slot: "center",
         props: '''
 return {
-  as: "h1",
   text: "Settings"
 };
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.title};
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0;
-}`;
 '''
       }
     },
     {
-      id: "settings_sections",
+      id: "navigation_cards",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
+        contextName: "navigationCard",
+        loop: true,
         props: '''
+const navigationItems = [
+  {
+    id: "categories",
+    title: "Manage Categories",
+    description: "Organize and customize your rule categories",
+    icon: "📂",
+    href: "/rb/categories",
+    bgColor: "success_light_300"
+  },
+  {
+    id: "rules",
+    title: "Manage Rules",
+    description: "Create, edit, and organize your personal rules",
+    icon: "📋",
+    href: "/rb/rules",
+    bgColor: "primary_light_300"
+  },
+  {
+    id: "goals",
+    title: "Goals & Achievements",
+    description: "Set and track your personal milestones",
+    icon: "🎯",
+    href: "/rb/goals",
+    bgColor: "warning_light_300"
+  }
+];
+
 return {
-  as: "div"
+  as: "div",
+  data: navigationItems
 };
 ''',
         css: '''
@@ -113,15 +125,17 @@ return `._id {
       }
     },
     {
-      id: "categories_link",
+      id: "nav_card",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const navItem = args.contextData.navigationCard;
+
 return {
   as: "a",
-  href: "/rb/categories"
+  href: navItem.href
 };
 ''',
         css: '''
@@ -143,7 +157,7 @@ return `._id {
       }
     },
     {
-      id: "categories_content",
+      id: "nav_card_content",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -163,7 +177,7 @@ return `._id {
       }
     },
     {
-      id: "categories_info",
+      id: "nav_card_info",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -183,192 +197,22 @@ return `._id {
       }
     },
     {
-      id: "categories_icon",
+      id: "nav_card_icon",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-return {
-  as: "div",
-  text: "📂"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: ${args.theme.var.color.success_light_300};
-  border-radius: ${args.theme.var.borderRadius.md};
-}`;
-'''
-      }
-    },
-    {
-      id: "categories_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-'''
-      }
-    },
-    {
-      id: "categories_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h3",
-  text: "Manage Categories"
-};
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.lg};
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 ${args.theme.var.spacing.xs} 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "categories_desc",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Organize and customize your rule categories"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: ${args.theme.var.fontSize.sm};
-  margin: 0;
-  line-height: 1.4;
-}`;
-'''
-      }
-    },
-    {
-      id: "categories_arrow",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:arrow-right",
-  width: 20,
-  height: 20
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "goals_link",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "a",
-  href: "/rb/goals"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: ${args.theme.var.borderRadius.lg};
-  padding: ${args.theme.var.spacing.lg};
-  cursor: pointer;
-  transition: all ${args.theme.var.animation.fast} ease;
-  text-decoration: none;
+const navItem = args.contextData.navigationCard;
 
-  &:hover {
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "goals_content",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}`;
-'''
-      }
-    },
-    {
-      id: "goals_info",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  align-items: center;
-  gap: ${args.theme.var.spacing.md};
-}`;
-'''
-      }
-    },
-    {
-      id: "goals_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
 return {
   as: "div",
-  text: "🎯"
+  text: navItem.icon
 };
 ''',
         css: '''
+const navItem = args.contextData.navigationCard;
+
 return `._id {
   font-size: 2rem;
   display: flex;
@@ -376,14 +220,14 @@ return `._id {
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: ${args.theme.var.color.warning_light_300};
+  background: ${args.theme.var.color[navItem.bgColor]};
   border-radius: ${args.theme.var.borderRadius.md};
 }`;
 '''
       }
     },
     {
-      id: "goals_text",
+      id: "nav_card_text",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -396,15 +240,17 @@ return {
       }
     },
     {
-      id: "goals_title",
+      id: "nav_card_title",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const navItem = args.contextData.navigationCard;
+
 return {
   as: "h3",
-  text: "Goals & Achievements"
+  text: navItem.title
 };
 ''',
         css: '''
@@ -418,15 +264,17 @@ return `._id {
       }
     },
     {
-      id: "goals_desc",
+      id: "nav_card_desc",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const navItem = args.contextData.navigationCard;
+
 return {
   as: "p",
-  text: "Set and track your personal milestones"
+  text: navItem.description
 };
 ''',
         css: '''
@@ -440,7 +288,7 @@ return `._id {
       }
     },
     {
-      id: "goals_arrow",
+      id: "nav_card_arrow",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -2035,26 +1883,18 @@ return {
   edges: [
     { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
     { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
-    { id: "e3", T: "Attr", S: "page_content", E: "header" },
-    { id: "e4", T: "Attr", S: "header", E: "page_title" },
-    { id: "e5", T: "Attr", S: "page_content", E: "settings_sections" },
-    { id: "e6", T: "Attr", S: "settings_sections", E: "categories_link" },
-    { id: "e7", T: "Attr", S: "categories_link", E: "categories_content" },
-    { id: "e8", T: "Attr", S: "categories_content", E: "categories_info" },
-    { id: "e9", T: "Attr", S: "categories_info", E: "categories_icon" },
-    { id: "e10", T: "Attr", S: "categories_info", E: "categories_text" },
-    { id: "e11", T: "Attr", S: "categories_text", E: "categories_title" },
-    { id: "e12", T: "Attr", S: "categories_text", E: "categories_desc" },
-    { id: "e13", T: "Attr", S: "categories_content", E: "categories_arrow" },
-    { id: "e14", T: "Attr", S: "settings_sections", E: "goals_link" },
-    { id: "e15", T: "Attr", S: "goals_link", E: "goals_content" },
-    { id: "e16", T: "Attr", S: "goals_content", E: "goals_info" },
-    { id: "e17", T: "Attr", S: "goals_info", E: "goals_icon" },
-    { id: "e18", T: "Attr", S: "goals_info", E: "goals_text" },
-    { id: "e19", T: "Attr", S: "goals_text", E: "goals_title" },
-    { id: "e20", T: "Attr", S: "goals_text", E: "goals_desc" },
-    { id: "e21", T: "Attr", S: "goals_content", E: "goals_arrow" },
-    { id: "e22", T: "Attr", S: "settings_sections", E: "preferences_section" },
+    { id: "e3", T: "Attr", S: "page_content", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "header_title" },
+    { id: "e5", T: "Attr", S: "page_content", E: "navigation_cards" },
+    { id: "e6", T: "Attr", S: "navigation_cards", E: "nav_card" },
+    { id: "e7", T: "Attr", S: "nav_card", E: "nav_card_content" },
+    { id: "e8", T: "Attr", S: "nav_card_content", E: "nav_card_info" },
+    { id: "e9", T: "Attr", S: "nav_card_info", E: "nav_card_icon" },
+    { id: "e10", T: "Attr", S: "nav_card_info", E: "nav_card_text" },
+    { id: "e11", T: "Attr", S: "nav_card_text", E: "nav_card_title" },
+    { id: "e12", T: "Attr", S: "nav_card_text", E: "nav_card_desc" },
+    { id: "e13", T: "Attr", S: "nav_card_content", E: "nav_card_arrow" },
+    { id: "e22", T: "Attr", S: "page_content", E: "preferences_section" },
     { id: "e23", T: "Attr", S: "preferences_section", E: "preferences_title" },
     { id: "e24", T: "Attr", S: "preferences_section", E: "theme_preference" },
     { id: "e25", T: "Attr", S: "theme_preference", E: "theme_label" },
@@ -2073,21 +1913,21 @@ return {
     { id: "e38", T: "Attr", S: "timezone_selector", E: "timezone_dropdown" },
     { id: "e39", T: "Attr", S: "timezone_dropdown", E: "timezone_options" },
     { id: "e40", T: "Attr", S: "timezone_options", E: "timezone_option_item" },
-    { id: "e41", T: "Attr", S: "settings_sections", E: "admin_section" },
+    { id: "e41", T: "Attr", S: "page_content", E: "admin_section" },
     { id: "e42", T: "Attr", S: "admin_section", E: "admin_title" },
     { id: "e43", T: "Attr", S: "admin_section", E: "sample_data_section" },
     { id: "e44", T: "Attr", S: "sample_data_section", E: "sample_data_info" },
     { id: "e45", T: "Attr", S: "sample_data_info", E: "sample_data_title" },
     { id: "e46", T: "Attr", S: "sample_data_info", E: "sample_data_desc" },
     { id: "e47", T: "Attr", S: "sample_data_section", E: "sample_data_button" },
-    { id: "e48", T: "Attr", S: "settings_sections", E: "account_section" },
+    { id: "e48", T: "Attr", S: "page_content", E: "account_section" },
     { id: "e49", T: "Attr", S: "account_section", E: "account_title" },
     { id: "e50", T: "Attr", S: "account_section", E: "logout_item" },
     { id: "e51", T: "Attr", S: "logout_item", E: "logout_info" },
     { id: "e52", T: "Attr", S: "logout_info", E: "logout_title" },
     { id: "e53", T: "Attr", S: "logout_info", E: "logout_desc" },
     { id: "e54", T: "Attr", S: "logout_item", E: "logout_button" },
-    { id: "e55", T: "Attr", S: "settings_sections", E: "danger_section" },
+    { id: "e55", T: "Attr", S: "page_content", E: "danger_section" },
     { id: "e56", T: "Attr", S: "danger_section", E: "danger_title" },
     { id: "e57", T: "Attr", S: "danger_section", E: "delete_data_section" },
     { id: "e58", T: "Attr", S: "delete_data_section", E: "delete_data_info" },

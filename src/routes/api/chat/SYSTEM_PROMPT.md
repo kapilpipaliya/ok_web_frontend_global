@@ -36,7 +36,8 @@ The graph must represent a valid Page Builder Item tree.
 
 ### Optional Properties
 - `componentName`: string - name of the component any of: 'Html', 'Slot' or Custom Component name if specified in prompt.
-- `fns`: Function Body string - function definitions for the Item e.g. "return {fn1: () => {}}". Its the place where you add javascript code to generate dynamic properties for the Item. It will be inherited to all the children of the Item.
+- `fns`: Function Body string - function definitions for the Item e.g. "return {fn1: () => {}}". Its the place where you add javascript code to define state and functions that can be shared with current or child components. It will be inherited to all the children of the Item. **Prefer using `fns` for defining state and functions (instead of passing them through context in props function).**
+  - Functions defined in parent `fns` are automatically available to all children via `args.fns`
 - `props`: Function Body string - dynamic properties for the Item, it returns an object with key-value pairs e.g. "return {key: value}". Its the place where you add javascript code to generate dynamic properties for the Item.
   - Use 'props' for dynamic props. It is a Function Body string that should return an object with key-value pairs.
   - You can add static props directly to the vertex properties, prefer the 'props' when value is dynamic.
@@ -174,10 +175,10 @@ If no componentName is provided, it is considered 'Html' type
   - Renders as: `<>{text}{children}</>`
 
 ### Data Features in HTML Component
-The HTML component can also includes data handling capabilities for repeating patterns and state management:
+The HTML component can also includes data handling capabilities for repeating patterns and passing data to the children components:
 - Required properties for data features:
   - `contextName`: string - name of the data context, must not be empty
-  - `loop`: boolean - set to true for duplicate repeater components
+  - `loop`: boolean - set to true to loop children components for each item
 - Optional properties:
   - `data`: array or function returning array - static data to iterate over
   - `expression`: string - expression to evaluate the data from database
@@ -187,9 +188,31 @@ The HTML component can also includes data handling capabilities for repeating pa
   - In the 'props' function body, pass the 'data' key with an array of values to iterate over
   - In child components, access the current iteration item using 'args.contextData.contextName' within 'props', 'fns', or 'css' function bodies
 - For state management:
-  - Define state in the 'props' property 'data' key using solid-js functions like 'args.createSignal' or 'args.createStore'
-  - Access state in child components using 'args.contextData.contextName' within 'props', 'fns', or 'css' function bodies
-  - Example: In 'props' property, define state like "const [count, setCount] = args.createSignal(0); return {data: {count, setCount}};" and access it in children via 'args.contextData.contextName.count' and 'args.contextData.contextName.setCount'
+  - **Preferred**: Define state management functions in the 'fns' property using solid-js functions like 'args.createSignal' or 'args.createStore'
+  - Access state functions in the same item or child components within 'props', 'fns', or 'css' function bodies using 'args.fns' when defined in parent's fns
+  - Example:
+    ```javascript
+    // Parent fns - define state and functions:
+    fns: `
+      const [count, setCount] = args.createSignal(0);
+      return {
+        count,
+        setCount,
+        increment: () => setCount(c => c + 1),
+        reset: () => setCount(0)
+      };
+    `
+    
+    // Child props - access via args.fns:
+    props: `return {
+      text: args.fns.count(),
+      onClick: args.fns.increment
+    };`
+    ```
+- For data passing:
+  - return value from 'props' function body with 'data' key
+  - Access it in child components using 'args.contextData.contextName' within 'props', 'fns', or 'css' function bodies
+  - Example: In 'props' property, return value like "return {data: {count: 10}};" and access it in children via 'args.contextData.contextName.count'
 
 ### Server Function Usage
 The `serverFunction` property allows executing server-side code with database access:

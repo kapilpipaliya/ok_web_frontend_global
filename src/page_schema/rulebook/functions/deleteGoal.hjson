@@ -22,10 +22,14 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Check if goal exists and belongs to user
+  // Check if goal exists and belongs to user (both User-direct and Rule-connected)
   const goalCheckQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)
+    MATCH (u:User {uuid: $userUuid})
+    OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)
     WHERE elementId(rg) = $goalId
+    OPTIONAL MATCH (u)-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg)
+    WITH rg, r
+    WHERE rg IS NOT NULL
     RETURN rg, r.title as ruleTitle
   `;
 
@@ -46,10 +50,14 @@ try {
   const tx = args.session.beginTransaction();
 
   try {
-    // Delete the goal and all its relationships
+    // Delete the goal and all its relationships (both User-direct and Rule-connected)
     const deleteGoalQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)
+      MATCH (u:User {uuid: $userUuid})
+      OPTIONAL MATCH (u)-[:UserRuleGoal]->(rg:RuleGoal)
       WHERE elementId(rg) = $goalId
+      OPTIONAL MATCH (u)-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg)
+      WITH rg
+      WHERE rg IS NOT NULL
       DETACH DELETE rg
     `;
 

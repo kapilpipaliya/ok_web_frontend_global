@@ -7,17 +7,30 @@
         key: "RBGoals",
         url: "/rb/goals",
         fns: '''
-return {
-  enabled: true
-};
-''',
-        props: '''
 const [showGoalModal, setShowGoalModal] = args.createSignal(false);
 const [modalMode, setModalMode] = args.createSignal("create");
 const [selectedGoal, setSelectedGoal] = args.createSignal(null);
 const [goals, setGoals] = args.createSignal([]);
 const [isLoading, setIsLoading] = args.createSignal(true);
 const [error, setError] = args.createSignal(null);
+const [goalTypeOptions, setGoalTypeOptions] = args.createSignal([]);
+const [includeCompleted, setIncludeCompleted] = args.createSignal(false);
+
+// Fetch goal type options
+const loadGoalTypeOptions = async () => {
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getGoalSelectOptions",
+      contextData: {}
+    });
+
+    if (result.result?.success && result.result?.data?.goalTypes) {
+      setGoalTypeOptions(result.result.data.goalTypes);
+    }
+  } catch (err) {
+    console.error("Error loading goal type options:", err);
+  }
+};
 
 const loadGoals = async () => {
   setIsLoading(true);
@@ -26,7 +39,7 @@ const loadGoals = async () => {
   try {
     const result = await args.executeNamedServerFunction({
       functionName: "getGoals",
-      contextData: { includeCompleted: false }
+      contextData: { includeCompleted: includeCompleted() }
     });
 
     if (result.error) {
@@ -47,26 +60,34 @@ const loadGoals = async () => {
 };
 
 const onMount = () => {
+  loadGoalTypeOptions();
   loadGoals();
 };
 
 return {
+  enabled: true,
+  showGoalModal,
+  setShowGoalModal,
+  modalMode,
+  setModalMode,
+  selectedGoal,
+  setSelectedGoal,
+  goals,
+  setGoals,
+  isLoading,
+  error,
+  loadGoals,
+  goalTypeOptions,
+  loadGoalTypeOptions,
+  includeCompleted,
+  setIncludeCompleted,
+  onMount
+};
+''',
+        props: '''
+return {
   isNoPermissionCheck: true,
-  contextName: "goalModal",
-  onMount,
-  data: {
-    showGoalModal,
-    setShowGoalModal,
-    modalMode,
-    setModalMode,
-    selectedGoal,
-    setSelectedGoal,
-    goals,
-    setGoals,
-    isLoading,
-    error,
-    loadGoals
-  }
+  onMount: args.fns.onMount
 };
 '''
       }
@@ -106,14 +127,79 @@ return `._id {
       }
     },
     {
-      id: "header",
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBHeader"
+      }
+    },
+    {
+      id: "header_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBPageTitle",
+        slot: "center",
+        props: '''
+return {
+  text: "🎯 Goals & Achievements"
+};
+'''
+      }
+    },
+    {
+      id: "completed_checkbox",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
-  as: "header"
+  as: "input",
+  type: "checkbox",
+  checked: args.fns.includeCompleted(),
+  onChange: (e) => {
+    const isChecked = e.target.checked;
+    args.fns.setIncludeCompleted(isChecked);
+    // Reload goals with new filter
+    args.fns.loadGoals();
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: ${args.theme.var.color.primary};
+}`;
+'''
+      }
+    },
+    {
+      id: "completed_label_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "Include completed goals"
+};
+'''
+      }
+    },
+    {
+      id: "controls_section",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
 };
 ''',
         css: '''
@@ -122,28 +208,15 @@ return `._id {
   justify-content: space-between;
   align-items: center;
   margin-bottom: ${args.theme.var.spacing.xl};
-}`;
-'''
-      }
-    },
-    {
-      id: "page_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h1",
-  text: "🎯 Goals & Achievements"
-};
-''',
-        css: '''
-return `._id {
-  font-size: ${args.theme.var.fontSize.title};
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0;
+  gap: ${args.theme.var.spacing.md};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    align-items: stretch;
+    gap: ${args.theme.var.spacing.md};
+  }
 }`;
 '''
       }
@@ -152,20 +225,46 @@ return `._id {
       id: "add_goal_button",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "RBButton",
         props: '''
-const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
-const setModalMode = args.contextData?.goalModal?.setModalMode;
-
 return {
   text: "Add Goal",
   variant: "primary",
   onClick: () => {
-    setModalMode?.("create");
-    setShowGoalModal?.(true);
+    args.fns.setModalMode("create");
+    args.fns.setShowGoalModal(true);
   }
 };
+'''
+      }
+    },
+    {
+      id: "completed_goals_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "label"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
+  color: ${args.theme.var.color.text};
+  font-size: ${args.theme.var.fontSize.base};
+  cursor: pointer;
+  user-select: none;
+  transition: opacity ${args.theme.var.animation.fast} ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}`;
 '''
       }
     },
@@ -173,14 +272,12 @@ return {
       id: "loading_container",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 3,
         componentName: "Html",
         props: '''
-const isLoading = args.contextData?.goalModal?.isLoading?.();
-
 return {
   as: "div",
-  hide: !isLoading
+  hide: !args.fns.isLoading()
 };
 ''',
         css: '''
@@ -199,23 +296,19 @@ return `._id {
       id: "goals_grid",
       L: "Attr",
       P: {
-        displayOrder: 3,
+        displayOrder: 4,
         componentName: "Html",
         props: '''
-const goals = args.contextData?.goalModal?.goals;
-const isLoading = args.contextData?.goalModal?.isLoading;
-const error = args.contextData?.goalModal?.error;
-
-if (error?.()) {
+if (args.fns.error()) {
   return {
     as: "div",
-    text: `Error: ${error()}`
+    text: `Error: ${args.fns.error()}`
   };
 }
 
-const goalsArray = goals?.() || [];
+const goalsArray = args.fns.goals() || [];
 
-if (goalsArray.length === 0 && !isLoading?.()) {
+if (goalsArray.length === 0 && !args.fns.isLoading()) {
   return {
     as: "div",
     contextName: "goalsGrid",
@@ -231,11 +324,7 @@ return {
 };
 ''',
         css: '''
-const goals = args.contextData?.goalModal?.goals;
-const isLoading = args.contextData?.goalModal?.isLoading;
-const error = args.contextData?.goalModal?.error;
-
-if (error?.()) {
+if (args.fns.error()) {
   return `._id {
     text-align: center;
     padding: ${args.theme.var.spacing.xl};
@@ -244,9 +333,9 @@ if (error?.()) {
   }`;
 }
 
-const goalsArray = goals?.() || [];
+const goalsArray = args.fns.goals() || [];
 
-if (goalsArray.length === 0 && !isLoading?.()) {
+if (goalsArray.length === 0 && !args.fns.isLoading()) {
   return `._id {
     text-align: center;
     padding: ${args.theme.var.spacing.xl};
@@ -256,9 +345,9 @@ if (goalsArray.length === 0 && !isLoading?.()) {
 }
 
 return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: ${args.theme.var.spacing.lg};
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xxl};
 }`;
 '''
       }
@@ -270,14 +359,137 @@ return `._id {
         displayOrder: 1,
         componentName: "RBLoadingSpinner",
         props: '''
-const isLoading = args.contextData?.goalModal?.isLoading?.();
-
 return {
   size: "medium",
   color: "primary",
   text: "Loading goals...",
-  hide: !isLoading
+  hide: !args.fns.isLoading()
 };
+'''
+      }
+    },
+    {
+      id: "rule_groups_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const goals = args.contextData?.goalsGrid?.goals || [];
+
+// Group goals by rule for better organization
+const groupedByRule = {};
+goals.forEach(goalData => {
+  const rule = goalData.rule;
+  const ruleId = rule?.id || 'no-rule';
+  const ruleTitle = rule?.P?.title || 'Unlinked Goals';
+  
+  if (!groupedByRule[ruleId]) {
+    groupedByRule[ruleId] = {
+      rule: rule,
+      ruleTitle: ruleTitle,
+      goals: []
+    };
+  }
+  groupedByRule[ruleId].goals.push(goalData);
+});
+
+// Convert to array for looping
+const ruleGroups = Object.values(groupedByRule);
+
+return {
+  as: "div",
+  contextName: "ruleGroups",
+  loop: true,
+  data: ruleGroups
+};
+''',
+        css: '''
+return `._id {
+  display: contents;
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_group",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "section"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_50};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.lg};
+  padding: ${args.theme.var.spacing.lg};
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_group_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const ruleGroup = args.contextData?.ruleGroups;
+const ruleTitle = ruleGroup?.ruleTitle || 'Unknown Rule';
+const goalsCount = ruleGroup?.goals?.length || 0;
+
+return {
+  as: "h3",
+  text: `📋 ${ruleTitle} (${goalsCount} goal${goalsCount !== 1 ? 's' : ''})`
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.lg};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.md} 0;
+  padding-bottom: ${args.theme.var.spacing.sm};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "rule_group_goals",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const ruleGroup = args.contextData?.ruleGroups;
+const goals = ruleGroup?.goals || [];
+
+return {
+  as: "div",
+  contextName: "goalCard",
+  loop: true,
+  data: goals
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: ${args.theme.var.spacing.md};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    grid-template-columns: 1fr;
+  }
+}`;
 '''
       }
     },
@@ -288,41 +500,95 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const goals = args.contextData?.goalsGrid?.goals || [];
+const goalItem = args.contextData?.goalCard;
+const goal = goalItem?.goal;
+const rule = goalItem?.rule;
+const progress = goalItem?.progress;
+const isCompleted = goal?.P?.isCompleted || false;
+
+// Get unique colors based on goal type or rule category
+const goalType = goal?.P?.goalType || "streak";
+const colorMap = {
+  streak: args.theme.var.color.streak,
+  completion: args.theme.var.color.success,
+  time: args.theme.var.color.info,
+  percentage: args.theme.var.color.primary
+};
+const accentColor = isCompleted ? args.theme.var.color.muted : (colorMap[goalType] || args.theme.var.color.primary);
 
 return {
-  as: "div",
-  contextName: "goalCard",
-  loop: true,
-  data: goals
+  as: "a",
+  href: goal ? `/rb/goal-detail?goalId=${goal.id}` : '#',
+  "data-goal-id": goal?.id,
+  "data-rule-id": rule?.id,
+  onClick: (e) => {
+    // Don't navigate if clicking on menu or menu items
+    if (e.target.closest('[role="menuitem"]') || e.target.closest('button')) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Prevent default and use client-side navigation
+    e.preventDefault();
+    if (goal) {
+      const goalId = goal.id;
+      args.navigate(`/rb/goal-detail?goalId=${goalId}`);
+    }
+  }
 };
 ''',
         css: '''
-return `._id > div {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
+const goalItem = args.contextData?.goalCard;
+const goal = goalItem?.goal;
+const rule = goalItem?.rule;
+const isCompleted = goal?.P?.isCompleted || false;
+
+// Get unique colors based on goal type
+const goalType = goal?.P?.goalType || "streak";
+const colorMap = {
+  streak: args.theme.var.color.streak,
+  completion: args.theme.var.color.success,
+  time: args.theme.var.color.info,
+  percentage: args.theme.var.color.primary
+};
+const accentColor = isCompleted ? args.theme.var.color.muted : (colorMap[goalType] || args.theme.var.color.primary);
+
+// Get rule category for additional styling
+const ruleCategoryName = rule?.P?.categoryName || "";
+
+return `._id {
+  display: block;
+  background: ${isCompleted ? args.theme.var.color.background_light_50 : args.theme.var.color.background};
+  border: 2px solid ${args.theme.var.color.border};
   border-radius: ${args.theme.var.borderRadius.lg};
   padding: ${args.theme.var.spacing.lg};
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  transition: all ${args.theme.var.animation.normal} ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   text-decoration: none;
-  transition: all ${args.theme.var.animation.fast} ease;
+  color: inherit;
+  opacity: ${isCompleted ? '0.7' : '1'};
 
   &:hover {
-    border-color: ${args.theme.var.color.primary};
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: ${accentColor};
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    text-decoration: none;
+    opacity: 1;
   }
 
-  &:before {
+  &::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 4px;
-    background: ${args.theme.var.color.primary};
+    background: ${accentColor};
   }
+
 }`;
 '''
       }
@@ -359,18 +625,12 @@ const goalItem = args.contextData?.goalCard;
 const goal = goalItem?.goal;
 
 return {
-  as: "div",
-  onClick: (e) => {
-    if (goal) {
-      const goalId = goal.id;
-      args.navigate(`/rb/goal-detail?goalId=${goalId}`);
-    }
-  }
+  as: "div"
 };
 ''',
         css: '''
 return `._id {
-  cursor: pointer;
+  flex: 1;
 }`;
 '''
       }
@@ -382,9 +642,11 @@ return `._id {
         displayOrder: 2,
         componentName: "RBFloatingMenu",
         props: '''
+const goal = args.contextData?.goalCard?.goal;
 return {
   placement: "bottom-end",
-  triggerIcon: "carbon:overflow-menu-vertical"
+  triggerIcon: "carbon:overflow-menu-vertical",
+  "data-goal-id": goal?.id
 };
 '''
       }
@@ -397,9 +659,6 @@ return {
         componentName: "RBMenuItem",
         slot: "menu-items",
         props: '''
-const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
-const setModalMode = args.contextData?.goalModal?.setModalMode;
-const setSelectedGoal = args.contextData?.goalModal?.setSelectedGoal;
 const goalItem = args.contextData?.goalCard;
 
 return {
@@ -411,6 +670,7 @@ return {
 
     const goal = goalItem?.goal;
     const rule = goalItem?.rule;
+    const closeMenu = args.contextData?.floatingMenuContext?.closeMenu;
 
     if (goal) {
       const goalData = {
@@ -425,9 +685,14 @@ return {
         reward: goal.P.reward,
         currentValue: goal.P.currentValue
       };
-      setSelectedGoal?.(goalData);
-      setModalMode?.("edit");
-      setShowGoalModal?.(true);
+      closeMenu?.();
+      
+      // Small delay to ensure menu closes before modal opens
+      setTimeout(() => {
+        args.fns.setSelectedGoal(goalData);
+        args.fns.setModalMode("edit");
+        args.fns.setShowGoalModal(true);
+      }, 50);
     }
   }
 };
@@ -455,6 +720,8 @@ return {
     if (goal) {
       const goalId = goal.id;
       args.navigate(`/rb/goal-detail?goalId=${goalId}`);
+      const closeMenu = args.contextData?.floatingMenuContext?.closeMenu;
+      closeMenu?.();
     }
   }
 };
@@ -469,9 +736,6 @@ return {
         componentName: "RBMenuItem",
         slot: "menu-items",
         props: '''
-const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
-const setModalMode = args.contextData?.goalModal?.setModalMode;
-const setSelectedGoal = args.contextData?.goalModal?.setSelectedGoal;
 const goalItem = args.contextData?.goalCard;
 
 return {
@@ -496,9 +760,11 @@ return {
         reward: goal.P.reward,
         currentValue: 0 // Reset progress for duplicate
       };
-      setSelectedGoal?.(goalData);
-      setModalMode?.("create");
-      setShowGoalModal?.(true);
+      args.fns.setSelectedGoal(goalData);
+      args.fns.setModalMode("create");
+      args.fns.setShowGoalModal(true);
+      const closeMenu = args.contextData?.floatingMenuContext?.closeMenu;
+      closeMenu?.();
     }
   }
 };
@@ -514,12 +780,13 @@ return {
         slot: "menu-items",
         props: '''
 const goalItem = args.contextData?.goalCard;
-const loadGoals = args.contextData?.goalModal?.loadGoals;
 const goal = goalItem?.goal;
+const isCompleted = goal?.P?.isCompleted || false;
 
 return {
   icon: "carbon:checkmark-filled",
   text: "Mark Complete",
+  hide: isCompleted,
   onClick: async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -545,7 +812,9 @@ return {
           args.showErrorToast(result.error);
         } else if (result.result?.success) {
           args.showSuccessToast("Goal marked as complete! 🏆");
-          if (loadGoals) loadGoals();
+          args.fns.loadGoals();
+          const closeMenu = args.contextData?.floatingMenuContext?.closeMenu;
+          closeMenu?.();
         } else {
           args.showErrorToast(result.result?.message || "Failed to complete goal");
         }
@@ -568,7 +837,6 @@ return {
         slot: "menu-items",
         props: '''
 const goalItem = args.contextData?.goalCard;
-const loadGoals = args.contextData?.goalModal?.loadGoals;
 const goal = goalItem?.goal;
 
 return {
@@ -599,7 +867,9 @@ return {
           args.showErrorToast(result.error);
         } else if (result.result?.success) {
           args.showSuccessToast("Goal deleted successfully");
-          if (loadGoals) loadGoals();
+          args.fns.loadGoals();
+          const closeMenu = args.contextData?.floatingMenuContext?.closeMenu;
+          closeMenu?.();
         } else {
           args.showErrorToast(result.result?.message || "Failed to delete goal");
         }
@@ -614,18 +884,70 @@ return {
       }
     },
     {
-      id: "goal_title",
+      id: "goal_type_badge",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 const goalItem = args.contextData?.goalCard;
-const goalTitle = goalItem?.goal?.P?.title || "Untitled Goal";
+const goal = goalItem?.goal;
+const goalType = goal?.P?.goalType || "streak";
+const goalTypeOptions = args.fns.goalTypeOptions() || [];
+
+// Find the matching goal type option
+const matchingOption = goalTypeOptions.find(option => option.value === goalType);
+
+let typeIcon = matchingOption?.icon || "🔥";
+let typeLabel = matchingOption?.label || "Streak Goal";
+
+return {
+  as: "span",
+  text: `${typeIcon} ${typeLabel}`
+};
+''',
+        css: '''
+const goalItem = args.contextData?.goalCard;
+const goal = goalItem?.goal;
+const goalType = goal?.P?.goalType || "streak";
+
+const colorMap = {
+  streak: args.theme.var.color.streak,
+  completion: args.theme.var.color.success,
+  time: args.theme.var.color.info,
+  percentage: args.theme.var.color.primary
+};
+const bgColor = colorMap[goalType] || args.theme.var.color.primary;
+
+return `._id {
+  display: inline-flex;
+  align-items: center;
+  background: ${bgColor}_light_300;
+  color: ${bgColor}_text;
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.full};
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 600;
+  margin-bottom: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const goalItem = args.contextData?.goalCard;
+const goal = goalItem?.goal;
+const goalTitle = goal?.P?.title || "Untitled Goal";
+const isCompleted = goal?.P?.isCompleted || false;
 
 return {
   as: "h3",
-  text: goalTitle
+  text: `${goalTitle}${isCompleted ? ' ✓' : ''}`
 };
 ''',
         css: '''
@@ -639,23 +961,53 @@ return `._id {
       }
     },
     {
-      id: "goal_rule",
+      id: "completed_badge",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
 const goalItem = args.contextData?.goalCard;
-const rule = goalItem?.rule;
+const goal = goalItem?.goal;
+const isCompleted = goal?.P?.isCompleted || false;
+
+return {
+  as: "span",
+  text: "Completed",
+  hide: !isCompleted
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.success};
+  color: ${args.theme.var.color.success_text};
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  font-size: ${args.theme.var.fontSize.xs};
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: ${args.theme.var.spacing.sm};
+}`;
+'''
+      }
+    },
+    {
+      id: "goal_rule",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const goalItem = args.contextData?.goalCard;
 const goal = goalItem?.goal;
 
-const ruleTitle = rule?.P?.title || "No rule linked";
 const targetDate = goal?.P?.targetDate;
 const formattedDate = targetDate ? new Date(targetDate).toLocaleDateString() : "No target date";
 
 return {
   as: "p",
-  text: `${ruleTitle} • Target: ${formattedDate}`
+  text: `🎯 Target: ${formattedDate}`
 };
 ''',
         css: '''
@@ -723,11 +1075,26 @@ return {
 };
 ''',
         css: '''
+const goalItem = args.contextData?.goalCard;
+const progress = goalItem?.progress;
+const percentage = progress?.percentage || 0;
+
+// Dynamic color based on progress
+let progressColor = args.theme.var.color.error; // 0-25%
+if (percentage >= 75) {
+  progressColor = args.theme.var.color.success;
+} else if (percentage >= 50) {
+  progressColor = args.theme.var.color.warning;
+} else if (percentage >= 25) {
+  progressColor = args.theme.var.color.info;
+}
+
 return `._id {
   height: 12px;
-  background: ${args.theme.var.color.primary};
+  background: ${progressColor};
   border-radius: ${args.theme.var.borderRadius.full};
   transition: width ${args.theme.var.animation.slow} ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }`;
 '''
       }
@@ -801,9 +1168,9 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const goals = args.contextData?.goalModal?.goals?.() || [];
-const isLoading = args.contextData?.goalModal?.isLoading?.();
-const error = args.contextData?.goalModal?.error?.();
+const goals = args.fns.goals() || [];
+const isLoading = args.fns.isLoading();
+const error = args.fns.error();
 
 return {
   as: "div",
@@ -850,15 +1217,12 @@ return `._id {
         displayOrder: 2,
         componentName: "RBButton",
         props: '''
-const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
-const setModalMode = args.contextData?.goalModal?.setModalMode;
-
 return {
   text: "Create Goal",
   variant: "primary",
   onClick: () => {
-    setModalMode?.("create");
-    setShowGoalModal?.(true);
+    args.fns.setModalMode("create");
+    args.fns.setShowGoalModal(true);
   }
 };
 '''
@@ -871,30 +1235,20 @@ return {
         displayOrder: 4,
         componentName: "RBGoalFormModal",
         props: '''
-const showGoalModal = args.contextData?.goalModal?.showGoalModal;
-const modalMode = args.contextData?.goalModal?.modalMode;
-const selectedGoal = args.contextData?.goalModal?.selectedGoal;
-const setShowGoalModal = args.contextData?.goalModal?.setShowGoalModal;
 return {
-  isOpen: showGoalModal?.(),
-  mode: modalMode?.(),
-  goalData: selectedGoal?.(),
+  isOpen: args.fns.showGoalModal(),
+  mode: args.fns.modalMode(),
+  goalData: args.fns.selectedGoal(),
   onClose: () => {
-    setShowGoalModal?.(false);
+    args.fns.setShowGoalModal(false);
   },
   onSave: (result) => {
     // Refresh goals data after successful save
-    const loadGoals = args.contextData?.goalModal?.loadGoals;
-    if (loadGoals) {
-      loadGoals();
-    }
+    args.fns.loadGoals();
   },
   onDelete: (result) => {
     // Refresh goals data after successful delete
-    const loadGoals = args.contextData?.goalModal?.loadGoals;
-    if (loadGoals) {
-      loadGoals();
-    }
+    args.fns.loadGoals();
   }
 };
 '''
@@ -904,16 +1258,26 @@ return {
   edges: [
     { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
     { id: "e2", T: "Attr", S: "page_root", E: "page_content" },
-    { id: "e3", T: "Attr", S: "page_content", E: "header" },
-    { id: "e4", T: "Attr", S: "header", E: "page_title" },
-    { id: "e5", T: "Attr", S: "header", E: "add_goal_button" },
+    { id: "e3", T: "Attr", S: "page_content", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "header_title" },
+    { id: "e5", T: "Attr", S: "page_content", E: "controls_section" },
+    { id: "e5a", T: "Attr", S: "controls_section", E: "add_goal_button" },
+    { id: "e5b", T: "Attr", S: "controls_section", E: "completed_goals_toggle" },
+    { id: "e5d", T: "Attr", S: "completed_goals_toggle", E: "completed_checkbox" },
+    { id: "e5e", T: "Attr", S: "completed_goals_toggle", E: "completed_label_text" },
     { id: "e6", T: "Attr", S: "page_content", E: "loading_container" },
     { id: "e6a", T: "Attr", S: "loading_container", E: "loading_spinner" },
     { id: "e7", T: "Attr", S: "page_content", E: "goals_grid" },
-    { id: "e9", T: "Attr", S: "goals_grid", E: "goal_card" },
+    { id: "e9", T: "Attr", S: "goals_grid", E: "rule_groups_container" },
+    { id: "e9a", T: "Attr", S: "rule_groups_container", E: "rule_group" },
+    { id: "e9b", T: "Attr", S: "rule_group", E: "rule_group_header" },
+    { id: "e9c", T: "Attr", S: "rule_group", E: "rule_group_goals" },
+    { id: "e9d", T: "Attr", S: "rule_group_goals", E: "goal_card" },
     { id: "e10", T: "Attr", S: "goal_card", E: "goal_header" },
     { id: "e11", T: "Attr", S: "goal_header", E: "goal_title_container" },
-    { id: "e12", T: "Attr", S: "goal_title_container", E: "goal_title" },
+    { id: "e12", T: "Attr", S: "goal_title_container", E: "goal_type_badge" },
+    { id: "e12a", T: "Attr", S: "goal_title_container", E: "goal_title" },
+    { id: "e12b", T: "Attr", S: "goal_title_container", E: "completed_badge" },
     { id: "e13", T: "Attr", S: "goal_title_container", E: "goal_rule" },
     { id: "e14", T: "Attr", S: "goal_header", E: "goal_menu" },
     { id: "e15", T: "Attr", S: "goal_menu", E: "goal_menu_edit" },

@@ -89,7 +89,8 @@ try {
 
   // STEP 1: Get overall statistics
   const overallStatsQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
     WITH rt, r, rc
     RETURN
@@ -111,7 +112,8 @@ try {
 
   // STEP 2: Get category breakdown
   const categoryBreakdownQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
     WITH rc, rt
     RETURN
@@ -132,7 +134,8 @@ try {
 
   // STEP 3: Get rule performance
   const rulePerformanceQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
     WITH r, rc, rt
     RETURN
@@ -154,7 +157,8 @@ try {
 
   // STEP 4: Get daily breakdown for trend analysis
   const dailyBreakdownQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE rt.date >= $startDate AND rt.date <= $endDate ${categoryFilter} ${ruleFilter}
     WITH rt.date as trackingDate, rt
     RETURN
@@ -171,7 +175,8 @@ try {
 
   // STEP 5: Get current streaks
   const streakQuery = `
-    MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+    MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
+    MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
     WHERE rs.currentStreak > 0 ${categoryFilter} ${ruleFilter}
     RETURN
       r.id as ruleId,

@@ -65,6 +65,7 @@ export type DynamicComponentProps = Readonly<{
   title?: string;
   txnId?: number;
   children?: JSX.Element;
+  class?: string;
 }>;
 
 /**

@@ -55,43 +55,49 @@ return `._id {
       }
     },
     {
-      id: "privacy_header",
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "RBHeader"
+      }
+    },
+    {
+      id: "header_title",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
+        slot: "center",
         props: '''
 return {
-  as: "header",
+  as: "h1",
   text: "Privacy Policy"
 };
 ''',
         css: '''
 return `._id {
-  text-align: center;
-  margin-bottom: ${args.theme.var.spacing.xl};
-  padding-bottom: ${args.theme.var.spacing.lg};
-  border-bottom: 2px solid ${args.theme.var.color.primary_light_200};
-  font-size: ${args.theme.var.fontSize.title};
+  font-size: 2rem;
   font-weight: 700;
   color: ${args.theme.var.color.primary};
+  margin: 0;
 }
 
 @media (max-width: 768px) {
   ._id {
-    font-size: ${args.theme.var.fontSize.xxl};
-    margin-bottom: ${args.theme.var.spacing.lg};
+    font-size: 1.75rem;
   }
 }`;
 '''
       }
     },
     {
-      id: "privacy_last_updated",
+      id: "header_date",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
+        slot: "subtitle",
         props: '''
 return {
   as: "p",
@@ -100,10 +106,9 @@ return {
 ''',
         css: '''
 return `._id {
-  text-align: center;
-  margin-bottom: ${args.theme.var.spacing.xl};
   color: ${args.theme.var.color.muted};
   font-style: italic;
+  margin: 0;
 }`;
 '''
       }
@@ -968,9 +973,10 @@ return `._id {
   edges: [
     { id: "e1", T: "PageLayout", S: "privacy_page", E: "privacy_layout_1" },
     { id: "e2", T: "Attr", S: "privacy_page", E: "privacy_container" },
-    { id: "e3", T: "Attr", S: "privacy_container", E: "privacy_header" },
-    { id: "e4", T: "Attr", S: "privacy_container", E: "privacy_last_updated" },
-    { id: "e5", T: "Attr", S: "privacy_container", E: "privacy_intro_section" },
+    { id: "e3", T: "Attr", S: "privacy_container", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "header_title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "header_date" },
+    { id: "e6", T: "Attr", S: "privacy_container", E: "privacy_intro_section" },
     { id: "e6", T: "Attr", S: "privacy_intro_section", E: "privacy_intro_text" },
     { id: "e7", T: "Attr", S: "privacy_container", E: "data_collection_section" },
     { id: "e8", T: "Attr", S: "data_collection_section", E: "data_collection_title" },

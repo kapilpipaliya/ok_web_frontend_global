@@ -55,31 +55,20 @@ return `._id {
       }
     },
     {
-      id: "hero_section",
+      id: "page_header",
       L: "Attr",
       P: {
         displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-''',
-        css: '''
-return `._id {
-  text-align: center;
-  margin-bottom: ${args.theme.var.spacing.xxl};
-  padding: ${args.theme.var.spacing.xl} 0;
-}`;
-'''
+        componentName: "RBHeader"
       }
     },
     {
-      id: "hero_title",
+      id: "header_title",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
+        slot: "center",
         props: '''
 return {
   as: "h1",
@@ -88,27 +77,27 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: 3rem;
-  font-weight: 800;
+  font-size: 2rem;
+  font-weight: 700;
   color: ${args.theme.var.color.primary};
-  margin-bottom: ${args.theme.var.spacing.lg};
-  text-shadow: 0 2px 4px ${args.theme.var.color.primary_light_200};
+  margin: 0;
 }
 
 @media (max-width: 768px) {
   ._id {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
   }
 }`;
 '''
       }
     },
     {
-      id: "hero_subtitle",
+      id: "header_subtitle",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
+        slot: "subtitle",
         props: '''
 return {
   as: "p",
@@ -117,16 +106,16 @@ return {
 ''',
         css: '''
 return `._id {
-  font-size: ${args.theme.var.fontSize.xl};
+  font-size: 1.1rem;
   line-height: 1.6;
   color: ${args.theme.var.color.muted};
-  max-width: 700px;
   margin: 0 auto;
+  max-width: 700px;
 }
 
 @media (max-width: 768px) {
   ._id {
-    font-size: ${args.theme.var.fontSize.lg};
+    font-size: 1rem;
   }
 }`;
 '''
@@ -1867,9 +1856,9 @@ return {
   edges: [
     { id: "e1", T: "PageLayout", S: "features_page", E: "features_layout_1" },
     { id: "e2", T: "Attr", S: "features_page", E: "features_container" },
-    { id: "e3", T: "Attr", S: "features_container", E: "hero_section" },
-    { id: "e4", T: "Attr", S: "hero_section", E: "hero_title" },
-    { id: "e5", T: "Attr", S: "hero_section", E: "hero_subtitle" },
+    { id: "e3", T: "Attr", S: "features_container", E: "page_header" },
+    { id: "e4", T: "Attr", S: "page_header", E: "header_title" },
+    { id: "e5", T: "Attr", S: "page_header", E: "header_subtitle" },
     { id: "e6", T: "Attr", S: "features_container", E: "main_features_section" },
     { id: "e7", T: "Attr", S: "main_features_section", E: "main_features_title" },
     { id: "e8", T: "Attr", S: "main_features_section", E: "main_features_grid" },

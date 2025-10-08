@@ -43,9 +43,9 @@ try {
     MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
     WHERE elementId(rc) = $categoryId
     MATCH (rc)<-[:RuleCategory]-(r:Rule)<-[:UserRule]-(u)
-    OPTIONAL MATCH (r)<-[:RuleTrackingRule]-(rt:RuleTracking)<-[:UserRuleTracking]-(u)
-    OPTIONAL MATCH (r)<-[:RuleGoalRule]-(rg:RuleGoal)<-[:UserRuleGoal]-(u)
-    OPTIONAL MATCH (r)<-[:RuleStreakRule]-(rs:RuleStreak)<-[:UserRuleStreak]-(u)
+    OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
+    OPTIONAL MATCH (r)-[:RuleGoal]->(rg:RuleGoal)
+    OPTIONAL MATCH (r)-[:RuleStreak]->(rs:RuleStreak)
     WITH r,
          collect(DISTINCT rt) as trackingRecords,
          collect(DISTINCT rg) as goals,

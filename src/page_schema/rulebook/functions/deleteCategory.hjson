@@ -27,12 +27,13 @@ try {
     MATCH (u:User {uuid: $userUuid})-[:UserRuleCategory]->(rc:RuleCategory)
     WHERE elementId(rc) = $categoryId
     OPTIONAL MATCH (rc)<-[:RuleCategory]-(r:Rule)
-    OPTIONAL MATCH (r)<-[:RuleTrackingRule]-(rt:RuleTracking)
-    OPTIONAL MATCH (r)<-[:RuleGoalRule]-(rg:RuleGoal)
+    OPTIONAL MATCH (r)-[:RuleTracking]->(rt:RuleTracking)
+    OPTIONAL MATCH (r)-[:RuleGoal]->(rg:RuleGoal)
+    OPTIONAL MATCH (u)-[:UserRuleGoal]->(urg:RuleGoal)
     RETURN rc,
            count(DISTINCT r) as ruleCount,
            count(DISTINCT rt) as trackingCount,
-           count(DISTINCT rg) as goalCount
+           count(DISTINCT rg) + count(DISTINCT urg) as goalCount
   `;
 
   const categoryResult = await args.session.run(categoryCheckQuery, {
@@ -65,7 +66,8 @@ try {
     // Step 1: Delete all goals associated with rules in this category
     if (goalCount > 0) {
       const deleteGoalsQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleGoal]->(rg:RuleGoal)-[:RuleGoalRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleGoal]->(rg:RuleGoal)
+        MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
         WHERE elementId(rc) = $categoryId
         DETACH DELETE rg
       `;
@@ -79,7 +81,8 @@ try {
     // Step 2: Delete all tracking data for rules in this category
     if (trackingCount > 0) {
       const deleteTrackingQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleTracking]->(rt:RuleTracking)-[:RuleTrackingRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleTracking]->(rt:RuleTracking)
+        MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
         WHERE elementId(rc) = $categoryId
         DETACH DELETE rt
       `;
@@ -91,7 +94,8 @@ try {
 
       // Also delete streak data
       const deleteStreaksQuery = `
-        MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)-[:RuleCategory]->(rc:RuleCategory)
+        MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
+        MATCH (r)-[:RuleCategory]->(rc:RuleCategory)
         WHERE elementId(rc) = $categoryId
         DETACH DELETE rs
       `;

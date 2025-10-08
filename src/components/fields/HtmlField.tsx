@@ -7,7 +7,7 @@ import {
   createMemo,
   For,
   createUniqueId,
-  Component,
+  Component, useContext,
 } from "solid-js";
 import { Dynamic, Portal } from "solid-js/web";
 import { untrack } from "solid-js";
@@ -42,6 +42,7 @@ import { DataInternal } from "./data/DataInternal";
 import { As } from "~/components/As";
 import {SolidMarkdown} from "~/components/solid-markdown";
 import remarkGfm from "remark-gfm";
+import {SlotContext} from "~/components/fields/component/contexts/SlotContext";
 const MetaTag = (
   tag: string,
   props: { [k: string]: any },
@@ -490,6 +491,9 @@ export function HtmlField(
         <Portal {...others}>
           <Content />
         </Portal>
+      </Match>
+      <Match when={asLowerCase() === "slot"}>
+        <Content/>
       </Match>
       <Match when={true}>
         <Dynamic

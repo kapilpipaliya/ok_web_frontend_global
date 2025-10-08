@@ -123,7 +123,7 @@ try {
       MATCH (u:User {uuid: $userUuid})
       MATCH (r:Rule) WHERE elementId(r) = $ruleId
       // First try to find existing tracking for this rule and date
-      OPTIONAL MATCH (u)-[:UserRuleTracking]->(existing:RuleTracking)-[:RuleTrackingRule]->(r)
+      OPTIONAL MATCH (r)-[:RuleTracking]->(existing:RuleTracking)
       WHERE existing.date = date($date)
       // If exists, update it; otherwise create new
       FOREACH (x IN CASE WHEN existing IS NOT NULL THEN [1] ELSE [] END |
@@ -136,7 +136,7 @@ try {
             existing.updatedAt = datetime()
       )
       FOREACH (x IN CASE WHEN existing IS NULL THEN [1] ELSE [] END |
-        CREATE (u)-[:UserRuleTracking]->(newTracking:RuleTracking {
+        CREATE (r)-[:RuleTracking]->(newTracking:RuleTracking {
           date: date($date),
           status: $status,
           completionPercentage: $completionPercentage,
@@ -147,11 +147,10 @@ try {
           createdAt: datetime(),
           updatedAt: datetime()
         })
-        CREATE (newTracking)-[:RuleTrackingRule]->(r)
       )
       // Return the final tracking record
       WITH r
-      MATCH (u)-[:UserRuleTracking]->(finalTracking:RuleTracking)-[:RuleTrackingRule]->(r)
+      MATCH (r)-[:RuleTracking]->(finalTracking:RuleTracking)
       WHERE finalTracking.date = date($date)
       RETURN finalTracking as rt, r
     `;
@@ -179,7 +178,7 @@ try {
 
     // Get current streak data
     const currentStreakQuery = `
-      MATCH (u:User {uuid: $userUuid})-[:UserRuleStreak]->(rs:RuleStreak)-[:RuleStreakRule]->(r:Rule)
+      MATCH (u:User {uuid: $userUuid})-[:UserRule]->(r:Rule)-[:RuleStreak]->(rs:RuleStreak)
       WHERE elementId(r) = $ruleId
       RETURN rs
     `;
@@ -256,7 +255,7 @@ try {
       MATCH (u:User {uuid: $userUuid})
       MATCH (r:Rule) WHERE elementId(r) = $ruleId
       // First try to find existing streak for this rule
-      OPTIONAL MATCH (u)-[:UserRuleStreak]->(existing:RuleStreak)-[:RuleStreakRule]->(r)
+      OPTIONAL MATCH (r)-[:RuleStreak]->(existing:RuleStreak)
       // If exists, update it; otherwise create new
       FOREACH (x IN CASE WHEN existing IS NOT NULL THEN [1] ELSE [] END |
         SET existing.currentStreak = $currentStreak,
@@ -269,7 +268,7 @@ try {
             existing.updatedAt = datetime()
       )
       FOREACH (x IN CASE WHEN existing IS NULL THEN [1] ELSE [] END |
-        CREATE (u)-[:UserRuleStreak]->(newStreak:RuleStreak {
+        CREATE (r)-[:RuleStreak]->(newStreak:RuleStreak {
           currentStreak: $currentStreak,
           longestStreak: $longestStreak,
           totalCompletions: $totalCompletions,
@@ -280,11 +279,10 @@ try {
           createdAt: datetime(),
           updatedAt: datetime()
         })
-        CREATE (newStreak)-[:RuleStreakRule]->(r)
       )
       // Return the final streak record
       WITH r
-      MATCH (u)-[:UserRuleStreak]->(finalStreak:RuleStreak)-[:RuleStreakRule]->(r)
+      MATCH (r)-[:RuleStreak]->(finalStreak:RuleStreak)
       RETURN finalStreak as rs
     `;
 
