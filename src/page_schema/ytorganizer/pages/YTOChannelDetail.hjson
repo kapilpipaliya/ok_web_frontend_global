@@ -33,7 +33,13 @@ return {
         props: '''
 return {
   as: "div",
-  onMount: () => args.fns.loadChannelContents()
+  onMount: () => {
+    args.fns.loadChannelContents();
+    window.addEventListener('resize', args.fns.handleResize);
+  },
+  onCleanup: () => {
+    window.removeEventListener('resize', args.fns.handleResize);
+  }
 };
 ''',
         fns: '''
@@ -49,6 +55,28 @@ const [activeTab, setActiveTab] = args.createSignal('videos');
 const [searchQuery, setSearchQuery] = args.createSignal('');
 const [filteredVideos, setFilteredVideos] = args.createSignal([]);
 const [filteredPlaylists, setFilteredPlaylists] = args.createSignal([]);
+
+// Virtualization state
+const [videosScrollElement, setVideosScrollElement] = args.createSignal(null);
+const [playlistsScrollElement, setPlaylistsScrollElement] = args.createSignal(null);
+const [videosScrollTop, setVideosScrollTop] = args.createSignal(0);
+const [playlistsScrollTop, setPlaylistsScrollTop] = args.createSignal(0);
+const [windowWidth, setWindowWidth] = args.createSignal(typeof window !== 'undefined' ? window.innerWidth : 768);
+const overscan = 1; // Extra items to render above/below
+
+// Reactive item heights based on screen size
+const getVideoItemHeight = () => {
+  return windowWidth() <= 768 ? 350 : 140; // Mobile: 350px, Desktop: 140px
+};
+
+const getPlaylistItemHeight = () => {
+  return windowWidth() <= 768 ? 250 : 380; // Mobile: 320px, Desktop: 380px
+};
+
+// Handle window resize
+const handleResize = () => {
+  setWindowWidth(window.innerWidth);
+};
 
 // Get channel ID from URL params
 const channelId = args.searchParams?.channelId || args.params?.channelId;
@@ -136,6 +164,86 @@ const clearSearch = () => {
   setFilteredPlaylists(playlists());
 };
 
+// Virtualization helpers for videos
+const getVideosVisibleRange = () => {
+  const el = videosScrollElement();
+  if (!el) return { start: 0, end: 0 };
+
+  const scroll = videosScrollTop();
+  const containerHeight = el.clientHeight || 600; // Default height if not calculated yet
+  const itemHeight = getVideoItemHeight();
+
+  const startIndex = Math.max(0, Math.floor(scroll / itemHeight) - overscan);
+  const endIndex = Math.min(
+    filteredVideos().length - 1,
+    Math.ceil((scroll + containerHeight) / itemHeight) + overscan
+  );
+
+  return { start: startIndex, end: endIndex };
+};
+
+const getVideosVirtualItems = () => {
+  const { start, end } = getVideosVisibleRange();
+  const items = [];
+  const itemHeight = getVideoItemHeight();
+
+  for (let i = start; i <= end; i++) {
+    items.push({
+      index: i,
+      start: i * itemHeight,
+      size: itemHeight
+    });
+  }
+
+  return items;
+};
+
+const getVideosTotalSize = () => filteredVideos().length * getVideoItemHeight();
+
+const handleVideosScroll = (e) => {
+  setVideosScrollTop(e.target.scrollTop);
+};
+
+// Virtualization helpers for playlists
+const getPlaylistsVisibleRange = () => {
+  const el = playlistsScrollElement();
+  if (!el) return { start: 0, end: 0 };
+
+  const scroll = playlistsScrollTop();
+  const containerHeight = el.clientHeight || 600; // Default height if not calculated yet
+  const itemHeight = getPlaylistItemHeight();
+
+  const startIndex = Math.max(0, Math.floor(scroll / itemHeight) - overscan);
+  const endIndex = Math.min(
+    filteredPlaylists().length - 1,
+    Math.ceil((scroll + containerHeight) / itemHeight) + overscan
+  );
+
+  return { start: startIndex, end: endIndex };
+};
+
+const getPlaylistsVirtualItems = () => {
+  const { start, end } = getPlaylistsVisibleRange();
+  const items = [];
+  const itemHeight = getPlaylistItemHeight();
+
+  for (let i = start; i <= end; i++) {
+    items.push({
+      index: i,
+      start: i * itemHeight,
+      size: itemHeight
+    });
+  }
+
+  return items;
+};
+
+const getPlaylistsTotalSize = () => filteredPlaylists().length * getPlaylistItemHeight();
+
+const handlePlaylistsScroll = (e) => {
+  setPlaylistsScrollTop(e.target.scrollTop);
+};
+
 return {
   channelData,
   videos,
@@ -149,7 +257,16 @@ return {
   searchQuery,
   loadChannelContents,
   performSearch,
-  clearSearch
+  clearSearch,
+  setVideosScrollElement,
+  setPlaylistsScrollElement,
+  handleVideosScroll,
+  handlePlaylistsScroll,
+  getVideosVirtualItems,
+  getVideosTotalSize,
+  getPlaylistsVirtualItems,
+  getPlaylistsTotalSize,
+  handleResize
 };
 '''
       }
@@ -1020,20 +1137,59 @@ const videos = args.fns.videos();
 
 return {
   as: "div",
-  hide: loading || activeTab !== 'videos'
+  hide: loading || activeTab !== 'videos',
+  ref: args.fns.setVideosScrollElement,
+  onScroll: args.fns.handleVideosScroll
 };
 ''',
         css: '''
 return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  overflow-y: auto;
+  height: calc(100vh - 450px);
+  position: relative;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    height: calc(100vh - 420px);
   }
 }`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_videos_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_videos_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const totalSize = args.fns.getVideosTotalSize();
+
+return {
+  as: "div",
+  style: {
+    height: `${totalSize}px`,
+    width: "100%",
+    position: "relative"
+  }
+};
 '''
       }
     },
@@ -1044,12 +1200,35 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const videos = args.fns.filteredVideos();
+const virtualItems = args.fns.getVideosVirtualItems();
 
 return {
-  data: videos,
+  data: virtualItems,
   loop: true,
-  contextName: "video"
+  contextName: "virtualItem"
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_video_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const virtualItem = args.contextData.virtualItem;
+
+return {
+  as: "div",
+  style: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: `${virtualItem.size}px`,
+    transform: `translateY(${virtualItem.start}px)`
+  }
 };
 '''
       }
@@ -1061,7 +1240,9 @@ return {
         displayOrder: 1,
         componentName: "YTOVideoCard",
         props: '''
-const video = args.contextData.video;
+const virtualItem = args.contextData.virtualItem;
+const videos = args.fns.filteredVideos();
+const video = videos[virtualItem.index];
 
 return {
   video: video,
@@ -1085,20 +1266,59 @@ const playlists = args.fns.playlists();
 
 return {
   as: "div",
-  hide: loading || activeTab !== 'playlists'
+  hide: loading || activeTab !== 'playlists',
+  ref: args.fns.setPlaylistsScrollElement,
+  onScroll: args.fns.handlePlaylistsScroll
 };
 ''',
         css: '''
 return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  overflow-y: auto;
+  height: calc(100vh - 450px);
+  position: relative;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    height: calc(100vh - 420px);
   }
 }`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_playlists_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_playlists_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const totalSize = args.fns.getPlaylistsTotalSize();
+
+return {
+  as: "div",
+  style: {
+    height: `${totalSize}px`,
+    width: "100%",
+    position: "relative"
+  }
+};
 '''
       }
     },
@@ -1109,13 +1329,35 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const playlists = args.fns.filteredPlaylists();
+const virtualItems = args.fns.getPlaylistsVirtualItems();
 
 return {
-  data: playlists,
+  data: virtualItems,
   loop: true,
-  name: "playlist",
-  contextName: "playlist"
+  contextName: "virtualItem"
+};
+'''
+      }
+    },
+    {
+      id: "yto_channel_detail_playlist_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const virtualItem = args.contextData.virtualItem;
+
+return {
+  as: "div",
+  style: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: `${virtualItem.size}px`,
+    transform: `translateY(${virtualItem.start}px)`
+  }
 };
 '''
       }
@@ -1127,7 +1369,9 @@ return {
         displayOrder: 1,
         componentName: "YTOPlaylistCard",
         props: '''
-const playlist = args.contextData.playlist;
+const virtualItem = args.contextData.virtualItem;
+const playlists = args.fns.filteredPlaylists();
+const playlist = playlists[virtualItem.index];
 
 return {
   playlist: playlist,
@@ -1333,15 +1577,21 @@ return `._id {
     { id: "e22", T: "Attr", S: "yto_channel_detail_loading", E: "yto_channel_detail_loading_spinner" },
     { id: "e23", T: "Attr", S: "yto_channel_detail_loading", E: "yto_channel_detail_loading_text" },
     { id: "e24", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_videos_tab" },
-    { id: "e25", T: "Attr", S: "yto_channel_detail_videos_tab", E: "yto_channel_detail_videos_data" },
-    { id: "e26", T: "Attr", S: "yto_channel_detail_videos_data", E: "yto_channel_detail_video_card" },
-    { id: "e27", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_playlists_tab" },
-    { id: "e28", T: "Attr", S: "yto_channel_detail_playlists_tab", E: "yto_channel_detail_playlists_data" },
-    { id: "e29", T: "Attr", S: "yto_channel_detail_playlists_data", E: "yto_channel_detail_playlist_card" },
-    { id: "e30", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_empty_state" },
-    { id: "e31", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_icon" },
-    { id: "e32", T: "Attr", S: "yto_channel_detail_empty_icon", E: "yto_channel_detail_empty_icon_svg" },
-    { id: "e33", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_title" },
-    { id: "e34", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_description" }
+    { id: "e25", T: "Attr", S: "yto_channel_detail_videos_tab", E: "yto_channel_detail_videos_wrapper" },
+    { id: "e26", T: "Attr", S: "yto_channel_detail_videos_wrapper", E: "yto_channel_detail_videos_list" },
+    { id: "e27", T: "Attr", S: "yto_channel_detail_videos_list", E: "yto_channel_detail_videos_data" },
+    { id: "e28", T: "Attr", S: "yto_channel_detail_videos_data", E: "yto_channel_detail_video_wrapper" },
+    { id: "e29", T: "Attr", S: "yto_channel_detail_video_wrapper", E: "yto_channel_detail_video_card" },
+    { id: "e30", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_playlists_tab" },
+    { id: "e31", T: "Attr", S: "yto_channel_detail_playlists_tab", E: "yto_channel_detail_playlists_wrapper" },
+    { id: "e32", T: "Attr", S: "yto_channel_detail_playlists_wrapper", E: "yto_channel_detail_playlists_list" },
+    { id: "e33", T: "Attr", S: "yto_channel_detail_playlists_list", E: "yto_channel_detail_playlists_data" },
+    { id: "e34", T: "Attr", S: "yto_channel_detail_playlists_data", E: "yto_channel_detail_playlist_wrapper" },
+    { id: "e35", T: "Attr", S: "yto_channel_detail_playlist_wrapper", E: "yto_channel_detail_playlist_card" },
+    { id: "e36", T: "Attr", S: "yto_channel_detail_content", E: "yto_channel_detail_empty_state" },
+    { id: "e37", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_icon" },
+    { id: "e38", T: "Attr", S: "yto_channel_detail_empty_icon", E: "yto_channel_detail_empty_icon_svg" },
+    { id: "e39", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_title" },
+    { id: "e40", T: "Attr", S: "yto_channel_detail_empty_state", E: "yto_channel_detail_empty_description" }
   ]
 }

@@ -33,7 +33,13 @@ return {
         props: '''
 return {
   as: "div",
-  onMount: () => args.fns.loadPlaylists()
+  onMount: () => {
+    args.fns.loadPlaylists();
+    window.addEventListener('resize', args.fns.handleResize);
+  },
+  onCleanup: () => {
+    window.removeEventListener('resize', args.fns.handleResize);
+  }
 };
 ''',
         fns: '''
@@ -41,6 +47,65 @@ return {
 const [playlists, setPlaylists] = args.createSignal([]);
 const [loading, setLoading] = args.createSignal(true);
 const [error, setError] = args.createSignal(null);
+const [scrollElement, setScrollElement] = args.createSignal(null);
+
+// Virtualization state
+const [scrollTop, setScrollTop] = args.createSignal(0);
+const [windowWidth, setWindowWidth] = args.createSignal(typeof window !== 'undefined' ? window.innerWidth : 768);
+const overscan = 5; // Extra items to render above/below
+
+// Reactive item height based on screen size
+const getItemHeight = () => {
+  return windowWidth() <= 768 ? 250 : 380; // Mobile: 250px, Desktop: 380px
+};
+
+// Handle window resize
+const handleResize = () => {
+  setWindowWidth(window.innerWidth);
+};
+
+// Calculate visible items
+const getVisibleRange = () => {
+  const el = scrollElement();
+  if (!el) return { start: 0, end: 0 };
+
+  const scroll = scrollTop();
+  const containerHeight = el.clientHeight || 600; // Default height if not calculated yet
+  const itemHeight = getItemHeight();
+
+  const startIndex = Math.max(0, Math.floor(scroll / itemHeight) - overscan);
+  const endIndex = Math.min(
+    playlists().length - 1,
+    Math.ceil((scroll + containerHeight) / itemHeight) + overscan
+  );
+
+  return { start: startIndex, end: endIndex };
+};
+
+// Get virtual items to render
+const getVirtualItems = () => {
+  const { start, end } = getVisibleRange();
+  const items = [];
+  const itemHeight = getItemHeight();
+
+  for (let i = start; i <= end; i++) {
+    items.push({
+      index: i,
+      start: i * itemHeight,
+      size: itemHeight
+    });
+  }
+
+  return items;
+};
+
+// Total height of all items
+const getTotalSize = () => playlists().length * getItemHeight();
+
+// Handle scroll
+const handleScroll = (e) => {
+  setScrollTop(e.target.scrollTop);
+};
 
 // Load playlists when component mounts
 const loadPlaylists = async () => {
@@ -85,7 +150,12 @@ return {
   loading,
   error,
   loadPlaylists,
-  handlePlaylistSubmit
+  handlePlaylistSubmit,
+  setScrollElement,
+  handleScroll,
+  getVirtualItems,
+  getTotalSize,
+  handleResize
 };
 '''
       }
@@ -115,7 +185,9 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "main"
+  as: "main",
+  ref: args.fns.setScrollElement,
+  onScroll: args.fns.handleScroll
 };
 ''',
         css: '''
@@ -124,9 +196,12 @@ return `._id {
   max-width: 1400px;
   margin: 0 auto;
   min-height: 60vh;
-  
+  overflow-y: auto;
+  height: calc(100vh - 200px);
+
   @media (max-width: 768px) {
     padding: 1rem;
+    height: calc(100vh - 180px);
   }
 }`;
 '''
@@ -426,7 +501,7 @@ return `._id {
       }
     },
     {
-      id: "yto_playlists_list",
+      id: "yto_playlists_list_wrapper",
       L: "Attr",
       P: {
         displayOrder: 3,
@@ -442,32 +517,69 @@ return {
 ''',
         css: '''
 return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  position: relative;
   margin-bottom: 2rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
 }`;
 '''
       }
     },
     {
-      id: "yto_playlists_list_data",
+      id: "yto_playlists_list",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const playlists = args.fns.playlists();
+const totalSize = args.fns.getTotalSize();
 
 return {
-  data: playlists,
+  as: "div",
+  style: {
+    height: `${totalSize}px`,
+    width: "100%",
+    position: "relative"
+  }
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlists_virtual_items",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const virtualItems = args.fns.getVirtualItems();
+
+return {
+  data: virtualItems,
   loop: true,
-  contextName: "playlist"
+  name: "virtualItem",
+  contextName: "virtualItem"
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlists_card_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const virtualItem = args.contextData.virtualItem;
+
+return {
+  as: "div",
+  style: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: `${virtualItem.size}px`,
+    transform: `translateY(${virtualItem.start}px)`
+  }
 };
 '''
       }
@@ -479,10 +591,12 @@ return {
         displayOrder: 1,
         componentName: "YTOPlaylistCard",
         props: '''
-const playlist = args.contextData.playlist;
+const virtualItem = args.contextData.virtualItem;
+const playlists = args.fns.playlists();
+const playlist = playlists[virtualItem.index];
 
 return {
-  playlist: playlist,
+  playlist: playlist
 };
 '''
       }
@@ -517,9 +631,11 @@ return {
     { id: "e12", T: "Attr", S: "yto_playlists_container", E: "yto_playlists_loading" },
     { id: "e13", T: "Attr", S: "yto_playlists_loading", E: "yto_playlists_loading_spinner" },
     { id: "e14", T: "Attr", S: "yto_playlists_loading", E: "yto_playlists_loading_text" },
-    { id: "e15", T: "Attr", S: "yto_playlists_container", E: "yto_playlists_list" },
-    { id: "e16", T: "Attr", S: "yto_playlists_list", E: "yto_playlists_list_data" },
-    { id: "e17", T: "Attr", S: "yto_playlists_list_data", E: "yto_playlists_card" },
-    { id: "e18", T: "Attr", S: "yto_playlists_root", E: "yto_playlists_add_button" }
+    { id: "e15", T: "Attr", S: "yto_playlists_container", E: "yto_playlists_list_wrapper" },
+    { id: "e16", T: "Attr", S: "yto_playlists_list_wrapper", E: "yto_playlists_list" },
+    { id: "e17", T: "Attr", S: "yto_playlists_list", E: "yto_playlists_virtual_items" },
+    { id: "e18", T: "Attr", S: "yto_playlists_virtual_items", E: "yto_playlists_card_wrapper" },
+    { id: "e19", T: "Attr", S: "yto_playlists_card_wrapper", E: "yto_playlists_card" },
+    { id: "e20", T: "Attr", S: "yto_playlists_root", E: "yto_playlists_add_button" }
   ]
 }

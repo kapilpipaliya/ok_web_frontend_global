@@ -41,10 +41,8 @@ export async function GET({ request }: APIEvent) {
     const secureToken = await generateSecureToken(userData, dbSession);
 
     // Generate the target URL with the token
-    const host = request.headers.get("host") || "";
     const autoSignInUrl = buildautoSignInUrl(
-      url.protocol,
-      host,
+      url,
       targetDomain,
       targetSubdomain,
       secureToken,
@@ -60,20 +58,46 @@ export async function GET({ request }: APIEvent) {
 }
 
 function buildautoSignInUrl(
-  protocol: string,
-  host: string,
+  url: URL,
   targetDomain: null | string,
   targetSubdomain: null | string,
   secureToken: string,
 ) {
-  if (host.includes("localhost")) {
-    // For localhost, use port if present
-    const port = host.split(":")[1] ? `:${host.split(":")[1]}` : "";
-    return `${protocol}//localhost${port}${API.auth.autoSignInUrl}?token=${secureToken}`;
+  const protocol = url.protocol;
+  const hostname = url.hostname;
+
+  // Check if this is a localhost environment (localhost, *.localhost, or *.localhost.*)
+  const parsed = parse(hostname);
+  const isLocalhost = hostname === "localhost" ||
+                      hostname.endsWith(".localhost") ||
+                      (parsed.domain && parsed.domain.startsWith("localhost."));
+
+  if (isLocalhost) {
+    // For localhost environments, build URL with targetSubdomain or targetDomain
+    const port = url.port ? `:${url.port}` : "";
+
+    if (targetDomain) {
+      return `${protocol}//${targetDomain}${API.auth.autoSignInUrl}?token=${secureToken}`;
+    }
+
+    // Extract base domain from current hostname
+    // For "admin.localhost.com" -> "localhost.com"
+    // For "admin.localhost.org" -> "localhost.org"
+    // For "admin.localhost" -> "localhost"
+    // For "localhost" -> "localhost"
+    let localhostBase: string;
+    if (hostname === "localhost" || hostname.endsWith(".localhost")) {
+      localhostBase = "localhost";
+    } else {
+      // For localhost with TLD (e.g., localhost.com, localhost.org)
+      localhostBase = parsed.domain || "localhost";
+    }
+
+    return `${protocol}//${targetSubdomain}.${localhostBase}${port}${API.auth.autoSignInUrl}?token=${secureToken}`;
   }
 
-  const parsedDomain = parse(host);
-  const baseDomain = parsedDomain.domain;
+  // For production domains, use the base domain from parsed result
+  const baseDomain = parsed.domain;
 
   if (targetDomain) {
     return `${protocol}//${targetDomain}${API.auth.autoSignInUrl}?token=${secureToken}`;

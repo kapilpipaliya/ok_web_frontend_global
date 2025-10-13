@@ -56,7 +56,7 @@ export function SignInForm() {
     } catch {
       return null;
     }
-  });
+  }, { deferStream: true });
 
   // Use our utility hooks
   const [showPassword, toggleVisibility] = usePasswordVisibility(["password"]);

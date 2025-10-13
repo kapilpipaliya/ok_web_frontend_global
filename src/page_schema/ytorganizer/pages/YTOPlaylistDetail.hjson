@@ -33,7 +33,13 @@ return {
         props: '''
 return {
   as: "div",
-  onMount: () => args.fns.loadPlaylistVideos()
+  onMount: () => {
+    args.fns.loadPlaylistVideos();
+    window.addEventListener('resize', args.fns.handleResize);
+  },
+  onCleanup: () => {
+    window.removeEventListener('resize', args.fns.handleResize);
+  }
 };
 ''',
         fns: '''
@@ -54,6 +60,27 @@ const [isDragging, setIsDragging] = args.createSignal(false);
 const [draggedVideoId, setDraggedVideoId] = args.createSignal(null);
 const [dragOverVideoId, setDragOverVideoId] = args.createSignal(null);
 const [isSavingOrder, setIsSavingOrder] = args.createSignal(false);
+
+// Virtualization state
+const [scrollElement, setScrollElement] = args.createSignal(null);
+const [scrollTop, setScrollTop] = args.createSignal(0);
+const [windowWidth, setWindowWidth] = args.createSignal(typeof window !== 'undefined' ? window.innerWidth : 768);
+const overscan = 2; // Extra items to render above/below
+
+// Reactive item height based on screen size
+const getItemHeight = () => {
+  return windowWidth() <= 768 ? 350 : 140; // Mobile: 350px, Desktop: 140px
+};
+
+// Handle window resize
+const handleResize = () => {
+  setWindowWidth(window.innerWidth);
+};
+
+// Handle scroll
+const handleScroll = (e) => {
+  setScrollTop(e.target.scrollTop);
+};
 
 // Get playlist ID from URL params
 const playlistId = args.searchParams?.playlistId || args.params?.playlistId;
@@ -460,6 +487,44 @@ const handleVideoSubmit = (data) => {
   loadPlaylistVideos();
 };
 
+// Calculate visible items for virtualization
+const getVisibleRange = (videosList) => {
+  const el = scrollElement();
+  if (!el) return { start: 0, end: Math.min(videosList.length - 1, 10) };
+
+  const scroll = scrollTop();
+  const containerHeight = el.clientHeight || 600; // Default height if not calculated yet
+  const itemHeight = getItemHeight();
+
+  const startIndex = Math.max(0, Math.floor(scroll / itemHeight) - overscan);
+  const endIndex = Math.min(
+    videosList.length - 1,
+    Math.ceil((scroll + containerHeight) / itemHeight) + overscan
+  );
+
+  return { start: startIndex, end: endIndex };
+};
+
+// Get virtual items to render
+const getVirtualItems = (videosList) => {
+  const { start, end } = getVisibleRange(videosList);
+  const items = [];
+  const itemHeight = getItemHeight();
+
+  for (let i = start; i <= end; i++) {
+    items.push({
+      index: i,
+      start: i * itemHeight,
+      size: itemHeight
+    });
+  }
+
+  return items;
+};
+
+// Total height of all items
+const getTotalSize = (videosList) => videosList.length * getItemHeight();
+
 return {
   playlistData,
   videos,
@@ -487,7 +552,12 @@ return {
   handleTouchStart,
   handleTouchMove,
   handleTouchEnd,
-  autoScroll
+  autoScroll,
+  setScrollElement,
+  handleScroll,
+  handleResize,
+  getVirtualItems,
+  getTotalSize
 };
 '''
       }
@@ -1732,8 +1802,20 @@ return {
         componentName: "Html",
         props: '''
 return {
-  as: "section"
+  as: "section",
+  ref: args.fns.setScrollElement,
+  onScroll: args.fns.handleScroll
 };
+''',
+        css: '''
+return `._id {
+  overflow-y: auto;
+  height: calc(100vh - 450px);
+
+  @media (max-width: 768px) {
+    height: calc(100vh - 420px);
+  }
+}`;
 '''
       }
     },
@@ -1812,7 +1894,7 @@ return `._id {
       }
     },
     {
-      id: "yto_playlist_detail_videos_list",
+      id: "yto_playlist_detail_videos_list_wrapper",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -1820,36 +1902,82 @@ return `._id {
         props: '''
 const loading = args.fns.loading();
 const videos = args.fns.videos();
+
+return {
+  as: "div",
+  hide: loading || videos.length === 0
+};
+''',
+        css: '''
+return `._id {
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_videos_list",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const videos = args.fns.filteredVideos();
 const sortBy = args.fns.sortBy();
+
+// Sort videos based on user preference
+let sortedVideos = [...videos];
+
+switch (sortBy) {
+  case 'title':
+    sortedVideos.sort((a, b) => (a.video?.P?.title || '').localeCompare(b.video?.P?.title || ''));
+    break;
+  case 'published':
+    sortedVideos.sort((a, b) => new Date(a.video?.P?.publishedAt || 0) - new Date(b.video?.P?.publishedAt || 0));
+    break;
+  case 'published_desc':
+    sortedVideos.sort((a, b) => new Date(b.video?.P?.publishedAt || 0) - new Date(a.video?.P?.publishedAt || 0));
+    break;
+  case 'custom':
+    // Apply custom order if available
+    const customOrder = args.fns.customOrder();
+    if (customOrder.length > 0) {
+      sortedVideos.sort((a, b) => {
+        const aIndex = customOrder.indexOf(a.video?.P?.youtubeId);
+        const bIndex = customOrder.indexOf(b.video?.P?.youtubeId);
+        if (aIndex === -1 && bIndex === -1) return 0;
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+      });
+    }
+    break;
+  case 'index':
+  default:
+    // Default index order is already applied in the API
+    break;
+}
+
+const totalSize = args.fns.getTotalSize(sortedVideos);
 const canDrag = sortBy === 'custom';
 
 return {
   as: "div",
-  hide: loading || videos.length === 0,
+  style: {
+    height: `${totalSize}px`,
+    width: "100%",
+    position: "relative"
+  },
   onDragOver: canDrag ? (e) => {
     e.preventDefault();
-    // Auto-scroll when dragging over empty areas
     args.fns.autoScroll(e.clientY);
   } : undefined,
   onTouchMove: canDrag ? (e) => {
-    // Auto-scroll when touch moving over empty areas
     if (e.touches && e.touches[0]) {
       args.fns.autoScroll(e.touches[0].clientY);
     }
   } : undefined
 };
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  /* Add padding at bottom for mobile drag-to-scroll area */
-  @media (max-width: 768px) {
-    padding-bottom: 12rem;
-  }
-}`;
 '''
       }
     },
@@ -1892,14 +2020,38 @@ switch (sortBy) {
     break;
   case 'index':
   default:
-    // Default index order is already applied in the API
     break;
 }
 
+const virtualItems = args.fns.getVirtualItems(sortedVideos);
+
 return {
-  data: sortedVideos,
+  data: virtualItems,
   loop: true,
-  contextName: "video"
+  contextName: "virtualItem"
+};
+'''
+      }
+    },
+    {
+      id: "yto_playlist_detail_video_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const virtualItem = args.contextData.virtualItem;
+
+return {
+  as: "div",
+  style: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: `${virtualItem.size}px`,
+    transform: `translateY(${virtualItem.start}px)`
+  }
 };
 '''
       }
@@ -1910,13 +2062,56 @@ return {
       P: {
         displayOrder: 1,
         componentName: "Html",
+        fns: '''
+// Get the actual video from the sorted list using virtualItem index
+const getVideoFromVirtualItem = () => {
+  const virtualItem = args.contextData.virtualItem;
+  const videos = args.fns.filteredVideos();
+  const sortBy = args.fns.sortBy();
+
+  // Sort videos based on user preference (same logic as in videos_data)
+  let sortedVideos = [...videos];
+
+  switch (sortBy) {
+    case 'title':
+      sortedVideos.sort((a, b) => (a.video?.P?.title || '').localeCompare(b.video?.P?.title || ''));
+      break;
+    case 'published':
+      sortedVideos.sort((a, b) => new Date(a.video?.P?.publishedAt || 0) - new Date(b.video?.P?.publishedAt || 0));
+      break;
+    case 'published_desc':
+      sortedVideos.sort((a, b) => new Date(b.video?.P?.publishedAt || 0) - new Date(a.video?.P?.publishedAt || 0));
+      break;
+    case 'custom':
+      const customOrder = args.fns.customOrder();
+      if (customOrder.length > 0) {
+        sortedVideos.sort((a, b) => {
+          const aIndex = customOrder.indexOf(a.video?.P?.youtubeId);
+          const bIndex = customOrder.indexOf(b.video?.P?.youtubeId);
+          if (aIndex === -1 && bIndex === -1) return 0;
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        });
+      }
+      break;
+    case 'index':
+    default:
+      break;
+  }
+
+  return sortedVideos[virtualItem.index];
+};
+
+return { getVideoFromVirtualItem };
+''',
         props: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 const sortBy = args.fns.sortBy();
 const isDragging = args.fns.isDragging();
 const draggedVideoId = args.fns.draggedVideoId();
 const dragOverVideoId = args.fns.dragOverVideoId();
-const videoId = video.video?.P?.youtubeId;
+const videoId = video?.video?.P?.youtubeId;
 
 const isDraggedItem = draggedVideoId === videoId;
 const isDragOver = dragOverVideoId === videoId;
@@ -1928,17 +2123,17 @@ return {
   onDragOver: canDrag ? (e) => args.fns.handleDragOver(e, videoId) : undefined,
   onDrop: canDrag ? (e) => args.fns.handleDrop(e, videoId) : undefined,
   onClick: () => {
-    window.open(`https://www.youtube.com/watch?v=${video.video?.P?.youtubeId}`, '_blank');
+    window.open(`https://www.youtube.com/watch?v=${video?.video?.P?.youtubeId}`, '_blank');
   }
 };
 ''',
         css: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 const sortBy = args.fns.sortBy();
 const isDragging = args.fns.isDragging();
 const draggedVideoId = args.fns.draggedVideoId();
 const dragOverVideoId = args.fns.dragOverVideoId();
-const videoId = video.video?.P?.youtubeId;
+const videoId = video?.video?.P?.youtubeId;
 
 const isDraggedItem = draggedVideoId === videoId;
 const isDragOver = dragOverVideoId === videoId;
@@ -1988,10 +2183,10 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 const sortBy = args.fns.sortBy();
 const canDrag = sortBy === 'custom';
-const videoId = video.video?.P?.youtubeId;
+const videoId = video?.video?.P?.youtubeId;
 
 return {
   as: "div",
@@ -2084,11 +2279,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 
 return {
   as: "div",
-  style: video.video?.P?.thumbnail ? `background-image: url(${video.video.P.thumbnail}); background-size: cover; background-position: center;` : ''
+  style: video?.video?.P?.thumbnail ? `background-image: url(${video.video.P.thumbnail}); background-size: cover; background-position: center;` : ''
 };
 ''',
         css: '''
@@ -2118,14 +2313,14 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 
 return {
   as: "icon",
   icon: "carbon:play",
   width: 24,
   height: 24,
-  hide: !!video.video?.P?.thumbnail
+  hide: !!video?.video?.P?.thumbnail
 };
 ''',
         css: '''
@@ -2173,11 +2368,11 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 
 return {
   as: "h4",
-  text: video.video?.P?.title || 'Untitled'
+  text: video?.video?.P?.title || 'Untitled'
 };
 ''',
         css: '''
@@ -2212,11 +2407,11 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 
 return {
   as: "p",
-  text: video.video?.P?.channelTitle || ''
+  text: video?.video?.P?.channelTitle || ''
 };
 ''',
         css: '''
@@ -2268,22 +2463,22 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 
 return {
   as: "span",
-  text: video.videoSettings?.P?.watched ? "Watched" : "Unwatched"
+  text: video?.videoSettings?.P?.watched ? "Watched" : "Unwatched"
 };
 ''',
         css: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 
 return `._id {
   font-size: 0.75rem;
   font-weight: 500;
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
-  ${video.videoSettings?.P?.watched ? `
+  ${video?.videoSettings?.P?.watched ? `
     background: ${args.theme.var.color.success_light_100};
     color: ${args.theme.var.color.success};
   ` : `
@@ -2301,9 +2496,9 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const video = args.contextData.video;
+const video = args.fns.getVideoFromVirtualItem();
 
-const publishedDate = video.video?.P?.publishedAt ? new Date(video.video.P.publishedAt) : null;
+const publishedDate = video?.video?.P?.publishedAt ? new Date(video.video.P.publishedAt) : null;
 const formattedDate = publishedDate ? publishedDate.toLocaleDateString() : '';
 
 return {
@@ -2528,9 +2723,11 @@ return {
     { id: "e35", T: "Attr", S: "yto_playlist_detail_videos", E: "yto_playlist_detail_loading" },
     { id: "e36", T: "Attr", S: "yto_playlist_detail_loading", E: "yto_playlist_detail_loading_spinner" },
     { id: "e37", T: "Attr", S: "yto_playlist_detail_loading", E: "yto_playlist_detail_loading_text" },
-    { id: "e38", T: "Attr", S: "yto_playlist_detail_videos", E: "yto_playlist_detail_videos_list" },
+    { id: "e38", T: "Attr", S: "yto_playlist_detail_videos", E: "yto_playlist_detail_videos_list_wrapper" },
+    { id: "e38a", T: "Attr", S: "yto_playlist_detail_videos_list_wrapper", E: "yto_playlist_detail_videos_list" },
     { id: "e39", T: "Attr", S: "yto_playlist_detail_videos_list", E: "yto_playlist_detail_videos_data" },
-    { id: "e40", T: "Attr", S: "yto_playlist_detail_videos_data", E: "yto_playlist_detail_video_item" },
+    { id: "e40", T: "Attr", S: "yto_playlist_detail_videos_data", E: "yto_playlist_detail_video_wrapper" },
+    { id: "e40_1", T: "Attr", S: "yto_playlist_detail_video_wrapper", E: "yto_playlist_detail_video_item" },
     { id: "e40a", T: "Attr", S: "yto_playlist_detail_video_item", E: "yto_playlist_detail_video_drag_handle" },
     { id: "e40b", T: "Attr", S: "yto_playlist_detail_video_drag_handle", E: "yto_playlist_detail_video_drag_icon" },
     { id: "e41", T: "Attr", S: "yto_playlist_detail_video_item", E: "yto_playlist_detail_video_thumbnail" },
