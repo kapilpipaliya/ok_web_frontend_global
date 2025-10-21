@@ -14,12 +14,19 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Cypher query to fetch all user's playlists with their settings and channel info
+  // Cypher query to fetch all user's playlists with their settings, channel info, and user-specific video count
   const query = `
     MATCH (u:User {uuid: $userUuid})
     MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
     OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
-    RETURN p, ps, c
+
+    // Count videos in this playlist that the user has access to
+    OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
+    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+
+    WITH p, ps, c, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+
+    RETURN p, ps, c, videoCount
     ORDER BY ps.createdAt DESC
   `;
 
@@ -28,12 +35,22 @@ try {
     userUuid: user.P.uuid
   });
 
-  // Return raw converted nodes for frontend processing
-  const playlists = result.records.map(record => ({
-    playlist: args.convertNodeToJson(record.get('p')),
-    playlistSettings: args.convertNodeToJson(record.get('ps')),
-    channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null
-  }));
+  // Return raw converted nodes for frontend processing with user-specific video count
+  const playlists = result.records.map(record => {
+    const playlistSettings = args.convertNodeToJson(record.get('ps'));
+    const videoCount = record.get('videoCount');
+
+    // Add user-specific video count to playlist settings
+    if (playlistSettings && playlistSettings.P) {
+      playlistSettings.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+    }
+
+    return {
+      playlist: args.convertNodeToJson(record.get('p')),
+      playlistSettings: playlistSettings,
+      channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null
+    };
+  });
 
   return {
     success: true,

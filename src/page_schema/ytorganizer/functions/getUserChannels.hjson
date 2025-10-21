@@ -14,11 +14,19 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Cypher query to fetch all user's channels with their settings
+  // Cypher query to fetch all user's channels with their settings and user-specific video count
   const query = `
     MATCH (u:User {uuid: $userUuid})
     MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
-    RETURN c, cs
+
+    // Find the uploads playlist for this channel and count user's videos in it
+    OPTIONAL MATCH (uploadsPlaylist:Playlist {youtubeId: c.uploadsPlaylistId})
+    OPTIONAL MATCH (uploadsPlaylist)-[:PlaylistVideo]->(v:Video)
+    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+
+    WITH c, cs, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+
+    RETURN c, cs, videoCount
     ORDER BY cs.createdAt DESC
   `;
 
@@ -27,11 +35,21 @@ try {
     userUuid: user.P.uuid
   });
 
-  // Return raw converted nodes for frontend processing
-  const channels = result.records.map(record => ({
-    channel: args.convertNodeToJson(record.get('c')),
-    channelSettings: args.convertNodeToJson(record.get('cs'))
-  }));
+  // Return raw converted nodes for frontend processing with user-specific video count
+  const channels = result.records.map(record => {
+    const channelSetting = args.convertNodeToJson(record.get('cs'));
+    const videoCount = record.get('videoCount');
+
+    // Add user-specific video count to channel settings
+    if (channelSetting && channelSetting.P) {
+      channelSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+    }
+
+    return {
+      channel: args.convertNodeToJson(record.get('c')),
+      channelSetting: channelSetting
+    };
+  });
 
   return {
     success: true,

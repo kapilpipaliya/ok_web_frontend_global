@@ -209,6 +209,7 @@ try {
       c.videoCount = $videoCount,
       c.viewCount = $viewCount,
       c.subscriberCount = $subscriberCount,
+      c.uploadsPlaylistId = $uploadsPlaylistId,
       c.publishedAt = datetime($publishedAt),
       c.updatedAt = datetime()
     RETURN c
@@ -227,6 +228,7 @@ try {
     videoCount: parseInt(channelData.channel.statistics?.videoCount || "0"),
     viewCount: parseInt(channelData.channel.statistics?.viewCount || "0"),
     subscriberCount: parseInt(channelData.channel.statistics?.subscriberCount || "0"),
+    uploadsPlaylistId: channelData.channel.contentDetails?.relatedPlaylists?.uploads || "",
     publishedAt: channelData.channel.snippet.publishedAt
   });
 
@@ -257,102 +259,7 @@ try {
     customName: name || null
   });
 
-  // STEP 3: Process ALL channel videos first
-  // This creates individual Video vertices and Channel->Video relationships
-  let savedVideos = 0;
-  let updatedVideos = 0;
-
-  for (const video of channelData.videos) {
-    if (!video.id || !video.snippet) {
-      console.warn('Skipping invalid video:', video);
-      continue;
-    }
-
-    const videoKey = `video_${video.id}`;
-
-    // Create or update individual Video vertex with MERGE (upsert)
-    const mergeVideoQuery = `
-      MERGE (v:Video {youtubeId: $videoId})
-      ON CREATE SET
-        v.key = $key,
-        v.youtubeId = $videoId,
-        v.createdAt = datetime()
-      ON MATCH SET
-        v.updatedCount = COALESCE(v.updatedCount, 0) + 1
-      SET
-        v.title = $title,
-        v.description = $description,
-        v.thumbnail = $thumbnail,
-        v.channelTitle = $channelTitle,
-        v.channelId = $channelId,
-        v.publishedAt = datetime($publishedAt),
-        v.updatedAt = datetime()
-      RETURN v, v.createdAt = v.updatedAt AS isNew
-    `;
-
-    const videoResult = await args.session.run(mergeVideoQuery, {
-      key: videoKey,
-      videoId: video.id,
-      title: video.snippet.title,
-      description: video.snippet.description || "",
-      thumbnail: video.snippet.thumbnails?.high?.url ||
-                 video.snippet.thumbnails?.medium?.url ||
-                 video.snippet.thumbnails?.default?.url || "",
-      channelTitle: video.snippet.channelTitle || "",
-      channelId: video.snippet.channelId || "",
-      publishedAt: video.snippet.publishedAt
-    });
-
-    const isNewVideo = videoResult.records[0].get('isNew');
-    if (isNewVideo) {
-      savedVideos++;
-    } else {
-      updatedVideos++;
-    }
-
-    // Create direct Channel -> Video relationship
-    const channelVideoQuery = `
-      MATCH (c:Channel {youtubeId: $channelId})
-      MATCH (v:Video {youtubeId: $videoId})
-      MERGE (c)-[:ChannelVideo]->(v)
-    `;
-
-    await args.session.run(channelVideoQuery, {
-      channelId: channelData.channel.id,
-      videoId: video.id
-    });
-
-    // Create user-specific VideoSetting for this video
-    // This stores user preferences like watched status, notes, custom ordering
-    const videoSettingKey = `video_setting_${user.id}_${video.id}`;
-
-    const mergeVideoSettingQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      MATCH (v:Video {youtubeId: $videoId})
-      MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-      ON CREATE SET
-        vs.key = $videoSettingKey,
-        vs.createdAt = datetime()
-      SET
-        vs.watched = false,
-        vs.notes = null,
-        vs.customPosition = $position,
-        vs.channelPosition = $channelPosition,
-        vs.addedToChannelAt = datetime(),
-        vs.updatedAt = datetime()
-      RETURN vs
-    `;
-
-    await args.session.run(mergeVideoSettingQuery, {
-      userUuid: user.P.uuid,
-      videoId: video.id,
-      videoSettingKey,
-      position: video.snippet.position,
-      channelPosition: video.snippet.position
-    });
-  }
-
-  // STEP 4: Process all channel playlists
+  // STEP 3: Process all channel playlists
   // This reuses the existing savePlaylist function for each playlist
   let savedPlaylists = 0;
 
@@ -439,9 +346,7 @@ try {
       customName: name,
       totalPlaylists: channelData.playlists.length,
       savedPlaylists,
-      totalVideos: channelData.videos.length,
-      savedVideos,
-      updatedVideos,
+      uploadsPlaylistId: channelData.channel.contentDetails?.relatedPlaylists?.uploads,
       subscriberCount: channelData.channel.statistics?.subscriberCount,
       videoCount: channelData.channel.statistics?.videoCount,
       userId: user.id,

@@ -1,0 +1,52 @@
+{
+  vertexes: [
+    {
+      id: "get_user_count_function",
+      L: "Function",
+      P: {
+        key: "getUserCount",
+        description: "Gets the total count of users using YouTube Organizer",
+        body: '''
+try {
+  // Query to count unique users who have channels or playlists
+  const query = `
+    MATCH (u:User)
+    WHERE EXISTS((u)-[:UserChannelSetting]->()) OR EXISTS((u)-[:UserPlaylistSetting]->())
+    RETURN COUNT(DISTINCT u) as totalUsers
+  `;
+
+  const result = await args.session.run(query);
+
+  const totalUsers = result.records[0]?.get('totalUsers');
+  const userCount = totalUsers ? (typeof totalUsers.toNumber === 'function' ? totalUsers.toNumber() : Number(totalUsers)) : 0;
+
+  return {
+    success: true,
+    data: {
+      totalUsers: userCount,
+      timestamp: new Date().toISOString()
+    },
+    message: `Found ${userCount} active users`
+  };
+
+} catch (error) {
+  console.error("Error getting user count:", error);
+
+  return {
+    success: false,
+    message: "Failed to get user count",
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    },
+    data: {
+      totalUsers: 0
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

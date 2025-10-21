@@ -7,7 +7,8 @@ import {
   createMemo,
   createEffect,
   onCleanup,
-  on
+  on,
+  batch,
 } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -238,6 +239,7 @@ export function createFunctionArgumentBase(
     createSignal,
     createStore,
     createMemo,
+    batch,
     createEffect,
     onCleanup,
     on,

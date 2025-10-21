@@ -15,12 +15,12 @@ try {
   }
 
   // Step 1: Delete all user channel settings and relationships
-  const deleteChannelSettingsQuery = `
+  const deleteChannelSettingQuery = `
     MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
     DETACH DELETE cs
   `;
 
-  const channelSettingsResult = await args.session.run(deleteChannelSettingsQuery, {
+  const channelSettingResult = await args.session.run(deleteChannelSettingQuery, {
     userUuid: user.P.uuid
   });
 
@@ -45,18 +45,18 @@ try {
   });
 
   // Get statistics for the response
-  const channelSettingsDeleted = channelSettingsResult.summary.counters.updates().nodesDeleted || 0;
-  const playlistSettingsDeleted = playlistSettingsResult.summary.counters.updates().nodesDeleted || 0;
-  const videoSettingsDeleted = videoSettingsResult.summary.counters.updates().nodesDeleted || 0;
+  const channelSettingDeleted = channelSettingResult.summary.counters.updates().nodesDeleted || 0;
+  const playlistSettingDeleted = playlistSettingsResult.summary.counters.updates().nodesDeleted || 0;
+  const videoSettingDeleted = videoSettingsResult.summary.counters.updates().nodesDeleted || 0;
 
   return {
     success: true,
     message: "All your personal data has been cleared successfully.",
     data: {
-      channelSettingsDeleted,
-      playlistSettingsDeleted,
-      videoSettingsDeleted,
-      totalItemsDeleted: channelSettingsDeleted + playlistSettingsDeleted + videoSettingsDeleted,
+      channelSettingDeleted,
+      playlistSettingDeleted,
+      videoSettingDeleted,
+      totalItemDeleted: channelSettingDeleted + playlistSettingDeleted + videoSettingDeleted,
       userId: user.id,
       clearedAt: new Date().toISOString()
     }
@@ -82,10 +82,10 @@ try {
       details: error.message
     },
     data: {
-      channelSettingsDeleted: 0,
-      playlistSettingsDeleted: 0,
-      videoSettingsDeleted: 0,
-      totalItemsDeleted: 0
+      channelSettingDeleted: 0,
+      playlistSettingDeleted: 0,
+      videoSettingDeleted: 0,
+      totalItemDeleted: 0
     }
   };
 }

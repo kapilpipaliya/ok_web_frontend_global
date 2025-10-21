@@ -1,0 +1,413 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "YTOAddVideosModal"
+      }
+    },
+    {
+      id: "variant_is_open",
+      L: "ComponentVariant",
+      P: {
+        key: "isOpen",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_on_close",
+      L: "ComponentVariant",
+      P: {
+        key: "onClose",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_playlist",
+      L: "ComponentVariant",
+      P: {
+        key: "playlist",
+        type: "object",
+        defValue: null
+      }
+    },
+    {
+      id: "variant_on_success",
+      L: "ComponentVariant",
+      P: {
+        key: "onSuccess",
+        type: "function",
+        defValue: null
+      }
+    },
+    {
+      id: "modal_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+const [videoUrlsInput, setVideoUrlsInput] = args.createSignal("");
+const [isAddingVideos, setIsAddingVideos] = args.createSignal(false);
+
+const closeModal = () => {
+  setVideoUrlsInput("");
+  const onClose = args.contextData.props?.onClose;
+  onClose?.();
+};
+
+const addVideosToPlaylist = async () => {
+  const playlist = args.contextData.props?.playlist;
+
+  if (!playlist) {
+    args.showErrorToast("Playlist not found");
+    return;
+  }
+
+  const urlsText = videoUrlsInput().trim();
+  if (!urlsText) {
+    args.showErrorToast("Please enter at least one video URL");
+    return;
+  }
+
+  setIsAddingVideos(true);
+
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "addVideoToPlaylist",
+      contextData: {
+        playlistId: playlist.P.youtubeId,
+        videoUrl: urlsText
+      }
+    });
+
+    if (result?.result?.success) {
+      args.showSuccessToast(result.result.message || "Videos added successfully");
+      const onSuccess = args.contextData.props?.onSuccess;
+      onSuccess?.();
+      closeModal();
+    } else {
+      args.showErrorToast(result?.result?.message || "Failed to add videos to playlist");
+    }
+  } catch (error) {
+    console.error("Error adding videos:", error);
+    args.showErrorToast("An error occurred while adding videos");
+  } finally {
+    setIsAddingVideos(false);
+  }
+};
+
+return {
+  videoUrlsInput,
+  setVideoUrlsInput,
+  isAddingVideos,
+  closeModal,
+  addVideosToPlaylist
+};
+''',
+        props: '''
+const isOpen = args.contextData.props?.isOpen;
+const getIsOpen = isOpen?.() || false;
+
+return {
+  as: "div",
+  hide: !getIsOpen,
+  onClick: (e) => {
+    if (e.target === e.currentTarget) {
+      args.fns.closeModal();
+    }
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  onClick: (e) => e.stopPropagation()
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background};
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h2",
+  text: "Add Videos to Playlist"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "close_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: args.fns.closeModal,
+  "aria-label": "Close modal"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.muted};
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 24,
+  height: 24
+};
+'''
+      }
+    },
+    {
+      id: "modal_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  flex: 1;
+  overflow: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_description",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Enter video URLs (one per line or comma-separated):"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0 0 1rem 0;
+  color: ${args.theme.var.color.muted};
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "modal_textarea",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOTextArea",
+        props: '''
+return {
+  value: args.fns.videoUrlsInput(),
+  onChange: (e) => args.fns.setVideoUrlsInput(e.target.value),
+  placeholder: "https://www.youtube.com/watch?v=...\nhttps://www.youtube.com/watch?v=...",
+  rows: 8
+};
+'''
+      }
+    },
+    {
+      id: "modal_footer",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  border-top: 1px solid ${args.theme.var.color.border};
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}`;
+'''
+      }
+    },
+    {
+      id: "cancel_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOButton",
+        props: '''
+return {
+  text: "Cancel",
+  variant: "secondary",
+  onClick: args.fns.closeModal,
+  disabled: args.fns.isAddingVideos()
+};
+'''
+      }
+    },
+    {
+      id: "save_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOButton",
+        props: '''
+const isAddingVideos = args.fns.isAddingVideos();
+
+return {
+  text: isAddingVideos ? "Adding..." : "Add Videos",
+  variant: "primary",
+  onClick: args.fns.addVideosToPlaylist,
+  disabled: isAddingVideos
+};
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "component_root", E: "variant_is_open" },
+    { id: "e2", T: "ComponentVariant", S: "component_root", E: "variant_on_close" },
+    { id: "e3", T: "ComponentVariant", S: "component_root", E: "variant_playlist" },
+    { id: "e4", T: "ComponentVariant", S: "component_root", E: "variant_on_success" },
+    { id: "e5", T: "Attr", S: "component_root", E: "modal_overlay" },
+    { id: "e6", T: "Attr", S: "modal_overlay", E: "modal_container" },
+    { id: "e7", T: "Attr", S: "modal_container", E: "modal_header" },
+    { id: "e8", T: "Attr", S: "modal_header", E: "modal_title" },
+    { id: "e9", T: "Attr", S: "modal_header", E: "close_button" },
+    { id: "e10", T: "Attr", S: "close_button", E: "close_icon" },
+    { id: "e11", T: "Attr", S: "modal_container", E: "modal_body" },
+    { id: "e12", T: "Attr", S: "modal_body", E: "modal_description" },
+    { id: "e13", T: "Attr", S: "modal_body", E: "modal_textarea" },
+    { id: "e14", T: "Attr", S: "modal_container", E: "modal_footer" },
+    { id: "e15", T: "Attr", S: "modal_footer", E: "cancel_button" },
+    { id: "e16", T: "Attr", S: "modal_footer", E: "save_button" }
+  ]
+}

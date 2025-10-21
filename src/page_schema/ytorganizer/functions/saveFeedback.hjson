@@ -1,0 +1,110 @@
+{
+  vertexes: [
+    {
+      id: "save_feedback_function",
+      L: "Function",
+      P: {
+        key: "saveFeedback",
+        description: "Saves user feedback to the database",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Extract parameters
+  const { feedback, category } = args.contextData;
+
+  if (!feedback || typeof feedback !== 'string') {
+    throw new Error("Feedback text is required");
+  }
+
+  const feedbackText = feedback.trim();
+  if (feedbackText.length === 0) {
+    throw new Error("Feedback cannot be empty");
+  }
+
+  if (feedbackText.length > 1000) {
+    throw new Error("Feedback exceeds maximum length of 1000 characters");
+  }
+
+  // Validate category
+  const validCategories = ["general", "bug", "feature", "improvement", "other"];
+  const feedbackCategory = category || "general";
+
+  if (!validCategories.includes(feedbackCategory)) {
+    throw new Error("Invalid feedback category");
+  }
+
+  // Query to create feedback node and relationship
+  const query = `
+    MATCH (u:User {uuid: $userUuid})
+    CREATE (f:Feedback {
+      feedback: $feedback,
+      category: $category,
+      createdAt: datetime(),
+      status: 'pending'
+    })
+    CREATE (u)-[:UserFeedback]->(f)
+    RETURN f, u
+  `;
+
+  // Execute the query
+  const result = await args.session.run(query, {
+    userUuid: user.P.uuid,
+    feedback: feedbackText,
+    category: feedbackCategory
+  });
+
+  if (result.records.length === 0) {
+    throw new Error("Failed to save feedback");
+  }
+
+  const savedFeedback = args.convertNodeToJson(result.records[0].get('f'));
+  const feedbackUser = args.convertNodeToJson(result.records[0].get('u'));
+
+  return {
+    success: true,
+    data: {
+      feedback: savedFeedback,
+      user: feedbackUser
+    },
+    message: "Thank you for your feedback! We'll review it soon."
+  };
+
+} catch (error) {
+  console.error("Error saving feedback:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to submit feedback. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to submit feedback.";
+  } else if (error.message.includes("Feedback text is required") ||
+             error.message.includes("Feedback cannot be empty")) {
+    userMessage = error.message;
+  } else if (error.message.includes("exceeds maximum length")) {
+    userMessage = "Your feedback is too long. Please keep it under 1000 characters.";
+  } else if (error.message.includes("Invalid feedback category")) {
+    userMessage = "Invalid feedback category selected.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

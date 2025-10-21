@@ -1,0 +1,182 @@
+{
+  vertexes: [
+    {
+      id: "delete_channel_function",
+      L: "Function",
+      P: {
+        key: "deleteChannel",
+        description: "Deletes a channel, its playlists, and videos that are only in this channel",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Extract parameters
+  const { item, itemType } = args.contextData;
+
+  if (!item || itemType !== "channel") {
+    throw new Error("Invalid channel data");
+  }
+
+  const channelId = item.P?.youtubeId;
+  if (!channelId) {
+    throw new Error("Channel ID not found");
+  }
+
+  // Step 1: Get all playlists in this channel
+  const getPlaylistsQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
+    RETURN p.youtubeId as playlistId
+  `;
+
+  const playlistsResult = await args.session.run(getPlaylistsQuery, {
+    userUuid: user.P.uuid,
+    channelId: channelId
+  });
+
+  const playlistIds = playlistsResult.records.map(record => record.get('playlistId'));
+
+  // Step 2: Delete videos that are only in this channel's playlists
+  // Only delete videos that don't exist in other playlists
+  if (playlistIds.length > 0) {
+    const deleteVideosQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+      WHERE p.youtubeId IN $playlistIds
+      MATCH (p)-[:PlaylistVideo]->(v:Video)
+      OPTIONAL MATCH (u)-[:UserVideoSettings]->(vs:VideoSettings)-[:VideoSettingsVideo]->(v)
+
+      // Check if video exists in other playlists
+      OPTIONAL MATCH (otherP:Playlist)-[:PlaylistVideo]->(v)
+      WHERE NOT otherP.youtubeId IN $playlistIds
+
+      // Check if other users have this video
+      OPTIONAL MATCH (otherU:User)-[:UserVideoSettings]->(otherVS:VideoSettings)-[:VideoSettingsVideo]->(v)
+      WHERE otherU.uuid <> $userUuid
+
+      WITH v, vs, otherP, otherU
+      WHERE otherP IS NULL AND otherU IS NULL
+
+      // Delete video settings and video node only if no other users
+      DETACH DELETE vs, v
+      RETURN count(v) as deletedVideos
+    `;
+
+    await args.session.run(deleteVideosQuery, {
+      userUuid: user.P.uuid,
+      playlistIds: playlistIds
+    });
+  }
+
+  // Step 3: Delete all playlists in this channel
+  if (playlistIds.length > 0) {
+    const deletePlaylistsQuery = `
+      MATCH (u:User {uuid: $userUuid})
+      MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+      WHERE p.youtubeId IN $playlistIds
+
+      // Check if other users have this playlist before deletion
+      OPTIONAL MATCH (otherU:User)-[:UserPlaylistSetting]->(otherPS:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+      WHERE otherU.uuid <> $userUuid
+
+      WITH ps, p, otherU
+
+      // Delete user's playlist settings
+      DETACH DELETE ps
+
+      WITH p, otherU
+      WHERE otherU IS NULL
+
+      // Delete playlist node only if no other users
+      DETACH DELETE p
+
+      RETURN count(p) as deletedPlaylists
+    `;
+
+    await args.session.run(deletePlaylistsQuery, {
+      userUuid: user.P.uuid,
+      playlistIds: playlistIds
+    });
+  }
+
+  // Step 4: Delete the channel settings and check if channel should be deleted
+  const deleteChannelQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+
+    // Get channel title before any deletion and check if other users have this channel
+    WITH c, cs, c.title as channelTitle
+
+    // Check if other users have this channel before deletion
+    OPTIONAL MATCH (otherU:User)-[:UserChannelSetting]->(otherCS:ChannelSetting)-[:ChannelSettingChannel]->(c)
+    WHERE otherU.uuid <> $userUuid
+
+    WITH cs, c, channelTitle, otherU
+
+    // Delete user's channel settings
+    DETACH DELETE cs
+
+    WITH c, channelTitle, otherU
+    WHERE otherU IS NULL
+
+    // Delete channel node only if no other users
+    DETACH DELETE c
+
+    RETURN channelTitle
+  `;
+
+  const channelResult = await args.session.run(deleteChannelQuery, {
+    userUuid: user.P.uuid,
+    channelId: channelId
+  });
+
+  if (channelResult.records.length === 0) {
+    throw new Error("Channel not found or already deleted");
+  }
+
+  const channelTitle = item.P?.title || "Channel";
+
+  return {
+    success: true,
+    data: {
+      channelId: channelId,
+      deletedPlaylists: playlistIds.length
+    },
+    message: `Successfully deleted channel "${channelTitle}" and ${playlistIds.length} playlist(s)`
+  };
+
+} catch (error) {
+  console.error("Error deleting channel:", error);
+
+  let userMessage = "Failed to delete channel. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to delete channels.";
+  } else if (error.message.includes("not found")) {
+    userMessage = error.message;
+  } else if (error.message.includes("Invalid channel data")) {
+    userMessage = error.message;
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

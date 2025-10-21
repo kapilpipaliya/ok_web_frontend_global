@@ -1,0 +1,81 @@
+{
+  vertexes: [
+    {
+      id: "update_video_settings_function",
+      L: "Function",
+      P: {
+        key: "updateVideoSettings",
+        description: "Updates video settings like custom name",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  const { youtubeId, customName } = args.contextData;
+
+  if (!youtubeId) {
+    throw new Error("Video ID is required");
+  }
+
+  // Update VideoSetting
+  const updateQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video {youtubeId: $youtubeId})
+    SET vs.customName = $customName,
+        vs.updatedAt = datetime()
+    RETURN v, vs
+  `;
+
+  const result = await args.session.run(updateQuery, {
+    userUuid: user.P.uuid,
+    youtubeId,
+    customName: customName || null
+  });
+
+  if (result.records.length === 0) {
+    throw new Error("Video not found");
+  }
+
+  const video = args.convertNodeToJson(result.records[0].get('v'));
+  const videoSettings = args.convertNodeToJson(result.records[0].get('vs'));
+
+  return {
+    success: true,
+    message: "Video settings updated successfully",
+    data: {
+      video: video,
+      videoSettings: videoSettings
+    }
+  };
+
+} catch (error) {
+  console.error("Error updating video settings:", error);
+
+  let userMessage = "Failed to update video settings. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to update video settings.";
+  } else if (error.message.includes("Video not found")) {
+    userMessage = "Video not found.";
+  } else if (error.message.includes("Video ID is required")) {
+    userMessage = "Video ID is required.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "UpdateError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

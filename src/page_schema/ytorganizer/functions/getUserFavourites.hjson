@@ -1,0 +1,141 @@
+{
+  vertexes: [
+    {
+      id: "get_user_favourites_function",
+      L: "Function",
+      P: {
+        key: "getUserFavourites",
+        description: "Fetches all favourite videos, channels, and playlists for the current user",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Query for favourite channels
+  const channelsQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting {isFavourite: true})-[:ChannelSettingChannel]->(c:Channel)
+
+    // Find the uploads playlist for this channel and count user's videos in it
+    OPTIONAL MATCH (uploadsPlaylist:Playlist {youtubeId: c.uploadsPlaylistId})
+    OPTIONAL MATCH (uploadsPlaylist)-[:PlaylistVideo]->(v:Video)
+    OPTIONAL MATCH (u)-[:UserVideoSettings]->(vs:VideoSettings)-[:VideoSettingsVideo]->(v)
+
+    WITH c, cs, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+
+    RETURN c, cs, videoCount
+    ORDER BY cs.favouritedAt DESC
+  `;
+
+  const channelsResult = await args.session.run(channelsQuery, { userUuid: user.P.uuid });
+
+  const channels = channelsResult.records.map(record => {
+    const channelSetting = args.convertNodeToJson(record.get('cs'));
+    const videoCount = record.get('videoCount');
+
+    // Add user-specific video count to channel settings
+    if (channelSetting && channelSetting.P) {
+      channelSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+    }
+
+    return {
+      channel: args.convertNodeToJson(record.get('c')),
+      channelSetting: channelSetting
+    };
+  });
+
+  // Query for favourite playlists
+  const playlistsQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting {isFavourite: true})-[:PlaylistSettingPlaylist]->(p:Playlist)
+
+    // Count videos in this playlist that the user has access to
+    OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
+    OPTIONAL MATCH (u)-[:UserVideoSettings]->(vs:VideoSettings)-[:VideoSettingsVideo]->(v)
+
+    WITH p, ps, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+
+    RETURN p, ps, videoCount
+    ORDER BY ps.favouritedAt DESC
+  `;
+
+  const playlistsResult = await args.session.run(playlistsQuery, { userUuid: user.P.uuid });
+
+  const playlists = playlistsResult.records.map(record => {
+    const playlistSettings = args.convertNodeToJson(record.get('ps'));
+    const videoCount = record.get('videoCount');
+
+    // Add user-specific video count to playlist settings
+    if (playlistSettings && playlistSettings.P) {
+      playlistSettings.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+    }
+
+    return {
+      playlist: args.convertNodeToJson(record.get('p')),
+      playlistSettings: playlistSettings
+    };
+  });
+
+  // Query for favourite videos
+  const videosQuery = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserVideoSettings]->(vs:VideoSettings {isFavourite: true})-[:VideoSettingsVideo]->(v:Video)
+    RETURN v, vs
+    ORDER BY vs.favouritedAt DESC
+  `;
+
+  const videosResult = await args.session.run(videosQuery, { userUuid: user.P.uuid });
+
+  const videos = videosResult.records.map(record => ({
+    video: args.convertNodeToJson(record.get('v')),
+    videoSettings: args.convertNodeToJson(record.get('vs'))
+  }));
+
+  return {
+    success: true,
+    data: {
+      channels,
+      playlists,
+      videos,
+      totalCount: channels.length + playlists.length + videos.length,
+      userId: user.id
+    },
+    message: `Found ${channels.length} channels, ${playlists.length} playlists, and ${videos.length} videos`
+  };
+
+} catch (error) {
+  console.error("Error fetching user favourites:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to fetch favourites. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to view your favourites.";
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    },
+    data: {
+      channels: [],
+      playlists: [],
+      videos: [],
+      totalCount: 0
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

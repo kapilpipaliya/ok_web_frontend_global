@@ -60,8 +60,6 @@ export const CSS_RESET = `
   }
 }
 body {
-  /* 4. Add accessible line-height */
-  line-height: 1.5rem;
   /* 5. Improve text rendering */
   -webkit-font-smoothing: antialiased;
 }

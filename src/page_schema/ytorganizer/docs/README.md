@@ -22,10 +22,12 @@ The system uses the following Neo4j graph relationships:
 (User)-[:UserPlaylistSetting]->(PlaylistSetting)-[:PlaylistSettingPlaylist]->(Playlist)
 (User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)
 (User)-[:UserLanguageSetting]->(LanguageSetting {language: "en|hi|gu", isDefault: boolean})
-(Channel)-[:ChannelVideo]->(Video)
+(User)-[:UserFeedback]->(Feedback)
 (Channel)-[:ChannelPlaylist]->(Playlist)
 (Playlist)-[:PlaylistVideo]->(Video)
 ```
+
+**Note**: Videos are only accessible through playlists. Channels do not have direct relationships to videos. Each channel stores an `uploadsPlaylistId` property that references the playlist containing all channel uploads.
 
 ### Vertex Types
 
@@ -47,6 +49,7 @@ The system uses the following Neo4j graph relationships:
   - `customUrl`: Channel custom URL handle
   - `country`: Channel's country
   - `videoCount`, `viewCount`, `subscriberCount`: Channel statistics
+  - `uploadsPlaylistId`: YouTube playlist ID containing all channel uploads
   - `publishedAt`, `createdAt`, `updatedAt`: Timestamps
 - **PlaylistSetting**: User-specific playlist preferences and custom ordering
   - `key`: Unique identifier (`playlist_setting_${userId}_${playlistId}`)
@@ -72,13 +75,16 @@ The system uses the following Neo4j graph relationships:
 - **VideoSetting**: User-specific video preferences
   - `key`: Unique identifier (`video_setting_${userId}_${videoId}`)
   - `watched`: Boolean indicating if user has watched the video
-  - `notes`: User's personal notes about the video
+  - `note`: User's personal notes about the video
+  - `isFavourite`: Boolean indicating if video is marked as favorite
   - `customPosition`: User-defined position in custom ordering
-  - `playlistIndex`: Original position in YouTube playlist (when from playlist)
-  - `channelPosition`: Original position in YouTube channel uploads (when from channel)
   - `addedToPlaylistAt`: When user added this video from a playlist
-  - `addedToChannelAt`: When user added this video from a channel
   - `createdAt`, `updatedAt`: Timestamps
+- **Feedback**: User feedback submissions
+  - `feedback`: Feedback text (max 1000 characters)
+  - `category`: Feedback category ('general', 'bug', 'feature', 'improvement', 'other')
+  - `status`: Feedback status (default: 'pending')
+  - `createdAt`: Timestamp
 
 ## Architecture
 
@@ -124,17 +130,17 @@ const youtube = google.youtube({
 
 ##### Functions
 
-- **saveChannel**: Save YouTube channel with all playlists and videos (Recommended)
+- **saveChannel**: Save YouTube channel with all playlists (Recommended)
   - Uses real YouTube Data API v3 with googleapis library
   - Extracts channel ID from various YouTube URL formats (/@handle, /channel/ID, /c/custom, /user/username)
   - Fetches complete channel metadata, statistics, and branding settings
   - Fetches ALL channel playlists with unlimited pagination
-  - Fetches ALL channel videos from uploads playlist with unlimited pagination
+  - Stores `uploadsPlaylistId` in Channel node for accessing all channel videos
   - Creates comprehensive database structure with proper relationships
   - Implements user authentication with `args.getUserFromSession()`
   - Reuses existing `savePlaylist` function for each channel playlist
-  - Creates direct Channel->Video relationships for all channel videos
-  - Creates user-specific ChannelSetting and VideoSetting for all content
+  - Videos are accessible through playlists (no direct Channel->Video relationships)
+  - Creates user-specific ChannelSetting for channel preferences
   - Comprehensive error handling for YouTube API issues
   - Support for custom channel names and user preferences
 
@@ -314,13 +320,12 @@ Users can set their preferred language through LanguageSetting vertex:
 5. Server function authenticates user with `args.getUserFromSession()`
 6. Extracts channel ID from URL using multiple URL pattern support
 7. Fetches complete channel data from YouTube Data API v3
-8. Fetches ALL channel playlists and videos with unlimited pagination
-9. Creates/updates Channel vertex with YouTube metadata and statistics
+8. Fetches ALL channel playlists with unlimited pagination
+9. Creates/updates Channel vertex with YouTube metadata, statistics, and `uploadsPlaylistId`
 10. Creates user-specific ChannelSetting with custom preferences
-11. Creates/updates Video vertices for all channel videos
-12. Creates user-specific VideoSetting for each video with watch status
-13. Processes all channel playlists using existing savePlaylist function
-14. Establishes comprehensive relationships following the database schema
+11. Processes all channel playlists using existing savePlaylist function
+12. Establishes comprehensive relationships following the database schema
+13. Videos are accessible through playlists (including the uploads playlist referenced by `uploadsPlaylistId`)
 
 ### Adding a Playlist
 1. Navigate to Playlists page
@@ -477,7 +482,7 @@ try {
 
 #### saveChannel Function Implementation (Recommended)
 
-The `saveChannel` function provides a complete user-centric channel management solution with comprehensive data fetching:
+The `saveChannel` function provides a complete user-centric channel management solution. Videos are accessible through playlists only:
 
 ```javascript
 // saveChannel.hjson function body:
@@ -499,7 +504,7 @@ const extractChannelId = (url) => {
 
 /**
  * Fetch complete channel data from YouTube Data API v3
- * Includes: channel info, all playlists, and all videos
+ * Includes: channel info and all playlists
  */
 const fetchChannelData = async (channelIdentifier) => {
   const { google } = await import('googleapis');
@@ -521,6 +526,8 @@ const fetchChannelData = async (channelIdentifier) => {
     id: [channelId]
   });
 
+  const channel = channelResponse.data.items[0];
+
   // Fetch ALL channel playlists with pagination (no limit)
   let allPlaylists = [];
   let nextPageToken = null;
@@ -533,22 +540,26 @@ const fetchChannelData = async (channelIdentifier) => {
     nextPageToken = playlistsResponse.data.nextPageToken;
   } while (nextPageToken);
 
-  // Fetch ALL channel videos from uploads playlist (no limit)
+  // Add the special "uploads playlist" (contains ALL channel videos)
   const uploadsPlaylistId = channel.contentDetails?.relatedPlaylists?.uploads;
-  let allVideos = [];
   if (uploadsPlaylistId) {
-    nextPageToken = null;
-    do {
-      const videosResponse = await youtube.playlistItems.list({
-        part: ['snippet', 'contentDetails'],
-        playlistId: uploadsPlaylistId, maxResults: 50, pageToken: nextPageToken
-      });
-      allVideos = allVideos.concat(videosResponse.data.items || []);
-      nextPageToken = videosResponse.data.nextPageToken;
-    } while (nextPageToken);
+    const uploadsPlaylist = {
+      id: uploadsPlaylistId,
+      snippet: {
+        title: 'All Uploads',
+        description: 'All videos uploaded by this channel',
+        channelId: channelId,
+        channelTitle: channel.snippet.title,
+        thumbnails: channel.snippet.thumbnails,
+        publishedAt: channel.snippet.publishedAt
+      },
+      status: { privacyStatus: 'public' },
+      contentDetails: { itemCount: channel.statistics?.videoCount || 0 }
+    };
+    allPlaylists.unshift(uploadsPlaylist);
   }
 
-  return { channel, playlists: allPlaylists, videos: allVideos };
+  return { channel, playlists: allPlaylists };
 };
 
 try {
@@ -573,12 +584,13 @@ try {
         c.thumbnail = $thumbnail, c.customUrl = $customUrl,
         c.country = $country, c.videoCount = $videoCount,
         c.viewCount = $viewCount, c.subscriberCount = $subscriberCount,
+        c.uploadsPlaylistId = $uploadsPlaylistId,
         c.publishedAt = datetime($publishedAt), c.updatedAt = datetime()
-  \`, { /* channel properties */ });
+  \`, { /* channel properties including uploadsPlaylistId */ });
 
   // STEP 2: Create user-specific ChannelSetting
   await args.session.run(\`
-    MATCH (u:User) WHERE elementId(u) = $userId
+    MATCH (u:User {uuid: $userUuid})
     MATCH (c:Channel {youtubeId: $channelId})
     MERGE (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
     ON CREATE SET cs.key = $channelSettingKey, cs.createdAt = datetime()
@@ -586,38 +598,7 @@ try {
         cs.autoDownload = false, cs.priority = 'normal', cs.updatedAt = datetime()
   \`, { /* channel setting properties */ });
 
-  // STEP 3: Process ALL channel videos first
-  for (const video of channelData.videos) {
-    // Create/update Video vertex
-    await args.session.run(\`
-      MERGE (v:Video {youtubeId: $videoId})
-      ON CREATE SET v.key = $key, v.createdAt = datetime()
-      SET v.title = $title, v.description = $description,
-          v.thumbnail = $thumbnail, v.channelTitle = $channelTitle,
-          v.channelId = $channelId, v.publishedAt = datetime($publishedAt),
-          v.updatedAt = datetime()
-    \`, { /* video properties */ });
-
-    // Create Channel -> Video relationship
-    await args.session.run(\`
-      MATCH (c:Channel {youtubeId: $channelId})
-      MATCH (v:Video {youtubeId: $videoId})
-      MERGE (c)-[:ChannelVideo]->(v)
-    \`, { channelId, videoId: video.id });
-
-    // Create user-specific VideoSetting
-    await args.session.run(\`
-      MATCH (u:User) WHERE elementId(u) = $userId
-      MATCH (v:Video {youtubeId: $videoId})
-      MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-      ON CREATE SET vs.key = $videoSettingKey, vs.createdAt = datetime()
-      SET vs.watched = false, vs.notes = null, vs.customPosition = $position,
-          vs.channelPosition = $channelPosition, vs.addedToChannelAt = datetime(),
-          vs.updatedAt = datetime()
-    \`, { /* video setting properties */ });
-  }
-
-  // STEP 4: Process all channel playlists using existing savePlaylist function
+  // STEP 3: Process all channel playlists using existing savePlaylist function
   for (const playlist of channelData.playlists) {
     const playlistUrl = \`https://www.youtube.com/playlist?list=\${playlist.id}\`;
     const result = await args.executeNamedServerFunction({
@@ -638,7 +619,8 @@ try {
     message: \`Channel "\${channelData.channel.snippet.title}" added to your collection!\`,
     data: {
       channelId, title: channelData.channel.snippet.title, customName: name,
-      totalPlaylists: channelData.playlists.length, totalVideos: channelData.videos.length,
+      totalPlaylists: channelData.playlists.length,
+      uploadsPlaylistId: channelData.channel.contentDetails?.relatedPlaylists?.uploads,
       subscriberCount: channelData.channel.statistics?.subscriberCount,
       videoCount: channelData.channel.statistics?.videoCount,
       userId: user.id, userSpecific: true
@@ -660,13 +642,13 @@ try {
 ```
 
 **Key Database Structure Features:**
-- **Complete Channel Coverage**: Fetches ALL videos and playlists from the channel
+- **Complete Channel Coverage**: Fetches ALL playlists from the channel
 - **User Authentication**: Uses `args.getUserFromSession()` for secure user identification
 - **Comprehensive Relationships**:
   - `(User)-[:UserChannelSetting]->(ChannelSetting)-[:ChannelSettingChannel]->(Channel)`
-  - `(Channel)-[:ChannelVideo]->(Video)` for all channel videos
   - `(Channel)-[:ChannelPlaylist]->(Playlist)` for all channel playlists
-  - `(User)-[:UserVideoSetting]->(VideoSetting)-[:VideoSettingVideo]->(Video)` for all videos
+  - Videos accessible through playlists only (no direct Channel->Video relationships)
+- **Uploads Playlist ID**: Stores `uploadsPlaylistId` in Channel node for accessing all channel videos
 - **URL Format Support**: Handles /@handle, /channel/ID, /c/custom, /user/username formats
 - **Unlimited Pagination**: Fetches ALL content without artificial limits
 - **Reuses Existing Functions**: Leverages savePlaylist function for playlist processing

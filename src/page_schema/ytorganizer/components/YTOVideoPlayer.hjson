@@ -1,0 +1,745 @@
+{
+  vertexes: [
+    {
+      id: "component_root",
+      L: "Component",
+      P: {
+        key: "YTOVideoPlayer"
+      }
+    },
+    {
+      id: "video_player_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+const currentState = getPlayerState?.() || "closed";
+const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
+const playerSize = args.contextData.props?.playerSize || { width: 400, height: 250 };
+
+// Calculate default position (bottom right) if not set
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+const defaultX = isMobile ? 8 : null;
+const defaultY = isMobile ? 80 : null;
+const x = playerPosition.x !== null ? playerPosition.x : defaultX;
+const y = playerPosition.y !== null ? playerPosition.y : defaultY;
+
+// Build inline styles for positioning
+const positionStyle = currentState === "minimized" && x !== null && y !== null
+  ? { left: `${x}px`, top: `${y}px`, width: `${playerSize.width}px`, height: `${playerSize.height}px` }
+  : {};
+
+return {
+  as: "div",
+  hide: () => {
+    const state = getPlayerState?.();
+    return state === "closed";
+  },
+  "data-state": currentState,
+  style: positionStyle
+};
+''',
+        css: '''
+const getPlayerState = args.contextData.props?.playerState;
+const state = getPlayerState?.() || "closed";
+const isMinimized = state === "minimized";
+const isMaximized = state === "maximized";
+
+return `._id {
+  position: fixed;
+  z-index: 9999;
+  background: ${args.theme.var.color.background_dark_900};
+  border-radius: ${isMinimized ? '0.5rem' : '0'};
+  box-shadow: ${isMinimized ? '0 4px 20px rgba(0, 0, 0, 0.3)' : 'none'};
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-radius 0.3s ease;
+}
+
+._id[data-state="minimized"] {
+  bottom: ${args.theme.var.spacing.lg};
+  right: ${args.theme.var.spacing.lg};
+  width: 400px;
+  height: 250px;
+  min-width: 300px;
+  min-height: 200px;
+}
+
+._id[data-state="maximized"] {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0;
+  bottom: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+@media (max-width: 768px) {
+  ._id[data-state="minimized"] {
+    bottom: 80px;
+    right: ${args.theme.var.spacing.sm};
+    left: ${args.theme.var.spacing.sm};
+    width: calc(100% - ${args.theme.var.spacing.md});
+    height: 200px;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "player_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+
+const handleMouseDown = (e) => {
+  const state = getPlayerState?.();
+  if (state !== "minimized") return;
+
+  // Prevent text selection while dragging
+  e.preventDefault();
+
+  const startX = e.clientX;
+  const startY = e.clientY;
+  const playerEl = e.currentTarget.parentElement;
+  const rect = playerEl.getBoundingClientRect();
+  const offsetX = startX - rect.left;
+  const offsetY = startY - rect.top;
+
+  const handleMouseMove = (moveEvent) => {
+    const newX = moveEvent.clientX - offsetX;
+    const newY = moveEvent.clientY - offsetY;
+
+    // Keep player within viewport bounds
+    const maxX = window.innerWidth - rect.width;
+    const maxY = window.innerHeight - rect.height;
+    const boundedX = Math.max(0, Math.min(newX, maxX));
+    const boundedY = Math.max(0, Math.min(newY, maxY));
+
+    setPlayerPosition?.({ x: boundedX, y: boundedY });
+  };
+
+  const handleMouseUp = () => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  };
+
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+};
+
+return {
+  as: "div",
+  onMouseDown: handleMouseDown
+};
+''',
+        css: '''
+const getPlayerState = args.contextData.props?.playerState;
+const state = getPlayerState?.() || "closed";
+
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  background: ${args.theme.var.color.background_dark_800};
+  border-bottom: 1px solid ${args.theme.var.color.background_dark_700};
+  cursor: ${state === "minimized" ? 'move' : 'default'};
+  user-select: none;
+}`;
+'''
+      }
+    },
+    {
+      id: "player_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const getCurrentVideo = args.contextData.props?.currentVideo;
+const video = getCurrentVideo?.();
+const title = video?.P?.title || "YouTube Video";
+
+return {
+  as: "h3",
+  text: title
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 500;
+  color: ${args.theme.var.color.background_dark_900_text};
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "player_controls",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "player_next_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const getVideoQueue = args.contextData.props?.videoQueue;
+const queue = getVideoQueue?.() || [];
+const playNext = args.contextData.props?.playNext;
+const hasNext = queue.length > 0;
+
+return {
+  as: "button",
+  onClick: playNext,
+  "aria-label": "Play next video",
+  title: `Next (${queue.length} in queue)`,
+  disabled: !hasNext,
+  hide: !hasNext
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.background_dark_900_text};
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.xs};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: background 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.background_dark_700};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "player_next_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:skip-forward",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "player_queue_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const getVideoQueue = args.contextData.props?.videoQueue;
+const queue = getVideoQueue?.() || [];
+const hasQueue = queue.length > 0;
+const openQueueModal = args.contextData.props?.openQueueModal;
+
+return {
+  as: "button",
+  onClick: openQueueModal,
+  "aria-label": "Manage queue",
+  title: `Queue (${queue.length})`,
+  hide: !hasQueue
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.background_dark_900_text};
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.xs};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_700};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "player_queue_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:list",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "player_toggle_button",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+const state = getPlayerState?.() || "closed";
+const isMinimized = state === "minimized";
+const togglePlayerState = args.contextData.props?.togglePlayerState;
+
+return {
+  as: "button",
+  onClick: togglePlayerState,
+  "aria-label": isMinimized ? "Maximize player" : "Minimize player",
+  title: isMinimized ? "Maximize" : "Minimize"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.background_dark_900_text};
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.xs};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_dark_700};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "player_toggle_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+const state = getPlayerState?.() || "closed";
+const isMinimized = state === "minimized";
+
+return {
+  as: "icon",
+  icon: isMinimized ? "carbon:maximize" : "carbon:minimize",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "player_close_button",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const closePlayer = args.contextData.props?.closePlayer;
+
+return {
+  as: "button",
+  onClick: closePlayer,
+  "aria-label": "Close player",
+  title: "Close"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.background_dark_900_text};
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.xs};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.error_dark_600};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "player_close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "player_video_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        fns: '''
+// Setup YouTube iframe API message listener
+const playNext = args.contextData.props?.playNext;
+const getPlayerState = args.contextData.props?.playerState;
+
+const handleMessage = (event) => {
+  if (event.origin !== "https://www.youtube.com") return;
+
+  try {
+    // YouTube sends data as string or object
+    let data = event.data;
+    if (typeof data === 'string') {
+      data = JSON.parse(data);
+    }
+
+    // YouTube player states: -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering, 5=cued
+    // Only auto-play next video when:
+    // 1. Current video has ended (state 0)
+    // 2. Player is still open (not closed)
+    if (data.event === "onStateChange" && data.info === 0) {
+      const currentState = getPlayerState?.();
+      if (currentState === "minimized" || currentState === "maximized") {
+        playNext?.();
+      }
+    }
+  } catch (e) {
+    // Ignore parse errors - many messages from YouTube aren't JSON
+  }
+};
+
+return {
+  handleMessage
+};
+''',
+        props: '''
+return {
+  as: "div",
+  onMount: (el) => {
+    window.addEventListener("message", args.fns.handleMessage);
+  },
+  onCleanup: () => {
+    window.removeEventListener("message", args.fns.handleMessage);
+  }
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: calc(100% - 48px);
+  background: ${args.theme.var.color.background_dark_900};
+  position: relative;
+}`;
+'''
+      }
+    },
+    {
+      id: "player_iframe",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const getCurrentVideo = args.contextData.props?.currentVideo;
+const video = getCurrentVideo?.();
+const youtubeId = video?.P?.youtubeId || "";
+
+return {
+  as: "iframe",
+  src: youtubeId ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&enablejsapi=1` : "",
+  allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+  allowfullscreen: true,
+  frameborder: "0"
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 100%;
+  border: none;
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_handle_se",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+const setPlayerSize = args.contextData.props?.setPlayerSize;
+const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
+
+const handleMouseDown = (e) => {
+  const state = getPlayerState?.();
+  if (state !== "minimized") return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const playerEl = e.currentTarget.parentElement;
+  const rect = playerEl.getBoundingClientRect();
+  const startX = e.clientX;
+  const startY = e.clientY;
+  const startWidth = rect.width;
+  const startHeight = rect.height;
+
+  const handleMouseMove = (moveEvent) => {
+    const deltaX = moveEvent.clientX - startX;
+    const deltaY = moveEvent.clientY - startY;
+
+    const newWidth = Math.max(300, startWidth + deltaX);
+    const newHeight = Math.max(200, startHeight + deltaY);
+
+    setPlayerSize?.({ width: newWidth, height: newHeight });
+  };
+
+  const handleMouseUp = () => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  };
+
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+};
+
+return {
+  as: "div",
+  onMouseDown: handleMouseDown,
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: se-resize;
+  z-index: 10;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid ${args.theme.var.color.background_dark_700};
+    border-bottom: 2px solid ${args.theme.var.color.background_dark_700};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_handle_e",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+const setPlayerSize = args.contextData.props?.setPlayerSize;
+
+const handleMouseDown = (e) => {
+  const state = getPlayerState?.();
+  if (state !== "minimized") return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const playerEl = e.currentTarget.parentElement;
+  const rect = playerEl.getBoundingClientRect();
+  const startX = e.clientX;
+  const startWidth = rect.width;
+  const currentHeight = rect.height;
+
+  const handleMouseMove = (moveEvent) => {
+    const deltaX = moveEvent.clientX - startX;
+    const newWidth = Math.max(300, startWidth + deltaX);
+    setPlayerSize?.({ width: newWidth, height: currentHeight });
+  };
+
+  const handleMouseUp = () => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  };
+
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+};
+
+return {
+  as: "div",
+  onMouseDown: handleMouseDown,
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: e-resize;
+  z-index: 10;
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_handle_s",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+const setPlayerSize = args.contextData.props?.setPlayerSize;
+
+const handleMouseDown = (e) => {
+  const state = getPlayerState?.();
+  if (state !== "minimized") return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const playerEl = e.currentTarget.parentElement;
+  const rect = playerEl.getBoundingClientRect();
+  const startY = e.clientY;
+  const startHeight = rect.height;
+  const currentWidth = rect.width;
+
+  const handleMouseMove = (moveEvent) => {
+    const deltaY = moveEvent.clientY - startY;
+    const newHeight = Math.max(200, startHeight + deltaY);
+    setPlayerSize?.({ width: currentWidth, height: newHeight });
+  };
+
+  const handleMouseUp = () => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  };
+
+  document.addEventListener('mousemove', handleMouseMove);
+  document.addEventListener('mouseup', handleMouseUp);
+};
+
+return {
+  as: "div",
+  onMouseDown: handleMouseDown,
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: s-resize;
+  z-index: 10;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "Attr", S: "component_root", E: "video_player_container" },
+    { id: "e2", T: "Attr", S: "video_player_container", E: "player_header" },
+    { id: "e3", T: "Attr", S: "player_header", E: "player_title" },
+    { id: "e4", T: "Attr", S: "player_header", E: "player_controls" },
+    { id: "e5", T: "Attr", S: "player_controls", E: "player_next_button" },
+    { id: "e6", T: "Attr", S: "player_next_button", E: "player_next_icon" },
+    { id: "e6a", T: "Attr", S: "player_controls", E: "player_queue_button" },
+    { id: "e6b", T: "Attr", S: "player_queue_button", E: "player_queue_icon" },
+    { id: "e7", T: "Attr", S: "player_controls", E: "player_toggle_button" },
+    { id: "e8", T: "Attr", S: "player_toggle_button", E: "player_toggle_icon" },
+    { id: "e9", T: "Attr", S: "player_controls", E: "player_close_button" },
+    { id: "e10", T: "Attr", S: "player_close_button", E: "player_close_icon" },
+    { id: "e11", T: "Attr", S: "video_player_container", E: "player_video_container" },
+    { id: "e12", T: "Attr", S: "player_video_container", E: "player_iframe" },
+    { id: "e13", T: "Attr", S: "video_player_container", E: "resize_handle_se" },
+    { id: "e14", T: "Attr", S: "video_player_container", E: "resize_handle_e" },
+    { id: "e15", T: "Attr", S: "video_player_container", E: "resize_handle_s" }
+  ]
+}

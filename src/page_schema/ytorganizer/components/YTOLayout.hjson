@@ -1,14 +1,315 @@
 {
   vertexes: [
     {
-      id: "yto_layout_component",
-      L: "Component",
+      id: "layout_root",
+      L: "Attr",
       P: {
-        key: "YTOLayout"
+        displayOrder: 1,
+        componentName: "YTOConfirmProvider"
       }
     },
     {
-      id: "yto_layout_root",
+      id: "layout_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+// Video player state management
+const [playerState, setPlayerState] = args.createSignal("closed"); // closed, minimized, maximized
+const [currentVideo, setCurrentVideo] = args.createSignal(null);
+
+// Player position and size state
+const [playerPosition, setPlayerPosition] = args.createStore({ x: null, y: null });
+const [playerSize, setPlayerSize] = args.createStore({ width: 400, height: 250 });
+
+// Video queue state
+const [videoQueue, setVideoQueue] = args.createSignal([]);
+
+// Play video in the player
+const playVideo = (video) => {
+  setCurrentVideo(video);
+  setPlayerState("minimized");
+};
+
+// Add video to queue
+const addToQueue = (video) => {
+  const queue = videoQueue();
+  const videoId = video?.P?.youtubeId;
+
+  // Check if video already in queue
+  const alreadyInQueue = queue.some(v => v?.P?.youtubeId === videoId);
+  if (alreadyInQueue) {
+    args.showWarningToast("Video already in queue");
+    return;
+  }
+
+  setVideoQueue([...queue, video]);
+  args.showSuccessToast("Added to queue");
+};
+
+// Play next video from queue
+const playNext = () => {
+  const queue = videoQueue();
+  if (queue.length === 0) {
+    setPlayerState("closed");
+    setCurrentVideo(null);
+    return;
+  }
+
+  const nextVideo = queue[0];
+  setCurrentVideo(nextVideo);
+  setVideoQueue(queue.slice(1));
+};
+
+// Remove video from queue
+const removeFromQueue = (index) => {
+  const queue = videoQueue();
+  setVideoQueue([...queue.slice(0, index), ...queue.slice(index + 1)]);
+};
+
+// Clear entire queue
+const clearQueue = () => {
+  setVideoQueue([]);
+  args.showSuccessToast("Queue cleared");
+};
+
+// Queue modal state
+const [isQueueModalOpen, setIsQueueModalOpen] = args.createSignal(false);
+
+const openQueueModal = () => {
+  setIsQueueModalOpen(true);
+};
+
+const closeQueueModal = () => {
+  setIsQueueModalOpen(false);
+};
+
+// Add to playlist modal state
+const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = args.createSignal(false);
+const [playlistModalVideo, setPlaylistModalVideo] = args.createSignal(null);
+
+const openAddToPlaylistModal = (video) => {
+  setPlaylistModalVideo(video);
+  setIsAddToPlaylistModalOpen(true);
+};
+
+const closeAddToPlaylistModal = () => {
+  setIsAddToPlaylistModalOpen(false);
+  setPlaylistModalVideo(null);
+};
+
+const addVideoToPlaylists = async (data) => {
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "addVideoToPlaylists",
+      contextData: data
+    });
+
+    if (result?.result?.success) {
+      args.showSuccessToast(result.result.message);
+      return result.result;
+    } else {
+      const errorMessage = result?.result?.message || "Failed to add video to playlists";
+      args.showErrorToast(errorMessage);
+      const error = new Error(errorMessage);
+      error.toastShown = true;
+      throw error;
+    }
+  } catch (error) {
+    // Only show toast for unexpected errors (network, etc.)
+    if (!error.toastShown) {
+      console.error("Unexpected error adding video to playlists:", error);
+      args.showErrorToast("Failed to add video to playlists");
+    }
+    throw error;
+  }
+};
+
+// Toggle player state
+const togglePlayerState = () => {
+  const current = playerState();
+  if (current === "minimized") {
+    setPlayerState("maximized");
+  } else if (current === "maximized") {
+    setPlayerState("minimized");
+  }
+};
+
+// Close player
+const closePlayer = () => {
+  setPlayerState("closed");
+  setCurrentVideo(null);
+};
+
+// Define navigation items for both desktop and mobile menus
+const navigationSections = [
+  {
+    id: "main",
+    title: null, // No title for main section
+    items: [
+      {
+        id: "home",
+        href: "/yto",
+        label: "Home",
+        icon: "carbon:home",
+        title: "Dashboard and overview",
+        pathCheck: (pathname) => pathname === "/yto" || pathname === "/yto/"
+      }
+    ]
+  },
+  {
+    id: "content",
+    title: "Content",
+    items: [
+      {
+        id: "search",
+        href: "/yto/content?q=",
+        label: "Search",
+        icon: "mdi:magnify",
+        title: "Search for YouTube channels and playlists",
+        pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.q !== undefined
+      },
+      {
+        id: "channels",
+        href: "/yto/content?type=channels",
+        label: "Channels",
+        icon: "mdi:youtube",
+        title: "View and manage YouTube channels",
+        pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "channels"
+      },
+      {
+        id: "playlists",
+        href: "/yto/content?type=playlists",
+        label: "Playlists",
+        icon: "mdi:playlist-play",
+        title: "View and manage YouTube playlists",
+        pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "playlists"
+      },
+      {
+        id: "favourites",
+        href: "/yto/content?type=favourites",
+        label: "Favourites",
+        icon: "carbon:favorite",
+        title: "View your favourite videos, channels and playlists",
+        pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "favourites"
+      }
+    ]
+  },
+  {
+    id: "other",
+    title: null, // No title for other section
+    hasBorder: true,
+    items: [
+      {
+        id: "settings",
+        href: "/yto/settings",
+        label: "Settings",
+        icon: "carbon:settings",
+        title: "App configuration and preferences",
+        pathCheck: (pathname) => pathname.startsWith("/yto/settings")
+      },
+      {
+        id: "logout",
+        href: "/auth/logout",
+        label: "Logout",
+        icon: "carbon:logout",
+        title: "Sign out of your account",
+        isButton: true,
+        isDanger: true
+      }
+    ]
+  }
+];
+
+// Define mobile navigation items (subset of desktop items)
+const mobileNavigationItems = [
+  {
+    id: "home",
+    href: "/yto",
+    label: "Home",
+    icon: "carbon:home",
+    title: "Dashboard and overview",
+    pathCheck: (pathname) => pathname === "/yto" || pathname === "/yto/"
+  },
+  {
+    id: "search",
+    href: "/yto/content?q=",
+    label: "Search",
+    icon: "mdi:magnify",
+    title: "Search for YouTube channels and playlists",
+    pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.q !== undefined
+  },
+  {
+    id: "channels",
+    href: "/yto/content?type=channels",
+    label: "Channels",
+    icon: "mdi:youtube",
+    title: "View and manage YouTube channels",
+    pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "channels"
+  },
+  {
+    id: "playlists",
+    href: "/yto/content?type=playlists",
+    label: "Playlists",
+    icon: "mdi:playlist-play",
+    title: "View and manage YouTube playlists",
+    pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "playlists"
+  },
+  {
+    id: "favourites",
+    href: "/yto/content?type=favourites",
+    label: "Favourites",
+    icon: "carbon:favorite",
+    title: "View your favourite videos, channels and playlists",
+    pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "favourites"
+  },
+  {
+    id: "settings",
+    href: "/yto/settings",
+    label: "Settings",
+    icon: "carbon:settings",
+    title: "App configuration and preferences",
+    pathCheck: (pathname) => pathname.startsWith("/yto/settings")
+  }
+];
+
+return {
+  navigationSections,
+  mobileNavigationItems,
+  playerState,
+  currentVideo,
+  playVideo,
+  togglePlayerState,
+  closePlayer,
+  playerPosition,
+  setPlayerPosition,
+  playerSize,
+  setPlayerSize,
+  videoQueue,
+  addToQueue,
+  playNext,
+  removeFromQueue,
+  clearQueue,
+  isQueueModalOpen,
+  openQueueModal,
+  closeQueueModal,
+  isAddToPlaylistModalOpen,
+  playlistModalVideo,
+  openAddToPlaylistModal,
+  closeAddToPlaylistModal,
+  addVideoToPlaylists
+};
+''',
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "layout_container",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -20,68 +321,129 @@ return {
 ''',
         css: '''
 return `._id {
-  height: 100vh;
-  background: ${args.theme.var.color.background};
-  color: ${args.theme.var.color.text};
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  background: ${args.theme.var.color.background};
+  color: ${args.theme.var.color.text};
+}
+
+@media (min-width: 768px) {
+  ._id {
+    flex-direction: row;
+  }
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_content",
+      id: "main_content",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "main"
 };
 ''',
         css: '''
 return `._id {
   flex: 1;
-  overflow-x: hidden;
+  padding-bottom: 80px;
   overflow-y: auto;
+  position: relative;
+}
 
-  /* Thin scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: ${args.theme.var.color.border} transparent;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: ${args.theme.var.color.border};
-    border-radius: 3px;
-
-    &:hover {
-      background-color: ${args.theme.var.color.muted};
-    }
+@media (min-width: 768px) {
+  ._id {
+    padding-bottom: 0;
+    margin-left: 240px;
   }
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_slot",
+      id: "slot_main",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Slot",
-        name: "children"
+        slot: "1children"
       }
     },
     {
-      id: "yto_layout_bottom_nav",
+      id: "navigation_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+// Get navigation state from YTOConfirmProvider context
+// This controls when the overlay should be visible
+const isNavigating = args.fns.isNavigating?.();
+
+return {
+  as: "div",
+  style: {
+    // Show overlay during navigation, hide when complete
+    // Uses flex to center the loading spinner
+    display: isNavigating ? 'flex' : 'none'
+  }
+};
+''',
+        css: '''
+return `._id {
+  /* Full-screen overlay positioning */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* Match theme background for seamless appearance */
+  background: ${args.theme.var.color.background};
+
+  /* Position spinner at top instead of center */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: ${args.theme.var.spacing.xxl};
+
+  /* High z-index to appear above all content */
+  z-index: 1;
+
+  /* Start invisible and fade in smoothly */
+  opacity: 0;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* Smooth fade-in animation for overlay appearance */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "navigation_spinner",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOLoadingSpinner",
+        props: '''
+return {
+  size: "medium",
+  color: "primary"
+};
+'''
+      }
+    },
+    {
+      id: "left_nav",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -93,22 +455,30 @@ return {
 ''',
         css: '''
 return `._id {
-  flex-shrink: 0;
-  background: ${args.theme.var.color.surface};
-  border-top: 1px solid ${args.theme.var.color.border};
-  padding: 0.75rem;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-  backdrop-filter: blur(10px);
+  display: none;
+}
 
-  @media (max-width: 768px) {
-    padding: 0.5rem;
+@media (min-width: 768px) {
+  ._id {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: ${args.theme.var.color.background};
+    border-right: 1px solid ${args.theme.var.color.border};
+    flex-direction: column;
+    padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.lg};
+    z-index: 1;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   }
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_container",
+      id: "left_nav_header",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -120,517 +490,536 @@ return {
 ''',
         css: '''
 return `._id {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  max-width: 600px;
-  margin: 0 auto;
-  gap: 0.5rem;
+  margin-bottom: ${args.theme.var.spacing.xl};
+  padding-bottom: ${args.theme.var.spacing.lg};
+  border-bottom: 1px solid ${args.theme.var.color.border};
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_home",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath === '' || currentPath === '/';
-
-return {
-  as: "button",
-  onClick: () => args.navigate('/')
-};
-''',
-        css: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath === '' || currentPath === '/';
-
-return `._id {
-  background: ${isActive ? args.theme.var.color.primary : 'transparent'};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.muted};
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  flex: 1;
-  max-width: 80px;
-  
-  &:hover {
-    background: ${isActive ? args.theme.var.color.primary_dark_200 : args.theme.var.color.background_dark_100};
-    color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0.5rem;
-    gap: 0.125rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_layout_nav_home_icon",
+      id: "left_nav_logo",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
-  as: "icon",
-  icon: "carbon:home",
-  width: 24,
-  height: 24
+  as: "h1",
+  text: "📺 YT Organizer"
 };
 ''',
         css: '''
 return `._id {
-  @media (max-width: 768px) {
-    width: 20px;
-    height: 20px;
-  }
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.sm};
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_home_label",
+      id: "left_nav_menu",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
-  as: "span",
-  text: "Home"
+  as: "div"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 0.75rem;
-  font-weight: 500;
-  
-  @media (max-width: 768px) {
-    font-size: 0.625rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_layout_nav_channels",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/channels');
-
-return {
-  as: "button",
-  onClick: () => args.navigate('/channels')
-};
-''',
-        css: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/channels');
-
-return `._id {
-  background: ${isActive ? args.theme.var.color.primary : 'transparent'};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.muted};
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  flex: 1;
-  max-width: 80px;
-  
-  &:hover {
-    background: ${isActive ? args.theme.var.color.primary_dark_200 : args.theme.var.color.background_dark_100};
-    color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0.5rem;
-    gap: 0.125rem;
-  }
+  gap: ${args.theme.var.spacing.lg};
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_channels_icon",
+      id: "nav_sections_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "navSection",
+        loop: true,
+        props: '''
+const sections = args.fns.navigationSections;
+return {
+  as: "div",
+  data: sections
+};
+''',
+        css: '''
+return `._id {
+  display: contents;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_section",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const section = args.contextData.navSection;
+const hasBorder = section.hasBorder;
 return {
-  as: "icon",
-  icon: "carbon:api-1",
-  width: 24,
-  height: 24
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "nav_section_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.navSection;
+const title = section.title;
+return {
+  as: "h3",
+  text: title,
+  hide: !title
 };
 ''',
         css: '''
 return `._id {
-  @media (max-width: 768px) {
-    width: 20px;
-    height: 20px;
-  }
+  font-size: ${args.theme.var.fontSize.sm};
+  font-weight: 600;
+  color: ${args.theme.var.color.muted};
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 ${args.theme.var.spacing.sm} 0;
+  padding: 0 ${args.theme.var.spacing.md};
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_channels_label",
+      id: "nav_section_list",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const section = args.contextData.navSection;
 return {
-  as: "span",
-  text: "Channels"
+  as: "ul"
 };
 ''',
         css: '''
+const section = args.contextData.navSection;
+const hasBorder = section.hasBorder;
 return `._id {
-  font-size: 0.75rem;
-  font-weight: 500;
-  
-  @media (max-width: 768px) {
-    font-size: 0.625rem;
-  }
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: ${args.theme.var.spacing.xs};
+  ${hasBorder ? `padding-top: ${args.theme.var.spacing.md}; border-top: 1px solid ${args.theme.var.color.border};` : ''}
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_playlists",
+      id: "nav_items_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "navItem",
+        loop: true,
+        props: '''
+const section = args.contextData.navSection;
+const items = section.items;
+return {
+  as: "li",
+  data: items
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_item_link",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const isButton = item.isButton;
+const isDanger = item.isDanger;
+
+return {
+  as: isButton ? "button" : "a",
+  href: !isButton ? item.href : undefined,
+  "aria-label": item.label,
+  title: item.title,
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.(item.href);
+  }
+};
+''',
+        css: '''
+const item = args.contextData.navItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+const isButton = item.isButton;
+const isDanger = item.isDanger;
+
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: ${args.theme.var.spacing.md};
+  padding: ${args.theme.var.spacing.sm} ${args.theme.var.spacing.md};
+  border-radius: ${args.theme.var.borderRadius.md};
+  background: ${isActive ? args.theme.var.color.background_light_200 : 'transparent'};
+  color: ${isDanger ? args.theme.var.color.error : (isActive ? args.theme.var.color.primary : args.theme.var.color.text)};
+  text-decoration: none;
+  font-weight: ${isActive ? '600' : '500'};
+  transition: all ${args.theme.var.animation.fast} ease;
+  ${isButton ? `
+    border: none;
+    font-size: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+  ` : ''}
+
+  &:hover {
+    background: ${isDanger ? args.theme.var.color.error_light_100 : args.theme.var.color.background_light_200};
+    color: ${isDanger ? args.theme.var.color.error_dark_200 : args.theme.var.color.primary};
+  }
+  
+  ${isButton ? `
+    &:active {
+      transform: scale(0.98);
+    }
+  ` : ''}
+}`;
+'''
+      }
+    },
+    {
+      id: "nav_item_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+return {
+  as: "icon",
+  icon: item.icon,
+  width: 20,
+  height: 20
+};
+'''
+      }
+    },
+    {
+      id: "nav_item_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.navItem;
+return {
+  as: "span",
+  text: item.label
+};
+'''
+      }
+    },
+    {
+      id: "bottom_nav",
       L: "Attr",
       P: {
         displayOrder: 3,
         componentName: "Html",
         props: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/playlists');
-
 return {
-  as: "button",
-  onClick: () => args.navigate('/playlists')
+  as: "nav"
 };
 ''',
         css: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/playlists');
-
 return `._id {
-  background: ${isActive ? args.theme.var.color.primary : 'transparent'};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.muted};
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: ${args.theme.var.color.background};
+  border-top: 1px solid ${args.theme.var.color.border};
+  z-index: 1;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  padding: ${args.theme.var.spacing.sm} 0;
+}
+
+._id .slider-container {
+  height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
+  justify-content: space-between;
+  padding: 0 ${args.theme.var.spacing.sm};
+  width: 100%;
+}
+
+/* Make each nav item equally distributed */
+._id .slider-container > * {
   flex: 1;
-  max-width: 80px;
-  
-  &:hover {
-    background: ${isActive ? args.theme.var.color.primary_dark_200 : args.theme.var.color.background_dark_100};
-    color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0.5rem;
-    gap: 0.125rem;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Responsive adjustment - hide on desktop */
+@media (min-width: 768px) {
+  ._id {
+    display: none;
   }
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_playlists_icon",
+      id: "nav_slider_container",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
-  as: "icon",
-  icon: "carbon:playlist",
-  width: 24,
-  height: 24
+  as: "div",
+  className: "slider-container"
+};
+'''
+      }
+    },
+    {
+      id: "mobile_nav_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "mobileNavItem",
+        loop: true,
+        props: '''
+const items = args.fns.mobileNavigationItems;
+return {
+  as: "div",
+  data: items
 };
 ''',
         css: '''
 return `._id {
-  @media (max-width: 768px) {
-    width: 20px;
-    height: 20px;
+  display: contents;
+}`;
+'''
+      }
+    },
+    {
+      id: "mobile_nav_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+
+return {
+  as: "a",
+  href: item.href,
+  "aria-label": item.label,
+  title: item.title,
+  onClick: (e) => {
+    e.preventDefault();
+    args.fns.navigateTo?.(item.href);
+  }
+};
+''',
+        css: '''
+const item = args.contextData.mobileNavItem;
+const isActive = item.pathCheck ? item.pathCheck(args.location.pathname) : false;
+
+return `._id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ${args.theme.var.spacing.xs};
+  padding: ${args.theme.var.spacing.xs};
+  border-radius: ${args.theme.var.borderRadius.sm};
+  background: none;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: ${args.theme.var.touch.minTarget};
+  color: ${isActive ? args.theme.var.color.primary : args.theme.var.color.muted};
+  transition: all ${args.theme.var.animation.fast} ease;
+  width: 100%;
+  position: relative;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    color: ${args.theme.var.color.primary};
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_playlists_label",
+      id: "mobile_nav_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const item = args.contextData.mobileNavItem;
+const iconSize = item.iconSize || 24;
+return {
+  as: "icon",
+  icon: item.icon,
+  width: iconSize,
+  height: iconSize
+};
+'''
+      }
+    },
+    {
+      id: "mobile_nav_text",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const item = args.contextData.mobileNavItem;
 return {
   as: "span",
-  text: "Playlists"
+  text: item.label
 };
 ''',
         css: '''
 return `._id {
-  font-size: 0.75rem;
+  font-size: ${args.theme.var.fontSize.xs};
   font-weight: 500;
-  
-  @media (max-width: 768px) {
-    font-size: 0.625rem;
-  }
+  text-align: center;
 }`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_search",
+      id: "video_player",
       L: "Attr",
       P: {
         displayOrder: 4,
-        componentName: "Html",
+        componentName: "YTOVideoPlayer",
         props: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/search');
-
 return {
-  as: "button",
-  onClick: () => args.navigate('/search')
+  playerState: args.fns.playerState,
+  currentVideo: args.fns.currentVideo,
+  togglePlayerState: args.fns.togglePlayerState,
+  closePlayer: args.fns.closePlayer,
+  playerPosition: args.fns.playerPosition,
+  setPlayerPosition: args.fns.setPlayerPosition,
+  playerSize: args.fns.playerSize,
+  setPlayerSize: args.fns.setPlayerSize,
+  videoQueue: args.fns.videoQueue,
+  playNext: args.fns.playNext,
+  removeFromQueue: args.fns.removeFromQueue,
+  clearQueue: args.fns.clearQueue,
+  openQueueModal: args.fns.openQueueModal
 };
-''',
-        css: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/search');
-
-return `._id {
-  background: ${isActive ? args.theme.var.color.primary : 'transparent'};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.muted};
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  flex: 1;
-  max-width: 80px;
-  
-  &:hover {
-    background: ${isActive ? args.theme.var.color.primary_dark_200 : args.theme.var.color.background_dark_100};
-    color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0.5rem;
-    gap: 0.125rem;
-  }
-}`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_search_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:search",
-  width: 24,
-  height: 24
-};
-''',
-        css: '''
-return `._id {
-  @media (max-width: 768px) {
-    width: 20px;
-    height: 20px;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_layout_nav_search_label",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "Search"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.75rem;
-  font-weight: 500;
-  
-  @media (max-width: 768px) {
-    font-size: 0.625rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_layout_nav_settings",
+      id: "queue_modal",
       L: "Attr",
       P: {
         displayOrder: 5,
-        componentName: "Html",
+        componentName: "YTOQueueModal",
         props: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/settings');
-
 return {
-  as: "button",
-  onClick: () => args.navigate('/settings')
+  isOpen: args.fns.isQueueModalOpen,
+  onClose: args.fns.closeQueueModal,
+  videoQueue: args.fns.videoQueue,
+  playVideo: args.fns.playVideo,
+  removeFromQueue: args.fns.removeFromQueue,
+  clearQueue: args.fns.clearQueue
 };
-''',
-        css: '''
-const currentPath = args.location?.pathname || '';
-const isActive = currentPath.includes('/settings');
-
-return `._id {
-  background: ${isActive ? args.theme.var.color.primary : 'transparent'};
-  color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.muted};
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  flex: 1;
-  max-width: 80px;
-  
-  &:hover {
-    background: ${isActive ? args.theme.var.color.primary_dark_200 : args.theme.var.color.background_dark_100};
-    color: ${isActive ? args.theme.var.color.primary_text : args.theme.var.color.text};
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0.5rem;
-    gap: 0.125rem;
-  }
-}`;
 '''
       }
     },
     {
-      id: "yto_layout_nav_settings_icon",
+      id: "playlist_modal",
       L: "Attr",
       P: {
-        displayOrder: 1,
-        componentName: "Html",
+        displayOrder: 6,
+        componentName: "YTOAddToPlaylistModal",
         props: '''
 return {
-  as: "icon",
-  icon: "carbon:settings",
-  width: 24,
-  height: 24
+  isOpen: args.fns.isAddToPlaylistModalOpen,
+  onClose: args.fns.closeAddToPlaylistModal,
+  video: args.fns.playlistModalVideo,
+  playlists: [],
+  onSave: args.fns.addVideoToPlaylists
 };
-''',
-        css: '''
-return `._id {
-  @media (max-width: 768px) {
-    width: 20px;
-    height: 20px;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "yto_layout_nav_settings_label",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "Settings"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.75rem;
-  font-weight: 500;
-  
-  @media (max-width: 768px) {
-    font-size: 0.625rem;
-  }
-}`;
 '''
       }
     }
   ],
   edges: [
-    { id: "e1", T: "Attr", S: "yto_layout_component", E: "yto_layout_root" },
-    { id: "e2", T: "Attr", S: "yto_layout_root", E: "yto_layout_content" },
-    { id: "e3", T: "Attr", S: "yto_layout_content", E: "yto_layout_slot" },
-    { id: "e4", T: "Attr", S: "yto_layout_root", E: "yto_layout_bottom_nav" },
-    { id: "e5", T: "Attr", S: "yto_layout_bottom_nav", E: "yto_layout_nav_container" },
-    { id: "e6", T: "Attr", S: "yto_layout_nav_container", E: "yto_layout_nav_home" },
-    { id: "e7", T: "Attr", S: "yto_layout_nav_home", E: "yto_layout_nav_home_icon" },
-    { id: "e8", T: "Attr", S: "yto_layout_nav_home", E: "yto_layout_nav_home_label" },
-    { id: "e9", T: "Attr", S: "yto_layout_nav_container", E: "yto_layout_nav_channels" },
-    { id: "e10", T: "Attr", S: "yto_layout_nav_channels", E: "yto_layout_nav_channels_icon" },
-    { id: "e11", T: "Attr", S: "yto_layout_nav_channels", E: "yto_layout_nav_channels_label" },
-    { id: "e12", T: "Attr", S: "yto_layout_nav_container", E: "yto_layout_nav_playlists" },
-    { id: "e13", T: "Attr", S: "yto_layout_nav_playlists", E: "yto_layout_nav_playlists_icon" },
-    { id: "e14", T: "Attr", S: "yto_layout_nav_playlists", E: "yto_layout_nav_playlists_label" },
-    { id: "e15", T: "Attr", S: "yto_layout_nav_container", E: "yto_layout_nav_search" },
-    { id: "e16", T: "Attr", S: "yto_layout_nav_search", E: "yto_layout_nav_search_icon" },
-    { id: "e17", T: "Attr", S: "yto_layout_nav_search", E: "yto_layout_nav_search_label" },
-    { id: "e18", T: "Attr", S: "yto_layout_nav_container", E: "yto_layout_nav_settings" },
-    { id: "e19", T: "Attr", S: "yto_layout_nav_settings", E: "yto_layout_nav_settings_icon" },
-    { id: "e20", T: "Attr", S: "yto_layout_nav_settings", E: "yto_layout_nav_settings_label" }
+    { id: "e0", T: "Attr", S: "layout_root", E: "layout_wrapper" },
+    { id: "e1", T: "Attr", S: "layout_wrapper", E: "layout_container" },
+    { id: "e2", T: "Attr", S: "layout_container", E: "main_content" },
+    { id: "e3", T: "Attr", S: "main_content", E: "slot_main" },
+    { id: "e3b", T: "Attr", S: "main_content", E: "navigation_overlay" },
+    { id: "e3c", T: "Attr", S: "navigation_overlay", E: "navigation_spinner" },
+    { id: "e4", T: "Attr", S: "layout_container", E: "left_nav" },
+    { id: "e5", T: "Attr", S: "left_nav", E: "left_nav_header" },
+    { id: "e6", T: "Attr", S: "left_nav_header", E: "left_nav_logo" },
+    { id: "e7", T: "Attr", S: "left_nav", E: "left_nav_menu" },
+    { id: "e8", T: "Attr", S: "left_nav_menu", E: "nav_sections_loop" },
+    { id: "e9", T: "Attr", S: "nav_sections_loop", E: "nav_section" },
+    { id: "e10", T: "Attr", S: "nav_section", E: "nav_section_title" },
+    { id: "e11", T: "Attr", S: "nav_section", E: "nav_section_list" },
+    { id: "e12", T: "Attr", S: "nav_section_list", E: "nav_items_loop" },
+    { id: "e13", T: "Attr", S: "nav_items_loop", E: "nav_item_link" },
+    { id: "e14", T: "Attr", S: "nav_item_link", E: "nav_item_icon" },
+    { id: "e15", T: "Attr", S: "nav_item_link", E: "nav_item_text" },
+    { id: "e50", T: "Attr", S: "layout_container", E: "bottom_nav" },
+    { id: "e51", T: "Attr", S: "bottom_nav", E: "nav_slider_container" },
+    { id: "e52", T: "Attr", S: "nav_slider_container", E: "mobile_nav_loop" },
+    { id: "e53", T: "Attr", S: "mobile_nav_loop", E: "mobile_nav_item" },
+    { id: "e54", T: "Attr", S: "mobile_nav_item", E: "mobile_nav_icon" },
+    { id: "e55", T: "Attr", S: "mobile_nav_item", E: "mobile_nav_text" },
+    { id: "e60", T: "Attr", S: "layout_container", E: "video_player" },
+    { id: "e61", T: "Attr", S: "layout_container", E: "queue_modal" },
+    { id: "e62", T: "Attr", S: "layout_container", E: "playlist_modal" }
   ]
 }

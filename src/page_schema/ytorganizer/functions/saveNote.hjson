@@ -1,0 +1,127 @@
+{
+  vertexes: [
+    {
+      id: "save_note_function",
+      L: "Function",
+      P: {
+        key: "saveNote",
+        description: "Saves or updates a note for a video, channel, or playlist",
+        body: '''
+try {
+  // Get current authenticated user from session
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Extract parameters
+  const { item, itemType, note } = args.contextData;
+
+  if (!item) {
+    throw new Error("Item is required");
+  }
+
+  if (!itemType || !["video", "channel", "playlist"].includes(itemType)) {
+    throw new Error("Invalid item type. Must be 'video', 'channel', or 'playlist'");
+  }
+
+  // Get the item ID
+  const itemId = item.P?.youtubeId;
+  if (!itemId) {
+    throw new Error("Item ID not found");
+  }
+
+  // Determine the correct node label and relationship
+  let nodeLabel, settingsLabel, userRelation, settingRelation, itemRelation;
+
+  if (itemType === "video") {
+    nodeLabel = "Video";
+    settingsLabel = "VideoSettings";
+    userRelation = "UserVideoSettings";
+    settingRelation = "VideoSettingsVideo";
+    itemRelation = "VideoSettingsVideo";
+  } else if (itemType === "channel") {
+    nodeLabel = "Channel";
+    settingsLabel = "ChannelSetting";
+    userRelation = "UserChannelSetting";
+    settingRelation = "ChannelSettingChannel";
+    itemRelation = "ChannelSettingChannel";
+  } else {
+    nodeLabel = "Playlist";
+    settingsLabel = "PlaylistSetting";
+    userRelation = "UserPlaylistSetting";
+    settingRelation = "PlaylistSettingPlaylist";
+    itemRelation = "PlaylistSettingPlaylist";
+  }
+
+  // Query to create or update the settings node with note
+  const query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (item:${nodeLabel} {youtubeId: $itemId})
+    MERGE (u)-[:${userRelation}]->(settings:${settingsLabel})-[:${itemRelation}]->(item)
+    ON CREATE SET
+      settings.note = $note,
+      settings.noteUpdatedAt = datetime(),
+      settings.createdAt = datetime()
+    ON MATCH SET
+      settings.note = $note,
+      settings.noteUpdatedAt = datetime()
+    RETURN settings, item
+  `;
+
+  // Execute the query
+  const result = await args.session.run(query, {
+    userUuid: user.P.uuid,
+    itemId: itemId,
+    note: note || ""
+  });
+
+  if (result.records.length === 0) {
+    throw new Error(`${itemType} not found`);
+  }
+
+  const settings = args.convertNodeToJson(result.records[0].get('settings'));
+  const updatedItem = args.convertNodeToJson(result.records[0].get('item'));
+
+  return {
+    success: true,
+    data: {
+      settings,
+      item: updatedItem,
+      itemType,
+      note: settings.P.note
+    },
+    message: note ? `Note saved for ${itemType}` : `Note cleared for ${itemType}`
+  };
+
+} catch (error) {
+  console.error("Error saving note:", error);
+
+  // Handle specific error types
+  let userMessage = "Failed to save note. Please try again.";
+
+  if (error.message.includes("User session not found")) {
+    userMessage = "Please log in to save notes.";
+  } else if (error.message.includes("not found")) {
+    userMessage = error.message;
+  } else if (error.message.includes("Invalid item type")) {
+    userMessage = error.message;
+  } else if (error.message.includes("database")) {
+    userMessage = "Database connection error. Please try again later.";
+  }
+
+  return {
+    success: false,
+    message: userMessage,
+    error: {
+      type: error.name || "DatabaseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

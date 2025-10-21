@@ -72,14 +72,14 @@ try {
   let parentChannel = null;
   if (channelResult.records.length > 0 && channelResult.records[0].get('c')) {
     const channel = args.convertNodeToJson(channelResult.records[0].get('c'));
-    const channelSettings = channelResult.records[0].get('cs') ? args.convertNodeToJson(channelResult.records[0].get('cs')) : null;
+    const channelSetting = channelResult.records[0].get('cs') ? args.convertNodeToJson(channelResult.records[0].get('cs')) : null;
 
     parentChannel = {
       channelId: channel.youtubeId,
       title: channel.title,
       thumbnail: channel.thumbnail || '',
-      isUserSaved: channelSettings !== null,
-      displayName: channelSettings?.customName || channel.title
+      isUserSaved: channelSetting !== null,
+      displayName: channelSetting?.customName || channel.title
     };
   }
 
