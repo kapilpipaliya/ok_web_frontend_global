@@ -1,4 +1,5 @@
 import { useNavigate } from "@solidjs/router";
+import { createAsync } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 import createFocusTrap from "solid-focus-trap";
 
@@ -22,6 +23,7 @@ import { createFormHeader } from "~/pages/auth/functions/schema/createFormHeader
 import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { validateUsername } from "~/lib/validation/validateUsername";
+import { isGoogleOAuthEnabled } from "~/pages/global/oauth/oauthServerFunctions";
 
 // Define type for submitState store
 type SubmitStateStore = ReturnType<
@@ -40,6 +42,12 @@ interface SignupFormFunctionArgumentType extends FunctionArgumentType {
 
 export function SignupForm() {
   const navigate = useNavigate();
+
+  // Check if Google OAuth is enabled
+  const googleOAuthEnabled = createAsync(async () => {
+    const response = await isGoogleOAuthEnabled();
+    return response.result || false;
+  });
 
   // Use our utility hooks
   const [showPassword, toggleVisibility] = usePasswordVisibility(["password"]);
@@ -119,6 +127,105 @@ export function SignupForm() {
       ),
       {
         attributes: [
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "button",
+                attributes: [
+                  {
+                    as: "icon",
+                    componentName: "Html",
+                    props: () => ({
+                      height: 20,
+                      icon: "logos:google-icon",
+                      width: 20,
+                    }),
+                  },
+                  {
+                    as: "span",
+                    componentName: "Html",
+                    text: "Continue with Google",
+                  },
+                ],
+                componentName: "Html",
+                css: `return \`._id {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: white;
+  color: #1f1f1f;
+  border: 1px solid \${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+._id:hover {
+  background: #f8f9fa;
+  border-color: \${args.theme.var.color.border_dark_200};
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+._id:active {
+  background: #e9ecef;
+}\`;`,
+                props: () => ({
+                  onClick: () => {
+                    window.location.href = "/api/auth/google/signin";
+                  },
+                  type: "button",
+                }),
+              },
+              {
+                as: "div",
+                attributes: [
+                  {
+                    as: "div",
+                    componentName: "Html",
+                    css: `return \`._id {
+  flex: 1;
+  height: 1px;
+  background: \${args.theme.var.color.border};
+}\`;`,
+                  },
+                  {
+                    as: "span",
+                    componentName: "Html",
+                    css: `return \`._id {
+  padding: 0 1rem;
+  color: \${args.theme.var.color.text_dark_300};
+  font-size: 0.875rem;
+}\`;`,
+                    text: "OR",
+                  },
+                  {
+                    as: "div",
+                    componentName: "Html",
+                    css: `return \`._id {
+  flex: 1;
+  height: 1px;
+  background: \${args.theme.var.color.border};
+}\`;`,
+                  },
+                ],
+                componentName: "Html",
+                css: `return \`._id {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+}\`;`,
+              },
+            ],
+            componentName: "Html",
+            props: () => ({
+              hide: () => !googleOAuthEnabled(),
+            }),
+          },
           {
             attributes: [
               // Use our utility for text fields

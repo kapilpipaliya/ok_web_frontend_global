@@ -1,0 +1,306 @@
+I buy a domain fulchandshastri.in to make a new sprititual website for https://www.fulchandshastri.com
+old website pages and prototypes are located at @src/page_schema/fullchandshastri_old_website/
+make different components and pages for it and add docs for users and AI context.
+dont add new content yourself use existing exact old content only. add all the pages as in old website. keep same padding and design. there is png files for each page prototypes.
+for images, audio, pdf, carousel etc use the old website link from https://www.fulchandshastri.com
+on the home page there is a play and stop icon to play music and stop, add it on all the pages header.
+
+the website will contain the following pages:
+Home
+About
+  About Fulchand
+  His Inspiration
+  About ASK Umarala
+  Atma Siddhi Shastra Mission
+  Gyaan Deepak ! Prajwalan
+  Atma Sadhana Nitya Kram
+Books
+Discourses
+Schedule
+Gallery
+  Photos
+  Videos
+Donation
+Bhakti
+Contact
+Add support for changing languages: "English", "Hindi", "Gujarati". read setting from userSettings and onChange save user settings.
+for the books page keep Download link as it is for now.
+use Data Component whenever possible for example Books, Discourses, Schedule, Photos, Videos, Bhakti etc pages.
+Fulchand is an enlightened master who has devoted his life to spreading the teachings of his spiritual guru, Shrimad Rajchandra, in more than 220 countries around the world. Though he is strongly rooted in the Jainism theory of Samyak Darshan (Enlightenment) and Moksha (Nirvana), he aims to share this divine knowledge with every soul in the world that is ready to acquire it, regardless of caste, creed, religious inclination, nationality, food habits, gender, or any other differentials. His disciples think of him as an ocean of compassion as he has relentlessly sweated, toiled, and even bled, just to spread the call of the divine to as many souls as he possibly can. He wishes he could communicate with trees and animals too and help them understand the Eternal Truth as well.
+Use icons, micro-interactions
+Use hover animations, slide reveals for feature showcases, or scroll-based reveals to modernize UX.
+follow @src/routes/api/chat/SYSTEM_PROMPT.md to make pages and components in .hjson format
+use carbon icons only like: carbon:api-1
+use theme colors
+add theme switcher button to toggle dark and light theme
+"background" color is white so adding light shades like background_light_100 and background_light_200 will not work
+prefix each component with FullChand
+make professional fully featured website fulchandshastri.in
+Dont use primary color as a background as it is not look good when theme is switched to dark mode
+instead of text icons use "Html" component and use as: "icon" and give "icon" property for icon name
+first analyze old website and prototypes then Create a plan and confirm it with me before proceeding
+
+
+a
+I buy a domain decodeui.io make a website like: https://webflow.com or https://builder.io for it.
+make different components and pages for it and add docs for users. 
+we will provide Professional Drag & Drop Page Builder that users can access directly to build their own websites. 
+Additionally, we offer custom page creation service where we build pages according to client's specific designs and requirements for $50-100/page. when customer signs up, they get full access to the decodeUI.io builder with documentation to create pages themselves, OR they can hire us to build pages for them.
+I attached a static Image for prototype too. @src/page_schema/DecodeUI.png
+the website is built using our own decodeUI.io builder. It will be fully SEO friendly. users can either build pages themselves using our tool or provide their designs for us to implement.
+Use icons, micro-interactions
+Use hover animations, slide reveals for feature showcases, or scroll-based reveals to modernize UX.
+Emphasize Flexibility: Show how DecodeUI offers both DIY and done-for-you options (e.g., "Build it yourself or let us build it for you - Your choice, your way")
+make for SEO
+follow @src/routes/api/chat/SYSTEM_PROMPT.md to make pages and components in .hjson format
+use carbon icons only like: carbon:api-1
+use theme colors
+add theme switcher button to toggle dark and light theme
+"background" color is white so adding light shades like light_100 and light_200 will not work
+follow @src/routes/api/chat/SYSTEM_PROMPT.md when making pages and components
+make professional fully featured website DecodeUI.io
+make a plan first and confirm first.
+
+
+  HomePage
+
+  - Removed GSAP Data component and replaced with simple header state
+  - Added CSS animations for:
+    - Hero section with fadeInUp animations
+    - Feature cards with slideInUp and hover effects
+    - Process timeline with expandHeight and alternating slide animations
+    - Testimonial cards with directional slide animations
+    - Pricing section hover effects
+    - FAQ items with staggered fadeInUp
+    - CTA section with scaleIn animation
+
+  AboutPage
+
+  - Removed GSAP Data component
+  - Added CSS animations for:
+    - Hero title and subtitle fadeInUp
+    - Story section slideInLeft
+    - Stats card with scaleIn animation
+    - Values title fadeInUp
+    - Value cards with 3D rotation and stagger effects
+    - CTA section with elastic scale animation
+
+  FeaturesPage
+
+  - Removed GSAP Data component
+  - Added CSS animations for:
+    - Hero section with character animation effect (using fadeInUp)
+    - Category headers with scaleRotateIn for icons
+    - Feature cards with 3D perspective animations
+    - Hover effects with scale and rotation
+    - CTA section with scaleSlideIn
+
+  PricingPage
+
+  - Removed GSAP Data component
+  - Added CSS animations for:
+    - Hero section with fadeInScale
+    - Pricing cards with 3D rotation and stagger
+    - Pre-selected middle card (Pro plan) styling
+    - Comparison table with scaleIn and row animations
+    - FAQ items with alternating left/right slide animations
+
+  All animations now use pure CSS with:
+  - @keyframes for animation definitions
+  - animation property with timing functions and delays
+  - transition property for hover effects
+  - nth-child selectors for staggered animations
+  - Modern CSS features like transform, perspective, and 3D transforms
+
+
+
+Plan for Adding Scroll Animations
+
+1. Create a Reusable Scroll Animation System
+
+- Add a Data component at the page level to track scroll position and manage intersection observer
+- Use the Intersection Observer API to trigger animations when elements come into view
+- Create CSS animations that trigger based on visibility state
+
+2. Animation Types to Implement
+
+- Fade In Up: Elements fade in while moving up (for text content, cards)
+- Fade In Left/Right: Elements slide in from sides (for alternating content)
+- Scale Up: Elements scale from 0.8 to 1 (for feature cards, buttons)
+- Stagger Animation: Sequential animations for lists (testimonials, features)
+- Parallax: Slower scroll speed for background elements
+
+3. Implementation Strategy
+
+- Add a scroll observer Data component to each page
+- Modify existing components to include data-animate attributes
+- Use CSS classes that activate when elements are in view
+- Ensure animations are performance-optimized and respect user preferences
+
+4. Pages to Update
+
+- HomePage.hjson
+- AboutPage.hjson
+- ContactPage.hjson
+- FeaturesPage.hjson
+- PricingPage.hjson
+- DocsPage.hjson and related documentation pages
+
+5. Key Considerations
+
+- Animations should be subtle and not overwhelming
+- Respect prefers-reduced-motion media query
+- Ensure animations don't affect SEO or accessibility
+- Use CSS transforms for better performance
+- Add animation delays for staggered effects
+
+create a human-based research service for YouTube. This will be a platform where clients can request research on YouTube content, trends, channels, or topics, and human researchers will provide detailed analysis and insights.
+domain name will be atmaanalytics.com
+use uikit for css, include following js and css file in every page
+<script src="https://cdn.jsdelivr.net/npm/uikit/dist/js/uikit.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit/dist/css/uikit.min.css">
+created a comprehensive human-based YouTube research service platform. Here's what I've built:
+Key Features:
+1. Three User Roles
+
+Clients: Post research projects and hire researchers
+Researchers: Browse projects, submit proposals, conduct research
+Admins: Manage platform, users, and disputes
+
+2. Research Project Types
+
+Channel Analysis
+Competitor Research
+Trend Analysis
+Content Audit
+Audience Research
+Keyword Research
+Custom Projects
+
+3. Core Functionality
+For Clients:
+
+Post detailed research projects with budgets and deadlines
+Review researcher profiles and proposals
+Track project progress in real-time
+Approve milestones and release payments
+Rate and review completed work
+
+For Researchers:
+
+Browse available projects by category, budget, expertise
+Submit detailed proposals with cover letters
+Upload research deliverables (reports, spreadsheets, presentations)
+Track earnings and ratings
+Build portfolio with completed projects
+
+4. Advanced Features
+
+Real-time Updates: Socket.io for live project updates
+Payment System: Escrow-based payments with Stripe integration
+YouTube API Integration: Automated data collection tools
+Milestone System: Break projects into manageable phases
+Rating System: Build trust with reviews and ratings
+Research Data Models: Structured storage for various research types
+
+5. Research Tools
+
+Channel Analytics: Subscriber growth, engagement rates, upload frequency
+Video Analysis: Performance metrics, view velocity, revenue estimates
+Trend Detection: Keyword tracking, growth analysis
+Competitor Comparison: Side-by-side channel analysis
+Audience Insights: Demographics, interests, watch patterns
+
+6. Security & Quality
+
+JWT authentication
+Role-based access control
+Secure file uploads to AWS S3
+Payment protection with escrow
+Verification system for researchers
+
+How It Works:
+For Clients:
+
+Post a research project with requirements
+Review proposals from qualified researchers
+Select and hire a researcher
+Fund escrow for payment security
+Review deliverables and approve milestones
+Release payment upon satisfaction
+
+For Researchers:
+
+Create profile with expertise areas
+Browse and filter available projects
+Submit proposals with timeline and budget
+Conduct research using platform tools
+Submit deliverables through the platform
+Receive payment after client approval
+
+Business Model:
+
+Platform fee: 15-20% of project value
+Featured project listings
+Premium researcher profiles
+Advanced analytics tools (subscription)
+
+Add:
+Complete Stripe implementation
+Use File vertex for deliverables
+Automated Email notifications
+Admin Panel for User management and analytics
+Automated AI insights and suggestions
+
+Make different pages for clients, researchers, and admin. for each page set permissions.
+use server functions to make apis.
+Write documentation in a readme file. add graph schema documentation too
+
+I making a app named RealAssistant, where real humans will help human problems.
+users have to pay a small fee for each problem solve.
+users can recharge the balance. after user approve the solution deduct the balance from his account.
+dont add auth pages, I have already auth pages ready
+write a mobile friendly admin panel, use mock data only
+prefix each component with RealAssistant
+use carbon icons only like: carbon:api-1
+
+
+---------------------
+
+args.executeNamedServerFunction can return error like {
+"error": "Failed to execute function 'saveChannel': Identifier 'uploadsPlaylistId' has already been declared"
+}
+
+on success return following structure: {
+"result": {
+"success": true,
+"data": {
+"playlists": [],
+"totalCount": 0,
+"userId": "4:3909544a-3e2f-4bcf-812d-c1fcb798e624:0"
+},
+"message": "Found 0 playlists"
+},
+"graph": {
+"edges": {},
+"vertexes": {}
+}
+
+1. when channel is added not close when click outside.
+
+2.
+3. when visit home page it should redirect to login page if not already logged in.
+4. Add a admin page to see all feedbacks for all users.
+5. Show a big loader or inform it will take some minutes when saving channel.
+6. show username in sidebar.
+7. settings page: fix setting color for red zone.
+8. make linkedin, twitter, youtube etc post.
+9. deploy it.
+10. In mobile open in youtube page (add setting)
+
+CyberPanel Successfully Installed
+                Visit: https://mail.decodeui.io:8090
+                Panel username: admin
+                Panel password: iLejYcAEO0M0rQc3
+visit: https://mail.decodeui.io:7080
+admin: Kapil7878%

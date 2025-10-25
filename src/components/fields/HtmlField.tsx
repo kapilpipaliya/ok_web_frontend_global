@@ -214,9 +214,30 @@ export function HtmlField(
   const asLowerCase = createMemo(() => local.as?.toLowerCase());
 
   const DataField = () => {
+    // Check if local.data is an async function
+    const isAsyncDataFunction = (() => {
+      return typeof local.data === "function" && local.data.constructor.name === "AsyncFunction";
+    });
+
     // DataField logic - Fetch data if expression is provided and no static data
     const selectionOptionsData = createAsync<ServerResult>(
       async () => {
+        // If local.data is an async function, call it and wrap result
+        if (isAsyncDataFunction()) {
+          try {
+            const result = await (local.data as () => Promise<unknown[]>)();
+            return {
+              success: true,
+              result: result,
+            } as ServerResult;
+          } catch (error) {
+            return {
+              success: false,
+              error: error instanceof Error ? error.message : String(error),
+            } as ServerResult;
+          }
+        }
+
         if ((!local.expression && !local.serverFunction) || local.data) {
           // Return empty result when no fetch is needed
           return {
@@ -256,8 +277,8 @@ export function HtmlField(
     const DataFieldInternal = () => {
       // Process the data based on props and fetched results
       const processedData = createMemo(() => {
-        // If static data is provided, use it directly
-        if (local.data) {
+        // If static data is provided (not async function), use it directly
+        if (local.data && !isAsyncDataFunction()) {
           return {
             options:
               typeof local.data === "function" ? local.data() : local.data,
@@ -265,8 +286,8 @@ export function HtmlField(
           };
         }
 
-        // If no expression or server function, return empty
-        if (!local.expression && !local.serverFunction) {
+        // If no expression, server function, or async data, return empty
+        if (!local.expression && !local.serverFunction && !isAsyncDataFunction()) {
           return { options: [], error: null };
         }
 
@@ -286,8 +307,8 @@ export function HtmlField(
             });
           }
 
-          // For server function, use the result directly
-          if (local.serverFunction && fetchedData.result !== undefined) {
+          // For async data function or server function, use the result directly
+          if ((isAsyncDataFunction() || local.serverFunction) && fetchedData.result !== undefined) {
             return { options: fetchedData.result, error: null };
           }
 

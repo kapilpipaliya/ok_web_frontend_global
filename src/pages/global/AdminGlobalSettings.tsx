@@ -3,8 +3,10 @@ import { ActivityLog } from "~/pages/global/activity/ActivityLog";
 import { EmailAudit } from "~/pages/global/email/EmailAudit";
 import { EmailSettings } from "~/pages/global/email/EmailSettings";
 import { GeneralSettings } from "~/pages/global/general/GeneralSettings";
+import { OAuthSettings } from "~/pages/global/oauth/OAuthSettings";
 import { PermissionsSettings } from "~/pages/global/permission/PermissionsSettings";
 import { RoleSettings } from "~/pages/global/role/RoleSettings";
+import { StripeSettings } from "~/pages/global/stripe/StripeSettings";
 import { SupportTickets } from "~/pages/global/support/SupportTickets";
 import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
@@ -31,6 +33,20 @@ export default function AdminGlobalSettings() {
       icon: "ph:envelope",
       id: "email",
       label: "Email Settings",
+    },
+    {
+      component: OAuthSettings,
+      group: "Authentication",
+      icon: "ph:key",
+      id: "oauth",
+      label: "OAuth Settings",
+    },
+    {
+      component: StripeSettings,
+      group: "Payments",
+      icon: "ph:credit-card",
+      id: "stripe",
+      label: "Stripe Settings",
     },
     {
       component: ThemeSettings,
