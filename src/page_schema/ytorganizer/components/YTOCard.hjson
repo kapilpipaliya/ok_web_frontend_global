@@ -170,17 +170,17 @@ return `._id {
 
 ._id[data-color="error"] {
   background: ${args.theme.var.color.error_light_100};
-  color: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_light_100_text};
 }
 
 ._id[data-color="success"] {
   background: ${args.theme.var.color.success_light_100};
-  color: ${args.theme.var.color.success};
+  color: ${args.theme.var.color.success_light_100_text};
 }
 
 ._id[data-color="info"] {
   background: ${args.theme.var.color.info_light_100};
-  color: ${args.theme.var.color.info};
+  color: ${args.theme.var.color.info_light_100_text};
 }`;
 '''
       }
