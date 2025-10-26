@@ -51,6 +51,7 @@ const [scrollElement, setScrollElement] = args.createSignal(null);
 
 // State for detail view
 const [detailData, setDetailData] = args.createSignal(null);
+const [detailSearchTerm, setDetailSearchTerm] = args.createSignal("");
 
 // State for search view
 const [searchResults, setSearchResults] = args.createSignal(null);
@@ -84,6 +85,37 @@ const detailItems = args.createMemo(() => {
 
   // For playlists, return videos
   return data.videos || [];
+});
+
+// Filtered detail items based on search term
+const filteredDetailItems = args.createMemo(() => {
+  const term = detailSearchTerm().toLowerCase();
+  if (!term) return detailItems();
+
+  return detailItems().filter(item => {
+    // For playlists (in channel detail view)
+    if (item.playlist) {
+      const playlist = item.playlist;
+      const playlistSettings = item.playlistSettings;
+      const title = playlist?.P?.title?.toLowerCase() || "";
+      const description = playlist?.P?.description?.toLowerCase() || "";
+      const customName = playlistSettings?.P?.customName?.toLowerCase() || "";
+      return title.includes(term) || description.includes(term) || customName.includes(term);
+    }
+
+    // For videos (in playlist detail view)
+    if (item.video) {
+      const video = item.video;
+      const videoSettings = item.videoSettings;
+      const title = video?.P?.title?.toLowerCase() || "";
+      const description = video?.P?.description?.toLowerCase() || "";
+      const channelTitle = video?.P?.channelTitle?.toLowerCase() || "";
+      const notes = videoSettings?.P?.notes?.toLowerCase() || "";
+      return title.includes(term) || description.includes(term) || channelTitle.includes(term) || notes.includes(term);
+    }
+
+    return false;
+  });
 });
 
 // Virtualization state for search results
@@ -160,7 +192,7 @@ const getDetailItemHeight = () => {
 // Calculate visible items for detail view
 const getDetailVisibleRange = () => {
   const el = detailScrollElement();
-  const videos = detailItems();
+  const videos = filteredDetailItems();
   const scroll = detailScrollTop();
   const itemHeight = getDetailItemHeight();
 
@@ -196,7 +228,7 @@ const getDetailVirtualItems = () => {
 };
 
 // Total height of all detail videos
-const getDetailTotalSize = () => detailItems().length * getDetailItemHeight();
+const getDetailTotalSize = () => filteredDetailItems().length * getDetailItemHeight();
 
 // Handle scroll for detail view
 const handleDetailScroll = (e) => {
@@ -1352,7 +1384,9 @@ return {
   isFavouritesView,
   isListView,
   detailData,
-  detailItems,
+  filteredDetailItems,
+  detailSearchTerm,
+  setDetailSearchTerm,
   getDetailVirtualItems,
   getDetailTotalSize,
   setDetailScrollElement,
@@ -1667,8 +1701,75 @@ return `._id {
   font-size: 2rem;
   font-weight: 700;
   color: ${args.theme.var.color.text};
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
 }`;
+'''
+      }
+    },
+    {
+      id: "detail_description",
+      L: "Attr",
+      P: {
+        displayOrder: 2.5,
+        componentName: "Html",
+        props: '''
+const contentType = args.searchParams?.type || "channels";
+const count = args.fns.filteredDetailItems().length;
+const description = contentType === "playlists"
+  ? `${count} video${count !== 1 ? 's' : ''}`
+  : `${count} playlist${count !== 1 ? 's' : ''}`;
+
+return {
+  as: "p",
+  text: description
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "detail_search_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}`;
+'''
+      }
+    },
+    {
+      id: "detail_search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOTextInput",
+        props: '''
+const contentType = args.searchParams?.type || "channels";
+const placeholder = contentType === "playlists"
+  ? "Search videos..."
+  : "Search playlists...";
+
+return {
+  placeholder,
+  leftIcon: "mdi:magnify",
+  value: args.fns.detailSearchTerm(),
+  onInput: (e) => args.fns.setDetailSearchTerm(e.target.value)
+};
 '''
       }
     },
@@ -1676,7 +1777,7 @@ return `._id {
       id: "detail_actions_wrapper",
       L: "Attr",
       P: {
-        displayOrder: 3,
+        displayOrder: 4,
         componentName: "Html",
         props: '''
 return {
@@ -2138,7 +2239,7 @@ return `._id {
         props: '''
 return {
   as: "div",
-  hide: args.fns.loading() || args.fns.detailItems().length > 0
+  hide: args.fns.loading() || args.fns.filteredDetailItems().length > 0
 };
 ''',
         css: '''
@@ -2210,7 +2311,7 @@ return `._id {
         props: '''
 return {
   as: "div",
-  hide: args.fns.loading() || args.fns.detailItems().length === 0
+  hide: args.fns.loading() || args.fns.filteredDetailItems().length === 0
 };
 ''',
         css: '''
@@ -2294,7 +2395,7 @@ return {
         props: '''
 const contentType = args.searchParams?.type || "channels";
 const videoItem = args.contextData.videoItem;
-const itemData = args.fns.detailItems()[videoItem.index];
+const itemData = args.fns.filteredDetailItems()[videoItem.index];
 
 // For channels view, itemData is a playlist object
 // For playlists view, itemData is a video object
@@ -3092,6 +3193,9 @@ return {
     { id: "e7c", T: "Attr", S: "page_root_container", E: "detail_header_section" },
     { id: "e7d", T: "Attr", S: "detail_header_section", E: "detail_back_button" },
     { id: "e7e", T: "Attr", S: "detail_header_section", E: "detail_title" },
+    { id: "e7e0", T: "Attr", S: "detail_header_section", E: "detail_description" },
+    { id: "e7e1", T: "Attr", S: "detail_header_section", E: "detail_search_container" },
+    { id: "e7e2", T: "Attr", S: "detail_search_container", E: "detail_search_input" },
     { id: "e7f", T: "Attr", S: "detail_header_section", E: "detail_actions_wrapper" },
     { id: "e7g", T: "Attr", S: "detail_actions_wrapper", E: "detail_sync_button" },
     { id: "e7h", T: "Attr", S: "detail_actions_wrapper", E: "detail_add_videos_button" },

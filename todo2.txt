@@ -304,3 +304,11 @@ CyberPanel Successfully Installed
                 Panel password: iLejYcAEO0M0rQc3
 visit: https://mail.decodeui.io:7080
 admin: Kapil7878%
+
+
+smtp.gmail.com
+25
+support@ysaar.com
+app pass
+fsda fmri hjfi fyrq
+secure:true

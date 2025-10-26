@@ -428,81 +428,185 @@ export function EmailSettings() {
                   }),
                 }),
               },
+            ],
+            css: `return \`._id {
+  margin-top: 24px;
+  display: flex;
+  gap: 1rem;
+}\`;`,
+            componentName: "Html",
+          },
+        ],
+        css: SETTINGS_CONSTANTS.FORM_CSS,
+        componentName: "Html",
+      },
+    ],
+    componentName: "Html",
+    props: (options: FunctionArgumentType) => ({
+      onUnmount: () => {
+        options.revertTransactionUpToIndex(options.txnId, -1);
+      },
+    }),
+  };
+
+  // Test email form
+  const testEmailForm = {
+    as: "div",
+    attributes: [
+      {
+        as: "h3",
+        css: `return \`._id {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: \${args.theme.var.color.text};
+  margin-bottom: 0.5rem;
+  margin-top: 2rem;
+}\`;`,
+        componentName: "Html",
+        text: "Test Email",
+      },
+      {
+        as: "p",
+        css: `return \`._id {
+  font-size: 0.875rem;
+  color: \${args.theme.var.color.text_dark_300};
+  margin-bottom: 1.5rem;
+}\`;`,
+        componentName: "Html",
+        text: "Send a test email to verify your email configuration is working correctly.",
+      },
+      {
+        as: "div",
+        attributes: [
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "To Email",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "SystemTextInput",
+                key: "toEmail",
+                placeholder: "recipient@example.com",
+                type: "email",
+                validate: (value: string) => {
+                  if (!value || value.trim() === "") {
+                    return "Email address is required";
+                  }
+                  return validateEmail(value);
+                },
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+          },
+          getErrorSchema(
+            "toEmail",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+          ),
+          {
+            as: "div",
+            attributes: [
+              {
+                as: "span",
+                css: SETTINGS_CONSTANTS.LABEL_CSS,
+                componentName: "Html",
+                text: "Email Content",
+              },
+              {
+                css: PROPERTIES.Css.TextFieldCss,
+                componentName: "SystemTextInput",
+                key: "emailContent",
+                placeholder: "Enter test email content",
+                props: () => ({
+                  as: "textarea",
+                  rows: 4,
+                }),
+                validate: (value: string) => {
+                  if (!value || value.trim() === "") {
+                    return "Email content is required";
+                  }
+                  return undefined;
+                },
+              },
+            ],
+            css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+            componentName: "Html",
+          },
+          getErrorSchema(
+            "emailContent",
+            `return \`._id {color: \${args.theme.var.color.error}; margin-top: -20px;}\`;`,
+          ),
+          {
+            as: "div",
+            attributes: [
               {
                 attributes: [
                   {
                     as: "button",
-                    css: SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
+                    css: SETTINGS_CONSTANTS.SAVE_BUTTON_CSS,
                     componentName: "Html",
                     props: (options: EmailSettingsFunctionArgumentType) => ({
-                      disabled: options.contextData.testState[0]?.isLoading,
+                      disabled: options.contextData.testEmailState[0]?.isLoading,
                       onClick: async () => {
-                        // Validate form data first
-                        const settings = options.data;
-                        const errors = validateFormData(
-                          settings.P as EmailSettingsData,
-                        );
-
-                        if (errors) {
-                          // Show validation errors
-                          for (const fieldKey in errors) {
-                            options.setError(errors[fieldKey], fieldKey);
-                          }
-                          showErrorToast(
-                            "Please fix the validation errors before testing",
-                          );
-                          return;
-                        }
-
-                        options.clearAllErrors();
-
-                        // Set loading state
-                        options.contextData.testState[1]("isLoading", true);
-
                         try {
-                          // First save the settings using handleApiRequest
-                          const saveResult = await handleApiRequest(
-                            API.settings.email.updateUrl,
-                            settings.P,
-                            "Settings saved before testing",
-                            () => {}, // We're managing loading state manually here
-                            () => {}, // Don't show success toast for save before test
-                            showErrorToast,
-                          );
+                          options.contextData.testEmailState[1]("isLoading", true);
+                          const testData = options.data;
 
-                          if (!saveResult.success) {
-                            options.contextData.testState[1](
-                              "isLoading",
-                              false,
-                            );
+                          // Validate test email data
+                          const toEmailError = testData.P.toEmail
+                            ? validateEmail(testData.P.toEmail)
+                            : "Email address is required";
+                          const contentError =
+                            !testData.P.emailContent ||
+                            testData.P.emailContent.trim() === ""
+                              ? "Email content is required"
+                              : undefined;
+
+                          if (toEmailError) {
+                            options.setError(toEmailError, "toEmail");
+                            showErrorToast("Please fix the validation errors");
                             return;
                           }
 
-                          // Then test the connection using handleApiRequest
+                          if (contentError) {
+                            options.setError(contentError, "emailContent");
+                            showErrorToast("Please fix the validation errors");
+                            return;
+                          }
+
+                          options.clearAllErrors();
+
+                          // Send test email
                           await handleApiRequest(
                             API.settings.email.testUrl,
-                            settings.P,
+                            {
+                              toEmail: testData.P.toEmail,
+                              content: testData.P.emailContent,
+                            },
                             "Test email sent successfully",
-                            () => {}, // We're managing loading state manually here
+                            () => {},
                             showSuccessToast,
                             showErrorToast,
                           );
                         } catch (error) {
                           showErrorToast((error as Error).message);
                         } finally {
-                          options.contextData.testState[1]("isLoading", false);
+                          options.contextData.testEmailState[1]("isLoading", false);
                         }
                       },
-                      text: options.contextData.testState[0]?.isLoading
-                        ? "Testing..."
-                        : "Test Connection",
-                      title:
-                        "Please save changes and click Test Connection to send test email to current logged in user",
+                      text: options.contextData.testEmailState[0]?.isLoading
+                        ? "Sending..."
+                        : "Send Test Email",
                     }),
                   },
                 ],
                 componentName: "Html",
-                contextName: "testState",
+                contextName: "testEmailState",
 
                 props: () => ({
                   data: createStore({
@@ -530,9 +634,14 @@ export function EmailSettings() {
   };
 
   return (
-    <SchemaRenderer
-      form={{ attributes: [form], key: "EmailSettings" }}
-      getFormData={loadSettingsData}
-    />
+    <div>
+      <SchemaRenderer
+        form={{ attributes: [form], key: "EmailSettings" }}
+        getFormData={loadSettingsData}
+      />
+      <SchemaRenderer
+        form={{ attributes: [testEmailForm], key: "TestEmail" }}
+      />
+    </div>
   );
 }

@@ -9,7 +9,6 @@ follow this steps:
 Unlock High Inbox Delivery 💯 Build SMTP Server with CyberPanel & Send Bulk Emails | CyberPanel Guide
 https://www.youtube.com/watch?v=Q37-qeYdiYY
 Notes while setup first time:
-we should use ubuntu 22, as 24 is not yet supported.
 1. on reverse dns set mail.decodeui.io
 2. we need to setup spf and DKIM1 and DMARC1 records.
 on initial configuration on cyberpanel use: mail.decodeui.io (first we neet to setup *.decodeui.io in dns)

@@ -332,11 +332,11 @@ Server functions allow you to execute server-side code and return results to the
         body: '''
 // This function runs on the server
 // It has access to args object with:
-// - args.params: Request parameters
-// - args.session: Current session
+// - args.contextData: Request parameters
+// - args.session: Current neo4j Database session
 // - args.graph: Graph interface
 
-const userId = args.params.userId;
+const userId = args.contextData.userId;
 if (!userId) {
   throw new Error("User ID is required");
 }
@@ -369,7 +369,7 @@ return {
 
 **Available in Function Body:**
 The function body has access to an `args` object containing:
-- `args.params`: Request parameters sent from the client
+- `args.contextData`: Request parameters sent from the client
 - `args.session`: Current user session
 - `args.graph`: Graph interface for database operations
 - `args.user`: Current authenticated user (if available)
