@@ -5,7 +5,17 @@
       L: "Page",
       P: {
         key: "ChaitanyaAlertContactPage",
-        url: "/contact"
+        url: "/contact",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
       }
     },
     {

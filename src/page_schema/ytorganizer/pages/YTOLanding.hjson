@@ -206,6 +206,7 @@ return {
   as: "a",
   text: "Pricing",
   href: "#pricing",
+  hide: true,
   onClick: (e) => {
     e.preventDefault();
     document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
@@ -906,7 +907,8 @@ return `._id {
         props: '''
 return {
   as: "section",
-  id: "pricing"
+  id: "pricing",
+  hide: true
 };
 ''',
         css: '''

@@ -5,7 +5,17 @@
       L: "Page",
       P: {
         key: "ChaitanyaAlertAboutPage",
-        url: "/about"
+        url: "/about",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
       }
     },
     {
