@@ -6,6 +6,7 @@
       P: {
         key: "YTOHome",
         url: "/yto",
+        siginRequired: true,
         fns: '''
 return {
   enabled: true
@@ -386,7 +387,12 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "a",
+  href: "/yto/content?type=channels",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate("/yto/content?type=channels");
+  }
 };
 ''',
         css: '''
@@ -399,6 +405,9 @@ return `._id {
   align-items: center;
   gap: 1rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 
   &:hover {
     transform: translateY(-2px);
@@ -423,8 +432,8 @@ return {
 return `._id {
   width: 48px;
   height: 48px;
-  background: ${args.theme.var.color.error_light_100};
-  color: ${args.theme.var.color.error};
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
@@ -522,7 +531,12 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div"
+  as: "a",
+  href: "/yto/content?type=playlists",
+  onClick: (e) => {
+    e.preventDefault();
+    args.navigate("/yto/content?type=playlists");
+  }
 };
 ''',
         css: '''
@@ -535,6 +549,9 @@ return `._id {
   align-items: center;
   gap: 1rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 
   &:hover {
     transform: translateY(-2px);
@@ -559,8 +576,8 @@ return {
 return `._id {
   width: 48px;
   height: 48px;
-  background: ${args.theme.var.color.success_light_100};
-  color: ${args.theme.var.color.success};
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
@@ -649,295 +666,6 @@ return `._id {
 }`;
 '''
       }
-    },
-    {
-      id: "quick_actions_section",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "section"
-};
-'''
-      }
-    },
-    {
-      id: "quick_actions_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h2",
-  text: "Quick Actions"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 1rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "quick_actions_grid",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "action_channels",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  onClick: () => args.navigate("/yto/content?type=channels")
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.error};
-  color: ${args.theme.var.color.error_text};
-  border: none;
-  border-radius: 0.75rem;
-  padding: 1.5rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  min-height: 120px;
-
-  &:hover {
-    background: ${args.theme.var.color.error_dark_200};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "action_channels_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "mdi:youtube",
-  width: 32,
-  height: 32
-};
-'''
-      }
-    },
-    {
-      id: "action_channels_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "Channels"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-align: center;
-}`;
-'''
-      }
-    },
-    {
-      id: "action_playlists",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  onClick: () => args.navigate("/yto/content?type=playlists")
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.success};
-  color: ${args.theme.var.color.success_text};
-  border: none;
-  border-radius: 0.75rem;
-  padding: 1.5rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  min-height: 120px;
-
-  &:hover {
-    background: ${args.theme.var.color.success_dark_200};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "action_playlists_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "mdi:playlist-play",
-  width: 32,
-  height: 32
-};
-'''
-      }
-    },
-    {
-      id: "action_playlists_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "Playlists"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-align: center;
-}`;
-'''
-      }
-    },
-    {
-      id: "action_settings",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  onClick: () => args.navigate("/yto/settings")
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_dark_100};
-  color: ${args.theme.var.color.text};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 1.5rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  min-height: 120px;
-
-  &:hover {
-    background: ${args.theme.var.color.background_dark_200};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "action_settings_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "mdi:cog",
-  width: 32,
-  height: 32
-};
-'''
-      }
-    },
-    {
-      id: "action_settings_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "span",
-  text: "Settings"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-align: center;
-}`;
-'''
-      }
     }
   ],
   edges: [
@@ -967,18 +695,6 @@ return `._id {
     { id: "e24", T: "Attr", S: "stat_playlists_icon_wrapper", E: "stat_playlists_icon" },
     { id: "e25", T: "Attr", S: "stat_playlists", E: "stat_playlists_content" },
     { id: "e26", T: "Attr", S: "stat_playlists_content", E: "stat_playlists_label" },
-    { id: "e27", T: "Attr", S: "stat_playlists_content", E: "stat_playlists_value" },
-    { id: "e28", T: "Attr", S: "main_content", E: "quick_actions_section" },
-    { id: "e29", T: "Attr", S: "quick_actions_section", E: "quick_actions_title" },
-    { id: "e30", T: "Attr", S: "quick_actions_section", E: "quick_actions_grid" },
-    { id: "e31", T: "Attr", S: "quick_actions_grid", E: "action_channels" },
-    { id: "e32", T: "Attr", S: "action_channels", E: "action_channels_icon" },
-    { id: "e33", T: "Attr", S: "action_channels", E: "action_channels_text" },
-    { id: "e34", T: "Attr", S: "quick_actions_grid", E: "action_playlists" },
-    { id: "e35", T: "Attr", S: "action_playlists", E: "action_playlists_icon" },
-    { id: "e36", T: "Attr", S: "action_playlists", E: "action_playlists_text" },
-    { id: "e37", T: "Attr", S: "quick_actions_grid", E: "action_settings" },
-    { id: "e38", T: "Attr", S: "action_settings", E: "action_settings_icon" },
-    { id: "e39", T: "Attr", S: "action_settings", E: "action_settings_text" }
+    { id: "e27", T: "Attr", S: "stat_playlists_content", E: "stat_playlists_value" }
   ]
 }

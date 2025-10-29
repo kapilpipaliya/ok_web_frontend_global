@@ -3,6 +3,7 @@ import type { Session } from "neo4j-driver";
 
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
+import { getEmailDomain } from "~/lib/email/getEmailDomain";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -20,7 +21,7 @@ export async function sendInvitationEmail(
 
   const inviteToken = await generateSecureToken(userData, dbSession);
   const protocol = request.url.startsWith("https") ? "https" : "http";
-  const host = request.headers.get("host") || "";
+  const host = await getEmailDomain(request, subDomain);
   const url = `${protocol}://${host}/api/auth/confirmInvitation?token=${inviteToken}`;
 
   sendNotificationEmail(

@@ -66,6 +66,32 @@ return {
 };
 ```
 
+#### Current User Access
+- `args.user` - Get the current authenticated user as a Vertex object (or `undefined` if not logged in)
+- Access user properties via the `P` field following vertex format: `args.user?.P?.propertyName`
+
+Example usage in props:
+```javascript
+return {
+  text: `Welcome, ${args.user?.P?.username || 'Guest'}`,
+  onClick: () => {
+    if (args.user) {
+      console.log('User email:', args.user.P.email);
+      console.log('User role:', args.user.P.role);
+    } else {
+      args.showWarningToast('Please sign in to continue');
+    }
+  },
+  hide: !args.user // Hide if not logged in
+};
+```
+
+The user vertex contains all user properties including:
+- `args.user?.P?.username` - User's username
+- `args.user?.P?.email` - User's email
+- `args.user?.P?.uuid` - User's unique identifier
+- `args.user?.id` - Vertex ID in the graph
+
 ```typescript
 export interface FunctionArgumentBaseType {
   clearAllErrors: () => void;
@@ -148,6 +174,8 @@ export interface FunctionArgumentBaseType {
   // User settings
   userSetting: Record<string, unknown> | undefined;
   saveUserSetting: (settings: Record<string, unknown>) => void;
+  // Current authenticated user
+  user: Vertex | undefined;
   // Server function execution
   executeServerFunction: (request: {functionBody: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
   executeNamedServerFunction: (request: {functionName: string; contextData?: any}, context?: Record<string, unknown>) => Promise<ServerResult>;
@@ -229,7 +257,7 @@ The `serverFunction` property allows executing server-side code with database ac
     const result = await args.session.run(
       'MATCH (u:User) WHERE u.active = true RETURN u.name as name, u.email as email LIMIT 10'
     );
-    
+
     // Process and return the data
     return result.records.map(record => ({
       name: record.get('name'),
@@ -239,6 +267,81 @@ The `serverFunction` property allows executing server-side code with database ac
   ```
 - The returned data is available to child components via `args.contextData.contextName`
 - Server functions are executed asynchronously and results are cached
+
+### Background Worker Functions
+Worker functions are special Function vertices that run continuously in the background. They are useful for processing queues, scheduled tasks, and long-running operations.
+
+**Creating Worker Functions:**
+Worker functions must have keys starting with `'process'` or `'background'`:
+```javascript
+{
+  id: "worker1",
+  L: "Function",
+  P: {
+    key: "processEmailQueue",  // Must start with 'process' or 'background'
+    description: "Processes pending emails from queue",
+    body: `
+      // Check if this is a start action
+      if (args.contextData.action === 'start') {
+        console.log('Starting email queue worker');
+
+        // Your worker initialization code here
+        // Example: Set up interval, queue listeners, etc.
+
+        // Return a stop method for graceful shutdown
+        return {
+          stop: async () => {
+            console.log('Stopping email queue worker');
+            // Cleanup code here
+          }
+        };
+      }
+    `
+  }
+}
+```
+
+**Available in Worker Body:**
+- `args.session` - Neo4j database session
+- `args.contextData` - Contains `{action: 'start'}` when initializing
+- `args.bullmq` - Access to BullMQ queues (channelQueue, playlistQueue)
+- `args.graph` - Graph nodes and relationships
+- `args.executeNamedServerFunction` - Call other server functions
+- `args.getUserFromSession` - Get current user
+- `args.convertNodeToJson` - Convert Neo4j nodes to JSON
+
+**Worker Lifecycle:**
+1. Worker functions are discovered by their key prefix
+2. They can be started/stopped via the Worker Management UI at `/admin/GlobalSettings` > Workers
+3. The `stop()` method is called when shutting down for cleanup
+4. Workers persist across application restarts if auto-start is enabled
+
+**Example Worker:**
+```javascript
+body: `
+  if (args.contextData.action === 'start') {
+    // Set up a recurring task
+    const intervalId = setInterval(async () => {
+      const result = await args.session.run(
+        'MATCH (t:Task {status: "pending"}) RETURN t LIMIT 10'
+      );
+
+      for (const record of result.records) {
+        // Process each task
+        console.log('Processing task:', record.get('t').properties.id);
+      }
+    }, 60000); // Run every minute
+
+    // Return cleanup function
+    return {
+      stop: async () => {
+        clearInterval(intervalId);
+        console.log('Worker stopped');
+      }
+    };
+  }
+`
+```
 
 #### 'Slot' - Component slots
 - Optional properties:
@@ -297,6 +400,25 @@ To add a URL for a page, add the `url` key in the Page properties. For example:
   }
 }
 ```
+
+#### Page Authentication
+To require users to be authenticated before accessing a page, set the `signinRequired` property to `true`:
+```JSON
+{
+  id: "page1",
+  L: "Page",
+  P: {
+    key: "UserDashboard",
+    url: "/dashboard",
+    signinRequired: true  // Requires authentication
+  }
+}
+```
+
+When `signinRequired` is enabled:
+- Unauthenticated users are automatically redirected to the sign-in page
+- After successful login, users are redirected back to the intended page
+- The authentication check happens before page rendering
 
 #### Page Permission System
 Pages support role-based access control through a graph-based permission model:

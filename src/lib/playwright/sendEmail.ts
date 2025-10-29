@@ -73,7 +73,7 @@ export async function sendEmail(options: EmailOptions) {
                 },
               ]
             : undefined,
-        from: dbSettings?.P.from || process.env.SMTP_FROM,
+        from: dbSettings?.P.fromEmail || process.env.SMTP_FROM,
         html: processedContent,
         subject,
         to,

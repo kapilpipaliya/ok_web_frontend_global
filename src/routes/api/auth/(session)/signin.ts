@@ -8,6 +8,7 @@ import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { verifyPassword } from "~/lib/auth/password";
+import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGeneralSettings";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -139,20 +140,4 @@ async function comparePassword(user: Vertex, password: string) {
   }
 
   return user;
-}
-
-async function getGeneralSettings(dbSession: Session) {
-  try {
-    const result = await dbSession.run(
-      `MATCH (s:GlobalSetting) RETURN s as settings LIMIT 1`
-    );
-
-    const node = result.records[0]?.get("settings");
-    return node ? convertNodeToJson(node) : null;
-  } catch (error) {
-    // If there's an error fetching settings, just return null
-    // This ensures signin still works even if settings aren't configured
-    console.warn("Failed to fetch general settings during signin:", error);
-    return null;
-  }
 }

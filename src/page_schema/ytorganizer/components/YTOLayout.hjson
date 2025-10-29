@@ -708,7 +708,7 @@ return `._id {
 
   &:hover {
     background: ${isDanger ? args.theme.var.color.error_light_100 : args.theme.var.color.background_light_200};
-    color: ${isDanger ? args.theme.var.color.error_dark_200 : args.theme.var.color.primary};
+    color: ${isDanger ? args.theme.var.color.error_light_100_text : args.theme.var.color.primary};
   }
   
   ${isButton ? `

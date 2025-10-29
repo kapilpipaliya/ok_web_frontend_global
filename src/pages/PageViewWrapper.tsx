@@ -22,6 +22,7 @@ import { useZIndex } from "~/components/fields/ZIndex";
 import { getOwner, createSignal } from "solid-js";
 import { usePageRenderContext } from "~/features/page_attr_render/context/PageRenderContext";
 import { getLastItem } from "~/lib/data_structure/array/getLastItem";
+import { AuthRequired } from "~/components/auth/AuthRequired";
 
 import type {
   PageViewWrapperProps,
@@ -269,17 +270,36 @@ export function PageViewWrapper(props: Readonly<PageViewWrapperProps>) {
   };
 
   const Content = () => (
-    <PageView
-      context={props.context}
-      data={dataVertex()}
-      hasFullPermission={permissions.full()}
-      hasEditPermission={permissions.edit()}
-      hasCreatePermission={permissions.create()}
-      hasViewPermission={permissions.view()}
-      id={id()}
-      isNoPermissionCheck={isNoPermissionCheck()}
-      metaVertex={metaVertex()!}
-    />
+    <Switch>
+      <Match when={metaVertex()?.P?.signinRequired}>
+        <AuthRequired>
+          <PageView
+            context={props.context}
+            data={dataVertex()}
+            hasFullPermission={permissions.full()}
+            hasEditPermission={permissions.edit()}
+            hasCreatePermission={permissions.create()}
+            hasViewPermission={permissions.view()}
+            id={id()}
+            isNoPermissionCheck={isNoPermissionCheck()}
+            metaVertex={metaVertex()!}
+          />
+        </AuthRequired>
+      </Match>
+      <Match when={!metaVertex()?.P?.signinRequired}>
+        <PageView
+          context={props.context}
+          data={dataVertex()}
+          hasFullPermission={permissions.full()}
+          hasEditPermission={permissions.edit()}
+          hasCreatePermission={permissions.create()}
+          hasViewPermission={permissions.view()}
+          id={id()}
+          isNoPermissionCheck={isNoPermissionCheck()}
+          metaVertex={metaVertex()!}
+        />
+      </Match>
+    </Switch>
   );
 
   const ContentSSR = () => {

@@ -6,6 +6,11 @@ export default defineConfig({
   // server: {
   //   preset: "deno",
   // },
+  server: {
+    experimental: {
+      websocket: true,
+    },
+  },
   vite: {
     server: {
       //  If set to true, the server is allowed to respond to requests for any hosts.
@@ -48,4 +53,10 @@ export default defineConfig({
       // }),
     ],
   },
+}).addRouter({
+  name: "ws",
+  type: "http",
+  handler: "./src/ws.ts",
+  target: "server",
+  base: "/ws",
 });

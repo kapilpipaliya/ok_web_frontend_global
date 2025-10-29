@@ -19,6 +19,7 @@ const [isSubmitting, setIsSubmitting] = args.createSignal(false);
 const [isProcessing, setIsProcessing] = args.createSignal(false);
 const [url, setUrl] = args.createSignal("");
 const [customName, setCustomName] = args.createSignal("");
+const [formError, setFormError] = args.createSignal(null);
 
 // Initialize form data
 const initializeFormData = () => {
@@ -42,6 +43,7 @@ const initializeFormData = () => {
   }
   setIsSubmitting(false);
   setIsProcessing(false);
+  setFormError(null);
 };
 
 // Handle form submission
@@ -67,10 +69,12 @@ const handleSave = async () => {
 
   // Validate required fields for add mode
   if (!editMode && !urlValue) {
+    setFormError("Please enter a YouTube URL");
     args.showErrorToast("Please enter a YouTube URL");
     return;
   }
 
+  setFormError(null);
   setIsSubmitting(true);
 
   try {
@@ -114,7 +118,9 @@ const handleSave = async () => {
     }
 
     if (result?.error) {
-      args.showErrorToast(result.error);
+      const errorMsg = result.error;
+      setFormError(errorMsg);
+      args.showErrorToast(errorMsg);
     } else if (result?.result?.success) {
       const action = editMode ? "updated" : "added";
       const itemTypeName = actualType === "videos" ? "Video" : ((editMode ? actualType : contentType) === "playlists" ? "Playlist" : "Channel");
@@ -133,11 +139,15 @@ const handleSave = async () => {
 
       onClose();
     } else {
-      args.showErrorToast(result?.result?.error || `Failed to ${editMode ? "update" : "add"} item`);
+      const errorMsg = result?.result?.message || result?.result?.error || `Failed to ${editMode ? "update" : "add"} item`;
+      setFormError(errorMsg);
+      args.showErrorToast(errorMsg);
     }
   } catch (error) {
     console.error("Error saving:", error);
-    args.showErrorToast(`Failed to ${editMode ? "update" : "add"} item`);
+    const errorMsg = error?.message || `Failed to ${editMode ? "update" : "add"} item`;
+    setFormError(errorMsg);
+    args.showErrorToast(errorMsg);
   } finally {
     setIsSubmitting(false);
   }
@@ -150,6 +160,8 @@ return {
   setUrl,
   customName,
   setCustomName,
+  formError,
+  setFormError,
   handleSave,
   initializeFormData
 };
@@ -559,6 +571,171 @@ return `._id {
       }
     },
     {
+      id: "error_alert",
+      L: "Attr",
+      P: {
+        displayOrder: 0,
+        componentName: "Html",
+        props: '''
+const error = args.fns.formError();
+
+return {
+  as: "div",
+  hide: !error
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: ${args.theme.var.color.error_light_50};
+  border: 2px solid ${args.theme.var.color.error_light_200};
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:warning",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error};
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Error"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_message",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const error = args.fns.formError();
+
+return {
+  as: "p",
+  text: error || ""
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: ${args.theme.var.color.error_light_50_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_close",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.fns.setFormError(null),
+  "aria-label": "Dismiss error"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.error};
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.error_light_100};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
       id: "url_field",
       L: "Attr",
       P: {
@@ -856,6 +1033,13 @@ return {
     { id: "e7c", T: "Attr", S: "processing_message", E: "processing_title" },
     { id: "e7d", T: "Attr", S: "processing_message", E: "processing_text" },
     { id: "e8", T: "Attr", S: "modal_body", E: "form_element" },
+    { id: "e8a", T: "Attr", S: "form_element", E: "error_alert" },
+    { id: "e8b", T: "Attr", S: "error_alert", E: "error_alert_icon" },
+    { id: "e8c", T: "Attr", S: "error_alert", E: "error_alert_content" },
+    { id: "e8d", T: "Attr", S: "error_alert_content", E: "error_alert_title" },
+    { id: "e8e", T: "Attr", S: "error_alert_content", E: "error_alert_message" },
+    { id: "e8f", T: "Attr", S: "error_alert", E: "error_alert_close" },
+    { id: "e8g", T: "Attr", S: "error_alert_close", E: "error_alert_close_icon" },
     { id: "e9", T: "Attr", S: "form_element", E: "url_field" },
     { id: "e10", T: "Attr", S: "url_field", E: "url_label" },
     { id: "e11", T: "Attr", S: "url_field", E: "url_input" },

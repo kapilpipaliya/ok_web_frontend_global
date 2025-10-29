@@ -256,6 +256,10 @@ export function createFunctionArgumentBase(
     saveUserSetting: (settings: Record<string, unknown>) => {
       return saveUserSetting(settings, hooks.graph, hooks.setGraph);
     },
+    // Current user vertex getter
+    get user() {
+      return hooks.graph.vertexes.member;
+    },
     executeServerFunction,
     executeNamedServerFunction
   } as Omit<FunctionArgumentType, "parentValue" | "projections" | "value">;

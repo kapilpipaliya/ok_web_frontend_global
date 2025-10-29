@@ -3,6 +3,7 @@ import type { Session, Transaction } from "neo4j-driver";
 
 import { generateSecureToken } from "~/lib/auth/secureToken";
 import { encodeUserData } from "~/lib/auth/userDataEncoder";
+import { getEmailDomain } from "~/lib/email/getEmailDomain";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import type { Vertex } from "~/lib/graph/type/vertex";
@@ -22,7 +23,9 @@ export async function sendSignupEmailVerification(
   // Generate a secure token for email verification
   const token = await generateSecureToken(userData, dbSession);
   const protocol = request.url.startsWith("https") ? "https" : "http";
-  const host = request.headers.get("host") || "";
+
+  // Get the domain to use for the email link
+  const host = await getEmailDomain(request, subDomain);
   const url = `${protocol}://${host}/api/auth/verifyEmail?token=${token}`;
 
   // Send verification email

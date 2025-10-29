@@ -6,6 +6,7 @@ import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
 import { createActivityLog } from "~/cypher/mutate/activity/createActivityLog";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
 import { APIError, handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGeneralSettings";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
 
@@ -202,15 +203,8 @@ export async function GET({ request }: APIEvent) {
     await updateSession(user);
 
     // Get redirect URL from settings
-    const generalSettingsResult = await dbSession.run(
-      "MATCH (s:GlobalSetting) RETURN s LIMIT 1",
-    );
-
-    const configuredRedirectUrl =
-      generalSettingsResult.records.length > 0
-        ? convertNodeToJson(generalSettingsResult.records[0].get("s")).P
-            ?.redirectUrlAfterSignin
-        : null;
+    const generalSettings = await getGeneralSettings(dbSession);
+    const configuredRedirectUrl = generalSettings?.P?.redirectUrlAfterSignin;
 
     const redirectUrl = updateRedirectUrl(
       user,

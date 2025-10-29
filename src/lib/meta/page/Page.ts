@@ -146,6 +146,12 @@ export const Page: IFormMetaData = {
           type: "textarea",
           key: "description",
         }),
+        wrapWithTitle("Signin Required", false, {
+          componentName: "SystemTextInput",
+          css: [PROPERTIES.Css.CheckBoxCss],
+          type: "checkbox",
+          key: "signinRequired",
+        }),
         // {
         //   collection: "g:'Dashboard'",
         //   componentName: "MultiSelect",

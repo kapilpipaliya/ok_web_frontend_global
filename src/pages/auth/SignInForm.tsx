@@ -75,6 +75,14 @@ export function SignInForm() {
       showErrorToast(searchParams.error as string);
       setSearchParams({ error: null }, { replace: true });
     }
+    if (searchParams.message) {
+      const type = searchParams.type || "info";
+      if (type === "success") {
+        // Don't show toast for success messages as they'll be shown in the alert
+      } else if (type === "error") {
+        // Don't show toast for error messages as they'll be shown in the alert
+      }
+    }
   });
 
   // Validation function using our utility
@@ -128,6 +136,110 @@ export function SignInForm() {
   const form = {
     as: "div",
     attributes: [
+      // Alert message component
+      {
+        as: "div",
+        attributes: [
+          {
+            as: "icon",
+            componentName: "Html",
+            props: () => {
+              const type = searchParams.type || "info";
+              return {
+                height: 20,
+                icon:
+                  type === "success"
+                    ? "ph:check-circle"
+                    : type === "error"
+                      ? "ph:warning-circle"
+                      : "ph:info",
+                width: 20,
+              };
+            },
+          },
+          {
+            as: "span",
+            componentName: "Html",
+            props: () => ({
+              text: searchParams.message || "",
+            }),
+          },
+          {
+            as: "button",
+            componentName: "Html",
+            css: `return \`._id {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+._id:hover {
+  opacity: 1;
+}\`;`,
+            props: () => ({
+              onClick: () => {
+                setSearchParams(
+                  { message: null, type: null },
+                  { replace: true },
+                );
+              },
+            }),
+            attributes: [
+              {
+                as: "icon",
+                componentName: "Html",
+                props: () => ({
+                  height: 16,
+                  icon: "ph:x",
+                  width: 16,
+                }),
+              },
+            ],
+          },
+        ],
+        componentName: "Html",
+        css: `return \`._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  width: 100%;
+  background: \${
+    (args.searchParams?.type || "info") === "success"
+      ? args.theme.var.color.success_light_900
+      : (args.searchParams?.type || "info") === "error"
+        ? args.theme.var.color.error_light_900
+        : args.theme.var.color.info_light_900
+  };
+  color: \${
+    (args.searchParams?.type || "info") === "success"
+      ? args.theme.var.color.success_dark_300
+      : (args.searchParams?.type || "info") === "error"
+        ? args.theme.var.color.error_dark_300
+        : args.theme.var.color.info_dark_300
+  };
+  border: 1px solid \${
+    (args.searchParams?.type || "info") === "success"
+      ? args.theme.var.color.success_light_700
+      : (args.searchParams?.type || "info") === "error"
+        ? args.theme.var.color.error_light_700
+        : args.theme.var.color.info_light_700
+  };
+  margin-bottom: 1.5rem;
+}\`;`,
+        props: () => ({
+          hide: !searchParams.message,
+        }),
+      },
       // Use our utility for form header
       ...createFormHeader(
         "Sign in to DecodeUI",
@@ -270,9 +382,26 @@ export function SignInForm() {
                     }),
                     text: "Forgot Password?",
                   },
+                  {
+                    as: "a",
+                    css: `return \`._id {
+  color: \${args.theme.var.color.primary};
+  font-size: 14px;
+  cursor: pointer;
+}\`;`,
+                    componentName: "Html",
+                    props: () => ({
+                      onClick: () => {
+                        navigate(API.urls.user.resendVerification);
+                      },
+                    }),
+                    text: "Resend Verification",
+                  },
                 ],
                 css: `return \`._id {
-  text-align: right;;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
 }\`;`,
                 componentName: "Html",

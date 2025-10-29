@@ -52,9 +52,11 @@
         fns: '''
 const [videoUrlsInput, setVideoUrlsInput] = args.createSignal("");
 const [isAddingVideos, setIsAddingVideos] = args.createSignal(false);
+const [formError, setFormError] = args.createSignal(null);
 
 const closeModal = () => {
   setVideoUrlsInput("");
+  setFormError(null);
   const onClose = args.contextData.props?.onClose;
   onClose?.();
 };
@@ -63,16 +65,21 @@ const addVideosToPlaylist = async () => {
   const playlist = args.contextData.props?.playlist;
 
   if (!playlist) {
-    args.showErrorToast("Playlist not found");
+    const errorMsg = "Playlist not found";
+    setFormError(errorMsg);
+    args.showErrorToast(errorMsg);
     return;
   }
 
   const urlsText = videoUrlsInput().trim();
   if (!urlsText) {
-    args.showErrorToast("Please enter at least one video URL");
+    const errorMsg = "Please enter at least one video URL";
+    setFormError(errorMsg);
+    args.showErrorToast(errorMsg);
     return;
   }
 
+  setFormError(null);
   setIsAddingVideos(true);
 
   try {
@@ -90,11 +97,15 @@ const addVideosToPlaylist = async () => {
       onSuccess?.();
       closeModal();
     } else {
-      args.showErrorToast(result?.result?.message || "Failed to add videos to playlist");
+      const errorMsg = result?.result?.message || "Failed to add videos to playlist";
+      setFormError(errorMsg);
+      args.showErrorToast(errorMsg);
     }
   } catch (error) {
     console.error("Error adding videos:", error);
-    args.showErrorToast("An error occurred while adding videos");
+    const errorMsg = error?.message || "An error occurred while adding videos";
+    setFormError(errorMsg);
+    args.showErrorToast(errorMsg);
   } finally {
     setIsAddingVideos(false);
   }
@@ -104,6 +115,8 @@ return {
   videoUrlsInput,
   setVideoUrlsInput,
   isAddingVideos,
+  formError,
+  setFormError,
   closeModal,
   addVideosToPlaylist
 };
@@ -320,6 +333,171 @@ return `._id {
       }
     },
     {
+      id: "error_alert",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const error = args.fns.formError();
+
+return {
+  as: "div",
+  hide: !error
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  background: ${args.theme.var.color.error_light_50};
+  border: 2px solid ${args.theme.var.color.error_light_200};
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:warning",
+  width: 20,
+  height: 20
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error};
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h4",
+  text: "Error"
+};
+''',
+        css: '''
+return `._id {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.error};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_message",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const error = args.fns.formError();
+
+return {
+  as: "p",
+  text: error || ""
+};
+''',
+        css: '''
+return `._id {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: ${args.theme.var.color.error_light_50_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_close",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "button",
+  onClick: () => args.fns.setFormError(null),
+  "aria-label": "Dismiss error"
+};
+''',
+        css: '''
+return `._id {
+  background: none;
+  border: none;
+  color: ${args.theme.var.color.error};
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.error_light_100};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "error_alert_close_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:close",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
       id: "modal_textarea",
       L: "Attr",
       P: {
@@ -405,6 +583,13 @@ return {
     { id: "e10", T: "Attr", S: "close_button", E: "close_icon" },
     { id: "e11", T: "Attr", S: "modal_container", E: "modal_body" },
     { id: "e12", T: "Attr", S: "modal_body", E: "modal_description" },
+    { id: "e12a", T: "Attr", S: "modal_body", E: "error_alert" },
+    { id: "e12b", T: "Attr", S: "error_alert", E: "error_alert_icon" },
+    { id: "e12c", T: "Attr", S: "error_alert", E: "error_alert_content" },
+    { id: "e12d", T: "Attr", S: "error_alert_content", E: "error_alert_title" },
+    { id: "e12e", T: "Attr", S: "error_alert_content", E: "error_alert_message" },
+    { id: "e12f", T: "Attr", S: "error_alert", E: "error_alert_close" },
+    { id: "e12g", T: "Attr", S: "error_alert_close", E: "error_alert_close_icon" },
     { id: "e13", T: "Attr", S: "modal_body", E: "modal_textarea" },
     { id: "e14", T: "Attr", S: "modal_container", E: "modal_footer" },
     { id: "e15", T: "Attr", S: "modal_footer", E: "cancel_button" },

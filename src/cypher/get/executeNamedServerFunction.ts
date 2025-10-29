@@ -6,6 +6,7 @@ import type { Edge } from "~/lib/graph/type/edge";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { convertNodeToJson, neo4jConvert } from "../conversion/convertNodeToJson";
+import * as bullmq from 'bullmq';
 
 interface NamedServerFunctionRequest {
   functionName: string;
@@ -82,6 +83,7 @@ export async function executeNamedServerFunction(
         relationships: context.relationships,
       },
       functionName: request.functionName,
+      bullmq
     };
 
     // Execute the function

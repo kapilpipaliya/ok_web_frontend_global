@@ -13,6 +13,7 @@ export const API = {
     prepareAutoSignInUrl: "/api/auth/prepareAutoSignIn",
     profileUrl: "/api/auth/updateProfile",
     resendEmailConfirmationUrl: "/api/auth/resendEmailConfirmation",
+    resendVerificationUrl: "/api/auth/resendVerification",
     signUpUrl: "/api/auth/signup",
     updateProfileImageUrl: "/api/auth/updateProfileImage",
   },
@@ -99,6 +100,7 @@ export const API = {
     user: {
       forgotPassword: "/auth/forgotPassword",
       logout: "/auth/logout",
+      resendVerification: "/auth/resendVerification",
       signUp: "/auth/signup",
     },
   },

@@ -28,7 +28,9 @@ export async function GET({ request }: APIEvent) {
     const userData = await validateAndConsumeToken(token, dbSession);
     if (!userData) {
       return new Response(null, {
-        headers: { Location: `${API.urls.admin.signIn}?error=invalid_token` },
+        headers: {
+          Location: `${API.urls.admin.signIn}?message=${encodeURIComponent("Invalid or expired verification link")}&type=error`,
+        },
         status: 302,
       });
     }
@@ -37,7 +39,9 @@ export async function GET({ request }: APIEvent) {
 
     if (!(uuid && email)) {
       return new Response(null, {
-        headers: { Location: `${API.urls.admin.signIn}?error=invalid_data` },
+        headers: {
+          Location: `${API.urls.admin.signIn}?message=${encodeURIComponent("Invalid verification data")}&type=error`,
+        },
         status: 302,
       });
     }
@@ -65,7 +69,7 @@ export async function GET({ request }: APIEvent) {
         if (systemResult.records.length === 0) {
           return new Response(null, {
             headers: {
-              Location: `${API.urls.admin.signIn}?error=user_not_found`,
+              Location: `${API.urls.admin.signIn}?message=${encodeURIComponent("User not found")}&type=error`,
             },
             status: 302,
           });
@@ -98,7 +102,7 @@ export async function GET({ request }: APIEvent) {
 
         return new Response(null, {
           headers: {
-            Location: `${API.urls.admin.signIn}?message=email_verified`,
+            Location: `${API.urls.admin.signIn}?message=${encodeURIComponent("Email verified successfully! You can now sign in.")}&type=success`,
           },
           status: 302,
         });
@@ -118,7 +122,7 @@ export async function GET({ request }: APIEvent) {
       if (result.records.length === 0) {
         return new Response(null, {
           headers: {
-            Location: `${API.urls.admin.signIn}?error=user_not_found`,
+            Location: `${API.urls.admin.signIn}?message=${encodeURIComponent("User not found")}&type=error`,
           },
           status: 302,
         });
@@ -138,7 +142,7 @@ export async function GET({ request }: APIEvent) {
 
       return new Response(null, {
         headers: {
-          Location: `${API.urls.admin.signIn}?message=email_verified`,
+          Location: `${API.urls.admin.signIn}?message=${encodeURIComponent("Email verified successfully! You can now sign in.")}&type=success`,
         },
         status: 302,
       });

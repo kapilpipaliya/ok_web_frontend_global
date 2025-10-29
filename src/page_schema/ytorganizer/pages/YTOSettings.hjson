@@ -6,6 +6,7 @@
       P: {
         key: "YTOSettings",
         url: "/yto/settings",
+        siginRequired: true,
         fns: '''
 // Feedback modal state
 const [isFeedbackModalOpen, setIsFeedbackModalOpen] = args.createSignal(false);
@@ -232,8 +233,8 @@ return {
 return `._id {
   width: 40px;
   height: 40px;
-  background: ${args.theme.var.color.error_light_100};
-  color: ${args.theme.var.color.error};
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
   border-radius: 0.5rem;
   display: flex;
   align-items: center;
@@ -330,8 +331,8 @@ return {
 return `._id {
   width: 40px;
   height: 40px;
-  background: ${args.theme.var.color.success_light_100};
-  color: ${args.theme.var.color.success};
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
   border-radius: 0.5rem;
   display: flex;
   align-items: center;
@@ -577,14 +578,14 @@ return `._id {
         props: '''
 return {
   as: "h2",
-  text: "Feedback"
+  text: "✨ Help Us Improve"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: ${args.theme.var.color.text};
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.primary};
   margin: 0 0 1rem 0;
 }`;
 '''
@@ -603,14 +604,21 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
+  background: ${args.theme.var.color.primary_light_50};
+  border: 2px solid ${args.theme.var.color.primary_light_200};
   border-radius: 0.75rem;
   padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+._id:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 640px) {
@@ -644,14 +652,14 @@ return {
         props: '''
 return {
   as: "label",
-  text: "Share Your Feedback"
+  text: "💬 We'd Love to Hear From You!"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${args.theme.var.color.text};
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.primary_light_50_text};
   display: block;
   margin-bottom: 0.25rem;
 }`;
@@ -667,14 +675,15 @@ return `._id {
         props: '''
 return {
   as: "p",
-  text: "Help us improve by sharing your thoughts, reporting bugs, or suggesting features"
+  text: "Your feedback helps us improve! Share your thoughts, report bugs, or suggest new features. Every suggestion matters!"
 };
 ''',
         css: '''
 return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
+  font-size: 0.9375rem;
+  color: ${args.theme.var.color.primary_light_50_text};
   margin: 0;
+  line-height: 1.5;
 }`;
 '''
       }
@@ -731,7 +740,7 @@ return {
 return `._id {
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_light_50_text};
   margin: 0 0 1rem 0;
   display: flex;
   align-items: center;
@@ -770,7 +779,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.error_light_50_text};
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
 }`;
@@ -858,7 +867,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.muted};
+  color: ${args.theme.var.color.error_light_50_text};
   margin: 0 0 1.5rem 0;
   line-height: 1.5;
   font-weight: 600;

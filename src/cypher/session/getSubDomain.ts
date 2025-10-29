@@ -24,22 +24,24 @@ export async function getSubDomain(host: string) {
   // Otherwise look up the domain in SubDomain vertex
   const driver = await getDriver();
   const dbSession = driver.session({ database: ADMIN_DB_NAME });
-  if (dbSession) {
-    try {
-      const query = `
-        MATCH (s:SubDomain {domain: $domain})
-        RETURN s.key as subdomain
-      `;
-      const result = await dbSession.run(query, { domain: effectiveDomain });
 
-      if (result.records.length > 0) {
-        return { domain, subdomain: result.records[0].get("subdomain") };
-      }
-    } catch (error) {
-      console.error("Error looking up domain:", error, effectiveDomain);
-      throw error;
+  try {
+    const query = `
+      MATCH (s:SubDomain {domain: $domain})
+      RETURN s.key as subdomain
+    `;
+    const result = await dbSession.run(query, { domain: effectiveDomain });
+
+    if (result.records.length > 0) {
+      return { domain, subdomain: result.records[0].get("subdomain") };
     }
-  }
 
-  throw "Error looking up domain";
+    console.error("Domain not found in SubDomain vertices:", effectiveDomain);
+    throw new Error(`Domain not found: ${effectiveDomain}`);
+  } catch (error) {
+    console.error("Error looking up domain:", error, effectiveDomain);
+    throw error;
+  } finally {
+    await dbSession.close();
+  }
 }

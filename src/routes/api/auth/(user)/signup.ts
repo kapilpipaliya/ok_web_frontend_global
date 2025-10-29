@@ -11,6 +11,7 @@ import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
 import { sendNotificationEmail } from "~/lib/playwright/sendNotificationEmail";
 import { EMAIL_TEMPLATES } from "~/pages/settings/constants";
 import { sendSignupEmailVerification } from "~/routes/api/auth/(profile)/functions/sendSignupEmailVerification";
+import { getGeneralSettings } from "~/routes/api/auth/(user)/functions/getGeneralSettings";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
 import { updateSession } from "~/server/auth/session/updateSession";
 
@@ -22,7 +23,7 @@ export async function POST({ request }: APIEvent) {
     };
   }
 
-  const { dbSession, domain, subDomain } =
+  const { dbSession, subDomain } =
     await getDBSessionForSubdomain(request);
   const tx = dbSession.beginTransaction();
 
@@ -86,7 +87,12 @@ async function handleSignup(
 
     await updateSession(user);
     delete user.P.password;
-    updateRedirectUrl(user, subDomain);
+
+    // Fetch the configured redirect URL from general settings
+    const generalSettings = await getGeneralSettings(tx);
+    const configuredRedirectUrl = generalSettings?.P?.redirectUrlAfterSignin;
+
+    updateRedirectUrl(user, subDomain, configuredRedirectUrl);
 
     return {
       graph: {

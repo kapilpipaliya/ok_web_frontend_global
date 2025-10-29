@@ -6,7 +6,7 @@ import { deleteExpiredTokens } from "~/cypher/mutate/token/deleteExpiredTokens";
 import { getAndConsumeToken } from "~/cypher/mutate/token/getAndConsumeToken";
 import { saveToken } from "~/cypher/mutate/token/saveToken";
 
-const TOKEN_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
+const TOKEN_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 export async function generateSecureToken(
   data: string,
@@ -18,20 +18,22 @@ export async function generateSecureToken(
   // Hash the token for storage
   const hashedToken = createHash("sha256").update(randomToken).digest("hex");
 
-  // Store the token in database
+  // Store the HASHED token in database
   await saveToken(dbSession, hashedToken, data);
 
   // Clean up old tokens periodically
   await cleanupOldTokens(dbSession);
 
-  return hashedToken;
+  // Return the RANDOM token (not the hash) to be sent in the email
+  return randomToken;
 }
 
 export async function validateAndConsumeToken(
-  hashedToken: string,
+  token: string,
   dbSession: Session,
 ): Promise<null | string> {
-  // const hashedToken = createHash("sha256").update(token).digest("hex");
+  // Hash the received token to match what's stored in the database
+  const hashedToken = createHash("sha256").update(token).digest("hex");
 
   const tokenData = await getAndConsumeToken(dbSession, hashedToken);
 

@@ -10,6 +10,7 @@ import { StripeSettings } from "~/pages/global/stripe/StripeSettings";
 import { SupportTickets } from "~/pages/global/support/SupportTickets";
 import { ThemeSettings } from "~/pages/global/theme/ThemeSettings";
 import { UserManagement } from "~/pages/global/user/UserManagement";
+import { WorkerManagement } from "~/pages/global/worker/WorkerManagement";
 
 export default function AdminGlobalSettings() {
   const menuItems = [
@@ -89,6 +90,13 @@ export default function AdminGlobalSettings() {
       icon: "ph:activity",
       id: "activity-log",
       label: "Activity Log",
+    },
+    {
+      component: WorkerManagement,
+      group: "System",
+      icon: "ph:gear-six",
+      id: "workers",
+      label: "Workers",
     },
     {
       component: SupportTickets,
