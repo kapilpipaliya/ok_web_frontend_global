@@ -1346,6 +1346,109 @@ const updateLocalItemSettings = (updatedData) => {
   }
 };
 
+// Polling state for processing status
+const [processingStatuses, setProcessingStatuses] = args.createSignal({
+  channels: {},
+  playlists: {}
+});
+const [pollingInterval, setPollingInterval] = args.createSignal(null);
+
+// Poll for processing status updates
+const pollProcessingStatus = async () => {
+  try {
+    const result = await args.executeNamedServerFunction({
+      functionName: "getAllProcessingStatus",
+      contextData: {}
+    });
+
+    if (result?.result?.success && result?.result?.data) {
+      const data = result.result.data;
+
+      // Convert arrays to objects keyed by ID for easier lookup
+      const channelsMap = {};
+      data.channels.forEach(item => {
+        const channelId = item.channel?.P?.youtubeId;
+        if (channelId) {
+          channelsMap[channelId] = item;
+        }
+      });
+
+      const playlistsMap = {};
+      data.playlists.forEach(item => {
+        const playlistId = item.playlist?.P?.youtubeId;
+        if (playlistId) {
+          playlistsMap[playlistId] = item;
+        }
+      });
+
+      setProcessingStatuses({
+        channels: channelsMap,
+        playlists: playlistsMap
+      });
+
+      // If no active processing, stop polling
+      if (!data.hasActiveProcessing) {
+        stopPolling();
+        // Reload data to show completed items
+        await loadData();
+      }
+    }
+  } catch (error) {
+    console.error('Error polling processing status:', error);
+  }
+};
+
+// Start polling
+const startPolling = () => {
+  // Initial poll
+  pollProcessingStatus();
+
+  // Set up interval (poll every 3 seconds)
+  const interval = setInterval(pollProcessingStatus, 3000);
+  setPollingInterval(interval);
+};
+
+// Stop polling
+const stopPolling = () => {
+  const interval = pollingInterval();
+  if (interval) {
+    clearInterval(interval);
+    setPollingInterval(null);
+  }
+};
+
+// Watch for view changes and start/stop polling as needed
+args.createEffect(() => {
+  const statuses = processingStatuses();
+  const hasProcessing = Object.keys(statuses.channels).length > 0 ||
+                        Object.keys(statuses.playlists).length > 0;
+
+  if (hasProcessing && !pollingInterval()) {
+    startPolling();
+  }
+});
+
+// Initial check for processing items
+args.createEffect(() => {
+  // Start polling on mount
+  startPolling();
+
+  // Cleanup on unmount
+  args.onCleanup(() => {
+    stopPolling();
+  });
+});
+
+// Get processing status for a specific channel
+const getChannelProcessingStatus = (channelId) => {
+  return processingStatuses().channels[channelId] || null;
+};
+
+// Get processing status for a specific playlist
+const getPlaylistProcessingStatus = (playlistId) => {
+  return processingStatuses().playlists[playlistId] || null;
+};
+
 return {
   items,
   filteredItems,
@@ -1416,7 +1519,10 @@ return {
   syncCurrentItem,
   isSyncing,
   isAddVideosModalOpen,
-  setIsAddVideosModalOpen
+  setIsAddVideosModalOpen,
+  processingStatuses,
+  getChannelProcessingStatus,
+  getPlaylistProcessingStatus
 };
 ''',
         props: '''
@@ -1731,6 +1837,63 @@ return `._id {
   color: ${args.theme.var.color.muted};
   margin: 0 0 1.5rem 0;
 }`;
+'''
+      }
+    },
+    {
+      id: "detail_processing_status",
+      L: "Attr",
+      P: {
+        displayOrder: 2.6,
+        componentName: "YTOProcessingStatus",
+        props: '''
+const contentType = args.searchParams?.type || "channels";
+const data = args.fns.detailData();
+
+if (!data) {
+  return { hide: true };
+}
+
+const itemId = contentType === "playlists"
+  ? data.playlist?.playlist?.P?.youtubeId
+  : data.channel?.channel?.P?.youtubeId;
+
+const processingData = contentType === "playlists"
+  ? args.fns.getPlaylistProcessingStatus(itemId)
+  : args.fns.getChannelProcessingStatus(itemId);
+
+if (!processingData) {
+  return { hide: true };
+}
+
+// Extract data from vertex format
+const settings = contentType === "playlists"
+  ? processingData.playlistSetting
+  : processingData.channelSetting;
+
+if (!settings || !settings.P) {
+  return { hide: true };
+}
+
+let details = '';
+if (contentType === "channels") {
+  const processedPlaylists = settings.P.processedPlaylists || 0;
+  const totalPlaylists = settings.P.totalPlaylists || 0;
+  const processedVideos = settings.P.processedVideos || 0;
+  const totalVideos = settings.P.totalVideos || 0;
+  details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
+} else {
+  const processedVideos = settings.P.processedVideos || 0;
+  const totalVideos = settings.P.totalVideos || 0;
+  details = `${processedVideos}/${totalVideos} videos`;
+}
+
+return {
+  status: settings.P.status,
+  progress: settings.P.progress || 0,
+  type: contentType === "playlists" ? "playlist" : "channel",
+  details
+};
 '''
       }
     },
@@ -2129,10 +2292,72 @@ const virtualItem = args.contextData.virtualItem;
 const contentType = args.searchParams?.type || "channels";
 const item = args.fns.filteredItems()[virtualItem.index];
 
+// Get processing status for this item
+const itemData = contentType === "playlists" ? item.playlist : item.channel;
+const itemId = itemData?.P?.youtubeId;
+const processingStatus = contentType === "playlists"
+  ? args.fns.getPlaylistProcessingStatus(itemId)
+  : args.fns.getChannelProcessingStatus(itemId);
+
 return {
-  item: contentType === "playlists" ? item.playlist : item.channel,
+  item: itemData,
   itemSettings: contentType === "playlists" ? item.playlistSettings : item.channelSetting,
-  itemType: contentType === "playlists" ? "playlist" : "channel"
+  itemType: contentType === "playlists" ? "playlist" : "channel",
+  processingStatus: processingStatus
+};
+'''
+      }
+    },
+    {
+      id: "card_processing_status",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "YTOProcessingStatus",
+        props: '''
+const virtualItem = args.contextData.virtualItem;
+const contentType = args.searchParams?.type || "channels";
+const item = args.fns.filteredItems()[virtualItem.index];
+
+const itemId = contentType === "playlists"
+  ? item.playlist?.P?.youtubeId
+  : item.channel?.P?.youtubeId;
+
+const processingData = contentType === "playlists"
+  ? args.fns.getPlaylistProcessingStatus(itemId)
+  : args.fns.getChannelProcessingStatus(itemId);
+
+if (!processingData) {
+  return { hide: true };
+}
+
+// Extract data from vertex format
+const settings = contentType === "playlists"
+  ? processingData.playlistSetting
+  : processingData.channelSetting;
+
+if (!settings || !settings.P) {
+  return { hide: true };
+}
+
+let details = '';
+if (contentType === "channels") {
+  const processedPlaylists = settings.P.processedPlaylists || 0;
+  const totalPlaylists = settings.P.totalPlaylists || 0;
+  const processedVideos = settings.P.processedVideos || 0;
+  const totalVideos = settings.P.totalVideos || 0;
+  details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
+} else {
+  const processedVideos = settings.P.processedVideos || 0;
+  const totalVideos = settings.P.totalVideos || 0;
+  details = `${processedVideos}/${totalVideos} videos`;
+}
+
+return {
+  status: settings.P.status,
+  progress: settings.P.progress || 0,
+  type: contentType === "playlists" ? "playlist" : "channel",
+  details
 };
 '''
       }
@@ -2401,11 +2626,19 @@ const itemData = args.fns.filteredDetailItems()[videoItem.index];
 // For channels view, itemData is a playlist object
 // For playlists view, itemData is a video object
 const isPlaylistItem = contentType === "channels";
+const item = isPlaylistItem ? itemData.playlist : itemData.video;
+const itemId = item?.P?.youtubeId;
+
+// Get processing status for playlists only (videos don't have processing status)
+const processingStatus = isPlaylistItem
+  ? args.fns.getPlaylistProcessingStatus(itemId)
+  : null;
 
 return {
-  item: isPlaylistItem ? itemData.playlist : itemData.video,
+  item: item,
   itemSettings: isPlaylistItem ? itemData.playlistSettings : itemData.videoSettings,
-  itemType: isPlaylistItem ? "playlist" : "video"
+  itemType: isPlaylistItem ? "playlist" : "video",
+  processingStatus: processingStatus
 };
 '''
       }
@@ -2775,12 +3008,22 @@ return {
 const searchItem = args.contextData.searchItem;
 const item = args.fns.getSearchItems()[searchItem.index];
 const resultType = item.resultType;
+const itemData = resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video);
+const itemId = itemData?.P?.youtubeId;
+
+// Get processing status (only for channels and playlists, not videos)
+const processingStatus = resultType === "channel"
+  ? args.fns.getChannelProcessingStatus(itemId)
+  : resultType === "playlist"
+  ? args.fns.getPlaylistProcessingStatus(itemId)
+  : null;
 
 return {
-  item: resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video),
+  item: itemData,
   itemSettings: resultType === "channel" ? item.channelSetting : (resultType === "playlist" ? item.playlistSettings : item.videoSettings),
   itemType: resultType,
-  showTypeBadge: true
+  showTypeBadge: true,
+  processingStatus: processingStatus
 };
 '''
       }
@@ -3111,12 +3354,22 @@ return {
 const favouriteItem = args.contextData.favouriteItem;
 const item = args.fns.getFavouritesItems()[favouriteItem.index];
 const resultType = item.resultType;
+const itemData = resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video);
+const itemId = itemData?.P?.youtubeId;
+
+// Get processing status (only for channels and playlists, not videos)
+const processingStatus = resultType === "channel"
+  ? args.fns.getChannelProcessingStatus(itemId)
+  : resultType === "playlist"
+  ? args.fns.getPlaylistProcessingStatus(itemId)
+  : null;
 
 return {
-  item: resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video),
+  item: itemData,
   itemSettings: resultType === "channel" ? item.channelSetting : (resultType === "playlist" ? item.playlistSettings : item.videoSettings),
   itemType: resultType,
-  showTypeBadge: true
+  showTypeBadge: true,
+  processingStatus: processingStatus
 };
 '''
       }

@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "savePlaylist",
-        description: "Fetches playlist data from YouTube API and saves all videos to the database",
+        description: "Fetches basic playlist metadata and queues background processing for videos",
         body: '''
 /**
  * Extract playlist ID from various YouTube URL formats
@@ -28,24 +28,21 @@ const extractPlaylistId = (url) => {
   return null;
 };
 
-// YouTube API key - replace with your actual API key
-const YOUTUBE_API_KEY = 'AIzaSyC_CClo37bSKqLUFNKEsDaZgYzTxEQfuds';
-
 /**
- * Fetch complete playlist data from YouTube Data API v3
- * Includes: playlist info and ALL videos with pagination
+ * Fetch ONLY basic playlist metadata (no videos)
+ * Full processing will be done in background worker
  */
-const fetchPlaylistData = async (playlistId) => {
+const fetchPlaylistMetadata = async (playlistId, apiKeyData) => {
   // Dynamic import of googleapis library
   const { google } = await import('googleapis');
 
-  // Initialize YouTube API client with authentication
+  // Initialize YouTube API client with authentication from database
   const youtube = google.youtube({
     version: 'v3',
-    auth: YOUTUBE_API_KEY
+    auth: apiKeyData.apiKey
   });
 
-  // Fetch playlist details (metadata, not videos yet)
+  // Fetch ONLY playlist details (metadata only, no videos)
   const playlistResponse = await youtube.playlists.list({
     part: ['snippet', 'contentDetails', 'status'],
     id: [playlistId]
@@ -57,47 +54,17 @@ const fetchPlaylistData = async (playlistId) => {
 
   const playlist = playlistResponse.data.items[0];
 
-  // Fetch ALL playlist videos with pagination (no limit)
-  let allVideos = [];
-  let nextPageToken = null;
-
-  do {
-    // Fetch videos in batches of 50 (YouTube API limit)
-    const itemsResponse = await youtube.playlistItems.list({
-      part: ['snippet', 'contentDetails'],
-      playlistId: playlistId,
-      maxResults: 50,                    // Maximum allowed per request
-      pageToken: nextPageToken           // For pagination
-    });
-
-    if (itemsResponse.data.items) {
-      allVideos = allVideos.concat(itemsResponse.data.items);
-    }
-
-    // Get the token for the next page of results
-    nextPageToken = itemsResponse.data.nextPageToken;
-  } while (nextPageToken); // Continue until all videos are fetched
-
-  // Format the response to match our expected structure
   return {
     id: playlistId,
     snippet: playlist.snippet,
     status: playlist.status,
-    contentDetails: playlist.contentDetails,
-    videos: allVideos.map((item, index) => ({
-      id: item.contentDetails.videoId,
-      snippet: {
-        ...item.snippet,
-        position: item.snippet.position || index
-      },
-      contentDetails: item.contentDetails
-    }))
+    contentDetails: playlist.contentDetails
   };
 };
 
 try {
   // Extract input parameters from the request
-  const { url, name } = args.contextData;
+  const { url, name, channelId } = args.contextData;
 
   if (!url) {
     throw new Error("Playlist URL is required");
@@ -115,10 +82,28 @@ try {
     throw new Error("Invalid YouTube playlist URL. Please provide a valid playlist URL.");
   }
 
-  // Fetch complete playlist data from YouTube API
-  const playlistData = await fetchPlaylistData(playlistId);
+  // Get active API key from database
+  const apiKeyResult = await args.executeNamedServerFunction({
+    functionName: "getActiveYouTubeAPIKey",
+    contextData: {}
+  });
 
-  // STEP 1: Create or update the main Playlist vertex (global data)
+  if (!apiKeyResult?.result?.success || !apiKeyResult?.result?.data) {
+    throw new Error(apiKeyResult?.result?.message || "Failed to get YouTube API key");
+  }
+
+  const apiKeyData = apiKeyResult.result.data;
+
+  // Fetch ONLY basic playlist metadata (fast operation)
+  const playlistData = await fetchPlaylistMetadata(playlistId, apiKeyData);
+
+  // Track API usage (playlist details = 1 call, costs ~1 quota unit)
+  await args.executeNamedServerFunction({
+    functionName: "trackYouTubeAPIUsage",
+    contextData: { keyId: apiKeyData.keyId, cost: 1 }
+  });
+
+  // STEP 1: Create or update the main Playlist vertex with basic metadata
   const playlistKey = `playlist_${playlistId}`;
 
   const mergePlaylistQuery = `
@@ -140,7 +125,7 @@ try {
     RETURN p
   `;
 
-  const playlistResult = await args.session.run(mergePlaylistQuery, {
+  await args.session.run(mergePlaylistQuery, {
     key: playlistKey,
     playlistId,
     title: playlistData.snippet.title,
@@ -151,14 +136,12 @@ try {
     channelTitle: playlistData.snippet.channelTitle,
     channelId: playlistData.snippet.channelId,
     privacyStatus: playlistData.status?.privacyStatus || "unknown",
-    itemCount: playlistData.contentDetails?.itemCount || playlistData.videos.length,
+    itemCount: playlistData.contentDetails?.itemCount || 0,
     publishedAt: playlistData.snippet.publishedAt
   });
 
-  // STEP 2: Create user-specific PlaylistSetting
-  // This stores the user's personal preferences for this playlist
+  // STEP 2: Create user-specific PlaylistSetting with status tracking
   const playlistSettingKey = `playlist_setting_${user.id}_${playlistId}`;
-  const videoIds = playlistData.videos.map(v => v.id);
 
   const mergePlaylistSettingQuery = `
     MATCH (u:User {uuid: $userUuid})
@@ -169,10 +152,15 @@ try {
       ps.createdAt = datetime()
     SET
       ps.customName = $customName,
-      ps.customOrder = $customOrder,
       ps.sortBy = 'index',
       ps.showThumbnails = true,
       ps.viewMode = 'list',
+      ps.status = 'queued',
+      ps.progress = 0,
+      ps.totalVideos = 0,
+      ps.processedVideos = 0,
+      ps.error = null,
+      ps.queuedAt = datetime(),
       ps.lastUpdated = datetime(),
       ps.updatedAt = datetime()
     RETURN ps
@@ -182,119 +170,63 @@ try {
     userUuid: user.P.uuid,
     playlistId,
     playlistSettingKey,
-    customName: name || null,
-    customOrder: videoIds
+    customName: name || null
   });
 
-  // STEP 3: Process all playlist videos
-  // This creates individual Video vertices and relationships
-  let savedVideos = 0;
-  let updatedVideos = 0;
-
-  for (const video of playlistData.videos) {
-    if (!video.id || !video.snippet) {
-      console.warn('Skipping invalid video:', video);
-      continue;
-    }
-
-    const videoKey = `video_${video.id}`;
-
-    // Create or update individual Video vertex with MERGE (upsert)
-    const mergeVideoQuery = `
-      MERGE (v:Video {youtubeId: $videoId})
-      ON CREATE SET
-        v.key = $key,
-        v.youtubeId = $videoId,
-        v.createdAt = datetime()
-      ON MATCH SET
-        v.updatedCount = COALESCE(v.updatedCount, 0) + 1
-      SET
-        v.title = $title,
-        v.description = $description,
-        v.thumbnail = $thumbnail,
-        v.channelTitle = $channelTitle,
-        v.channelId = $channelId,
-        v.publishedAt = datetime($publishedAt),
-        v.updatedAt = datetime()
-      RETURN v, v.createdAt = v.updatedAt AS isNew
-    `;
-
-    const videoResult = await args.session.run(mergeVideoQuery, {
-      key: videoKey,
-      videoId: video.id,
-      title: video.snippet.title,
-      description: video.snippet.description || "",
-      thumbnail: video.snippet.thumbnails?.high?.url ||
-                 video.snippet.thumbnails?.medium?.url ||
-                 video.snippet.thumbnails?.default?.url || "",
-      channelTitle: video.snippet.channelTitle || "",
-      channelId: video.snippet.channelId || "",
-      publishedAt: video.snippet.publishedAt
-    });
-
-    const isNewVideo = videoResult.records[0].get('isNew');
-    if (isNewVideo) {
-      savedVideos++;
-    } else {
-      updatedVideos++;
-    }
-
-    // Create Playlist -> Video relationship (no data stored on edge)
-    const playlistVideoQuery = `
+  // If playlist is part of a channel, create relationship
+  if (channelId) {
+    const channelPlaylistQuery = `
+      MATCH (c:Channel {youtubeId: $channelId})
       MATCH (p:Playlist {youtubeId: $playlistId})
-      MATCH (v:Video {youtubeId: $videoId})
-      MERGE (p)-[:PlaylistVideo]->(v)
+      MERGE (c)-[:ChannelPlaylist]->(p)
     `;
-
-    await args.session.run(playlistVideoQuery, {
-      playlistId,
-      videoId: video.id
-    });
-
-    // Create user-specific VideoSetting for this video
-    // This stores user preferences like watched status, notes, custom ordering
-    const videoSettingKey = `video_setting_${user.id}_${video.id}`;
-
-    const mergeVideoSettingQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      MATCH (v:Video {youtubeId: $videoId})
-      MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-      ON CREATE SET
-        vs.key = $videoSettingKey,
-        vs.createdAt = datetime()
-      SET
-        vs.watched = false,
-        vs.notes = null,
-        vs.customPosition = $position,
-        vs.playlistIndex = $playlistIndex,
-        vs.addedToPlaylistAt = datetime(),
-        vs.updatedAt = datetime()
-      RETURN vs
-    `;
-
-    await args.session.run(mergeVideoSettingQuery, {
-      userUuid: user.P.uuid,
-      videoId: video.id,
-      videoSettingKey,
-      position: video.snippet.position,
-      playlistIndex: video.snippet.position
-    });
+    await args.session.run(channelPlaylistQuery, { channelId, playlistId });
   }
+
+  // STEP 3: Add to background processing queue using BullMQ
+  const { Queue } = args.bullmq;
+
+  // Get Redis connection
+  const connection = args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    maxRetriesPerRequest: null
+  };
+
+  const playlistQueue = new Queue('playlistProcessing', { connection });
+
+  await playlistQueue.add('processPlaylist', {
+    playlistId,
+    userId: user.id,
+    userUuid: user.P.uuid,
+    customName: name || null,
+    channelId: channelId || null
+  }, {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 5000
+    },
+    removeOnComplete: 100,
+    removeOnFail: 50
+  });
+
+  // Close queue connection
+  await playlistQueue.close();
 
   return {
     success: true,
-    message: `Playlist "${playlistData.snippet.title}" added to your collection!`,
+    message: `Playlist "${playlistData.snippet.title}" has been queued for processing. This may take a few minutes.`,
     data: {
       playlistId,
       title: playlistData.snippet.title,
       customName: name,
-      totalVideos: playlistData.videos.length,
-      savedVideos,
-      updatedVideos,
+      status: 'queued',
+      progress: 0,
+      totalVideos: playlistData.contentDetails?.itemCount || 0,
       channelTitle: playlistData.snippet.channelTitle,
       userId: user.id,
-      userSpecific: true,
-      videoIds: playlistData.videos.map(v => v.id).filter(id => id) // Return video IDs for channel processing
+      userSpecific: true
     }
   };
 

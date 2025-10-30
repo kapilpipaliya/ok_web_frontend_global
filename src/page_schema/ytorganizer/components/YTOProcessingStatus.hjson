@@ -1,0 +1,294 @@
+{
+  vertexes: [
+    {
+      id: "yto_processing_status_component",
+      L: "Component",
+      P: {
+        key: "YTOProcessingStatus"
+      }
+    },
+    {
+      id: "variant_status",
+      L: "ComponentVariant",
+      P: {
+        key: "status",
+        type: "string",
+        defValue: "queued",
+        description: "Processing status: queued, processing, completed, failed"
+      }
+    },
+    {
+      id: "variant_status_queued",
+      L: "ComponentVariantOption",
+      P: {
+        key: "queued",
+        value: "queued",
+        description: "Item is queued for processing"
+      }
+    },
+    {
+      id: "variant_status_processing",
+      L: "ComponentVariantOption",
+      P: {
+        key: "processing",
+        value: "processing",
+        description: "Item is currently being processed"
+      }
+    },
+    {
+      id: "variant_status_completed",
+      L: "ComponentVariantOption",
+      P: {
+        key: "completed",
+        value: "completed",
+        description: "Processing completed successfully"
+      }
+    },
+    {
+      id: "variant_status_failed",
+      L: "ComponentVariantOption",
+      P: {
+        key: "failed",
+        value: "failed",
+        description: "Processing failed with error"
+      }
+    },
+    {
+      id: "variant_progress",
+      L: "ComponentVariant",
+      P: {
+        key: "progress",
+        type: "number",
+        defValue: 0,
+        description: "Progress percentage (0-100)"
+      }
+    },
+    {
+      id: "variant_type",
+      L: "ComponentVariant",
+      P: {
+        key: "type",
+        type: "string",
+        defValue: "channel",
+        description: "Type of item: channel or playlist"
+      }
+    },
+    {
+      id: "variant_type_channel",
+      L: "ComponentVariantOption",
+      P: {
+        key: "channel",
+        value: "channel",
+        description: "Channel processing"
+      }
+    },
+    {
+      id: "variant_type_playlist",
+      L: "ComponentVariantOption",
+      P: {
+        key: "playlist",
+        value: "playlist",
+        description: "Playlist processing"
+      }
+    },
+    {
+      id: "variant_details",
+      L: "ComponentVariant",
+      P: {
+        key: "details",
+        type: "string",
+        defValue: "",
+        description: "Additional processing details"
+      }
+    },
+    {
+      id: "root_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const status = args.contextData.props?.status || 'queued';
+const progress = args.contextData.props?.progress || 0;
+
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-left: 3px solid ${args.theme.var.color.info};
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "icon_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const status = args.contextData.props?.status || 'queued';
+
+let icon = 'carbon:time';
+let color = args.theme.var.color.info;
+
+if (status === 'processing') {
+  icon = 'carbon:in-progress';
+  color = args.theme.var.color.primary;
+} else if (status === 'completed') {
+  icon = 'carbon:checkmark';
+  color = args.theme.var.color.success;
+} else if (status === 'failed') {
+  icon = 'carbon:warning';
+  color = args.theme.var.color.error;
+}
+
+return {
+  as: "icon",
+  icon,
+  width: 20,
+  height: 20,
+  style: { color }
+};
+'''
+      }
+    },
+    {
+      id: "content_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "status_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const status = args.contextData.props?.status || 'queued';
+const type = args.contextData.props?.type || 'channel';
+const details = args.contextData.props?.details || '';
+
+let statusText = '';
+if (status === 'queued') {
+  statusText = `Queued for processing...`;
+} else if (status === 'processing') {
+  statusText = `Processing ${type}...`;
+  if (details) {
+    statusText += ` (${details})`;
+  }
+} else if (status === 'completed') {
+  statusText = `Processing completed`;
+} else if (status === 'failed') {
+  statusText = `Processing failed`;
+}
+
+return {
+  as: "div",
+  text: statusText
+};
+''',
+        css: '''
+return `._id {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  margin-bottom: 0.25rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const status = args.contextData.props?.status || 'queued';
+
+return {
+  as: "div",
+  hide: status === 'completed' || status === 'failed'
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  height: 6px;
+  background: ${args.theme.var.color.background_light_300};
+  border-radius: 3px;
+  overflow: hidden;
+}`;
+'''
+      }
+    },
+    {
+      id: "progress_bar_fill",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const progress = args.contextData.props?.progress || 0;
+
+return {
+  as: "div",
+  style: {
+    width: `${Math.min(Math.max(progress, 0), 100)}%`
+  }
+};
+''',
+        css: '''
+return `._id {
+  height: 100%;
+  background: ${args.theme.var.color.primary};
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "ComponentVariant", S: "yto_processing_status_component", E: "variant_status" },
+    { id: "e2", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_queued" },
+    { id: "e3", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_processing" },
+    { id: "e4", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_completed" },
+    { id: "e5", T: "ComponentVariantOption", S: "variant_status", E: "variant_status_failed" },
+    { id: "e6", T: "ComponentVariant", S: "yto_processing_status_component", E: "variant_progress" },
+    { id: "e7", T: "ComponentVariant", S: "yto_processing_status_component", E: "variant_type" },
+    { id: "e8", T: "ComponentVariantOption", S: "variant_type", E: "variant_type_channel" },
+    { id: "e9", T: "ComponentVariantOption", S: "variant_type", E: "variant_type_playlist" },
+    { id: "e10", T: "ComponentVariant", S: "yto_processing_status_component", E: "variant_details" },
+    { id: "e11", T: "Attr", S: "yto_processing_status_component", E: "root_container" },
+    { id: "e12", T: "Attr", S: "root_container", E: "icon_container" },
+    { id: "e13", T: "Attr", S: "root_container", E: "content_container" },
+    { id: "e14", T: "Attr", S: "content_container", E: "status_text" },
+    { id: "e15", T: "Attr", S: "content_container", E: "progress_bar_container" },
+    { id: "e16", T: "Attr", S: "progress_bar_container", E: "progress_bar_fill" }
+  ]
+}

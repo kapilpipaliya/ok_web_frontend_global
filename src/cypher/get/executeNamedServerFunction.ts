@@ -71,6 +71,7 @@ export async function executeNamedServerFunction(
     // Prepare the args object that will be available in the function
     const args = {
       session: dbSession,
+      getSession: getDBSessionForSubdomain,
       context: context,
       contextData: request.contextData || {},
       vertexes: context.vertexes || [],

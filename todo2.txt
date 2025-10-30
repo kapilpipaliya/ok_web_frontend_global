@@ -312,3 +312,24 @@ support@ysaar.com
 app pass
 fsda fmri hjfi fyrq
 secure:true
+
+
+yssar.com youtube API key:
+AIzaSyAFp840CbkfT7-TnDmp0qUvrV7vtjNo8qs
+
+
+Usage Examples:
+  Line-separated format:
+  AIzaSyC_CClo37bSKqLUFNKEsDaZgYzTxEQfuds
+  AIzaSyAFp840CbkfT7-TnDmp0qUvrV7vtjNo8qs
+
+  JSON format:
+  [
+    "AIzaSyC_CClo37bSKqLUFNKEsDaZgYzTxEQfuds",
+    {
+      "apiKey": "AIzaSyAFp840CbkfT7-TnDmp0qUvrV7vtjNo8qs",
+      "name": "Secondary Key",
+      "dailyLimit": 10000,
+      "priority": 101
+    }
+  ]

@@ -1,0 +1,61 @@
+{
+  vertexes: [
+    {
+      id: "get_playlist_status_function",
+      L: "Function",
+      P: {
+        key: "getPlaylistStatus",
+        description: "Get processing status for a specific playlist",
+        body: '''
+try {
+  const { playlistId } = args.contextData;
+
+  if (!playlistId) {
+    throw new Error("Playlist ID is required");
+  }
+
+  // Get current authenticated user
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found");
+  }
+
+  // Fetch playlist setting status
+  const result = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    RETURN ps, p
+  `, { userUuid: user.P.uuid, playlistId });
+
+  if (result.records.length === 0) {
+    return {
+      success: false,
+      message: "Playlist not found"
+    };
+  }
+
+  const playlistSetting = args.convertNodeToJson(result.records[0].get('ps'));
+  const playlist = args.convertNodeToJson(result.records[0].get('p'));
+
+  return {
+    success: true,
+    data: {
+      playlist,
+      playlistSetting
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching playlist status:", error);
+  return {
+    success: false,
+    message: "Failed to fetch playlist status",
+    error: { details: error.message }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

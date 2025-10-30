@@ -1,0 +1,61 @@
+{
+  vertexes: [
+    {
+      id: "get_channel_status_function",
+      L: "Function",
+      P: {
+        key: "getChannelStatus",
+        description: "Get processing status for a specific channel",
+        body: '''
+try {
+  const { channelId } = args.contextData;
+
+  if (!channelId) {
+    throw new Error("Channel ID is required");
+  }
+
+  // Get current authenticated user
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found");
+  }
+
+  // Fetch channel setting status
+  const result = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    RETURN cs, c
+  `, { userUuid: user.P.uuid, channelId });
+
+  if (result.records.length === 0) {
+    return {
+      success: false,
+      message: "Channel not found"
+    };
+  }
+
+  const channelSetting = args.convertNodeToJson(result.records[0].get('cs'));
+  const channel = args.convertNodeToJson(result.records[0].get('c'));
+
+  return {
+    success: true,
+    data: {
+      channel,
+      channelSetting
+    }
+  };
+
+} catch (error) {
+  console.error("Error fetching channel status:", error);
+  return {
+    success: false,
+    message: "Failed to fetch channel status",
+    error: { details: error.message }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

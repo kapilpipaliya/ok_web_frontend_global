@@ -9,7 +9,7 @@
     "startDev": "dotenv -e .env -- vinxi start --port 3001",
     "start": "dotenv -e .env -- vinxi start --port 3001",
     "prepare": "husky",
-    "postinstall": "npx playwright install",
+    "postinstall": "npx playwright install-deps && npx playwright install",
     "s": "git pull && npm i --force && npm run build && npm run start",
     "send-test-email": "dotenv -e .env -- tsx scripts/sendTestEmail.ts admin admin@decodeui.io kapilpipaliya@gmail.com"
   },

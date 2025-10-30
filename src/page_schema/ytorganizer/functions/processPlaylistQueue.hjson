@@ -1,0 +1,232 @@
+{
+  vertexes: [
+    {
+      id: "process_playlist_queue_worker",
+      L: "Function",
+      P: {
+        key: "processPlaylistQueue",
+        description: "Background worker that processes playlists by fetching all videos",
+        body: '''
+// This is a background worker function that processes playlists
+if (args.contextData.action === 'start') {
+  console.log('Starting playlist processing worker');
+
+  const { Worker } = args.bullmq;
+
+  // Get Redis connection from bullmq config
+  const connection = args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    maxRetriesPerRequest: null
+  };
+
+  // Create worker for playlist processing queue
+  const worker = new Worker('playlistProcessing', async (job) => {
+    const { playlistId, userId, userUuid, customName, channelId } = job.data;
+
+    console.log(`Processing playlist ${playlistId} for user ${userId}`);
+
+    // Get a new database session for this job
+    const { dbSession: session } = await args.getSession();
+
+    try {
+      // Update status to processing
+      await session.run(`
+        MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+              -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        SET ps.status = 'processing',
+            ps.progress = 0,
+            ps.updatedAt = datetime()
+        RETURN ps
+      `, { userUuid, playlistId });
+
+      // Get active API key from database
+      const apiKeyResult = await args.executeNamedServerFunction({
+        functionName: "getActiveYouTubeAPIKey",
+        contextData: {}
+      });
+
+      if (!apiKeyResult?.result?.success || !apiKeyResult?.result?.data) {
+        throw new Error(apiKeyResult?.result?.message || "Failed to get YouTube API key");
+      }
+
+      const apiKeyData = apiKeyResult.result.data;
+
+      // Fetch playlist videos from YouTube API
+      const { google } = await import('googleapis');
+      const youtube = google.youtube({ version: 'v3', auth: apiKeyData.apiKey });
+
+      // Fetch ALL playlist videos with pagination
+      let allVideos = [];
+      let nextPageToken = null;
+
+      do {
+        const itemsResponse = await youtube.playlistItems.list({
+          part: ['snippet', 'contentDetails'],
+          playlistId: playlistId,
+          maxResults: 50,
+          pageToken: nextPageToken
+        });
+
+        // Track API usage for playlistItems.list call
+        await args.executeNamedServerFunction({
+          functionName: "trackYouTubeAPIUsage",
+          contextData: { keyId: apiKeyData.keyId, cost: 3 }
+        });
+
+        if (itemsResponse.data.items) {
+          allVideos = allVideos.concat(itemsResponse.data.items);
+        }
+
+        nextPageToken = itemsResponse.data.nextPageToken;
+      } while (nextPageToken);
+
+      const totalVideos = allVideos.length;
+
+      // Update total count
+      await session.run(`
+        MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+              -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        SET ps.totalVideos = $totalVideos,
+            ps.processedVideos = 0,
+            ps.updatedAt = datetime()
+        RETURN ps
+      `, { userUuid, playlistId, totalVideos });
+
+      let processedVideos = 0;
+
+      // Process each video
+      for (const video of allVideos) {
+        if (!video.contentDetails?.videoId) continue;
+
+        const videoId = video.contentDetails.videoId;
+
+        // Save video
+        await session.run(`
+          MERGE (v:Video {youtubeId: $videoId})
+          ON CREATE SET
+            v.key = $key,
+            v.createdAt = datetime()
+          SET
+            v.title = $title,
+            v.description = $description,
+            v.thumbnail = $thumbnail,
+            v.channelId = $channelId,
+            v.channelTitle = $channelTitle,
+            v.updatedAt = datetime()
+        `, {
+          videoId,
+          key: `video_${videoId}`,
+          title: video.snippet?.title || '',
+          description: video.snippet?.description || '',
+          thumbnail: video.snippet?.thumbnails?.high?.url ||
+                     video.snippet?.thumbnails?.medium?.url || '',
+          channelId: video.snippet?.channelId || channelId || '',
+          channelTitle: video.snippet?.channelTitle || ''
+        });
+
+        // Create playlist-video relationship
+        await session.run(`
+          MATCH (p:Playlist {youtubeId: $playlistId})
+          MATCH (v:Video {youtubeId: $videoId})
+          MERGE (p)-[:PlaylistVideo]->(v)
+        `, { playlistId, videoId });
+
+        // Create user video setting
+        const videoSettingKey = `video_setting_${userId}_${videoId}`;
+        await session.run(`
+          MATCH (u:User {uuid: $userUuid})
+          MATCH (v:Video {youtubeId: $videoId})
+          MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+          ON CREATE SET
+            vs.key = $videoSettingKey,
+            vs.createdAt = datetime()
+          SET
+            vs.watched = false,
+            vs.notes = null,
+            vs.customPosition = $position,
+            vs.playlistIndex = $position,
+            vs.updatedAt = datetime()
+        `, {
+          userUuid,
+          videoId,
+          videoSettingKey,
+          position: video.snippet?.position || 0
+        });
+
+        processedVideos++;
+
+        // Update progress every 10 videos or on last video
+        if (processedVideos % 10 === 0 || processedVideos === totalVideos) {
+          const progress = Math.round((processedVideos / totalVideos) * 100);
+
+          await session.run(`
+            MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+                  -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+            SET ps.processedVideos = $processedVideos,
+                ps.progress = $progress,
+                ps.updatedAt = datetime()
+          `, { userUuid, playlistId, processedVideos, progress });
+        }
+      }
+
+      // Update customOrder with all video IDs
+      const videoIds = allVideos.map(v => v.contentDetails?.videoId).filter(Boolean);
+
+      // Mark as completed
+      await session.run(`
+        MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+              -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        SET ps.status = 'completed',
+            ps.progress = 100,
+            ps.customOrder = $customOrder,
+            ps.completedAt = datetime(),
+            ps.updatedAt = datetime()
+      `, { userUuid, playlistId, customOrder: videoIds });
+
+      console.log(`Playlist ${playlistId} processing completed: ${processedVideos} videos`);
+
+    } catch (error) {
+      console.error(`Error processing playlist ${playlistId}:`, error);
+
+      // Mark as failed
+      await session.run(`
+        MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+              -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+        SET ps.status = 'failed',
+            ps.error = $error,
+            ps.updatedAt = datetime()
+      `, { userUuid, playlistId, error: error.message });
+
+      throw error;
+    } finally {
+      // Always close the session
+      await session.close();
+    }
+  }, {
+    connection,
+    concurrency: 5
+  });
+
+  worker.on('completed', (job) => {
+    console.log(`Playlist processing job ${job.id} completed`);
+  });
+
+  worker.on('failed', (job, err) => {
+    console.error(`Playlist processing job ${job?.id} failed:`, err);
+  });
+
+  // Return stop function for graceful shutdown
+  return {
+    stop: async () => {
+      console.log('Stopping playlist processing worker');
+      await worker.close();
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -133,9 +133,48 @@ const handleMouseDown = (e) => {
   document.addEventListener('mouseup', handleMouseUp);
 };
 
+const handleTouchStart = (e) => {
+  const state = getPlayerState?.();
+  if (state !== "minimized") return;
+
+  // Prevent default scrolling while dragging
+  e.preventDefault();
+
+  const touch = e.touches[0];
+  const startX = touch.clientX;
+  const startY = touch.clientY;
+  const playerEl = e.currentTarget.parentElement;
+  const rect = playerEl.getBoundingClientRect();
+  const offsetX = startX - rect.left;
+  const offsetY = startY - rect.top;
+
+  const handleTouchMove = (moveEvent) => {
+    const touch = moveEvent.touches[0];
+    const newX = touch.clientX - offsetX;
+    const newY = touch.clientY - offsetY;
+
+    // Keep player within viewport bounds
+    const maxX = window.innerWidth - rect.width;
+    const maxY = window.innerHeight - rect.height;
+    const boundedX = Math.max(0, Math.min(newX, maxX));
+    const boundedY = Math.max(0, Math.min(newY, maxY));
+
+    setPlayerPosition?.({ x: boundedX, y: boundedY });
+  };
+
+  const handleTouchEnd = () => {
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+  };
+
+  document.addEventListener('touchmove', handleTouchMove);
+  document.addEventListener('touchend', handleTouchEnd);
+};
+
 return {
   as: "div",
-  onMouseDown: handleMouseDown
+  onMouseDown: handleMouseDown,
+  onTouchStart: handleTouchStart
 };
 ''',
         css: '''
@@ -151,6 +190,7 @@ return `._id {
   border-bottom: 1px solid ${args.theme.var.color.background_dark_700};
   cursor: ${state === "minimized" ? 'move' : 'default'};
   user-select: none;
+  touch-action: ${state === "minimized" ? 'none' : 'auto'};
 }`;
 '''
       }

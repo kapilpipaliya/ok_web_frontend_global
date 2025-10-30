@@ -1,0 +1,98 @@
+{
+  vertexes: [
+    {
+      id: "get_active_youtube_api_key",
+      L: "Function",
+      P: {
+        key: "getActiveYouTubeAPIKey",
+        description: "Get the currently active YouTube API key based on usage limits and rotation",
+        body: '''
+try {
+  // Get current date for daily reset
+  const today = new Date().toISOString().split('T')[0];
+
+  // Get all API keys ordered by priority (lower number = higher priority)
+  const result = await args.session.run(`
+    MATCH (ak:YouTubeAPIKey)
+    WHERE ak.isActive = true
+    RETURN ak
+    ORDER BY ak.priority ASC, ak.currentCount ASC
+  `);
+
+  if (result.records.length === 0) {
+    throw new Error("No active YouTube API keys found. Please add an API key in the settings.");
+  }
+
+  // Convert to vertex format
+  const apiKeys = result.records.map(record => args.convertNodeToJson(record.get('ak')));
+
+  // Find first available API key
+  for (const apiKeyData of apiKeys) {
+    const apiKey = apiKeyData;
+    const resetDate = apiKey.P.resetDate || '';
+    const currentCount = apiKey.P.currentCount || 0;
+    const dailyLimit = apiKey.P.dailyLimit || 10000;
+
+    // Reset count if it's a new day
+    if (resetDate !== today) {
+      await args.session.run(`
+        MATCH (ak:YouTubeAPIKey {key: $key})
+        SET ak.currentCount = 0,
+            ak.resetDate = $today,
+            ak.updatedAt = datetime()
+      `, { key: apiKey.P.key, today });
+
+      return {
+        success: true,
+        data: {
+          apiKey: apiKey.P.apiKey,
+          keyId: apiKey.P.key,
+          currentCount: 0,
+          dailyLimit: dailyLimit,
+          remainingCalls: dailyLimit
+        }
+      };
+    }
+
+    // Check if this key has capacity
+    if (currentCount < dailyLimit) {
+      return {
+        success: true,
+        data: {
+          apiKey: apiKey.P.apiKey,
+          keyId: apiKey.P.key,
+          currentCount: currentCount,
+          dailyLimit: dailyLimit,
+          remainingCalls: dailyLimit - currentCount
+        }
+      };
+    }
+  }
+
+  // All keys exhausted
+  return {
+    success: false,
+    message: "All YouTube API keys have reached their daily limit. Please try again tomorrow or add more API keys.",
+    error: {
+      type: "APIQuotaExceeded",
+      details: "All API keys exhausted for today"
+    }
+  };
+
+} catch (error) {
+  console.error('Error getting active API key:', error);
+  return {
+    success: false,
+    message: "Failed to get API key",
+    error: {
+      type: "DatabaseError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

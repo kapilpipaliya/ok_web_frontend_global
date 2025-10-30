@@ -5,7 +5,7 @@
       L: "Function",
       P: {
         key: "saveChannel",
-        description: "Fetches channel data from YouTube API and saves channel, playlists, and videos to the database",
+        description: "Fetches basic channel metadata and queues background processing for playlists and videos",
         body: '''
 /**
  * Extract channel ID or identifier from various YouTube URL formats
@@ -30,27 +30,23 @@ const extractChannelId = (url) => {
   return null;
 };
 
-// YouTube API key - replace with your actual API key
-const YOUTUBE_API_KEY = 'AIzaSyC_CClo37bSKqLUFNKEsDaZgYzTxEQfuds';
-
 /**
- * Fetch complete channel data from YouTube Data API v3
- * Includes: channel info, all playlists, and all videos
+ * Fetch ONLY basic channel metadata (no playlists or videos)
+ * Full processing will be done in background worker
  */
-const fetchChannelData = async (channelIdentifier) => {
+const fetchChannelMetadata = async (channelIdentifier, apiKeyData) => {
   // Dynamic import of googleapis library
   const { google } = await import('googleapis');
 
-  // Initialize YouTube API client with authentication
+  // Initialize YouTube API client with authentication from database
   const youtube = google.youtube({
     version: 'v3',
-    auth: YOUTUBE_API_KEY
+    auth: apiKeyData.apiKey
   });
 
   let channelId;
 
   // Resolve channel identifier to actual channel ID
-  // If it's a handle (@username) or custom URL, we need to search for the channel
   if (channelIdentifier.startsWith('@') || !channelIdentifier.startsWith('UC')) {
     // Search for channel by handle or custom URL
     const searchResponse = await youtube.search.list({
@@ -64,14 +60,12 @@ const fetchChannelData = async (channelIdentifier) => {
       throw new Error('Channel not found');
     }
 
-    // Extract the actual channel ID from search results
     channelId = searchResponse.data.items[0].snippet.channelId;
   } else {
-    // Already a channel ID (starts with UC), use directly
     channelId = channelIdentifier;
   }
 
-  // Fetch channel details with comprehensive information
+  // Fetch ONLY channel details (metadata only, no playlists/videos)
   const channelResponse = await youtube.channels.list({
     part: ['snippet', 'contentDetails', 'statistics', 'brandingSettings'],
     id: [channelId]
@@ -83,88 +77,12 @@ const fetchChannelData = async (channelIdentifier) => {
 
   const channel = channelResponse.data.items[0];
 
-  // Fetch all channel playlists with pagination
-  let allPlaylists = [];
-  let nextPageToken = null;
-
-  do {
-    const playlistsResponse = await youtube.playlists.list({
-      part: ['snippet', 'contentDetails', 'status'],
-      channelId: channelId,
-      maxResults: 50,
-      pageToken: nextPageToken
-    });
-
-    if (playlistsResponse.data.items) {
-      allPlaylists = allPlaylists.concat(playlistsResponse.data.items);
-    }
-
-    nextPageToken = playlistsResponse.data.nextPageToken;
-  } while (nextPageToken); // Fetch ALL playlists without limit
-
-  // Add the special "uploads playlist" (contains ALL channel videos)
-  // Every YouTube channel has an automatic uploads playlist with ID starting with "UU"
-  const uploadsPlaylistId = channel.contentDetails?.relatedPlaylists?.uploads;
-  if (uploadsPlaylistId) {
-    const uploadsPlaylist = {
-      id: uploadsPlaylistId,
-      snippet: {
-        title: 'All Uploads',
-        description: 'All videos uploaded by this channel',
-        channelId: channelId,
-        channelTitle: channel.snippet.title,
-        thumbnails: channel.snippet.thumbnails,
-        publishedAt: channel.snippet.publishedAt
-      },
-      status: { privacyStatus: 'public' },
-      contentDetails: { itemCount: channel.statistics?.videoCount || 0 }
-    };
-    // Add uploads playlist at the beginning
-    allPlaylists.unshift(uploadsPlaylist);
-  }
-
-  // Fetch ALL channel videos from the uploads playlist
-  // This is the most reliable way to get every video uploaded to the channel
-  let allVideos = [];
-
-  if (uploadsPlaylistId) {
-    let nextPageToken = null;
-
-    do {
-      // Fetch videos in batches of 50 (YouTube API limit)
-      const videosResponse = await youtube.playlistItems.list({
-        part: ['snippet', 'contentDetails'],
-        playlistId: uploadsPlaylistId,
-        maxResults: 50,                    // Maximum allowed per request
-        pageToken: nextPageToken           // For pagination
-      });
-
-      if (videosResponse.data.items) {
-        allVideos = allVideos.concat(videosResponse.data.items);
-      }
-
-      // Get the token for the next page of results
-      nextPageToken = videosResponse.data.nextPageToken;
-    } while (nextPageToken); // Continue until all videos are fetched (no limit)
-  }
-
   return {
-    channel: {
-      id: channelId,
-      snippet: channel.snippet,
-      statistics: channel.statistics,
-      contentDetails: channel.contentDetails,
-      brandingSettings: channel.brandingSettings
-    },
-    playlists: allPlaylists,
-    videos: allVideos.map((item, index) => ({
-      id: item.contentDetails.videoId,
-      snippet: {
-        ...item.snippet,
-        position: item.snippet.position || index
-      },
-      contentDetails: item.contentDetails
-    }))
+    id: channelId,
+    snippet: channel.snippet,
+    statistics: channel.statistics,
+    contentDetails: channel.contentDetails,
+    brandingSettings: channel.brandingSettings
   };
 };
 
@@ -188,11 +106,29 @@ try {
     throw new Error("Invalid YouTube channel URL. Please provide a valid channel URL.");
   }
 
-  // Fetch complete channel data from YouTube API
-  const channelData = await fetchChannelData(channelIdentifier);
+  // Get active API key from database
+  const apiKeyResult = await args.executeNamedServerFunction({
+    functionName: "getActiveYouTubeAPIKey",
+    contextData: {}
+  });
 
-  // STEP 1: Create or update the main Channel vertex in the database
-  const channelKey = `channel_${channelData.channel.id}`;
+  if (!apiKeyResult?.result?.success || !apiKeyResult?.result?.data) {
+    throw new Error(apiKeyResult?.result?.message || "Failed to get YouTube API key");
+  }
+
+  const apiKeyData = apiKeyResult.result.data;
+
+  // Fetch ONLY basic channel metadata (fast operation)
+  const channelData = await fetchChannelMetadata(channelIdentifier, apiKeyData);
+
+  // Track API usage (channel search + channel details = 2 calls, each costs ~1-3 quota units)
+  await args.executeNamedServerFunction({
+    functionName: "trackYouTubeAPIUsage",
+    contextData: { keyId: apiKeyData.keyId, cost: 5 }
+  });
+
+  // STEP 1: Create or update the main Channel vertex with basic metadata
+  const channelKey = `channel_${channelData.id}`;
 
   const mergeChannelQuery = `
     MERGE (c:Channel {youtubeId: $channelId})
@@ -217,24 +153,23 @@ try {
 
   await args.session.run(mergeChannelQuery, {
     key: channelKey,
-    channelId: channelData.channel.id,
-    title: channelData.channel.snippet.title,
-    description: channelData.channel.snippet.description || "",
-    thumbnail: channelData.channel.snippet.thumbnails?.high?.url ||
-               channelData.channel.snippet.thumbnails?.medium?.url ||
-               channelData.channel.snippet.thumbnails?.default?.url || "",
-    customUrl: channelData.channel.snippet.customUrl || "",
-    country: channelData.channel.snippet.country || "",
-    videoCount: parseInt(channelData.channel.statistics?.videoCount || "0"),
-    viewCount: parseInt(channelData.channel.statistics?.viewCount || "0"),
-    subscriberCount: parseInt(channelData.channel.statistics?.subscriberCount || "0"),
-    uploadsPlaylistId: channelData.channel.contentDetails?.relatedPlaylists?.uploads || "",
-    publishedAt: channelData.channel.snippet.publishedAt
+    channelId: channelData.id,
+    title: channelData.snippet.title,
+    description: channelData.snippet.description || "",
+    thumbnail: channelData.snippet.thumbnails?.high?.url ||
+               channelData.snippet.thumbnails?.medium?.url ||
+               channelData.snippet.thumbnails?.default?.url || "",
+    customUrl: channelData.snippet.customUrl || "",
+    country: channelData.snippet.country || "",
+    videoCount: parseInt(channelData.statistics?.videoCount || "0"),
+    viewCount: parseInt(channelData.statistics?.viewCount || "0"),
+    subscriberCount: parseInt(channelData.statistics?.subscriberCount || "0"),
+    uploadsPlaylistId: channelData.contentDetails?.relatedPlaylists?.uploads || "",
+    publishedAt: channelData.snippet.publishedAt
   });
 
-  // STEP 2: Create user-specific ChannelSetting
-  // This stores the user's personal preferences for this channel
-  const channelSettingKey = `channel_setting_${user.id}_${channelData.channel.id}`;
+  // STEP 2: Create user-specific ChannelSetting with status tracking
+  const channelSettingKey = `channel_setting_${user.id}_${channelData.id}`;
 
   const mergeChannelSettingQuery = `
     MATCH (u:User {uuid: $userUuid})
@@ -248,107 +183,66 @@ try {
       cs.notifications = true,
       cs.autoDownload = false,
       cs.priority = 'normal',
+      cs.status = 'queued',
+      cs.progress = 0,
+      cs.totalPlaylists = 0,
+      cs.processedPlaylists = 0,
+      cs.totalVideos = 0,
+      cs.processedVideos = 0,
+      cs.error = null,
+      cs.queuedAt = datetime(),
       cs.updatedAt = datetime()
     RETURN cs
   `;
 
   await args.session.run(mergeChannelSettingQuery, {
     userUuid: user.P.uuid,
-    channelId: channelData.channel.id,
+    channelId: channelData.id,
     channelSettingKey,
     customName: name || null
   });
 
-  // STEP 3: Process all channel playlists
-  // This reuses the existing savePlaylist function for each playlist
-  let savedPlaylists = 0;
+  // STEP 3: Add to background processing queue using BullMQ
+  const { Queue } = args.bullmq;
 
-  for (const playlist of channelData.playlists) {
-    if (!playlist.id || !playlist.snippet) {
-      console.warn('Skipping invalid playlist:', playlist);
-      continue;
-    }
+  // Get Redis connection
+  const connection = args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    maxRetriesPerRequest: null
+  };
 
-    // Save each playlist using the existing savePlaylist function
-    // This handles all playlist-specific logic and video relationships
-    try {
-      const playlistUrl = `https://www.youtube.com/playlist?list=${playlist.id}`;
+  const channelQueue = new Queue('channelProcessing', { connection });
 
-      // Call the existing savePlaylist server function
-      const result = await args.executeNamedServerFunction({
-        functionName: "savePlaylist",
-        contextData: {
-          url: playlistUrl,
-          name: null // Let it use the original playlist name from YouTube
-        }
-      });
+  await channelQueue.add('processChannel', {
+    channelId: channelData.id,
+    userId: user.id,
+    userUuid: user.P.uuid,
+    customName: name || null
+  }, {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 5000
+    },
+    removeOnComplete: 100,
+    removeOnFail: 50
+  });
 
-      if (result.error) {
-        console.error(`Error from savePlaylist function for ${playlist.id}:`, result.error);
-      } else if (result.result && result.result.success) {
-        savedPlaylists++;
-      } else if (result.success) {
-        savedPlaylists++;
-      }
-
-      // Create Channel -> Playlist relationship
-      const channelPlaylistQuery = `
-        MATCH (c:Channel {youtubeId: $channelId})
-        MATCH (p:Playlist {youtubeId: $playlistId})
-        MERGE (c)-[:ChannelPlaylist]->(p)
-      `;
-
-      await args.session.run(channelPlaylistQuery, {
-        channelId: channelData.channel.id,
-        playlistId: playlist.id
-      });
-
-      // Create user-specific PlaylistSetting relationship
-      // This ensures the user has access to this playlist
-      const playlistSettingKey = `playlist_setting_${user.id}_${playlist.id}`;
-
-      const mergePlaylistSettingQuery = `
-        MATCH (u:User {uuid: $userUuid})
-        MATCH (p:Playlist {youtubeId: $playlistId})
-        MERGE (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
-        ON CREATE SET
-          ps.key = $playlistSettingKey,
-          ps.createdAt = datetime()
-        SET
-          ps.customName = null,
-          ps.notifications = true,
-          ps.autoDownload = false,
-          ps.sortBy = 'index',
-          ps.showThumbnails = true,
-          ps.viewMode = 'list',
-          ps.updatedAt = datetime()
-        RETURN ps
-      `;
-
-      await args.session.run(mergePlaylistSettingQuery, {
-        userUuid: user.P.uuid,
-        playlistId: playlist.id,
-        playlistSettingKey
-      });
-
-    } catch (playlistError) {
-      console.error(`Error saving playlist ${playlist.id}:`, playlistError);
-      // Continue processing other playlists even if one fails
-    }
-  }
+  // Close queue connection
+  await channelQueue.close();
 
   return {
     success: true,
-    message: `Channel "${channelData.channel.snippet.title}" added to your collection!`,
+    message: `Channel "${channelData.snippet.title}" has been queued for processing. This may take a few minutes.`,
     data: {
-      channelId: channelData.channel.id,
-      title: channelData.channel.snippet.title,
+      channelId: channelData.id,
+      title: channelData.snippet.title,
       customName: name,
-      totalPlaylists: channelData.playlists.length,
-      savedPlaylists,
-      uploadsPlaylistId: channelData.channel.contentDetails?.relatedPlaylists?.uploads,
-      subscriberCount: channelData.channel.statistics?.subscriberCount,
-      videoCount: channelData.channel.statistics?.videoCount,
+      status: 'queued',
+      progress: 0,
+      subscriberCount: channelData.statistics?.subscriberCount,
+      videoCount: channelData.statistics?.videoCount,
       userId: user.id,
       userSpecific: true
     }
