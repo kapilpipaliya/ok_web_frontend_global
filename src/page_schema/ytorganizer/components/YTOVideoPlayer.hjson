@@ -482,48 +482,29 @@ return {
         displayOrder: 2,
         componentName: "Html",
         fns: '''
-// Setup YouTube iframe API message listener
-const playNext = args.contextData.props?.playNext;
-const getPlayerState = args.contextData.props?.playerState;
+// Initialize YouTube iframe API
+if (typeof window !== 'undefined' && !window.YT) {
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  const firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+}
 
-const handleMessage = (event) => {
-  if (event.origin !== "https://www.youtube.com") return;
-
-  try {
-    // YouTube sends data as string or object
-    let data = event.data;
-    if (typeof data === 'string') {
-      data = JSON.parse(data);
-    }
-
-    // YouTube player states: -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering, 5=cued
-    // Only auto-play next video when:
-    // 1. Current video has ended (state 0)
-    // 2. Player is still open (not closed)
-    if (data.event === "onStateChange" && data.info === 0) {
-      const currentState = getPlayerState?.();
-      if (currentState === "minimized" || currentState === "maximized") {
-        playNext?.();
-      }
-    }
-  } catch (e) {
-    // Ignore parse errors - many messages from YouTube aren't JSON
-  }
-};
+// Create reactive store for player state
+const [playerState, setPlayerState] = args.createStore({
+  player: null,
+  isPlayerReady: false
+});
 
 return {
-  handleMessage
+  playerState,
+  setPlayer: (p) => setPlayerState('player', p),
+  setPlayerReady: (ready) => setPlayerState('isPlayerReady', ready)
 };
 ''',
         props: '''
 return {
-  as: "div",
-  onMount: (el) => {
-    window.addEventListener("message", args.fns.handleMessage);
-  },
-  onCleanup: () => {
-    window.removeEventListener("message", args.fns.handleMessage);
-  }
+  as: "div"
 };
 ''',
         css: '''
@@ -542,24 +523,84 @@ return `._id {
       P: {
         displayOrder: 1,
         componentName: "Html",
+        fns: '''
+// Watch for video changes and update player without changing iframe src
+args.createEffect(() => {
+  const getCurrentVideo = args.contextData.props?.currentVideo;
+  const video = getCurrentVideo?.();
+  const currentId = video?.P?.youtubeId || "";
+  const player = args.fns.playerState.player;
+  const isReady = args.fns.playerState.isPlayerReady;
+
+  if (player && isReady && currentId) {
+    try {
+      // Use loadVideoById to change video without creating history entry
+      player.loadVideoById(currentId);
+    } catch (e) {
+      console.error('Error loading video:', e);
+    }
+  }
+});
+
+return {};
+''',
         props: '''
 const getCurrentVideo = args.contextData.props?.currentVideo;
 const video = getCurrentVideo?.();
 const youtubeId = video?.P?.youtubeId || "";
 
 return {
-  as: "iframe",
-  src: youtubeId ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&enablejsapi=1` : "",
-  allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
-  allowfullscreen: true,
-  frameborder: "0"
+  as: "div",
+  id: "youtube-player",
+  ref: (el) => {
+    if (!el || args.fns.playerState.player) return;
+
+    // Wait for YT API to be ready
+    const initPlayer = () => {
+      if (!window.YT || !window.YT.Player) {
+        setTimeout(initPlayer, 100);
+        return;
+      }
+
+      // Create YouTube player
+      const ytPlayer = new window.YT.Player(el, {
+        height: '100%',
+        width: '100%',
+        videoId: youtubeId || '',
+        playerVars: {
+          autoplay: 1,
+          enablejsapi: 1,
+          origin: window.location.origin,
+          rel: 0  // Don't show related videos from other channels after video ends
+        },
+        events: {
+          onReady: () => {
+            args.fns.setPlayerReady(true);
+            args.fns.setPlayer(ytPlayer);
+          },
+          onStateChange: (event) => {
+            // YouTube player states: 0=ended
+            if (event.data === 0) {
+              const getPlayerState = args.contextData.props?.playerState;
+              const playNext = args.contextData.props?.playNext;
+              const currentState = getPlayerState?.();
+              if (currentState === "minimized" || currentState === "maximized") {
+                playNext?.();
+              }
+            }
+          }
+        }
+      });
+    };
+
+    initPlayer();
+  }
 };
 ''',
         css: '''
 return `._id {
   width: 100%;
   height: 100%;
-  border: none;
 }`;
 '''
       }

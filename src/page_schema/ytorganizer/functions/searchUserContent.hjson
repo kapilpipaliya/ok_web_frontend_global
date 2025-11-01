@@ -9,28 +9,7 @@
         body: '''
 try {
   // Extract search parameters from request
-  const { query, type, limit = 50, page = 1, isRegex = false } = args.contextData;
-
-  // Ensure limit is a valid integer (Neo4j requires integers, not floats)
-  let validLimit = 50; // default
-  if (limit !== undefined && limit !== null) {
-    const parsed = parseInt(String(limit), 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      validLimit = Math.min(100, parsed); // Cap at 100 per page for better performance
-    }
-  }
-
-  // Ensure page is a valid integer
-  let validPage = 1; // default
-  if (page !== undefined && page !== null) {
-    const parsed = parseInt(String(page), 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      validPage = parsed;
-    }
-  }
-
-  // Calculate offset for pagination
-  const offset = (validPage - 1) * validLimit;
+  const { query, type, isRegex = false } = args.contextData;
 
   if (!query || query.trim().length === 0) {
     return {
@@ -39,7 +18,7 @@ try {
         channels: [],
         playlists: [],
         videos: [],
-        totalResults: 0
+        totalCount: 0
       },
       message: "Please enter a search query"
     };
@@ -70,33 +49,9 @@ try {
     videos: []
   };
 
-  const counts = {
-    channels: 0,
-    playlists: 0,
-    videos: 0
-  };
-
   // SEARCH CHANNELS
   if (!type || type === 'all' || type === 'channels') {
-    // Get total count for pagination
-    const channelsCountQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
-      WHERE c.title =~ $pattern OR
-            c.description =~ $pattern OR
-            cs.customName =~ $pattern
-      RETURN COUNT(*) as total
-    `;
-
-    const channelsCountResult = await args.session.run(channelsCountQuery, {
-      userUuid: user.P.uuid,
-      pattern: searchPattern
-    });
-
-    const channelsTotal = channelsCountResult.records[0]?.get('total');
-    counts.channels = channelsTotal ? (typeof channelsTotal.toNumber === 'function' ? channelsTotal.toNumber() : Number(channelsTotal)) : 0;
-
-    // Get paginated results with user-specific video count
+    // Get results with user-specific video count
     const channelsQuery = `
       MATCH (u:User {uuid: $userUuid})
       MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
@@ -113,8 +68,6 @@ try {
 
       RETURN c, cs, videoCount
       ORDER BY cs.createdAt DESC
-      SKIP ${offset}
-      LIMIT ${validLimit}
     `;
 
     const channelsResult = await args.session.run(channelsQuery, {
@@ -141,25 +94,7 @@ try {
 
   // SEARCH PLAYLISTS
   if (!type || type === 'all' || type === 'playlists') {
-    // Get total count for pagination
-    const playlistsCountQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
-      WHERE p.title =~ $pattern OR
-            p.description =~ $pattern OR
-            ps.customName =~ $pattern
-      RETURN COUNT(*) as total
-    `;
-
-    const playlistsCountResult = await args.session.run(playlistsCountQuery, {
-      userUuid: user.P.uuid,
-      pattern: searchPattern
-    });
-
-    const playlistsTotal = playlistsCountResult.records[0]?.get('total');
-    counts.playlists = playlistsTotal ? (typeof playlistsTotal.toNumber === 'function' ? playlistsTotal.toNumber() : Number(playlistsTotal)) : 0;
-
-    // Get paginated results with user-specific video count
+    // Get results with user-specific video count
     const playlistsQuery = `
       MATCH (u:User {uuid: $userUuid})
       MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
@@ -176,8 +111,6 @@ try {
 
       RETURN p, ps, c, videoCount
       ORDER BY ps.createdAt DESC
-      SKIP ${offset}
-      LIMIT ${validLimit}
     `;
 
     const playlistsResult = await args.session.run(playlistsQuery, {
@@ -205,26 +138,7 @@ try {
 
   // SEARCH VIDEOS
   if (!type || type === 'all' || type === 'videos') {
-    // Get total count for pagination
-    const videosCountQuery = `
-      MATCH (u:User {uuid: $userUuid})
-      MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
-      WHERE v.title =~ $pattern OR
-            v.description =~ $pattern OR
-            v.channelTitle =~ $pattern OR
-            vs.notes =~ $pattern
-      RETURN COUNT(*) as total
-    `;
-
-    const videosCountResult = await args.session.run(videosCountQuery, {
-      userUuid: user.P.uuid,
-      pattern: searchPattern
-    });
-
-    const videosTotal = videosCountResult.records[0]?.get('total');
-    counts.videos = videosTotal ? (typeof videosTotal.toNumber === 'function' ? videosTotal.toNumber() : Number(videosTotal)) : 0;
-
-    // Get paginated results
+    // Get results
     const videosQuery = `
       MATCH (u:User {uuid: $userUuid})
       MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
@@ -237,8 +151,6 @@ try {
       WITH v, vs, COLLECT(DISTINCT {playlist: p, playlistSettings: ps}) as playlists
       RETURN v, vs, playlists[0] as firstPlaylist
       ORDER BY vs.updatedAt DESC
-      SKIP ${offset}
-      LIMIT ${validLimit}
     `;
 
     const videosResult = await args.session.run(videosQuery, {
@@ -261,48 +173,21 @@ try {
     });
   }
 
-  // Calculate pagination metadata
-  const totalResults = results.channels.length + results.playlists.length + results.videos.length;
-  const totalCount = counts.channels + counts.playlists + counts.videos;
-  const totalPages = Math.ceil(totalCount / validLimit);
-  const hasNextPage = validPage < totalPages;
-  const hasPrevPage = validPage > 1;
-
-  // Calculate type-specific pagination
-  const typePagination = {
-    channels: {
-      total: counts.channels,
-      pages: Math.ceil(counts.channels / validLimit),
-      hasNext: type === 'channels' && validPage < Math.ceil(counts.channels / validLimit),
-      hasPrev: type === 'channels' && validPage > 1
-    },
-    playlists: {
-      total: counts.playlists,
-      pages: Math.ceil(counts.playlists / validLimit),
-      hasNext: type === 'playlists' && validPage < Math.ceil(counts.playlists / validLimit),
-      hasPrev: type === 'playlists' && validPage > 1
-    },
-    videos: {
-      total: counts.videos,
-      pages: Math.ceil(counts.videos / validLimit),
-      hasNext: type === 'videos' && validPage < Math.ceil(counts.videos / validLimit),
-      hasPrev: type === 'videos' && validPage > 1
-    }
-  };
+  // Calculate total results
+  const channelsCount = results.channels.length;
+  const playlistsCount = results.playlists.length;
+  const videosCount = results.videos.length;
+  const totalCount = channelsCount + playlistsCount + videosCount;
 
   // Prepare summary message
   let message = `Found ${totalCount} total result${totalCount !== 1 ? 's' : ''}`;
   const parts = [];
-  if (counts.channels > 0) parts.push(`${counts.channels} channel${counts.channels !== 1 ? 's' : ''}`);
-  if (counts.playlists > 0) parts.push(`${counts.playlists} playlist${counts.playlists !== 1 ? 's' : ''}`);
-  if (counts.videos > 0) parts.push(`${counts.videos} video${counts.videos !== 1 ? 's' : ''}`);
+  if (channelsCount > 0) parts.push(`${channelsCount} channel${channelsCount !== 1 ? 's' : ''}`);
+  if (playlistsCount > 0) parts.push(`${playlistsCount} playlist${playlistsCount !== 1 ? 's' : ''}`);
+  if (videosCount > 0) parts.push(`${videosCount} video${videosCount !== 1 ? 's' : ''}`);
 
   if (parts.length > 0) {
     message += `: ${parts.join(', ')}`;
-  }
-
-  if (totalPages > 1) {
-    message += ` (Page ${validPage} of ${totalPages})`;
   }
 
   return {
@@ -311,21 +196,9 @@ try {
       channels: results.channels,
       playlists: results.playlists,
       videos: results.videos,
-      totalResults,
       totalCount,
       query,
-      type: type || 'all',
-      pagination: {
-        page: validPage,
-        limit: validLimit,
-        totalPages,
-        totalCount,
-        hasNextPage,
-        hasPrevPage,
-        startIndex: offset + 1,
-        endIndex: Math.min(offset + totalResults, totalCount),
-        byType: typePagination
-      }
+      type: type || 'all'
     },
     message
   };
@@ -353,7 +226,7 @@ try {
       channels: [],
       playlists: [],
       videos: [],
-      totalResults: 0
+      totalCount: 0
     }
   };
 }

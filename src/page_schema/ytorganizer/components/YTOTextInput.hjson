@@ -318,6 +318,7 @@ return {
   onBlur: args.contextData.props?.onBlur || null,
   onFocus: args.contextData.props?.onFocus || null,
   onInput: args.contextData.props?.onInput || null,
+  onKeyDown: args.contextData.props?.onKeyDown || null,
   onMount: args.contextData.props?.onMount || null
 };
 ''',

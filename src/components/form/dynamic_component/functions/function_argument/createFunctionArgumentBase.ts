@@ -9,6 +9,7 @@ import {
   onCleanup,
   on,
   batch,
+  untrack
 } from "solid-js";
 import type { FormStoreObject } from "~/components/form/context/FormContext";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
@@ -243,6 +244,7 @@ export function createFunctionArgumentBase(
     createEffect,
     onCleanup,
     on,
+    untrack,
     // Theme toggle functions from useThemeToggle hook
     toggleTheme: hooks.themeToggle.toggleTheme,
     setColorMode: hooks.themeToggle.setColorMode,

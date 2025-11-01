@@ -52,8 +52,9 @@ const addToQueue = (video) => {
 const playNext = () => {
   const queue = videoQueue();
   if (queue.length === 0) {
-    setPlayerState("closed");
-    setCurrentVideo(null);
+    // Don't close player when queue is empty, just keep current video
+    // setPlayerState("closed");
+    // setCurrentVideo(null);
     return;
   }
 

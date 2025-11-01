@@ -154,31 +154,66 @@ const getSearchItems = args.createMemo(() => {
   return combined;
 });
 
-// Get combined favourites items
+// Get combined favourites items with filtering
 const getFavouritesItems = args.createMemo(() => {
   const data = favouritesData();
   if (!data) return [];
 
+  const term = searchTerm().toLowerCase();
   const combined = [];
 
   // Add favourite channels
   if (data.channels) {
     data.channels.forEach(item => {
-      combined.push({ ...item, resultType: 'channel' });
+      if (!term) {
+        combined.push({ ...item, resultType: 'channel' });
+      } else {
+        const channel = item.channel;
+        const channelSetting = item.channelSetting;
+        const title = channel?.P?.title?.toLowerCase() || "";
+        const description = channel?.P?.description?.toLowerCase() || "";
+        const customName = channelSetting?.P?.customName?.toLowerCase() || "";
+        if (title.includes(term) || description.includes(term) || customName.includes(term)) {
+          combined.push({ ...item, resultType: 'channel' });
+        }
+      }
     });
   }
 
   // Add favourite playlists
   if (data.playlists) {
     data.playlists.forEach(item => {
-      combined.push({ ...item, resultType: 'playlist' });
+      if (!term) {
+        combined.push({ ...item, resultType: 'playlist' });
+      } else {
+        const playlist = item.playlist;
+        const playlistSettings = item.playlistSettings;
+        const title = playlist?.P?.title?.toLowerCase() || "";
+        const description = playlist?.P?.description?.toLowerCase() || "";
+        const customName = playlistSettings?.P?.customName?.toLowerCase() || "";
+        if (title.includes(term) || description.includes(term) || customName.includes(term)) {
+          combined.push({ ...item, resultType: 'playlist' });
+        }
+      }
     });
   }
 
   // Add favourite videos
   if (data.videos) {
     data.videos.forEach(item => {
-      combined.push({ ...item, resultType: 'video' });
+      if (!term) {
+        combined.push({ ...item, resultType: 'video' });
+      } else {
+        const video = item.video;
+        const videoSettings = item.videoSettings;
+        const title = video?.P?.title?.toLowerCase() || "";
+        const description = video?.P?.description?.toLowerCase() || "";
+        const channelTitle = video?.P?.channelTitle?.toLowerCase() || "";
+        const notes = videoSettings?.P?.notes?.toLowerCase() || "";
+        if (title.includes(term) || description.includes(term) || channelTitle.includes(term) || notes.includes(term)) {
+          combined.push({ ...item, resultType: 'video' });
+        }
+      }
     });
   }
 
@@ -481,7 +516,7 @@ const loadDetailData = async () => {
 // Load search data
 const loadSearchData = async (query) => {
   if (!query || query.trim().length === 0) {
-    setSearchResults({ channels: [], playlists: [], videos: [], totalResults: 0 });
+    setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
     setLoading(false);
     return;
   }
@@ -492,15 +527,14 @@ const loadSearchData = async (query) => {
       functionName: "searchUserContent",
       contextData: {
         query: query.trim(),
-        type: "all",
-        limit: 100
+        type: "all"
       }
     });
 
     if (result?.error) {
       console.error("Error searching:", result.error);
       args.showErrorToast(result.error);
-      setSearchResults({ channels: [], playlists: [], videos: [], totalResults: 0 });
+      setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
     } else if (result?.result?.success && result?.result?.data) {
       setSearchResults(result.result.data);
     } else {
@@ -511,12 +545,12 @@ const loadSearchData = async (query) => {
       console.error("Error searching:", errorDetails || errorMessage);
       args.showErrorToast(errorMessage);
 
-      setSearchResults({ channels: [], playlists: [], videos: [], totalResults: 0 });
+      setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
     }
   } catch (error) {
     console.error("Unexpected error searching:", error);
     args.showErrorToast("Failed to search");
-    setSearchResults({ channels: [], playlists: [], videos: [], totalResults: 0 });
+    setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
   } finally {
     setLoading(false);
   }
@@ -599,11 +633,11 @@ args.createEffect(() => {
   const currentId = args.searchParams?.id;
   const currentQuery = args.searchParams?.q;
 
-  // Reset scroll positions FIRST before loading new data
-  resetScrollPositions();
+  // Reset scroll positions FIRST before loading new data (untracked to avoid creating dependencies)
+  args.untrack(() => resetScrollPositions());
 
-  // Trigger reload when params change
-  loadData();
+  // Trigger reload when params change (untracked to prevent infinite loops)
+  args.untrack(() => loadData());
 });
 
 // Handle search form submission
@@ -1352,9 +1386,16 @@ const [processingStatuses, setProcessingStatuses] = args.createSignal({
   playlists: {}
 });
 const [pollingInterval, setPollingInterval] = args.createSignal(null);
+const [isPolling, setIsPolling] = args.createSignal(false);
 
 // Poll for processing status updates
 const pollProcessingStatus = async () => {
+  // Skip if already polling
+  if (isPolling()) {
+    return;
+  }
+
+  setIsPolling(true);
   try {
     const result = await args.executeNamedServerFunction({
       functionName: "getAllProcessingStatus",
@@ -1389,12 +1430,16 @@ const pollProcessingStatus = async () => {
       // If no active processing, stop polling
       if (!data.hasActiveProcessing) {
         stopPolling();
-        // Reload data to show completed items
-        await loadData();
+        // Reload data to show completed items (only for list/detail views, not search/favourites)
+        if (!isSearchView() && !isFavouritesView()) {
+          await loadData();
+        }
       }
     }
   } catch (error) {
     console.error('Error polling processing status:', error);
+  } finally {
+    setIsPolling(false);
   }
 };
 
@@ -1415,6 +1460,7 @@ const stopPolling = () => {
     clearInterval(interval);
     setPollingInterval(null);
   }
+  setIsPolling(false);
 };
 
 // Watch for view changes and start/stop polling as needed
@@ -1423,20 +1469,31 @@ args.createEffect(() => {
   const hasProcessing = Object.keys(statuses.channels).length > 0 ||
                         Object.keys(statuses.playlists).length > 0;
 
+  // Stop polling if in search or favourites view
+  if (isSearchView() || isFavouritesView()) {
+    if (pollingInterval()) {
+      args.untrack(() => stopPolling());
+    }
+    return;
+  }
+
+  // Only start polling if there's processing AND we're in list or detail views
   if (hasProcessing && !pollingInterval()) {
-    startPolling();
+    args.untrack(() => startPolling());
   }
 });
 
 // Initial check for processing items
 args.createEffect(() => {
-  // Start polling on mount
-  startPolling();
+  // Only start polling in list or detail views (not search or favourites)
+  if (!isSearchView() && !isFavouritesView()) {
+    args.untrack(() => startPolling());
+  }
+});
 
-  // Cleanup on unmount
-  args.onCleanup(() => {
-    stopPolling();
-  });
+// Cleanup on unmount
+args.onCleanup(() => {
+    args.untrack(() => stopPolling());
 });
 
 // Get processing status for a specific channel
@@ -1553,8 +1610,7 @@ return `._id {
         componentName: "Html",
         props: '''
 return {
-  as: "div",
-  hide: () => !args.fns.isListView()
+  as: "div"
 };
 ''',
         css: '''
@@ -1581,221 +1637,27 @@ return `._id {
         componentName: "Html",
         props: '''
 const contentType = args.searchParams?.type || "channels";
-const title = contentType === "playlists" ? "Playlists" : "Channels";
 
-return {
-  as: "h1",
-  text: title
-};
-''',
-        css: '''
-return `._id {
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 0.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "page_description",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const count = args.fns.filteredItems().length;
-const description = contentType === "playlists"
-  ? `${count} playlist${count !== 1 ? 's' : ''}`
-  : `${count} channel${count !== 1 ? 's' : ''}`;
-
-return {
-  as: "p",
-  text: description
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  color: ${args.theme.var.color.muted};
-  margin: 0 0 1.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_container",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 1.5rem;
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "search_input_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    width: 100%;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "search_input",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOTextInput",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const placeholder = contentType === "playlists"
-  ? "Search playlists..."
-  : "Search channels...";
-
-return {
-  placeholder,
-  leftIcon: "mdi:magnify",
-  value: args.fns.searchTerm(),
-  onInput: (e) => args.fns.setSearchTerm(e.target.value)
-};
-'''
-      }
-    },
-    {
-      id: "add_button",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "YTOButton",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const text = contentType === "playlists" ? "Add Playlist" : "Add Channel";
-
-return {
-  text,
-  variant: "primary",
-  leftIcon: "carbon:add",
-  onClick: args.fns.openModal,
-  hide: () => !args.fns.isListView()
-};
-''',
-        css: '''
-return `._id {
-  flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    width: 100%;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_header_section",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: () => !args.fns.isDetailView()
-};
-''',
-        css: '''
-return `._id {
-  padding: 1.5rem 1.5rem 0 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 1rem 1rem 0 1rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_back_button",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOButton",
-        props: '''
-return {
-  text: "Back",
-  variant: "secondary",
-  leftIcon: "carbon:arrow-left",
-  onClick: args.fns.navigateBack,
-  hide: true
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_title",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const data = args.fns.detailData();
-
-let title = contentType === "playlists" ? "Playlist Details" : "Channel Details";
-if (data) {
-  if (contentType === "playlists") {
-    title = data.playlist?.P?.title || title;
+// Determine title based on view
+let title = "";
+if (args.fns.isSearchView()) {
+  title = "Search";
+} else if (args.fns.isFavouritesView()) {
+  title = "Favourites";
+} else if (args.fns.isDetailView()) {
+  const data = args.fns.detailData();
+  if (data) {
+    if (contentType === "playlists") {
+      title = data.playlist?.playlist?.P?.title || "Playlist Details";
+    } else {
+      title = data.channel?.channel?.P?.title || "Channel Details";
+    }
   } else {
-    title = data.channel?.channel?.P?.title || title;
+    title = contentType === "playlists" ? "Playlist Details" : "Channel Details";
   }
+} else {
+  // List view
+  title = contentType === "playlists" ? "Playlists" : "Channels";
 }
 
 return {
@@ -1814,43 +1676,16 @@ return `._id {
       }
     },
     {
-      id: "detail_description",
+      id: "processing_status",
       L: "Attr",
       P: {
-        displayOrder: 2.5,
-        componentName: "Html",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const count = args.fns.filteredDetailItems().length;
-const description = contentType === "playlists"
-  ? `${count} video${count !== 1 ? 's' : ''}`
-  : `${count} playlist${count !== 1 ? 's' : ''}`;
-
-return {
-  as: "p",
-  text: description
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  color: ${args.theme.var.color.muted};
-  margin: 0 0 1.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_processing_status",
-      L: "Attr",
-      P: {
-        displayOrder: 2.6,
+        displayOrder: 2,
         componentName: "YTOProcessingStatus",
         props: '''
 const contentType = args.searchParams?.type || "channels";
 const data = args.fns.detailData();
 
-if (!data) {
+if (!args.fns.isDetailView() || !data) {
   return { hide: true };
 }
 
@@ -1898,7 +1733,7 @@ return {
       }
     },
     {
-      id: "detail_search_container",
+      id: "search_container",
       L: "Attr",
       P: {
         displayOrder: 3,
@@ -1910,38 +1745,182 @@ return {
 ''',
         css: '''
 return `._id {
-  margin-bottom: 1.5rem;
-  width: 100%;
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 }`;
 '''
       }
     },
     {
-      id: "detail_search_input",
+      id: "page_description",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const contentType = args.searchParams?.type || "channels";
+
+// Determine description based on view
+let description = "";
+if (args.fns.isSearchView()) {
+  const results = args.fns.searchResults();
+  const totalCount = results?.totalCount || 0;
+  description = results ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''}` : "";
+} else if (args.fns.isFavouritesView()) {
+  const items = args.fns.getFavouritesItems();
+  const totalCount = items.length;
+  description = `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`;
+} else if (args.fns.isDetailView()) {
+  const count = args.fns.filteredDetailItems().length;
+  description = contentType === "playlists"
+    ? `${count} video${count !== 1 ? 's' : ''}`
+    : `${count} playlist${count !== 1 ? 's' : ''}`;
+} else {
+  // List view
+  const count = args.fns.filteredItems().length;
+  description = contentType === "playlists"
+    ? `${count} playlist${count !== 1 ? 's' : ''}`
+    : `${count} channel${count !== 1 ? 's' : ''}`;
+}
+
+return {
+  as: "p",
+  text: description,
+  hide: args.fns.loading()
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0 0 1.5rem 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "search_input_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+// Use form for search view to handle Enter key, div for others
+const as = args.fns.isSearchView() ? "form" : "div";
+const onSubmit = args.fns.isSearchView() ? args.fns.handleSearch : undefined;
+
+return {
+  as,
+  onSubmit
+};
+''',
+        css: '''
+return `._id {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "search_input",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "YTOTextInput",
         props: '''
 const contentType = args.searchParams?.type || "channels";
-const placeholder = contentType === "playlists"
-  ? "Search videos..."
-  : "Search playlists...";
+
+// Determine placeholder and handlers based on view
+let placeholder = "";
+let value = "";
+let onInput = null;
+let autofocus = false;
+
+if (args.fns.isSearchView()) {
+  placeholder = "Search channels, playlists, and videos...";
+  value = args.fns.searchInput();
+  onInput = (e) => args.fns.setSearchInput(e.target.value);
+  autofocus = true;
+} else if (args.fns.isFavouritesView()) {
+  placeholder = "Filter favourites...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.setSearchTerm(e.target.value);
+} else if (args.fns.isDetailView()) {
+  placeholder = contentType === "playlists"
+    ? "Search videos..."
+    : "Search playlists...";
+  value = args.fns.detailSearchTerm();
+  onInput = (e) => args.fns.setDetailSearchTerm(e.target.value);
+} else {
+  // List view
+  placeholder = contentType === "playlists"
+    ? "Search playlists..."
+    : "Search channels...";
+  value = args.fns.searchTerm();
+  onInput = (e) => args.fns.setSearchTerm(e.target.value);
+}
 
 return {
   placeholder,
   leftIcon: "mdi:magnify",
-  value: args.fns.detailSearchTerm(),
-  onInput: (e) => args.fns.setDetailSearchTerm(e.target.value)
+  value,
+  onInput,
+  autofocus
 };
 '''
       }
     },
     {
-      id: "detail_actions_wrapper",
+      id: "add_button",
       L: "Attr",
       P: {
-        displayOrder: 4,
+        displayOrder: 2,
+        componentName: "YTOButton",
+        props: '''
+const contentType = args.searchParams?.type || "channels";
+const text = contentType === "playlists" ? "Add Playlist" : "Add Channel";
+
+return {
+  text,
+  variant: "primary",
+  leftIcon: "carbon:add",
+  onClick: args.fns.openModal,
+  hide: () => !args.fns.isListView()
+};
+''',
+        css: '''
+return `._id {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "detail_actions_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
         componentName: "Html",
         props: '''
 return {
@@ -1953,13 +1932,19 @@ return {
 return `._id {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  ._id {
+    width: 100%;
+  }
 }`;
 '''
       }
     },
     {
-      id: "detail_sync_button",
+      id: "sync_button",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -1978,7 +1963,7 @@ return {
       }
     },
     {
-      id: "detail_add_videos_button",
+      id: "add_videos_button",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -1997,17 +1982,36 @@ return {
       }
     },
     {
-      id: "content_container",
+      id: "main_content_container",
       L: "Attr",
       P: {
         displayOrder: 5,
         componentName: "Html",
         props: '''
+// Determine current view
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+
+// Set ref based on view
+let ref;
+if (isListView) ref = args.fns.setScrollElement;
+else if (isDetailView) ref = args.fns.setDetailScrollElement;
+else if (isSearchView) ref = args.fns.setSearchScrollElement;
+else if (isFavouritesView) ref = args.fns.setFavouritesScrollElement;
+
+// Set onScroll based on view
+let onScroll;
+if (isListView) onScroll = args.fns.handleScroll;
+else if (isDetailView) onScroll = args.fns.handleDetailScroll;
+else if (isSearchView) onScroll = args.fns.handleSearchScroll;
+else if (isFavouritesView) onScroll = args.fns.handleFavouritesScroll;
+
 return {
   as: "main",
-  ref: args.fns.setScrollElement,
-  onScroll: args.fns.handleScroll,
-  hide: () => !args.fns.isListView()
+  ref,
+  onScroll
 };
 ''',
         css: '''
@@ -2073,10 +2077,22 @@ return {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
 const contentType = args.searchParams?.type || "channels";
-const text = contentType === "playlists"
-  ? "Loading playlists..."
-  : "Loading channels...";
+
+let text;
+if (isListView) {
+  text = contentType === "playlists" ? "Loading playlists..." : "Loading channels...";
+} else if (isDetailView) {
+  text = contentType === "channels" ? "Loading playlists..." : "Loading videos...";
+} else if (isSearchView) {
+  text = "Searching...";
+} else if (isFavouritesView) {
+  text = "Loading favourites...";
+}
 
 return {
   as: "p",
@@ -2099,9 +2115,25 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+
+let hasItems = false;
+if (isListView) {
+  hasItems = args.fns.filteredItems().length > 0;
+} else if (isDetailView) {
+  hasItems = args.fns.filteredDetailItems().length > 0;
+} else if (isSearchView) {
+  hasItems = args.fns.getSearchItems().length > 0;
+} else if (isFavouritesView) {
+  hasItems = args.fns.getFavouritesItems().length > 0;
+}
+
 return {
   as: "div",
-  hide: args.fns.loading() || args.fns.filteredItems().length > 0
+  hide: args.fns.loading() || hasItems
 };
 ''',
         css: '''
@@ -2122,8 +2154,22 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
 const contentType = args.searchParams?.type || "channels";
-const icon = contentType === "playlists" ? "mdi:playlist-play" : "mdi:youtube";
+
+let icon;
+if (isListView) {
+  icon = contentType === "playlists" ? "mdi:playlist-play" : "mdi:youtube";
+} else if (isDetailView) {
+  icon = contentType === "channels" ? "mdi:playlist-remove" : "mdi:video-off";
+} else if (isSearchView) {
+  icon = "mdi:magnify";
+} else if (isFavouritesView) {
+  icon = "carbon:favorite";
+}
 
 return {
   as: "icon",
@@ -2148,11 +2194,26 @@ return `._id {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
 const contentType = args.searchParams?.type || "channels";
 const hasSearchTerm = args.fns.searchTerm().length > 0;
-const title = hasSearchTerm
-  ? "No results found"
-  : (contentType === "playlists" ? "No playlists yet" : "No channels yet");
+const query = args.searchParams?.q || "";
+
+let title;
+if (isListView) {
+  title = hasSearchTerm
+    ? "No results found"
+    : (contentType === "playlists" ? "No playlists yet" : "No channels yet");
+} else if (isDetailView) {
+  title = contentType === "channels" ? "No playlists found" : "No videos found";
+} else if (isSearchView) {
+  title = query ? "No results found" : "Enter a search query";
+} else if (isFavouritesView) {
+  title = "No favourite items yet";
+}
 
 return {
   as: "h3",
@@ -2176,17 +2237,33 @@ return `._id {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
 const contentType = args.searchParams?.type || "channels";
 const hasSearchTerm = args.fns.searchTerm().length > 0;
-const text = hasSearchTerm
-  ? "Try adjusting your search terms"
-  : (contentType === "playlists"
-      ? "Start by adding some YouTube playlists to organize your content"
-      : "Start by adding some YouTube channels to track your favorites");
+const query = args.searchParams?.q || "";
+
+let text;
+if (isListView) {
+  text = hasSearchTerm
+    ? "Try adjusting your search terms"
+    : (contentType === "playlists"
+        ? "Start by adding some YouTube playlists to organize your content"
+        : "Start by adding some YouTube channels to track your favorites");
+} else if (isDetailView) {
+  text = ""; // Detail view doesn't show description (only has 2 children)
+} else if (isSearchView) {
+  text = query ? "Try adjusting your search terms" : "to find channels, playlists, and videos";
+} else if (isFavouritesView) {
+  text = "Start by adding channels, playlists, or videos to your favourites!";
+}
 
 return {
   as: "p",
-  text
+  text,
+  hide: isDetailView // Hide in detail view
 };
 ''',
         css: '''
@@ -2198,15 +2275,31 @@ return `._id {
       }
     },
     {
-      id: "virtual_list_wrapper",
+      id: "content_wrapper",
       L: "Attr",
       P: {
         displayOrder: 3,
         componentName: "Html",
         props: '''
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+
+let hasItems = false;
+if (isListView) {
+  hasItems = args.fns.filteredItems().length > 0;
+} else if (isDetailView) {
+  hasItems = args.fns.filteredDetailItems().length > 0;
+} else if (isSearchView) {
+  hasItems = args.fns.getSearchItems().length > 0;
+} else if (isFavouritesView) {
+  hasItems = args.fns.getFavouritesItems().length > 0;
+}
+
 return {
   as: "div",
-  hide: args.fns.loading() || args.fns.filteredItems().length === 0
+  hide: args.fns.loading() || !hasItems
 };
 ''',
         css: '''
@@ -2223,7 +2316,21 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const totalSize = args.fns.getTotalSize();
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+
+let totalSize;
+if (isListView) {
+  totalSize = args.fns.getTotalSize();
+} else if (isDetailView) {
+  totalSize = args.fns.getDetailTotalSize();
+} else if (isSearchView) {
+  totalSize = args.fns.getSearchTotalSize();
+} else if (isFavouritesView) {
+  totalSize = args.fns.getFavouritesTotalSize();
+}
 
 return {
   as: "div",
@@ -2243,12 +2350,32 @@ return {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const virtualItems = args.fns.getVirtualItems();
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+
+let virtualItems;
+let contextName;
+
+if (isListView) {
+  virtualItems = args.fns.getVirtualItems();
+  contextName = "virtualItem";
+} else if (isDetailView) {
+  virtualItems = args.fns.getDetailVirtualItems();
+  contextName = "videoItem";
+} else if (isSearchView) {
+  virtualItems = args.fns.getSearchVirtualItems();
+  contextName = "searchItem";
+} else if (isFavouritesView) {
+  virtualItems = args.fns.getFavouritesVirtualItems();
+  contextName = "favouriteItem";
+}
 
 return {
   data: virtualItems,
   loop: true,
-  contextName: "virtualItem"
+  contextName
 };
 ''',
         css: '''
@@ -2265,7 +2392,22 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const virtualItem = args.contextData.virtualItem;
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
+
+// Get the appropriate item based on view
+let item;
+if (isListView) {
+  item = args.contextData.virtualItem;
+} else if (isDetailView) {
+  item = args.contextData.videoItem;
+} else if (isSearchView) {
+  item = args.contextData.searchItem;
+} else if (isFavouritesView) {
+  item = args.contextData.favouriteItem;
+}
 
 return {
   as: "div",
@@ -2274,8 +2416,8 @@ return {
     top: 0,
     left: 0,
     width: "100%",
-    height: `${virtualItem.size}px`,
-    transform: `translateY(${virtualItem.start}px)`
+    height: `${item.size}px`,
+    transform: `translateY(${item.start}px)`
   }
 };
 '''
@@ -2288,1088 +2430,71 @@ return {
         displayOrder: 1,
         componentName: "YTOCard",
         props: '''
-const virtualItem = args.contextData.virtualItem;
+const isListView = args.fns.isListView();
+const isDetailView = args.fns.isDetailView();
+const isSearchView = args.fns.isSearchView();
+const isFavouritesView = args.fns.isFavouritesView();
 const contentType = args.searchParams?.type || "channels";
-const item = args.fns.filteredItems()[virtualItem.index];
 
-// Get processing status for this item
-const itemData = contentType === "playlists" ? item.playlist : item.channel;
-const itemId = itemData?.P?.youtubeId;
-const processingStatus = contentType === "playlists"
-  ? args.fns.getPlaylistProcessingStatus(itemId)
-  : args.fns.getChannelProcessingStatus(itemId);
+let itemData, itemSettings, itemType, processingStatus, showTypeBadge, itemId, item;
+
+if (isListView) {
+  const virtualItem = args.contextData.virtualItem;
+  item = args.fns.filteredItems()[virtualItem.index];
+  itemData = contentType === "playlists" ? item.playlist : item.channel;
+  itemId = itemData?.P?.youtubeId;
+  processingStatus = contentType === "playlists"
+    ? args.fns.getPlaylistProcessingStatus(itemId)
+    : args.fns.getChannelProcessingStatus(itemId);
+  itemSettings = contentType === "playlists" ? item.playlistSettings : item.channelSetting;
+  itemType = contentType === "playlists" ? "playlist" : "channel";
+  showTypeBadge = false;
+} else if (isDetailView) {
+  const videoItem = args.contextData.videoItem;
+  item = args.fns.filteredDetailItems()[videoItem.index];
+  const isPlaylistItem = contentType === "channels";
+  itemData = isPlaylistItem ? item.playlist : item.video;
+  itemId = itemData?.P?.youtubeId;
+  processingStatus = isPlaylistItem ? args.fns.getPlaylistProcessingStatus(itemId) : null;
+  itemSettings = isPlaylistItem ? item.playlistSettings : item.videoSettings;
+  itemType = isPlaylistItem ? "playlist" : "video";
+  showTypeBadge = false;
+} else if (isSearchView) {
+  const searchItem = args.contextData.searchItem;
+  item = args.fns.getSearchItems()[searchItem.index];
+  const resultType = item.resultType;
+  itemData = resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video);
+  itemId = itemData?.P?.youtubeId;
+  processingStatus = resultType === "channel"
+    ? args.fns.getChannelProcessingStatus(itemId)
+    : resultType === "playlist"
+    ? args.fns.getPlaylistProcessingStatus(itemId)
+    : null;
+  itemSettings = resultType === "channel" ? item.channelSetting : (resultType === "playlist" ? item.playlistSettings : item.videoSettings);
+  itemType = resultType;
+  showTypeBadge = true;
+} else if (isFavouritesView) {
+  const favouriteItem = args.contextData.favouriteItem;
+  item = args.fns.getFavouritesItems()[favouriteItem.index];
+  const resultType = item.resultType;
+  itemData = resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video);
+  itemId = itemData?.P?.youtubeId;
+  processingStatus = resultType === "channel"
+    ? args.fns.getChannelProcessingStatus(itemId)
+    : resultType === "playlist"
+    ? args.fns.getPlaylistProcessingStatus(itemId)
+    : null;
+  itemSettings = resultType === "channel" ? item.channelSetting : (resultType === "playlist" ? item.playlistSettings : item.videoSettings);
+  itemType = resultType;
+  showTypeBadge = true;
+}
 
 return {
   item: itemData,
-  itemSettings: contentType === "playlists" ? item.playlistSettings : item.channelSetting,
-  itemType: contentType === "playlists" ? "playlist" : "channel",
-  processingStatus: processingStatus
-};
-'''
-      }
-    },
-    {
-      id: "card_processing_status",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "YTOProcessingStatus",
-        props: '''
-const virtualItem = args.contextData.virtualItem;
-const contentType = args.searchParams?.type || "channels";
-const item = args.fns.filteredItems()[virtualItem.index];
-
-const itemId = contentType === "playlists"
-  ? item.playlist?.P?.youtubeId
-  : item.channel?.P?.youtubeId;
-
-const processingData = contentType === "playlists"
-  ? args.fns.getPlaylistProcessingStatus(itemId)
-  : args.fns.getChannelProcessingStatus(itemId);
-
-if (!processingData) {
-  return { hide: true };
-}
-
-// Extract data from vertex format
-const settings = contentType === "playlists"
-  ? processingData.playlistSetting
-  : processingData.channelSetting;
-
-if (!settings || !settings.P) {
-  return { hide: true };
-}
-
-let details = '';
-if (contentType === "channels") {
-  const processedPlaylists = settings.P.processedPlaylists || 0;
-  const totalPlaylists = settings.P.totalPlaylists || 0;
-  const processedVideos = settings.P.processedVideos || 0;
-  const totalVideos = settings.P.totalVideos || 0;
-  details = `${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos`;
-} else {
-  const processedVideos = settings.P.processedVideos || 0;
-  const totalVideos = settings.P.totalVideos || 0;
-  details = `${processedVideos}/${totalVideos} videos`;
-}
-
-return {
-  status: settings.P.status,
-  progress: settings.P.progress || 0,
-  type: contentType === "playlists" ? "playlist" : "channel",
-  details
-};
-'''
-      }
-    },
-    {
-      id: "detail_content_container",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "main",
-  hide: () => !args.fns.isDetailView(),
-  ref: args.fns.setDetailScrollElement,
-  onScroll: args.fns.handleDetailScroll
-};
-''',
-        css: '''
-return `._id {
-  padding: 0 1.5rem 1.5rem 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  overflow-y: auto;
-  height: calc(100vh - 280px);
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 0 1rem 1rem 1rem;
-    height: calc(100vh - 240px);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_loading",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: !args.fns.loading()
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_loading_spinner",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOLoadingSpinner",
-        props: '''
-return {
-  size: "lg"
-};
-'''
-      }
-    },
-    {
-      id: "detail_loading_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const loadingText = contentType === "channels" ? "Loading playlists..." : "Loading videos...";
-
-return {
-  as: "p",
-  text: loadingText
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: 1rem;
-  margin: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_empty_state",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.loading() || args.fns.filteredDetailItems().length > 0
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 3rem 2rem;
-  text-align: center;
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_empty_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const icon = contentType === "channels" ? "mdi:playlist-remove" : "mdi:video-off";
-
-return {
-  as: "icon",
-  icon,
-  width: 64,
-  height: 64
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_empty_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const emptyText = contentType === "channels" ? "No playlists found" : "No videos found";
-
-return {
-  as: "p",
-  text: emptyText
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_video_list_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.loading() || args.fns.filteredDetailItems().length === 0
-};
-''',
-        css: '''
-return `._id {
-  position: relative;
-}`;
-'''
-      }
-    },
-    {
-      id: "detail_video_list",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const totalSize = args.fns.getDetailTotalSize();
-
-return {
-  as: "div",
-  style: {
-    height: `${totalSize}px`,
-    width: "100%",
-    position: "relative"
-  }
-};
-'''
-      }
-    },
-    {
-      id: "detail_virtual_items",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const virtualItems = args.fns.getDetailVirtualItems();
-
-return {
-  data: virtualItems,
-  loop: true,
-  contextName: "videoItem"
-};
-''',
-        css: '''
-return `._id {
-  display: contents;
-}`;
-'''
-      }
-    },
-    {
-      id: "video_card_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const videoItem = args.contextData.videoItem;
-
-return {
-  as: "div",
-  style: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: `${videoItem.size}px`,
-    transform: `translateY(${videoItem.start}px)`
-  }
-};
-'''
-      }
-    },
-    {
-      id: "video_card",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOCard",
-        props: '''
-const contentType = args.searchParams?.type || "channels";
-const videoItem = args.contextData.videoItem;
-const itemData = args.fns.filteredDetailItems()[videoItem.index];
-
-// For channels view, itemData is a playlist object
-// For playlists view, itemData is a video object
-const isPlaylistItem = contentType === "channels";
-const item = isPlaylistItem ? itemData.playlist : itemData.video;
-const itemId = item?.P?.youtubeId;
-
-// Get processing status for playlists only (videos don't have processing status)
-const processingStatus = isPlaylistItem
-  ? args.fns.getPlaylistProcessingStatus(itemId)
-  : null;
-
-return {
-  item: item,
-  itemSettings: isPlaylistItem ? itemData.playlistSettings : itemData.videoSettings,
-  itemType: isPlaylistItem ? "playlist" : "video",
-  processingStatus: processingStatus
-};
-'''
-      }
-    },
-    {
-      id: "search_header_section",
-      L: "Attr",
-      P: {
-        displayOrder: 5,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: () => !args.fns.isSearchView()
-};
-''',
-        css: '''
-return `._id {
-  padding: 1.5rem 1.5rem 0 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 1rem 1rem 0 1rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "search_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h1",
-  text: "Search"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 1.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_form",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "form",
-  onSubmit: args.fns.handleSearch
-};
-''',
-        css: '''
-return `._id {
-  margin-bottom: 1.5rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_form_input",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOTextInput",
-        props: '''
-return {
-  placeholder: "Search channels, playlists, and videos...",
-  leftIcon: "mdi:magnify",
-  value: args.fns.searchInput(),
-  onInput: (e) => args.fns.setSearchInput(e.target.value),
-  autofocus: true
-};
-'''
-      }
-    },
-    {
-      id: "search_results_summary",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-const results = args.fns.searchResults();
-const totalCount = results?.totalCount || 0;
-
-return {
-  as: "p",
-  text: results ? `Found ${totalCount} result${totalCount !== 1 ? 's' : ''}` : "",
-  hide: !results || args.fns.loading()
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  color: ${args.theme.var.color.muted};
-  margin: 0 0 1.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_content_container",
-      L: "Attr",
-      P: {
-        displayOrder: 6,
-        componentName: "Html",
-        props: '''
-return {
-  as: "main",
-  hide: () => !args.fns.isSearchView(),
-  ref: args.fns.setSearchScrollElement,
-  onScroll: args.fns.handleSearchScroll
-};
-''',
-        css: '''
-return `._id {
-  padding: 0 1.5rem 1.5rem 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  overflow-y: auto;
-  height: calc(100vh - 280px);
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 0 1rem 1rem 1rem;
-    height: calc(100vh - 240px);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "search_loading",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: !args.fns.loading()
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_loading_spinner",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOLoadingSpinner",
-        props: '''
-return {
-  size: "lg"
-};
-'''
-      }
-    },
-    {
-      id: "search_loading_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Searching..."
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: 1rem;
-  margin: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_empty_state",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.loading() || args.fns.getSearchItems().length > 0
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 3rem 2rem;
-  text-align: center;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_empty_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "mdi:magnify",
-  width: 64,
-  height: 64
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_empty_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const query = args.searchParams?.q || "";
-const text = query ? "No results found" : "Enter a search query to find channels, playlists, and videos";
-
-return {
-  as: "p",
-  text
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_results_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.loading() || args.fns.getSearchItems().length === 0
-};
-''',
-        css: '''
-return `._id {
-  position: relative;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_results_list",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const totalSize = args.fns.getSearchTotalSize();
-
-return {
-  as: "div",
-  style: {
-    height: `${totalSize}px`,
-    width: "100%",
-    position: "relative"
-  }
-};
-'''
-      }
-    },
-    {
-      id: "search_virtual_items",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const virtualItems = args.fns.getSearchVirtualItems();
-
-return {
-  data: virtualItems,
-  loop: true,
-  contextName: "searchItem"
-};
-''',
-        css: '''
-return `._id {
-  display: contents;
-}`;
-'''
-      }
-    },
-    {
-      id: "search_result_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const searchItem = args.contextData.searchItem;
-
-return {
-  as: "div",
-  style: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: `${searchItem.size}px`,
-    transform: `translateY(${searchItem.start}px)`
-  }
-};
-'''
-      }
-    },
-    {
-      id: "search_result_card",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOCard",
-        props: '''
-const searchItem = args.contextData.searchItem;
-const item = args.fns.getSearchItems()[searchItem.index];
-const resultType = item.resultType;
-const itemData = resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video);
-const itemId = itemData?.P?.youtubeId;
-
-// Get processing status (only for channels and playlists, not videos)
-const processingStatus = resultType === "channel"
-  ? args.fns.getChannelProcessingStatus(itemId)
-  : resultType === "playlist"
-  ? args.fns.getPlaylistProcessingStatus(itemId)
-  : null;
-
-return {
-  item: itemData,
-  itemSettings: resultType === "channel" ? item.channelSetting : (resultType === "playlist" ? item.playlistSettings : item.videoSettings),
-  itemType: resultType,
-  showTypeBadge: true,
-  processingStatus: processingStatus
-};
-'''
-      }
-    },
-    {
-      id: "favourites_header_section",
-      L: "Attr",
-      P: {
-        displayOrder: 7,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: () => !args.fns.isFavouritesView()
-};
-''',
-        css: '''
-return `._id {
-  padding: 1.5rem 1.5rem 0 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 1rem 1rem 0 1rem;
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h1",
-  text: "Favourites"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 2rem;
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-  margin: 0 0 1.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_results_summary",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const items = args.fns.getFavouritesItems();
-const totalCount = items.length;
-
-return {
-  as: "p",
-  text: `${totalCount} favourite item${totalCount !== 1 ? 's' : ''}`,
-  hide: args.fns.loading()
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  color: ${args.theme.var.color.muted};
-  margin: 0 0 1.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_content_container",
-      L: "Attr",
-      P: {
-        displayOrder: 8,
-        componentName: "Html",
-        props: '''
-return {
-  as: "main",
-  hide: () => !args.fns.isFavouritesView(),
-  ref: args.fns.setFavouritesScrollElement,
-  onScroll: args.fns.handleFavouritesScroll
-};
-''',
-        css: '''
-return `._id {
-  padding: 0 1.5rem 1.5rem 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  overflow-y: auto;
-  height: calc(100vh - 280px);
-}
-
-@media (max-width: 768px) {
-  ._id {
-    padding: 0 1rem 1rem 1rem;
-    height: calc(100vh - 240px);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_loading",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: !args.fns.loading()
-};
-''',
-        css: '''
-return `._id {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_loading_spinner",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOLoadingSpinner",
-        props: '''
-return {
-  size: "lg"
-};
-'''
-      }
-    },
-    {
-      id: "favourites_loading_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "Loading favourites..."
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  font-size: 1rem;
-  margin: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_empty_state",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.loading() || args.fns.getFavouritesItems().length > 0
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_light_100};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 3rem 2rem;
-  text-align: center;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_empty_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "carbon:favorite",
-  width: 64,
-  height: 64
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_empty_text",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "p",
-  text: "No favourite items yet. Start by adding channels, playlists, or videos to your favourites!"
-};
-''',
-        css: '''
-return `._id {
-  color: ${args.theme.var.color.muted};
-  margin: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_results_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  hide: args.fns.loading() || args.fns.getFavouritesItems().length === 0
-};
-''',
-        css: '''
-return `._id {
-  position: relative;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourites_results_list",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const totalSize = args.fns.getFavouritesTotalSize();
-
-return {
-  as: "div",
-  style: {
-    height: `${totalSize}px`,
-    width: "100%",
-    position: "relative"
-  }
-};
-'''
-      }
-    },
-    {
-      id: "favourites_virtual_items",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const virtualItems = args.fns.getFavouritesVirtualItems();
-
-return {
-  data: virtualItems,
-  loop: true,
-  contextName: "favouriteItem"
-};
-''',
-        css: '''
-return `._id {
-  display: contents;
-}`;
-'''
-      }
-    },
-    {
-      id: "favourite_result_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-const favouriteItem = args.contextData.favouriteItem;
-
-return {
-  as: "div",
-  style: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: `${favouriteItem.size}px`,
-    transform: `translateY(${favouriteItem.start}px)`
-  }
-};
-'''
-      }
-    },
-    {
-      id: "favourite_result_card",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "YTOCard",
-        props: '''
-const favouriteItem = args.contextData.favouriteItem;
-const item = args.fns.getFavouritesItems()[favouriteItem.index];
-const resultType = item.resultType;
-const itemData = resultType === "channel" ? item.channel : (resultType === "playlist" ? item.playlist : item.video);
-const itemId = itemData?.P?.youtubeId;
-
-// Get processing status (only for channels and playlists, not videos)
-const processingStatus = resultType === "channel"
-  ? args.fns.getChannelProcessingStatus(itemId)
-  : resultType === "playlist"
-  ? args.fns.getPlaylistProcessingStatus(itemId)
-  : null;
-
-return {
-  item: itemData,
-  itemSettings: resultType === "channel" ? item.channelSetting : (resultType === "playlist" ? item.playlistSettings : item.videoSettings),
-  itemType: resultType,
-  showTypeBadge: true,
-  processingStatus: processingStatus
+  itemSettings,
+  itemType,
+  showTypeBadge,
+  processingStatus
 };
 '''
       }
@@ -3440,76 +2565,27 @@ return {
     { id: "e3", T: "Attr", S: "page_root_container", E: "header_section" },
     { id: "e4", T: "Attr", S: "header_section", E: "page_title" },
     { id: "e5", T: "Attr", S: "header_section", E: "page_description" },
+    { id: "e5a", T: "Attr", S: "header_section", E: "processing_status" },
     { id: "e6", T: "Attr", S: "header_section", E: "search_container" },
     { id: "e7", T: "Attr", S: "search_container", E: "search_input_wrapper" },
     { id: "e7a", T: "Attr", S: "search_input_wrapper", E: "search_input" },
     { id: "e7b", T: "Attr", S: "search_container", E: "add_button" },
-    { id: "e7c", T: "Attr", S: "page_root_container", E: "detail_header_section" },
-    { id: "e7d", T: "Attr", S: "detail_header_section", E: "detail_back_button" },
-    { id: "e7e", T: "Attr", S: "detail_header_section", E: "detail_title" },
-    { id: "e7e0", T: "Attr", S: "detail_header_section", E: "detail_description" },
-    { id: "e7e1", T: "Attr", S: "detail_header_section", E: "detail_search_container" },
-    { id: "e7e2", T: "Attr", S: "detail_search_container", E: "detail_search_input" },
-    { id: "e7f", T: "Attr", S: "detail_header_section", E: "detail_actions_wrapper" },
-    { id: "e7g", T: "Attr", S: "detail_actions_wrapper", E: "detail_sync_button" },
-    { id: "e7h", T: "Attr", S: "detail_actions_wrapper", E: "detail_add_videos_button" },
-    { id: "e8", T: "Attr", S: "page_root_container", E: "content_container" },
-    { id: "e9", T: "Attr", S: "content_container", E: "loading_state" },
+    { id: "e7c", T: "Attr", S: "search_container", E: "detail_actions_container" },
+    { id: "e7d", T: "Attr", S: "detail_actions_container", E: "sync_button" },
+    { id: "e7e", T: "Attr", S: "detail_actions_container", E: "add_videos_button" },
+    { id: "e8", T: "Attr", S: "page_root_container", E: "main_content_container" },
+    { id: "e9", T: "Attr", S: "main_content_container", E: "loading_state" },
     { id: "e10", T: "Attr", S: "loading_state", E: "loading_spinner" },
     { id: "e11", T: "Attr", S: "loading_state", E: "loading_text" },
-    { id: "e12", T: "Attr", S: "content_container", E: "empty_state" },
+    { id: "e12", T: "Attr", S: "main_content_container", E: "empty_state" },
     { id: "e13", T: "Attr", S: "empty_state", E: "empty_icon" },
     { id: "e14", T: "Attr", S: "empty_state", E: "empty_title" },
     { id: "e15", T: "Attr", S: "empty_state", E: "empty_description" },
-    { id: "e16", T: "Attr", S: "content_container", E: "virtual_list_wrapper" },
-    { id: "e17", T: "Attr", S: "virtual_list_wrapper", E: "virtual_list" },
+    { id: "e16", T: "Attr", S: "main_content_container", E: "content_wrapper" },
+    { id: "e17", T: "Attr", S: "content_wrapper", E: "virtual_list" },
     { id: "e18", T: "Attr", S: "virtual_list", E: "virtual_items" },
     { id: "e19", T: "Attr", S: "virtual_items", E: "card_wrapper" },
     { id: "e20", T: "Attr", S: "card_wrapper", E: "card" },
-    { id: "e45", T: "Attr", S: "page_root_container", E: "detail_content_container" },
-    { id: "e46", T: "Attr", S: "detail_content_container", E: "detail_loading" },
-    { id: "e47", T: "Attr", S: "detail_loading", E: "detail_loading_spinner" },
-    { id: "e48", T: "Attr", S: "detail_loading", E: "detail_loading_text" },
-    { id: "e49", T: "Attr", S: "detail_content_container", E: "detail_empty_state" },
-    { id: "e50", T: "Attr", S: "detail_empty_state", E: "detail_empty_icon" },
-    { id: "e51", T: "Attr", S: "detail_empty_state", E: "detail_empty_text" },
-    { id: "e52", T: "Attr", S: "detail_content_container", E: "detail_video_list_wrapper" },
-    { id: "e53", T: "Attr", S: "detail_video_list_wrapper", E: "detail_video_list" },
-    { id: "e54", T: "Attr", S: "detail_video_list", E: "detail_virtual_items" },
-    { id: "e55", T: "Attr", S: "detail_virtual_items", E: "video_card_wrapper" },
-    { id: "e56", T: "Attr", S: "video_card_wrapper", E: "video_card" },
-    { id: "e61", T: "Attr", S: "page_root_container", E: "search_header_section" },
-    { id: "e62", T: "Attr", S: "search_header_section", E: "search_title" },
-    { id: "e63", T: "Attr", S: "search_header_section", E: "search_form" },
-    { id: "e64", T: "Attr", S: "search_form", E: "search_form_input" },
-    { id: "e65", T: "Attr", S: "search_header_section", E: "search_results_summary" },
-    { id: "e66", T: "Attr", S: "page_root_container", E: "search_content_container" },
-    { id: "e67", T: "Attr", S: "search_content_container", E: "search_loading" },
-    { id: "e68", T: "Attr", S: "search_loading", E: "search_loading_spinner" },
-    { id: "e69", T: "Attr", S: "search_loading", E: "search_loading_text" },
-    { id: "e70", T: "Attr", S: "search_content_container", E: "search_empty_state" },
-    { id: "e71", T: "Attr", S: "search_empty_state", E: "search_empty_icon" },
-    { id: "e72", T: "Attr", S: "search_empty_state", E: "search_empty_text" },
-    { id: "e73", T: "Attr", S: "search_content_container", E: "search_results_wrapper" },
-    { id: "e74", T: "Attr", S: "search_results_wrapper", E: "search_results_list" },
-    { id: "e75", T: "Attr", S: "search_results_list", E: "search_virtual_items" },
-    { id: "e76", T: "Attr", S: "search_virtual_items", E: "search_result_wrapper" },
-    { id: "e77", T: "Attr", S: "search_result_wrapper", E: "search_result_card" },
-    { id: "e83", T: "Attr", S: "page_root_container", E: "favourites_header_section" },
-    { id: "e83a", T: "Attr", S: "favourites_header_section", E: "favourites_title" },
-    { id: "e83b", T: "Attr", S: "favourites_header_section", E: "favourites_results_summary" },
-    { id: "e84", T: "Attr", S: "page_root_container", E: "favourites_content_container" },
-    { id: "e85", T: "Attr", S: "favourites_content_container", E: "favourites_loading" },
-    { id: "e86", T: "Attr", S: "favourites_loading", E: "favourites_loading_spinner" },
-    { id: "e87", T: "Attr", S: "favourites_loading", E: "favourites_loading_text" },
-    { id: "e88", T: "Attr", S: "favourites_content_container", E: "favourites_empty_state" },
-    { id: "e89", T: "Attr", S: "favourites_empty_state", E: "favourites_empty_icon" },
-    { id: "e90", T: "Attr", S: "favourites_empty_state", E: "favourites_empty_text" },
-    { id: "e91", T: "Attr", S: "favourites_content_container", E: "favourites_results_wrapper" },
-    { id: "e92", T: "Attr", S: "favourites_results_wrapper", E: "favourites_results_list" },
-    { id: "e93", T: "Attr", S: "favourites_results_list", E: "favourites_virtual_items" },
-    { id: "e94", T: "Attr", S: "favourites_virtual_items", E: "favourite_result_wrapper" },
-    { id: "e95", T: "Attr", S: "favourite_result_wrapper", E: "favourite_result_card" },
     { id: "e101", T: "Attr", S: "page_root_container", E: "add_modal" },
     { id: "e102", T: "Attr", S: "page_root_container", E: "note_modal" },
     { id: "e103", T: "Attr", S: "page_root_container", E: "add_videos_modal" }
