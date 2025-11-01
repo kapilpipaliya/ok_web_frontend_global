@@ -4,7 +4,7 @@ import { useToast } from "~/components/styled/modal/Toast";
 import { As } from "~/components/As";
 import {
   getWorkerStatus,
-  initWorkers,
+  initSubdomainWorkersUI,
   startWorker,
   stopWorker,
   stopWorkers,
@@ -39,12 +39,12 @@ export function WorkerManagement() {
 
   const handleInitWorkers = async () => {
     try {
-      await initWorkers();
-      showSuccessToast("Workers initialized successfully");
+      await initSubdomainWorkersUI();
+      showSuccessToast("Subdomain workers initialized successfully");
       setRefreshKey((prev) => prev + 1);
     } catch (error) {
       showErrorToast(
-        error instanceof Error ? error.message : "Failed to initialize workers",
+        error instanceof Error ? error.message : "Failed to initialize subdomain workers",
       );
     }
   };
@@ -110,6 +110,43 @@ export function WorkerManagement() {
       <As
         as="div"
         css={`return \`._id {
+  background: \${args.theme.var.color.info_light_900};
+  border: 1px solid \${args.theme.var.color.info_light_700};
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  color: \${args.theme.var.color.info_dark_300};
+}\`;`}
+      >
+        <As
+          as="div"
+          css={`return \`._id {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}\`;`}
+        >
+          <As as="span">ℹ️</As>
+          <As as="span">Subdomain Workers Only</As>
+        </As>
+        <As
+          as="p"
+          css={`return \`._id {
+  font-size: 0.875rem;
+  margin: 0;
+  line-height: 1.5;
+}\`;`}
+        >
+          This page manages subdomain-specific workers only. Platform-level workers (like the email worker)
+          are managed automatically on app startup and cannot be controlled from this interface.
+        </As>
+      </As>
+
+      <As
+        as="div"
+        css={`return \`._id {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -124,7 +161,7 @@ export function WorkerManagement() {
   margin: 0;
 }\`;`}
         >
-          Worker Management
+          Subdomain Worker Management
         </As>
         <As
           as="button"
@@ -367,7 +404,7 @@ export function WorkerManagement() {
   cursor: not-allowed;
 }\`;`}
               >
-                {"▶️ Initialize All Workers"}
+                {"▶️ Initialize Subdomain Workers"}
               </As>
               <As
                 as="button"
@@ -395,7 +432,7 @@ export function WorkerManagement() {
   cursor: not-allowed;
 }\`;`}
               >
-                {"⏹️ Stop All Workers"}
+                {"⏹️ Stop All Subdomain Workers"}
               </As>
             </As>
 
@@ -420,7 +457,7 @@ export function WorkerManagement() {
                   >
                     {"📦"}
                   </As>
-                  <As as="p">No worker functions found.</As>
+                  <As as="p">No subdomain worker functions found.</As>
                   <As
                     as="p"
                     css={`return \`._id {
@@ -430,6 +467,17 @@ export function WorkerManagement() {
                   >
                     Create Function vertices with keys starting with 'process' or
                     'background' to see them here.
+                  </As>
+                  <As
+                    as="p"
+                    css={`return \`._id {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  color: \${args.theme.var.color.muted};
+}\`;`}
+                  >
+                    Note: Platform-level workers (like email worker) are managed automatically
+                    and do not appear here.
                   </As>
                 </As>
               }

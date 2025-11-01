@@ -9,6 +9,7 @@ import { getDriver } from "~/cypher/core/driver";
 
 import { useEmail } from "./functions/getEmailService";
 import type { Vertex } from "~/lib/graph/type/vertex";
+import {queueEmail} from "~/server/queue/emailQueue";
 
 interface EmailOptions {
   attachmentName?: string;
@@ -19,7 +20,37 @@ interface EmailOptions {
   to: string;
 }
 
+/**
+ * Queue an email for asynchronous sending via BullMQ worker
+ * This is the main function to use for sending emails
+ */
 export async function sendEmail(options: EmailOptions) {
+  // Process HTML content with juice to inline CSS before queueing
+  const processedContent = juice(options.content);
+
+  try {
+    const result = await queueEmail({
+      to: options.to,
+      subject: options.subject,
+      content: processedContent,
+      subDomain: options.subDomain,
+      attachmentName: options.attachmentName,
+      attachmentPath: options.attachmentPath,
+    });
+
+    console.log(`[Email] Email queued for ${options.to} with job ID: ${result.jobId}`);
+    return result;
+  } catch (error) {
+    console.error("[Email] Failed to queue email:", error);
+    throw error;
+  }
+}
+
+/**
+ * Send an email directly (used by the BullMQ worker)
+ * Do not call this directly - use sendEmail() instead
+ */
+export async function sendEmailDirect(options: EmailOptions) {
   const { attachmentName, attachmentPath, content, subDomain, subject, to } =
     options;
 

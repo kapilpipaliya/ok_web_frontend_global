@@ -284,7 +284,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
   return (
     <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
       <Suspense>
-        <Show when={cssStyle()}>
+        <Show when={cssStyle()} keyed>
           <Style2 cssContent={cssStyle()!} />
         </Show>
         {/* <Show when={!props.isNoPermissionCheck && getGlobalStore(graph).P.isDevelopment}>

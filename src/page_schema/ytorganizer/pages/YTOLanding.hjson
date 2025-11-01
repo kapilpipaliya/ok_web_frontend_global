@@ -206,7 +206,6 @@ return {
   as: "a",
   text: "Pricing",
   href: "#pricing",
-  hide: true,
   onClick: (e) => {
     e.preventDefault();
     document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
@@ -907,8 +906,7 @@ return `._id {
         props: '''
 return {
   as: "section",
-  id: "pricing",
-  hide: true
+  id: "pricing"
 };
 ''',
         css: '''
@@ -991,406 +989,166 @@ return {
 return `._id {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+  gap: 1.5rem;
   margin-top: 3rem;
+  align-items: stretch;
 }
 
-@media (max-width: 1024px) {
+._id > * {
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
   ._id {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
   }
 }
 
 @media (max-width: 640px) {
   ._id {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.25rem;
+    margin-top: 2rem;
   }
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_free",
+      id: "pricing_cards_loop",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 1rem;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-._id:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_free_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h4",
-  text: "Free"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_free_price",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
+        contextName: "tier",
+        loop: true,
         props: '''
 return {
   as: "div",
-  text: "$0"
+  data: [
+    {
+      name: "Free",
+      priceAmount: "$0",
+      pricePeriod: "",
+      channels: "2 channels",
+      features: [
+        "Basic video organization",
+        "Channel tracking",
+        "Manual refresh"
+      ],
+      popular: false,
+      buttonText: "Get Started Free"
+    },
+    {
+      name: "Basic",
+      priceAmount: "$2.50",
+      pricePeriod: "/month",
+      channels: "10 channels",
+      features: [
+        "Everything in Free",
+        "Auto-refresh channels",
+        "API access",
+      ],
+      popular: false,
+      buttonText: "Start Basic Plan"
+    },
+    {
+      name: "Pro",
+      priceAmount: "$5.00",
+      pricePeriod: "/month",
+      channels: "25 channels",
+      features: [
+        "Everything in Basic",
+        "Priority support",
+        "Custom integrations"
+      ],
+      popular: true,
+      buttonText: "Go Pro"
+    },
+    {
+      name: "Unlimited",
+      priceAmount: "$10.00",
+      pricePeriod: "/month",
+      channels: "Unlimited channels",
+      features: [
+        "Everything in Pro",
+        // "Team collaboration",
+        "Priority processing",
+        "Dedicated support"
+      ],
+      popular: false,
+      buttonText: "Get Unlimited"
+    }
+  ]
 };
 ''',
         css: '''
 return `._id {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: ${args.theme.var.color.primary};
-  margin: 0.5rem 0;
+  display: contents;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_free_features",
+      id: "pricing_card",
       L: "Attr",
       P: {
-        displayOrder: 3,
+        displayOrder: 1,
         componentName: "Html",
         props: '''
+const tier = args.contextData.tier;
+const isPopular = tier?.popular;
+
 return {
   as: "div"
 };
 ''',
         css: '''
+const tier = args.contextData.tier;
+const isPopular = tier?.popular;
+
 return `._id {
-  flex: 1;
+  width: 100%;
+  background: ${args.theme.var.color.background};
+  border: ${isPopular ? `2px solid ${args.theme.var.color.primary}` : `1px solid ${args.theme.var.color.border}`};
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_free_channels",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "2 channels"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  color: ${args.theme.var.color.text};
-  font-weight: 500;
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_free_all_features",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "All features included"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_free_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  text: "Get Started",
-  onClick: () => args.navigate('/auth/signup')
-};
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border: none;
-  padding: 0.875rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_basic",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 1rem;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-._id:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_basic_title",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "h4",
-  text: "Basic"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_basic_price",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "$2.50/month"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: ${args.theme.var.color.primary};
-  margin: 0.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_basic_features",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_basic_channels",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "10 channels"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  color: ${args.theme.var.color.text};
-  font-weight: 500;
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_basic_all_features",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "All features included"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_basic_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
-return {
-  as: "button",
-  text: "Get Started",
-  onClick: () => args.navigate('/auth/signup')
-};
-''',
-        css: '''
-return `._id {
-  width: 100%;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border: none;
-  padding: 0.875rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_pro",
-      L: "Attr",
-      P: {
-        displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background};
-  border: 2px solid ${args.theme.var.color.primary};
-  border-radius: 1rem;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
   position: relative;
+  box-shadow: ${isPopular ? '0 8px 24px rgba(0, 0, 0, 0.12)' : '0 2px 8px rgba(0, 0, 0, 0.05)'};
 }
 
 ._id:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+  border-color: ${args.theme.var.color.primary};
+}
+
+@media (max-width: 768px) {
+  ._id {
+    padding: 1.5rem 1rem;
+  }
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_pro_badge",
+      id: "pricing_card_badge",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const tier = args.contextData.tier;
 return {
   as: "div",
-  text: "Most Popular"
+  text: "Most Popular",
+  hide: !tier?.popular
 };
 ''',
         css: '''
@@ -1411,15 +1169,16 @@ return `._id {
       }
     },
     {
-      id: "pricing_card_pro_title",
+      id: "pricing_card_title",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const tier = args.contextData.tier;
 return {
   as: "h4",
-  text: "Pro"
+  text: tier?.name || ""
 };
 ''',
         css: '''
@@ -1433,32 +1192,10 @@ return `._id {
       }
     },
     {
-      id: "pricing_card_pro_price",
+      id: "pricing_card_price",
       L: "Attr",
       P: {
         displayOrder: 3,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "$5.00/month"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: ${args.theme.var.color.primary};
-  margin: 0.5rem 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_pro_features",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
         componentName: "Html",
         props: '''
 return {
@@ -1467,94 +1204,134 @@ return {
 ''',
         css: '''
 return `._id {
-  flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_pro_channels",
+      id: "pricing_card_price_amount",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const tier = args.contextData.tier;
 return {
-  as: "div",
-  text: "25 channels"
+  as: "span",
+  text: tier?.priceAmount || ""
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1rem;
-  color: ${args.theme.var.color.text};
-  font-weight: 500;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: ${args.theme.var.color.primary};
+  line-height: 1;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_pro_all_features",
+      id: "pricing_card_price_period",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const tier = args.contextData.tier;
 return {
-  as: "div",
-  text: "All features included"
+  as: "span",
+  text: tier?.pricePeriod || ""
 };
 ''',
         css: '''
 return `._id {
-  font-size: 0.875rem;
+  font-size: 1rem;
+  font-weight: 500;
   color: ${args.theme.var.color.muted};
+  line-height: 1;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_pro_button",
+      id: "pricing_card_channels_badge",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+const tier = args.contextData.tier;
+return {
+  as: "div",
+  text: tier?.channels || ""
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.primary_light_100};
+  color: ${args.theme.var.color.primary_light_100_text};
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid ${args.theme.var.color.primary_light_200};
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_divider",
       L: "Attr",
       P: {
         displayOrder: 5,
         componentName: "Html",
         props: '''
 return {
-  as: "button",
-  text: "Get Started",
-  onClick: () => args.navigate('/auth/signup')
+  as: "div"
 };
 ''',
         css: '''
 return `._id {
-  width: 100%;
-  background: ${args.theme.var.color.primary};
-  color: ${args.theme.var.color.primary_text};
-  border: none;
-  padding: 0.875rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-._id:hover {
-  background: ${args.theme.var.color.primary_dark_200};
+  height: 1px;
+  background: ${args.theme.var.color.border};
+  margin: 0.5rem 0;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_unlimited",
+      id: "pricing_card_features",
       L: "Attr",
       P: {
-        displayOrder: 4,
+        displayOrder: 6,
+        componentName: "Html",
+        contextName: "feature",
+        loop: true,
+        props: '''
+const tier = args.contextData.tier;
+return {
+  as: "div",
+  data: tier?.features || []
+};
+''',
+        css: '''
+return `._id {
+  display: contents;
+}`;
+'''
+      }
+    },
+    {
+      id: "pricing_card_feature_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
@@ -1563,72 +1340,64 @@ return {
 ''',
         css: '''
 return `._id {
-  background: ${args.theme.var.color.background};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 1rem;
-  padding: 2rem;
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-._id:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.375rem 0;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_unlimited_title",
+      id: "pricing_card_feature_icon",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
-  as: "h4",
-  text: "Unlimited"
+  as: "icon",
+  icon: "carbon:checkmark-filled",
+  width: 20,
+  height: 20
 };
 ''',
         css: '''
 return `._id {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: ${args.theme.var.color.text};
+  color: ${args.theme.var.color.primary};
+  flex-shrink: 0;
+  margin-top: 0.125rem;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_unlimited_price",
+      id: "pricing_card_feature_text",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
+const feature = args.contextData.feature;
 return {
-  as: "div",
-  text: "$10.00/month"
+  as: "span",
+  text: feature || ""
 };
 ''',
         css: '''
 return `._id {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: ${args.theme.var.color.primary};
-  margin: 0.5rem 0;
+  font-size: 0.9375rem;
+  color: ${args.theme.var.color.text};
+  line-height: 1.5;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_unlimited_features",
+      id: "pricing_card_spacer",
       L: "Attr",
       P: {
-        displayOrder: 3,
+        displayOrder: 7,
         componentName: "Html",
         props: '''
 return {
@@ -1638,64 +1407,21 @@ return {
         css: '''
 return `._id {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
 }`;
 '''
       }
     },
     {
-      id: "pricing_card_unlimited_channels",
+      id: "pricing_card_button",
       L: "Attr",
       P: {
-        displayOrder: 1,
+        displayOrder: 8,
         componentName: "Html",
         props: '''
-return {
-  as: "div",
-  text: "Unlimited channels"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1rem;
-  color: ${args.theme.var.color.text};
-  font-weight: 500;
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_unlimited_all_features",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "All features included"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-}`;
-'''
-      }
-    },
-    {
-      id: "pricing_card_unlimited_button",
-      L: "Attr",
-      P: {
-        displayOrder: 4,
-        componentName: "Html",
-        props: '''
+const tier = args.contextData.tier;
 return {
   as: "button",
-  text: "Get Started",
+  text: tier?.buttonText || "Get Started",
   onClick: () => args.navigate('/auth/signup')
 };
 ''',
@@ -1710,12 +1436,20 @@ return `._id {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 ._id:hover {
   background: ${args.theme.var.color.primary_dark_200};
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+._id:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }`;
 '''
       }
@@ -1730,7 +1464,10 @@ return `._id {
         serverFunction: '''
 try {
   // Execute the getUserCount function
-  const result = await args.fns.executeYTOFunction("getUserCount", {});
+  const result = await args.executeNamedServerFunction({
+    functionName: "getUserCount",
+    contextData: {}
+  });
 
   if (result?.result?.success) {
     return result.result.data;
@@ -2075,35 +1812,21 @@ return `._id {
     { id: "e33", T: "Attr", S: "pricing_section", E: "pricing_title" },
     { id: "e34", T: "Attr", S: "pricing_section", E: "pricing_subtitle" },
     { id: "e35", T: "Attr", S: "pricing_section", E: "pricing_grid" },
-    { id: "e36", T: "Attr", S: "pricing_grid", E: "pricing_card_free" },
-    { id: "e37", T: "Attr", S: "pricing_card_free", E: "pricing_card_free_title" },
-    { id: "e38", T: "Attr", S: "pricing_card_free", E: "pricing_card_free_price" },
-    { id: "e39", T: "Attr", S: "pricing_card_free", E: "pricing_card_free_features" },
-    { id: "e40", T: "Attr", S: "pricing_card_free_features", E: "pricing_card_free_channels" },
-    { id: "e41", T: "Attr", S: "pricing_card_free_features", E: "pricing_card_free_all_features" },
-    { id: "e42", T: "Attr", S: "pricing_card_free", E: "pricing_card_free_button" },
-    { id: "e43", T: "Attr", S: "pricing_grid", E: "pricing_card_basic" },
-    { id: "e44", T: "Attr", S: "pricing_card_basic", E: "pricing_card_basic_title" },
-    { id: "e45", T: "Attr", S: "pricing_card_basic", E: "pricing_card_basic_price" },
-    { id: "e46", T: "Attr", S: "pricing_card_basic", E: "pricing_card_basic_features" },
-    { id: "e47", T: "Attr", S: "pricing_card_basic_features", E: "pricing_card_basic_channels" },
-    { id: "e48", T: "Attr", S: "pricing_card_basic_features", E: "pricing_card_basic_all_features" },
-    { id: "e49", T: "Attr", S: "pricing_card_basic", E: "pricing_card_basic_button" },
-    { id: "e50", T: "Attr", S: "pricing_grid", E: "pricing_card_pro" },
-    { id: "e51", T: "Attr", S: "pricing_card_pro", E: "pricing_card_pro_badge" },
-    { id: "e52", T: "Attr", S: "pricing_card_pro", E: "pricing_card_pro_title" },
-    { id: "e53", T: "Attr", S: "pricing_card_pro", E: "pricing_card_pro_price" },
-    { id: "e54", T: "Attr", S: "pricing_card_pro", E: "pricing_card_pro_features" },
-    { id: "e55", T: "Attr", S: "pricing_card_pro_features", E: "pricing_card_pro_channels" },
-    { id: "e56", T: "Attr", S: "pricing_card_pro_features", E: "pricing_card_pro_all_features" },
-    { id: "e57", T: "Attr", S: "pricing_card_pro", E: "pricing_card_pro_button" },
-    { id: "e58", T: "Attr", S: "pricing_grid", E: "pricing_card_unlimited" },
-    { id: "e59", T: "Attr", S: "pricing_card_unlimited", E: "pricing_card_unlimited_title" },
-    { id: "e60", T: "Attr", S: "pricing_card_unlimited", E: "pricing_card_unlimited_price" },
-    { id: "e61", T: "Attr", S: "pricing_card_unlimited", E: "pricing_card_unlimited_features" },
-    { id: "e62", T: "Attr", S: "pricing_card_unlimited_features", E: "pricing_card_unlimited_channels" },
-    { id: "e63", T: "Attr", S: "pricing_card_unlimited_features", E: "pricing_card_unlimited_all_features" },
-    { id: "e64", T: "Attr", S: "pricing_card_unlimited", E: "pricing_card_unlimited_button" },
+    { id: "e36", T: "Attr", S: "pricing_grid", E: "pricing_cards_loop" },
+    { id: "e37", T: "Attr", S: "pricing_cards_loop", E: "pricing_card" },
+    { id: "e38", T: "Attr", S: "pricing_card", E: "pricing_card_badge" },
+    { id: "e39", T: "Attr", S: "pricing_card", E: "pricing_card_title" },
+    { id: "e40", T: "Attr", S: "pricing_card", E: "pricing_card_price" },
+    { id: "e40a", T: "Attr", S: "pricing_card_price", E: "pricing_card_price_amount" },
+    { id: "e40b", T: "Attr", S: "pricing_card_price", E: "pricing_card_price_period" },
+    { id: "e41", T: "Attr", S: "pricing_card", E: "pricing_card_channels_badge" },
+    { id: "e42", T: "Attr", S: "pricing_card", E: "pricing_card_divider" },
+    { id: "e43", T: "Attr", S: "pricing_card", E: "pricing_card_features" },
+    { id: "e43a", T: "Attr", S: "pricing_card_features", E: "pricing_card_feature_item" },
+    { id: "e43b", T: "Attr", S: "pricing_card_feature_item", E: "pricing_card_feature_icon" },
+    { id: "e43c", T: "Attr", S: "pricing_card_feature_item", E: "pricing_card_feature_text" },
+    { id: "e43d", T: "Attr", S: "pricing_card", E: "pricing_card_spacer" },
+    { id: "e44", T: "Attr", S: "pricing_card", E: "pricing_card_button" },
     { id: "e68", T: "Attr", S: "main_content", E: "stats_section" },
     { id: "e69", T: "Attr", S: "stats_section", E: "stats_container" },
     { id: "e70", T: "Attr", S: "stats_container", E: "stats_title" },
