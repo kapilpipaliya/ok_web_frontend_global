@@ -25,10 +25,7 @@ const [formData, setFormData] = args.createStore({
 const loadAPIKeys = async () => {
   setLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "manageYouTubeAPIKeys",
-      contextData: { action: 'list' }
-    });
+    const result = await args.fns.executeYTOFunction("manageYouTubeAPIKeys", { action: 'list' });
 
     if (result?.result?.success && result?.result?.data) {
       setApiKeys(result.result.data.apiKeys || []);
@@ -51,16 +48,13 @@ const handleAddAPIKey = async () => {
   }
 
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "manageYouTubeAPIKeys",
-      contextData: {
-        action: 'add',
-        apiKey: formData.apiKey,
-        name: formData.name || 'Unnamed Key',
-        dailyLimit: formData.dailyLimit,
-        priority: formData.priority,
-        isActive: true
-      }
+    const result = await args.fns.executeYTOFunction("manageYouTubeAPIKeys", {
+      action: 'add',
+      apiKey: formData.apiKey,
+      name: formData.name || 'Unnamed Key',
+      dailyLimit: formData.dailyLimit,
+      priority: formData.priority,
+      isActive: true
     });
 
     if (result?.result?.success) {
@@ -124,16 +118,13 @@ const handleBulkImport = async () => {
 
     for (const keyData of keysToImport) {
       try {
-        const result = await args.executeNamedServerFunction({
-          functionName: "manageYouTubeAPIKeys",
-          contextData: {
-            action: 'add',
-            apiKey: keyData.apiKey,
-            name: keyData.name,
-            dailyLimit: keyData.dailyLimit,
-            priority: keyData.priority,
-            isActive: true
-          }
+        const result = await args.fns.executeYTOFunction("manageYouTubeAPIKeys", {
+          action: 'add',
+          apiKey: keyData.apiKey,
+          name: keyData.name,
+          dailyLimit: keyData.dailyLimit,
+          priority: keyData.priority,
+          isActive: true
         });
 
         if (result?.result?.success) {
@@ -188,12 +179,9 @@ const handleRemoveAPIKey = async (keyId, keyName) => {
   if (!confirmed) return;
 
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "manageYouTubeAPIKeys",
-      contextData: {
-        action: 'remove',
-        keyId: keyId
-      }
+    const result = await args.fns.executeYTOFunction("manageYouTubeAPIKeys", {
+      action: 'remove',
+      keyId: keyId
     });
 
     if (result?.result?.success) {
@@ -211,13 +199,10 @@ const handleRemoveAPIKey = async (keyId, keyName) => {
 // Toggle active status
 const handleToggleActive = async (keyId, currentStatus) => {
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "manageYouTubeAPIKeys",
-      contextData: {
-        action: 'update',
-        keyId: keyId,
-        isActive: !currentStatus
-      }
+    const result = await args.fns.executeYTOFunction("manageYouTubeAPIKeys", {
+      action: 'update',
+      keyId: keyId,
+      isActive: !currentStatus
     });
 
     if (result?.result?.success) {
@@ -250,10 +235,7 @@ const handleResetCounts = async () => {
   if (!confirmed) return;
 
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "manageYouTubeAPIKeys",
-      contextData: { action: 'reset' }
-    });
+    const result = await args.fns.executeYTOFunction("manageYouTubeAPIKeys", { action: 'reset' });
 
     if (result?.result?.success) {
       args.showSuccessToast(result.result.message);

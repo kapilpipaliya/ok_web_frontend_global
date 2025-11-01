@@ -1,0 +1,38 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "impersonateUser",
+        description: "Start impersonating a user (admin only)",
+        body: '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  throw new Error("User session not found");
+}
+
+const targetUserId = args.contextData.targetUserId;
+
+if (!targetUserId) {
+  throw new Error("targetUserId is required");
+}
+
+// Call platform function (from args)
+const result = await args.setImpersonation(
+  args.session,
+  actualUser,
+  targetUserId
+);
+
+return {
+  success: true,
+  data: result,
+  message: `Now viewing as ${result.impersonatedUser.P.username}`
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

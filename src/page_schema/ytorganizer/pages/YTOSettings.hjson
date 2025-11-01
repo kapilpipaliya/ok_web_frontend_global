@@ -21,10 +21,7 @@ const closeFeedbackModal = () => {
 
 const submitFeedback = async (data) => {
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "saveFeedback",
-      contextData: data
-    });
+    const result = await args.fns.executeYTOFunction("saveFeedback", data);
 
     if (result?.result?.success) {
       args.showSuccessToast(result.result.message);
@@ -813,10 +810,7 @@ return {
 
     if (confirmed) {
       try {
-        const result = await args.executeNamedServerFunction({
-          functionName: "clearAllUserData",
-          contextData: {}
-        });
+        const result = await args.fns.executeYTOFunction("clearAllUserData", {});
 
         if (result?.result?.success) {
           args.showSuccessToast(result.result.message || "All data cleared successfully");
@@ -912,10 +906,7 @@ return {
 
       if (doubleConfirmed) {
         try {
-          const result = await args.executeNamedServerFunction({
-            functionName: "deleteAccount",
-            contextData: {}
-          });
+          const result = await args.fns.executeYTOFunction("deleteAccount", {});
 
           if (result?.result?.success) {
             args.showSuccessToast(result.result.message || "Account deleted successfully");

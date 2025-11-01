@@ -48,7 +48,7 @@ import { createDynamicFunctions } from "~/components/form/dynamic_component/func
 import { createValueUpdater } from "~/components/form/dynamic_component/functions/value/createValueUpdater";
 import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaType";
 import { createStore } from "solid-js/store";
-import { Style } from "@solidjs/meta";
+import {Style2} from "~/components/StyleRenderer";
 
 export type DynamicComponentProps = Readonly<{
   componentName?: string;
@@ -285,7 +285,7 @@ export function DynamicComponent(props: DynamicComponentProps) {
     <ErrorBoundary fallback={(err) => <div>Error: {err.message}</div>}>
       <Suspense>
         <Show when={cssStyle()}>
-          <Style>{cssStyle()}</Style>
+          <Style2 cssContent={cssStyle()!} />
         </Show>
         {/* <Show when={!props.isNoPermissionCheck && getGlobalStore(graph).P.isDevelopment}>
         comp:{componentName()}

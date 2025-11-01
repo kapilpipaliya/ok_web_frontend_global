@@ -1730,10 +1730,7 @@ return `._id {
         serverFunction: '''
 try {
   // Execute the getUserCount function
-  const result = await args.executeNamedServerFunction({
-    functionName: "getUserCount",
-    contextData: {}
-  });
+  const result = await args.fns.executeYTOFunction("getUserCount", {});
 
   if (result?.result?.success) {
     return result.result.data;

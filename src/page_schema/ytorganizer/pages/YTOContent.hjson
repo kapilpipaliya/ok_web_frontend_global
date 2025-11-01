@@ -443,10 +443,7 @@ const loadListData = async () => {
   setLoading(true);
   try {
     const functionName = contentType === "playlists" ? "getUserPlaylists" : "getUserChannels";
-    const result = await args.executeNamedServerFunction({
-      functionName,
-      contextData: {}
-    });
+    const result = await args.fns.executeYTOFunction(functionName, {});
 
     if (result?.error) {
       console.error("Error loading data:", result.error);
@@ -481,11 +478,8 @@ const loadDetailData = async () => {
   setLoading(true);
   try {
     const functionName = contentType === "playlists" ? "getPlaylistVideos" : "getChannelContents";
-    const result = await args.executeNamedServerFunction({
-      functionName,
-      contextData: {
-        [contentType === "playlists" ? "playlistId" : "channelId"]: detailId
-      }
+    const result = await args.fns.executeYTOFunction(functionName, {
+      [contentType === "playlists" ? "playlistId" : "channelId"]: detailId
     });
 
     if (result?.error) {
@@ -523,12 +517,9 @@ const loadSearchData = async (query) => {
 
   setLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "searchUserContent",
-      contextData: {
-        query: query.trim(),
-        type: "all"
-      }
+    const result = await args.fns.executeYTOFunction("searchUserContent", {
+      query: query.trim(),
+      type: "all"
     });
 
     if (result?.error) {
@@ -560,10 +551,7 @@ const loadSearchData = async (query) => {
 const loadFavouritesData = async () => {
   setLoading(true);
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "getUserFavourites",
-      contextData: {}
-    });
+    const result = await args.fns.executeYTOFunction("getUserFavourites", {});
 
     if (result?.error) {
       console.error("Error loading favourites:", result.error);
@@ -635,6 +623,9 @@ args.createEffect(() => {
 
   // Reset scroll positions FIRST before loading new data (untracked to avoid creating dependencies)
   args.untrack(() => resetScrollPositions());
+
+  // Reset initial poll flag when view changes
+  args.untrack(() => setIsInitialPoll(true));
 
   // Trigger reload when params change (untracked to prevent infinite loops)
   args.untrack(() => loadData());
@@ -740,10 +731,7 @@ const deleteItem = async (item) => {
   if (confirmed) {
     try {
       const functionName = itemType === "channel" ? "deleteChannel" : "deletePlaylist";
-      const result = await args.executeNamedServerFunction({
-        functionName,
-        contextData: { item: data, itemType }
-      });
+      const result = await args.fns.executeYTOFunction(functionName, { item: data, itemType });
 
       if (result?.result?.success) {
         args.showSuccessToast(result.result.message);
@@ -800,13 +788,10 @@ const deleteVideo = async (videoData) => {
 
   if (confirmed) {
     try {
-      const result = await args.executeNamedServerFunction({
-        functionName: "deleteVideo",
-        contextData: {
-          video,
-          contextType: currentContext,
-          contextItem: contextItem
-        }
+      const result = await args.fns.executeYTOFunction("deleteVideo", {
+        video,
+        contextType: currentContext,
+        contextItem: contextItem
       });
 
       if (result?.result?.success) {
@@ -858,10 +843,7 @@ const closeNoteModal = () => {
 
 const saveNote = async (data) => {
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "saveNote",
-      contextData: data
-    });
+    const result = await args.fns.executeYTOFunction("saveNote", data);
 
     if (result?.result?.success) {
       args.showSuccessToast(result.result.message);
@@ -890,10 +872,7 @@ const saveNote = async (data) => {
 // Toggle favourite function
 const toggleFavourite = async (item, itemType) => {
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "toggleFavourite",
-      contextData: { item, itemType }
-    });
+    const result = await args.fns.executeYTOFunction("toggleFavourite", { item, itemType });
 
     if (result?.result?.success) {
       args.showSuccessToast(result.result.message);
@@ -1168,10 +1147,7 @@ const syncCurrentItem = async () => {
 
       const url = `https://www.youtube.com/playlist?list=${playlist.P.youtubeId}`;
 
-      const result = await args.executeNamedServerFunction({
-        functionName: "savePlaylist",
-        contextData: { url }
-      });
+      const result = await args.fns.executeYTOFunction("savePlaylist", { url });
 
       if (result?.result?.success) {
         args.showSuccessToast(result.result.message || "Playlist synced successfully");
@@ -1189,10 +1165,7 @@ const syncCurrentItem = async () => {
 
       const url = `https://www.youtube.com/channel/${channel.P.youtubeId}`;
 
-      const result = await args.executeNamedServerFunction({
-        functionName: "saveChannel",
-        contextData: { url }
-      });
+      const result = await args.fns.executeYTOFunction("saveChannel", { url });
 
       if (result?.result?.success) {
         args.showSuccessToast(result.result.message || "Channel synced successfully");
@@ -1387,6 +1360,7 @@ const [processingStatuses, setProcessingStatuses] = args.createSignal({
 });
 const [pollingInterval, setPollingInterval] = args.createSignal(null);
 const [isPolling, setIsPolling] = args.createSignal(false);
+const [isInitialPoll, setIsInitialPoll] = args.createSignal(true);
 
 // Poll for processing status updates
 const pollProcessingStatus = async () => {
@@ -1397,10 +1371,7 @@ const pollProcessingStatus = async () => {
 
   setIsPolling(true);
   try {
-    const result = await args.executeNamedServerFunction({
-      functionName: "getAllProcessingStatus",
-      contextData: {}
-    });
+    const result = await args.fns.executeYTOFunction("getAllProcessingStatus", {});
 
     if (result?.result?.success && result?.result?.data) {
       const data = result.result.data;
@@ -1431,9 +1402,15 @@ const pollProcessingStatus = async () => {
       if (!data.hasActiveProcessing) {
         stopPolling();
         // Reload data to show completed items (only for list/detail views, not search/favourites)
-        if (!isSearchView() && !isFavouritesView()) {
+        // Skip reload on initial poll to avoid duplicate API calls
+        if (!isSearchView() && !isFavouritesView() && !isInitialPoll()) {
           await loadData();
         }
+      }
+
+      // Mark that initial poll is complete
+      if (isInitialPoll()) {
+        setIsInitialPoll(false);
       }
     }
   } catch (error) {

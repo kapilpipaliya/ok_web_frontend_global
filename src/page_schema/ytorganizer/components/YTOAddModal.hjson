@@ -70,7 +70,6 @@ const handleSave = async () => {
   // Validate required fields for add mode
   if (!editMode && !urlValue) {
     setFormError("Please enter a YouTube URL");
-    args.showErrorToast("Please enter a YouTube URL");
     return;
   }
 
@@ -120,7 +119,6 @@ const handleSave = async () => {
     if (result?.error) {
       const errorMsg = result.error;
       setFormError(errorMsg);
-      args.showErrorToast(errorMsg);
     } else if (result?.result?.success) {
       const action = editMode ? "updated" : "added";
       const itemTypeName = actualType === "videos" ? "Video" : ((editMode ? actualType : contentType) === "playlists" ? "Playlist" : "Channel");
@@ -141,13 +139,11 @@ const handleSave = async () => {
     } else {
       const errorMsg = result?.result?.message || result?.result?.error || `Failed to ${editMode ? "update" : "add"} item`;
       setFormError(errorMsg);
-      args.showErrorToast(errorMsg);
     }
   } catch (error) {
     console.error("Error saving:", error);
     const errorMsg = error?.message || `Failed to ${editMode ? "update" : "add"} item`;
     setFormError(errorMsg);
-    args.showErrorToast(errorMsg);
   } finally {
     setIsSubmitting(false);
   }
@@ -614,7 +610,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_light_50_text};
   flex-shrink: 0;
   margin-top: 0.125rem;
 }`;
@@ -656,7 +652,7 @@ return `._id {
   margin: 0 0 0.25rem 0;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_light_50_text};
 }`;
 '''
       }

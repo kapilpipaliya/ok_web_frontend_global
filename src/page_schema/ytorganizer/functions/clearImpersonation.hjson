@@ -1,0 +1,38 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "clearImpersonation",
+        description: "Stop impersonating a user (admin only)",
+        body: '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  throw new Error("User session not found");
+}
+
+const impersonatedUserId = args.contextData.impersonatedUserId;
+
+if (!impersonatedUserId) {
+  throw new Error("impersonatedUserId is required");
+}
+
+// Call platform function (from args)
+const result = await args.clearImpersonation(
+  args.session,
+  actualUser,
+  impersonatedUserId
+);
+
+return {
+  success: true,
+  data: result,
+  message: "Stopped viewing as user"
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -1,0 +1,89 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getAllYTOUsers",
+        description: "Get all users with their YTO statistics (channels, playlists, videos counts)",
+        body: '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  throw new Error("User session not found");
+}
+
+// Verify admin role
+const adminCheck = await args.session.run(
+  `MATCH (u:User)-[:UserRole]->(r:Role {key: "Admin"})
+   WHERE u.uuid = $userId RETURN u`,
+  { userId: actualUser.P.uuid }
+);
+
+if (adminCheck.records.length === 0) {
+  throw new Error("Unauthorized: Admin role required");
+}
+
+// Query all users with YTO statistics
+const query = `
+  MATCH (u:User)
+  WHERE $searchQuery IS NULL OR u.username CONTAINS $searchQuery OR u.email CONTAINS $searchQuery
+  OPTIONAL MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
+  OPTIONAL MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+  OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
+  ORDER BY u.createdAt DESC
+  LIMIT $limit OFFSET $offset
+  RETURN u,
+         count(DISTINCT cs) as channelCount,
+         count(DISTINCT ps) as playlistCount,
+         count(DISTINCT vs) as videoCount,
+         count(DISTINCT CASE WHEN cs.isFavourite = true THEN cs END) as favoriteChannelCount,
+         count(DISTINCT CASE WHEN ps.isFavourite = true THEN ps END) as favoritePlaylistCount,
+         count(DISTINCT CASE WHEN vs.isFavourite = true THEN vs END) as favoriteVideoCount,
+         max(cs.createdAt) as lastChannelAdded,
+         max(ps.createdAt) as lastPlaylistAdded,
+         max(vs.updatedAt) as lastVideoActivity
+`;
+
+const neo4j = await import('neo4j-driver');
+
+const result = await args.session.run(query, {
+  searchQuery: args.contextData.searchQuery || null,
+  limit: neo4j.int(args.contextData.limit || 50),
+  offset: neo4j.int(args.contextData.offset || 0)
+});
+
+// Helper to convert Neo4j integers to JS numbers
+const toNumber = (value) => {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'number') return value;
+  if (neo4j.isInt(value)) return value.toNumber();
+  return Number(value);
+};
+
+// Convert to vertex format
+const users = result.records.map(record => ({
+  user: args.convertNodeToJson(record.get('u')),
+  stats: {
+    channelCount: toNumber(record.get('channelCount')),
+    playlistCount: toNumber(record.get('playlistCount')),
+    videoCount: toNumber(record.get('videoCount')),
+    favoriteChannelCount: toNumber(record.get('favoriteChannelCount')),
+    favoritePlaylistCount: toNumber(record.get('favoritePlaylistCount')),
+    favoriteVideoCount: toNumber(record.get('favoriteVideoCount')),
+    lastChannelAdded: record.get('lastChannelAdded')?.toStandardDate().toISOString(),
+    lastPlaylistAdded: record.get('lastPlaylistAdded')?.toStandardDate().toISOString(),
+    lastVideoActivity: record.get('lastVideoActivity')?.toStandardDate().toISOString()
+  }
+}));
+
+return {
+  success: true,
+  data: { users, totalCount: users.length },
+  message: `Found ${users.length} users`
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

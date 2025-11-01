@@ -1,0 +1,92 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getUserYTODetails",
+        description: "Get detailed YTO data for a specific user (channels, playlists, videos)",
+        body: '''
+const actualUser = await args.getUserFromSession();
+if (!actualUser) {
+  throw new Error("User session not found");
+}
+
+// Verify admin role
+const adminCheck = await args.session.run(
+  `MATCH (u:User)-[:UserRole]->(r:Role {key: "Admin"})
+   WHERE u.uuid = $userId RETURN u`,
+  { userId: actualUser.P.uuid }
+);
+
+if (adminCheck.records.length === 0) {
+  throw new Error("Unauthorized: Admin role required");
+}
+
+const targetUserId = args.contextData.userId;
+
+if (!targetUserId) {
+  throw new Error("userId is required");
+}
+
+// Get user's channels
+const channelsQuery = `
+  MATCH (u:User {uuid: $userId})
+  MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
+  RETURN c, cs
+  ORDER BY cs.createdAt DESC
+  LIMIT 20
+`;
+
+const channelsResult = await args.session.run(channelsQuery, { userId: targetUserId });
+const channels = channelsResult.records.map(r => ({
+  channel: args.convertNodeToJson(r.get('c')),
+  channelSetting: args.convertNodeToJson(r.get('cs'))
+}));
+
+// Get user's playlists
+const playlistsQuery = `
+  MATCH (u:User {uuid: $userId})
+  MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+  RETURN p, ps
+  ORDER BY ps.createdAt DESC
+  LIMIT 20
+`;
+
+const playlistsResult = await args.session.run(playlistsQuery, { userId: targetUserId });
+const playlists = playlistsResult.records.map(r => ({
+  playlist: args.convertNodeToJson(r.get('p')),
+  playlistSetting: args.convertNodeToJson(r.get('ps'))
+}));
+
+// Get user's favorite videos (limit to 20 most recent)
+const videosQuery = `
+  MATCH (u:User {uuid: $userId})
+  MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
+  WHERE vs.isFavourite = true
+  RETURN v, vs
+  ORDER BY vs.updatedAt DESC
+  LIMIT 20
+`;
+
+const videosResult = await args.session.run(videosQuery, { userId: targetUserId });
+const favoriteVideos = videosResult.records.map(r => ({
+  video: args.convertNodeToJson(r.get('v')),
+  videoSetting: args.convertNodeToJson(r.get('vs'))
+}));
+
+return {
+  success: true,
+  data: {
+    channels,
+    playlists,
+    favoriteVideos
+  },
+  message: `Found ${channels.length} channels, ${playlists.length} playlists, ${favoriteVideos.length} favorite videos`
+};
+'''
+      }
+    }
+  ],
+  edges: []
+}

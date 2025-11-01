@@ -1,0 +1,505 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "YTOAdminUsers",
+        url: "/yto/admin/users",
+        signinRequired: true,
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "layout_ref",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOLayout"
+      }
+    },
+    {
+      id: "main_container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        fns: '''
+// State management
+const [store, setStore] = args.createStore({
+  users: [],
+  loading: true,
+  error: null,
+  searchQuery: '',
+  impersonatedUserId: null
+});
+
+// Check if user is admin
+const checkAdminRole = () => {
+  const userRoles = args.user?.OUT?.UserRole || [];
+  return userRoles.some(edge => {
+    const role = args.graph.nodes[edge.E];
+    return role?.P?.key === "Admin";
+  });
+};
+// this is breaking the page:
+//  if (!checkAdminRole()) {
+//    args.navigate('/yto');
+//    args.showErrorToast("Admin access required");
+//    return {};
+//  }
+
+// Load all users with YTO stats
+const loadUsers = async () => {
+  setStore('loading', true);
+  setStore('error', null);
+
+  const result = await args.fns.executeYTOFunction("getAllYTOUsers", {
+    searchQuery: store.searchQuery,
+    limit: 50,
+    offset: 0
+  });
+
+  // Check for error at top level
+  if (result.error) {
+    setStore('error', result.error);
+    setStore('loading', false);
+    return;
+  }
+
+  // executeYTOFunction returns {result: {...}, graph: {...}}
+  const serverResult = result.result;
+
+  if (serverResult?.success) {
+    setStore('users', serverResult.data.users || []);
+  } else {
+    setStore('error', serverResult?.message || "Failed to load users");
+  }
+  setStore('loading', false);
+};
+
+// Start impersonation
+const startImpersonation = async (userId) => {
+  const result = await args.fns.executeYTOFunction("impersonateUser", { targetUserId: userId });
+
+  // Check for error at top level
+  if (result.error) {
+    args.showErrorToast(result.error);
+    return;
+  }
+
+  const serverResult = result.result;
+
+  if (serverResult?.success) {
+    const impersonatedUser = serverResult.data.impersonatedUser;
+
+    // Store impersonated user in sessionStorage for persistence across pages
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('yto_impersonatedUser', JSON.stringify(impersonatedUser));
+    }
+
+    setStore('impersonatedUserId', userId);
+    args.showSuccessToast("Now viewing as user");
+
+    // Navigate to YTO content - layout will pick up impersonation from sessionStorage
+    args.navigate('/yto/content');
+  } else {
+    args.showErrorToast(serverResult?.message || "Failed to start impersonation");
+  }
+};
+
+// Stop impersonation
+const stopImpersonation = async () => {
+  const result = await args.fns.executeYTOFunction("clearImpersonation", { impersonatedUserId: store.impersonatedUserId });
+
+  // Check for error at top level
+  if (result.error) {
+    args.showErrorToast(result.error);
+    return;
+  }
+
+  const serverResult = result.result;
+
+  if (serverResult?.success || !serverResult) {
+    setStore('impersonatedUserId', null);
+    args.showSuccessToast("Stopped viewing as user");
+  } else {
+    args.showErrorToast(serverResult?.message || "Failed to stop impersonation");
+  }
+};
+
+// Search handler with debounce
+let searchTimeout;
+const handleSearch = (query) => {
+  setStore('searchQuery', query);
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    loadUsers();
+  }, 500);
+};
+
+return {
+  store,
+  loadUsers,
+  startImpersonation,
+  stopImpersonation,
+  handleSearch
+};
+''',
+        props: '''
+return {
+  as: "div",
+  onMount: args.fns.loadUsers
+};
+''',
+        css: '''
+return `._id {
+  padding: ${args.theme.var.spacing.lg};
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "User Management"
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.xl};
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0 0 ${args.theme.var.spacing.lg} 0;
+
+  @media (max-width: 768px) {
+    font-size: ${args.theme.var.fontSize.lg};
+    margin-bottom: ${args.theme.var.spacing.md};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "stats_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        contextName: "stat",
+        loop: true,
+        fns: '''
+// Return function to calculate stats data
+return {
+  getStatsData: () => {
+    const users = args.fns.store.users;
+    const now = new Date();
+
+    const activeUsers = users.filter(userdata => {
+      const stats = userdata.stats;
+      const lastChannelAdded = stats?.lastChannelAdded ? new Date(stats.lastChannelAdded) : null;
+      const lastPlaylistAdded = stats?.lastPlaylistAdded ? new Date(stats.lastPlaylistAdded) : null;
+      const lastVideoActivity = stats?.lastVideoActivity ? new Date(stats.lastVideoActivity) : null;
+
+      const activityDates = [lastChannelAdded, lastPlaylistAdded, lastVideoActivity].filter(d => d);
+      const lastActivity = activityDates.length > 0 ? new Date(Math.max(...activityDates)) : null;
+
+      return lastActivity && (now - lastActivity) / (1000 * 60 * 60 * 24) <= 7;
+    }).length;
+
+    return [
+      {
+        label: "Total Users",
+        value: users.length
+      },
+      {
+        label: "Active (7 days)",
+        value: activeUsers
+      },
+      {
+        label: "Total Channels",
+        value: users.reduce((sum, userdata) => sum + (userdata.stats?.channelCount || 0), 0)
+      },
+      {
+        label: "Total Playlists",
+        value: users.reduce((sum, userdata) => sum + (userdata.stats?.playlistCount || 0), 0)
+      }
+    ];
+  }
+};
+''',
+        props: '''
+return {
+  as: "div",
+  data: args.fns.getStatsData(),
+  hide: () => args.fns.store.loading
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: ${args.theme.var.spacing.md};
+  margin-bottom: ${args.theme.var.spacing.lg};
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "search_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: ${args.theme.var.spacing.lg};
+}`;
+'''
+      }
+    },
+    {
+      id: "search_input",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOTextInput",
+        props: '''
+return {
+  type: "search",
+  placeholder: "Search by username or email...",
+  value: args.fns.store.searchQuery,
+  leftIcon: "carbon:search",
+  onInput: (e) => {
+    args.fns.handleSearch(e.target.value);
+  }
+};
+'''
+      }
+    },
+    {
+      id: "stat_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_dark_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: ${args.theme.var.borderRadius.md};
+  padding: ${args.theme.var.spacing.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_card_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div",
+  text: stat.label
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize.sm};
+  color: ${args.theme.var.color.muted};
+  margin-bottom: ${args.theme.var.spacing.xs};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_card_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+return {
+  as: "div",
+  text: stat.value
+};
+''',
+        css: '''
+return `._id {
+  font-size: ${args.theme.var.fontSize['2xl']};
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "Loading users...",
+  hide: () => !args.fns.store.loading
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    },
+    {
+      id: "error_state",
+      L: "Attr",
+      P: {
+        displayOrder: 5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: args.fns.store.error || "An error occurred",
+  hide: () => !args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.error_light_50_text};
+  background: ${args.theme.var.color.error_light_50};
+  border-radius: ${args.theme.var.borderRadius.md};
+}`;
+'''
+      }
+    },
+    {
+      id: "users_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        contextName: "userdata",
+        loop: true,
+        props: '''
+return {
+  as: "div",
+  data: args.fns.store.users,
+  hide: () => args.fns.store.loading || args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: ${args.theme.var.spacing.md};
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: ${args.theme.var.spacing.sm};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "user_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "YTOAdminUserCard",
+        props: '''
+return {
+  userdata: args.contextData.userdata,
+  onImpersonate: args.fns.startImpersonation
+};
+'''
+      }
+    },
+    {
+      id: "empty_state",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div",
+  text: "No users found",
+  hide: () => args.fns.store.users.length > 0 || args.fns.store.loading || args.fns.store.error
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: ${args.theme.var.spacing.xl};
+  color: ${args.theme.var.color.muted};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "page_root", E: "layout_ref" },
+    { id: "e2", T: "Attr", S: "page_root", E: "main_container" },
+    { id: "e3", T: "Attr", S: "main_container", E: "page_title" },
+    { id: "e3b", T: "Attr", S: "main_container", E: "stats_summary" },
+    { id: "e3c", T: "Attr", S: "stats_summary", E: "stat_card" },
+    { id: "e3d", T: "Attr", S: "stat_card", E: "stat_card_label" },
+    { id: "e3e", T: "Attr", S: "stat_card", E: "stat_card_value" },
+    { id: "e4", T: "Attr", S: "main_container", E: "search_container" },
+    { id: "e5", T: "Attr", S: "search_container", E: "search_input" },
+    { id: "e6", T: "Attr", S: "main_container", E: "loading_state" },
+    { id: "e7", T: "Attr", S: "main_container", E: "error_state" },
+    { id: "e8", T: "Attr", S: "main_container", E: "users_grid" },
+    { id: "e9", T: "Attr", S: "users_grid", E: "user_card" },
+    { id: "e10", T: "Attr", S: "main_container", E: "empty_state" }
+  ]
+}

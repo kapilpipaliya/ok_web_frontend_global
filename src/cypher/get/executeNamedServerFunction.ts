@@ -7,6 +7,9 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { convertNodeToJson, neo4jConvert } from "../conversion/convertNodeToJson";
 import * as bullmq from 'bullmq';
+import { getEffectiveUser } from "./admin/getEffectiveUser";
+import { setImpersonation } from "../mutate/admin/setImpersonation";
+import { clearImpersonation } from "../mutate/admin/clearImpersonation";
 
 interface NamedServerFunctionRequest {
   functionName: string;
@@ -84,7 +87,11 @@ export async function executeNamedServerFunction(
         relationships: context.relationships,
       },
       functionName: request.functionName,
-      bullmq
+      bullmq,
+      // Admin/impersonation helper functions (platform-level)
+      getEffectiveUser,
+      setImpersonation,
+      clearImpersonation
     };
 
     // Execute the function

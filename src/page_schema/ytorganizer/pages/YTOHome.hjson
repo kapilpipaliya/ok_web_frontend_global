@@ -46,16 +46,10 @@ const fetchDashboardData = async () => {
     setDashboardError(null);
 
     // Fetch channels
-    const channelsResult = await args.executeNamedServerFunction({
-      functionName: 'getUserChannels',
-      contextData: {}
-    });
+    const channelsResult = await args.fns.executeYTOFunction('getUserChannels', {});
 
     // Fetch playlists
-    const playlistsResult = await args.executeNamedServerFunction({
-      functionName: 'getUserPlaylists',
-      contextData: {}
-    });
+    const playlistsResult = await args.fns.executeYTOFunction('getUserPlaylists', {});
 
     if (channelsResult.error) {
       throw new Error(channelsResult.error);

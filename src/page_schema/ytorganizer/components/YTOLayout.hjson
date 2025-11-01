@@ -9,12 +9,83 @@
       }
     },
     {
+      id: "impersonation_banner",
+      L: "Attr",
+      P: {
+        displayOrder: 0,
+        componentName: "YTOImpersonationBanner",
+        props: '''
+return {
+  impersonatedUser: args.fns.impersonatedUser(),
+  onExitImpersonation: args.fns.exitImpersonation
+};
+'''
+      }
+    },
+    {
       id: "layout_wrapper",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         fns: '''
+// Impersonation state management
+const [impersonatedUser, setImpersonatedUser] = args.createSignal(null);
+
+// Load impersonation state from sessionStorage (client-side only)
+// This is called from onMount to avoid SSR/hydration mismatch
+const loadImpersonationState = () => {
+  if (typeof window !== 'undefined') {
+    const storedImpersonation = sessionStorage.getItem('yto_impersonatedUser');
+    if (storedImpersonation) {
+      try {
+        setImpersonatedUser(JSON.parse(storedImpersonation));
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    }
+  }
+};
+
+// Exit impersonation
+const exitImpersonation = async () => {
+  const impersonated = impersonatedUser();
+  if (!impersonated) return;
+
+  const result = await args.executeNamedServerFunction({
+    functionName: "clearImpersonation",
+    contextData: { impersonatedUserId: impersonated.P.uuid }
+  });
+
+  setImpersonatedUser(null);
+  if (typeof window !== 'undefined') {
+    sessionStorage.removeItem('yto_impersonatedUser');
+  }
+  args.showSuccessToast("Stopped viewing as user");
+
+  // Reload current page to refresh data
+  window.location.reload();
+};
+
+// Get impersonatedUserId for contextData
+const getImpersonatedUserId = () => {
+  const impersonated = impersonatedUser();
+  return impersonated?.P?.uuid || null;
+};
+
+// Wrapper for executeNamedServerFunction that automatically includes impersonatedUserId
+const executeYTOFunction = async (functionName, contextData = {}) => {
+  const impersonatedUserId = getImpersonatedUserId();
+  return await args.executeNamedServerFunction({
+    functionName,
+    contextData: {
+      ...contextData,
+      // Only add impersonatedUserId if it exists (admin is impersonating)
+      ...(impersonatedUserId ? { impersonatedUserId } : {})
+    }
+  });
+};
+
 // Video player state management
 const [playerState, setPlayerState] = args.createSignal("closed"); // closed, minimized, maximized
 const [currentVideo, setCurrentVideo] = args.createSignal(null);
@@ -198,6 +269,28 @@ const navigationSections = [
     ]
   },
   {
+    id: "admin",
+    title: "Admin",
+    items: [
+      {
+        id: "admin_users",
+        href: "/yto/admin/users",
+        label: "Manage Users",
+        icon: "carbon:user-admin",
+        title: "View and manage all users",
+        pathCheck: (pathname) => pathname.startsWith("/yto/admin")
+      }
+    ],
+    // Only show for admin users
+    showIf: () => {
+      const userRoles = args.user?.OUT?.UserRole || [];
+      return userRoles.some(edge => {
+        const role = args.graph.nodes[edge.E];
+        return role?.P?.key === "Admin";
+      });
+    }
+  },
+  {
     id: "other",
     title: null, // No title for other section
     hasBorder: true,
@@ -266,6 +359,22 @@ const mobileNavigationItems = [
     pathCheck: (pathname) => pathname === "/yto/content" && args.searchParams?.type === "favourites"
   },
   {
+    id: "admin_users",
+    href: "/yto/admin/users",
+    label: "Admin",
+    icon: "carbon:user-admin",
+    title: "View and manage all users",
+    pathCheck: (pathname) => pathname.startsWith("/yto/admin"),
+    // Only show for admin users
+    showIf: () => {
+      const userRoles = args.user?.OUT?.UserRole || [];
+      return userRoles.some(edge => {
+        const role = args.graph.nodes[edge.E];
+        return role?.P?.key === "Admin";
+      });
+    }
+  },
+  {
     id: "settings",
     href: "/yto/settings",
     label: "Settings",
@@ -275,9 +384,30 @@ const mobileNavigationItems = [
   }
 ];
 
+// Filter navigation sections based on showIf condition
+const filteredNavigationSections = navigationSections.filter(section => {
+  if (section.showIf && typeof section.showIf === 'function') {
+    return section.showIf();
+  }
+  return true; // Show by default if no showIf condition
+});
+
+// Filter mobile navigation items based on showIf condition
+const filteredMobileNavigationItems = mobileNavigationItems.filter(item => {
+  if (item.showIf && typeof item.showIf === 'function') {
+    return item.showIf();
+  }
+  return true; // Show by default if no showIf condition
+});
+
 return {
-  navigationSections,
-  mobileNavigationItems,
+  impersonatedUser,
+  exitImpersonation,
+  getImpersonatedUserId,
+  executeYTOFunction,
+  loadImpersonationState,
+  navigationSections: filteredNavigationSections,
+  mobileNavigationItems: filteredMobileNavigationItems,
   playerState,
   currentVideo,
   playVideo,
@@ -304,7 +434,10 @@ return {
 ''',
         props: '''
 return {
-  as: "div"
+  as: "div",
+  onMount: () => {
+    args.fns.loadImpersonationState?.();
+  }
 };
 '''
       }
@@ -341,7 +474,7 @@ return `._id {
       id: "main_content",
       L: "Attr",
       P: {
-        displayOrder: 1,
+        displayOrder: 2,
         componentName: "Html",
         props: '''
 return {
@@ -353,13 +486,11 @@ return `._id {
   flex: 1;
   padding-bottom: 80px;
   overflow-y: auto;
-  position: relative;
 }
 
 @media (min-width: 768px) {
   ._id {
     padding-bottom: 0;
-    margin-left: 240px;
   }
 }`;
 '''
@@ -447,7 +578,7 @@ return {
       id: "left_nav",
       L: "Attr",
       P: {
-        displayOrder: 2,
+        displayOrder: 1,
         componentName: "Html",
         props: '''
 return {
@@ -462,16 +593,12 @@ return `._id {
 @media (min-width: 768px) {
   ._id {
     display: flex;
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 240px;
-    height: 100vh;
+    min-height: 100vh;
     background: ${args.theme.var.color.background};
     border-right: 1px solid ${args.theme.var.color.border};
     flex-direction: column;
     padding: ${args.theme.var.spacing.xl} ${args.theme.var.spacing.lg};
-    z-index: 1;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   }
 }`;
@@ -996,6 +1123,7 @@ return {
   ],
   edges: [
     { id: "e0", T: "Attr", S: "layout_root", E: "layout_wrapper" },
+    { id: "e0b", T: "Attr", S: "layout_wrapper", E: "impersonation_banner" },
     { id: "e1", T: "Attr", S: "layout_wrapper", E: "layout_container" },
     { id: "e2", T: "Attr", S: "layout_container", E: "main_content" },
     { id: "e3", T: "Attr", S: "main_content", E: "slot_main" },
