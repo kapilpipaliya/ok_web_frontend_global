@@ -559,7 +559,7 @@ export function ForgotPasswordForm() {
     ],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      onUnmount: () => {
+      onCleanup: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
       },
     }),

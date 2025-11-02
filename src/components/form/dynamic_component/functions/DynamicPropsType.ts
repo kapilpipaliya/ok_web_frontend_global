@@ -6,7 +6,7 @@ import type { FunctionArgumentType } from "~/components/form/type/FieldSchemaTyp
 export type DynamicPropsType = Record<string, unknown> & {
   beforeMount?: (arg: FunctionArgumentType) => void;
   onMount?: () => undefined | (() => void);
-  onUnmount?: (arg: FunctionArgumentType) => void;
+  onCleanup?: (arg: FunctionArgumentType) => void;
   readOnly?: boolean;
   componentName?: string;
   hide?: boolean | ((arg: FunctionArgumentType) => boolean);

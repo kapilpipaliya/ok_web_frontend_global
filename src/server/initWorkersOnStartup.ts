@@ -5,32 +5,28 @@
  * It checks Redis availability first and only starts workers if Redis is running.
  */
 
-// Track worker initialization state
-let workersInitialized = false;
-let workersInitializing = false;
-let redisChecked = false;
-let redisAvailable = false;
+// Use Promise-based singleton to prevent race conditions
+let initializationPromise: Promise<void> | null = null;
 
 /**
  * Initialize workers on first request (checks Redis first)
+ * Uses Promise-based singleton to prevent duplicate initialization
  */
 export async function initializeWorkersIfNeeded() {
-  if (workersInitialized || workersInitializing) {
-    return;
+  // If already initializing or initialized, wait for/return the same promise
+  if (initializationPromise) {
+    return initializationPromise;
   }
 
-  workersInitializing = true;
-
-  try {
-    // First, check if Redis is running
-    if (!redisChecked) {
+  // Create the initialization promise
+  initializationPromise = (async () => {
+    try {
+      // First, check if Redis is running
       console.log('[Server] Checking if Redis is running...');
       const { checkRedisConnection } = await import("./queue/checkRedis");
       const redisCheck = await checkRedisConnection();
-      redisChecked = true;
-      redisAvailable = redisCheck.connected;
 
-      if (!redisAvailable) {
+      if (!redisCheck.connected) {
         console.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.warn('⚠️  Redis is not running');
         console.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -45,25 +41,21 @@ export async function initializeWorkersIfNeeded() {
         console.warn('');
         console.warn('Then restart the application.');
         console.warn('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        workersInitialized = true; // Mark as "done" so we don't keep checking
         return;
       }
 
       console.log('[Server] ✓ Redis is running');
-    }
 
-    // Only initialize workers if Redis is available
-    if (redisAvailable && !workersInitialized) {
+      // Initialize workers
       console.log('[Server] Initializing workers...');
       const { initWorkersCore } = await import("./queue/initWorkersCore");
       await initWorkersCore();
-      workersInitialized = true;
       console.log('[Server] ✓ Workers initialized successfully');
+    } catch (error) {
+      console.error('[Server] Failed to initialize workers:', error);
+      // Don't throw - let the app continue even if worker init fails
     }
-  } catch (error) {
-    console.error('[Server] Failed to initialize workers:', error);
-    workersInitialized = true; // Mark as done to avoid retrying every request
-  } finally {
-    workersInitializing = false;
-  }
+  })();
+
+  return initializationPromise;
 }

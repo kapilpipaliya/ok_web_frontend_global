@@ -52,10 +52,10 @@ export function useComponentLifecycle(options: {
   const setupCleanup = () => {
     try {
       options.setMounted(false);
-      const onUnmount = options.dynamicProps().onUnmount;
-      if (onUnmount && typeof onUnmount === "function" && owner) {
+      const onCleanup = options.dynamicProps().onCleanup;
+      if (onCleanup && typeof onCleanup === "function" && owner) {
         runWithOwner(owner, () => {
-          onUnmount(options.getFunctionArgumentWithValue());
+          onCleanup(options.getFunctionArgumentWithValue());
         });
       }
     } catch (error) {

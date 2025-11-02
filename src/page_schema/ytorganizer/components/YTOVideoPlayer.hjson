@@ -17,7 +17,7 @@
 const getPlayerState = args.contextData.props?.playerState;
 const currentState = getPlayerState?.() || "closed";
 const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
-const playerSize = args.contextData.props?.playerSize || { width: 400, height: 250 };
+const playerSize = args.contextData.props?.playerSize || { width: 480, height: 270 };
 
 // Calculate default position (bottom right) if not set
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
@@ -60,10 +60,10 @@ return `._id {
 ._id[data-state="minimized"] {
   bottom: ${args.theme.var.spacing.lg};
   right: ${args.theme.var.spacing.lg};
-  width: 400px;
-  height: 250px;
-  min-width: 300px;
-  min-height: 200px;
+  width: 480px;
+  height: 270px;
+  min-width: 480px;
+  min-height: 270px;
 }
 
 ._id[data-state="maximized"] {
@@ -81,7 +81,7 @@ return `._id {
     right: ${args.theme.var.spacing.sm};
     left: ${args.theme.var.spacing.sm};
     width: calc(100% - ${args.theme.var.spacing.md});
-    height: 200px;
+    height: 270px;
   }
 }`;
 '''
@@ -196,10 +196,54 @@ return `._id {
       }
     },
     {
-      id: "player_title",
+      id: "player_title_container",
       L: "Attr",
       P: {
         displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "youtube_logo",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "mdi:youtube",
+  width: 24,
+  height: 24
+};
+''',
+        css: '''
+return `._id {
+  color: #FF0000;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "player_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
         componentName: "Html",
         props: '''
 const getCurrentVideo = args.contextData.props?.currentVideo;
@@ -365,10 +409,94 @@ return {
       }
     },
     {
-      id: "player_toggle_button",
+      id: "watch_on_youtube_button",
       L: "Attr",
       P: {
         displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const getCurrentVideo = args.contextData.props?.currentVideo;
+const video = getCurrentVideo?.();
+const youtubeId = video?.P?.youtubeId || "";
+
+return {
+  as: "a",
+  href: `https://www.youtube.com/watch?v=${youtubeId}`,
+  target: "_blank",
+  rel: "noopener",
+  "aria-label": "Watch on YouTube",
+  title: "Watch on YouTube",
+  onClick: (e) => {
+    e.stopPropagation();
+  }
+};
+''',
+        css: '''
+return `._id {
+  background: #FF0000;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: ${args.theme.var.spacing.xs} ${args.theme.var.spacing.sm};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: ${args.theme.var.borderRadius.sm};
+  transition: background 0.2s ease;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &:hover {
+    background: #CC0000;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "watch_on_youtube_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "icon",
+  icon: "carbon:launch",
+  width: 16,
+  height: 16
+};
+'''
+      }
+    },
+    {
+      id: "watch_on_youtube_text",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "span",
+  text: "YouTube"
+};
+''',
+        css: '''
+return `._id {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "player_toggle_button",
+      L: "Attr",
+      P: {
+        displayOrder: 4,
         componentName: "Html",
         props: '''
 const getPlayerState = args.contextData.props?.playerState;
@@ -427,7 +555,7 @@ return {
       id: "player_close_button",
       L: "Attr",
       P: {
-        displayOrder: 4,
+        displayOrder: 5,
         componentName: "Html",
         props: '''
 const closePlayer = args.contextData.props?.closePlayer;
@@ -569,9 +697,13 @@ return {
         videoId: youtubeId || '',
         playerVars: {
           autoplay: 1,
+          controls: 1,  // Required: Ensure player controls are visible
           enablejsapi: 1,
           origin: window.location.origin,
-          rel: 0  // Don't show related videos from other channels after video ends
+          modestbranding: 1,  // Minimize YouTube branding while keeping attribution
+          fs: 1,  // Enable fullscreen button
+          // rel: 1  // Show related videos (YouTube TOS compliance)
+          rel: 0  // Don't show related videos from other channels after video ends (keep this until youtube raise this complain)
         },
         events: {
           onReady: () => {
@@ -635,8 +767,8 @@ const handleMouseDown = (e) => {
     const deltaX = moveEvent.clientX - startX;
     const deltaY = moveEvent.clientY - startY;
 
-    const newWidth = Math.max(300, startWidth + deltaX);
-    const newHeight = Math.max(200, startHeight + deltaY);
+    const newWidth = Math.max(480, startWidth + deltaX);
+    const newHeight = Math.max(270, startHeight + deltaY);
 
     setPlayerSize?.({ width: newWidth, height: newHeight });
   };
@@ -708,7 +840,7 @@ const handleMouseDown = (e) => {
 
   const handleMouseMove = (moveEvent) => {
     const deltaX = moveEvent.clientX - startX;
-    const newWidth = Math.max(300, startWidth + deltaX);
+    const newWidth = Math.max(480, startWidth + deltaX);
     setPlayerSize?.({ width: newWidth, height: currentHeight });
   };
 
@@ -768,7 +900,7 @@ const handleMouseDown = (e) => {
 
   const handleMouseMove = (moveEvent) => {
     const deltaY = moveEvent.clientY - startY;
-    const newHeight = Math.max(200, startHeight + deltaY);
+    const newHeight = Math.max(270, startHeight + deltaY);
     setPlayerSize?.({ width: currentWidth, height: newHeight });
   };
 
@@ -807,12 +939,17 @@ return `._id {
   edges: [
     { id: "e1", T: "Attr", S: "component_root", E: "video_player_container" },
     { id: "e2", T: "Attr", S: "video_player_container", E: "player_header" },
-    { id: "e3", T: "Attr", S: "player_header", E: "player_title" },
+    { id: "e3", T: "Attr", S: "player_header", E: "player_title_container" },
+    { id: "e3a", T: "Attr", S: "player_title_container", E: "youtube_logo" },
+    { id: "e3b", T: "Attr", S: "player_title_container", E: "player_title" },
     { id: "e4", T: "Attr", S: "player_header", E: "player_controls" },
     { id: "e5", T: "Attr", S: "player_controls", E: "player_next_button" },
     { id: "e6", T: "Attr", S: "player_next_button", E: "player_next_icon" },
     { id: "e6a", T: "Attr", S: "player_controls", E: "player_queue_button" },
     { id: "e6b", T: "Attr", S: "player_queue_button", E: "player_queue_icon" },
+    { id: "e6c", T: "Attr", S: "player_controls", E: "watch_on_youtube_button" },
+    { id: "e6d", T: "Attr", S: "watch_on_youtube_button", E: "watch_on_youtube_icon" },
+    { id: "e6e", T: "Attr", S: "watch_on_youtube_button", E: "watch_on_youtube_text" },
     { id: "e7", T: "Attr", S: "player_controls", E: "player_toggle_button" },
     { id: "e8", T: "Attr", S: "player_toggle_button", E: "player_toggle_icon" },
     { id: "e9", T: "Attr", S: "player_controls", E: "player_close_button" },

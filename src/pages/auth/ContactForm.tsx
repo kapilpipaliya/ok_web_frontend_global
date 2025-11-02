@@ -182,7 +182,7 @@ export function ContactForm() {
     ],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      onUnmount: () => {
+      onCleanup: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
       },
     }),

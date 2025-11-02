@@ -199,7 +199,7 @@ export function ProfileImageSettings() {
         css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
         componentName: "Html",
         props: (options: SaveStateFunctionArgumentType) => ({
-          onUnmount: () => {
+          onCleanup: () => {
             options.revertTransactionUpToIndex(options.txnId, -1);
           },
         }),

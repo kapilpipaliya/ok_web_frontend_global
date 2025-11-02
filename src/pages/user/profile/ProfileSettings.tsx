@@ -428,7 +428,7 @@ margin-bottom: 24px;
     css: SETTINGS_CONSTANTS.FORM_CSS,
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      onUnmount: () => {
+      onCleanup: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
       },
     }),

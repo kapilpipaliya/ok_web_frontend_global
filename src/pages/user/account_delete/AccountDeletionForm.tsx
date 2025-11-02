@@ -325,7 +325,7 @@ export function AccountDeletionForm() {
         showConfirmDialog: false,
         successMessage: "",
       }),
-      onUnmount: () => {
+      onCleanup: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
       },
     }),

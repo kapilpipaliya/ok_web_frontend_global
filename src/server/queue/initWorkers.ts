@@ -75,6 +75,7 @@ export async function getWorkerList() {
 /**
  * Start a specific subdomain worker
  * Platform-level workers cannot be started from the UI
+ * Uses Promise-based singleton to prevent duplicate starts
  */
 export async function startWorker(workerKey: string) {
   "use server"
@@ -91,34 +92,66 @@ export async function startWorker(workerKey: string) {
     // Get current subdomain
     const {subDomain} = await getDBSessionForSubdomain();
 
-    console.log(`[Workers] Starting subdomain worker: ${workerKey} for subdomain: ${subDomain}`);
-
-    // Get or create worker map for this subdomain
-    const subdomainWorkers = workerState.activeWorkers.get(subDomain) || new Map();
-    if (!workerState.activeWorkers.has(subDomain)) {
-      workerState.activeWorkers.set(subDomain, subdomainWorkers);
+    // Check if worker is already running
+    const subdomainWorkers = workerState.activeWorkers.get(subDomain);
+    if (subdomainWorkers?.has(workerKey)) {
+      return {
+        success: false,
+        error: 'Worker is already running'
+      };
     }
 
-    // Handle database-defined subdomain workers
-    const workerResult = await executeNamedServerFunction({
-      functionName: workerKey,
-      contextData: {
-        action: 'start'
+    // Create unique key for this worker start operation
+    const workerStartKey = `${subDomain}:${workerKey}`;
+
+    // Check if already starting this worker
+    if (workerState.workerStartPromises.has(workerStartKey)) {
+      // Wait for the existing start operation to complete
+      return await workerState.workerStartPromises.get(workerStartKey)!;
+    }
+
+    // Create the start promise
+    const startPromise = (async () => {
+      console.log(`[Workers] Starting subdomain worker: ${workerKey} for subdomain: ${subDomain}`);
+
+      // Get or create worker map for this subdomain
+      const workers = workerState.activeWorkers.get(subDomain) || new Map();
+      if (!workerState.activeWorkers.has(subDomain)) {
+        workerState.activeWorkers.set(subDomain, workers);
       }
-    });
 
-    if (workerResult.error) {
-      console.error(`[Workers] Failed to start ${workerKey}:`, workerResult.error);
-      return { success: false, error: workerResult.error };
-    }
+      // Handle database-defined subdomain workers
+      const workerResult = await executeNamedServerFunction({
+        functionName: workerKey,
+        contextData: {
+          action: 'start'
+        }
+      });
 
-    // Store worker reference if the function returns a stop method
-    if (workerResult.result?.stop) {
-      subdomainWorkers.set(workerKey, workerResult.result);
-    }
+      if (workerResult.error) {
+        console.error(`[Workers] Failed to start ${workerKey}:`, workerResult.error);
+        return { success: false, error: workerResult.error };
+      }
 
-    console.log(`[Workers] Successfully started: ${workerKey} for subdomain: ${subDomain}`);
-    return { success: true };
+      // Store worker reference if the function returns a stop method
+      if (workerResult.result?.stop) {
+        workers.set(workerKey, workerResult.result);
+      }
+
+      console.log(`[Workers] Successfully started: ${workerKey} for subdomain: ${subDomain}`);
+      return { success: true };
+    })();
+
+    // Store the promise
+    workerState.workerStartPromises.set(workerStartKey, startPromise);
+
+    // Wait for completion
+    const result = await startPromise;
+
+    // Clean up the promise after completion (success or failure)
+    workerState.workerStartPromises.delete(workerStartKey);
+
+    return result;
   } catch (error: any) {
     console.error(`[Workers] Error starting ${workerKey}:`, error);
     return { success: false, error: error.message };
@@ -145,6 +178,10 @@ export async function stopWorker(workerKey: string) {
     console.log(`[Workers] Stopping worker: ${workerKey} for subdomain: ${subDomain}`);
     await worker.stop();
     subdomainWorkers!.delete(workerKey);
+
+    // Clean up the start promise tracking for this worker
+    const workerStartKey = `${subDomain}:${workerKey}`;
+    workerState.workerStartPromises.delete(workerStartKey);
 
     // If no more workers in this subdomain, remove the subdomain entry
     if (subdomainWorkers!.size === 0) {

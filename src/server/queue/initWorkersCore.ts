@@ -8,8 +8,13 @@ import {executeNamedServerFunction} from "~/cypher/get/executeNamedServerFunctio
  * Subdomain workers are stored with their respective subdomain keys
  */
 export const workerState = {
-  initialized: false,
-  activeWorkers: new Map<string, Map<string, { stop: () => Promise<void> }>>()
+  activeWorkers: new Map<string, Map<string, { stop: () => Promise<void> }>>(),
+  // Promise-based initialization tracking to prevent race conditions
+  platformInitPromise: null as Promise<void> | null,
+  subdomainInitPromises: new Map<string, Promise<void>>(),
+  // Track individual worker start operations to prevent duplicate starts
+  // Key format: "subdomain:workerKey"
+  workerStartPromises: new Map<string, Promise<any>>()
 };
 
 /**
@@ -26,122 +31,144 @@ function getSubdomainWorkers(subdomain: string): Map<string, { stop: () => Promi
  * Core initialization logic for platform-level workers only
  * Called at app startup in middleware
  * Does NOT initialize subdomain-specific workers
+ * Uses Promise-based singleton to prevent race conditions
  */
 export async function initWorkersCore() {
-  if (workerState.initialized) {
-    console.log('[Workers] Platform-level workers already initialized');
-    return;
+  // If already initializing or initialized, wait for/return the same promise
+  if (workerState.platformInitPromise) {
+    return workerState.platformInitPromise;
   }
 
-  console.log('[Workers] Starting platform-level BullMQ workers...');
+  // Create the initialization promise
+  workerState.platformInitPromise = (async () => {
+    console.log('[Workers] Starting platform-level BullMQ workers...');
 
-  // Note: Redis check is done in middleware before calling this function
-  // If we reach here, Redis should be available
+    // Note: Redis check is done in middleware before calling this function
+    // If we reach here, Redis should be available
 
-  // Start platform-level workers only (currently only email worker)
-  const platformWorkers = getSubdomainWorkers('platform');
+    // Start platform-level workers only (currently only email worker)
+    const platformWorkers = getSubdomainWorkers('platform');
 
-  try {
-    console.log('[Workers] Starting email worker...');
-    await startEmailWorker();
-    platformWorkers.set('emailWorker', {stop: stopEmailWorker});
-    console.log('[Workers] Email worker started successfully');
-  } catch (error) {
-    console.error('[Workers] Failed to start email worker:', error);
-  }
+    try {
+      console.log('[Workers] Starting email worker...');
+      await startEmailWorker();
+      platformWorkers.set('emailWorker', {stop: stopEmailWorker});
+      console.log('[Workers] Email worker started successfully');
+    } catch (error) {
+      console.error('[Workers] Failed to start email worker:', error);
+    }
 
-  workerState.initialized = true;
+    // Handle graceful shutdown for all workers (platform and all subdomains)
+    const shutdown = async () => {
+      console.log('[Workers] Shutting down gracefully...');
+      await closeAllWorkersForShutdown();
+      console.log('[Workers] Shutdown complete');
+    };
 
-  // Handle graceful shutdown for all workers (platform and all subdomains)
-  const shutdown = async () => {
-    console.log('[Workers] Shutting down gracefully...');
-    await closeAllWorkersForShutdown();
-    console.log('[Workers] Shutdown complete');
-  };
+    process.on('SIGTERM', async () => {
+      await shutdown();
+      process.exit(0);
+    });
 
-  process.on('SIGTERM', async () => {
-    await shutdown();
-    process.exit(0);
-  });
+    process.on('SIGINT', async () => {
+      await shutdown();
+      process.exit(0);
+    });
 
-  process.on('SIGINT', async () => {
-    await shutdown();
-    process.exit(0);
-  });
+    // Handle uncaught errors
+    process.on('uncaughtException', (error) => {
+      console.error('[Workers] Uncaught exception:', error);
+    });
 
-  // Handle uncaught errors
-  process.on('uncaughtException', (error) => {
-    console.error('[Workers] Uncaught exception:', error);
-  });
+    process.on('unhandledRejection', (reason, promise) => {
+      console.error('[Workers] Unhandled rejection at:', promise, 'reason:', reason);
+    });
 
-  process.on('unhandledRejection', (reason, promise) => {
-    console.error('[Workers] Unhandled rejection at:', promise, 'reason:', reason);
-  });
+    console.log('[Workers] Platform-level workers started successfully');
+  })();
 
-  console.log('[Workers] Platform-level workers started successfully');
+  return workerState.platformInitPromise;
 }
 
 /**
  * Initialize subdomain-specific workers from database
  * Should be called per subdomain, not at app startup
  * Uses current subdomain from request context automatically
+ * Uses Promise-based singleton per subdomain to prevent race conditions
  */
 export async function initSubdomainWorkers() {
-  console.log('[Workers] Starting subdomain-specific workers...');
+  // Get subdomain to check if already initializing
+  const {dbSession: tempSession, subDomain} = await getDBSessionForSubdomain();
+  await tempSession.close();
 
-  // Find and execute all database-defined worker functions
-  const {dbSession, subDomain} = await getDBSessionForSubdomain();
-
-  console.log(`[Workers] Initializing workers for subdomain: ${subDomain}`);
-
-  // Get or create worker map for this subdomain
-  const subdomainWorkers = getSubdomainWorkers(subDomain);
-
-  try {
-    const query = `
-      MATCH (f:Function)
-      WHERE f.key STARTS WITH 'process' OR f.key STARTS WITH 'background'
-      RETURN f
-    `;
-
-    const result = await dbSession.run(query);
-
-    console.log(`[Workers] Found ${result.records.length} subdomain worker functions for ${subDomain}`);
-
-    for (const record of result.records) {
-      const functionVertex = record.get('f');
-      const functionKey = functionVertex.properties.key;
-
-      try {
-        console.log(`[Workers] Initializing subdomain worker ${functionKey} for ${subDomain}`);
-
-        const workerResult = await executeNamedServerFunction({
-          functionName: functionKey,
-          contextData: {
-            action: 'start'
-          }
-        });
-
-        if (workerResult.error) {
-          console.error(`[Workers] Failed to initialize ${functionKey}:`, workerResult.error);
-        } else {
-          console.log(`[Workers] Successfully initialized: ${functionKey} for ${subDomain}`);
-          // Store worker reference if the function returns a stop method
-          if (workerResult.result?.stop) {
-            subdomainWorkers.set(functionKey, workerResult.result);
-          }
-        }
-      } catch (error) {
-        console.error(`[Workers] Error initializing ${functionKey}:`, error);
-      }
-    }
-  } catch (error) {
-    console.error('[Workers] Error finding subdomain worker functions:', error);
-  } finally {
-    await dbSession.close();
+  // If already initializing for this subdomain, wait for/return the same promise
+  if (workerState.subdomainInitPromises.has(subDomain)) {
+    return workerState.subdomainInitPromises.get(subDomain)!;
   }
 
-  console.log(`[Workers] Subdomain workers initialization complete for ${subDomain}`);
+  // Create the initialization promise for this subdomain
+  const initPromise = (async () => {
+    console.log('[Workers] Starting subdomain-specific workers...');
+
+    // Find and execute all database-defined worker functions
+    const {dbSession, subDomain: currentSubdomain} = await getDBSessionForSubdomain();
+
+    console.log(`[Workers] Initializing workers for subdomain: ${currentSubdomain}`);
+
+    // Get or create worker map for this subdomain
+    const subdomainWorkers = getSubdomainWorkers(currentSubdomain);
+
+    try {
+      const query = `
+        MATCH (f:Function)
+        WHERE f.key STARTS WITH 'process' OR f.key STARTS WITH 'background'
+        RETURN f
+      `;
+
+      const result = await dbSession.run(query);
+
+      console.log(`[Workers] Found ${result.records.length} subdomain worker functions for ${currentSubdomain}`);
+
+      for (const record of result.records) {
+        const functionVertex = record.get('f');
+        const functionKey = functionVertex.properties.key;
+
+        try {
+          console.log(`[Workers] Initializing subdomain worker ${functionKey} for ${currentSubdomain}`);
+
+          const workerResult = await executeNamedServerFunction({
+            functionName: functionKey,
+            contextData: {
+              action: 'start'
+            }
+          });
+
+          if (workerResult.error) {
+            console.error(`[Workers] Failed to initialize ${functionKey}:`, workerResult.error);
+          } else {
+            console.log(`[Workers] Successfully initialized: ${functionKey} for ${currentSubdomain}`);
+            // Store worker reference if the function returns a stop method
+            if (workerResult.result?.stop) {
+              subdomainWorkers.set(functionKey, workerResult.result);
+            }
+          }
+        } catch (error) {
+          console.error(`[Workers] Error initializing ${functionKey}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error('[Workers] Error finding subdomain worker functions:', error);
+    } finally {
+      await dbSession.close();
+    }
+
+    console.log(`[Workers] Subdomain workers initialization complete for ${currentSubdomain}`);
+  })();
+
+  // Store the promise
+  workerState.subdomainInitPromises.set(subDomain, initPromise);
+
+  return initPromise;
 }
 
 /**
@@ -162,12 +189,18 @@ export async function closeAllWorkers() {
       try {
         console.log(`[Workers] Stopping worker: ${workerName} (subdomain: ${subDomain})`);
         await worker.stop();
+
+        // Clean up individual worker start promise
+        const workerStartKey = `${subDomain}:${workerName}`;
+        workerState.workerStartPromises.delete(workerStartKey);
       } catch (error) {
         console.error(`[Workers] Error stopping ${workerName}:`, error);
       }
     }
     subdomainWorkers.clear();
     workerState.activeWorkers.delete(subDomain);
+    // Clean up the initialization promise so workers can be reinitialized
+    workerState.subdomainInitPromises.delete(subDomain);
     console.log(`[Workers] All workers stopped for subdomain: ${subDomain}`);
   } else {
     console.log(`[Workers] No workers found for subdomain: ${subDomain}`);
@@ -191,5 +224,9 @@ export async function closeAllWorkersForShutdown() {
     }
   }
   workerState.activeWorkers.clear();
+  // Clear all subdomain initialization promises
+  workerState.subdomainInitPromises.clear();
+  // Clear all worker start promises
+  workerState.workerStartPromises.clear();
   console.log('[Workers] All workers stopped for all subdomains');
 }

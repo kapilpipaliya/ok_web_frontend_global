@@ -11,6 +11,7 @@ import { sendEmailDirect } from '~/lib/playwright/sendEmail';
 import type { EmailJobData } from '../emailQueue';
 
 let worker: Worker<EmailJobData> | null = null;
+let startPromise: Promise<Worker<EmailJobData>> | null = null;
 
 /**
  * Process a single email job
@@ -39,48 +40,57 @@ async function processEmailJob(job: Job<EmailJobData>) {
 
 /**
  * Start the email worker
+ * Uses Promise-based singleton to prevent race conditions
  */
 export async function startEmailWorker() {
-  if (worker) {
-    console.log('[EmailWorker] Worker already running');
-    return worker;
+  // If already starting or started, wait for/return the same promise
+  if (startPromise) {
+    return startPromise;
   }
 
-  console.log('[EmailWorker] Starting email worker...');
+  // Create the start promise
+  startPromise = (async () => {
+    console.log('[EmailWorker] Starting email worker...');
 
-  worker = new Worker<EmailJobData>(
-    'email',
-    processEmailJob,
-    {
-      connection: redisConnection,
-      concurrency: 5, // Process up to 5 emails concurrently
-      limiter: {
-        max: 10, // Maximum 10 emails
-        duration: 1000, // per second (rate limiting)
-      },
-    }
-  );
+    const newWorker = new Worker<EmailJobData>(
+      'email',
+      processEmailJob,
+      {
+        connection: redisConnection,
+        concurrency: 5, // Process up to 5 emails concurrently
+        limiter: {
+          max: 10, // Maximum 10 emails
+          duration: 1000, // per second (rate limiting)
+        },
+      }
+    );
 
-  // Worker event listeners
-  worker.on('completed', (job) => {
-    console.log(`[EmailWorker] Job ${job.id} completed successfully`);
-  });
+    // Worker event listeners
+    newWorker.on('completed', (job) => {
+      console.log(`[EmailWorker] Job ${job.id} completed successfully`);
+    });
 
-  worker.on('failed', (job, err) => {
-    console.error(`[EmailWorker] Job ${job?.id} failed:`, err.message);
-  });
+    newWorker.on('failed', (job, err) => {
+      console.error(`[EmailWorker] Job ${job?.id} failed:`, err.message);
+    });
 
-  worker.on('error', (err) => {
-    console.error('[EmailWorker] Worker error:', err);
-  });
+    newWorker.on('error', (err) => {
+      console.error('[EmailWorker] Worker error:', err);
+    });
 
-  worker.on('stalled', (jobId) => {
-    console.warn(`[EmailWorker] Job ${jobId} stalled`);
-  });
+    newWorker.on('stalled', (jobId) => {
+      console.warn(`[EmailWorker] Job ${jobId} stalled`);
+    });
 
-  console.log('[EmailWorker] Email worker started successfully');
+    // Assign to module-level variable
+    worker = newWorker;
 
-  return worker;
+    console.log('[EmailWorker] Email worker started successfully');
+
+    return newWorker;
+  })();
+
+  return startPromise;
 }
 
 /**
@@ -95,6 +105,7 @@ export async function stopEmailWorker() {
   console.log('[EmailWorker] Stopping email worker...');
   await worker.close();
   worker = null;
+  startPromise = null; // Reset promise so worker can be restarted
   console.log('[EmailWorker] Email worker stopped');
 }
 

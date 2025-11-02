@@ -70,7 +70,7 @@ return {
   as: "a",
   href: href,
   target: target,
-  rel: target === "_blank" ? "noopener noreferrer" : "",
+  rel: target === "_blank" ? "noopener" : "",
   style: thumbnailUrl ? `background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center;` : "",
   onClick: (e) => {
     e.preventDefault();

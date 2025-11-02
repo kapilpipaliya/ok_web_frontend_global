@@ -460,7 +460,7 @@ export const getSupportTicketFormSchema = (onSuccess: () => void) => {
             }, 100);
           }
         },
-        onUnmount: () => {
+        onCleanup: () => {
           options.revertTransactionUpToIndex(options.txnId, -1);
         },
       };

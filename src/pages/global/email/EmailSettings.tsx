@@ -443,7 +443,7 @@ export function EmailSettings() {
     ],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      onUnmount: () => {
+      onCleanup: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
       },
     }),
@@ -627,7 +627,7 @@ export function EmailSettings() {
     ],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      onUnmount: () => {
+      onCleanup: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
       },
     }),

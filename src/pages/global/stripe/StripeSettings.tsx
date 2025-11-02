@@ -306,7 +306,7 @@ export function StripeSettings() {
     ],
     componentName: "Html",
     props: (options: FunctionArgumentType) => ({
-      onUnmount: () => {
+      onCleanup: () => {
         options.revertTransactionUpToIndex(options.txnId, -1);
       },
     }),
