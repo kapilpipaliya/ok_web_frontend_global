@@ -10,8 +10,22 @@ import { redisConnection } from '../redisConfig';
 import { sendEmailDirect } from '~/lib/playwright/sendEmail';
 import type { EmailJobData } from '../emailQueue';
 
-let worker: Worker<EmailJobData> | null = null;
-let startPromise: Promise<Worker<EmailJobData>> | null = null;
+/**
+ * Email worker state stored globally to share across module instances
+ * (Vinxi dev mode creates multiple module instances in separate contexts)
+ */
+declare global {
+  var __emailWorker: Worker<EmailJobData> | undefined;
+  var __emailWorkerStartPromise: Promise<Worker<EmailJobData>> | undefined;
+}
+
+// Initialize global state
+if (!global.__emailWorker) {
+  global.__emailWorker = undefined;
+}
+if (!global.__emailWorkerStartPromise) {
+  global.__emailWorkerStartPromise = undefined;
+}
 
 /**
  * Process a single email job
@@ -40,16 +54,17 @@ async function processEmailJob(job: Job<EmailJobData>) {
 
 /**
  * Start the email worker
- * Uses Promise-based singleton to prevent race conditions
+ * Uses global Promise-based singleton to prevent race conditions
+ * across multiple module instances
  */
 export async function startEmailWorker() {
   // If already starting or started, wait for/return the same promise
-  if (startPromise) {
-    return startPromise;
+  if (global.__emailWorkerStartPromise) {
+    return global.__emailWorkerStartPromise;
   }
 
   // Create the start promise
-  startPromise = (async () => {
+  global.__emailWorkerStartPromise = (async () => {
     console.log('[EmailWorker] Starting email worker...');
 
     const newWorker = new Worker<EmailJobData>(
@@ -82,30 +97,30 @@ export async function startEmailWorker() {
       console.warn(`[EmailWorker] Job ${jobId} stalled`);
     });
 
-    // Assign to module-level variable
-    worker = newWorker;
+    // Assign to global variable
+    global.__emailWorker = newWorker;
 
     console.log('[EmailWorker] Email worker started successfully');
 
     return newWorker;
   })();
 
-  return startPromise;
+  return global.__emailWorkerStartPromise;
 }
 
 /**
  * Stop the email worker
  */
 export async function stopEmailWorker() {
-  if (!worker) {
+  if (!global.__emailWorker) {
     console.log('[EmailWorker] Worker not running');
     return;
   }
 
   console.log('[EmailWorker] Stopping email worker...');
-  await worker.close();
-  worker = null;
-  startPromise = null; // Reset promise so worker can be restarted
+  await global.__emailWorker.close();
+  global.__emailWorker = undefined;
+  global.__emailWorkerStartPromise = undefined; // Reset promise so worker can be restarted
   console.log('[EmailWorker] Email worker stopped');
 }
 
@@ -114,9 +129,9 @@ export async function stopEmailWorker() {
  */
 export function getEmailWorkerStatus() {
   return {
-    running: worker !== null,
-    isRunning: worker?.isRunning() || false,
-    isPaused: worker?.isPaused() || false,
+    running: global.__emailWorker !== undefined,
+    isRunning: global.__emailWorker?.isRunning() || false,
+    isPaused: global.__emailWorker?.isPaused() || false,
   };
 }
 
@@ -124,10 +139,10 @@ export function getEmailWorkerStatus() {
  * Pause the worker
  */
 export async function pauseEmailWorker() {
-  if (!worker) {
+  if (!global.__emailWorker) {
     throw new Error('Worker not running');
   }
-  await worker.pause();
+  await global.__emailWorker.pause();
   console.log('[EmailWorker] Worker paused');
 }
 
@@ -135,9 +150,9 @@ export async function pauseEmailWorker() {
  * Resume the worker
  */
 export async function resumeEmailWorker() {
-  if (!worker) {
+  if (!global.__emailWorker) {
     throw new Error('Worker not running');
   }
-  await worker.resume();
+  await global.__emailWorker.resume();
   console.log('[EmailWorker] Worker resumed');
 }

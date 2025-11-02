@@ -5,7 +5,7 @@ import { API } from "~/lib/api/endpoints";
 import { postAPI } from "~/lib/api/general/postApi";
 import { As } from "~/components/As";
 import { Loader } from "~/components/Loader";
-import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { clearUserData } from "~/lib/graph/mutate/user/setUserData";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 
 export default function Logout() {
@@ -20,8 +20,8 @@ export default function Logout() {
       // Execute API call and minimum delay in parallel
       await Promise.all([postAPI(API.auth.logOutUrl, {}), minimumDelay]);
 
-      // Delete member vertex from the graph
-      deleteVertex(0, "member", graph, setGraph);
+      // Clear user data from global store
+      clearUserData(graph, setGraph);
 
       // Navigate to signIn page with replaced history
       navigate(API.urls.admin.signIn, { replace: true });
@@ -83,5 +83,5 @@ export default function Logout() {
       successMessage: "Log Out Successfully",
     });
 
-    deleteVertex(0, "member", graph, setGraph);
+    clearUserData(graph, setGraph);
 */

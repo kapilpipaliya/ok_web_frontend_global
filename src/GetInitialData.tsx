@@ -16,6 +16,7 @@ import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
 import { useGraph } from "~/lib/graph/context/UseGraph";
 import { SimpleErrorMessage } from "~/components/SimpleErrorMessage";
 import { loadWebsiteSchemasForSubdomain } from "~/createAppState";
+import {APIErrorResponse} from "~/lib/api/server/apiErrorHandler";
 
 interface GetInitialDataProps extends ParentProps {
   dontRedirectToLogin?: boolean;
@@ -41,7 +42,7 @@ export function GetInitialData(props: GetInitialDataProps) {
   const graph = useGraph();
   const navigate = useNavigate();
 
-  const setData = (initialData: ServerResult, userData: null | UserData) => {
+  const setData = (initialData: ServerResult, userData?: UserData | APIErrorResponse | null) => {
     if (initialData.error) {
       mergeVertexProperties<GlobalProperties>(
         0,
@@ -81,7 +82,21 @@ export function GetInitialData(props: GetInitialDataProps) {
     }
 
     if (userData) {
+      // Check if userData is an error response
+      if ("error" in userData) {
+        // Handle API error - log it or store in global state if needed
+        console.error("Failed to load user data:", userData.error);
+        return;
+      }
+
+      // First, set the graph with IN/OUT relationships
+      if (userData.graph) {
+        setGraphData(graph[0], graph[1], userData.graph);
+      }
+
+      // Then, set user IDs in global store
       setUserData(graph[0], graph[1], userData);
+
       handleUserNavigation(
         userData,
         props.dontRedirectToLogin ? undefined : navigate,
@@ -97,7 +112,7 @@ export function GetInitialData(props: GetInitialDataProps) {
   );
 
   const RenderContent = () => {
-    setData(data()!.initialData, data()!.userData as UserData);
+    setData(data()!.initialData, data()!.userData);
     return (
       <Switch>
         <Match when={getGlobalStore(graph[0]).P.initialDataFetchError}>

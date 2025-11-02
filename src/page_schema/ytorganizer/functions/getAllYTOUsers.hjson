@@ -23,45 +23,49 @@ if (adminCheck.records.length === 0) {
   throw new Error("Unauthorized: Admin role required");
 }
 
-// Query all users with YTO statistics
-const query = `
+// Query all users with YTO statistics (without filtering yet)
+const dataQuery = `
   MATCH (u:User)
   WHERE $searchQuery IS NULL OR u.username CONTAINS $searchQuery OR u.email CONTAINS $searchQuery
   OPTIONAL MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
   OPTIONAL MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
   OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
-  ORDER BY u.createdAt DESC
-  LIMIT $limit OFFSET $offset
+  WITH u,
+       count(DISTINCT cs) as channelCount,
+       count(DISTINCT ps) as playlistCount,
+       count(DISTINCT vs) as videoCount,
+       count(DISTINCT CASE WHEN cs.isFavourite = true THEN cs END) as favoriteChannelCount,
+       count(DISTINCT CASE WHEN ps.isFavourite = true THEN ps END) as favoritePlaylistCount,
+       count(DISTINCT CASE WHEN vs.isFavourite = true THEN vs END) as favoriteVideoCount,
+       max(cs.createdAt) as lastChannelAdded,
+       max(ps.createdAt) as lastPlaylistAdded,
+       max(vs.updatedAt) as lastVideoActivity
   RETURN u,
-         count(DISTINCT cs) as channelCount,
-         count(DISTINCT ps) as playlistCount,
-         count(DISTINCT vs) as videoCount,
-         count(DISTINCT CASE WHEN cs.isFavourite = true THEN cs END) as favoriteChannelCount,
-         count(DISTINCT CASE WHEN ps.isFavourite = true THEN ps END) as favoritePlaylistCount,
-         count(DISTINCT CASE WHEN vs.isFavourite = true THEN vs END) as favoriteVideoCount,
-         max(cs.createdAt) as lastChannelAdded,
-         max(ps.createdAt) as lastPlaylistAdded,
-         max(vs.updatedAt) as lastVideoActivity
+         channelCount,
+         playlistCount,
+         videoCount,
+         favoriteChannelCount,
+         favoritePlaylistCount,
+         favoriteVideoCount,
+         lastChannelAdded,
+         lastPlaylistAdded,
+         lastVideoActivity
 `;
 
-const neo4j = await import('neo4j-driver');
-
-const result = await args.session.run(query, {
-  searchQuery: args.contextData.searchQuery || null,
-  limit: neo4j.int(args.contextData.limit || 50),
-  offset: neo4j.int(args.contextData.offset || 0)
+const dataResult = await args.session.run(dataQuery, {
+  searchQuery: args.contextData.searchQuery || null
 });
 
 // Helper to convert Neo4j integers to JS numbers
 const toNumber = (value) => {
   if (value === null || value === undefined) return 0;
   if (typeof value === 'number') return value;
-  if (neo4j.isInt(value)) return value.toNumber();
+  if (args.neo4jDriver.isInt(value)) return value.toNumber();
   return Number(value);
 };
 
-// Convert to vertex format
-const users = result.records.map(record => ({
+// Convert all results to vertex format
+let allUsers = dataResult.records.map(record => ({
   user: args.convertNodeToJson(record.get('u')),
   stats: {
     channelCount: toNumber(record.get('channelCount')),
@@ -76,10 +80,48 @@ const users = result.records.map(record => ({
   }
 }));
 
+// Apply status filter if provided (server-side filtering)
+const filterStatus = args.contextData.filterStatus;
+if (filterStatus && filterStatus !== 'all') {
+  allUsers = allUsers.filter(userdata => {
+    const now = Date.now();
+    const lastActivity = [
+      userdata.stats.lastChannelAdded ? new Date(userdata.stats.lastChannelAdded).getTime() : null,
+      userdata.stats.lastPlaylistAdded ? new Date(userdata.stats.lastPlaylistAdded).getTime() : null,
+      userdata.stats.lastVideoActivity ? new Date(userdata.stats.lastVideoActivity).getTime() : null
+    ].filter(d => d !== null).sort((a, b) => b - a)[0];
+
+    if (!lastActivity) return filterStatus === 'dormant';
+
+    const daysSinceActivity = (now - lastActivity) / (1000 * 60 * 60 * 24);
+
+    if (filterStatus === 'active') return daysSinceActivity < 7;
+    if (filterStatus === 'new') return daysSinceActivity >= 7 && daysSinceActivity < 30;
+    if (filterStatus === 'dormant') return daysSinceActivity >= 30;
+
+    return true;
+  });
+}
+
+// Get total count after filtering
+const totalCount = allUsers.length;
+
+// Sort by createdAt DESC
+allUsers.sort((a, b) => {
+  const dateA = new Date(a.user?.P?.createdAt || 0).getTime();
+  const dateB = new Date(b.user?.P?.createdAt || 0).getTime();
+  return dateB - dateA;
+});
+
+// Apply pagination
+const offset = args.contextData.offset || 0;
+const limit = args.contextData.limit || 50;
+const users = allUsers.slice(offset, offset + limit);
+
 return {
   success: true,
-  data: { users, totalCount: users.length },
-  message: `Found ${users.length} users`
+  data: { users, totalCount },
+  message: `Found ${users.length} of ${totalCount} users`
 };
 '''
       }

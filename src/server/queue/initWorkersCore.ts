@@ -6,16 +6,30 @@ import {executeNamedServerFunction} from "~/cypher/get/executeNamedServerFunctio
  * Worker state management
  * Platform workers are stored with subdomain = 'platform'
  * Subdomain workers are stored with their respective subdomain keys
+ *
+ * Uses global state to share across module instances (Vinxi creates multiple contexts)
  */
-export const workerState = {
-  activeWorkers: new Map<string, Map<string, { stop: () => Promise<void> }>>(),
-  // Promise-based initialization tracking to prevent race conditions
-  platformInitPromise: null as Promise<void> | null,
-  subdomainInitPromises: new Map<string, Promise<void>>(),
-  // Track individual worker start operations to prevent duplicate starts
-  // Key format: "subdomain:workerKey"
-  workerStartPromises: new Map<string, Promise<any>>()
-};
+declare global {
+  var __workerState: {
+    activeWorkers: Map<string, Map<string, { stop: () => Promise<void> }>>;
+    platformInitPromise: Promise<void> | null;
+    subdomainInitPromises: Map<string, Promise<void>>;
+    workerStartPromises: Map<string, Promise<any>>;
+  } | undefined;
+}
+
+// Initialize global worker state if not exists
+if (!global.__workerState) {
+  global.__workerState = {
+    activeWorkers: new Map<string, Map<string, { stop: () => Promise<void> }>>(),
+    platformInitPromise: null,
+    subdomainInitPromises: new Map<string, Promise<void>>(),
+    workerStartPromises: new Map<string, Promise<any>>()
+  };
+}
+
+// Export reference to global state
+export const workerState = global.__workerState;
 
 /**
  * Get workers for a specific subdomain

@@ -414,6 +414,8 @@ return {
       P: {
         displayOrder: 3,
         componentName: "Html",
+        // YouTube TOS Required: Provide a link for users to watch the video on YouTube.com
+        // This button fulfills the requirement to allow users to access the video on YouTube's platform
         props: '''
 const getCurrentVideo = args.contextData.props?.currentVideo;
 const video = getCurrentVideo?.();
@@ -691,22 +693,29 @@ return {
       }
 
       // Create YouTube player
+      // YouTube TOS: https://developers.google.com/youtube/terms/required-minimum-functionality
+      // Required Minimum Functionality:
+      // 1. Player controls must be visible and functional (play, pause, volume, seek)
+      // 2. Fullscreen button must be available
+      // 3. YouTube branding must be visible (logo/watermark)
+      // 4. Link to watch on YouTube must be provided
+      // 5. Related videos should be shown (rel parameter)
       const ytPlayer = new window.YT.Player(el, {
         height: '100%',
         width: '100%',
         videoId: youtubeId || '',
         playerVars: {
           autoplay: 1,
-          controls: 1,  // Required: Ensure player controls are visible
+          controls: 1,  // YouTube TOS Required: Player controls (play, pause, volume, seek) must be visible
           enablejsapi: 1,
           origin: window.location.origin,
-          modestbranding: 1,  // Minimize YouTube branding while keeping attribution
-          fs: 1,  // Enable fullscreen button
-          // rel: 1  // Show related videos (YouTube TOS compliance)
-          rel: 0  // Don't show related videos from other channels after video ends (keep this until youtube raise this complain)
+          modestbranding: 1,  // YouTube TOS Required: Minimize branding but keep YouTube logo/watermark visible
+          fs: 1,  // YouTube TOS Required: Enable fullscreen button
+          // rel: 1  // YouTube TOS Required: Show related videos at video end
+          rel: 0  // VIOLATION: Disabled to prevent showing other channels' videos (keep this until YouTube enforces)
         },
         events: {
-          onReady: () => {
+          onReady: (event) => {
             args.fns.setPlayerReady(true);
             args.fns.setPlayer(ytPlayer);
           },

@@ -213,7 +213,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_light_100_text};
   margin-bottom: 1rem;
 }`;
 '''
@@ -233,7 +233,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.error};
+  color: ${args.theme.var.color.error_light_100_text};
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 0.5rem 0;
@@ -257,7 +257,7 @@ return {
 ''',
         css: '''
 return `._id {
-  color: ${args.theme.var.color.error_dark_200};
+  color: ${args.theme.var.color.error_light_100_text};
   margin: 0 0 1.5rem 0;
   max-width: 400px;
 }`;

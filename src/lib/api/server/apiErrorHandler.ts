@@ -9,7 +9,12 @@ export class APIError extends Error {
   }
 }
 
-export function handleAPIError(error: unknown) {
+export type APIErrorResponse = {
+  details?: unknown;
+  error: string;
+};
+
+export function handleAPIError(error: unknown): APIErrorResponse | Response {
   if (error instanceof APIError) {
     return {
       details: error.details,

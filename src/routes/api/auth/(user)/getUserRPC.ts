@@ -1,10 +1,11 @@
 import { findUserByEmailOrUuid } from "~/cypher/mutate/user/findUserByEmailOrUuid";
 import { getDBSessionForSubdomain } from "~/cypher/session/getSessionForSubdomain";
-import { handleAPIError } from "~/lib/api/server/apiErrorHandler";
+import {APIErrorResponse, handleAPIError} from "~/lib/api/server/apiErrorHandler";
 import { getUserFromSession } from "~/server/auth/session/getUserFromSession";
 import { updateRedirectUrl } from "~/routes/api/auth/(user)/functions/updateRedirectUrl";
+import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 
-export async function getUserRPC() {
+export async function getUserRPC(): Promise<UserData | APIErrorResponse | null> {
   "use server";
   const { dbSession, subDomain } = await getDBSessionForSubdomain();
   try {
@@ -29,9 +30,10 @@ export async function getUserRPC() {
       updateRedirectUrl(data.user, subDomain!, configuredRedirectUrl);
     }
 
+    // Graph is already built by findUserByEmailOrUuid
     return data;
   } catch (error) {
-    return handleAPIError(error);
+    return handleAPIError(error) as APIErrorResponse;
   } finally {
     await dbSession.close();
   }

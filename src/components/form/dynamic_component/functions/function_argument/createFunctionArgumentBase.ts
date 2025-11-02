@@ -35,6 +35,8 @@ import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 import { saveUserSetting } from "~/lib/api/saveUserSetting";
 import { executeServerFunction } from "~/cypher/get/executeServerFunction";
 import { executeNamedServerFunction } from "~/cypher/get/executeNamedServerFunction";
+import {getMemberVertex} from "~/lib/graph/get/sync/store/getMemberVertex";
+
 interface ToastFunctions {
   showErrorToast: (message: string) => void;
   showSuccessToast: (message: string) => void;
@@ -260,7 +262,7 @@ export function createFunctionArgumentBase(
     },
     // Current user vertex getter
     get user() {
-      return hooks.graph.vertexes.member;
+      return getMemberVertex(hooks.graph);
     },
     executeServerFunction,
     executeNamedServerFunction

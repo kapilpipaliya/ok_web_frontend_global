@@ -123,11 +123,11 @@ if (args.contextData.action === 'start') {
         RETURN cs
       `, { userUuid, channelId, totalPlaylists });
 
-      let processedPlaylists = 0;
-      let totalVideos = 0;
-      let processedVideos = 0;
+      // Create a queue for playlist processing
+      const { Queue } = args.bullmq;
+      const playlistQueue = new Queue('playlistProcessing', { connection });
 
-      // Process each playlist
+      // Process each playlist by adding to queue
       for (const playlist of allPlaylists) {
         if (!playlist.id) continue;
 
@@ -142,6 +142,7 @@ if (args.contextData.action === 'start') {
             p.description = $description,
             p.thumbnail = $thumbnail,
             p.channelId = $channelId,
+            p.itemCount = $itemCount,
             p.updatedAt = datetime()
         `, {
           playlistId: playlist.id,
@@ -150,7 +151,8 @@ if (args.contextData.action === 'start') {
           description: playlist.snippet?.description || '',
           thumbnail: playlist.snippet?.thumbnails?.high?.url ||
                      playlist.snippet?.thumbnails?.medium?.url || '',
-          channelId
+          channelId,
+          itemCount: playlist.contentDetails?.itemCount || 0
         });
 
         // Create channel-playlist relationship
@@ -160,7 +162,7 @@ if (args.contextData.action === 'start') {
           MERGE (c)-[:ChannelPlaylist]->(p)
         `, { channelId, playlistId: playlist.id });
 
-        // Create user playlist setting and mark as processing
+        // Create user playlist setting and mark as queued
         const playlistSettingKey = `playlist_setting_${userId}_${playlist.id}`;
         await session.run(`
           MATCH (u:User {uuid: $userUuid})
@@ -170,13 +172,14 @@ if (args.contextData.action === 'start') {
             ps.key = $playlistSettingKey,
             ps.createdAt = datetime()
           SET
-            ps.status = 'processing',
+            ps.status = 'queued',
             ps.progress = 0,
             ps.totalVideos = 0,
             ps.processedVideos = 0,
             ps.sortBy = 'index',
             ps.showThumbnails = true,
             ps.viewMode = 'list',
+            ps.queuedAt = datetime(),
             ps.updatedAt = datetime()
         `, {
           userUuid,
@@ -184,162 +187,30 @@ if (args.contextData.action === 'start') {
           playlistSettingKey
         });
 
-        // Fetch ALL videos in this playlist
-        let allVideos = [];
-        let nextPageToken = null;
-
-        do {
-          const itemsResponse = await youtube.playlistItems.list({
-            part: ['snippet', 'contentDetails'],
-            playlistId: playlist.id,
-            maxResults: 50,
-            pageToken: nextPageToken
-          });
-
-          // Track API usage for playlistItems.list call
-          await args.executeNamedServerFunction({
-            functionName: "trackYouTubeAPIUsage",
-            contextData: { keyId: apiKeyData.keyId, cost: 3 }
-          });
-
-          if (itemsResponse.data.items) {
-            allVideos = allVideos.concat(itemsResponse.data.items);
-          }
-
-          nextPageToken = itemsResponse.data.nextPageToken;
-        } while (nextPageToken);
-
-        totalVideos += allVideos.length;
-
-        // Update playlist item count and total videos
-        await session.run(`
-          MATCH (p:Playlist {youtubeId: $playlistId})
-          SET p.itemCount = $itemCount
-
-          WITH p
-          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
-                -[:PlaylistSettingPlaylist]->(p)
-          SET ps.totalVideos = $totalVideos,
-              ps.updatedAt = datetime()
-        `, {
+        // Add playlist to processing queue
+        await playlistQueue.add('processPlaylist', {
           playlistId: playlist.id,
-          userUuid,
-          itemCount: allVideos.length,
-          totalVideos: allVideos.length
+          userId: userId,
+          userUuid: userUuid,
+          customName: null,
+          channelId: channelId
+        }, {
+          attempts: 3,
+          backoff: {
+            type: 'exponential',
+            delay: 5000
+          },
+          removeOnComplete: 100,
+          removeOnFail: 50
         });
 
-        // Process videos
-        let playlistProcessedVideos = 0;
-        for (const video of allVideos) {
-          if (!video.contentDetails?.videoId) continue;
-
-          const videoId = video.contentDetails.videoId;
-
-          // Save video
-          await session.run(`
-            MERGE (v:Video {youtubeId: $videoId})
-            ON CREATE SET
-              v.key = $key,
-              v.createdAt = datetime()
-            SET
-              v.title = $title,
-              v.description = $description,
-              v.thumbnail = $thumbnail,
-              v.channelId = $channelId,
-              v.updatedAt = datetime()
-          `, {
-            videoId,
-            key: `video_${videoId}`,
-            title: video.snippet?.title || '',
-            description: video.snippet?.description || '',
-            thumbnail: video.snippet?.thumbnails?.high?.url ||
-                       video.snippet?.thumbnails?.medium?.url || '',
-            channelId
-          });
-
-          // Create playlist-video relationship
-          await session.run(`
-            MATCH (p:Playlist {youtubeId: $playlistId})
-            MATCH (v:Video {youtubeId: $videoId})
-            MERGE (p)-[:PlaylistVideo]->(v)
-          `, { playlistId: playlist.id, videoId });
-
-          // Create user video setting
-          const videoSettingKey = `video_setting_${userId}_${videoId}`;
-          await session.run(`
-            MATCH (u:User {uuid: $userUuid})
-            MATCH (v:Video {youtubeId: $videoId})
-            MERGE (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-            ON CREATE SET
-              vs.key = $videoSettingKey,
-              vs.createdAt = datetime()
-            SET
-              vs.watched = false,
-              vs.notes = null,
-              vs.updatedAt = datetime()
-          `, { userUuid, videoId, videoSettingKey });
-
-          processedVideos++;
-          playlistProcessedVideos++;
-
-          // Update playlist progress every 10 videos or on last video
-          if (playlistProcessedVideos % 10 === 0 || playlistProcessedVideos === allVideos.length) {
-            const playlistProgress = Math.round((playlistProcessedVideos / allVideos.length) * 100);
-
-            await session.run(`
-              MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
-                    -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-              SET ps.processedVideos = $processedVideos,
-                  ps.progress = $progress,
-                  ps.updatedAt = datetime()
-            `, { userUuid, playlistId: playlist.id, processedVideos: playlistProcessedVideos, progress: playlistProgress });
-          }
-        }
-
-        // Update customOrder with all video IDs and mark playlist as completed
-        const videoIds = allVideos.map(v => v.contentDetails?.videoId).filter(Boolean);
-
-        await session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
-                -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-          SET ps.status = 'completed',
-              ps.progress = 100,
-              ps.processedVideos = $totalVideos,
-              ps.customOrder = $customOrder,
-              ps.completedAt = datetime(),
-              ps.updatedAt = datetime()
-        `, { userUuid, playlistId: playlist.id, totalVideos: allVideos.length, customOrder: videoIds });
-
-        processedPlaylists++;
-
-        // Calculate progress: 50% for playlists, 50% for videos
-        const playlistProgress = (processedPlaylists / totalPlaylists) * 50;
-        const videoProgress = totalVideos > 0 ? (processedVideos / totalVideos) * 50 : 0;
-        const totalProgress = Math.min(Math.round(playlistProgress + videoProgress), 100);
-
-        // Update progress
-        await session.run(`
-          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
-                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-          SET cs.processedPlaylists = $processedPlaylists,
-              cs.totalVideos = $totalVideos,
-              cs.processedVideos = $processedVideos,
-              cs.progress = $progress,
-              cs.updatedAt = datetime()
-        `, { userUuid, channelId, processedPlaylists, totalVideos, processedVideos, progress: totalProgress });
+        console.log(`Queued playlist ${playlist.id} (${playlist.snippet?.title}) for processing`);
       }
 
-      // Mark as completed
-      await session.run(`
-        MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
-              -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-        SET cs.status = 'completed',
-            cs.progress = 100,
-            cs.completedAt = datetime(),
-            cs.updatedAt = datetime()
-      `, { userUuid, channelId });
+      // Close playlist queue connection
+      await playlistQueue.close();
 
-      console.log(`Channel ${channelId} processing completed: ${processedPlaylists} playlists, ${processedVideos} videos`);
+      console.log(`Channel ${channelId} processing completed: queued ${totalPlaylists} playlists for processing`);
 
     } catch (error) {
       console.error(`Error processing channel ${channelId}:`, error);
@@ -360,7 +231,7 @@ if (args.contextData.action === 'start') {
     }
   }, {
     connection,
-    concurrency: 2
+    concurrency: 1
   });
 
   worker.on('completed', (job) => {

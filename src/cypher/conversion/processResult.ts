@@ -14,7 +14,7 @@ export function processResult(
   records: Record[],
   context: EvalExpressionContext,
   nodeLabel: string | string[],
-  typeLabel?: string,
+  typeLabel?: string | string[],
 ) {
   const vertices: Vertex[] = [];
   const labels = Array.isArray(nodeLabel) ? nodeLabel : [nodeLabel];
@@ -24,35 +24,49 @@ export function processResult(
     // Process nodes
     for (let index = 0; index < labels.length; index++) {
       const label = labels[index];
-      const node = record.get(label);
-      if (node) {
-        const vertex = convertNodeToJson(node);
-        if (index === 0) {
-          vertices.push(vertex);
-        }
-        if (nodes) {
-          nodes[vertex.id] = vertex;
+      const nodeData = record.get(label);
+      if (nodeData) {
+        // Handle both single nodes and arrays of nodes (from collect())
+        const nodeArray = Array.isArray(nodeData) ? nodeData : [nodeData];
+
+        for (const node of nodeArray) {
+          if (node) {
+            const vertex = convertNodeToJson(node);
+            if (index === 0 && !Array.isArray(nodeData)) {
+              vertices.push(vertex);
+            }
+            if (nodes) {
+              nodes[vertex.id] = vertex;
+            }
+          }
         }
       }
     }
 
-    // Process relationships
-    if (!typeLabel) {
-      continue;
-    }
+    const typeLabels = typeLabel
+      ? Array.isArray(typeLabel)
+        ? typeLabel
+        : [typeLabel]
+      : [];
+    // Process relationships for all type labels
+    for (const currentTypeLabel of typeLabels) {
+      const relationshipData = record.get(currentTypeLabel);
+      const relationships = Array.isArray(relationshipData)
+        ? relationshipData
+        : relationshipData
+          ? [relationshipData]
+          : [];
 
-    const relationshipData = record.get(typeLabel);
-    const relationships = Array.isArray(relationshipData)
-      ? relationshipData
-      : relationshipData
-        ? [relationshipData]
-        : [];
-
-    for (const relationship of relationships) {
-      const convertedRel = convertRelationshipToJson(relationship);
-      if (relationshipMap) {
-        updateNodeRelations(context.nodes!, convertedRel);
-        relationshipMap[convertedRel.id] = convertedRel;
+      for (const relationship of relationships) {
+        // Skip null relationships (from OPTIONAL MATCH with DISTINCT collect)
+        if (!relationship) {
+          continue;
+        }
+        const convertedRel = convertRelationshipToJson(relationship);
+        if (relationshipMap) {
+          updateNodeRelations(context.nodes!, convertedRel);
+          relationshipMap[convertedRel.id] = convertedRel;
+        }
       }
     }
   }

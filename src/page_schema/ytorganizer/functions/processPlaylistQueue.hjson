@@ -186,6 +186,76 @@ if (args.contextData.action === 'start') {
 
       console.log(`Playlist ${playlistId} processing completed: ${processedVideos} videos`);
 
+      // If this playlist is part of a channel, update channel progress
+      if (channelId) {
+        // Increment processedPlaylists counter for the channel
+        const channelUpdateResult = await session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+          SET cs.processedPlaylists = coalesce(cs.processedPlaylists, 0) + 1,
+              cs.updatedAt = datetime()
+          RETURN cs
+        `, { userUuid, channelId });
+
+        if (channelUpdateResult.records.length > 0) {
+          const record = channelUpdateResult.records[0];
+          const channelSettingNode = record.get('cs');
+          const channelSetting = args.convertNodeToJson(channelSettingNode);
+
+          const processedPlaylists = channelSetting.P.processedPlaylists || 0;
+          const totalPlaylists = channelSetting.P.totalPlaylists || 0;
+
+          // Calculate channel progress based on completed playlists
+          const channelProgress = totalPlaylists > 0
+            ? Math.round((processedPlaylists / totalPlaylists) * 100)
+            : 0;
+
+          // Update channel progress
+          await session.run(`
+            MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                  -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+            SET cs.progress = $progress,
+                cs.updatedAt = datetime()
+          `, { userUuid, channelId, progress: channelProgress });
+
+          console.log(`Channel ${channelId} progress: ${processedPlaylists}/${totalPlaylists} playlists (${channelProgress}%)`);
+
+          // Check if all playlists for this channel are completed
+          if (processedPlaylists >= totalPlaylists && totalPlaylists > 0) {
+            // Verify all playlists are indeed completed
+            const verifyResult = await session.run(`
+              MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                    -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+              MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
+              MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+              WITH count(ps) as totalCount,
+                   sum(CASE WHEN ps.status = 'completed' THEN 1 ELSE 0 END) as completedCount
+              RETURN totalCount, completedCount
+            `, { userUuid, channelId });
+
+            if (verifyResult.records.length > 0) {
+              const verifyRecord = verifyResult.records[0];
+              const totalCount = verifyRecord.get('totalCount');
+              const completedCount = verifyRecord.get('completedCount');
+
+              // If all playlists are completed, mark channel as completed
+              if (completedCount >= totalCount && totalCount > 0) {
+                await session.run(`
+                  MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                        -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+                  SET cs.status = 'completed',
+                      cs.progress = 100,
+                      cs.completedAt = datetime(),
+                      cs.updatedAt = datetime()
+                `, { userUuid, channelId });
+
+                console.log(`Channel ${channelId} marked as completed: all ${totalCount} playlists processed`);
+              }
+            }
+          }
+        }
+      }
+
     } catch (error) {
       console.error(`Error processing playlist ${playlistId}:`, error);
 
@@ -198,6 +268,84 @@ if (args.contextData.action === 'start') {
             ps.updatedAt = datetime()
       `, { userUuid, playlistId, error: error.message });
 
+      // If this playlist is part of a channel, update channel with error
+      if (channelId) {
+        // Increment processedPlaylists counter even on failure
+        const channelUpdateResult = await session.run(`
+          MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+          SET cs.processedPlaylists = coalesce(cs.processedPlaylists, 0) + 1,
+              cs.updatedAt = datetime()
+          RETURN cs
+        `, { userUuid, channelId });
+
+        if (channelUpdateResult.records.length > 0) {
+          const record = channelUpdateResult.records[0];
+          const channelSettingNode = record.get('cs');
+          const channelSetting = args.convertNodeToJson(channelSettingNode);
+
+          const processedPlaylists = channelSetting.P.processedPlaylists || 0;
+          const totalPlaylists = channelSetting.P.totalPlaylists || 0;
+
+          // Calculate channel progress
+          const channelProgress = totalPlaylists > 0
+            ? Math.round((processedPlaylists / totalPlaylists) * 100)
+            : 0;
+
+          // Update channel progress
+          await session.run(`
+            MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                  -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+            SET cs.progress = $progress,
+                cs.updatedAt = datetime()
+          `, { userUuid, channelId, progress: channelProgress });
+
+          console.log(`Channel ${channelId} progress after playlist failure: ${processedPlaylists}/${totalPlaylists} playlists (${channelProgress}%)`);
+
+          // Check if all playlists have been processed (completed or failed)
+          if (processedPlaylists >= totalPlaylists && totalPlaylists > 0) {
+            // Check if any playlists failed
+            const statusCheckResult = await session.run(`
+              MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                    -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+              MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
+              MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+              WITH count(ps) as totalCount,
+                   sum(CASE WHEN ps.status = 'completed' THEN 1 ELSE 0 END) as completedCount,
+                   sum(CASE WHEN ps.status = 'failed' THEN 1 ELSE 0 END) as failedCount
+              RETURN totalCount, completedCount, failedCount
+            `, { userUuid, channelId });
+
+            if (statusCheckResult.records.length > 0) {
+              const statusRecord = statusCheckResult.records[0];
+              const totalCount = statusRecord.get('totalCount');
+              const completedCount = statusRecord.get('completedCount');
+              const failedCount = statusRecord.get('failedCount');
+
+              // If all playlists are processed (completed or failed)
+              if ((completedCount + failedCount) >= totalCount && totalCount > 0) {
+                const finalStatus = failedCount > 0 ? 'completed_with_errors' : 'completed';
+                const errorMessage = failedCount > 0
+                  ? `${failedCount} out of ${totalCount} playlists failed to process`
+                  : null;
+
+                await session.run(`
+                  MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+                        -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+                  SET cs.status = $status,
+                      cs.progress = 100,
+                      cs.error = $error,
+                      cs.completedAt = datetime(),
+                      cs.updatedAt = datetime()
+                `, { userUuid, channelId, status: finalStatus, error: errorMessage });
+
+                console.log(`Channel ${channelId} marked as ${finalStatus}: ${completedCount} completed, ${failedCount} failed`);
+              }
+            }
+          }
+        }
+      }
+
       throw error;
     } finally {
       // Always close the session
@@ -205,7 +353,7 @@ if (args.contextData.action === 'start') {
     }
   }, {
     connection,
-    concurrency: 5
+    concurrency: 1
   });
 
   worker.on('completed', (job) => {

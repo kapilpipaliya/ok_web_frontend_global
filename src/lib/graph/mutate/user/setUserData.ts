@@ -1,19 +1,11 @@
 import type { SetStoreFunction } from "solid-js/store";
 
-import { updateVertex } from "../core/setGraphData";
-import { setSelectionValue } from "../selection/setSelectionValue";
-import { addNewVertex } from "~/lib/graph/mutate/core/vertex/addNewVertex";
 import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
-import { replaceVertexProperties } from "~/lib/graph/mutate/core/vertex/replaceVertexProperties";
-import type { Vertex } from "~/lib/graph/type/vertex";
+import { deleteVertex } from "~/lib/graph/mutate/core/vertex/deleteVertex";
+import { deleteEdge } from "~/lib/graph/mutate/core/edge/deleteEdge";
 import type { GraphInterface } from "~/lib/graph/context/GraphInterface";
-
-interface UserData {
-  profileImage?: Vertex;
-  roles?: Vertex[];
-  user?: Vertex;
-  userSetting?: Vertex;
-}
+import { UserData } from "~/lib/graph/mutate/user/loadUser";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
 
 export function setUserData(
   graph: GraphInterface,
@@ -21,30 +13,14 @@ export function setUserData(
   data: UserData,
 ) {
   if (data.user) {
-    saveUser(data.user, graph, setGraph);
+    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+      userId: data.user.id,
+    });
   }
 
   if (data.userSetting) {
     mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
       userSettingId: data.userSetting.id,
-    });
-    updateVertex(data.userSetting.id, data.userSetting, graph, setGraph);
-  } else {
-    // Create a new userSetting vertex if not provided
-    const newUserSettingId = `userSetting_${Date.now()}`;
-    const newUserSetting: Vertex = {
-      id: newUserSettingId,
-      IN: {},
-      L: [],
-      OUT: {},
-      P: {
-        type: "UserSetting",
-      },
-    };
-
-    addNewVertex(0, newUserSetting, graph, setGraph);
-    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
-      userSettingId: newUserSettingId,
     });
   }
 
@@ -52,51 +28,58 @@ export function setUserData(
     mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
       userRoles: data.roles.map((role) => role.id),
     });
-    for (const role of data.roles) {
-      updateVertex(role.id, role, graph, setGraph);
-    }
   }
 
-  if (data.user && data.profileImage) {
-    if (data.profileImage.id && !graph.vertexes[data.profileImage.id]) {
-      addNewVertex(0, data.profileImage, graph, setGraph);
-    }
-    setSelectionValue(
-      0,
-      graph.vertexes.member,
-      graph,
-      setGraph,
-      {
-        id: "",
-        L: [],
-        P: {
-          type: "UserProfileImage",
-        },
-      } as unknown as Vertex,
-      data.profileImage.id,
-    );
+  if (data.profileImage) {
+    mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+      profileImageId: data.profileImage.id,
+    });
   }
 }
 
-function saveUser(
-  user: Vertex,
+export function clearUserData(
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  if (graph.vertexes.member) {
-    replaceVertexProperties(0, "member", graph, setGraph, user.P, {
-      cloneProperties: false,
-    });
-  } else {
-    addNewVertex(
-      0,
-      {
-        ...user,
-        id: "member",
-        L: ["member"],
-      },
-      graph,
-      setGraph,
-    );
+  // Get current user IDs from global store
+  const globalStore = getGlobalStore(graph);
+  const { userId } = globalStore.P;
+
+  // Delete user and all related vertices
+  if (userId && graph.vertexes[userId]) {
+    const userVertex = graph.vertexes[userId];
+
+    // Delete all OUT edges and their target vertices
+    for (const edgeType of Object.keys(userVertex.OUT)) {
+      const edgeIds = userVertex.OUT[edgeType];
+      if (edgeIds) {
+        for (const edgeId of edgeIds) {
+          const edge = graph.edges[edgeId];
+          if (edge) {
+            const targetVertexId = edge.E;
+
+            // Delete the edge first
+            deleteEdge(0, edgeId, graph, setGraph);
+
+            // Delete the target vertex if it exists
+            // (will fail silently if vertex has dependencies, which is fine for shared resources like Roles)
+            if (graph.vertexes[targetVertexId]) {
+              deleteVertex(0, targetVertexId, graph, setGraph);
+            }
+          }
+        }
+      }
+    }
+
+    // Now delete the user vertex (should have no OUT edges now)
+    deleteVertex(0, userId, graph, setGraph);
   }
+
+  // Clear all user-related IDs from global store
+  mergeVertexProperties(0, "globalStoreId", graph, setGraph, {
+    userId: undefined,
+    userSettingId: undefined,
+    userRoles: undefined,
+    profileImageId: undefined,
+  });
 }

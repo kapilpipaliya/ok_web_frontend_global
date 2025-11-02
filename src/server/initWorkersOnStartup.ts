@@ -5,21 +5,30 @@
  * It checks Redis availability first and only starts workers if Redis is running.
  */
 
-// Use Promise-based singleton to prevent race conditions
-let initializationPromise: Promise<void> | null = null;
+// Use global shared state to prevent duplicate initialization across module instances
+// (Vinxi dev mode creates multiple module instances in separate contexts)
+declare global {
+  var __workerInitPromise: Promise<void> | undefined;
+}
+
+// Initialize global if not exists
+if (!global.__workerInitPromise) {
+  global.__workerInitPromise = undefined;
+}
 
 /**
  * Initialize workers on first request (checks Redis first)
- * Uses Promise-based singleton to prevent duplicate initialization
+ * Uses global Promise-based singleton to prevent duplicate initialization
+ * across multiple module instances (Vinxi creates separate contexts)
  */
 export async function initializeWorkersIfNeeded() {
   // If already initializing or initialized, wait for/return the same promise
-  if (initializationPromise) {
-    return initializationPromise;
+  if (global.__workerInitPromise) {
+    return global.__workerInitPromise;
   }
 
   // Create the initialization promise
-  initializationPromise = (async () => {
+  global.__workerInitPromise = (async () => {
     try {
       // First, check if Redis is running
       console.log('[Server] Checking if Redis is running...');
@@ -57,5 +66,5 @@ export async function initializeWorkersIfNeeded() {
     }
   })();
 
-  return initializationPromise;
+  return global.__workerInitPromise;
 }

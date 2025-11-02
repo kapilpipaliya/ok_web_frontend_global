@@ -1,24 +1,19 @@
 import type { Node, Session } from "neo4j-driver";
 
 import { convertNodeToJson } from "~/cypher/conversion/convertNodeToJson";
+import { processResult } from "~/cypher/conversion/processResult";
+import type { EvalExpressionContext } from "~/cypher/types/EvalExpressionContext";
+import type { GraphData } from "~/cypher/types/ServerResult";
 
 import { createUserSetting } from "./createUserSetting";
 import type { Vertex } from "~/lib/graph/type/vertex";
-
-interface UserResult {
-  // globalTheme: null | Vertex;
-  globalSetting: null | Vertex;
-  profileImage: null | Vertex;
-  roles: Vertex[];
-  user: null | Vertex;
-  userSetting: null | Vertex;
-}
+import type { UserData } from "~/lib/graph/mutate/user/loadUser";
 
 export async function findUserByEmailOrUuid(
   dbSession: Session,
   email?: null | string,
   uuid?: null | string,
-): Promise<UserResult> {
+): Promise<UserData> {
   if (!(email || uuid)) {
     return getGuestOnlyResult(dbSession);
   }
@@ -38,11 +33,14 @@ export async function findUserByEmailOrUuid(
   }
 
   query += `
-    OPTIONAL MATCH (u)-[:UserSetting]->(s:UserSetting)
-    OPTIONAL MATCH (u)-[:UserRole]->(r:Role)
-    OPTIONAL MATCH (u)-[:UserProfileImage]->(p:File)
+    OPTIONAL MATCH (u)-[rel1:UserSetting]->(s:UserSetting)
+    OPTIONAL MATCH (u)-[rel2:UserRole]->(r:Role)
+    OPTIONAL MATCH (u)-[rel3:UserProfileImage]->(p:File)
     OPTIONAL MATCH (g:GlobalSetting)
-    RETURN u, s, collect(r) AS roles, p, g
+    RETURN u, s, collect(DISTINCT r) AS roles, p, g,
+           collect(DISTINCT rel1) AS userSettingRels,
+           collect(DISTINCT rel2) AS userRoleRels,
+           collect(DISTINCT rel3) AS profileImageRels
   `;
 
   const result = await dbSession.run(query, { email, uuid });
@@ -51,25 +49,58 @@ export async function findUserByEmailOrUuid(
     return getGuestOnlyResult(dbSession);
   }
 
+  // Create context for relationship processing
+  const context: EvalExpressionContext = {
+    nodes: {},
+    relationships: {},
+  };
+
+  // Process all nodes and relationships in one call
+  processResult(
+    result.records,
+    context,
+    ["u", "s", "p", "g", "roles"],
+    ["userSettingRels", "userRoleRels", "profileImageRels"]
+  );
+
   const record = result.records[0];
-  const user = convertNodeToJson(record.get("u") as Node);
-  const roles =
-    (record.get("roles") as Node[] | null)?.map((role) =>
-      convertNodeToJson(role),
-    ) || [];
-  let userSetting = record.get("s")
-    ? convertNodeToJson(record.get("s") as Node)
+
+  // Get user from context (already has IN/OUT populated)
+  const userNode = record.get("u") as Node | null;
+  const user = userNode ? context.nodes![userNode.elementId] || null : null;
+
+  // Get roles from context (already have IN/OUT populated)
+  const rolesNodes = (record.get("roles") as Node[] | null) || [];
+  const roles = rolesNodes
+    .filter((r) => r !== null)
+    .map((roleNode) => context.nodes![roleNode.elementId])
+    .filter((r) => r !== undefined);
+
+  // Get other vertices from context (already have IN/OUT populated)
+  const settingNode = record.get("s") as Node | null;
+  let userSetting = settingNode
+    ? context.nodes![settingNode.elementId] || null
     : null;
-  const profileImage = record.get("p")
-    ? convertNodeToJson(record.get("p") as Node)
+
+  const profileNode = record.get("p") as Node | null;
+  const profileImage = profileNode
+    ? context.nodes![profileNode.elementId] || null
     : null;
-  const globalSetting = record.get("g")
-    ? convertNodeToJson(record.get("g") as Node)
+
+  const globalNode = record.get("g") as Node | null;
+  const globalSetting = globalNode
+    ? context.nodes![globalNode.elementId] || null
     : null;
 
   if (user && !userSetting) {
     userSetting = (await createUserSetting(dbSession, user.P.uuid)) as Vertex;
   }
+
+  // Build graph structure from context
+  const graph: GraphData = {
+    vertexes: context.nodes!,
+    edges: context.relationships!,
+  };
 
   return {
     globalSetting,
@@ -77,6 +108,7 @@ export async function findUserByEmailOrUuid(
     roles,
     user,
     userSetting,
+    graph,
   };
 }
 
@@ -102,7 +134,7 @@ export async function findUserByEmailSimple(
   return convertNodeToJson(result.records[0].get("u") as Node);
 }
 
-async function getGuestOnlyResult(dbSession: Session): Promise<UserResult> {
+async function getGuestOnlyResult(dbSession: Session): Promise<UserData> {
   const guestRole = await getGuestRole(dbSession);
   const globalSetting = await getGlobalSetting(dbSession);
   return {

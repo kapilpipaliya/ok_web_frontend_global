@@ -285,7 +285,7 @@ const navigationSections = [
     showIf: () => {
       const userRoles = args.user?.OUT?.UserRole || [];
       return userRoles.some(edge => {
-        const role = args.graph.nodes[edge.E];
+        const role = args.graph.vertexes[edge.E];
         return role?.P?.key === "Admin";
       });
     }
@@ -369,7 +369,7 @@ const mobileNavigationItems = [
     showIf: () => {
       const userRoles = args.user?.OUT?.UserRole || [];
       return userRoles.some(edge => {
-        const role = args.graph.nodes[edge.E];
+        const role = args.graph.vertexes[edge.E];
         return role?.P?.key === "Admin";
       });
     }
