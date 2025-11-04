@@ -42,7 +42,7 @@ try {
   }
 
   const playlist = args.convertNodeToJson(playlistAccessResult.records[0].get('p'));
-  const playlistSettings = args.convertNodeToJson(playlistAccessResult.records[0].get('ps'));
+  const playlistSetting = args.convertNodeToJson(playlistAccessResult.records[0].get('ps'));
 
   // Normalize input to array of items (either URLs or video IDs)
   let items = [];
@@ -194,7 +194,7 @@ try {
   // Update playlist metadata if any videos were added
   if (results.length > 0) {
     // Get current customOrder array
-    const currentOrder = playlistSettings.P.customOrder || [];
+    const currentOrder = playlistSetting.P.customOrder || [];
 
     // Add new video IDs to customOrder
     const addedVideoIds = results.map(r => r.video.P.youtubeId);
@@ -240,7 +240,7 @@ try {
       : `Added ${successCount} video${successCount !== 1 ? 's' : ''} to playlist, ${errorCount} failed`,
     data: {
       playlist: playlist,
-      playlistSettings: playlistSettings,
+      playlistSetting,
       addedVideos: results,
       failedVideos: errors,
       successCount,

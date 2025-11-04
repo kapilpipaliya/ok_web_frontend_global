@@ -19,6 +19,21 @@ return {
       }
     },
     {
+      id: "favicon_link",
+      L: "Attr",
+      P: {
+        displayOrder: 0.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    },
+    {
       id: "landing_container",
       L: "Attr",
       P: {
@@ -1031,7 +1046,7 @@ return {
       name: "Free",
       priceAmount: "$0",
       pricePeriod: "",
-      channels: "2 channels",
+      channels: "10,000 videos",
       features: [
         "Basic video organization",
         "Channel tracking",
@@ -1044,7 +1059,7 @@ return {
       name: "Basic",
       priceAmount: "$2.50",
       pricePeriod: "/month",
-      channels: "10 channels",
+      channels: "50,000 videos",
       features: [
         "Everything in Free",
         "Auto-refresh channels",
@@ -1057,7 +1072,7 @@ return {
       name: "Pro",
       priceAmount: "$5.00",
       pricePeriod: "/month",
-      channels: "25 channels",
+      channels: "150,000 videos",
       features: [
         "Everything in Basic",
         "Priority support",
@@ -1070,7 +1085,7 @@ return {
       name: "Unlimited",
       priceAmount: "$10.00",
       pricePeriod: "/month",
-      channels: "Unlimited channels",
+      channels: "Unlimited videos",
       features: [
         "Everything in Pro",
         // "Team collaboration",
@@ -1776,6 +1791,7 @@ return `._id {
     }
   ],
   edges: [
+    { id: "e0", T: "Attr", S: "landing_page", E: "favicon_link" },
     { id: "e1", T: "Attr", S: "landing_page", E: "landing_container" },
     { id: "e2", T: "Attr", S: "landing_container", E: "landing_header" },
     { id: "e3", T: "Attr", S: "landing_header", E: "header_content" },

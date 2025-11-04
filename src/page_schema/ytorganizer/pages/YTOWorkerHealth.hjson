@@ -1,0 +1,1889 @@
+{
+  vertexes: [
+    {
+      id: "root",
+      L: "Page",
+      P: {
+        key: "YTOWorkerHealth",
+        url: "/yto/admin/worker-health",
+        signinRequired: true,
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1,
+        description: "YTO layout with navigation"
+      }
+    },
+    {
+      id: "admin_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOAdminLayout",
+        displayOrder: 2,
+        description: "Admin layout wrapper"
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        description: "Main container with data fetching and state management",
+        fns: '''
+// STATE MANAGEMENT
+const [healthData, setHealthData] = args.createSignal(null);
+const [queuesData, setQueuesData] = args.createSignal([]);
+const [loading, setLoading] = args.createSignal(true);
+const [error, setError] = args.createSignal(null);
+const [lastUpdated, setLastUpdated] = args.createSignal(null);
+const [autoRefresh, setAutoRefresh] = args.createSignal(true);
+const [currentTime, setCurrentTime] = args.createSignal(Date.now());
+
+// Expandable sections state
+const [expandedSections, setExpandedSections] = args.createSignal({});
+
+// Job data cache
+const [jobDataCache, setJobDataCache] = args.createSignal({});
+const [loadingSections, setLoadingSections] = args.createSignal({});
+
+// Selection state: { "queueName-sectionKey": Set<jobId> }
+const [selectedJobs, setSelectedJobs] = args.createSignal({});
+
+// Update current time every second
+const timeUpdateInterval = setInterval(() => {
+  setCurrentTime(Date.now());
+}, 1000);
+
+// FETCH WORKER HEALTH DATA
+const fetchHealth = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+
+    // Fetch worker health
+    const healthResponse = await args.executeNamedServerFunction({
+      functionName: "getWorkerHealth",
+      contextData: {}
+    });
+
+    // Fetch available queues
+    const queuesResponse = await args.executeNamedServerFunction({
+      functionName: "getAvailableQueues",
+      contextData: {}
+    });
+
+    if (healthResponse.result?.success) {
+      setHealthData(healthResponse.result.data);
+      setLastUpdated(new Date());
+    } else {
+      setError(healthResponse.result?.message || "Failed to fetch worker health");
+    }
+
+    if (queuesResponse.result?.success) {
+      setQueuesData(queuesResponse.result.data.queues || []);
+    }
+
+  } catch (err) {
+    setError(err.message || "An error occurred");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// TOGGLE SECTION
+const toggleSection = async (queueName, sectionKey) => {
+  const current = expandedSections();
+  const queueSections = current[queueName] || {};
+  const isExpanded = queueSections[sectionKey];
+
+  setExpandedSections({
+    ...current,
+    [queueName]: {
+      ...queueSections,
+      [sectionKey]: !isExpanded
+    }
+  });
+
+  // Load data if expanding
+  if (!isExpanded) {
+    await loadSectionData(queueName, sectionKey);
+  }
+};
+
+// LOAD SECTION DATA
+const loadSectionData = async (queueName, sectionKey, force = false) => {
+  if (sectionKey === 'metrics') {
+    await loadMetrics(queueName);
+    return;
+  }
+
+  const cacheKey = `${queueName}-${sectionKey}`;
+  const cached = jobDataCache()[cacheKey];
+
+  // Check if data is fresh (< 30 seconds old), unless forced
+  if (!force && cached && (Date.now() - cached.timestamp < 30000)) {
+    return;
+  }
+
+  setLoadingSections({ ...loadingSections(), [cacheKey]: true });
+
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "getQueueJobs",
+      contextData: {
+        queueName,
+        jobState: sectionKey,
+        limit: 100
+      }
+    });
+
+    if (response.result?.success) {
+      setJobDataCache({
+        ...jobDataCache(),
+        [cacheKey]: {
+          data: response.result.data,
+          timestamp: Date.now()
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Error loading section data:', err);
+  } finally {
+    setLoadingSections({ ...loadingSections(), [cacheKey]: false });
+  }
+};
+
+// LOAD METRICS
+const loadMetrics = async (queueName) => {
+  const cacheKey = `${queueName}-metrics`;
+  const cached = jobDataCache()[cacheKey];
+
+  if (cached && (Date.now() - cached.timestamp < 30000)) {
+    return;
+  }
+
+  setLoadingSections({ ...loadingSections(), [cacheKey]: true });
+
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "getQueueMetrics",
+      contextData: { queueName }
+    });
+
+    if (response.result?.success) {
+      setJobDataCache({
+        ...jobDataCache(),
+        [cacheKey]: {
+          data: response.result.data,
+          timestamp: Date.now()
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Error loading metrics:', err);
+  } finally {
+    setLoadingSections({ ...loadingSections(), [cacheKey]: false });
+  }
+};
+
+// SELECTION FUNCTIONS
+const toggleJobSelection = (queueName, sectionKey, jobId) => {
+  const key = `${queueName}-${sectionKey}`;
+  const current = selectedJobs();
+  const selected = current[key] || new Set();
+
+  if (selected.has(jobId)) {
+    selected.delete(jobId);
+  } else {
+    selected.add(jobId);
+  }
+
+  setSelectedJobs({
+    ...current,
+    [key]: new Set(selected)
+  });
+};
+
+const toggleSelectAll = (queueName, sectionKey, jobIds) => {
+  const key = `${queueName}-${sectionKey}`;
+  const current = selectedJobs();
+  const selected = current[key] || new Set();
+
+  if (selected.size === jobIds.length) {
+    // Deselect all
+    setSelectedJobs({
+      ...current,
+      [key]: new Set()
+    });
+  } else {
+    // Select all
+    setSelectedJobs({
+      ...current,
+      [key]: new Set(jobIds)
+    });
+  }
+};
+
+const getSelectedCount = (queueName, sectionKey) => {
+  const key = `${queueName}-${sectionKey}`;
+  return (selectedJobs()[key] || new Set()).size;
+};
+
+const isJobSelected = (queueName, sectionKey, jobId) => {
+  const key = `${queueName}-${sectionKey}`;
+  return (selectedJobs()[key] || new Set()).has(jobId);
+};
+
+// DELETE FUNCTIONS
+const deleteSelectedJobs = async (queueName, sectionKey) => {
+  const key = `${queueName}-${sectionKey}`;
+  const selected = selectedJobs()[key];
+
+  if (!selected || selected.size === 0) {
+    args.showWarningToast('No jobs selected');
+    return;
+  }
+
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const confirmed = await rbConfirm({
+    title: 'Delete Selected Jobs',
+    message: `Are you sure you want to delete ${selected.size} selected job(s)? This action cannot be undone.`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger'
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "bulkDeleteQueueJobs",
+      contextData: {
+        queueName,
+        jobIds: Array.from(selected),
+        state: sectionKey
+      }
+    });
+
+    if (response.result?.success) {
+      args.showSuccessToast(response.result.message);
+
+      // Clear selection
+      setSelectedJobs({
+        ...selectedJobs(),
+        [key]: new Set()
+      });
+
+      // Reload data - force refresh to bypass cache
+      await loadSectionData(queueName, sectionKey, true);
+      await fetchHealth();
+    } else {
+      args.showErrorToast(response.result?.message || 'Failed to delete jobs');
+    }
+  } catch (err) {
+    args.showErrorToast('Error deleting jobs: ' + err.message);
+  }
+};
+
+const deleteAllJobs = async (queueName, sectionKey) => {
+  const rbConfirm = args.contextData?.confirmContext?.rbConfirm;
+  const confirmed = await rbConfirm({
+    title: 'Delete All Jobs',
+    message: `Are you sure you want to delete ALL ${sectionKey} jobs in ${queueName}? This action cannot be undone.`,
+    confirmText: 'Delete All',
+    cancelText: 'Cancel',
+    variant: 'danger'
+  });
+
+  if (!confirmed) return;
+
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "deleteAllQueueJobs",
+      contextData: {
+        queueName,
+        state: sectionKey
+      }
+    });
+
+    if (response.result?.success) {
+      args.showSuccessToast(response.result.message);
+
+      // Clear selection
+      const key = `${queueName}-${sectionKey}`;
+      setSelectedJobs({
+        ...selectedJobs(),
+        [key]: new Set()
+      });
+
+      // Reload data - force refresh to bypass cache
+      await loadSectionData(queueName, sectionKey, true);
+      await fetchHealth();
+    } else {
+      args.showErrorToast(response.result?.message || 'Failed to delete all jobs');
+    }
+  } catch (err) {
+    args.showErrorToast('Error deleting all jobs: ' + err.message);
+  }
+};
+
+// HELPER FUNCTIONS
+const formatDuration = (ms) => {
+  if (!ms || ms < 0) return 'N/A';
+  const seconds = Math.floor(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ${seconds % 60}s`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ${minutes % 60}m`;
+};
+
+const formatTime = (timestamp) => {
+  if (!timestamp) return 'N/A';
+  const date = new Date(timestamp);
+  return date.toLocaleString();
+};
+
+const truncate = (str, length = 20) => {
+  if (!str) return 'N/A';
+  return str.length > length ? str.substring(0, length) + '...' : str;
+};
+
+const formatJobData = (job) => {
+  const jobData = {
+    channelId: job.channelId,
+    playlistId: job.playlistId,
+    userId: job.userId,
+    userUuid: job.userUuid,
+    customName: job.customName
+  };
+
+  const cleanedData = Object.fromEntries(
+    Object.entries(jobData).filter(([_, v]) => v != null)
+  );
+
+  return JSON.stringify(cleanedData, null, 2);
+};
+
+// AUTO-REFRESH
+let refreshInterval = null;
+
+const startAutoRefresh = () => {
+  if (refreshInterval) return;
+  refreshInterval = setInterval(() => {
+    if (autoRefresh()) fetchHealth();
+  }, 10000);
+};
+
+const stopAutoRefresh = () => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+    refreshInterval = null;
+  }
+};
+
+// Initial fetch
+fetchHealth();
+startAutoRefresh();
+
+// Cleanup
+args.onCleanup(() => {
+  clearInterval(timeUpdateInterval);
+  stopAutoRefresh();
+});
+
+return {
+  healthData,
+  queuesData,
+  loading,
+  error,
+  lastUpdated,
+  currentTime,
+  autoRefresh,
+  setAutoRefresh,
+  fetchHealth,
+  startAutoRefresh,
+  stopAutoRefresh,
+  expandedSections,
+  toggleSection,
+  jobDataCache,
+  loadingSections,
+  formatDuration,
+  formatTime,
+  truncate,
+  formatJobData,
+  selectedJobs,
+  toggleJobSelection,
+  toggleSelectAll,
+  getSelectedCount,
+  isJobSelected,
+  deleteSelectedJobs,
+  deleteAllJobs
+};
+''',
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Worker Health Monitor"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "controls",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "auto_refresh_toggle",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isAutoRefresh = args.fns.autoRefresh();
+
+return {
+  as: "button",
+  text: isAutoRefresh ? "Auto-Refresh: ON" : "Auto-Refresh: OFF",
+  onClick: () => {
+    const newValue = !args.fns.autoRefresh();
+    args.fns.setAutoRefresh(newValue);
+
+    if (newValue) {
+      args.fns.startAutoRefresh();
+      args.showSuccessToast("Auto-refresh enabled");
+    } else {
+      args.fns.stopAutoRefresh();
+      args.showWarningToast("Auto-refresh disabled");
+    }
+  }
+};
+''',
+        css: '''
+const isAutoRefresh = args.fns.autoRefresh();
+
+return `._id {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  border: 2px solid ${isAutoRefresh ? args.theme.var.color.success : args.theme.var.color.border};
+  background: ${isAutoRefresh ? args.theme.var.color.success_light_100 : args.theme.var.color.background};
+  color: ${isAutoRefresh ? args.theme.var.color.success_light_100_text : args.theme.var.color.text};
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "refresh_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const isLoading = args.fns.loading();
+
+return {
+  as: "button",
+  text: isLoading ? "Refreshing..." : "Refresh Now",
+  disabled: isLoading,
+  onClick: () => args.fns.fetchHealth()
+};
+''',
+        css: '''
+const isLoading = args.fns.loading();
+
+return `._id {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: ${args.theme.var.color.primary};
+  color: ${args.theme.var.color.primary_text};
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: ${isLoading ? 0.6 : 1};
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.primary_dark_200};
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "last_updated",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const lastUpdated = args.fns.lastUpdated();
+const currentTime = args.fns.currentTime();
+
+const timeAgo = lastUpdated
+  ? Math.floor((currentTime - lastUpdated.getTime()) / 1000)
+  : null;
+
+let timeText = "Never";
+if (timeAgo !== null) {
+  if (timeAgo < 60) {
+    timeText = `${timeAgo}s ago`;
+  } else if (timeAgo < 3600) {
+    timeText = `${Math.floor(timeAgo / 60)}m ago`;
+  } else {
+    timeText = lastUpdated.toLocaleTimeString();
+  }
+}
+
+return {
+  as: "div",
+  text: `Updated: ${timeText}`
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  font-size: 0.875rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+'''
+      }
+    },
+    {
+      id: "loading_state",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const isLoading = args.fns.loading();
+const hasData = args.fns.healthData() !== null;
+
+return {
+  as: "div",
+  text: "Loading worker health data...",
+  hide: !isLoading || hasData
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  padding: 3rem;
+  color: ${args.theme.var.color.text};
+  opacity: 0.7;
+  font-size: 1.125rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_state",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const error = args.fns.error();
+
+return {
+  as: "div",
+  hide: !error
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.error_light_100};
+  border: 2px solid ${args.theme.var.color.error};
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h3",
+  text: "⚠️ Error Loading Worker Health"
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error_light_100_text};
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}`;
+'''
+      }
+    },
+    {
+      id: "error_message",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const error = args.fns.error();
+
+return {
+  as: "p",
+  text: error || ""
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.error_light_100_text};
+  margin: 0;
+  opacity: 0.9;
+}`;
+'''
+      }
+    },
+    {
+      id: "health_data_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const healthData = args.fns.healthData();
+
+return {
+  as: "div",
+  hide: !healthData
+};
+'''
+      }
+    },
+    {
+      id: "status_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const healthData = args.fns.healthData();
+const isHealthy = healthData?.healthy;
+
+return `._id {
+  background: ${isHealthy ? args.theme.var.color.success_light_100 : args.theme.var.color.error_light_100};
+  border: 2px solid ${isHealthy ? args.theme.var.color.success : args.theme.var.color.error};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "status_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const healthData = args.fns.healthData();
+const isHealthy = healthData?.healthy;
+
+return {
+  as: "div",
+  text: `${isHealthy ? "✅" : "❌"} ${isHealthy ? "Workers are Healthy" : "Workers are Unhealthy"}`
+};
+''',
+        css: '''
+const healthData = args.fns.healthData();
+const isHealthy = healthData?.healthy;
+
+return `._id {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${isHealthy ? args.theme.var.color.success_light_100_text : args.theme.var.color.error_light_100_text};
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "status_summary",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const queues = args.fns.queuesData();
+
+// Calculate totals across all queues
+const totals = queues.reduce((acc, queue) => ({
+  active: acc.active + queue.active,
+  waiting: acc.waiting + queue.waiting,
+  failed: acc.failed + queue.failed,
+  completed: acc.completed + queue.completed,
+  delayed: acc.delayed + queue.delayed
+}), { active: 0, waiting: 0, failed: 0, completed: 0, delayed: 0 });
+
+// Build summary message
+let parts = [];
+
+if (totals.active > 0) {
+  parts.push(`${totals.active} processing`);
+}
+if (totals.waiting > 0) {
+  parts.push(`${totals.waiting} waiting`);
+}
+if (totals.failed > 0) {
+  parts.push(`${totals.failed} failed`);
+}
+if (totals.delayed > 0) {
+  parts.push(`${totals.delayed} delayed`);
+}
+
+let message = parts.length > 0
+  ? parts.join(', ')
+  : "All queues empty - no active jobs";
+
+return {
+  as: "div",
+  text: message
+};
+''',
+        css: '''
+const healthData = args.fns.healthData();
+const isHealthy = healthData?.healthy;
+
+return `._id {
+  font-size: 1rem;
+  opacity: 0.9;
+  color: ${isHealthy ? args.theme.var.color.success_light_100_text : args.theme.var.color.error_light_100_text};
+}`;
+'''
+      }
+    },
+    {
+      id: "queues_container",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        description: "Container for all queue cards using loop",
+        props: '''
+const queues = args.fns.queuesData();
+
+return {
+  as: "div",
+  contextName: "queue",
+  loop: true,
+  data: queues
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const queue = args.contextData.queue;
+
+return {
+  as: "h3",
+  text: `${queue.icon} ${queue.displayName}`
+};
+''',
+        css: '''
+return `._id {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "queue_stats",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const queue = args.contextData.queue;
+
+return {
+  as: "div",
+  contextName: "stat",
+  loop: true,
+  data: [
+    { label: "Active", value: queue.active, color: "warning", icon: "⚙️" },
+    { label: "Waiting", value: queue.waiting, color: "info", icon: "⏳" },
+    { label: "Completed", value: queue.completed, color: "success", icon: "✅" },
+    { label: "Failed", value: queue.failed, color: "error", icon: "❌" },
+    { label: "Delayed", value: queue.delayed, color: "text", icon: "⏰" },
+    { label: "Paused", value: queue.paused, color: "text", icon: "⏸️" }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: ${args.theme.var.color.background};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_label",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+
+return {
+  as: "span",
+  text: `${stat.icon} ${stat.label}`
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_value",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const stat = args.contextData.stat;
+
+return {
+  as: "span",
+  text: String(stat.value)
+};
+''',
+        css: '''
+const stat = args.contextData.stat;
+let color = args.theme.var.color[stat.color] || args.theme.var.color.text;
+
+return `._id {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: ${color};
+}`;
+'''
+      }
+    },
+    {
+      id: "sections_container",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const queue = args.contextData.queue;
+
+return {
+  as: "div",
+  contextName: "section",
+  loop: true,
+  data: [
+    { key: "active", label: "Active Jobs", icon: "carbon:in-progress", count: queue.active, queueName: queue.queueName },
+    { key: "waiting", label: "Waiting Jobs", icon: "carbon:time", count: queue.waiting, queueName: queue.queueName },
+    { key: "failed", label: "Failed Jobs", icon: "carbon:close-filled", count: queue.failed, queueName: queue.queueName },
+    { key: "completed", label: "Completed Jobs", icon: "carbon:checkmark-filled", count: queue.completed, queueName: queue.queueName },
+    { key: "delayed", label: "Delayed Jobs", icon: "carbon:alarm", count: queue.delayed, queueName: queue.queueName },
+    { key: "metrics", label: "Performance Metrics", icon: "carbon:chart-line", count: null, queueName: queue.queueName }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "section_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  margin-bottom: 0.5rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "section_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
+
+return {
+  as: "button",
+  onClick: () => args.fns.toggleSection(section.queueName, section.key)
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_200};
+    border-color: ${args.theme.var.color.primary};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "section_button_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const countText = section.count !== null ? ` (${section.count})` : '';
+
+return {
+  as: "span",
+  text: `${section.label}${countText}`
+};
+''',
+        css: '''
+return `._id {
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+  font-size: 0.9375rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "section_button_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
+const cacheKey = `${section.queueName}-${section.key}`;
+const isLoading = args.fns.loadingSections()[cacheKey];
+
+return {
+  as: "span",
+  text: isLoading ? "Loading..." : (isExpanded ? "▼" : "▶")
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.text};
+  opacity: 0.6;
+  font-size: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "section_content",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const isExpanded = args.fns.expandedSections()[section.queueName]?.[section.key];
+const cacheKey = `${section.queueName}-${section.key}`;
+const hasData = args.fns.jobDataCache()[cacheKey]?.data;
+
+return {
+  as: "div",
+  hide: !isExpanded || !hasData
+};
+''',
+        css: '''
+return `._id {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}`;
+'''
+      }
+    },
+    {
+      id: "bulk_actions",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+
+return {
+  as: "div",
+  hide: section.key === 'metrics' || section.key === 'active'
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_selected_button",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+
+return {
+  as: "button",
+  text: `Delete Selected (${selectedCount})`,
+  disabled: selectedCount === 0,
+  onClick: () => args.fns.deleteSelectedJobs(section.queueName, section.key)
+};
+''',
+        css: '''
+const section = args.contextData.section;
+const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${selectedCount > 0 ? args.theme.var.color.error : args.theme.var.color.background_light_200};
+  color: ${selectedCount > 0 ? args.theme.var.color.error_text : args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: ${args.theme.var.color.error_dark_200};
+    color: ${args.theme.var.color.error_dark_200_text};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "delete_all_button",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+
+return {
+  as: "button",
+  text: "Delete All",
+  onClick: () => args.fns.deleteAllJobs(section.queueName, section.key)
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.5rem 1rem;
+  background: ${args.theme.var.color.background_light_200};
+  color: ${args.theme.var.color.text};
+  border: 1px solid ${args.theme.var.color.error};
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${args.theme.var.color.error};
+    color: ${args.theme.var.color.error_text};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "jobs_table",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+
+return {
+  as: "table",
+  hide: section.key === 'metrics'
+};
+''',
+        css: '''
+return `._id {
+  width: 100%;
+  border-collapse: collapse;
+}`;
+'''
+      }
+    },
+    {
+      id: "table_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const cacheKey = `${section.queueName}-${section.key}`;
+const cachedData = args.fns.jobDataCache()[cacheKey];
+const jobs = cachedData?.data?.jobs || [];
+const showActions = ['waiting', 'failed', 'delayed', 'completed'].includes(section.key);
+
+return {
+  as: "thead",
+  contextName: "headerData",
+  data: {
+    jobs,
+    showActions,
+    showCheckbox: showActions
+  }
+};
+'''
+      }
+    },
+    {
+      id: "header_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tr"
+};
+''',
+        css: '''
+return `._id {
+  background: ${args.theme.var.color.background_light_200};
+  border-bottom: 2px solid ${args.theme.var.color.border};
+}`;
+'''
+      }
+    },
+    {
+      id: "header_checkbox_cell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const headerData = args.contextData.headerData;
+
+return {
+  as: "th",
+  hide: !headerData.showCheckbox
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  width: 40px;
+}`;
+'''
+      }
+    },
+    {
+      id: "select_all_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const headerData = args.contextData.headerData;
+const selectedCount = args.fns.getSelectedCount(section.queueName, section.key);
+const totalCount = headerData.jobs.length;
+const jobIds = headerData.jobs.map(j => j.id);
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: selectedCount === totalCount && totalCount > 0,
+  onChange: () => args.fns.toggleSelectAll(section.queueName, section.key, jobIds)
+};
+''',
+        css: '''
+return `._id {
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "header_cells",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const headerData = args.contextData.headerData;
+
+let headers = ["Job ID", "Item", "User"];
+
+if (section.key === 'active') {
+  headers.push("Progress", "Duration", "Job Data");
+} else if (section.key === 'waiting') {
+  headers.push("Queued", "Job Data");
+  if (headerData.showActions) headers.push("Actions");
+} else if (section.key === 'failed') {
+  headers.push("Error", "Attempts", "Job Data");
+  if (headerData.showActions) headers.push("Actions");
+} else if (section.key === 'completed') {
+  headers.push("Duration", "Completed", "Job Data");
+} else if (section.key === 'delayed') {
+  headers.push("Scheduled", "Job Data");
+  if (headerData.showActions) headers.push("Actions");
+}
+
+return {
+  contextName: "header",
+  loop: true,
+  data: headers.map(h => ({ text: h }))
+};
+'''
+      }
+    },
+    {
+      id: "header_th",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "th"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  white-space: nowrap;
+}`;
+'''
+      }
+    },
+    {
+      id: "header_cell_text",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const header = args.contextData.header;
+
+return {
+  text: header.text
+};
+'''
+      }
+    },
+    {
+      id: "table_body",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const cacheKey = `${section.queueName}-${section.key}`;
+const cachedData = args.fns.jobDataCache()[cacheKey];
+const jobs = cachedData?.data?.jobs || [];
+
+return {
+  as: "tbody",
+  contextName: "job",
+  loop: true,
+  data: jobs
+};
+'''
+      }
+    },
+    {
+      id: "table_row",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "tr"
+};
+''',
+        css: '''
+return `._id {
+  border-bottom: 1px solid ${args.theme.var.color.border};
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: ${args.theme.var.color.background_light_100};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "checkbox_cell",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const showCheckbox = ['waiting', 'failed', 'delayed', 'completed'].includes(section.key);
+
+return {
+  as: "td",
+  hide: !showCheckbox
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "job_checkbox",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const job = args.contextData.job;
+const isSelected = args.fns.isJobSelected(section.queueName, section.key, job.id);
+
+return {
+  as: "input",
+  type: "checkbox",
+  checked: isSelected,
+  onChange: () => args.fns.toggleJobSelection(section.queueName, section.key, job.id)
+};
+''',
+        css: '''
+return `._id {
+  cursor: pointer;
+  width: 1rem;
+  height: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "row_cells",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const job = args.contextData.job;
+const section = args.contextData.section;
+
+// Helper to create YouTube link
+const createYouTubeLink = (job) => {
+  const name = job.channelName || job.playlistName || job.customName || args.fns.truncate(job.channelId || job.playlistId, 20);
+  let url = '';
+  if (job.channelId) {
+    url = `https://www.youtube.com/channel/${job.channelId}`;
+  } else if (job.playlistId) {
+    url = `https://www.youtube.com/playlist?list=${job.playlistId}`;
+  }
+  return { name, url };
+};
+
+let cellData = [];
+const ytLink = createYouTubeLink(job);
+
+// Common cells
+cellData.push(
+  { value: args.fns.truncate(job.id, 15), label: 'Job ID', type: 'text' },
+  { value: ytLink.name, url: ytLink.url, label: 'Item', type: 'link' },
+  { value: job.username || args.fns.truncate(job.userUuid, 20), label: 'User', type: 'text' }
+);
+
+// State-specific cells
+if (section.key === 'active') {
+  cellData.push(
+    { value: `${job.progress || 0}%`, label: 'Progress', type: 'text' },
+    { value: args.fns.formatDuration(job.duration), label: 'Duration', type: 'text' },
+    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+  );
+} else if (section.key === 'waiting') {
+  cellData.push(
+    { value: args.fns.formatTime(job.timestamp), label: 'Queued', type: 'text' },
+    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+  );
+} else if (section.key === 'failed') {
+  cellData.push(
+    { value: args.fns.truncate(job.failedReason, 30), label: 'Error', type: 'text' },
+    { value: `${job.attemptsMade || 0}/3`, label: 'Attempts', type: 'text' },
+    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+  );
+} else if (section.key === 'completed') {
+  cellData.push(
+    { value: args.fns.formatDuration(job.duration), label: 'Duration', type: 'text' },
+    { value: args.fns.formatTime(job.finishedOn), label: 'Completed', type: 'text' },
+    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+  );
+} else if (section.key === 'delayed') {
+  cellData.push(
+    { value: args.fns.formatTime(job.timestamp), label: 'Scheduled', type: 'text' },
+    { value: args.fns.formatJobData(job), label: 'Job Data', type: 'json' }
+  );
+}
+
+return {
+  contextName: "cell",
+  loop: true,
+  data: cellData
+};
+'''
+      }
+    },
+    {
+      id: "cell_td",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "td"
+};
+''',
+        css: '''
+return `._id {
+  padding: 0.75rem;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "cell_content",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const cell = args.contextData.cell;
+
+if (cell.type === 'link' && cell.url) {
+  return {
+    as: "a",
+    href: cell.url,
+    target: "_blank",
+    rel: "noopener noreferrer",
+    text: cell.value
+  };
+}
+
+return {
+  text: cell.value,
+  title: cell.value
+};
+''',
+        css: '''
+const cell = args.contextData.cell;
+
+if (cell.type === 'json') {
+  return `._id {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    white-space: pre-wrap;
+    max-width: 300px;
+    line-height: 1.4;
+  }`;
+}
+
+if (cell.type === 'link') {
+  return `._id {
+    color: ${args.theme.var.color.primary};
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }`;
+}
+
+return `._id {
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    },
+    {
+      id: "metrics_display",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.section;
+const cacheKey = `${section.queueName}-metrics`;
+const cachedData = args.fns.jobDataCache()[cacheKey];
+const data = cachedData?.data;
+
+return {
+  as: "div",
+  hide: section.key !== 'metrics' || !data,
+  contextName: "metric",
+  loop: true,
+  data: data ? [
+    { label: "Average Duration", value: data.metrics.avgDurationFormatted },
+    { label: "Success Rate", value: data.metrics.successRateFormatted },
+    { label: "Throughput", value: data.metrics.throughputFormatted },
+    { label: "Total Completed", value: `${data.totalCompleted || 0} jobs` },
+    { label: "Total Failed", value: `${data.totalFailed || 0} jobs` },
+    { label: "Active Workers", value: `${data.activeWorkers || 0} jobs` },
+    { label: "Concurrency", value: `${data.concurrency} workers` }
+  ] : []
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "metric_item",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const metric = args.contextData.metric;
+
+return {
+  as: "div",
+  text: `${metric.label}: ${metric.value}`
+};
+''',
+        css: '''
+return `._id {
+  padding: 1rem;
+  background: ${args.theme.var.color.background_light_100};
+  border-radius: 0.5rem;
+  border: 1px solid ${args.theme.var.color.border};
+  font-weight: 500;
+  color: ${args.theme.var.color.text};
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e1", T: "PageLayout", S: "root", E: "page_layout" },
+    { id: "e_admin_layout", T: "PageLayout", S: "root", E: "admin_layout" },
+    { id: "e2", T: "Attr", S: "root", E: "container" },
+    { id: "e3", T: "Attr", S: "container", E: "header" },
+    { id: "e4", T: "Attr", S: "header", E: "title" },
+    { id: "e5", T: "Attr", S: "header", E: "controls" },
+    { id: "e6", T: "Attr", S: "controls", E: "auto_refresh_toggle" },
+    { id: "e7", T: "Attr", S: "controls", E: "refresh_button" },
+    { id: "e8", T: "Attr", S: "controls", E: "last_updated" },
+    { id: "e9", T: "Attr", S: "container", E: "content" },
+    { id: "e10", T: "Attr", S: "content", E: "loading_state" },
+    { id: "e11", T: "Attr", S: "content", E: "error_state" },
+    { id: "e12", T: "Attr", S: "error_state", E: "error_title" },
+    { id: "e13", T: "Attr", S: "error_state", E: "error_message" },
+    { id: "e14", T: "Attr", S: "content", E: "health_data_container" },
+    { id: "e15", T: "Attr", S: "health_data_container", E: "status_card" },
+    { id: "e16", T: "Attr", S: "status_card", E: "status_header" },
+    { id: "e16b", T: "Attr", S: "status_card", E: "status_summary" },
+    { id: "e17", T: "Attr", S: "health_data_container", E: "queues_container" },
+    { id: "e18", T: "Attr", S: "queues_container", E: "queue_card" },
+    { id: "e19", T: "Attr", S: "queue_card", E: "queue_title" },
+    { id: "e20", T: "Attr", S: "queue_card", E: "queue_stats" },
+    { id: "e21", T: "Attr", S: "queue_stats", E: "stat_item" },
+    { id: "e22", T: "Attr", S: "stat_item", E: "stat_label" },
+    { id: "e23", T: "Attr", S: "stat_item", E: "stat_value" },
+    { id: "e24", T: "Attr", S: "queue_card", E: "sections_container" },
+    { id: "e25", T: "Attr", S: "sections_container", E: "section_wrapper" },
+    { id: "e26", T: "Attr", S: "section_wrapper", E: "section_button" },
+    { id: "e27", T: "Attr", S: "section_button", E: "section_button_text" },
+    { id: "e28", T: "Attr", S: "section_button", E: "section_button_icon" },
+    { id: "e29", T: "Attr", S: "section_wrapper", E: "section_content" },
+    { id: "e30", T: "Attr", S: "section_content", E: "bulk_actions" },
+    { id: "e31", T: "Attr", S: "bulk_actions", E: "delete_selected_button" },
+    { id: "e32", T: "Attr", S: "bulk_actions", E: "delete_all_button" },
+    { id: "e33", T: "Attr", S: "section_content", E: "jobs_table" },
+    { id: "e34", T: "Attr", S: "jobs_table", E: "table_header" },
+    { id: "e35", T: "Attr", S: "table_header", E: "header_row" },
+    { id: "e36", T: "Attr", S: "header_row", E: "header_checkbox_cell" },
+    { id: "e37", T: "Attr", S: "header_checkbox_cell", E: "select_all_checkbox" },
+    { id: "e38", T: "Attr", S: "header_row", E: "header_cells" },
+    { id: "e39", T: "Attr", S: "header_cells", E: "header_th" },
+    { id: "e39b", T: "Attr", S: "header_th", E: "header_cell_text" },
+    { id: "e40", T: "Attr", S: "jobs_table", E: "table_body" },
+    { id: "e41", T: "Attr", S: "table_body", E: "table_row" },
+    { id: "e42", T: "Attr", S: "table_row", E: "checkbox_cell" },
+    { id: "e43", T: "Attr", S: "checkbox_cell", E: "job_checkbox" },
+    { id: "e44", T: "Attr", S: "table_row", E: "row_cells" },
+    { id: "e45", T: "Attr", S: "row_cells", E: "cell_td" },
+    { id: "e45b", T: "Attr", S: "cell_td", E: "cell_content" },
+    { id: "e46", T: "Attr", S: "section_content", E: "metrics_display" },
+    { id: "e47", T: "Attr", S: "metrics_display", E: "metric_item" }
+  ]
+}

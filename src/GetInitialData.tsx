@@ -104,9 +104,19 @@ export function GetInitialData(props: GetInitialDataProps) {
     }
   };
 
+  const reSetData = async (count: number | undefined, freshData: ReturnType<typeof fetchData>) => {
+    // Only refetch if count is greater than 0 (skip initial load)
+    if (count && count > 0) {
+      setData(freshData.initialData, freshData.userData);
+    }
+  }
+
   const data = createAsync(
     async () => {
-      return await fetchData();
+      const trackedCountBeforeFetch = getGlobalStore(graph[0]).P.initialDataRefreshCount;
+      const result = await fetchData();
+      reSetData(trackedCountBeforeFetch, result);
+      return result;
     },
     { deferStream: true },
   );

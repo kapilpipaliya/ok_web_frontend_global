@@ -24,9 +24,9 @@ export async function POST({ request }: APIEvent) {
       throw new APIError("Unauthorized. Admin access required.", 403);
     }
 
-    const { rectangularLogo, squareLogo } = await request.json();
-    if (!(rectangularLogo || squareLogo)) {
-      throw new APIError("At least one company logo is required", 400);
+    const { rectangularLogo, squareLogo, favicon } = await request.json();
+    if (!(rectangularLogo || squareLogo || favicon)) {
+      throw new APIError("At least one company logo or favicon is required", 400);
     }
 
     // First ensure GlobalSetting exists
@@ -79,12 +79,30 @@ export async function POST({ request }: APIEvent) {
       );
     }
 
-    // Get updated GlobalSetting with both logos
+    // Delete all existing CompanyFavicon relationships
+    await dbSession.run(
+      `MATCH (g:GlobalSetting)-[r:CompanyFavicon]->(f:File)
+       DELETE r`,
+    );
+
+    // Handle favicon
+    if (favicon) {
+      // Create new relationship
+      await dbSession.run(
+        `MATCH (g:GlobalSetting)
+         MATCH (f:File) WHERE elementId(f) = $favicon
+         MERGE (g)-[:CompanyFavicon]->(f)`,
+        { favicon },
+      );
+    }
+
+    // Get updated GlobalSetting with all logos
     const result = await dbSession.run(
       `MATCH (g:GlobalSetting)
        OPTIONAL MATCH (g)-[:CompanyRectangularLogo]->(rectLogo:File)
        OPTIONAL MATCH (g)-[:CompanySquareLogo]->(squareLogo:File)
-       RETURN g, rectLogo, squareLogo`,
+       OPTIONAL MATCH (g)-[:CompanyFavicon]->(favicon:File)
+       RETURN g, rectLogo, squareLogo, favicon`,
     );
 
     if (!result.records[0]?.get("g")) {
@@ -98,6 +116,9 @@ export async function POST({ request }: APIEvent) {
     const squareLogoFile = result.records[0].get("squareLogo")
       ? convertNodeToJson(result.records[0].get("squareLogo"))
       : null;
+    const faviconFile = result.records[0].get("favicon")
+      ? convertNodeToJson(result.records[0].get("favicon"))
+      : null;
 
     // Log company logo updates
     const logDetails = [];
@@ -109,6 +130,11 @@ export async function POST({ request }: APIEvent) {
     if (squareLogo) {
       logDetails.push(
         `Square logo: ${squareLogoFile?.P.fileName} (${squareLogoFile?.P.contentType})`,
+      );
+    }
+    if (favicon) {
+      logDetails.push(
+        `Favicon: ${faviconFile?.P.fileName} (${faviconFile?.P.contentType})`,
       );
     }
 
@@ -133,6 +159,10 @@ export async function POST({ request }: APIEvent) {
       vertexes[squareLogoFile.id] = squareLogoFile;
     }
 
+    if (faviconFile) {
+      vertexes[faviconFile.id] = faviconFile;
+    }
+
     return {
       graph: {
         edges: {},
@@ -142,6 +172,7 @@ export async function POST({ request }: APIEvent) {
         globalSetting: updatedGlobalSetting,
         rectangularLogoFile,
         squareLogoFile,
+        faviconFile,
       },
     };
   } catch (error) {

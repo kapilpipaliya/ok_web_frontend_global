@@ -1,0 +1,137 @@
+{
+  vertexes: [
+    {
+      id: "get_available_queues",
+      L: "Function",
+      P: {
+        key: "getAvailableQueues",
+        description: "Fetches all available BullMQ queues and their statistics",
+        body: '''
+/**
+ * Get all available BullMQ queues
+ * Returns queue names, counts, and metadata
+ *
+ * Note: This function dynamically discovers queues based on worker Functions
+ * in the database (Functions with keys starting with 'process' or 'background').
+ * Queues are created automatically when first job is added.
+ */
+
+// Helper to get queue metadata
+const getQueueMetadata = (queueName) => {
+  let icon = '📋';
+  let displayName = queueName;
+
+  if (queueName.includes('channel') || queueName.toLowerCase().includes('channel')) {
+    icon = '📺';
+    displayName = queueName.replace(/([A-Z])/g, ' $1').trim() + ' Queue';
+  } else if (queueName.includes('playlist') || queueName.toLowerCase().includes('playlist')) {
+    icon = '📑';
+    displayName = queueName.replace(/([A-Z])/g, ' $1').trim() + ' Queue';
+  } else if (queueName.includes('email') || queueName.toLowerCase().includes('email')) {
+    icon = '📧';
+    displayName = queueName.replace(/([A-Z])/g, ' $1').trim() + ' Queue';
+  } else {
+    // Generic processing icon
+    icon = '⚙️';
+    displayName = queueName.replace(/([A-Z])/g, ' $1').trim() + ' Queue';
+  }
+
+  return { icon, displayName };
+};
+
+// Discover queue names from database Functions
+let queueNames = [];
+
+try {
+  const query = `
+    MATCH (f:Function)
+    WHERE f.key STARTS WITH 'process' OR f.key STARTS WITH 'background'
+    RETURN f.key as key, f.description as description
+    ORDER BY f.key
+  `;
+
+  const result = await args.session.run(query);
+
+  queueNames = result.records.map(record => record.get('key'));
+} catch (error) {
+  return {
+    success: false,
+    message: `Error discovering worker functions from database: ${error.message}`
+  };
+}
+
+// If no queues found, return error
+if (queueNames.length === 0) {
+  return {
+    success: false,
+    message: 'No worker functions found in database. Please ensure worker functions exist with keys starting with "process" or "background".'
+  };
+}
+
+// Check if BullMQ is available
+if (!args.bullmq || !args.bullmq.Queue) {
+  return {
+    success: false,
+    message: 'BullMQ is not available. Please check your Redis connection and BullMQ configuration.'
+  };
+}
+
+const { Queue } = args.bullmq;
+const connection = args.bullmq.redisConnection || {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  maxRetriesPerRequest: null
+};
+
+try {
+  const queuesData = [];
+
+  for (const queueName of queueNames) {
+    let queue = null;
+    const { icon, displayName } = getQueueMetadata(queueName);
+
+    // Create/connect to queue
+    queue = new Queue(queueName, { connection });
+
+    // Use getJobCounts() which gets all counts in a single Redis operation
+    // This is more efficient and avoids connection closing issues
+    const counts = await queue.getJobCounts('active', 'waiting', 'completed', 'failed', 'delayed', 'paused');
+
+    queuesData.push({
+      queueName,
+      displayName,
+      icon,
+      active: counts.active || 0,
+      waiting: counts.waiting || 0,
+      completed: counts.completed || 0,
+      failed: counts.failed || 0,
+      delayed: counts.delayed || 0,
+      paused: counts.paused || 0
+    });
+
+    // Always close the queue connection
+    if (queue) {
+      await queue.close();
+    }
+  }
+
+  return {
+    success: true,
+    data: {
+      queues: queuesData,
+      total: queuesData.length
+    }
+  };
+
+} catch (error) {
+  return {
+    success: false,
+    message: `Error fetching queue stats: ${error.message}`
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

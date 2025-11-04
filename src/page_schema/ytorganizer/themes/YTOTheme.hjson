@@ -5,68 +5,68 @@
       L: "Theme",
       P: {
         key: "YTOTheme",
-        name: "Personal Rulebook Theme",
-        description: "Custom theme optimized for motivation and progress tracking with high contrast for accessibility",
+        name: "YouTube Theme",
+        description: "YouTube-inspired theme with custom brand color (#db4646)",
         data: '''
 return {
   var: {
     color: {
       primary: {
-        light: "oklch(0.65 0.25 280)",
-        dark: "oklch(0.75 0.20 285)"
+        light: "oklch(0.62 0.22 25)",
+        dark: "oklch(0.68 0.20 25)"
       },
       info: {
-        light: "oklch(0.70 0.18 230)",
-        dark: "oklch(0.80 0.15 235)"
+        light: "oklch(0.60 0.15 240)",
+        dark: "oklch(0.70 0.12 240)"
       },
       success: {
-        light: "oklch(0.72 0.20 145)",
-        dark: "oklch(0.82 0.18 150)"
+        light: "oklch(0.65 0.18 145)",
+        dark: "oklch(0.75 0.15 145)"
       },
       warning: {
-        light: "oklch(0.85 0.15 85)",
-        dark: "oklch(0.90 0.12 90)"
+        light: "oklch(0.75 0.14 85)",
+        dark: "oklch(0.80 0.12 85)"
       },
       error: {
-        light: "oklch(0.68 0.25 25)",
-        dark: "oklch(0.78 0.22 30)"
+        light: "oklch(0.62 0.22 25)",
+        dark: "oklch(0.68 0.20 25)"
       },
       text: {
-        light: "oklch(0.15 0.01 280)",
-        dark: "oklch(0.95 0.01 280)"
+        light: "oklch(0.10 0.00 0)",
+        dark: "oklch(0.98 0.00 0)"
       },
       background: {
-        light: "oklch(0.98 0.005 280)",
-        dark: "oklch(0.12 0.01 280)"
+        light: "oklch(0.99 0.00 0)",
+        dark: "oklch(0.15 0.00 0)"
       },
       border: {
-        light: "oklch(0.85 0.01 280)",
-        dark: "oklch(0.25 0.01 280)"
+        light: "oklch(0.90 0.00 0)",
+        dark: "oklch(0.25 0.00 0)"
       },
       muted: {
-        light: "oklch(0.60 0.02 280)",
-        dark: "oklch(0.45 0.02 280)"
+        light: "oklch(0.55 0.00 0)",
+        dark: "oklch(0.60 0.00 0)"
       },
       // Motivational colors for tracking
       streak: {
-        light: "oklch(0.75 0.20 50)",
-        dark: "oklch(0.80 0.18 55)"
+        light: "oklch(0.70 0.18 50)",
+        dark: "oklch(0.75 0.15 50)"
       },
       completed: {
-        light: "oklch(0.72 0.20 145)",
-        dark: "oklch(0.82 0.18 150)"
+        light: "oklch(0.65 0.18 145)",
+        dark: "oklch(0.75 0.15 145)"
       },
       partial: {
-        light: "oklch(0.85 0.15 85)",
-        dark: "oklch(0.90 0.12 90)"
+        light: "oklch(0.75 0.14 85)",
+        dark: "oklch(0.80 0.12 85)"
       },
       missed: {
-        light: "oklch(0.68 0.25 25)",
-        dark: "oklch(0.78 0.22 30)"
+        light: "oklch(0.62 0.22 25)",
+        dark: "oklch(0.68 0.20 25)"
       },
       skipped: {
-        light: "oklch(0.60 0.02 280)",
-        dark: "oklch(0.45 0.02 280)"
+        light: "oklch(0.55 0.00 0)",
+        dark: "oklch(0.60 0.00 0)"
       }
     },
     // Custom spacing for mobile-first design

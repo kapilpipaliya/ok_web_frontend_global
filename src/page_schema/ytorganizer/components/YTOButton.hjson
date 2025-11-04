@@ -179,6 +179,7 @@ if (variant === 'primary') {
 
     &:not(:disabled):hover {
       background: ${args.theme.var.color.success_dark_200};
+      color: ${args.theme.var.color.success_dark_200_text};
     }
   `;
 } else if (variant === 'secondary') {

@@ -187,7 +187,7 @@ return {
   singularName: "Channel",
   pluralName: "Channels",
   valueKey: "channel.P.youtubeId",     // Extract from nested vertex structure
-  labelKey: "channelSettings.P.customName"  // Extract from related settings vertex
+  labelKey: "channelSetting.P.customName"  // Extract from related settings vertex
 };
 ```
 
@@ -212,7 +212,7 @@ return {
   pluralName: "Channels",
   dataKey: "items",                    // Extract from response.data.items
   valueKey: "channel.P.youtubeId",     // Extract from nested structure
-  labelKey: "channelSettings.P.customName"
+  labelKey: "channelSetting.P.customName"
 };
 ```
 

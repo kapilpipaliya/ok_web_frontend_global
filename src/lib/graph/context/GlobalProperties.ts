@@ -3,6 +3,7 @@ import type { Id } from "~/lib/graph/type/id";
 export interface GlobalProperties {
   activeClickOutside: string[];
   initialDataFetchError: string;
+  initialDataRefreshCount?: number; // Counter to trigger refetch of initial data
   isDevelopment: boolean;
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;

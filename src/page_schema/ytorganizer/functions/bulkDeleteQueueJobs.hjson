@@ -1,0 +1,111 @@
+{
+  vertexes: [
+    {
+      id: "bulk_delete_queue_jobs",
+      L: "Function",
+      P: {
+        key: "bulkDeleteQueueJobs",
+        description: "Deletes multiple jobs from a BullMQ queue",
+        body: '''
+/**
+ * Bulk delete queue jobs
+ *
+ * Parameters:
+ * - queueName: string - Name of the queue
+ * - jobIds: string[] - Array of job IDs to delete
+ * - state: string - Job state (waiting, delayed, failed, etc.)
+ */
+
+const { queueName, jobIds, state } = args.contextData;
+
+// Validate parameters
+if (!queueName || !jobIds || !Array.isArray(jobIds) || jobIds.length === 0) {
+  return {
+    success: false,
+    message: "queueName and jobIds array are required"
+  };
+}
+
+if (!state) {
+  return {
+    success: false,
+    message: "state is required"
+  };
+}
+
+// Get the queue
+const { Queue } = args.bullmq;
+const connection = args.bullmq.redisConnection || {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  maxRetriesPerRequest: null
+};
+
+const queue = new Queue(queueName, { connection });
+
+try {
+  // Only allow deletion of waiting, delayed, or failed jobs
+  if (!['waiting', 'delayed', 'failed', 'completed'].includes(state)) {
+    await queue.close();
+    return {
+      success: false,
+      message: `Cannot delete jobs in state '${state}'. Only waiting, delayed, failed, or completed jobs can be deleted.`
+    };
+  }
+
+  const results = {
+    deleted: [],
+    failed: []
+  };
+
+  // Delete each job
+  for (const jobId of jobIds) {
+    try {
+      const job = await queue.getJob(jobId);
+
+      if (!job) {
+        results.failed.push({ jobId, reason: 'Job not found' });
+        continue;
+      }
+
+      await job.remove();
+      results.deleted.push(jobId);
+    } catch (error) {
+      results.failed.push({ jobId, reason: error.message });
+    }
+  }
+
+  await queue.close();
+
+  return {
+    success: true,
+    data: {
+      deletedCount: results.deleted.length,
+      failedCount: results.failed.length,
+      deleted: results.deleted,
+      failed: results.failed
+    },
+    message: `Deleted ${results.deleted.length} job(s)${results.failed.length > 0 ? `, failed to delete ${results.failed.length} job(s)` : ''}`
+  };
+
+} catch (error) {
+  console.error('Error bulk deleting jobs:', error);
+
+  // Always try to close the queue
+  try {
+    await queue.close();
+  } catch (closeError) {
+    console.error('Error closing queue:', closeError);
+  }
+
+  return {
+    success: false,
+    message: `Error deleting jobs: ${error.message}`
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

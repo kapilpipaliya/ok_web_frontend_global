@@ -13,6 +13,84 @@
       P: {
         displayOrder: 1,
         componentName: "Html",
+        fns: '''
+// Common resize handler factory
+// Accepts direction: 'n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'
+const createResizeHandler = (direction) => {
+  // Determine resize behavior based on direction
+  const resizeWidth = direction.includes('e') ? 'add' : direction.includes('w') ? 'subtract' : null;
+  const resizeHeight = direction.includes('s') ? 'add' : direction.includes('n') ? 'subtract' : null;
+  const adjustX = direction.includes('w');
+  const adjustY = direction.includes('n');
+
+  return (e) => {
+    const getPlayerState = args.contextData.props?.playerState;
+    const state = getPlayerState?.();
+    if (state !== "minimized") return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const playerEl = e.currentTarget.parentElement;
+    const rect = playerEl.getBoundingClientRect();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = rect.width;
+    const startHeight = rect.height;
+    const startLeft = rect.left;
+    const startTop = rect.top;
+    const setPlayerSize = args.contextData.props?.setPlayerSize;
+    const setPlayerPosition = args.contextData.props?.setPlayerPosition;
+    const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
+
+    const handleMouseMove = (moveEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaY = moveEvent.clientY - startY;
+
+      let newWidth = startWidth;
+      let newHeight = startHeight;
+      let newX = playerPosition.x;
+      let newY = playerPosition.y;
+
+      // Calculate new dimensions based on resize direction
+      if (resizeWidth === 'add') {
+        newWidth = Math.max(480, startWidth + deltaX);
+      } else if (resizeWidth === 'subtract') {
+        newWidth = Math.max(480, startWidth - deltaX);
+      }
+
+      if (resizeHeight === 'add') {
+        newHeight = Math.max(270, startHeight + deltaY);
+      } else if (resizeHeight === 'subtract') {
+        newHeight = Math.max(270, startHeight - deltaY);
+      }
+
+      // Adjust position if resizing from left or top
+      if (adjustX) {
+        newX = startLeft + (startWidth - newWidth);
+      }
+      if (adjustY) {
+        newY = startTop + (startHeight - newHeight);
+      }
+
+      setPlayerSize?.({ width: newWidth, height: newHeight });
+      setPlayerPosition?.({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+};
+
+return {
+  createResizeHandler
+};
+''',
         props: '''
 const getPlayerState = args.contextData.props?.playerState;
 const currentState = getPlayerState?.() || "closed";
@@ -754,46 +832,10 @@ return `._id {
         componentName: "Html",
         props: '''
 const getPlayerState = args.contextData.props?.playerState;
-const setPlayerSize = args.contextData.props?.setPlayerSize;
-const setPlayerPosition = args.contextData.props?.setPlayerPosition;
-const playerPosition = args.contextData.props?.playerPosition || { x: null, y: null };
-
-const handleMouseDown = (e) => {
-  const state = getPlayerState?.();
-  if (state !== "minimized") return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  const playerEl = e.currentTarget.parentElement;
-  const rect = playerEl.getBoundingClientRect();
-  const startX = e.clientX;
-  const startY = e.clientY;
-  const startWidth = rect.width;
-  const startHeight = rect.height;
-
-  const handleMouseMove = (moveEvent) => {
-    const deltaX = moveEvent.clientX - startX;
-    const deltaY = moveEvent.clientY - startY;
-
-    const newWidth = Math.max(480, startWidth + deltaX);
-    const newHeight = Math.max(270, startHeight + deltaY);
-
-    setPlayerSize?.({ width: newWidth, height: newHeight });
-  };
-
-  const handleMouseUp = () => {
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  };
-
-  document.addEventListener('mousemove', handleMouseMove);
-  document.addEventListener('mouseup', handleMouseUp);
-};
 
 return {
   as: "div",
-  onMouseDown: handleMouseDown,
+  onMouseDown: args.fns.createResizeHandler('se'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -832,39 +874,10 @@ return `._id {
         componentName: "Html",
         props: '''
 const getPlayerState = args.contextData.props?.playerState;
-const setPlayerSize = args.contextData.props?.setPlayerSize;
-
-const handleMouseDown = (e) => {
-  const state = getPlayerState?.();
-  if (state !== "minimized") return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  const playerEl = e.currentTarget.parentElement;
-  const rect = playerEl.getBoundingClientRect();
-  const startX = e.clientX;
-  const startWidth = rect.width;
-  const currentHeight = rect.height;
-
-  const handleMouseMove = (moveEvent) => {
-    const deltaX = moveEvent.clientX - startX;
-    const newWidth = Math.max(480, startWidth + deltaX);
-    setPlayerSize?.({ width: newWidth, height: currentHeight });
-  };
-
-  const handleMouseUp = () => {
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  };
-
-  document.addEventListener('mousemove', handleMouseMove);
-  document.addEventListener('mouseup', handleMouseUp);
-};
 
 return {
   as: "div",
-  onMouseDown: handleMouseDown,
+  onMouseDown: args.fns.createResizeHandler('e'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -892,39 +905,10 @@ return `._id {
         componentName: "Html",
         props: '''
 const getPlayerState = args.contextData.props?.playerState;
-const setPlayerSize = args.contextData.props?.setPlayerSize;
-
-const handleMouseDown = (e) => {
-  const state = getPlayerState?.();
-  if (state !== "minimized") return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  const playerEl = e.currentTarget.parentElement;
-  const rect = playerEl.getBoundingClientRect();
-  const startY = e.clientY;
-  const startHeight = rect.height;
-  const currentWidth = rect.width;
-
-  const handleMouseMove = (moveEvent) => {
-    const deltaY = moveEvent.clientY - startY;
-    const newHeight = Math.max(270, startHeight + deltaY);
-    setPlayerSize?.({ width: currentWidth, height: newHeight });
-  };
-
-  const handleMouseUp = () => {
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-  };
-
-  document.addEventListener('mousemove', handleMouseMove);
-  document.addEventListener('mouseup', handleMouseUp);
-};
 
 return {
   as: "div",
-  onMouseDown: handleMouseDown,
+  onMouseDown: args.fns.createResizeHandler('s'),
   hide: () => {
     const state = getPlayerState?.();
     return state !== "minimized";
@@ -940,6 +924,194 @@ return `._id {
   height: 6px;
   cursor: s-resize;
   z-index: 10;
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_handle_w",
+      L: "Attr",
+      P: {
+        displayOrder: 6,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+
+return {
+  as: "div",
+  onMouseDown: args.fns.createResizeHandler('w'),
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: w-resize;
+  z-index: 10;
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_handle_n",
+      L: "Attr",
+      P: {
+        displayOrder: 7,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+
+return {
+  as: "div",
+  onMouseDown: args.fns.createResizeHandler('n'),
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: n-resize;
+  z-index: 10;
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_handle_ne",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+
+return {
+  as: "div",
+  onMouseDown: args.fns.createResizeHandler('ne'),
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: ne-resize;
+  z-index: 11;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid ${args.theme.var.color.background_dark_700};
+    border-top: 2px solid ${args.theme.var.color.background_dark_700};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_handle_nw",
+      L: "Attr",
+      P: {
+        displayOrder: 9,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+
+return {
+  as: "div",
+  onMouseDown: args.fns.createResizeHandler('nw'),
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nw-resize;
+  z-index: 11;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-left: 2px solid ${args.theme.var.color.background_dark_700};
+    border-top: 2px solid ${args.theme.var.color.background_dark_700};
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_handle_sw",
+      L: "Attr",
+      P: {
+        displayOrder: 10,
+        componentName: "Html",
+        props: '''
+const getPlayerState = args.contextData.props?.playerState;
+
+return {
+  as: "div",
+  onMouseDown: args.fns.createResizeHandler('sw'),
+  hide: () => {
+    const state = getPlayerState?.();
+    return state !== "minimized";
+  }
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  cursor: sw-resize;
+  z-index: 11;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-left: 2px solid ${args.theme.var.color.background_dark_700};
+    border-bottom: 2px solid ${args.theme.var.color.background_dark_700};
+  }
 }`;
 '''
       }
@@ -967,6 +1139,11 @@ return `._id {
     { id: "e12", T: "Attr", S: "player_video_container", E: "player_iframe" },
     { id: "e13", T: "Attr", S: "video_player_container", E: "resize_handle_se" },
     { id: "e14", T: "Attr", S: "video_player_container", E: "resize_handle_e" },
-    { id: "e15", T: "Attr", S: "video_player_container", E: "resize_handle_s" }
+    { id: "e15", T: "Attr", S: "video_player_container", E: "resize_handle_s" },
+    { id: "e16", T: "Attr", S: "video_player_container", E: "resize_handle_w" },
+    { id: "e17", T: "Attr", S: "video_player_container", E: "resize_handle_n" },
+    { id: "e18", T: "Attr", S: "video_player_container", E: "resize_handle_ne" },
+    { id: "e19", T: "Attr", S: "video_player_container", E: "resize_handle_nw" },
+    { id: "e20", T: "Attr", S: "video_player_container", E: "resize_handle_sw" }
   ]
 }

@@ -38,13 +38,12 @@ export function useFormSubmit() {
 
     // Default success handler that handles signIn redirect if needed
     const defaultSuccessHandler = (value: any) => {
-      if (options.shouldRedirect && options.navigate) {
-        handleSignInRedirect(value?.result, graph, options.navigate);
-      }
-
       // Call custom success handler if provided
       if (options.onSuccess) {
         options.onSuccess(value);
+      }
+      if (options.shouldRedirect && options.navigate) {
+        handleSignInRedirect(value?.result, graph, options.navigate);
       }
     };
 

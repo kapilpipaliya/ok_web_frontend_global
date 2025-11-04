@@ -1,0 +1,153 @@
+{
+  vertexes: [
+    {
+      id: "retry_channel_function",
+      L: "Function",
+      P: {
+        key: "retryChannel",
+        description: "Retry a failed or stuck channel processing job",
+        body: '''
+/**
+ * Retry Channel Processing
+ *
+ * This function allows manual retry of failed or stuck channels
+ * Useful for:
+ * - Recovering from temporary API failures
+ * - Retrying after quota limits are lifted
+ * - Fixing stuck jobs that are processing for too long
+ * - Re-processing channels after bug fixes
+ *
+ * IMPORTANT: This resets the channel to 'queued' state and re-adds it to the queue
+ * Any partially completed playlists will be re-processed
+ */
+
+try {
+  const { channelId } = args.contextData;
+
+  if (!channelId) {
+    throw new Error("Channel ID is required");
+  }
+
+  // Get current authenticated user
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Check if channel exists and get its current status
+  const checkResult = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    RETURN c, cs
+  `, { userUuid: user.P.uuid, channelId });
+
+  if (checkResult.records.length === 0) {
+    return {
+      success: false,
+      message: "Channel not found in your collection"
+    };
+  }
+
+  const channelSettingNode = checkResult.records[0].get('cs');
+  const channelNode = checkResult.records[0].get('c');
+  const channelSetting = args.convertNodeToJson(channelSettingNode);
+  const channel = args.convertNodeToJson(channelNode);
+
+  const currentStatus = channelSetting.P.status;
+
+  // Prevent retry of channels that are already queued or processing
+  if (currentStatus === 'queued' || currentStatus === 'processing') {
+    return {
+      success: false,
+      message: `Channel is already ${currentStatus}. Please wait for it to complete.`,
+      data: {
+        channelId,
+        currentStatus
+      }
+    };
+  }
+
+  // Reset channel status to queued
+  // This clears error state and resets progress counters
+  await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    SET cs.status = 'queued',
+        cs.progress = 0,
+        cs.processedPlaylists = 0,
+        cs.error = null,
+        cs.queuedAt = datetime(),
+        cs.updatedAt = datetime()
+  `, { userUuid: user.P.uuid, channelId });
+
+  // Also reset all playlist settings for this channel to queued
+  // This ensures playlists are re-processed even if some were completed before
+  await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+          -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
+    MATCH (c)-[:ChannelPlaylist]->(p:Playlist)
+    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    SET ps.status = 'queued',
+        ps.progress = 0,
+        ps.processedVideos = 0,
+        ps.error = null,
+        ps.queuedAt = datetime(),
+        ps.updatedAt = datetime()
+  `, { userUuid: user.P.uuid, channelId });
+
+  // Re-add channel to processing queue
+  const { Queue } = args.bullmq;
+
+  const connection = args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    maxRetriesPerRequest: null
+  };
+
+  const channelQueue = new Queue('processChannelQueue', { connection });
+
+  await channelQueue.add('processChannel', {
+    channelId,
+    userId: user.id,
+    userUuid: user.P.uuid,
+    customName: channelSetting.P.customName || null
+  }, {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 5000
+    },
+    removeOnComplete: 100,
+    removeOnFail: false  // Keep failed jobs in dead letter queue
+  });
+
+  await channelQueue.close();
+
+  return {
+    success: true,
+    message: `Channel "${channel.P.title}" has been queued for retry. Processing will begin shortly.`,
+    data: {
+      channelId,
+      title: channel.P.title,
+      previousStatus: currentStatus,
+      newStatus: 'queued'
+    }
+  };
+
+} catch (error) {
+  console.error("Error retrying channel:", error);
+  return {
+    success: false,
+    message: "Failed to retry channel processing",
+    error: {
+      type: "RetryChannelError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

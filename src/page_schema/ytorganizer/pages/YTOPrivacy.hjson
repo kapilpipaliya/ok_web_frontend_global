@@ -21,6 +21,21 @@ return {
       }
     },
     {
+      id: "favicon_link",
+      L: "Attr",
+      P: {
+        displayOrder: 0.5,
+        componentName: "Html",
+        props: '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    },
+    {
       id: "privacy_root",
       L: "Attr",
       P: {
@@ -1239,6 +1254,7 @@ return `._id {
   ],
   edges: [
     // Root edges
+    { id: "e0", T: "Attr", S: "yto_privacy_page", E: "favicon_link" },
     { id: "e_page_root", T: "Attr", S: "yto_privacy_page", E: "privacy_root" },
 
     // Header edges

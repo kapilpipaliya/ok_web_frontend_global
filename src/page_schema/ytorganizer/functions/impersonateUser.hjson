@@ -12,17 +12,19 @@ if (!actualUser) {
   throw new Error("User session not found");
 }
 
-const targetUserId = args.contextData.targetUserId;
+// Verification of admin role is done by setImpersonation
 
-if (!targetUserId) {
-  throw new Error("targetUserId is required");
+const targetUserUuid = args.contextData.targetUserUuid;
+
+if (!targetUserUuid) {
+  throw new Error("targetUserUuid is required");
 }
 
 // Call platform function (from args)
 const result = await args.setImpersonation(
   args.session,
   actualUser,
-  targetUserId
+  targetUserUuid
 );
 
 return {

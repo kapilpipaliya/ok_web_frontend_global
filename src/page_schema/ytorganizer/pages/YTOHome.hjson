@@ -38,6 +38,32 @@ const [isDashboardLoading, setIsDashboardLoading] = args.createSignal(true);
 const [dashboardError, setDashboardError] = args.createSignal(null);
 const [channelsCount, setChannelsCount] = args.createSignal(0);
 const [playlistsCount, setPlaylistsCount] = args.createSignal(0);
+const [videosCount, setVideosCount] = args.createSignal(0);
+const [userPlan, setUserPlan] = args.createSignal('free');
+const [videoLimit, setVideoLimit] = args.createSignal(10000);
+
+// Check onboarding status and redirect if needed
+const checkOnboarding = async () => {
+  try {
+    const response = await args.executeNamedServerFunction({
+      functionName: "checkOnboardingStatus",
+      contextData: {}
+    });
+
+    const result = response.result;
+
+    if (result.success && !result.data.isOnboarded) {
+      // User hasn't completed onboarding, redirect them
+      args.navigate('/yto/onboarding');
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Onboarding check error:', error);
+    // If check fails, assume onboarded to avoid blocking access
+    return true;
+  }
+};
 
 // Function to fetch dashboard data
 const fetchDashboardData = async () => {
@@ -45,24 +71,43 @@ const fetchDashboardData = async () => {
     setIsDashboardLoading(true);
     setDashboardError(null);
 
-    // Fetch channels
-    const channelsResult = await args.fns.executeYTOFunction('getUserChannels', {});
+    // Fetch user details to get plan information
+    const userDetailsResult = await args.fns.executeYTOFunction('getUserYTODetails', {
+      userUuid: args.user?.P?.uuid
+    });
 
     // Fetch playlists
     const playlistsResult = await args.fns.executeYTOFunction('getUserPlaylists', {});
 
-    if (channelsResult.error) {
-      throw new Error(channelsResult.error);
+    if (userDetailsResult.error) {
+      throw new Error(userDetailsResult.error);
     }
     if (playlistsResult.error) {
       throw new Error(playlistsResult.error);
     }
 
-    const channels = channelsResult.result;
+    const userDetails = userDetailsResult.result;
     const playlists = playlistsResult.result;
 
-    if (channels && channels.success) {
-      setChannelsCount(channels.data.totalCount || 0);
+    if (userDetails && userDetails.success) {
+      const data = userDetails.data;
+
+      // Set counts
+      setChannelsCount(data.channels?.length || 0);
+      setVideosCount(data.totalVideos || 0);
+
+      // Set user plan (default to free if not specified)
+      const plan = data.userPlan || 'free';
+      setUserPlan(plan);
+
+      // Set video limit based on plan
+      const limits = {
+        free: 10000,
+        basic: 50000,
+        pro: 150000,
+        unlimited: -1 // unlimited
+      };
+      setVideoLimit(limits[plan] || 10000);
     }
 
     if (playlists && playlists.success) {
@@ -78,8 +123,14 @@ const fetchDashboardData = async () => {
 };
 
 // Fetch data on mount
-const onMount = () => {
-  fetchDashboardData();
+const onMount = async () => {
+  // Check onboarding first
+  const isOnboarded = await checkOnboarding();
+
+  // Only fetch dashboard data if user is onboarded
+  if (isOnboarded) {
+    fetchDashboardData();
+  }
 };
 
 return {
@@ -87,6 +138,9 @@ return {
   dashboardError,
   channelsCount,
   playlistsCount,
+  videosCount,
+  userPlan,
+  videoLimit,
   fetchDashboardData,
   onMount
 };
@@ -326,7 +380,7 @@ if (hour < 12) greeting = "Good Morning";
 else if (hour < 18) greeting = "Good Afternoon";
 
 return {
-  text: `${greeting}!`
+  text: `${greeting} ${args.user.P.username}!`
 };
 '''
       }
@@ -374,22 +428,77 @@ return `._id {
       }
     },
     {
-      id: "stat_channels",
+      id: "stats_loop",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        contextName: "stat",
+        loop: true,
+        props: '''
+const channelsCount = args.fns.channelsCount?.() || 0;
+const playlistsCount = args.fns.playlistsCount?.() || 0;
+const videosCount = args.fns.videosCount?.() || 0;
+const videoLimit = args.fns.videoLimit?.() || 10000;
+const limitText = videoLimit === -1 ? "unlimited" : videoLimit.toLocaleString();
+
+return {
+  as: "div",
+  data: [
+    {
+      id: "channels",
+      label: "Channels",
+      icon: "mdi:youtube",
+      count: channelsCount,
+      href: "/yto/content?type=channels"
+    },
+    {
+      id: "playlists",
+      label: "Playlists",
+      icon: "mdi:playlist-play",
+      count: playlistsCount,
+      href: "/yto/content?type=playlists"
+    },
+    {
+      id: "videos",
+      label: "Videos",
+      icon: "mdi:video-outline",
+      count: videosCount,
+      countText: `${videosCount.toLocaleString()} / ${limitText}`
+    }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: contents;
+}`;
+'''
+      }
+    },
+    {
+      id: "stat_card",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const stat = args.contextData.stat;
+const hasLink = !!stat.href;
+
 return {
-  as: "a",
-  href: "/yto/content?type=channels",
-  onClick: (e) => {
+  as: hasLink ? "a" : "div",
+  href: hasLink ? stat.href : undefined,
+  onClick: hasLink ? (e) => {
     e.preventDefault();
-    args.navigate("/yto/content?type=channels");
-  }
+    args.navigate(stat.href);
+  } : undefined
 };
 ''',
         css: '''
+const stat = args.contextData.stat;
+const hasLink = !!stat.href;
+
 return `._id {
   background: ${args.theme.var.color.background_dark_50};
   border: 1px solid ${args.theme.var.color.border};
@@ -399,20 +508,22 @@ return `._id {
   align-items: center;
   gap: 1rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
+  ${hasLink ? 'cursor: pointer;' : ''}
   text-decoration: none;
   color: inherit;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
+  ${hasLink ? `
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  ` : ''}
 }`;
 '''
       }
     },
     {
-      id: "stat_channels_icon_wrapper",
+      id: "stat_card_icon_wrapper",
       L: "Attr",
       P: {
         displayOrder: 1,
@@ -438,15 +549,17 @@ return `._id {
       }
     },
     {
-      id: "stat_channels_icon",
+      id: "stat_card_icon",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const stat = args.contextData.stat;
+
 return {
   as: "icon",
-  icon: "mdi:youtube",
+  icon: stat.icon,
   width: 28,
   height: 28
 };
@@ -454,7 +567,7 @@ return {
       }
     },
     {
-      id: "stat_channels_content",
+      id: "stat_card_content",
       L: "Attr",
       P: {
         displayOrder: 2,
@@ -472,15 +585,17 @@ return `._id {
       }
     },
     {
-      id: "stat_channels_label",
+      id: "stat_card_label",
       L: "Attr",
       P: {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+const stat = args.contextData.stat;
+
 return {
   as: "div",
-  text: "Channels"
+  text: stat.label
 };
 ''',
         css: '''
@@ -495,161 +610,18 @@ return `._id {
       }
     },
     {
-      id: "stat_channels_value",
+      id: "stat_card_value",
       L: "Attr",
       P: {
         displayOrder: 2,
         componentName: "Html",
         props: '''
-const count = args.fns.channelsCount?.() || 0;
+const stat = args.contextData.stat;
+const displayText = stat.countText || stat.count.toLocaleString();
 
 return {
   as: "div",
-  text: count.toString()
-};
-''',
-        css: '''
-return `._id {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: ${args.theme.var.color.text};
-}`;
-'''
-      }
-    },
-    {
-      id: "stat_playlists",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "a",
-  href: "/yto/content?type=playlists",
-  onClick: (e) => {
-    e.preventDefault();
-    args.navigate("/yto/content?type=playlists");
-  }
-};
-''',
-        css: '''
-return `._id {
-  background: ${args.theme.var.color.background_dark_50};
-  border: 1px solid ${args.theme.var.color.border};
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-}`;
-'''
-      }
-    },
-    {
-      id: "stat_playlists_icon_wrapper",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  width: 48px;
-  height: 48px;
-  background: ${args.theme.var.color.primary_light_100};
-  color: ${args.theme.var.color.primary_light_100_text};
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}`;
-'''
-      }
-    },
-    {
-      id: "stat_playlists_icon",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "icon",
-  icon: "mdi:playlist-play",
-  width: 28,
-  height: 28
-};
-'''
-      }
-    },
-    {
-      id: "stat_playlists_content",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div"
-};
-''',
-        css: '''
-return `._id {
-  flex: 1;
-}`;
-'''
-      }
-    },
-    {
-      id: "stat_playlists_label",
-      L: "Attr",
-      P: {
-        displayOrder: 1,
-        componentName: "Html",
-        props: '''
-return {
-  as: "div",
-  text: "Playlists"
-};
-''',
-        css: '''
-return `._id {
-  font-size: 0.875rem;
-  color: ${args.theme.var.color.muted};
-  margin-bottom: 0.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}`;
-'''
-      }
-    },
-    {
-      id: "stat_playlists_value",
-      L: "Attr",
-      P: {
-        displayOrder: 2,
-        componentName: "Html",
-        props: '''
-const count = args.fns.playlistsCount?.() || 0;
-
-return {
-  as: "div",
-  text: count.toString()
+  text: displayText
 };
 ''',
         css: '''
@@ -678,17 +650,12 @@ return `._id {
     { id: "e13", T: "Attr", S: "page_header", E: "page_title" },
     { id: "e14", T: "Attr", S: "page_header", E: "page_subtitle" },
     { id: "e15", T: "Attr", S: "main_content", E: "stats_grid" },
-    { id: "e16", T: "Attr", S: "stats_grid", E: "stat_channels" },
-    { id: "e17", T: "Attr", S: "stat_channels", E: "stat_channels_icon_wrapper" },
-    { id: "e18", T: "Attr", S: "stat_channels_icon_wrapper", E: "stat_channels_icon" },
-    { id: "e19", T: "Attr", S: "stat_channels", E: "stat_channels_content" },
-    { id: "e20", T: "Attr", S: "stat_channels_content", E: "stat_channels_label" },
-    { id: "e21", T: "Attr", S: "stat_channels_content", E: "stat_channels_value" },
-    { id: "e22", T: "Attr", S: "stats_grid", E: "stat_playlists" },
-    { id: "e23", T: "Attr", S: "stat_playlists", E: "stat_playlists_icon_wrapper" },
-    { id: "e24", T: "Attr", S: "stat_playlists_icon_wrapper", E: "stat_playlists_icon" },
-    { id: "e25", T: "Attr", S: "stat_playlists", E: "stat_playlists_content" },
-    { id: "e26", T: "Attr", S: "stat_playlists_content", E: "stat_playlists_label" },
-    { id: "e27", T: "Attr", S: "stat_playlists_content", E: "stat_playlists_value" }
+    { id: "e16", T: "Attr", S: "stats_grid", E: "stats_loop" },
+    { id: "e17", T: "Attr", S: "stats_loop", E: "stat_card" },
+    { id: "e18", T: "Attr", S: "stat_card", E: "stat_card_icon_wrapper" },
+    { id: "e19", T: "Attr", S: "stat_card_icon_wrapper", E: "stat_card_icon" },
+    { id: "e20", T: "Attr", S: "stat_card", E: "stat_card_content" },
+    { id: "e21", T: "Attr", S: "stat_card_content", E: "stat_card_label" },
+    { id: "e22", T: "Attr", S: "stat_card_content", E: "stat_card_value" }
   ]
 }

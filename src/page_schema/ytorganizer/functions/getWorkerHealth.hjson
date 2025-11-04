@@ -1,0 +1,113 @@
+{
+  vertexes: [
+    {
+      id: "get_worker_health_function",
+      L: "Function",
+      P: {
+        key: "getWorkerHealth",
+        description: "Get health status and job counts for YouTube Organizer workers",
+        body: '''
+/**
+ * Worker Health Check
+ *
+ * This function checks the health and status of BullMQ workers
+ * Returns job counts for both processChannelQueue and processPlaylistQueue queues
+ *
+ * Use this to:
+ * - Verify workers are running properly
+ * - Monitor queue backlogs
+ * - Detect processing issues
+ * - Display worker status in admin UI
+ */
+
+try {
+  const { Queue } = args.bullmq;
+
+  // Get Redis connection configuration
+  const connection = args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    maxRetriesPerRequest: null
+  };
+
+  // Connect to both worker queues
+  const channelQueue = new Queue('processChannelQueue', { connection });
+  const playlistQueue = new Queue('processPlaylistQueue', { connection });
+
+  // Get job counts for both queues
+  // This includes: waiting, active, completed, failed, delayed, and paused jobs
+  const [channelCounts, playlistCounts] = await Promise.all([
+    channelQueue.getJobCounts(),
+    playlistQueue.getJobCounts()
+  ]);
+
+  // Close queue connections
+  await channelQueue.close();
+  await playlistQueue.close();
+
+  // Calculate total active processing
+  const totalActive = (channelCounts.active || 0) + (playlistCounts.active || 0);
+  const totalWaiting = (channelCounts.waiting || 0) + (playlistCounts.waiting || 0);
+  const totalFailed = (channelCounts.failed || 0) + (playlistCounts.failed || 0);
+
+  // Determine health status
+  // Workers are healthy if we can connect and get counts
+  const healthy = true;
+
+  return {
+    success: true,
+    data: {
+      healthy,
+      timestamp: new Date().toISOString(),
+      queues: {
+        processChannelQueue: {
+          waiting: channelCounts.waiting || 0,      // Jobs waiting to be processed
+          active: channelCounts.active || 0,        // Jobs currently being processed
+          completed: channelCounts.completed || 0,  // Jobs completed successfully
+          failed: channelCounts.failed || 0,        // Jobs that failed after all retries
+          delayed: channelCounts.delayed || 0,      // Jobs scheduled for future processing
+          paused: channelCounts.paused || 0         // Jobs in paused state
+        },
+        processPlaylistQueue: {
+          waiting: playlistCounts.waiting || 0,
+          active: playlistCounts.active || 0,
+          completed: playlistCounts.completed || 0,
+          failed: playlistCounts.failed || 0,
+          delayed: playlistCounts.delayed || 0,
+          paused: playlistCounts.paused || 0
+        }
+      },
+      summary: {
+        totalActive,
+        totalWaiting,
+        totalFailed,
+        isProcessing: totalActive > 0 || totalWaiting > 0
+      }
+    }
+  };
+
+} catch (error) {
+  console.error("Error checking worker health:", error);
+
+  // Worker health check failed - Redis might be down or workers not started
+  return {
+    success: false,
+    message: "Worker health check failed. Redis may not be running or workers may not be initialized.",
+    data: {
+      healthy: false,
+      timestamp: new Date().toISOString(),
+      error: error.message
+    },
+    error: {
+      type: "WorkerHealthCheckError",
+      details: error.message,
+      stack: error.stack
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

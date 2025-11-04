@@ -209,7 +209,7 @@ Server functions return consistent data format across all pages:
 
 **getUserPlaylists**
 - Returns user's YouTube playlists with settings
-- Data format: `{ playlists: Array<{playlist, playlistSettings}>, totalCount, userId }`
+- Data format: `{ playlists: Array<{playlist, playlistSetting}>, totalCount, userId }`
 
 **saveFeedback**
 - Saves user feedback to the database

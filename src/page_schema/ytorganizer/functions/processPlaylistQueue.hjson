@@ -21,7 +21,7 @@ if (args.contextData.action === 'start') {
   };
 
   // Create worker for playlist processing queue
-  const worker = new Worker('playlistProcessing', async (job) => {
+  const worker = new Worker('processPlaylistQueue', async (job) => {
     const { playlistId, userId, userUuid, customName, channelId } = job.data;
 
     console.log(`Processing playlist ${playlistId} for user ${userId}`);
@@ -79,6 +79,12 @@ if (args.contextData.action === 'start') {
         }
 
         nextPageToken = itemsResponse.data.nextPageToken;
+
+        // TESTING: Wait 5 seconds before fetching next page
+        if (nextPageToken) {
+          console.log(`[Playlist ${playlistId}] Waiting 5 seconds before fetching next page...`);
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
       } while (nextPageToken);
 
       const totalVideos = allVideos.length;
@@ -188,7 +194,9 @@ if (args.contextData.action === 'start') {
 
       // If this playlist is part of a channel, update channel progress
       if (channelId) {
-        // Increment processedPlaylists counter for the channel
+        // ATOMIC UPDATE: Increment processedPlaylists counter for the channel
+        // This is safe for concurrent updates - Neo4j handles the increment atomically
+        // Multiple workers can complete playlists simultaneously without losing counts
         const channelUpdateResult = await session.run(`
           MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
                 -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
@@ -270,7 +278,9 @@ if (args.contextData.action === 'start') {
 
       // If this playlist is part of a channel, update channel with error
       if (channelId) {
-        // Increment processedPlaylists counter even on failure
+        // ATOMIC UPDATE: Increment processedPlaylists counter even on failure
+        // This ensures channel completion tracking is accurate even when some playlists fail
+        // The counter increment is atomic and safe for concurrent updates
         const channelUpdateResult = await session.run(`
           MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
                 -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
@@ -353,7 +363,13 @@ if (args.contextData.action === 'start') {
     }
   }, {
     connection,
-    concurrency: 1
+    // CONCURRENCY CONFIGURATION:
+    // Process 5 playlists simultaneously for faster throughput
+    // Playlists are independent and can be processed in parallel
+    // This significantly speeds up channel processing
+    // Monitor YouTube API quota usage and adjust if hitting limits
+    // Reduce to 2-3 if experiencing API rate limit errors
+    concurrency: 5
   });
 
   worker.on('completed', (job) => {

@@ -307,7 +307,17 @@ return {
       L: "PageLayout",
       P: {
         componentName: "YTOLayout",
-        displayOrder: 1
+        displayOrder: 1,
+        description: "YTO layout with navigation"
+      }
+    },
+    {
+      id: "admin_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOAdminLayout",
+        displayOrder: 2,
+        description: "Admin layout wrapper"
       }
     },
     {
@@ -1488,6 +1498,7 @@ return {
   ],
   edges: [
     { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
     { id: "e2", T: "Attr", S: "page_root", E: "header_section" },
     { id: "e3", T: "Attr", S: "header_section", E: "title" },
     { id: "e4", T: "Attr", S: "header_section", E: "header_actions" },

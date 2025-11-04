@@ -9,15 +9,54 @@
         body: '''
 try {
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
-  if (!user) {
+  const currentUser = await args.getUserFromSession();
+  if (!currentUser) {
     throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Check if this is an admin deleting another user
+  const targetUserId = args.contextData.userId;
+  let userToDelete;
+  let isAdminDelete = false;
+
+  if (targetUserId) {
+    // Admin deletion - verify admin role
+    const adminCheck = await args.session.run(
+      `MATCH (u:User)-[:UserRole]->(r:Role {key: "Admin"})
+       WHERE u.uuid = $userId RETURN u`,
+      { userId: currentUser.P.uuid }
+    );
+
+    if (adminCheck.records.length === 0) {
+      throw new Error("Unauthorized: Admin role required");
+    }
+
+    // Get the target user
+    const targetUserQuery = `
+      MATCH (u:User)
+      WHERE elementId(u) = $userId
+      RETURN u
+    `;
+
+    const targetUserResult = await args.session.run(targetUserQuery, {
+      userId: targetUserId
+    });
+
+    if (targetUserResult.records.length === 0) {
+      throw new Error("Target user not found");
+    }
+
+    userToDelete = args.convertNodeToJson(targetUserResult.records[0].get('u'));
+    isAdminDelete = true;
+  } else {
+    // Self-deletion
+    userToDelete = currentUser;
   }
 
   // Step 1: Clear all user data first
   const clearDataResult = await args.executeNamedServerFunction({
     functionName: "clearAllUserData",
-    contextData: {}
+    contextData: isAdminDelete ? { userId: targetUserId } : {}
   });
 
   if (!clearDataResult?.result?.success) {
@@ -31,15 +70,21 @@ try {
   `;
 
   await args.session.run(deleteUserQuery, {
-    userUuid: user.P.uuid
+    userUuid: userToDelete.P.uuid
   });
+
+  const username = userToDelete.P.username || 'User';
+  const message = isAdminDelete
+    ? `User "${username}" and all their data have been deleted successfully`
+    : "Your account has been permanently deleted.";
 
   return {
     success: true,
-    message: "Your account has been permanently deleted.",
+    message: message,
     data: {
-      userId: user.id,
-      userUuid: user.P.uuid
+      userId: userToDelete.id,
+      userUuid: userToDelete.P.uuid,
+      username: username
     }
   };
 

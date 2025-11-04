@@ -26,6 +26,7 @@ import { postAPI } from "~/lib/api/general/postApi";
 import { evalExpression } from "~/lib/expression_eval";
 import { getCompanyRectangularLogoVertex } from "~/lib/graph/get/sync/company/getCompanyRectangularLogoVertex";
 import { getCompanySquareLogoVertex } from "~/lib/graph/get/sync/company/getCompanySquareLogoVertex";
+import { getCompanyFaviconVertex } from "~/lib/graph/get/sync/company/getCompanyFaviconVertex";
 import { setSelectionValue } from "~/lib/graph/mutate/selection/setSelectionValue";
 import {
   rectangleLogoImage,
@@ -40,10 +41,12 @@ import { useGraph } from "~/lib/graph/context/UseGraph";
 export function CompanyLogoSettings() {
   const [openRectangularDialog, setOpenRectangularDialog] = createSignal(false);
   const [openSquareDialog, setOpenSquareDialog] = createSignal(false);
+  const [openFaviconDialog, setOpenFaviconDialog] = createSignal(false);
   const [graph, setGraph] = useGraph();
   const { showErrorToast, showSuccessToast } = useToast();
   let rectangularFileManagerStore: FileManagerObject;
   let squareFileManagerStore: FileManagerObject;
+  let faviconFileManagerStore: FileManagerObject;
 
   // because we are loading custom settings, we need to create a new vertex
   const formDataId = uuidv7();
@@ -83,6 +86,19 @@ export function CompanyLogoSettings() {
       setGraph,
       { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanySquareLogo" } },
       companySquareLogoVertexCopy.id,
+    );
+  }
+
+  // Setup for Favicon
+  const companyFaviconVertexCopy = getCompanyFaviconVertex(graph);
+  if (companyFaviconVertexCopy?.id) {
+    setSelectionValue(
+      0,
+      graph.vertexes[formDataId],
+      graph,
+      setGraph,
+      { id: "", IN: {}, L: [], OUT: {}, P: { type: "CompanyFavicon" } },
+      companyFaviconVertexCopy.id,
     );
   }
 
@@ -153,6 +169,39 @@ export function CompanyLogoSettings() {
 
   const setSquareFileManagerStore = (fileManagerStore_: FileManagerObject) => {
     squareFileManagerStore = fileManagerStore_;
+  };
+
+  const onFaviconFileSelected = () => {
+    const selectedFile = faviconFileManagerStore.gridStore?.[0].selectedRows[0];
+    if (!selectedFile) {
+      showErrorToast("Please select a file");
+      return;
+    }
+
+    const selectedFileMetaVertex = {
+      id: "",
+      IN: {},
+      L: [],
+      OUT: {},
+      P: {
+        type: "CompanyFavicon",
+      },
+    };
+
+    setSelectionValue(
+      0,
+      graph.vertexes[formDataId],
+      graph,
+      setGraph,
+      selectedFileMetaVertex,
+      selectedFile.id,
+    );
+
+    setOpenFaviconDialog(false);
+  };
+
+  const setFaviconFileManagerStore = (fileManagerStore_: FileManagerObject) => {
+    faviconFileManagerStore = fileManagerStore_;
   };
 
   const form = {
@@ -253,6 +302,52 @@ export function CompanyLogoSettings() {
         as: "div",
         attributes: [
           {
+            as: "span",
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
+            componentName: "Html",
+            text: "Company Favicon",
+          },
+          {
+            as: "img",
+            css: `return \`._id {
+  cursor: pointer;
+  height: 32px;
+  width: 32px;
+}\`;`,
+            componentName: "Html",
+            key: "companyFavicon",
+            props: () => {
+              const selectedFile = companyFaviconVertex()[0];
+              return {
+                onClick: () => setOpenFaviconDialog(true),
+                src: getDownloadLink(selectedFile) || "/favicon.ico",
+              };
+            },
+          },
+          {
+            as: "div",
+            componentName: "Html",
+          },
+          {
+            as: "button",
+            css: [
+              SETTINGS_CONSTANTS.SECONDARY_BUTTON_CSS,
+              `return \`._id {margin-right: auto;}\`;`,
+            ],
+            componentName: "Html",
+            props: () => ({
+              onClick: () => setOpenFaviconDialog(true),
+            }),
+            text: "Change Favicon",
+          },
+        ],
+        css: SETTINGS_CONSTANTS.GRID_ITEM_NARROW_CSS,
+        componentName: "Html",
+      },
+      {
+        as: "div",
+        attributes: [
+          {
             attributes: [
               {
                 as: "button",
@@ -263,9 +358,10 @@ export function CompanyLogoSettings() {
                   onClick: async () => {
                     const rectangularLogo = rectangularCompanyLogoVertex()[0];
                     const squareLogo = squareCompanyLogoVertex()[0];
+                    const favicon = companyFaviconVertex()[0];
 
-                    if (!(rectangularLogo || squareLogo)) {
-                      showErrorToast("Please select at least one company logo");
+                    if (!(rectangularLogo || squareLogo || favicon)) {
+                      showErrorToast("Please select at least one company logo or favicon");
                       return;
                     }
 
@@ -276,6 +372,7 @@ export function CompanyLogoSettings() {
                         {
                           rectangularLogo: rectangularLogo?.id || null,
                           squareLogo: squareLogo?.id || null,
+                          favicon: favicon?.id || null,
                         },
                       );
 
@@ -338,6 +435,16 @@ export function CompanyLogoSettings() {
     );
   });
 
+  const companyFaviconVertex = createMemo(() => {
+    return (
+      evalExpression("->CompanyFavicon", {
+        graph,
+        setGraph,
+        vertexes: [graph.vertexes[formDataId]],
+      }) || []
+    );
+  });
+
   return (
     <div>
       <SchemaRenderer
@@ -357,6 +464,13 @@ export function CompanyLogoSettings() {
         selectedFileVertex={squareCompanyLogoVertex()}
         setFileManagerStore={setSquareFileManagerStore}
         setOpen={setOpenSquareDialog}
+      />
+      <FilePickerModal
+        onFileSelected={onFaviconFileSelected}
+        open={openFaviconDialog}
+        selectedFileVertex={companyFaviconVertex()}
+        setFileManagerStore={setFaviconFileManagerStore}
+        setOpen={setOpenFaviconDialog}
       />
     </div>
   );

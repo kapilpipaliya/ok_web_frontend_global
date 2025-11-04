@@ -21,7 +21,7 @@ if (args.contextData.action === 'start') {
   };
 
   // Create worker for channel processing queue
-  const worker = new Worker('channelProcessing', async (job) => {
+  const worker = new Worker('processChannelQueue', async (job) => {
     const { channelId, userId, userUuid, customName } = job.data;
 
     console.log(`Processing channel ${channelId} for user ${userId}`);
@@ -125,7 +125,7 @@ if (args.contextData.action === 'start') {
 
       // Create a queue for playlist processing
       const { Queue } = args.bullmq;
-      const playlistQueue = new Queue('playlistProcessing', { connection });
+      const playlistQueue = new Queue('processPlaylistQueue', { connection });
 
       // Process each playlist by adding to queue
       for (const playlist of allPlaylists) {
@@ -215,12 +215,19 @@ if (args.contextData.action === 'start') {
     } catch (error) {
       console.error(`Error processing channel ${channelId}:`, error);
 
-      // Mark as failed
+      // CRITICAL: Mark channel as failed to prevent it from being stuck in 'processing' state forever
+      // This handles cases where:
+      // - YouTube API is unavailable
+      // - Channel is deleted or private
+      // - Network errors occur
+      // - Database connection issues
+      // Without this, the channel would stay in 'processing' state indefinitely
       await session.run(`
         MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
               -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
         SET cs.status = 'failed',
             cs.error = $error,
+            cs.progress = 0,
             cs.updatedAt = datetime()
       `, { userUuid, channelId, error: error.message });
 
@@ -231,7 +238,12 @@ if (args.contextData.action === 'start') {
     }
   }, {
     connection,
-    concurrency: 1
+    // CONCURRENCY CONFIGURATION:
+    // Process 2 channels simultaneously to improve throughput
+    // Keep it low to respect YouTube API rate limits
+    // Each channel can spawn many playlist jobs, so 2 is reasonable
+    // Increase to 5 if you have high API quota limits
+    concurrency: 2
   });
 
   worker.on('completed', (job) => {

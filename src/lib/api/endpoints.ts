@@ -25,6 +25,7 @@ export const API = {
     downloadCompanyRectangularLogoUrl:
       "/api/file/downloadCompanyRectangularLogo",
     downloadCompanySquareLogoUrl: "/api/file/downloadCompanySquareLogo",
+    downloadCompanyFaviconUrl: "/api/file/downloadCompanyFavicon",
     downloadFileUrl: "/api/file/download",
     replaceFileUrl: "/api/file/replace",
     uploadFileUrl: "/api/file/upload",

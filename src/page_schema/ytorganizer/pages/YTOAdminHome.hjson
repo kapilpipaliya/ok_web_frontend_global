@@ -1,0 +1,441 @@
+{
+  vertexes: [
+    {
+      id: "page_root",
+      L: "Page",
+      P: {
+        key: "YTOAdminHome",
+        url: "/yto/admin",
+        signinRequired: true,
+        description: "Admin dashboard home page with links to all admin sections",
+        fns: '''
+return {
+  enabled: true
+};
+''',
+        props: '''
+return {
+  isNoPermissionCheck: true
+};
+'''
+      }
+    },
+    {
+      id: "page_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOLayout",
+        displayOrder: 1,
+        description: "YTO layout with navigation"
+      }
+    },
+    {
+      id: "admin_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOAdminLayout",
+        displayOrder: 2,
+        description: "Admin layout wrapper"
+      }
+    },
+    {
+      id: "container",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        description: "Main container for admin dashboard",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  text-align: center;
+  margin-bottom: 3rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "page_title",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "h1",
+  text: "Admin Dashboard"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "page_subtitle",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+return {
+  as: "p",
+  text: "Manage system settings, monitor workers, and oversee user accounts"
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.125rem;
+  color: ${args.theme.var.color.muted};
+  margin: 0.5rem 0 0 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "admin_sections_grid",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        description: "Grid layout for admin section cards with loop",
+        props: '''
+return {
+  as: "section",
+  contextName: "adminSection",
+  loop: true,
+  data: [
+    {
+      title: "Worker Health",
+      description: "Monitor background workers, queue status, and job processing health. View real-time metrics for channel and playlist processing.",
+      icon: "carbon:dashboard",
+      iconBg: "success_light_100",
+      hoverBorder: "primary",
+      link: "/yto/admin/worker-health",
+      linkText: "View Dashboard",
+      enabled: true
+    },
+    {
+      title: "User Management",
+      description: "View and manage all user accounts. Access user details, permissions, and account settings.",
+      icon: "carbon:user-multiple",
+      iconBg: "info_light_100",
+      hoverBorder: "info",
+      link: "/yto/admin/users",
+      linkText: "Manage Users",
+      enabled: true
+    },
+    {
+      title: "API Key Management",
+      description: "Manage YouTube API keys, monitor usage, set daily limits, and configure key priorities.",
+      icon: "carbon:key",
+      iconBg: "warning_light_100",
+      hoverBorder: "warning",
+      link: "/yto/api-keys",
+      linkText: "Manage API Keys",
+      enabled: true
+    },
+    {
+      title: "Global Settings",
+      description: "Configure system-wide settings, themes, and application preferences. Manage global configuration options.",
+      icon: "carbon:settings",
+      iconBg: "error_light_100",
+      hoverBorder: "error",
+      link: "/admin/GlobalSettings",
+      linkText: "View Settings",
+      enabled: true,
+      openInNewTab: true
+    },
+    {
+      title: "Workers",
+      description: "Manage background workers and scheduled tasks. Monitor worker health, start/stop workers, and configure worker settings.",
+      icon: "carbon:task",
+      iconBg: "primary_light_100",
+      hoverBorder: "primary",
+      link: "/admin/GlobalSettings?tab=workers",
+      linkText: "Manage Workers",
+      enabled: true,
+      openInNewTab: true
+    }
+  ]
+};
+''',
+        css: '''
+return `._id {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}`;
+'''
+      }
+    },
+    {
+      id: "section_card",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        description: "Admin section card",
+        props: '''
+const section = args.contextData.adminSection;
+
+return {
+  as: section.enabled ? "a" : "div",
+  href: section.enabled ? section.link : undefined,
+  target: section.openInNewTab ? "_blank" : undefined,
+  rel: section.openInNewTab ? "noopener noreferrer" : undefined,
+  onClick: section.enabled ? ((e) => {
+    if (section.openInNewTab) {
+      // Let the browser handle the new tab opening
+      return;
+    }
+    e.preventDefault();
+    args.navigate(section.link);
+  }) : undefined
+};
+''',
+        css: '''
+const section = args.contextData.adminSection;
+
+return `._id {
+  background: ${args.theme.var.color.background};
+  border: 1px solid ${args.theme.var.color.border};
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  cursor: ${section.enabled ? 'pointer' : 'default'};
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+  opacity: ${section.enabled ? '1' : '0.6'};
+
+  ${section.enabled ? `
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      border-color: ${args.theme.var.color[section.hoverBorder]};
+    }
+  ` : ''}
+}`;
+'''
+      }
+    },
+    {
+      id: "card_header",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+return `._id {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "icon_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "div"
+};
+''',
+        css: '''
+const section = args.contextData.adminSection;
+const iconBgColor = args.theme.var.color[section.iconBg];
+const textColor = args.theme.var.color[section.iconBg + '_text'];
+
+return `._id {
+  width: 56px;
+  height: 56px;
+  background: ${iconBgColor};
+  color: ${textColor};
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_icon",
+      L: "Attr",
+      P: {
+        displayOrder: 1,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.adminSection;
+
+return {
+  as: "icon",
+  icon: section.icon,
+  width: 32,
+  height: 32
+};
+'''
+      }
+    },
+    {
+      id: "card_title",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.adminSection;
+
+return {
+  as: "h3",
+  text: section.title
+};
+''',
+        css: '''
+return `._id {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: ${args.theme.var.color.text};
+  margin: 0;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_description",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.adminSection;
+
+return {
+  as: "p",
+  text: section.description
+};
+''',
+        css: '''
+return `._id {
+  color: ${args.theme.var.color.muted};
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.9375rem;
+}`;
+'''
+      }
+    },
+    {
+      id: "card_action",
+      L: "Attr",
+      P: {
+        displayOrder: 3,
+        componentName: "Html",
+        props: '''
+const section = args.contextData.adminSection;
+
+return {
+  as: "div",
+  text: section.linkText
+};
+''',
+        css: '''
+const section = args.contextData.adminSection;
+const actionColor = section.enabled
+  ? args.theme.var.color[section.hoverBorder]
+  : args.theme.var.color.muted;
+
+return `._id {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: ${actionColor};
+  font-weight: 500;
+  font-size: 0.9375rem;
+
+  ${section.enabled ? `
+    &::after {
+      content: '→';
+      font-size: 1rem;
+    }
+  ` : ''}
+}`;
+'''
+      }
+    }
+  ],
+  edges: [
+    { id: "e_layout", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
+    { id: "e1", T: "Attr", S: "page_root", E: "container" },
+    { id: "e2", T: "Attr", S: "container", E: "page_header" },
+    { id: "e3", T: "Attr", S: "page_header", E: "page_title" },
+    { id: "e4", T: "Attr", S: "page_header", E: "page_subtitle" },
+    { id: "e5", T: "Attr", S: "container", E: "admin_sections_grid" },
+    { id: "e6", T: "Attr", S: "admin_sections_grid", E: "section_card" },
+    { id: "e7", T: "Attr", S: "section_card", E: "card_header" },
+    { id: "e8", T: "Attr", S: "card_header", E: "icon_wrapper" },
+    { id: "e9", T: "Attr", S: "icon_wrapper", E: "card_icon" },
+    { id: "e10", T: "Attr", S: "card_header", E: "card_title" },
+    { id: "e11", T: "Attr", S: "section_card", E: "card_description" },
+    { id: "e12", T: "Attr", S: "section_card", E: "card_action" }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  vertexes: [
+    {
+      id: "retry_playlist_function",
+      L: "Function",
+      P: {
+        key: "retryPlaylist",
+        description: "Retry a failed or stuck playlist processing job",
+        body: '''
+/**
+ * Retry Playlist Processing
+ *
+ * This function allows manual retry of failed or stuck playlists
+ * Useful for:
+ * - Recovering from temporary API failures
+ * - Retrying after quota limits are lifted
+ * - Fixing stuck jobs that are processing for too long
+ * - Re-processing playlists after bug fixes
+ *
+ * IMPORTANT: This resets the playlist to 'queued' state and re-adds it to the queue
+ * Any partially completed videos will be re-processed
+ */
+
+try {
+  const { playlistId } = args.contextData;
+
+  if (!playlistId) {
+    throw new Error("Playlist ID is required");
+  }
+
+  // Get current authenticated user
+  const user = await args.getUserFromSession();
+  if (!user) {
+    throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Check if playlist exists and get its current status
+  const checkResult = await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    RETURN p, ps
+  `, { userUuid: user.P.uuid, playlistId });
+
+  if (checkResult.records.length === 0) {
+    return {
+      success: false,
+      message: "Playlist not found in your collection"
+    };
+  }
+
+  const playlistSettingNode = checkResult.records[0].get('ps');
+  const playlistNode = checkResult.records[0].get('p');
+  const playlistSetting = args.convertNodeToJson(playlistSettingNode);
+  const playlist = args.convertNodeToJson(playlistNode);
+
+  const currentStatus = playlistSetting.P.status;
+
+  // Prevent retry of playlists that are already queued or processing
+  if (currentStatus === 'queued' || currentStatus === 'processing') {
+    return {
+      success: false,
+      message: `Playlist is already ${currentStatus}. Please wait for it to complete.`,
+      data: {
+        playlistId,
+        currentStatus
+      }
+    };
+  }
+
+  // Get channel ID if this playlist is part of a channel
+  const channelResult = await args.session.run(`
+    MATCH (c:Channel)-[:ChannelPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    RETURN c.youtubeId as channelId
+    LIMIT 1
+  `, { playlistId });
+
+  const channelId = channelResult.records.length > 0
+    ? channelResult.records[0].get('channelId')
+    : null;
+
+  // Reset playlist status to queued
+  // This clears error state and resets progress counters
+  await args.session.run(`
+    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+          -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+    SET ps.status = 'queued',
+        ps.progress = 0,
+        ps.processedVideos = 0,
+        ps.error = null,
+        ps.queuedAt = datetime(),
+        ps.updatedAt = datetime()
+  `, { userUuid: user.P.uuid, playlistId });
+
+  // Re-add playlist to processing queue
+  const { Queue } = args.bullmq;
+
+  const connection = args.bullmq.redisConnection || {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    maxRetriesPerRequest: null
+  };
+
+  const playlistQueue = new Queue('processPlaylistQueue', { connection });
+
+  await playlistQueue.add('processPlaylist', {
+    playlistId,
+    userId: user.id,
+    userUuid: user.P.uuid,
+    customName: playlistSetting.P.customName || null,
+    channelId: channelId
+  }, {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 5000
+    },
+    removeOnComplete: 100,
+    removeOnFail: false  // Keep failed jobs in dead letter queue
+  });
+
+  await playlistQueue.close();
+
+  return {
+    success: true,
+    message: `Playlist "${playlist.P.title}" has been queued for retry. Processing will begin shortly.`,
+    data: {
+      playlistId,
+      title: playlist.P.title,
+      previousStatus: currentStatus,
+      newStatus: 'queued',
+      channelId: channelId
+    }
+  };
+
+} catch (error) {
+  console.error("Error retrying playlist:", error);
+  return {
+    success: false,
+    message: "Failed to retry playlist processing",
+    error: {
+      type: "RetryPlaylistError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

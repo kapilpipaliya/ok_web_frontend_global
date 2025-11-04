@@ -78,17 +78,17 @@ try {
 
   // Return raw converted nodes for frontend processing with user-specific video count
   const playlists = playlistsResult.records.map(record => {
-    const playlistSettings = record.get('ps') ? args.convertNodeToJson(record.get('ps')) : null;
+    const playlistSetting = record.get('ps') ? args.convertNodeToJson(record.get('ps')) : null;
     const videoCount = record.get('videoCount');
 
     // Add user-specific video count to playlist settings
-    if (playlistSettings && playlistSettings.P) {
-      playlistSettings.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+    if (playlistSetting && playlistSetting.P) {
+      playlistSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
     }
 
     return {
       playlist: args.convertNodeToJson(record.get('p')),
-      playlistSettings: playlistSettings
+      playlistSetting
     };
   });
 

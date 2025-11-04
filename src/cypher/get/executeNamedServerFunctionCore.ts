@@ -11,6 +11,7 @@ import {getEffectiveUser} from "~/cypher/get/admin/getEffectiveUser";
 import {setImpersonation} from "~/cypher/mutate/admin/setImpersonation";
 import {clearImpersonation} from "~/cypher/mutate/admin/clearImpersonation";
 import {executeNamedServerFunction} from "~/cypher/get/executeNamedServerFunction";
+import * as neo4jDriver from "neo4j-driver";
 
 export interface NamedServerFunctionRequest {
   functionName: string;
@@ -85,6 +86,7 @@ export async function executeNamedServerFunctionCore(
       executeNamedServerFunction,
       getUserFromSession,
       convertNodeToJson,
+      neo4jDriver,
       neo4jConvert,
       graph: {
         nodes: context.nodes,

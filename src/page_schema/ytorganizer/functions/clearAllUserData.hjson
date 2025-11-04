@@ -9,9 +9,48 @@
         body: '''
 try {
   // Get current authenticated user from session
-  const user = await args.getUserFromSession();
-  if (!user) {
+  const currentUser = await args.getUserFromSession();
+  if (!currentUser) {
     throw new Error("User session not found. Please log in and try again.");
+  }
+
+  // Check if this is an admin clearing another user's data
+  const targetUserId = args.contextData.userId;
+  let userToClear;
+  let isAdminClear = false;
+
+  if (targetUserId) {
+    // Admin deletion - verify admin role
+    const adminCheck = await args.session.run(
+      `MATCH (u:User)-[:UserRole]->(r:Role {key: "Admin"})
+       WHERE u.uuid = $userId RETURN u`,
+      { userId: currentUser.P.uuid }
+    );
+
+    if (adminCheck.records.length === 0) {
+      throw new Error("Unauthorized: Admin role required");
+    }
+
+    // Get the target user
+    const targetUserQuery = `
+      MATCH (u:User)
+      WHERE elementId(u) = $userId
+      RETURN u
+    `;
+
+    const targetUserResult = await args.session.run(targetUserQuery, {
+      userId: targetUserId
+    });
+
+    if (targetUserResult.records.length === 0) {
+      throw new Error("Target user not found");
+    }
+
+    userToClear = args.convertNodeToJson(targetUserResult.records[0].get('u'));
+    isAdminClear = true;
+  } else {
+    // Self-clearing
+    userToClear = currentUser;
   }
 
   // Step 1: Delete all user channel settings and relationships
@@ -21,7 +60,7 @@ try {
   `;
 
   const channelSettingResult = await args.session.run(deleteChannelSettingQuery, {
-    userUuid: user.P.uuid
+    userUuid: userToClear.P.uuid
   });
 
   // Step 2: Delete all user playlist settings and relationships
@@ -31,7 +70,7 @@ try {
   `;
 
   const playlistSettingsResult = await args.session.run(deletePlaylistSettingsQuery, {
-    userUuid: user.P.uuid
+    userUuid: userToClear.P.uuid
   });
 
   // Step 3: Delete all user video settings and relationships
@@ -41,7 +80,7 @@ try {
   `;
 
   const videoSettingsResult = await args.session.run(deleteVideoSettingsQuery, {
-    userUuid: user.P.uuid
+    userUuid: userToClear.P.uuid
   });
 
   // Get statistics for the response
@@ -49,15 +88,21 @@ try {
   const playlistSettingDeleted = playlistSettingsResult.summary.counters.updates().nodesDeleted || 0;
   const videoSettingDeleted = videoSettingsResult.summary.counters.updates().nodesDeleted || 0;
 
+  const username = userToClear.P.username || 'User';
+  const message = isAdminClear
+    ? `All data for user "${username}" has been cleared successfully.`
+    : "All your personal data has been cleared successfully.";
+
   return {
     success: true,
-    message: "All your personal data has been cleared successfully.",
+    message: message,
     data: {
       channelSettingDeleted,
       playlistSettingDeleted,
       videoSettingDeleted,
       totalItemDeleted: channelSettingDeleted + playlistSettingDeleted + videoSettingDeleted,
-      userId: user.id,
+      userId: userToClear.id,
+      username: username,
       clearedAt: new Date().toISOString()
     }
   };

@@ -49,12 +49,12 @@ try {
   }
 
   const playlist = args.convertNodeToJson(result.records[0].get('p'));
-  const playlistSettings = args.convertNodeToJson(result.records[0].get('ps'));
+  const playlistSetting = args.convertNodeToJson(result.records[0].get('ps'));
   const videoCount = result.records[0].get('videoCount');
 
   // Add user-specific video count to playlist settings
-  if (playlistSettings && playlistSettings.P) {
-    playlistSettings.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+  if (playlistSetting && playlistSetting.P) {
+    playlistSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
   }
 
   return {
@@ -62,7 +62,7 @@ try {
     message: "Playlist settings updated successfully",
     data: {
       playlist: playlist,
-      playlistSettings: playlistSettings
+      playlistSetting
     }
   };
 

@@ -24,6 +24,11 @@ import { createTextField } from "~/pages/auth/functions/schema/createTextField";
 import type { Vertex } from "~/lib/graph/type/vertex";
 import { validateUsername } from "~/lib/validation/validateUsername";
 import { isGoogleOAuthEnabled } from "~/pages/global/oauth/oauthServerFunctions";
+import { useGraph } from "~/lib/graph/context/UseGraph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/core/vertex/mergeVertexProperties";
+import type { GlobalProperties } from "~/lib/graph/context/GlobalProperties";
+import { getGlobalStore } from "~/lib/graph/get/sync/store/getGlobalStore";
+import {getGlobalSettingVertex} from "~/lib/graph/get/sync/store/getGlobalSettingVertex";
 
 // Define type for submitState store
 type SubmitStateStore = ReturnType<
@@ -42,6 +47,7 @@ interface SignupFormFunctionArgumentType extends FunctionArgumentType {
 
 export function SignupForm() {
   const navigate = useNavigate();
+  const graph = useGraph();
 
   // Check if Google OAuth is enabled
   const googleOAuthEnabled = createAsync(async () => {
@@ -53,6 +59,20 @@ export function SignupForm() {
   const [showPassword, toggleVisibility] = usePasswordVisibility(["password"]);
   const [formRefs, setRef] = useFormRefs(["emailRef", "passwordRef"]);
   const { showErrorToast, submitForm } = useFormSubmit();
+
+  // Function to trigger refresh of initial data
+  const triggerRefresh = () => {
+    const currentCount = getGlobalStore(graph[0]).P.initialDataRefreshCount || 0;
+    mergeVertexProperties<GlobalProperties>(
+      0,
+      "globalStoreId",
+      graph[0],
+      graph[1],
+      {
+        initialDataRefreshCount: currentCount + 1,
+      },
+    );
+  };
 
   // Validation function using our utility
   const validateSignupData = (formData: Vertex) => {
@@ -85,6 +105,7 @@ export function SignupForm() {
       shouldRedirect: true,
       successMessage: "Registered Successfully",
       validateFn: validateSignupData,
+      onSuccess: triggerRefresh,
     });
   };
 
@@ -369,7 +390,7 @@ export function SignupForm() {
 }\`;`,
                         props: () => ({
                           onClick: () => {
-                            navigate("/terms");
+                            navigate(getGlobalSettingVertex(graph[0])?.P.privacyPageUrl || "/terms");
                           },
                         }),
                         text: "Terms of Service",

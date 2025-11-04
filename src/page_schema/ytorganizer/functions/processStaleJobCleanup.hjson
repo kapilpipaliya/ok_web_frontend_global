@@ -1,0 +1,164 @@
+{
+  vertexes: [
+    {
+      id: "process_stale_job_cleanup_worker",
+      L: "Function",
+      P: {
+        key: "processStaleJobCleanup",
+        description: "Background worker that cleans up stale jobs stuck in processing state",
+        body: '''
+/**
+ * Stale Job Cleanup Worker
+ *
+ * This background worker runs periodically to find and cleanup jobs that have been
+ * stuck in "processing" state for too long (default: 2 hours).
+ *
+ * Common causes of stale jobs:
+ * - Worker crash or restart during processing
+ * - Database connection timeout
+ * - Server shutdown during processing
+ * - Redis connection issues
+ * - YouTube API hanging requests
+ *
+ * The worker marks stale jobs as "failed" so they can be manually retried
+ */
+
+// This is a background worker function that cleans up stale jobs
+if (args.contextData.action === 'start') {
+  console.log('[Stale Job Cleanup] Starting stale job cleanup worker');
+
+  // CONFIGURATION:
+  // - Check interval: Run cleanup every 15 minutes
+  // - Stale timeout: Consider jobs stale after 2 hours of no updates
+  const CHECK_INTERVAL_MS = 15 * 60 * 1000;  // 15 minutes
+  const STALE_TIMEOUT_HOURS = 2;              // 2 hours
+
+  let cleanupInterval = null;
+
+  const runCleanup = async () => {
+    const { dbSession: session } = await args.getSession();
+
+    try {
+      console.log('[Stale Job Cleanup] Running cleanup check...');
+
+      // Calculate the cutoff time (2 hours ago)
+      const cutoffTime = new Date();
+      cutoffTime.setHours(cutoffTime.getHours() - STALE_TIMEOUT_HOURS);
+      const cutoffIsoString = cutoffTime.toISOString();
+
+      // Find stale channel jobs
+      // A channel is stale if:
+      // - Status is 'processing'
+      // - updatedAt is older than 2 hours
+      const staleChannelsResult = await session.run(`
+        MATCH (u:User)-[:UserChannelSetting]->(cs:ChannelSetting)
+        WHERE cs.status = 'processing'
+          AND datetime(cs.updatedAt) < datetime($cutoffTime)
+        SET cs.status = 'failed',
+            cs.error = $errorMessage,
+            cs.updatedAt = datetime()
+        WITH cs, u
+        MATCH (cs)-[:ChannelSettingChannel]->(c:Channel)
+        RETURN count(cs) as count, collect(c.title) as titles
+      `, {
+        cutoffTime: cutoffIsoString,
+        errorMessage: `Processing timeout - job exceeded ${STALE_TIMEOUT_HOURS} hour limit. Marked as failed by stale job cleanup. Please retry.`
+      });
+
+      const staleChannelCount = staleChannelsResult.records.length > 0
+        ? staleChannelsResult.records[0].get('count')
+        : 0;
+
+      if (staleChannelCount > 0) {
+        const titles = staleChannelsResult.records[0].get('titles');
+        console.log(`[Stale Job Cleanup] Marked ${staleChannelCount} stale channels as failed:`, titles);
+      }
+
+      // Find stale playlist jobs
+      // A playlist is stale if:
+      // - Status is 'processing'
+      // - updatedAt is older than 2 hours
+      const stalePlaylistsResult = await session.run(`
+        MATCH (u:User)-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+        WHERE ps.status = 'processing'
+          AND datetime(ps.updatedAt) < datetime($cutoffTime)
+        SET ps.status = 'failed',
+            ps.error = $errorMessage,
+            ps.updatedAt = datetime()
+        WITH ps, u
+        MATCH (ps)-[:PlaylistSettingPlaylist]->(p:Playlist)
+        RETURN count(ps) as count, collect(p.title) as titles
+      `, {
+        cutoffTime: cutoffIsoString,
+        errorMessage: `Processing timeout - job exceeded ${STALE_TIMEOUT_HOURS} hour limit. Marked as failed by stale job cleanup. Please retry.`
+      });
+
+      const stalePlaylistCount = stalePlaylistsResult.records.length > 0
+        ? stalePlaylistsResult.records[0].get('count')
+        : 0;
+
+      if (stalePlaylistCount > 0) {
+        const titles = stalePlaylistsResult.records[0].get('titles');
+        console.log(`[Stale Job Cleanup] Marked ${stalePlaylistCount} stale playlists as failed:`, titles);
+      }
+
+      // If any stale jobs were found, update parent channel progress
+      // This ensures channel status is accurate even when playlists time out
+      if (stalePlaylistCount > 0) {
+        // Find all channels that had stale playlists and update their progress
+        await session.run(`
+          MATCH (u:User)-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+                -[:PlaylistSettingPlaylist]->(p:Playlist)<-[:ChannelPlaylist]-(c:Channel)
+          WHERE ps.status = 'failed' AND ps.error CONTAINS 'timeout'
+          WITH u, c, count(ps) as failedCount
+          MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
+          WHERE cs.status = 'processing'
+          WITH cs, c, failedCount,
+               cs.totalPlaylists as totalPlaylists,
+               cs.processedPlaylists as processedPlaylists
+          WHERE processedPlaylists >= totalPlaylists
+          SET cs.status = 'completed_with_errors',
+              cs.error = 'Some playlists failed due to timeout',
+              cs.progress = 100,
+              cs.updatedAt = datetime()
+        `);
+      }
+
+      if (staleChannelCount === 0 && stalePlaylistCount === 0) {
+        console.log('[Stale Job Cleanup] No stale jobs found');
+      } else {
+        console.log(`[Stale Job Cleanup] Cleanup complete: ${staleChannelCount} channels, ${stalePlaylistCount} playlists marked as failed`);
+      }
+
+    } catch (error) {
+      console.error('[Stale Job Cleanup] Error during cleanup:', error);
+    } finally {
+      await session.close();
+    }
+  };
+
+  // Run cleanup immediately on start
+  runCleanup();
+
+  // Schedule periodic cleanup
+  cleanupInterval = setInterval(runCleanup, CHECK_INTERVAL_MS);
+
+  console.log(`[Stale Job Cleanup] Worker started. Will check for stale jobs every ${CHECK_INTERVAL_MS / 60000} minutes`);
+
+  // Return stop function for graceful shutdown
+  return {
+    stop: async () => {
+      console.log('[Stale Job Cleanup] Stopping stale job cleanup worker');
+      if (cleanupInterval) {
+        clearInterval(cleanupInterval);
+        cleanupInterval = null;
+      }
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

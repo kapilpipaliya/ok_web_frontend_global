@@ -20,11 +20,21 @@ return {
       }
     },
     {
-      id: "layout_ref",
-      L: "Attr",
+      id: "page_layout",
+      L: "PageLayout",
       P: {
+        componentName: "YTOLayout",
         displayOrder: 1,
-        componentName: "YTOLayout"
+        description: "YTO layout with navigation"
+      }
+    },
+    {
+      id: "admin_layout",
+      L: "PageLayout",
+      P: {
+        componentName: "YTOAdminLayout",
+        displayOrder: 2,
+        description: "Admin layout wrapper"
       }
     },
     {
@@ -44,21 +54,12 @@ const [store, setStore] = args.createStore({
   sortBy: 'createdAt',
   sortOrder: 'desc',
   filterStatus: 'all', // all, active, dormant, new
-  impersonatedUserId: null,
+  impersonatedUserUuid: null,
   currentPage: 1,
   pageSize: 20,
   totalCount: 0,
   totalPages: 0
 });
-
-// Check if user is admin
-const checkAdminRole = () => {
-  const userRoles = args.user?.OUT?.UserRole || [];
-  return userRoles.some(edge => {
-    const role = args.graph.vertexes[edge.E];
-    return role?.P?.key === "Admin";
-  });
-};
 
 // Load all users with YTO stats
 const loadUsers = async (page = store.currentPage) => {
@@ -137,8 +138,8 @@ const getFilteredUsers = () => {
 };
 
 // Start impersonation
-const startImpersonation = async (userId) => {
-  const result = await args.fns.executeYTOFunction("impersonateUser", { targetUserId: userId });
+const startImpersonation = async (userUuid) => {
+  const result = await args.fns.executeYTOFunction("impersonateUser", { targetUserUuid: userUuid });
 
   if (result.error) {
     args.showErrorToast(result.error);
@@ -154,7 +155,7 @@ const startImpersonation = async (userId) => {
       sessionStorage.setItem('yto_impersonatedUser', JSON.stringify(impersonatedUser));
     }
 
-    setStore('impersonatedUserId', userId);
+    setStore('impersonatedUserUuid', userUuid);
     args.showSuccessToast("Now viewing as user");
     args.navigate('/yto/content');
   } else {
@@ -209,6 +210,44 @@ const handleFilterChange = (status) => {
   setStore('filterStatus', status);
   setStore('currentPage', 1); // Reset to first page when filter changes
   loadUsers(1);
+};
+
+// Delete user handler
+const handleDeleteUser = async (userId, username) => {
+  const confirmed = await args.rbConfirm({
+    title: "Delete User",
+    message: `Are you sure you want to permanently delete user "${username}"? This will remove all their data including channels, playlists, and videos.`,
+    confirmText: "Delete User",
+    cancelText: "Cancel",
+    variant: "danger"
+  });
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const result = await args.fns.executeYTOFunction("deleteAccount", {
+      userId: userId
+    });
+
+    if (result.error) {
+      args.showErrorToast(result.error);
+      return;
+    }
+
+    const serverResult = result.result;
+
+    if (serverResult?.success) {
+      args.showSuccessToast(serverResult.message || "User deleted successfully");
+      // Reload users from current page
+      await loadUsers(store.currentPage);
+    } else {
+      args.showErrorToast(serverResult?.message || "Failed to delete user");
+    }
+  } catch (error) {
+    args.showErrorToast("Error deleting user: " + error.message);
+  }
 };
 
 // Pagination handlers
@@ -297,6 +336,7 @@ return {
   handleSearch,
   handleSort,
   handleFilterChange,
+  handleDeleteUser,
   goToPage,
   goToNextPage,
   goToPreviousPage,
@@ -2024,12 +2064,12 @@ return `._id {
         componentName: "Html",
         props: '''
 const userdata = args.contextData.userdata;
-const userId = userdata.user?.id;
+const userUuid = userdata.user?.P?.uuid;
 
 return {
   as: "button",
   title: "Impersonate User",
-  onClick: () => args.fns.startImpersonation(userId)
+  onClick: () => args.fns.startImpersonation(userUuid)
 };
 ''',
         css: '''
@@ -2129,14 +2169,14 @@ return {
         componentName: "Html",
         props: '''
 const userdata = args.contextData.userdata;
+const userId = userdata.user?.id;
+const username = userdata.user?.P?.username || 'Unknown User';
 
 return {
   as: "button",
   title: "Delete User",
   onClick: () => {
-    if (confirm(`Are you sure you want to delete user ${userdata.user?.P?.username}?`)) {
-      args.showWarningToast("Delete functionality coming soon");
-    }
+    args.fns.handleDeleteUser(userId, username);
   }
 };
 ''',
@@ -2423,7 +2463,8 @@ return `._id {
     }
   ],
   edges: [
-    { id: "e1", T: "PageLayout", S: "page_root", E: "layout_ref" },
+    { id: "e1", T: "PageLayout", S: "page_root", E: "page_layout" },
+    { id: "e_admin_layout", T: "PageLayout", S: "page_root", E: "admin_layout" },
     { id: "e2", T: "Attr", S: "page_root", E: "main_container" },
     { id: "e3", T: "Attr", S: "main_container", E: "header_section" },
     { id: "e4", T: "Attr", S: "header_section", E: "header_left" },

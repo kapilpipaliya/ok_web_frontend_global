@@ -91,6 +91,25 @@ export function GeneralSettings() {
         css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
         componentName: "Html",
       },
+      {
+        as: "div",
+        attributes: [
+          {
+            as: "span",
+            css: SETTINGS_CONSTANTS.LABEL_CSS,
+            componentName: "Html",
+            text: "Privacy Page URL",
+          },
+          {
+            css: PROPERTIES.Css.TextFieldCss,
+            componentName: "SystemTextInput",
+            key: "privacyPageUrl",
+            placeholder: "Enter privacy page URL (e.g., /privacy)",
+          },
+        ],
+        css: SETTINGS_CONSTANTS.GRID_ITEM_CSS,
+        componentName: "Html",
+      },
       /*{
         as: "div",
         attributes: [

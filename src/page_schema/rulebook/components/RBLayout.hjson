@@ -9,10 +9,25 @@
       }
     },
     {
-      id: "layout_wrapper",
+      id: "favicon_link",
       L: "Attr",
       P: {
         displayOrder: 1,
+        componentName: "Html",
+        props: '''
+return {
+  as: "link",
+  rel: "icon",
+  href: "/api/file/downloadCompanyFavicon"
+};
+'''
+      }
+    },
+    {
+      id: "layout_wrapper",
+      L: "Attr",
+      P: {
+        displayOrder: 2,
         componentName: "Html",
         fns: '''
 // Define navigation items for both desktop and mobile menus
@@ -791,7 +806,8 @@ return `._id {
     },
   ],
   edges: [
-    { id: "e0", T: "Attr", S: "layout_root", E: "layout_wrapper" },
+    { id: "e0", T: "Attr", S: "layout_root", E: "favicon_link" },
+    { id: "e0a", T: "Attr", S: "layout_root", E: "layout_wrapper" },
     { id: "e1", T: "Attr", S: "layout_wrapper", E: "layout_container" },
     { id: "e2", T: "Attr", S: "layout_container", E: "main_content" },
     { id: "e3", T: "Attr", S: "main_content", E: "slot_main" },

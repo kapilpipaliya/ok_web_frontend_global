@@ -7,7 +7,7 @@ import type { Vertex } from "~/lib/graph/type/vertex";
 
 interface FileMetadata {
   filePath: string;
-  originalFilename: string;
+  originalFileName: string;
   mimeType: string;
 }
 
@@ -30,11 +30,11 @@ export async function downloadFile(
 
   try {
     const metadata = fileMetadata as Vertex<FileMetadata>;
-    const { filePath, originalFilename, mimeType } = metadata.P;
+    const { filePath, originalFileName, mimeType } = metadata.P;
     const fileData = await fs.readFile(filePath);
 
     // Ensure the filename is safe for headers
-    const safeFileName = encodeURIComponent(originalFilename);
+    const safeFileName = encodeURIComponent(originalFileName);
 
     return new Response(fileData, {
       headers: {

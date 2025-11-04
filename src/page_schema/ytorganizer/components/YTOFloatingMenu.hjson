@@ -249,8 +249,8 @@ const triggerIcon = args.contextData.props?.triggerIcon || "carbon:overflow-menu
 return {
   as: "icon",
   icon: triggerIcon,
-  width: 16,
-  height: 16
+  width: 30,
+  height: 30
 };
 '''
       }

@@ -1,0 +1,144 @@
+{
+  vertexes: [
+    {
+      id: "get_queue_metrics",
+      L: "Function",
+      P: {
+        key: "getQueueMetrics",
+        description: "Fetches performance metrics for a specific queue",
+        body: '''
+/**
+ * Get performance metrics for a BullMQ queue
+ *
+ * Parameters:
+ * - queueName: 'processChannelQueue' | 'processPlaylistQueue'
+ */
+
+const { queueName } = args.contextData;
+
+// Validate parameters
+if (!queueName) {
+  return {
+    success: false,
+    message: "queueName is required"
+  };
+}
+
+// Get the queue
+const { Queue } = args.bullmq;
+const connection = args.bullmq.redisConnection || {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  maxRetriesPerRequest: null
+};
+
+const queue = new Queue(queueName, { connection });
+
+try {
+  // Get job counts
+  const counts = await queue.getJobCounts('active', 'waiting', 'completed', 'failed', 'delayed', 'paused');
+
+  // Get recent completed jobs to calculate metrics (last 100)
+  const completedJobs = await queue.getCompleted(0, 99);
+  const failedJobs = await queue.getFailed(0, 99);
+
+  // Calculate average duration from completed jobs
+  let avgDuration = 0;
+  let totalDuration = 0;
+  let jobsWithDuration = 0;
+
+  for (const job of completedJobs) {
+    if (job.processedOn && job.finishedOn) {
+      totalDuration += (job.finishedOn - job.processedOn);
+      jobsWithDuration++;
+    }
+  }
+
+  if (jobsWithDuration > 0) {
+    avgDuration = Math.round(totalDuration / jobsWithDuration);
+  }
+
+  // Calculate success rate
+  const totalProcessed = completedJobs.length + failedJobs.length;
+  const successRate = totalProcessed > 0
+    ? Math.round((completedJobs.length / totalProcessed) * 100 * 10) / 10
+    : 0;
+
+  // Calculate throughput (jobs per hour based on last hour of completed jobs)
+  const oneHourAgo = Date.now() - (60 * 60 * 1000);
+  const recentCompletedJobs = completedJobs.filter(job =>
+    job.finishedOn && job.finishedOn >= oneHourAgo
+  );
+  const throughput = recentCompletedJobs.length;
+
+  // Get concurrency setting (check worker configuration)
+  // Default concurrency is based on queue name
+  let concurrency = 1; // Default for playlist processing
+  if (queueName === 'processChannelQueue') {
+    concurrency = 1; // Default for channel processing
+  }
+
+  // Close the queue connection
+  await queue.close();
+
+  return {
+    success: true,
+    data: {
+      queueName,
+      avgDuration,           // milliseconds
+      successRate,           // percentage
+      throughput,            // jobs per hour
+      totalCompleted: counts.completed,
+      totalFailed: counts.failed,
+      concurrency,           // worker concurrency setting
+      activeWorkers: counts.active,  // current active jobs
+      metrics: {
+        avgDurationFormatted: formatDuration(avgDuration),
+        successRateFormatted: `${successRate}%`,
+        throughputFormatted: `${throughput}/hour`
+      }
+    }
+  };
+
+} catch (error) {
+  console.error('Error fetching queue metrics:', error);
+
+  // Always try to close the queue
+  try {
+    await queue.close();
+  } catch (closeError) {
+    console.error('Error closing queue:', closeError);
+  }
+
+  return {
+    success: false,
+    message: `Error fetching queue metrics: ${error.message}`
+  };
+}
+
+// Helper function to format duration
+function formatDuration(ms) {
+  if (!ms || ms === 0) return '0s';
+
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) {
+    return `${days}d ${hours % 24}h`;
+  }
+  if (hours > 0) {
+    return `${hours}h ${minutes % 60}m`;
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${seconds % 60}s`;
+  }
+  return `${seconds}s`;
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

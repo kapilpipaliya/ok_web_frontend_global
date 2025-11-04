@@ -108,8 +108,12 @@
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const status = args.contextData.props?.status || 'queued';
-const progress = args.contextData.props?.progress || 0;
+const status = args.contextData.props?.status;
+
+// Hide component if no status provided
+if (!status) {
+  return { hide: true };
+}
 
 return {
   as: "div"
@@ -138,6 +142,7 @@ return `._id {
         props: '''
 const status = args.contextData.props?.status || 'queued';
 
+// Map status to icon and color with sensible defaults
 let icon = 'carbon:time';
 let color = args.theme.var.color.info;
 
@@ -150,6 +155,13 @@ if (status === 'processing') {
 } else if (status === 'failed') {
   icon = 'carbon:warning';
   color = args.theme.var.color.error;
+} else if (status === 'queued') {
+  icon = 'carbon:time';
+  color = args.theme.var.color.info;
+} else {
+  // Unknown status - use question mark
+  icon = 'carbon:help';
+  color = args.theme.var.color.muted;
 }
 
 return {
@@ -188,22 +200,31 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
+// Safely extract all props with defaults
 const status = args.contextData.props?.status || 'queued';
 const type = args.contextData.props?.type || 'channel';
+const progress = Math.max(0, Math.min(100, args.contextData.props?.progress || 0));
 const details = args.contextData.props?.details || '';
 
+// Build status text based on status
 let statusText = '';
 if (status === 'queued') {
   statusText = `Queued for processing...`;
 } else if (status === 'processing') {
-  statusText = `Processing ${type}...`;
+  statusText = `Processing ${type}... ${progress}%`;
   if (details) {
     statusText += ` (${details})`;
   }
 } else if (status === 'completed') {
   statusText = `Processing completed`;
+  if (details) {
+    statusText += ` - ${details}`;
+  }
 } else if (status === 'failed') {
   statusText = `Processing failed`;
+} else {
+  // Fallback for unknown status
+  statusText = `Status: ${status}`;
 }
 
 return {
@@ -253,12 +274,14 @@ return `._id {
         displayOrder: 1,
         componentName: "Html",
         props: '''
-const progress = args.contextData.props?.progress || 0;
+// Clamp progress between 0 and 100
+const rawProgress = args.contextData.props?.progress;
+const progress = Math.min(Math.max(rawProgress || 0, 0), 100);
 
 return {
   as: "div",
   style: {
-    width: `${Math.min(Math.max(progress, 0), 100)}%`
+    width: `${progress}%`
   }
 };
 ''',

@@ -1,0 +1,100 @@
+{
+  vertexes: [
+    {
+      id: "delete_queue_job",
+      L: "Function",
+      P: {
+        key: "deleteQueueJob",
+        description: "Deletes a job from a BullMQ queue by job ID",
+        body: '''
+/**
+ * Delete a job from a BullMQ queue
+ *
+ * Parameters:
+ * - queueName: function name used as a query name
+ * - jobId: string - The ID of the job to delete
+ */
+
+const { queueName, jobId } = args.contextData;
+
+// Validate parameters
+if (!queueName || !jobId) {
+  return {
+    success: false,
+    message: "queueName and jobId are required"
+  };
+}
+
+// Get the queue
+const { Queue } = args.bullmq;
+const connection = args.bullmq.redisConnection || {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  maxRetriesPerRequest: null
+};
+
+const queue = new Queue(queueName, { connection });
+
+try {
+  // Get the job
+  const job = await queue.getJob(jobId);
+
+  if (!job) {
+    await queue.close();
+    return {
+      success: false,
+      message: `Job ${jobId} not found in queue ${queueName}`
+    };
+  }
+
+  // Get job state before deletion
+  const state = await job.getState();
+
+  // Only allow deletion of waiting, delayed, or failed jobs
+  if (!['waiting', 'delayed', 'failed'].includes(state)) {
+    await queue.close();
+    return {
+      success: false,
+      message: `Cannot delete job in state '${state}'. Only waiting, delayed, or failed jobs can be deleted.`
+    };
+  }
+
+  // Remove the job
+  await job.remove();
+
+  // Close the queue connection
+  await queue.close();
+
+  console.log(`Deleted job ${jobId} from queue ${queueName} (was in state: ${state})`);
+
+  return {
+    success: true,
+    message: `Job ${jobId} deleted successfully`,
+    data: {
+      jobId,
+      queueName,
+      state
+    }
+  };
+
+} catch (error) {
+  console.error('Error deleting queue job:', error);
+
+  // Always try to close the queue
+  try {
+    await queue.close();
+  } catch (closeError) {
+    console.error('Error closing queue:', closeError);
+  }
+
+  return {
+    success: false,
+    message: `Error deleting job: ${error.message}`
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

@@ -86,14 +86,14 @@ try {
     customName: null // Use original name for custom playlists
   });
 
-  const playlistSettings = args.convertNodeToJson(playlistSettingResult.records[0].get('ps'));
+  const playlistSetting = args.convertNodeToJson(playlistSettingResult.records[0].get('ps'));
 
   return {
     success: true,
     message: `Custom playlist "${name}" created successfully!`,
     data: {
-      playlist: playlist,
-      playlistSettings: playlistSettings,
+      playlist,
+      playlistSetting,
       playlistId: customPlaylistId,
       userId: user.id,
       isCustom: true

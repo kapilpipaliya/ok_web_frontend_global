@@ -7,25 +7,25 @@ import {Vertex} from "~/lib/graph/type/vertex";
  *
  * @param session - Neo4j database session
  * @param adminUser - The admin user who is currently impersonating
- * @param impersonatedUserId - UUID of the user being impersonated
+ * @param impersonatedUserUuid - UUID of the user being impersonated
  * @returns Success status
  */
 export async function clearImpersonation(
   session: Session,
   adminUser: Vertex,
-  impersonatedUserId: string
+  impersonatedUserUuid: string
 ) {
   // Create audit log
   await session.run(
     `MATCH (admin:User {uuid: $adminId})
-     MATCH (target:User {uuid: $impersonatedUserId})
+     MATCH (target:User {uuid: $impersonatedUserUuid})
      CREATE (admin)-[:AuditLog]->(log:AuditLog {
        key: "audit_" + toString(datetime()) + "_" + randomUUID(),
        action: "clear_impersonation",
        timestamp: datetime(),
        details: "Admin stopped impersonating user"
      })-[:AuditLogTarget]->(target)`,
-    { adminId: adminUser.P.uuid, impersonatedUserId }
+    { adminId: adminUser.P.uuid, impersonatedUserUuid }
   );
 
   return { success: true };

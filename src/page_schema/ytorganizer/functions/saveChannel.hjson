@@ -88,7 +88,7 @@ const fetchChannelMetadata = async (channelIdentifier, apiKeyData) => {
 
 try {
   // Extract input parameters from the request
-  const { url, name } = args.contextData;
+  const { url, name, refresh = false } = args.contextData;
 
   if (!url) {
     throw new Error("Channel URL is required");
@@ -104,6 +104,38 @@ try {
   const channelIdentifier = extractChannelId(url);
   if (!channelIdentifier) {
     throw new Error("Invalid YouTube channel URL. Please provide a valid channel URL.");
+  }
+
+  // DUPLICATE JOB PREVENTION: Check if this channel is already queued or processing
+  // Prevents multiple concurrent jobs for the same channel which would waste API quota
+  // and potentially cause data inconsistencies
+  // REFRESH MODE: If refresh=true, skip this check to allow re-processing completed channels
+  if (!refresh) {
+    const existingChannelResult = await args.session.run(`
+      MATCH (c:Channel)
+      WHERE c.youtubeId = $channelIdentifier OR c.customUrl = $channelIdentifier
+      WITH c
+      MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
+            -[:ChannelSettingChannel]->(c)
+      WHERE cs.status IN ['queued', 'processing']
+      RETURN c.youtubeId as channelId, cs.status as status, c.title as title
+    `, { userUuid: user.P.uuid, channelIdentifier });
+
+    if (existingChannelResult.records.length > 0) {
+      const record = existingChannelResult.records[0];
+      const status = record.get('status');
+      const title = record.get('title');
+
+      return {
+        success: false,
+        message: `Channel "${title}" is already ${status}. Please wait for it to complete before adding again. Use refresh=true to force re-processing.`,
+        data: {
+          channelId: record.get('channelId'),
+          status: status,
+          alreadyExists: true
+        }
+      };
+    }
   }
 
   // Get active API key from database
@@ -212,21 +244,25 @@ try {
     maxRetriesPerRequest: null
   };
 
-  const channelQueue = new Queue('channelProcessing', { connection });
+  const channelQueue = new Queue('processChannelQueue', { connection });
 
+  // DEAD LETTER QUEUE CONFIGURATION:
+  // Failed jobs are kept (removeOnFail: false) so admins can inspect errors
+  // After 3 retry attempts, the job stays in the failed set for manual review
+  // This helps debug YouTube API issues, quota problems, and other failures
   await channelQueue.add('processChannel', {
     channelId: channelData.id,
     userId: user.id,
     userUuid: user.P.uuid,
     customName: name || null
   }, {
-    attempts: 3,
+    attempts: 3,                           // Retry 3 times before giving up
     backoff: {
-      type: 'exponential',
+      type: 'exponential',                 // Exponential backoff: 5s, 10s, 20s
       delay: 5000
     },
-    removeOnComplete: 100,
-    removeOnFail: 50
+    removeOnComplete: 100,                 // Keep last 100 completed jobs for audit
+    removeOnFail: false                    // KEEP failed jobs for inspection (Dead Letter Queue)
   });
 
   // Close queue connection
@@ -234,7 +270,9 @@ try {
 
   return {
     success: true,
-    message: `Channel "${channelData.snippet.title}" has been queued for processing. This may take a few minutes.`,
+    message: refresh
+      ? `Channel "${channelData.snippet.title}" has been queued for refresh. All data will be re-fetched from YouTube.`
+      : `Channel "${channelData.snippet.title}" has been queued for processing. This may take a few minutes.`,
     data: {
       channelId: channelData.id,
       title: channelData.snippet.title,
@@ -244,7 +282,8 @@ try {
       subscriberCount: channelData.statistics?.subscriberCount,
       videoCount: channelData.statistics?.videoCount,
       userId: user.id,
-      userSpecific: true
+      userSpecific: true,
+      isRefresh: refresh
     }
   };
 

@@ -415,8 +415,8 @@ return `._id {
         props: '''
 const item = args.contextData.playlistItem;
 const playlist = item?.playlist;
-const playlistSettings = item?.playlistSettings;
-const customName = playlistSettings?.P?.customName;
+const playlistSetting = item?.playlistSetting;
+const customName = playlistSetting?.P?.customName;
 const title = customName || playlist?.P?.title || "Untitled Playlist";
 
 return {

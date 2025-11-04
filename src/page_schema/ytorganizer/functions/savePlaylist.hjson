@@ -64,7 +64,7 @@ const fetchPlaylistMetadata = async (playlistId, apiKeyData) => {
 
 try {
   // Extract input parameters from the request
-  const { url, name, channelId } = args.contextData;
+  const { url, name, channelId, refresh = false } = args.contextData;
 
   if (!url) {
     throw new Error("Playlist URL is required");
@@ -80,6 +80,35 @@ try {
   const playlistId = extractPlaylistId(url);
   if (!playlistId) {
     throw new Error("Invalid YouTube playlist URL. Please provide a valid playlist URL.");
+  }
+
+  // DUPLICATE JOB PREVENTION: Check if this playlist is already queued or processing
+  // Prevents multiple concurrent jobs for the same playlist which would waste API quota
+  // and potentially cause data inconsistencies
+  // REFRESH MODE: If refresh=true, skip this check to allow re-processing completed playlists
+  if (!refresh) {
+    const existingPlaylistResult = await args.session.run(`
+      MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
+            -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
+      WHERE ps.status IN ['queued', 'processing']
+      RETURN p.youtubeId as playlistId, ps.status as status, p.title as title
+    `, { userUuid: user.P.uuid, playlistId });
+
+    if (existingPlaylistResult.records.length > 0) {
+      const record = existingPlaylistResult.records[0];
+      const status = record.get('status');
+      const title = record.get('title');
+
+      return {
+        success: false,
+        message: `Playlist "${title}" is already ${status}. Please wait for it to complete before adding again. Use refresh=true to force re-processing.`,
+        data: {
+          playlistId: record.get('playlistId'),
+          status: status,
+          alreadyExists: true
+        }
+      };
+    }
   }
 
   // Get active API key from database
@@ -193,8 +222,12 @@ try {
     maxRetriesPerRequest: null
   };
 
-  const playlistQueue = new Queue('playlistProcessing', { connection });
+  const playlistQueue = new Queue('processPlaylistQueue', { connection });
 
+  // DEAD LETTER QUEUE CONFIGURATION:
+  // Failed jobs are kept (removeOnFail: false) so admins can inspect errors
+  // After 3 retry attempts, the job stays in the failed set for manual review
+  // This helps debug YouTube API issues, quota problems, and other failures
   await playlistQueue.add('processPlaylist', {
     playlistId,
     userId: user.id,
@@ -202,13 +235,13 @@ try {
     customName: name || null,
     channelId: channelId || null
   }, {
-    attempts: 3,
+    attempts: 3,                           // Retry 3 times before giving up
     backoff: {
-      type: 'exponential',
+      type: 'exponential',                 // Exponential backoff: 5s, 10s, 20s
       delay: 5000
     },
-    removeOnComplete: 100,
-    removeOnFail: 50
+    removeOnComplete: 100,                 // Keep last 100 completed jobs for audit
+    removeOnFail: false                    // KEEP failed jobs for inspection (Dead Letter Queue)
   });
 
   // Close queue connection
@@ -216,7 +249,9 @@ try {
 
   return {
     success: true,
-    message: `Playlist "${playlistData.snippet.title}" has been queued for processing. This may take a few minutes.`,
+    message: refresh
+      ? `Playlist "${playlistData.snippet.title}" has been queued for refresh. All videos will be re-fetched from YouTube.`
+      : `Playlist "${playlistData.snippet.title}" has been queued for processing. This may take a few minutes.`,
     data: {
       playlistId,
       title: playlistData.snippet.title,
@@ -226,7 +261,8 @@ try {
       totalVideos: playlistData.contentDetails?.itemCount || 0,
       channelTitle: playlistData.snippet.channelTitle,
       userId: user.id,
-      userSpecific: true
+      userSpecific: true,
+      isRefresh: refresh
     }
   };
 

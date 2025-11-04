@@ -1,0 +1,72 @@
+{
+  vertexes: [
+    {
+      id: "1"
+      L: "Function"
+      P: {
+        key: "checkOnboardingStatus"
+        description: "Checks if user has completed onboarding and optionally marks it as complete"
+        body: '''
+try {
+  // Get current user
+  const user = await args.getUserFromSession();
+  if (!user) {
+    return {
+      success: false,
+      message: "User not authenticated",
+      data: { isOnboarded: false }
+    };
+  }
+
+  const { markComplete } = args.contextData || {};
+
+  // Check if user has onboarding status in settings
+  const settingsResult = await args.session.run(`
+    MATCH (u:User)
+    WHERE u.uuid = $userUuid
+    RETURN u.ytoOnboardingComplete as onboardingComplete
+  `, { userUuid: user.P.uuid });
+
+  let isOnboarded = false;
+  if (settingsResult.records.length > 0) {
+    isOnboarded = settingsResult.records[0].get('onboardingComplete') || false;
+  }
+
+  // If marking as complete
+  if (markComplete && !isOnboarded) {
+    await args.session.run(`
+      MATCH (u:User)
+      WHERE u.uuid = $userUuid
+      SET u.ytoOnboardingComplete = true,
+          u.ytoOnboardingCompletedAt = datetime()
+    `, { userUuid: user.P.uuid });
+
+    isOnboarded = true;
+  }
+
+  return {
+    success: true,
+    message: isOnboarded ? "Onboarding complete" : "Onboarding not complete",
+    data: {
+      isOnboarded,
+      userId: user.id
+    }
+  };
+
+} catch (error) {
+  console.error('Error checking onboarding status:', error);
+  return {
+    success: false,
+    message: "Failed to check onboarding status",
+    error: {
+      type: "OnboardingCheckError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ]
+  edges: []
+}

@@ -1,0 +1,104 @@
+{
+  vertexes: [
+    {
+      id: "delete_all_queue_jobs",
+      L: "Function",
+      P: {
+        key: "deleteAllQueueJobs",
+        description: "Deletes all jobs in a specific state from a BullMQ queue",
+        body: '''
+/**
+ * Delete all jobs in a specific state from a queue
+ *
+ * Parameters:
+ * - queueName: string - Name of the queue
+ * - state: string - Job state (waiting, delayed, failed, completed)
+ */
+
+const { queueName, state } = args.contextData;
+
+// Validate parameters
+if (!queueName || !state) {
+  return {
+    success: false,
+    message: "queueName and state are required"
+  };
+}
+
+// Get the queue
+const { Queue } = args.bullmq;
+const connection = args.bullmq.redisConnection || {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+  maxRetriesPerRequest: null
+};
+
+const queue = new Queue(queueName, { connection });
+
+try {
+  // Only allow deletion of waiting, delayed, failed, or completed jobs
+  if (!['waiting', 'delayed', 'failed', 'completed'].includes(state)) {
+    await queue.close();
+    return {
+      success: false,
+      message: `Cannot delete jobs in state '${state}'. Only waiting, delayed, failed, or completed jobs can be deleted.`
+    };
+  }
+
+  let deletedCount = 0;
+
+  // Use BullMQ's built-in clean method for completed and failed jobs
+  if (state === 'completed' || state === 'failed') {
+    const jobs = await queue.clean(0, 1000000, state);
+    deletedCount = jobs.length;
+  } else {
+    // For waiting and delayed, get all jobs and delete them
+    let jobs = [];
+
+    if (state === 'waiting') {
+      jobs = await queue.getWaiting(0, 10000);
+    } else if (state === 'delayed') {
+      jobs = await queue.getDelayed(0, 10000);
+    }
+
+    for (const job of jobs) {
+      try {
+        await job.remove();
+        deletedCount++;
+      } catch (error) {
+        console.error(`Error deleting job ${job.id}:`, error);
+      }
+    }
+  }
+
+  await queue.close();
+
+  return {
+    success: true,
+    data: {
+      deletedCount
+    },
+    message: `Deleted ${deletedCount} ${state} job(s)`
+  };
+
+} catch (error) {
+  console.error('Error deleting all jobs:', error);
+
+  // Always try to close the queue
+  try {
+    await queue.close();
+  } catch (closeError) {
+    console.error('Error closing queue:', closeError);
+  }
+
+  return {
+    success: false,
+    message: `Error deleting all jobs: ${error.message}`
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

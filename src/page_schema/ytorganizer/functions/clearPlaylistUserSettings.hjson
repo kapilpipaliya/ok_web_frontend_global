@@ -40,9 +40,9 @@ try {
 
   const record = playlistResult.records[0];
   const playlist = record.get('p');
-  const playlistSettings = record.get('ps');
+  const playlistSetting = record.get('ps');
 
-  if (!playlistSettings) {
+  if (!playlistSetting) {
     return {
       success: true,
       message: "No user settings found for this playlist",

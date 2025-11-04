@@ -32,7 +32,7 @@ const initializeFormData = () => {
     if (itemData.video) {
       settings = itemData.videoSettings;
     } else if (itemData.playlist) {
-      settings = itemData.playlistSettings;
+      settings = itemData.playlistSetting;
     } else {
       settings = itemData.channelSetting;
     }

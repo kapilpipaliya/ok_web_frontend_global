@@ -234,39 +234,24 @@ return `._id {
         componentName: "Html",
         props: '''
 const processingStatus = args.contextData.props?.processingStatus;
-const settings = processingStatus?.channelSetting || processingStatus?.playlistSetting;
-const status = settings?.P?.status;
+
+// Hide if no processing status
+if (!processingStatus) {
+  return { hide: true };
+}
+
+const status = processingStatus.status;
 
 // Only show if status is queued or processing
 if (!status || (status !== 'queued' && status !== 'processing')) {
   return { hide: true };
 }
 
-const progress = settings?.P?.progress || 0;
-const processedPlaylists = settings?.P?.processedPlaylists || 0;
-const totalPlaylists = settings?.P?.totalPlaylists || 0;
-const processedVideos = settings?.P?.processedVideos || 0;
-const totalVideos = settings?.P?.totalVideos || 0;
-
-let statusText = '';
-let iconName = '';
 let colorVar = '';
-
 if (status === 'queued') {
-  statusText = 'Queued';
-  iconName = 'carbon:time';
   colorVar = args.theme.var.color.info;
 } else if (status === 'processing') {
-  statusText = `Processing... ${progress}%`;
-  iconName = 'carbon:in-progress';
   colorVar = args.theme.var.color.primary;
-
-  // Add details if available
-  if (totalPlaylists > 0 && totalVideos > 0) {
-    statusText += ` (${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos)`;
-  } else if (totalVideos > 0) {
-    statusText += ` (${processedVideos}/${totalVideos} videos)`;
-  }
 }
 
 return {
@@ -309,13 +294,13 @@ return `._id {
         componentName: "Html",
         props: '''
 const processingStatus = args.contextData.props?.processingStatus;
-const settings = processingStatus?.channelSetting || processingStatus?.playlistSetting;
-const status = settings?.P?.status;
 
-let iconName = '';
-if (status === 'queued') {
-  iconName = 'carbon:time';
-} else if (status === 'processing') {
+// Get status safely
+const status = processingStatus?.status;
+
+// Default to time icon if no specific status
+let iconName = 'carbon:time';
+if (status === 'processing') {
   iconName = 'carbon:in-progress';
 }
 
@@ -341,13 +326,11 @@ return `._id {
         componentName: "Html",
         props: '''
 const processingStatus = args.contextData.props?.processingStatus;
-const settings = processingStatus?.channelSetting || processingStatus?.playlistSetting;
-const status = settings?.P?.status;
-const progress = settings?.P?.progress || 0;
-const processedPlaylists = settings?.P?.processedPlaylists || 0;
-const totalPlaylists = settings?.P?.totalPlaylists || 0;
-const processedVideos = settings?.P?.processedVideos || 0;
-const totalVideos = settings?.P?.totalVideos || 0;
+
+// Safely extract all needed data
+const status = processingStatus?.status || '';
+const progress = processingStatus?.progress || 0;
+const details = processingStatus?.details || '';
 
 let statusText = '';
 
@@ -356,11 +339,9 @@ if (status === 'queued') {
 } else if (status === 'processing') {
   statusText = `Processing... ${progress}%`;
 
-  // Add details if available
-  if (totalPlaylists > 0 && totalVideos > 0) {
-    statusText += ` (${processedPlaylists}/${totalPlaylists} playlists, ${processedVideos}/${totalVideos} videos)`;
-  } else if (totalVideos > 0) {
-    statusText += ` (${processedVideos}/${totalVideos} videos)`;
+  // Add formatted details if available
+  if (details) {
+    statusText += ` (${details})`;
   }
 }
 
@@ -838,10 +819,61 @@ return {
       }
     },
     {
-      id: "menu_item_delete",
+      id: "menu_item_retry",
       L: "Attr",
       P: {
         displayOrder: 7,
+        componentName: "YTOMenuItem",
+        slot: "menu-items",
+        props: '''
+const item = args.contextData.props?.item;
+const itemSettings = args.contextData.props?.itemSettings;
+const itemType = args.contextData.props?.itemType;
+const status = itemSettings?.P?.status;
+const youtubeId = item?.P?.youtubeId;
+
+// Only show for channels and playlists with failed or completed_with_errors status
+const canRetry = (itemType === "channel" || itemType === "playlist") &&
+                 (status === "failed" || status === "completed_with_errors");
+
+return {
+  icon: "carbon:restart",
+  text: "Retry Processing",
+  hide: !canRetry,
+  onClick: async (e) => {
+    e?.stopPropagation();
+
+    try {
+      const functionName = itemType === "channel" ? "retryChannel" : "retryPlaylist";
+      const contextData = itemType === "channel"
+        ? { channelId: youtubeId }
+        : { playlistId: youtubeId };
+
+      const response = await args.executeNamedServerFunction({
+        functionName: functionName,
+        contextData: contextData
+      });
+
+      if (response.result?.success) {
+        args.showSuccessToast(response.result.message || "Processing retry queued successfully");
+      } else {
+        args.showErrorToast(response.result?.message || "Failed to retry processing");
+      }
+    } catch (error) {
+      args.showErrorToast("Error retrying processing: " + error.message);
+    }
+
+    args.contextData.floatingMenuContext?.closeMenu?.();
+  }
+};
+'''
+      }
+    },
+    {
+      id: "menu_item_delete",
+      L: "Attr",
+      P: {
+        displayOrder: 8,
         componentName: "YTOMenuItem",
         slot: "menu-items",
         props: '''
@@ -897,6 +929,7 @@ return {
     { id: "e20", T: "Attr", S: "card_menu", E: "menu_divider" },
     { id: "e21", T: "Attr", S: "card_menu", E: "menu_item_open_youtube" },
     { id: "e22", T: "Attr", S: "card_menu", E: "menu_item_edit_name" },
-    { id: "e23", T: "Attr", S: "card_menu", E: "menu_item_delete" }
+    { id: "e23", T: "Attr", S: "card_menu", E: "menu_item_retry" },
+    { id: "e24", T: "Attr", S: "card_menu", E: "menu_item_delete" }
   ]
 }

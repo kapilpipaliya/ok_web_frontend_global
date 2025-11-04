@@ -251,8 +251,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: \${status().enabled ? args.theme.var.color.success_light_900 : args.theme.var.color.error_light_900};
-  color: \${status().enabled ? args.theme.var.color.success_dark_300 : args.theme.var.color.error_dark_300};
+  background: ${status().enabled ? `\${args.theme.var.color.success_light_900}` : `\${args.theme.var.color.error_light_900}`};
+  color: ${status().enabled ? `\${args.theme.var.color.success_dark_300}` : `\${args.theme.var.color.error_dark_300}`};
 }\`;`}
                   >
                     {status().enabled ? "Enabled" : "Disabled"}
@@ -296,8 +296,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: \${status().initialized ? args.theme.var.color.info_light_900 : args.theme.var.color.background_light_300};
-  color: \${status().initialized ? args.theme.var.color.info_dark_300 : args.theme.var.color.text_light_600};
+  background: ${status().initialized ? `\${args.theme.var.color.info_light_900}` : `\${args.theme.var.color.background_light_300}`};
+  color: ${status().initialized ? `\${args.theme.var.color.info_dark_300}` : `\${args.theme.var.color.text_light_600}`};
 }\`;`}
                   >
                     {status().initialized ? "Yes" : "No"}
@@ -552,8 +552,8 @@ export function WorkerManagement() {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
-  background: \${worker.active ? args.theme.var.color.success_light_900 : args.theme.var.color.error_light_900};
-  color: \${worker.active ? args.theme.var.color.success_dark_300 : args.theme.var.color.error_dark_300};
+  background: ${worker.active ? `\${args.theme.var.color.success_light_900}` : `\${args.theme.var.color.error_light_900}`};
+  color: ${worker.active ? `\${args.theme.var.color.success_dark_300}` : `\${args.theme.var.color.error_dark_300}`};
 }\`;`}
                         >
                           {worker.active ? "Active" : "Inactive"}

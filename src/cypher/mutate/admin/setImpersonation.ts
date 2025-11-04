@@ -8,13 +8,13 @@ import {Vertex} from "~/lib/graph/type/vertex";
  *
  * @param session - Neo4j database session
  * @param adminUser - The admin user performing the impersonation
- * @param targetUserId - UUID of the user to impersonate
+ * @param targetUserUuid - UUID of the user to impersonate
  * @returns Impersonation details including the impersonated user
  */
 export async function setImpersonation(
   session: Session,
   adminUser: Vertex,
-  targetUserId: string
+  targetUserUuid: string
 ) {
   // Verify admin role
   const adminCheck = await session.run(
@@ -31,7 +31,7 @@ export async function setImpersonation(
   // Verify target user exists
   const targetResult = await session.run(
     `MATCH (u:User {uuid: $uuid}) RETURN u`,
-    { uuid: targetUserId }
+    { uuid: targetUserUuid }
   );
 
   if (targetResult.records.length === 0) {
@@ -43,18 +43,18 @@ export async function setImpersonation(
   // Create audit log
   await session.run(
     `MATCH (admin:User {uuid: $adminId})
-     MATCH (target:User {uuid: $targetUserId})
+     MATCH (target:User {uuid: $targetUserUuid})
      CREATE (admin)-[:AuditLog]->(log:AuditLog {
        key: "audit_" + toString(datetime()) + "_" + randomUUID(),
        action: "impersonate",
        timestamp: datetime(),
        details: "Admin started impersonating user"
      })-[:AuditLogTarget]->(target)`,
-    { adminId: adminUser.P.uuid, targetUserId }
+    { adminId: adminUser.P.uuid, targetUserUuid }
   );
 
   return {
-    impersonatedUserId: targetUserId,
+    impersonatedUserUuid: targetUserUuid,
     impersonatedUser: targetUser
   };
 }

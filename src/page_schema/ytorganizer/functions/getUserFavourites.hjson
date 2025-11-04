@@ -65,17 +65,17 @@ try {
   const playlistsResult = await args.session.run(playlistsQuery, { userUuid: user.P.uuid });
 
   const playlists = playlistsResult.records.map(record => {
-    const playlistSettings = args.convertNodeToJson(record.get('ps'));
+    const playlistSetting = args.convertNodeToJson(record.get('ps'));
     const videoCount = record.get('videoCount');
 
     // Add user-specific video count to playlist settings
-    if (playlistSettings && playlistSettings.P) {
-      playlistSettings.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+    if (playlistSetting && playlistSetting.P) {
+      playlistSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
     }
 
     return {
       playlist: args.convertNodeToJson(record.get('p')),
-      playlistSettings: playlistSettings
+      playlistSetting
     };
   });
 

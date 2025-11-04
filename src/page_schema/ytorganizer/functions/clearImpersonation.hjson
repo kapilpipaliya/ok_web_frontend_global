@@ -12,17 +12,17 @@ if (!actualUser) {
   throw new Error("User session not found");
 }
 
-const impersonatedUserId = args.contextData.impersonatedUserId;
+const impersonatedUserUuid = args.contextData.impersonatedUserUuid;
 
-if (!impersonatedUserId) {
-  throw new Error("impersonatedUserId is required");
+if (!impersonatedUserUuid) {
+  throw new Error("impersonatedUserUuid is required");
 }
 
 // Call platform function (from args)
 const result = await args.clearImpersonation(
   args.session,
   actualUser,
-  impersonatedUserId
+  impersonatedUserUuid
 );
 
 return {

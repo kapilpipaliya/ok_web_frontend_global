@@ -137,7 +137,7 @@ When working with Neo4j data in functions and frontend components:
    // Component receives vertex format data
    const channelData = args.contextData.props?.channel;
    const channel = channelData?.channel;        // The vertex
-   const settings = channelData?.channelSettings; // Related vertex
+   const settings = channelData?.channelSetting; // Related vertex
 
    // Access properties via P field
    const title = channel?.P?.title;
@@ -157,8 +157,8 @@ When working with Neo4j data in functions and frontend components:
    return {
      success: true,
      data: {
-       channels: channelsResult,  // Array of {channel: vertex, channelSettings: vertex}
-       playlists: playlistsResult, // Array of {playlist: vertex, playlistSettings: vertex}
+       channels: channelsResult,  // Array of {channel: vertex, channelSetting: vertex}
+       playlists: playlistsResult, // Array of {playlist: vertex, playlistSetting: vertex}
        // Don't process or flatten these!
      }
    };

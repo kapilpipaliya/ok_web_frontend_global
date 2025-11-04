@@ -9,16 +9,16 @@ import {Vertex} from "~/lib/graph/type/vertex";
  *
  * @param session - Neo4j database session
  * @param actualUser - The currently authenticated user
- * @param contextData - Optional context data containing impersonatedUserId
+ * @param contextData - Optional context data containing impersonatedUserUuid
  * @returns The effective user (either actual or impersonated)
  */
 export async function getEffectiveUser(
   session: Session,
   actualUser: Vertex,
-  contextData?: { impersonatedUserId?: string }
+  contextData?: { impersonatedUserUuid?: string }
 ): Promise<Vertex> {
   // If no impersonation requested, return actual user
-  if (!contextData?.impersonatedUserId) {
+  if (!contextData?.impersonatedUserUuid) {
     return actualUser;
   }
 
@@ -37,7 +37,7 @@ export async function getEffectiveUser(
   // Get impersonated user
   const impersonatedResult = await session.run(
     `MATCH (u:User {uuid: $uuid}) RETURN u`,
-    { uuid: contextData.impersonatedUserId }
+    { uuid: contextData.impersonatedUserUuid }
   );
 
   if (impersonatedResult.records.length === 0) {
