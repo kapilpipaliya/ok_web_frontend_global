@@ -65,6 +65,53 @@ export const Script: Component<JSX.ScriptHTMLAttributes<HTMLScriptElement>> = (
   props,
 ) => MetaTag("script", props, { close: true });
 
+// Component that untracks props and re-renders based on key
+const UntrackedMetaTag: Component<{
+  tag: "base" | "link" | "meta" | "script" | "style" | "title";
+  props: any;
+  children?: any;
+}> = (componentProps) => {
+  // Create a key from the props to force re-render when props change
+  // Track componentProps.props, but untrack during JSON.stringify to avoid deep reactivity issues
+  const propsKey = createMemo(() => {
+    const props = componentProps.props; // This is tracked
+    return untrack(() => JSON.stringify(props)); // This is not tracked
+  });
+
+  return (
+    <Show when={propsKey()} keyed>
+      {(key) => {
+        // Parse the key back to get untracked props snapshot
+        // This ensures we have a completely non-reactive copy
+        const untrackedProps = JSON.parse(key);
+
+        return (
+          <Switch>
+            <Match when={componentProps.tag === "base"}>
+              <Base {...untrackedProps} />
+            </Match>
+            <Match when={componentProps.tag === "link"}>
+              <Link {...untrackedProps} />
+            </Match>
+            <Match when={componentProps.tag === "meta"}>
+              <Meta {...untrackedProps} />
+            </Match>
+            <Match when={componentProps.tag === "script"}>
+              <Script {...untrackedProps}>{componentProps.children}</Script>
+            </Match>
+            <Match when={componentProps.tag === "style"}>
+              <Style {...untrackedProps}>{componentProps.children}</Style>
+            </Match>
+            <Match when={componentProps.tag === "title"}>
+              <Title {...untrackedProps}>{componentProps.children}</Title>
+            </Match>
+          </Switch>
+        );
+      }}
+    </Show>
+  );
+};
+
 export function replacePlaceholderWithUrl(
   value: string,
   edgeName: string,
@@ -485,27 +532,33 @@ export function HtmlField(
         <Icon class={`${local.class || ""}`} noobserver {...others} />
       </Match>
       <Match when={asLowerCase() === "base"}>
-        <Base {...others} />
+        <UntrackedMetaTag tag="base" props={others} />
       </Match>
 
       <Match when={asLowerCase() === "link"}>
-        <Link {...others} />
+        <UntrackedMetaTag tag="link" props={others} />
       </Match>
 
       <Match when={asLowerCase() === "meta"}>
-        <Meta {...others} />
+        <UntrackedMetaTag tag="meta" props={others} />
       </Match>
 
       <Match when={asLowerCase() === "style"}>
-        <Style>{local.text}</Style>
+        <UntrackedMetaTag tag="style" props={{}}>
+          {local.text}
+        </UntrackedMetaTag>
       </Match>
 
       <Match when={asLowerCase() === "title"}>
-        <Title>{local.text}</Title>
+        <UntrackedMetaTag tag="title" props={{}}>
+          {local.text}
+        </UntrackedMetaTag>
       </Match>
 
       <Match when={asLowerCase() === "script"}>
-        <Script {...others}>{local.text}</Script>
+        <UntrackedMetaTag tag="script" props={others}>
+          {local.text}
+        </UntrackedMetaTag>
       </Match>
 
       <Match when={asLowerCase() === "portal"}>
