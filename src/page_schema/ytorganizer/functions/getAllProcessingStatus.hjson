@@ -4,6 +4,7 @@
       id: "get_all_processing_status_function",
       L: "Function",
       P: {
+        // Note: This function is not used anymore now
         key: "getAllProcessingStatus",
         description: "Get processing status for all channels and playlists for current user",
         body: '''
@@ -14,31 +15,25 @@ try {
     throw new Error("User session not found");
   }
 
-  // Fetch all channel statuses that are not completed
-  const channelResult = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
-          -[:ChannelSettingChannel]->(c:Channel)
-    WHERE cs.status IN ['queued', 'processing']
-    RETURN c, cs
-  `, { userUuid: user.P.uuid });
+  // Use helper functions to fetch channels and playlists with video counts
+  const channelResult = await args.executeNamedServerFunction({
+    functionName: "getChannelsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      statusFilter: ['queued', 'processing']
+    }
+  });
 
-  // Fetch all playlist statuses that are not completed
-  const playlistResult = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
-          -[:PlaylistSettingPlaylist]->(p:Playlist)
-    WHERE ps.status IN ['queued', 'processing']
-    RETURN p, ps
-  `, { userUuid: user.P.uuid });
+  const playlistResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      statusFilter: ['queued', 'processing']
+    }
+  });
 
-  const channels = channelResult.records.map(record => ({
-    channel: args.convertNodeToJson(record.get('c')),
-    channelSetting: args.convertNodeToJson(record.get('cs'))
-  }));
-
-  const playlists = playlistResult.records.map(record => ({
-    playlist: args.convertNodeToJson(record.get('p')),
-    playlistSetting: args.convertNodeToJson(record.get('ps'))
-  }));
+  const channels = channelResult.result?.success ? channelResult.result.data : [];
+  const playlists = playlistResult.result?.success ? playlistResult.result.data : [];
 
   return {
     success: true,

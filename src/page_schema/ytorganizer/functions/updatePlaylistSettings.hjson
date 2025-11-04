@@ -20,50 +20,44 @@ try {
     throw new Error("Playlist ID is required");
   }
 
-  // Update PlaylistSetting and get video count
+  // Step 1: Update PlaylistSetting
   const updateQuery = `
     MATCH (u:User {uuid: $userUuid})
     MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $youtubeId})
     SET ps.customName = $customName,
         ps.updatedAt = datetime()
-
-    WITH u, p, ps
-
-    // Count videos in this playlist that the user has access to
-    OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
-    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-
-    WITH p, ps, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
-
-    RETURN p, ps, videoCount
+    RETURN p.youtubeId as youtubeId
   `;
 
-  const result = await args.session.run(updateQuery, {
+  const updateResult = await args.session.run(updateQuery, {
     userUuid: user.P.uuid,
     youtubeId,
     customName: customName || null
   });
 
-  if (result.records.length === 0) {
+  if (updateResult.records.length === 0) {
     throw new Error("Playlist not found");
   }
 
-  const playlist = args.convertNodeToJson(result.records[0].get('p'));
-  const playlistSetting = args.convertNodeToJson(result.records[0].get('ps'));
-  const videoCount = result.records[0].get('videoCount');
+  // Step 2: Fetch updated playlist with video count using helper function
+  const fetchResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      playlistIds: [youtubeId]
+    }
+  });
 
-  // Add user-specific video count to playlist settings
-  if (playlistSetting && playlistSetting.P) {
-    playlistSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+  if (!fetchResult.result || !fetchResult.result.success || fetchResult.result.data.length === 0) {
+    throw new Error("Failed to fetch updated playlist data");
   }
+
+  const playlistData = fetchResult.result.data[0];
 
   return {
     success: true,
     message: "Playlist settings updated successfully",
-    data: {
-      playlist: playlist,
-      playlistSetting
-    }
+    data: playlistData
   };
 
 } catch (error) {

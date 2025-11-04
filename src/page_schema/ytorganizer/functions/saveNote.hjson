@@ -80,16 +80,45 @@ try {
     throw new Error(`${itemType} not found`);
   }
 
-  const settings = args.convertNodeToJson(result.records[0].get('settings'));
-  const updatedItem = args.convertNodeToJson(result.records[0].get('item'));
+  // Fetch updated data with video counts using helper functions
+  let itemData;
+
+  if (itemType === 'channel') {
+    const channelResult = await args.executeNamedServerFunction({
+      functionName: "getChannelsWithVideoCount",
+      contextData: {
+        userUuid: user.P.uuid,
+        channelIds: [itemId]
+      }
+    });
+
+    if (channelResult.result?.success && channelResult.result.data.length > 0) {
+      itemData = channelResult.result.data[0];
+    }
+  } else if (itemType === 'playlist') {
+    const playlistResult = await args.executeNamedServerFunction({
+      functionName: "getPlaylistsWithVideoCount",
+      contextData: {
+        userUuid: user.P.uuid,
+        playlistIds: [itemId]
+      }
+    });
+
+    if (playlistResult.result?.success && playlistResult.result.data.length > 0) {
+      itemData = playlistResult.result.data[0];
+    }
+  } else {
+    // For videos, use the original approach
+    const settings = args.convertNodeToJson(result.records[0].get('settings'));
+    const updatedItem = args.convertNodeToJson(result.records[0].get('item'));
+    itemData = { video: updatedItem, videoSettings: settings };
+  }
 
   return {
     success: true,
     data: {
-      settings,
-      item: updatedItem,
-      itemType,
-      note: settings.P.note
+      ...itemData,
+      itemType
     },
     message: note ? `Note saved for ${itemType}` : `Note cleared for ${itemType}`
   };

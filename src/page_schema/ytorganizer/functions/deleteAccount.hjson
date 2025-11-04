@@ -22,8 +22,8 @@ try {
   if (targetUserId) {
     // Admin deletion - verify admin role
     const adminCheck = await args.session.run(
-      `MATCH (u:User)-[:UserRole]->(r:Role {key: "Admin"})
-       WHERE u.uuid = $userId RETURN u`,
+      `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
+       RETURN u`,
       { userId: currentUser.P.uuid }
     );
 

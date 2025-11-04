@@ -25,8 +25,8 @@ const isViewingSelf = actualUser.P.uuid === targetUserUuid;
 if (!isViewingSelf) {
   // Verify admin role when viewing other users' data
   const adminCheck = await args.session.run(
-    `MATCH (u:User)-[:UserRole]->(r:Role {key: "Admin"})
-     WHERE u.uuid = $userId RETURN u`,
+    `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
+     RETURN u`,
     { userId: actualUser.P.uuid }
   );
 
@@ -35,51 +35,45 @@ if (!isViewingSelf) {
   }
 }
 
-// Get user's channels
-const channelsQuery = `
-  MATCH (u:User {uuid: $userUuid})
-  MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c:Channel)
-  RETURN c, cs
-  ORDER BY cs.createdAt DESC
-  LIMIT 20
-`;
+// Get user's channels with video counts using helper function
+const channelsResult = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: targetUserUuid
+  }
+});
 
-const channelsResult = await args.session.run(channelsQuery, { userUuid: targetUserUuid });
-const channels = channelsResult.records.map(r => ({
-  channel: args.convertNodeToJson(r.get('c')),
-  channelSetting: args.convertNodeToJson(r.get('cs'))
-}));
+const channels = channelsResult.result?.success
+  ? channelsResult.result.data
+  : [];
 
-// Get user's playlists
-const playlistsQuery = `
-  MATCH (u:User {uuid: $userUuid})
-  MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
-  RETURN p, ps
-  ORDER BY ps.createdAt DESC
-  LIMIT 20
-`;
+// Get user's playlists with video counts using helper function
+const playlistsResult = await args.executeNamedServerFunction({
+  functionName: "getPlaylistsWithVideoCount",
+  contextData: {
+    userUuid: targetUserUuid
+  }
+});
 
-const playlistsResult = await args.session.run(playlistsQuery, { userUuid: targetUserUuid });
-const playlists = playlistsResult.records.map(r => ({
-  playlist: args.convertNodeToJson(r.get('p')),
-  playlistSetting: args.convertNodeToJson(r.get('ps'))
-}));
+const playlists = playlistsResult.result?.success
+  ? playlistsResult.result.data
+  : [];
 
-// Get user's favorite videos (limit to 20 most recent)
-const videosQuery = `
-  MATCH (u:User {uuid: $userUuid})
-  MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v:Video)
-  WHERE vs.isFavourite = true
-  RETURN v, vs
-  ORDER BY vs.updatedAt DESC
-  LIMIT 20
-`;
+// Get user's favorite videos using helper function (limit to 20 most recent)
+const videosResult = await args.executeNamedServerFunction({
+  functionName: "getVideosWithDetails",
+  contextData: {
+    userUuid: targetUserUuid,
+    isFavouriteOnly: true,
+    orderBy: 'vs.updatedAt',
+    orderDirection: 'DESC',
+    limit: 20
+  }
+});
 
-const videosResult = await args.session.run(videosQuery, { userUuid: targetUserUuid });
-const favoriteVideos = videosResult.records.map(r => ({
-  video: args.convertNodeToJson(r.get('v')),
-  videoSetting: args.convertNodeToJson(r.get('vs'))
-}));
+const favoriteVideos = videosResult.result?.success
+  ? videosResult.result.data
+  : [];
 
 // Get total videos count
 const totalVideosQuery = `

@@ -858,6 +858,112 @@ const result = await args.executeNamedServerFunction({
 });
 ```
 
+#### Helper Functions for Data Retrieval
+
+The system provides reusable helper functions for fetching channels and playlists with video counts:
+
+**getChannelsWithVideoCount** - Fetches channels with user-specific video counts:
+```javascript
+// Basic usage - get all user's channels
+const result = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid
+  }
+});
+
+// Filter by specific channel IDs
+const result = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    channelIds: ['UCxxxxx', 'UCyyyyy']
+  }
+});
+
+// Filter by status
+const result = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    statusFilter: ['queued', 'processing']
+  }
+});
+
+// Custom ordering
+const result = await args.executeNamedServerFunction({
+  functionName: "getChannelsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    orderBy: 'c.subscriberCount',  // Order by subscriber count
+    orderDirection: 'DESC'
+  }
+});
+```
+
+**Available orderBy fields for channels:**
+- `cs.createdAt`, `cs.updatedAt` - Channel setting timestamps
+- `c.title`, `c.publishedAt` - Channel metadata
+- `c.videoCount`, `c.subscriberCount`, `c.viewCount` - Channel statistics
+- `videoCount` - User-specific video count
+
+**getPlaylistsWithVideoCount** - Fetches playlists with user-specific video counts:
+```javascript
+// Basic usage - get all user's playlists
+const result = await args.executeNamedServerFunction({
+  functionName: "getPlaylistsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid
+  }
+});
+
+// Filter by specific playlist IDs
+const result = await args.executeNamedServerFunction({
+  functionName: "getPlaylistsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    playlistIds: ['PLxxxxx', 'PLyyyyy']
+  }
+});
+
+// Filter by status with custom ordering
+const result = await args.executeNamedServerFunction({
+  functionName: "getPlaylistsWithVideoCount",
+  contextData: {
+    userUuid: user.P.uuid,
+    statusFilter: ['completed'],
+    orderBy: 'videoCount',  // Order by video count
+    orderDirection: 'DESC'
+  }
+});
+```
+
+**Available orderBy fields for playlists:**
+- `ps.createdAt`, `ps.updatedAt`, `ps.lastUpdated` - Playlist setting timestamps
+- `p.title`, `p.publishedAt` - Playlist metadata
+- `p.itemCount` - Playlist item count
+- `videoCount` - User-specific video count
+
+**Return Format:**
+Both functions return data in vertex format:
+```javascript
+{
+  success: true,
+  data: [
+    {
+      channel: Vertex,           // Channel vertex
+      channelSetting: Vertex     // ChannelSetting vertex with userVideoCount in P
+    }
+    // or for playlists:
+    {
+      playlist: Vertex,          // Playlist vertex
+      playlistSetting: Vertex,   // PlaylistSetting vertex with userVideoCount in P
+      channel: Vertex | null     // Parent channel if exists
+    }
+  ]
+}
+```
+
 ### State Management
 - Use reactive stores for UI state
 - Implement optimistic updates

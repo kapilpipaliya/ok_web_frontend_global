@@ -168,7 +168,10 @@ return `._id {
         componentName: "Html",
         props: '''
 const itemType = args.contextData.props?.itemType || "item";
-const title = `Add note for ${itemType}`;
+const existingNote = args.contextData.props?.existingNote || "";
+const hasNote = existingNote.length > 0;
+const action = hasNote ? "Edit" : "Add";
+const title = `${action} note for ${itemType}`;
 
 return {
   as: "h2",

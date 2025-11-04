@@ -18,8 +18,7 @@ export async function setImpersonation(
 ) {
   // Verify admin role
   const adminCheck = await session.run(
-    `MATCH (u:User)-[:UserRole]->(r:Role {key: "Admin"})
-     WHERE u.uuid = $userId
+    `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
      RETURN u`,
     { userId: adminUser.P.uuid }
   );

@@ -454,9 +454,6 @@ const loadListData = async () => {
         ? result.result.data.playlists || []
         : result.result.data.channels || [];
       setItems(itemsData);
-
-      // Extract processing status from loaded data
-      extractProcessingStatusFromData();
     } else {
       // Handle error case
       const errorMessage = result?.result?.message || "Failed to load data";
@@ -491,9 +488,6 @@ const loadDetailData = async () => {
       setDetailData(null);
     } else if (result?.result?.success && result?.result?.data) {
       setDetailData(result.result.data);
-
-      // Extract processing status from loaded data
-      extractProcessingStatusFromData();
     } else {
       // Handle error case
       const errorMessage = result?.result?.message || "Failed to load details";
@@ -534,9 +528,6 @@ const loadSearchData = async (query) => {
       setSearchResults({ channels: [], playlists: [], videos: [], totalCount: 0 });
     } else if (result?.result?.success && result?.result?.data) {
       setSearchResults(result.result.data);
-
-      // Extract processing status from loaded data
-      extractProcessingStatusFromData();
     } else {
       // Handle error case
       const errorMessage = result?.result?.message || "Failed to search content";
@@ -568,9 +559,6 @@ const loadFavouritesData = async () => {
       setFavouritesData({ channels: [], playlists: [], videos: [] });
     } else if (result?.result?.success && result?.result?.data) {
       setFavouritesData(result.result.data);
-
-      // Extract processing status from loaded data
-      extractProcessingStatusFromData();
     } else {
       // Handle error case - show the error message from server
       const errorMessage = result?.result?.message || "Failed to load favourites";
@@ -628,17 +616,18 @@ const resetScrollPositions = () => {
 };
 
 // Watch for query parameter changes and reload data
-args.createEffect(() => {
-  const currentType = args.searchParams?.type;
-  const currentId = args.searchParams?.id;
-  const currentQuery = args.searchParams?.q;
+args.createEffect(
+  args.on(
+    () => [args.searchParams?.type, args.searchParams?.id, args.searchParams?.q],
+    () => {
+      // Reset scroll positions FIRST before loading new data (untracked to avoid creating dependencies)
+      args.untrack(() => resetScrollPositions());
 
-  // Reset scroll positions FIRST before loading new data (untracked to avoid creating dependencies)
-  args.untrack(() => resetScrollPositions());
-
-  // Trigger reload when params change (untracked to prevent infinite loops)
-  args.untrack(() => loadData());
-});
+      // Trigger reload when params change (untracked to prevent infinite loops)
+      args.untrack(() => loadData());
+    }
+  )
+);
 
 // Handle search form submission
 const handleSearch = async (e) => {
@@ -744,7 +733,6 @@ const deleteItem = async (item) => {
 
       if (result?.result?.success) {
         args.showSuccessToast(result.result.message);
-        // Processing status will be extracted from loaded data automatically
         await loadData();
       } else {
         args.showErrorToast(result?.result?.message || `Failed to delete ${itemType}`);
@@ -836,7 +824,6 @@ const handleModalSave = async (saveData) => {
     args.fns.updateLocalItemSettings(saveData.result);
   } else {
     // Add mode, reload all data
-    // Processing status will be extracted from loaded data automatically
     await loadData();
   }
 };
@@ -911,7 +898,22 @@ const toggleFavourite = async (item, itemType) => {
 
 // Update item data after toggle favourite
 const updateItemDataAfterToggleFavourite = (updatedData) => {
-  const { settings, item, itemType } = updatedData;
+  const { itemType } = updatedData;
+  if (!itemType) return;
+
+  // Extract settings and item based on itemType
+  let settings, item;
+  if (itemType === 'channel') {
+    settings = updatedData.channelSetting;
+    item = updatedData.channel;
+  } else if (itemType === 'playlist') {
+    settings = updatedData.playlistSetting;
+    item = updatedData.playlist;
+  } else if (itemType === 'video') {
+    settings = updatedData.videoSettings;
+    item = updatedData.video;
+  }
+
   if (!settings || !item) return;
 
   const itemId = item.P?.youtubeId;
@@ -1023,7 +1025,22 @@ const updateItemDataAfterToggleFavourite = (updatedData) => {
 
 // Update item data after note is saved
 const updateItemDataAfterNoteSave = (updatedData) => {
-  const { settings, item, itemType } = updatedData;
+  const { itemType } = updatedData;
+  if (!itemType) return;
+
+  // Extract settings and item based on itemType
+  let settings, item;
+  if (itemType === 'channel') {
+    settings = updatedData.channelSetting;
+    item = updatedData.channel;
+  } else if (itemType === 'playlist') {
+    settings = updatedData.playlistSetting;
+    item = updatedData.playlist;
+  } else if (itemType === 'video') {
+    settings = updatedData.videoSettings;
+    item = updatedData.video;
+  }
+
   if (!settings || !item) return;
 
   const itemId = item.P?.youtubeId;
@@ -1372,7 +1389,32 @@ const [processingStatuses, setProcessingStatuses] = args.createSignal({
 const [pollingInterval, setPollingInterval] = args.createSignal(null);
 const [isPolling, setIsPolling] = args.createSignal(false);
 
-// Helper function to extract processing items from channel/playlist arrays
+// Helper function to collect visible IDs from channel/playlist arrays (only those with processing status)
+const collectVisibleIds = (channelsArray, playlistsArray, channelIds, playlistIds) => {
+  // Collect channel IDs with processing status
+  if (channelsArray) {
+    channelsArray.forEach(item => {
+      const channelId = item.channel?.P?.youtubeId;
+      const status = item.channelSetting?.P?.status;
+      if (channelId && status && (status === 'queued' || status === 'processing') && !channelIds.includes(channelId)) {
+        channelIds.push(channelId);
+      }
+    });
+  }
+
+  // Collect playlist IDs with processing status
+  if (playlistsArray) {
+    playlistsArray.forEach(item => {
+      const playlistId = item.playlist?.P?.youtubeId;
+      const status = item.playlistSetting?.P?.status;
+      if (playlistId && status && (status === 'queued' || status === 'processing') && !playlistIds.includes(playlistId)) {
+        playlistIds.push(playlistId);
+      }
+    });
+  }
+};
+
+// Helper function to extract processing items from arrays
 const extractProcessingItems = (channelsArray, playlistsArray, channelsMap, playlistsMap) => {
   // Extract from channels
   if (channelsArray) {
@@ -1397,70 +1439,133 @@ const extractProcessingItems = (channelsArray, playlistsArray, channelsMap, play
   }
 };
 
-// Extract processing status from loaded data
-const extractProcessingStatusFromData = () => {
-  const channelsMap = {};
-  const playlistsMap = {};
+// Reactive effect to automatically update processing status when data changes
+args.createEffect(
+  args.on(
+    [items, detailData, searchResults, favouritesData, isListView, isDetailView, isSearchView, isFavouritesView],
+    () => {
+      const channelsMap = {};
+      const playlistsMap = {};
 
-  // Extract from list view items
+      // Watch list view items
+      if (isListView() && !isSearchView() && !isFavouritesView()) {
+        const currentItems = items();
+
+        if (contentType === "channels") {
+          extractProcessingItems(currentItems, null, channelsMap, playlistsMap);
+        } else if (contentType === "playlists") {
+          extractProcessingItems(null, currentItems, channelsMap, playlistsMap);
+        }
+      }
+
+      // Watch detail view
+      if (isDetailView()) {
+        const detail = detailData();
+        if (detail) {
+          if (contentType === "channels") {
+            // Check channel itself
+            const channelId = detail.channel?.channel?.P?.youtubeId;
+            const channelStatus = detail.channel?.channelSetting?.P?.status;
+            if (channelId && channelStatus && (channelStatus === 'queued' || channelStatus === 'processing')) {
+              channelsMap[channelId] = detail.channel;
+            }
+
+            // Check playlists in channel
+            extractProcessingItems(null, detail.playlists, channelsMap, playlistsMap);
+          } else if (contentType === "playlists") {
+            // Check playlist itself
+            const playlistId = detail.playlist?.playlist?.P?.youtubeId;
+            const playlistStatus = detail.playlist?.playlistSetting?.P?.status;
+            if (playlistId && playlistStatus && (playlistStatus === 'queued' || playlistStatus === 'processing')) {
+              playlistsMap[playlistId] = detail.playlist;
+            }
+          }
+        }
+      }
+
+      // Watch search results
+      if (isSearchView()) {
+        const results = searchResults();
+        if (results) {
+          extractProcessingItems(results.channels, results.playlists, channelsMap, playlistsMap);
+        }
+      }
+
+      // Watch favourites
+      if (isFavouritesView()) {
+        const favourites = favouritesData();
+        if (favourites) {
+          extractProcessingItems(favourites.channels, favourites.playlists, channelsMap, playlistsMap);
+        }
+      }
+
+      // Automatically update processingStatuses whenever data changes
+      setProcessingStatuses({
+        channels: channelsMap,
+        playlists: playlistsMap
+      });
+    }
+  )
+);
+
+// Collect visible IDs from current view for polling
+const collectVisibleIdsFromData = () => {
+  const channelIds = [];
+  const playlistIds = [];
+
+  // Collect from list view items
   if (isListView() && !isSearchView() && !isFavouritesView()) {
     const currentItems = items();
 
     if (contentType === "channels") {
-      extractProcessingItems(currentItems, null, channelsMap, playlistsMap);
+      collectVisibleIds(currentItems, null, channelIds, playlistIds);
     } else if (contentType === "playlists") {
-      extractProcessingItems(null, currentItems, channelsMap, playlistsMap);
+      collectVisibleIds(null, currentItems, channelIds, playlistIds);
     }
   }
 
-  // Extract from detail view
+  // Collect from detail view
   if (isDetailView()) {
     const detail = detailData();
     if (detail) {
       if (contentType === "channels") {
-        // Check channel itself
+        // Collect channel ID itself if processing
         const channelId = detail.channel?.channel?.P?.youtubeId;
         const channelStatus = detail.channel?.channelSetting?.P?.status;
-        if (channelId && channelStatus && (channelStatus === 'queued' || channelStatus === 'processing')) {
-          channelsMap[channelId] = detail.channel;
+        if (channelId && channelStatus && (channelStatus === 'queued' || channelStatus === 'processing') && !channelIds.includes(channelId)) {
+          channelIds.push(channelId);
         }
 
-        // Check playlists in channel
-        extractProcessingItems(null, detail.playlists, channelsMap, playlistsMap);
+        // Collect playlists in channel
+        collectVisibleIds(null, detail.playlists, channelIds, playlistIds);
       } else if (contentType === "playlists") {
-        // Check playlist itself
+        // Collect playlist ID itself if processing
         const playlistId = detail.playlist?.playlist?.P?.youtubeId;
         const playlistStatus = detail.playlist?.playlistSetting?.P?.status;
-        if (playlistId && playlistStatus && (playlistStatus === 'queued' || playlistStatus === 'processing')) {
-          playlistsMap[playlistId] = detail.playlist;
+        if (playlistId && playlistStatus && (playlistStatus === 'queued' || playlistStatus === 'processing') && !playlistIds.includes(playlistId)) {
+          playlistIds.push(playlistId);
         }
       }
     }
   }
 
-  // Extract from search results
+  // Collect from search results
   if (isSearchView()) {
     const results = searchResults();
     if (results) {
-      extractProcessingItems(results.channels, results.playlists, channelsMap, playlistsMap);
+      collectVisibleIds(results.channels, results.playlists, channelIds, playlistIds);
     }
   }
 
-  // Extract from favourites
+  // Collect from favourites
   if (isFavouritesView()) {
     const favourites = favouritesData();
     if (favourites) {
-      extractProcessingItems(favourites.channels, favourites.playlists, channelsMap, playlistsMap);
+      collectVisibleIds(favourites.channels, favourites.playlists, channelIds, playlistIds);
     }
   }
 
-  setProcessingStatuses({
-    channels: channelsMap,
-    playlists: playlistsMap
-  });
-
-  // Return whether there are any active processing items
-  return Object.keys(channelsMap).length > 0 || Object.keys(playlistsMap).length > 0;
+  return { channelIds, playlistIds };
 };
 
 // Poll for processing status updates
@@ -1470,9 +1575,20 @@ const pollProcessingStatus = async () => {
     return;
   }
 
+  // Collect visible IDs from current view
+  const { channelIds, playlistIds } = collectVisibleIdsFromData();
+
+  // If no IDs to poll, skip
+  if (channelIds.length === 0 && playlistIds.length === 0) {
+    return;
+  }
+
   setIsPolling(true);
   try {
-    const result = await args.fns.executeYTOFunction("getAllProcessingStatus", {});
+    const result = await args.fns.executeYTOFunction("getProcessingStatusByIds", {
+      channelIds,
+      playlistIds
+    });
 
     if (result?.result?.success && result?.result?.data) {
       const data = result.result.data;
@@ -1538,21 +1654,23 @@ const stopPolling = () => {
   setIsPolling(false);
 };
 
-// Watch for view changes and start/stop polling as needed
-args.createEffect(() => {
-  const statuses = processingStatuses();
-  const hasProcessing = Object.keys(statuses.channels).length > 0 ||
-                        Object.keys(statuses.playlists).length > 0;
+// Watch for processing status changes and start/stop polling as needed
+args.createEffect(
+  args.on([processingStatuses, pollingInterval], () => {
+    const statuses = processingStatuses();
+    const hasProcessing = Object.keys(statuses.channels).length > 0 ||
+                          Object.keys(statuses.playlists).length > 0;
 
-  // Start polling if there's processing
-  if (hasProcessing && !pollingInterval()) {
-    args.untrack(() => startPolling());
-  }
-  // Stop polling if there's no processing
-  else if (!hasProcessing && pollingInterval()) {
-    args.untrack(() => stopPolling());
-  }
-});
+    // Start polling if there's processing
+    if (hasProcessing && !pollingInterval()) {
+      args.untrack(() => startPolling());
+    }
+    // Stop polling if there's no processing
+    else if (!hasProcessing && pollingInterval()) {
+      args.untrack(() => stopPolling());
+    }
+  })
+);
 
 // Cleanup on unmount
 args.onCleanup(() => {

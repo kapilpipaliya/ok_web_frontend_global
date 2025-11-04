@@ -1,0 +1,182 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getVideosWithDetails",
+        description: "Helper function to fetch videos with details for a user. Supports filtering by videoIds, statusFilter, and custom ordering (orderBy, orderDirection)",
+        body: '''
+/**
+ * Get Videos with Details
+ *
+ * Parameters (via args.contextData):
+ * - userUuid: string (required) - User UUID
+ * - videoIds: string[] (optional) - Filter by specific video IDs
+ * - playlistId: string (optional) - Filter videos by specific playlist ID
+ * - statusFilter: string[] (optional) - Filter by status values (e.g., ['watched', 'unwatched'])
+ * - isFavouriteOnly: boolean (optional) - Filter to only favourite videos (default: false)
+ * - customFilter: string (optional) - Custom WHERE clause condition (e.g., 'v.title =~ $pattern OR vs.notes =~ $pattern')
+ * - customFilterParams: object (optional) - Parameters for the custom filter (e.g., {pattern: '(?i).*search.*'})
+ * - includePlaylist: boolean (optional) - Include first playlist information (default: false)
+ * - orderBy: string (optional) - Field to order by (default: 'vs.updatedAt')
+ *   Allowed values: 'vs.createdAt', 'vs.updatedAt', 'vs.favouritedAt', 'vs.playlistIndex',
+ *                   'v.title', 'v.publishedAt', 'v.duration', 'v.viewCount'
+ * - orderDirection: string (optional) - Order direction 'ASC' or 'DESC' (default: 'DESC')
+ * - secondaryOrderBy: string (optional) - Secondary field to order by
+ * - limit: number (optional) - Maximum number of results to return
+ * - skip: number (optional) - Number of results to skip (for pagination)
+ *
+ * Returns:
+ * - Array of {video: Vertex, videoSettings: Vertex, parentPlaylist: {playlist: Vertex, playlistSetting: Vertex}|null}
+ */
+try {
+  const {
+    userUuid,
+    videoIds = [],
+    playlistId = null,
+    statusFilter = [],
+    isFavouriteOnly = false,
+    customFilter = '',
+    customFilterParams = {},
+    includePlaylist = false,
+    orderBy = 'vs.updatedAt',
+    orderDirection = 'DESC',
+    secondaryOrderBy = null,
+    limit = null,
+    skip = 0
+  } = args.contextData;
+
+  if (!userUuid) {
+    throw new Error("User UUID is required");
+  }
+
+  // Build playlist match clause if filtering by playlist
+  const playlistMatch = playlistId
+    ? 'MATCH (p:Playlist {youtubeId: $playlistId})-[:PlaylistVideo]->(v)'
+    : '';
+
+  // Build WHERE clause for video IDs if provided
+  const videoIdFilter = videoIds.length > 0
+    ? 'AND v.youtubeId IN $videoIds'
+    : '';
+
+  // Build WHERE clause for status filter if provided
+  const statusFilterClause = statusFilter.length > 0
+    ? 'AND vs.status IN $statusFilter'
+    : '';
+
+  // Build WHERE clause for favourite filter if provided
+  const favouriteFilterClause = isFavouriteOnly
+    ? 'AND vs.isFavourite = true'
+    : '';
+
+  // Build custom filter clause if provided
+  const customFilterClause = customFilter ? `AND (${customFilter})` : '';
+
+  // Validate and build ORDER BY clause
+  // Allowed fields for ordering
+  const allowedOrderFields = [
+    'vs.createdAt', 'vs.updatedAt', 'vs.favouritedAt', 'vs.playlistIndex',
+    'v.title', 'v.publishedAt', 'v.duration', 'v.viewCount'
+  ];
+
+  let orderByClause = 'vs.updatedAt DESC'; // Default
+
+  if (orderBy && allowedOrderFields.includes(orderBy)) {
+    const direction = (orderDirection || 'DESC').toUpperCase();
+    if (direction === 'ASC' || direction === 'DESC') {
+      // Handle COALESCE for playlistIndex
+      const orderField = orderBy === 'vs.playlistIndex' ? 'COALESCE(vs.playlistIndex, 0)' : orderBy;
+      orderByClause = `${orderField} ${direction}`;
+
+      // Add secondary ordering if provided
+      if (secondaryOrderBy && allowedOrderFields.includes(secondaryOrderBy)) {
+        orderByClause += `, ${secondaryOrderBy} ASC`;
+      }
+    }
+  }
+
+  // Build playlist matching clause for includePlaylist (different from filtering)
+  const playlistInfoClause = includePlaylist && !playlistId ? `
+    OPTIONAL MATCH (p:Playlist)-[:PlaylistVideo]->(v)
+    OPTIONAL MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p)
+    WITH v, vs, COLLECT(DISTINCT {playlist: p, playlistSetting: ps}) as playlists
+  ` : '';
+
+  const playlistReturn = includePlaylist && !playlistId ? ', playlists[0] as firstPlaylist' : '';
+
+  // Build SKIP and LIMIT clauses
+  const skipClause = skip > 0 ? `SKIP ${skip}` : '';
+  const limitClause = limit ? `LIMIT ${limit}` : '';
+
+  // Cypher query to fetch videos with details
+  const query = `
+    MATCH (u:User {uuid: $userUuid})
+    ${playlistMatch}
+    MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+    WHERE 1=1 ${videoIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
+    ${playlistInfoClause}
+    RETURN v, vs${playlistReturn}
+    ORDER BY ${orderByClause}
+    ${skipClause}
+    ${limitClause}
+  `;
+
+  // Execute the query
+  const result = await args.session.run(query, {
+    userUuid,
+    videoIds,
+    playlistId,
+    statusFilter,
+    ...customFilterParams
+  });
+
+  // Convert results to JSON format
+  const videos = result.records.map(record => {
+    const videoData = {
+      video: args.convertNodeToJson(record.get('v')),
+      videoSettings: args.convertNodeToJson(record.get('vs'))
+    };
+
+    // Add playlist information if requested
+    if (includePlaylist) {
+      const firstPlaylist = record.get('firstPlaylist');
+      if (firstPlaylist && firstPlaylist.playlist) {
+        videoData.parentPlaylist = {
+          playlist: args.convertNodeToJson(firstPlaylist.playlist),
+          playlistSetting: firstPlaylist.playlistSetting
+            ? args.convertNodeToJson(firstPlaylist.playlistSetting)
+            : null
+        };
+      } else {
+        videoData.parentPlaylist = null;
+      }
+    }
+
+    return videoData;
+  });
+
+  return {
+    success: true,
+    data: videos
+  };
+
+} catch (error) {
+  console.error('Error fetching videos with details:', error);
+  return {
+    success: false,
+    message: "Failed to fetch videos",
+    error: {
+      type: "DatabaseError",
+      details: error.message
+    },
+    data: []
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

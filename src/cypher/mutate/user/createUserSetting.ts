@@ -8,8 +8,7 @@ export async function createUserSetting(
   uuid: string,
 ): Promise<null | Vertex> {
   const createUserSettingQuery = `
-      MATCH (u:User)
-      WHERE u.uuid = $uuid
+      MATCH (u:User {uuid: $uuid})
       CREATE (u)-[:UserSetting]->(s:UserSetting { createdAt: localDateTime() })
       RETURN s
     `;

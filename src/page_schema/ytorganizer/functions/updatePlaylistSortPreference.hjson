@@ -43,11 +43,26 @@ try {
     throw new Error("Playlist settings not found for this user");
   }
 
+  // Fetch updated playlist data with video count using helper function
+  const fetchResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      playlistIds: [playlistId]
+    }
+  });
+
+  if (!fetchResult.result || !fetchResult.result.success || fetchResult.result.data.length === 0) {
+    throw new Error("Failed to fetch updated playlist data");
+  }
+
+  const playlistData = fetchResult.result.data[0];
+
   return {
     success: true,
     message: "Sort preference updated successfully",
     data: {
-      playlistId: playlistId,
+      ...playlistData,
       sortBy: sortBy,
       customOrder: customOrder,
       hasCustomOrder: Array.isArray(customOrder) && customOrder.length > 0

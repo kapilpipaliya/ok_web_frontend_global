@@ -72,7 +72,7 @@ async function authenticateAdminUser(dbUser: Vertex, password: string) {
   });
 
   try {
-    const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u";
+    const query = "MATCH (u:User {uuid: $uuid}) RETURN u";
     const adminDbResult = await adminDbSession.run(query, {
       uuid: dbUser.P.uuid,
     });

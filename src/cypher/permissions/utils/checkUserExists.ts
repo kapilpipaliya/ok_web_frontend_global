@@ -11,7 +11,7 @@ export async function checkUserExists(
 ): Promise<{ exists: boolean; user?: Vertex }> {
   try {
     const userExists = await dbSession.run(
-      "MATCH (u:User) WHERE u.uuid = $uuid RETURN u;",
+      "MATCH (u:User {uuid: $uuid}) RETURN u;",
       { uuid },
     );
 

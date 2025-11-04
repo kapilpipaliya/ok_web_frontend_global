@@ -14,6 +14,9 @@
         displayOrder: 1,
         componentName: "Html",
         fns: '''
+// State to track if resize is active
+const [isResizing, setIsResizing] = args.createSignal(false);
+
 // Common resize handler factory
 // Accepts direction: 'n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'
 const createResizeHandler = (direction) => {
@@ -30,6 +33,9 @@ const createResizeHandler = (direction) => {
 
     e.preventDefault();
     e.stopPropagation();
+
+    // Show overlay to prevent iframe from capturing mouse events
+    setIsResizing(true);
 
     const playerEl = e.currentTarget.parentElement;
     const rect = playerEl.getBoundingClientRect();
@@ -52,17 +58,25 @@ const createResizeHandler = (direction) => {
       let newX = playerPosition.x;
       let newY = playerPosition.y;
 
+      // Determine minimum size based on screen size
+      const isMobile = window.innerWidth < 768;
+      const minWidth = isMobile ? 280 : 480;
+      const minHeight = isMobile ? 158 : 270; // 16:9 aspect ratio
+
+      // Calculate maximum width (available viewport width with padding)
+      const maxWidth = isMobile ? window.innerWidth - 16 : window.innerWidth;
+
       // Calculate new dimensions based on resize direction
       if (resizeWidth === 'add') {
-        newWidth = Math.max(480, startWidth + deltaX);
+        newWidth = Math.min(maxWidth, Math.max(minWidth, startWidth + deltaX));
       } else if (resizeWidth === 'subtract') {
-        newWidth = Math.max(480, startWidth - deltaX);
+        newWidth = Math.min(maxWidth, Math.max(minWidth, startWidth - deltaX));
       }
 
       if (resizeHeight === 'add') {
-        newHeight = Math.max(270, startHeight + deltaY);
+        newHeight = Math.max(minHeight, startHeight + deltaY);
       } else if (resizeHeight === 'subtract') {
-        newHeight = Math.max(270, startHeight - deltaY);
+        newHeight = Math.max(minHeight, startHeight - deltaY);
       }
 
       // Adjust position if resizing from left or top
@@ -80,6 +94,8 @@ const createResizeHandler = (direction) => {
     const handleMouseUp = () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      // Hide overlay after resize completes
+      setIsResizing(false);
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -88,7 +104,8 @@ const createResizeHandler = (direction) => {
 };
 
 return {
-  createResizeHandler
+  createResizeHandler,
+  isResizing
 };
 ''',
         props: '''
@@ -104,9 +121,22 @@ const defaultY = isMobile ? 80 : null;
 const x = playerPosition.x !== null ? playerPosition.x : defaultX;
 const y = playerPosition.y !== null ? playerPosition.y : defaultY;
 
+// Constrain width on mobile screens
+let constrainedWidth = playerSize.width;
+let constrainedHeight = playerSize.height;
+
+if (isMobile && currentState === "minimized") {
+  // On mobile, use available width with padding
+  const availableWidth = window.innerWidth - 16; // 8px padding on each side
+  constrainedWidth = Math.min(playerSize.width, availableWidth);
+
+  // Maintain 16:9 aspect ratio
+  constrainedHeight = Math.round(constrainedWidth * 9 / 16);
+}
+
 // Build inline styles for positioning
 const positionStyle = currentState === "minimized" && x !== null && y !== null
-  ? { left: `${x}px`, top: `${y}px`, width: `${playerSize.width}px`, height: `${playerSize.height}px` }
+  ? { left: `${x}px`, top: `${y}px`, width: `${constrainedWidth}px`, height: `${constrainedHeight}px` }
   : {};
 
 return {
@@ -155,11 +185,11 @@ return `._id {
 
 @media (max-width: 768px) {
   ._id[data-state="minimized"] {
-    bottom: 80px;
-    right: ${args.theme.var.spacing.sm};
-    left: ${args.theme.var.spacing.sm};
-    width: calc(100% - ${args.theme.var.spacing.md});
-    height: 270px;
+    /* Remove min-width/min-height constraints on mobile */
+    min-width: unset;
+    min-height: unset;
+    /* Max width ensures player never exceeds screen */
+    max-width: calc(100vw - 16px);
   }
 }`;
 '''
@@ -760,8 +790,9 @@ const youtubeId = video?.P?.youtubeId || "";
 return {
   as: "div",
   id: "youtube-player",
-  ref: (el) => {
-    if (!el || args.fns.playerState.player) return;
+  // only onMount works, ref function not works.
+  onMount: () => {
+    if (args.fns.playerState.player) return;
 
     // Wait for YT API to be ready
     const initPlayer = () => {
@@ -778,7 +809,7 @@ return {
       // 3. YouTube branding must be visible (logo/watermark)
       // 4. Link to watch on YouTube must be provided
       // 5. Related videos should be shown (rel parameter)
-      const ytPlayer = new window.YT.Player(el, {
+      const ytPlayer = new window.YT.Player("youtube-player", {
         height: '100%',
         width: '100%',
         videoId: youtubeId || '',
@@ -813,6 +844,11 @@ return {
     };
 
     initPlayer();
+  },
+  onCleanup: () => {
+    args.fns.playerState.player.destroy();
+    args.fns.setPlayerReady(false);
+    args.fns.playerState.setPlayer(null);
   }
 };
 ''',
@@ -847,18 +883,18 @@ return `._id {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   cursor: se-resize;
-  z-index: 10;
+  z-index: 11;
 
   &::after {
     content: '';
     position: absolute;
     bottom: 2px;
     right: 2px;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-right: 2px solid ${args.theme.var.color.background_dark_700};
     border-bottom: 2px solid ${args.theme.var.color.background_dark_700};
   }
@@ -887,9 +923,9 @@ return {
         css: '''
 return `._id {
   position: absolute;
-  top: 0;
+  top: 20px;
   right: 0;
-  bottom: 0;
+  bottom: 20px;
   width: 6px;
   cursor: e-resize;
   z-index: 10;
@@ -919,8 +955,8 @@ return {
 return `._id {
   position: absolute;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 20px;
+  right: 20px;
   height: 6px;
   cursor: s-resize;
   z-index: 10;
@@ -949,9 +985,9 @@ return {
         css: '''
 return `._id {
   position: absolute;
-  top: 0;
+  top: 20px;
   left: 0;
-  bottom: 0;
+  bottom: 20px;
   width: 6px;
   cursor: w-resize;
   z-index: 10;
@@ -981,8 +1017,8 @@ return {
 return `._id {
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 20px;
+  right: 20px;
   height: 6px;
   cursor: n-resize;
   z-index: 10;
@@ -1013,8 +1049,8 @@ return `._id {
   position: absolute;
   top: 0;
   right: 0;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   cursor: ne-resize;
   z-index: 11;
 
@@ -1023,8 +1059,8 @@ return `._id {
     position: absolute;
     top: 2px;
     right: 2px;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-right: 2px solid ${args.theme.var.color.background_dark_700};
     border-top: 2px solid ${args.theme.var.color.background_dark_700};
   }
@@ -1055,8 +1091,8 @@ return `._id {
   position: absolute;
   top: 0;
   left: 0;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   cursor: nw-resize;
   z-index: 11;
 
@@ -1065,8 +1101,8 @@ return `._id {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-left: 2px solid ${args.theme.var.color.background_dark_700};
     border-top: 2px solid ${args.theme.var.color.background_dark_700};
   }
@@ -1097,8 +1133,8 @@ return `._id {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   cursor: sw-resize;
   z-index: 11;
 
@@ -1107,11 +1143,39 @@ return `._id {
     position: absolute;
     bottom: 2px;
     left: 2px;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-left: 2px solid ${args.theme.var.color.background_dark_700};
     border-bottom: 2px solid ${args.theme.var.color.background_dark_700};
   }
+}`;
+'''
+      }
+    },
+    {
+      id: "resize_overlay",
+      L: "Attr",
+      P: {
+        displayOrder: 11,
+        componentName: "Html",
+        props: '''
+const isResizing = args.fns.isResizing;
+
+return {
+  as: "div",
+  hide: () => !isResizing()
+};
+''',
+        css: '''
+return `._id {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  pointer-events: auto;
+  background: transparent;
 }`;
 '''
       }
@@ -1144,6 +1208,7 @@ return `._id {
     { id: "e17", T: "Attr", S: "video_player_container", E: "resize_handle_n" },
     { id: "e18", T: "Attr", S: "video_player_container", E: "resize_handle_ne" },
     { id: "e19", T: "Attr", S: "video_player_container", E: "resize_handle_nw" },
-    { id: "e20", T: "Attr", S: "video_player_container", E: "resize_handle_sw" }
+    { id: "e20", T: "Attr", S: "video_player_container", E: "resize_handle_sw" },
+    { id: "e21", T: "Attr", S: "video_player_container", E: "resize_overlay" }
   ]
 }

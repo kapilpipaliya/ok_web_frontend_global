@@ -20,28 +20,29 @@ try {
     throw new Error("User session not found");
   }
 
-  // Fetch channel setting status
-  const result = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserChannelSetting]->(cs:ChannelSetting)
-          -[:ChannelSettingChannel]->(c:Channel {youtubeId: $channelId})
-    RETURN cs, c
-  `, { userUuid: user.P.uuid, channelId });
+  // Use helper function to fetch channel with video count
+  const result = await args.executeNamedServerFunction({
+    functionName: "getChannelsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      channelIds: [channelId]
+    }
+  });
 
-  if (result.records.length === 0) {
+  if (!result.result || !result.result.success || result.result.data.length === 0) {
     return {
       success: false,
       message: "Channel not found"
     };
   }
 
-  const channelSetting = args.convertNodeToJson(result.records[0].get('cs'));
-  const channel = args.convertNodeToJson(result.records[0].get('c'));
+  const channelData = result.result.data[0];
 
   return {
     success: true,
     data: {
-      channel,
-      channelSetting
+      channel: channelData.channel,
+      channelSetting: channelData.channelSetting
     }
   };
 

@@ -1,0 +1,85 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getProcessingStatusByIds",
+        description: "Fetches processing status for specific channel and playlist IDs",
+        body: '''
+try {
+  const { channelIds = [], playlistIds = [] } = args.contextData;
+
+  // Get current user
+  const user = await args.getUserFromSession();
+  if (!user) {
+    return {
+      success: false,
+      message: "User session not found"
+    };
+  }
+
+  let channels = [];
+  let playlists = [];
+
+  // Fetch channel processing status for specific IDs with video counts
+  if (channelIds.length > 0) {
+    const channelResult = await args.executeNamedServerFunction({
+      functionName: "getChannelsWithVideoCount",
+      contextData: {
+        userUuid: user.P.uuid,
+        channelIds: channelIds,
+        statusFilter: ['queued', 'processing']
+      }
+    });
+
+    if (channelResult.result && channelResult.result.success) {
+      channels = channelResult.result.data;
+    }
+  }
+
+  // Fetch playlist processing status for specific IDs with video counts
+  if (playlistIds.length > 0) {
+    const playlistResult = await args.executeNamedServerFunction({
+      functionName: "getPlaylistsWithVideoCount",
+      contextData: {
+        userUuid: user.P.uuid,
+        playlistIds: playlistIds,
+        statusFilter: ['queued', 'processing']
+      }
+    });
+
+    if (playlistResult.result && playlistResult.result.success) {
+      playlists = playlistResult.result.data;
+    }
+  }
+
+  // Check if there's any active processing
+  const hasActiveProcessing = channels.length > 0 || playlists.length > 0;
+
+  return {
+    success: true,
+    data: {
+      channels,
+      playlists,
+      hasActiveProcessing
+    }
+  };
+
+} catch (error) {
+  console.error('Error fetching processing status:', error);
+  return {
+    success: false,
+    message: "Failed to fetch processing status",
+    error: {
+      type: "ProcessingStatusError",
+      details: error.message
+    }
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

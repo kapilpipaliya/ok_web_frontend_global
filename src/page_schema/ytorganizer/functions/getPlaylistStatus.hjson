@@ -20,28 +20,30 @@ try {
     throw new Error("User session not found");
   }
 
-  // Fetch playlist setting status
-  const result = await args.session.run(`
-    MATCH (u:User {uuid: $userUuid})-[:UserPlaylistSetting]->(ps:PlaylistSetting)
-          -[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-    RETURN ps, p
-  `, { userUuid: user.P.uuid, playlistId });
+  // Use helper function to fetch playlist with video count
+  const result = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      playlistIds: [playlistId]
+    }
+  });
 
-  if (result.records.length === 0) {
+  if (!result.result || !result.result.success || result.result.data.length === 0) {
     return {
       success: false,
       message: "Playlist not found"
     };
   }
 
-  const playlistSetting = args.convertNodeToJson(result.records[0].get('ps'));
-  const playlist = args.convertNodeToJson(result.records[0].get('p'));
+  const playlistData = result.result.data[0];
 
   return {
     success: true,
     data: {
-      playlist,
-      playlistSetting
+      playlist: playlistData.playlist,
+      playlistSetting: playlistData.playlistSetting,
+      channel: playlistData.channel
     }
   };
 

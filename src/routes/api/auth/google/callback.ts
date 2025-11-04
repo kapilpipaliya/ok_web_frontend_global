@@ -120,7 +120,7 @@ export async function GET({ request }: APIEvent) {
 
       // Update user with Google information
       await dbSession.run(
-        `MATCH (u:User) WHERE u.uuid = $uuid
+        `MATCH (u:User {uuid: $uuid})
          SET u.googleId = $googleId,
              u.googleEmail = $googleEmail,
              u.googleProfilePicture = $googleProfilePicture,
@@ -140,7 +140,7 @@ export async function GET({ request }: APIEvent) {
 
       // Refresh user data
       const updatedUserResult = await dbSession.run(
-        "MATCH (u:User) WHERE u.uuid = $uuid RETURN u",
+        "MATCH (u:User {uuid: $uuid}) RETURN u",
         { uuid: user.P.uuid },
       );
       user = convertNodeToJson(updatedUserResult.records[0].get("u"));
@@ -184,7 +184,7 @@ export async function GET({ request }: APIEvent) {
       );
 
       const newUserResult = await dbSession.run(
-        "MATCH (u:User) WHERE u.uuid = $uuid RETURN u",
+        "MATCH (u:User {uuid: $uuid}) RETURN u",
         { uuid },
       );
       user = convertNodeToJson(newUserResult.records[0].get("u"));

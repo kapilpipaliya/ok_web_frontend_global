@@ -21,85 +21,46 @@ try {
     throw new Error("User session not found. Please log in and try again.");
   }
 
-  // Verify user has access to this playlist
-  const playlistAccessQuery = `
-    MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist {youtubeId: $playlistId})
-    RETURN p, ps
-  `;
-
-  const playlistAccessResult = await args.session.run(playlistAccessQuery, {
-    userUuid: user.P.uuid,
-    playlistId
+  // Verify user has access to this playlist and get video count using helper function
+  const playlistResult = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid,
+      playlistIds: [playlistId]
+    }
   });
 
-  if (playlistAccessResult.records.length === 0) {
+  if (!playlistResult.result || !playlistResult.result.success || playlistResult.result.data.length === 0) {
     throw new Error("Playlist not found or access denied");
   }
 
-  const playlistRecord = playlistAccessResult.records[0];
-  const playlist = args.convertNodeToJson(playlistRecord.get('p'));
-  const playlistSetting = args.convertNodeToJson(playlistRecord.get('ps'));
+  const playlistData = playlistResult.result.data[0];
+  const playlist = playlistData.playlist;
+  const playlistSetting = playlistData.playlistSetting;
+  const parentChannel = playlistData.channel; // Channel info is already included from getPlaylistsWithVideoCount
 
-  // Fetch all videos in this playlist with user settings
-  const videosQuery = `
-    MATCH (p:Playlist {youtubeId: $playlistId})-[:PlaylistVideo]->(v:Video)
-    MATCH (u:User {uuid: $userUuid})
-    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-    RETURN v, vs
-    ORDER BY COALESCE(vs.playlistIndex, 0) ASC, v.publishedAt ASC
-  `;
-
-  const videosResult = await args.session.run(videosQuery, {
-    playlistId,
-    userUuid: user.P.uuid
+  // Fetch all videos in this playlist using helper function
+  const videosResult = await args.executeNamedServerFunction({
+    functionName: "getVideosWithDetails",
+    contextData: {
+      userUuid: user.P.uuid,
+      playlistId: playlistId,
+      orderBy: 'vs.playlistIndex',
+      orderDirection: 'ASC',
+      secondaryOrderBy: 'v.publishedAt'
+    }
   });
 
-  // Check if playlist belongs to a saved channel
-  const channelQuery = `
-    MATCH (p:Playlist {youtubeId: $playlistId})
-    OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
-    OPTIONAL MATCH (u:User {uuid: $userUuid})
-    OPTIONAL MATCH (u)-[:UserChannelSetting]->(cs:ChannelSetting)-[:ChannelSettingChannel]->(c)
-    RETURN c, cs
-  `;
-
-  const channelResult = await args.session.run(channelQuery, {
-    playlistId,
-    userUuid: user.P.uuid
-  });
-
-  let parentChannel = null;
-  if (channelResult.records.length > 0 && channelResult.records[0].get('c')) {
-    const channel = args.convertNodeToJson(channelResult.records[0].get('c'));
-    const channelSetting = channelResult.records[0].get('cs') ? args.convertNodeToJson(channelResult.records[0].get('cs')) : null;
-
-    parentChannel = {
-      channelId: channel.youtubeId,
-      title: channel.title,
-      thumbnail: channel.thumbnail || '',
-      isUserSaved: channelSetting !== null,
-      displayName: channelSetting?.customName || channel.title
-    };
-  }
-
-  // Return raw converted nodes for frontend processing
-  const videos = videosResult.records.map(record => ({
-    video: args.convertNodeToJson(record.get('v')),
-    videoSettings: record.get('vs') ? args.convertNodeToJson(record.get('vs')) : null
-  }));
-
-  // Return raw converted nodes for frontend processing
-  const playlistData = {
-    playlist,
-    playlistSetting,
-    parentChannel: parentChannel
-  };
+  const videos = videosResult.result?.success ? videosResult.result.data : [];
 
   return {
     success: true,
     data: {
-      playlist: playlistData,
+      playlist: {
+        playlist,
+        playlistSetting,
+        channel: parentChannel // Channel vertex from getPlaylistsWithVideoCount
+      },
       videos,
       userId: user.id
     },

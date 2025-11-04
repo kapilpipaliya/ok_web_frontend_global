@@ -22,8 +22,7 @@ try {
 
   // Check if user has onboarding status in settings
   const settingsResult = await args.session.run(`
-    MATCH (u:User)
-    WHERE u.uuid = $userUuid
+    MATCH (u:User {uuid: $userUuid})
     RETURN u.ytoOnboardingComplete as onboardingComplete
   `, { userUuid: user.P.uuid });
 
@@ -35,8 +34,7 @@ try {
   // If marking as complete
   if (markComplete && !isOnboarded) {
     await args.session.run(`
-      MATCH (u:User)
-      WHERE u.uuid = $userUuid
+      MATCH (u:User {uuid: $userUuid})
       SET u.ytoOnboardingComplete = true,
           u.ytoOnboardingCompletedAt = datetime()
     `, { userUuid: user.P.uuid });

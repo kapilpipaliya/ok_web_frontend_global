@@ -685,10 +685,11 @@ const item = args.contextData.props?.item;
 const itemSettings = args.contextData.props?.itemSettings;
 const itemType = args.contextData.props?.itemType;
 const note = itemSettings?.P?.note || "";
+const hasNote = note.length > 0;
 
 return {
-  icon: "carbon:document-add",
-  text: "Add a note",
+  icon: hasNote ? "carbon:edit" : "carbon:document-add",
+  text: hasNote ? "Edit a note" : "Add a note",
   onClick: (e) => {
     e?.stopPropagation();
     args.fns.openNoteModal?.(item, itemType, note);

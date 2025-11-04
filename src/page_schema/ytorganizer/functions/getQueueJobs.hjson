@@ -115,7 +115,7 @@ try {
   if (userUuids.length > 0) {
     try {
       const userResult = await args.session.run(
-        'MATCH (u:User) WHERE u.uuid IN $userUuids RETURN u',
+        'UNWIND $userUuids AS userUuid MATCH (u:User {uuid: userUuid}) RETURN u',
         { userUuids }
       );
       for (const record of userResult.records) {

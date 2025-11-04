@@ -34,8 +34,8 @@ export async function processAccountDeletions() {
         // Check if user still exists and is marked for deletion
         const userCheck = await dbSession.run(
           `
-          MATCH (u:User)
-          WHERE u.uuid = $uuid AND u.pendingDeletion = true
+          MATCH (u:User {uuid: $uuid})
+          WHERE u.pendingDeletion = true
           RETURN u
         `,
           { uuid },
@@ -59,8 +59,7 @@ export async function processAccountDeletions() {
         // Proceed with permanent deletion of the user and all their data
         await dbSession.run(
           `
-          MATCH (u:User)
-          WHERE u.uuid = $uuid
+          MATCH (u:User {uuid: $uuid})
           OPTIONAL MATCH (u)-[r]-()
           DELETE u, r
         `,

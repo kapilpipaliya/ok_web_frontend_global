@@ -17,43 +17,19 @@ try {
   // Get effective user (handles admin impersonation)
   const user = await args.getEffectiveUser(args.session, actualUser, args.contextData);
 
-  // Cypher query to fetch all user's playlists with their settings, channel info, and user-specific video count
-  const query = `
-    MATCH (u:User {uuid: $userUuid})
-    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
-    OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
-
-    // Count videos in this playlist that the user has access to
-    OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
-    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
-
-    WITH p, ps, c, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
-
-    RETURN p, ps, c, videoCount
-    ORDER BY ps.createdAt DESC
-  `;
-
-  // Execute the query
-  const result = await args.session.run(query, {
-    userUuid: user.P.uuid
-  });
-
-  // Return raw converted nodes for frontend processing with user-specific video count
-  const playlists = result.records.map(record => {
-    const playlistSetting = args.convertNodeToJson(record.get('ps'));
-    const videoCount = record.get('videoCount');
-
-    // Add user-specific video count to playlist settings
-    if (playlistSetting && playlistSetting.P) {
-      playlistSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+  // Use helper function to fetch playlists with video counts
+  const result = await args.executeNamedServerFunction({
+    functionName: "getPlaylistsWithVideoCount",
+    contextData: {
+      userUuid: user.P.uuid
     }
-
-    return {
-      playlist: args.convertNodeToJson(record.get('p')),
-      playlistSetting,
-      channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null
-    };
   });
+
+  if (!result.result || !result.result.success) {
+    throw new Error(result.result?.message || "Failed to fetch playlists");
+  }
+
+  const playlists = result.result.data;
 
   return {
     success: true,

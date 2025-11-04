@@ -21,8 +21,7 @@ export async function POST({ request }: APIEvent) {
     // Mark the user account for deletion (set pendingDeletion flag and timestamp)
     const userUpdate = await dbSession.run(
       `
-      MATCH (u:User)
-      WHERE u.uuid = $uuid
+      MATCH (u:User {uuid: $uuid})
       SET u.pendingDeletion = true,
           u.deletionScheduledAt = datetime()
       RETURN u

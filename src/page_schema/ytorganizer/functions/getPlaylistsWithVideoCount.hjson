@@ -1,0 +1,154 @@
+{
+  vertexes: [
+    {
+      id: "function_root",
+      L: "Function",
+      P: {
+        key: "getPlaylistsWithVideoCount",
+        description: "Helper function to fetch playlists with video counts for a user. Supports filtering by playlistIds, statusFilter, and custom ordering (orderBy, orderDirection)",
+        body: '''
+/**
+ * Get Playlists with Video Counts
+ *
+ * Parameters (via args.contextData):
+ * - userUuid: string (required) - User UUID
+ * - playlistIds: string[] (optional) - Filter by specific playlist IDs
+ * - statusFilter: string[] (optional) - Filter by status values (e.g., ['queued', 'processing'])
+ * - isFavouriteOnly: boolean (optional) - Filter to only favourite playlists (default: false)
+ * - customFilter: string (optional) - Custom WHERE clause condition (e.g., 'p.title =~ $pattern OR ps.customName =~ $pattern')
+ * - customFilterParams: object (optional) - Parameters for the custom filter (e.g., {pattern: '(?i).*search.*'})
+ * - orderBy: string (optional) - Field to order by (default: 'ps.createdAt')
+ *   Allowed values: 'ps.createdAt', 'ps.updatedAt', 'ps.lastUpdated', 'ps.favouritedAt',
+ *                   'p.title', 'p.publishedAt', 'p.itemCount', 'videoCount'
+ * - orderDirection: string (optional) - Order direction 'ASC' or 'DESC' (default: 'DESC')
+ * - limit: number (optional) - Maximum number of results to return
+ * - skip: number (optional) - Number of results to skip (for pagination)
+ *
+ * Returns:
+ * - Array of {playlist: Vertex, playlistSetting: Vertex, channel: Vertex|null}
+ *   with userVideoCount in playlistSetting.P
+ */
+try {
+  const {
+    userUuid,
+    playlistIds = [],
+    statusFilter = [],
+    isFavouriteOnly = false,
+    customFilter = '',
+    customFilterParams = {},
+    orderBy = 'ps.createdAt',
+    orderDirection = 'DESC',
+    limit = null,
+    skip = 0
+  } = args.contextData;
+
+  if (!userUuid) {
+    throw new Error("User UUID is required");
+  }
+
+  // Build WHERE clause for playlist IDs if provided
+  const playlistIdFilter = playlistIds.length > 0
+    ? 'AND p.youtubeId IN $playlistIds'
+    : '';
+
+  // Build WHERE clause for status filter if provided
+  const statusFilterClause = statusFilter.length > 0
+    ? 'AND ps.status IN $statusFilter'
+    : '';
+
+  // Build WHERE clause for favourite filter if provided
+  const favouriteFilterClause = isFavouriteOnly
+    ? 'AND ps.isFavourite = true'
+    : '';
+
+  // Build custom filter clause if provided
+  const customFilterClause = customFilter ? `AND (${customFilter})` : '';
+
+  // Validate and build ORDER BY clause
+  // Allowed fields for ordering
+  const allowedOrderFields = [
+    'ps.createdAt', 'ps.updatedAt', 'ps.lastUpdated', 'ps.favouritedAt',
+    'p.title', 'p.publishedAt', 'p.itemCount',
+    'videoCount'
+  ];
+
+  let orderByClause = 'ps.createdAt DESC'; // Default
+
+  if (orderBy && allowedOrderFields.includes(orderBy)) {
+    const direction = (orderDirection || 'DESC').toUpperCase();
+    if (direction === 'ASC' || direction === 'DESC') {
+      orderByClause = `${orderBy} ${direction}`;
+    }
+  }
+
+  // Build SKIP and LIMIT clauses
+  const skipClause = skip > 0 ? `SKIP ${skip}` : '';
+  const limitClause = limit ? `LIMIT ${limit}` : '';
+
+  // Cypher query to fetch playlists with video counts
+  const query = `
+    MATCH (u:User {uuid: $userUuid})
+    MATCH (u)-[:UserPlaylistSetting]->(ps:PlaylistSetting)-[:PlaylistSettingPlaylist]->(p:Playlist)
+    WHERE 1=1 ${playlistIdFilter} ${statusFilterClause} ${favouriteFilterClause} ${customFilterClause}
+    OPTIONAL MATCH (c:Channel)-[:ChannelPlaylist]->(p)
+
+    // Count videos in this playlist that the user has access to
+    OPTIONAL MATCH (p)-[:PlaylistVideo]->(v:Video)
+    OPTIONAL MATCH (u)-[:UserVideoSetting]->(vs:VideoSetting)-[:VideoSettingVideo]->(v)
+
+    WITH p, ps, c, COUNT(DISTINCT CASE WHEN v IS NOT NULL THEN v END) as videoCount
+
+    RETURN p, ps, c, videoCount
+    ORDER BY ${orderByClause}
+    ${skipClause}
+    ${limitClause}
+  `;
+
+  // Execute the query
+  const result = await args.session.run(query, {
+    userUuid,
+    playlistIds,
+    statusFilter,
+    ...customFilterParams
+  });
+
+  // Convert results to JSON format
+  const playlists = result.records.map(record => {
+    const playlistSetting = args.convertNodeToJson(record.get('ps'));
+    const videoCount = record.get('videoCount');
+
+    // Add user-specific video count to playlist settings
+    if (playlistSetting && playlistSetting.P) {
+      playlistSetting.P.userVideoCount = videoCount ? (typeof videoCount.toNumber === 'function' ? videoCount.toNumber() : Number(videoCount)) : 0;
+    }
+
+    return {
+      playlist: args.convertNodeToJson(record.get('p')),
+      playlistSetting,
+      channel: record.get('c') ? args.convertNodeToJson(record.get('c')) : null
+    };
+  });
+
+  return {
+    success: true,
+    data: playlists
+  };
+
+} catch (error) {
+  console.error('Error fetching playlists with video count:', error);
+  return {
+    success: false,
+    message: "Failed to fetch playlists",
+    error: {
+      type: "DatabaseError",
+      details: error.message
+    },
+    data: []
+  };
+}
+'''
+      }
+    }
+  ],
+  edges: []
+}

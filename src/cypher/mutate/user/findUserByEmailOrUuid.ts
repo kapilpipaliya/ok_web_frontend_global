@@ -18,17 +18,20 @@ export async function findUserByEmailOrUuid(
     return getGuestOnlyResult(dbSession);
   }
 
-  let query = `
-    MATCH (u:User)
-  `;
+  let query = "";
 
   if (uuid) {
-    query += `
-      WHERE u.uuid = $uuid
+    query = `
+    MATCH (u:User {uuid: $uuid})
     `;
   } else if (email) {
-    query += `
-      WHERE u.email = $email OR u.username = $email
+    query = `
+    MATCH (u:User)
+    WHERE u.email = $email OR u.username = $email
+    `;
+  } else {
+    query = `
+    MATCH (u:User)
     `;
   }
 

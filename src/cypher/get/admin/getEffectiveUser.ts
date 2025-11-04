@@ -24,8 +24,7 @@ export async function getEffectiveUser(
 
   // Verify actual user is admin
   const adminCheck = await session.run(
-    `MATCH (u:User)-[:UserRole]->(r:Role {key: "Admin"})
-     WHERE u.uuid = $userId
+    `MATCH (u:User {uuid: $userId})-[:UserRole]->(r:Role {key: "Admin"})
      RETURN u`,
     { userId: actualUser.P.uuid }
   );

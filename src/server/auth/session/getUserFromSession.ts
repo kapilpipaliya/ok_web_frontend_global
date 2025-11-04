@@ -27,7 +27,7 @@ export async function getUserFromSession(
     const sessionData = await getDBSessionForSubdomain(request);
     dbSession = sessionData.dbSession;
     const subDomain = sessionData.subDomain;
-    const query = "MATCH (u:User) WHERE u.uuid = $uuid RETURN u as u";
+    const query = "MATCH (u:User {uuid: $uuid}) RETURN u as u";
     const result = await dbSession.run(query, { uuid: sessionUser.P.uuid });
 
     if (result.records.length === 0) {
